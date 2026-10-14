@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Anatomy of the sigmoid — Javharbek</title>
+  <meta name="description" content="Two horizontal asymptotes and a single inflection point: what they mean for the sigmoid function and for neural networks. With interactive figures.">
+  <meta property="og:title" content="Anatomy of the sigmoid">
+  <meta property="og:description" content="Two horizontal asymptotes and a single inflection point: what they mean for a neural network and why 0.5 became the decision threshold. With interactive figures.">
+  <meta property="og:type" content="article">
+  <link rel="alternate" hreflang="ru" href="../../ru/sigmoid/">
+  <link rel="alternate" hreflang="uz" href="../../uz/sigmoid/">
+  <link rel="alternate" hreflang="en" href="../../en/sigmoid/">
+  <link rel="alternate" hreflang="x-default" href="../../en/sigmoid/">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="wordmark" href="../../en/">Javharbek</a>
+  <nav class="site-nav" aria-label="Sections">
+    <a href="../../en/">Blog</a>
+    <a href="https://javharbek.uz">About</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+  </nav>
+  <nav class="lang-nav" aria-label="Language">
+    <a href="../../ru/sigmoid/" lang="ru" hreflang="ru">Русский</a> <a href="../../uz/sigmoid/" lang="uz" hreflang="uz">O‘zbekcha</a> <a href="../../en/sigmoid/" lang="en" hreflang="en" aria-current="true">English</a>
+  </nav>
+</header>
+
+<main class="article">
+  <header class="article-head">
+    <time datetime="2026-10-14">14 October 2026</time>
+    <h1>Anatomy of the sigmoid</h1>
+    <p class="dek">The function σ(x) = 1 / (1 + e<sup>−x</sup>) has two horizontal asymptotes and one inflection point. These are not two dry textbook facts; they are everything you need to know about why it works inside a neural network and where it breaks.</p>
+  </header>
+
+  <h2>A road between the floor and the ceiling</h2>
+  <p>The easiest way to think about the sigmoid is as a road. Below is a floor at height 0, above is a ceiling at height 1. The road runs left to right: it starts almost on the floor, then rises smoothly and settles almost under the ceiling.</p>
+  <p>The key word is “almost”. The road comes arbitrarily close to the floor and the ceiling but never touches them. A line that a curve approaches forever without ever reaching is called an asymptote. The sigmoid has two, both horizontal: <span class="red">y = 0</span> as x → −∞ and <span class="red">y = 1</span> as x → +∞.</p>
+
+  <figure class="figure">
+    <canvas id="fig-asymptotes" width="1600" height="760" aria-label="Sigmoid between the asymptotes y = 0 and y = 1"></canvas>
+    <div class="figure-controls">
+      <label>Range of x
+        <input type="range" id="range" min="4" max="40" step="1" value="6" aria-label="Range of the x axis">
+        <output id="range-out" for="range">±6</output>
+      </label>
+    </div>
+    <p class="figcaption">Widen the range. The curve hugs the asymptotes ever more tightly, but the gap between them remains for every x.</p>
+  </figure>
+
+  <p>The numbers show just how small that gap becomes.</p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>x</th><th>σ(x)</th><th>1 − σ(x)</th></tr></thead>
+      <tbody>
+        <tr><td>2</td><td>0.8808</td><td>0.12</td></tr>
+        <tr><td>5</td><td>0.9933</td><td>6.7 × 10<sup>−3</sup></td></tr>
+        <tr><td>10</td><td>0.99995</td><td>4.5 × 10<sup>−5</sup></td></tr>
+        <tr><td>20</td><td>0.999999998</td><td>2.1 × 10<sup>−9</sup></td></tr>
+        <tr><td>100</td><td>1 − 3.7 × 10<sup>−44</sup></td><td>3.7 × 10<sup>−44</sup></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>At x = 100 the distance to one is a number with forty-three zeros after the decimal point. But it is still not zero, and no x will ever make it zero. That “never” is the whole meaning of the word “asymptote”.</p>
+
+  <h2>The steepest place</h2>
+  <p>Now walk the road. On the left it is almost flat. Then the climb gets steeper and steeper, peaks exactly in the middle, at x = 0 and height 0.5, and levels off again.</p>
+  <p>The place where “getting steeper” turns into “getting flatter” is called the inflection point. Formally, the second derivative changes sign there: the curve is convex on the left and concave on the right. The sigmoid has exactly one such point, so the whole curve is a single smooth S-shaped move with no steps or plateaus in the middle.</p>
+
+  <figure class="figure">
+    <canvas id="fig-slope" width="1600" height="900" aria-label="Steepness of the sigmoid and the graph of its derivative"></canvas>
+    <div class="figure-controls">
+      <label>Position x
+        <input type="range" id="pos" min="-6" max="6" step="0.1" value="0" aria-label="Position of the point on the curve">
+        <output id="pos-out" for="pos">0.0</output>
+      </label>
+      <span>σ(x) = <span class="value" id="sig-out">0.5000</span></span>
+      <span>σ′(x) = <span class="value" id="slope-out">0.2500</span></span>
+    </div>
+    <p class="figcaption">The black segment is the tangent at the chosen point. Below is the derivative σ′(x) = σ(x)(1 − σ(x)); its maximum of 0.25 sits directly under the inflection point.</p>
+  </figure>
+
+  <p>The derivative is remarkably convenient here. It is expressed through the function itself: <span class="formula">σ′ = σ(1 − σ)</span>. So during backpropagation there is no need to recompute the exponential; the value the network already computed on the forward pass is enough.</p>
+
+  <h2>What this means for a neural network</h2>
+  <p>Inside the network, an output neuron receives an arbitrary number: −50, 3, 1000. Binary classification needs an answer as a probability between 0 and 1. The sigmoid takes any number and lays it onto the road between the floor and the ceiling.</p>
+  <p><strong>The asymptotes give boundedness.</strong> The output is always strictly between 0 and 1, so it can be read as a probability. The same property is also the main drawback: on the flat parts, large inputs stop being distinguishable. σ(10) and σ(100) differ in the fifth decimal, and the derivative there is practically zero. When activations drift into the tails, no gradient passes through them and the weights stop learning. This is the vanishing gradient, the reason the sigmoid left the hidden layers of deep networks.</p>
+  <p><strong>The inflection point gives the threshold.</strong> x = 0 and σ = 0.5 is the midpoint between “no” and “yes”. The derivative is largest there, so the network is most sensitive: a small shift in the input visibly changes the output. In logistic regression the decision boundary w·x + b = 0 maps exactly to this point. That is why 0.5 became the standard threshold.</p>
+  <p><strong>A single inflection gives a single transition.</strong> The curve is monotonic with no intermediate shelves, so there is exactly one boundary between “no” and “yes”, not several.</p>
+
+  <section class="takeaway">
+    <h2>In short</h2>
+    <ul>
+      <li>Two horizontal asymptotes, 0 and 1: the output can always be read as a probability, but in the tails the function saturates and the gradient vanishes.</li>
+      <li>One inflection point at (0, 0.5): maximum sensitivity, a natural decision threshold and a single boundary between classes.</li>
+      <li>The derivative is expressed through the function itself, σ′ = σ(1 − σ), which makes backpropagation cheap.</li>
+      <li>For comparison, tanh has the same properties but asymptotes at −1 and 1, an inflection at the origin and a slope of 1 instead of 0.25, so it trains faster in hidden layers. The sigmoid stayed where a probability is exactly what is needed: the output of a binary classifier.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 Javharbek</span>
+  <span><a href="https://javharbek.uz">javharbek.uz</a></span>
+</footer>
+
+<script src="../../assets/js/sigmoid.js" defer></script>
+</body>
+</html>

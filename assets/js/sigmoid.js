@@ -8,6 +8,13 @@
   const dsig = (x) => { const s = sig(x); return s * (1 - s); };
   const token = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const FONT = '"Figtree", "Helvetica Neue", Helvetica, Arial, sans-serif';
+  const LANG = document.documentElement.lang || "ru";
+  try { localStorage.setItem("lang", LANG); } catch (e) {}
+  const TXT = {
+    ru: { gap: "щель", inflection: "точка перегиба (0, 0.5)", down: "выпукла вниз", up: "выпукла вверх" },
+    uz: { gap: "oraliq", inflection: "burilish nuqtasi (0, 0.5)", down: "pastga qavariq", up: "yuqoriga qavariq" },
+    en: { gap: "gap", inflection: "inflection point (0, 0.5)", down: "convex", up: "concave" },
+  }[LANG] || { gap: "gap", inflection: "inflection point (0, 0.5)", down: "convex", up: "concave" };
   const fmtSmall = (v) => (v < 1e-3 ? v.toExponential(1).replace("e-", " × 10⁻") : v.toFixed(4));
 
   function setupCanvas(el) {
@@ -83,8 +90,8 @@
       ctx.fillStyle = bg; ctx.fillRect(bx, y - 18, w, 36);
       ctx.fillStyle = fg2; ctx.fillText(text, align === "right" ? x - 6 : x + 6, y);
     };
-    label("щель " + fmtSmall(gapR), px(xr) - 8, py(1) + Math.max(40, (py(sig(xr)) - py(1)) / 2), "right");
-    label("щель " + fmtSmall(gapL), px(xl) + 8, py(0) - Math.max(40, (py(0) - py(sig(xl))) / 2), "left");
+    label(TXT.gap + " " + fmtSmall(gapR), px(xr) - 8, py(1) + Math.max(40, (py(sig(xr)) - py(1)) / 2), "right");
+    label(TXT.gap + " " + fmtSmall(gapL), px(xl) + 8, py(0) - Math.max(40, (py(0) - py(sig(xl))) / 2), "left");
   }
 
   /* ---------- Figure 2: slope and the inflection point ---------- */
@@ -128,8 +135,8 @@
     ctx.fillRect(px(0), top.y0, W - RR - px(0), top.y1 - top.y0);
     ctx.globalAlpha = 1;
     ctx.fillStyle = fg2; ctx.font = `400 26px ${FONT}`; ctx.textAlign = "center"; ctx.textBaseline = "top";
-    ctx.fillText("выпукла вниз", (L + px(0)) / 2, top.y0 + 4);
-    ctx.fillText("выпукла вверх", (px(0) + W - RR) / 2, top.y0 + 4);
+    ctx.fillText(TXT.down, (L + px(0)) / 2, top.y0 + 4);
+    ctx.fillText(TXT.up, (px(0) + W - RR) / 2, top.y0 + 4);
 
     // bottom panel: derivative as area + line
     ctx.beginPath();
@@ -168,7 +175,7 @@
     ctx.fillStyle = bg; ctx.strokeStyle = fg; ctx.lineWidth = 2.5;
     ctx.beginPath(); ctx.arc(px(0), pyT(0.5), 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     ctx.fillStyle = fg; ctx.font = `400 26px ${FONT}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.fillText("точка перегиба (0, 0.5)", px(0) + 26, pyT(0.5) + 44);
+    ctx.fillText(TXT.inflection, px(0) + 26, pyT(0.5) + 44);
 
     // tangent at the chosen point
     const span = 1.5;

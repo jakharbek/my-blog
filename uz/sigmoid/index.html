@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sigmoidaning anatomiyasi — Javharbek</title>
+  <meta name="description" content="Ikki gorizontal asimptota va yagona burilish nuqtasi: ular sigmoida funksiyasi va neyron tarmoqlar kontekstida nimani anglatadi. Interaktiv grafiklar bilan.">
+  <meta property="og:title" content="Sigmoidaning anatomiyasi">
+  <meta property="og:description" content="Ikki gorizontal asimptota va bitta burilish nuqtasi: ular neyron tarmoq uchun nimani anglatadi va nega 0.5 qaror chegarasiga aylandi. Interaktiv grafiklar bilan.">
+  <meta property="og:type" content="article">
+  <link rel="alternate" hreflang="ru" href="../../ru/sigmoid/">
+  <link rel="alternate" hreflang="uz" href="../../uz/sigmoid/">
+  <link rel="alternate" hreflang="en" href="../../en/sigmoid/">
+  <link rel="alternate" hreflang="x-default" href="../../en/sigmoid/">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="wordmark" href="../../uz/">Javharbek</a>
+  <nav class="site-nav" aria-label="Bo‘limlar">
+    <a href="../../uz/">Blog</a>
+    <a href="https://javharbek.uz">Men haqimda</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+  </nav>
+  <nav class="lang-nav" aria-label="Til">
+    <a href="../../ru/sigmoid/" lang="ru" hreflang="ru">Русский</a> <a href="../../uz/sigmoid/" lang="uz" hreflang="uz" aria-current="true">O‘zbekcha</a> <a href="../../en/sigmoid/" lang="en" hreflang="en">English</a>
+  </nav>
+</header>
+
+<main class="article">
+  <header class="article-head">
+    <time datetime="2026-10-14">2026-yil 14-oktabr</time>
+    <h1>Sigmoidaning anatomiyasi</h1>
+    <p class="dek">σ(x) = 1 / (1 + e<sup>−x</sup>) funksiyasining ikkita gorizontal asimptotasi va bitta burilish nuqtasi bor. Bu darslikdagi ikki quruq fakt emas, balki u neyron tarmoqda nega ishlashi va qayerda buzilishi haqida bilish kerak bo‘lgan hamma narsa.</p>
+  </header>
+
+  <h2>Pol va shift orasidagi yo‘l</h2>
+  <p>Sigmoidani yo‘l deb tasavvur qilish eng oson. Pastda 0 balandlikdagi pol, tepada 1 balandlikdagi shift. Yo‘l chapdan o‘ngga boradi: avval deyarli polda yotadi, so‘ng silliq ko‘tarilib deyarli shift ostiga yotadi.</p>
+  <p>Bu yerda asosiy so‘z «deyarli». Yo‘l polga ham, shiftga ham istalgancha yaqinlashadi, lekin hech qachon ularga tegmaydi. Egri chiziq cheksiz yaqinlashadigan, ammo hech qachon yetib bormaydigan chiziq asimptota deb ataladi. Sigmoidada bunday chiziq ikkita, ikkalasi ham gorizontal: x → −∞ da <span class="red">y = 0</span> va x → +∞ da <span class="red">y = 1</span>.</p>
+
+  <figure class="figure">
+    <canvas id="fig-asymptotes" width="1600" height="760" aria-label="y = 0 va y = 1 asimptotalar orasidagi sigmoida"></canvas>
+    <div class="figure-controls">
+      <label>x oralig‘i
+        <input type="range" id="range" min="4" max="40" step="1" value="6" aria-label="x o‘qi oralig‘i">
+        <output id="range-out" for="range">±6</output>
+      </label>
+    </div>
+    <p class="figcaption">Oraliqni kengaytiring. Egri chiziq asimptotalarga tobora zichroq yopishadi, lekin ular orasidagi oraliq istalgan x da saqlanib qoladi.</p>
+  </figure>
+
+  <p>Bu oraliq qanchalik kichik bo‘lishi raqamlarda ko‘rinadi.</p>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>x</th><th>σ(x)</th><th>1 − σ(x)</th></tr></thead>
+      <tbody>
+        <tr><td>2</td><td>0.8808</td><td>0.12</td></tr>
+        <tr><td>5</td><td>0.9933</td><td>6.7 × 10<sup>−3</sup></td></tr>
+        <tr><td>10</td><td>0.99995</td><td>4.5 × 10<sup>−5</sup></td></tr>
+        <tr><td>20</td><td>0.999999998</td><td>2.1 × 10<sup>−9</sup></td></tr>
+        <tr><td>100</td><td>1 − 3.7 × 10<sup>−44</sup></td><td>3.7 × 10<sup>−44</sup></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>x = 100 da birgacha verguldan keyin qirq uchta nol bo‘lgan son yetmaydi. Lekin bu hali ham nol emas va hech qanday x da nol bo‘lmaydi. Ana shu «hech qachon» — «asimptota» so‘zining mazmuni.</p>
+
+  <h2>Eng tik joy</h2>
+  <p>Endi yo‘l bo‘ylab piyoda yuramiz. Chapda u deyarli tekis. Keyin ko‘tarilish tobora tikroq bo‘lib boradi, aynan o‘rtada, x = 0 nuqtada 0.5 balandlikda maksimumga yetadi va yana tekislanadi.</p>
+  <p>«Tobora tikroq» «tobora yotiqroq»ga almashadigan joy burilish nuqtasi deb ataladi. Rasman u yerda ikkinchi hosilaning ishorasi o‘zgaradi: chapda egri chiziq pastga qavariq, o‘ngda yuqoriga qavariq. Sigmoidada bunday joy aynan bitta, shuning uchun butun egri chiziq zinapoyasiz va o‘rtada tekisliksiz bitta silliq S-harakatdan iborat.</p>
+
+  <figure class="figure">
+    <canvas id="fig-slope" width="1600" height="900" aria-label="Sigmoidaning tikligi va hosilasining grafigi"></canvas>
+    <div class="figure-controls">
+      <label>x holati
+        <input type="range" id="pos" min="-6" max="6" step="0.1" value="0" aria-label="Egri chiziqdagi nuqta holati">
+        <output id="pos-out" for="pos">0.0</output>
+      </label>
+      <span>σ(x) = <span class="value" id="sig-out">0.5000</span></span>
+      <span>σ′(x) = <span class="value" id="slope-out">0.2500</span></span>
+    </div>
+    <p class="figcaption">Qora kesma — tanlangan nuqtadagi urinma. Pastda — σ′(x) = σ(x)(1 − σ(x)) hosilasi; uning maksimumi 0.25 aynan burilish nuqtasi ostida turadi.</p>
+  </figure>
+
+  <p>Bu yerda hosila hayratlanarli darajada qulay. U funksiyaning o‘zi orqali ifodalanadi: <span class="formula">σ′ = σ(1 − σ)</span>. Demak, xatoni teskari tarqatishda eksponentani qayta hisoblash shart emas, tarmoq to‘g‘ri o‘tishda allaqachon hisoblagan qiymat kifoya.</p>
+
+  <h2>Bu neyron tarmoq uchun nimani anglatadi</h2>
+  <p>Tarmoq ichida chiqishdagi neyron ixtiyoriy sonni oladi: −50, 3, 1000. Binar tasniflash uchun 0 dan 1 gacha ehtimollik ko‘rinishidagi javob kerak. Sigmoida istalgan sonni olib, uni pol va shift orasidagi yo‘lga joylaydi.</p>
+  <p><strong>Asimptotalar chegaralanganlik beradi.</strong> Chiqish har doim qat’iy 0 va 1 orasida, shuning uchun uni ehtimollik sifatida o‘qish mumkin. Xuddi shu xususiyat asosiy kamchilik hamdir: tekis qismlarda katta kirishlar farqlanmay qoladi. σ(10) va σ(100) beshinchi raqamda farq qiladi, hosila u yerda deyarli nol. Aktivatsiyalar dumlarga ketsa, gradient ulardan o‘tmaydi va vaznlar o‘rganishni to‘xtatadi. Bu so‘nuvchi gradient — sigmoida chuqur tarmoqlarning yashirin qatlamlaridan ketganining sababi.</p>
+  <p><strong>Burilish nuqtasi chegara beradi.</strong> x = 0 va σ = 0.5 — «yo‘q» va «ha» o‘rtasidagi o‘rta nuqta. Bu yerda hosila maksimal, demak tarmoq eng sezgir: kirishning kichik siljishi chiqishni sezilarli o‘zgartiradi. Logistik regressiyada w·x + b = 0 qaror chegarasi aynan shu nuqtaga tushadi. Shuning uchun 0.5 standart chegaraga aylandi.</p>
+  <p><strong>Burilishning yagonaligi bitta o‘tish beradi.</strong> Egri chiziq monoton va oraliq tekisliklarsiz, shuning uchun «yo‘q» va «ha» orasida bir nechta emas, aynan bitta chegara bor.</p>
+
+  <section class="takeaway">
+    <h2>Qisqacha</h2>
+    <ul>
+      <li>Ikki gorizontal asimptota, 0 va 1: chiqishni har doim ehtimollik sifatida o‘qish mumkin, lekin dumlarda funksiya to‘yinadi va gradient so‘nadi.</li>
+      <li>(0, 0.5) dagi bitta burilish nuqtasi: maksimal sezgirlik, tabiiy qaror chegarasi va sinflar orasidagi yagona chegara.</li>
+      <li>Hosila funksiyaning o‘zi orqali ifodalanadi, σ′ = σ(1 − σ), bu teskari tarqatishni arzon qiladi.</li>
+      <li>Taqqoslash uchun, tanh da xuddi shu xususiyatlar, lekin asimptotalar −1 va 1, burilish koordinata boshida va qiyalik 0.25 o‘rniga 1, shuning uchun yashirin qatlamlarda u tezroq o‘rganadi. Sigmoida aynan ehtimollik kerak bo‘lgan joyda qoldi: binar tasniflagich chiqishida.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 Javharbek</span>
+  <span><a href="https://javharbek.uz">javharbek.uz</a></span>
+</footer>
+
+<script src="../../assets/js/sigmoid.js" defer></script>
+</body>
+</html>
