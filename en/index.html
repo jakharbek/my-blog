@@ -3,57 +3,171 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Javharbek — notes on machine learning</title>
-  <meta name="description" content="Notes on machine learning, infrastructure and mathematics.">
-  <meta property="og:title" content="Javharbek">
-  <meta property="og:description" content="Notes on machine learning, infrastructure and mathematics.">
+  <title>Abdulatipov J. — programming, mathematics, machine learning</title>
+  <meta name="description" content="Javharbek Abdulatipov's blog: the mathematics under the models, machine learning, computer vision, systems engineering.">
+  <meta property="og:title" content="Abdulatipov J. — programming, mathematics, machine learning">
+  <meta property="og:description" content="Javharbek Abdulatipov's blog: the mathematics under the models, machine learning, computer vision, systems engineering.">
   <meta property="og:type" content="website">
+  <meta property="og:image" content="../assets/img/javharbek.png">
   <link rel="alternate" hreflang="ru" href="../ru/">
-  <link rel="alternate" hreflang="uz" href="../uz/">
   <link rel="alternate" hreflang="en" href="../en/">
+  <link rel="alternate" hreflang="uz" href="../uz/">
   <link rel="alternate" hreflang="x-default" href="../en/">
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
   <link rel="stylesheet" href="../assets/css/site.css">
 </head>
 <body>
-
 <header class="site-header">
-  <a class="wordmark" href="../en/">Javharbek</a>
-  <nav class="site-nav" aria-label="Sections">
-    <a href="../en/">Blog</a>
-    <a href="https://javharbek.uz">About</a>
-    <a href="https://github.com/jakharbek">GitHub</a>
-  </nav>
-  <nav class="lang-nav" aria-label="Language">
-    <a href="../ru/" lang="ru" hreflang="ru">Русский</a> <a href="../uz/" lang="uz" hreflang="uz">O‘zbekcha</a> <a href="../en/" lang="en" hreflang="en" aria-current="true">English</a>
-  </nav>
+  <div class="wrap">
+    <a class="brand" href="../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="#posts">Articles</a>
+    <a href="#fields">Topics</a>
+    <a href="#research">Research</a>
+    <a href="about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../ru/" lang="ru" hreflang="ru">RU</a> <a href="../en/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../uz/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
 </header>
 
 <main>
-  <section class="hero">
-    <h1>Machine learning, explained all the way down</h1>
-    <p>An engineer's notes on the mathematics under the models, infrastructure and credit analytics.</p>
-  </section>
+<section id="top" class="hero">
+  <svg class="bg" viewBox="0 0 520 560" aria-hidden="true"><path class="attractor" d="M171 297L156 283L151 263L169 273L175 293L155 286L149 266L169 270L177 289L157 293L148 274L147 254L166 262L176 280L181 300L161 302L150 285L143 264L152 246L168 261L179 279L185 299L178 318L160 307L149 289L141 270L138 250L158 245L172 261L183 279L190 300L189 320L169 322L154 306L145 288L137 268L133 247L144 230L161 241L174 257L185 275L193 295L197 315L192 335L172 334L157 319L146 302L137 283L131 263L126 241L130 221L150 224L165 238L178 254L189 272L198 291L205 312L206 332L197 351L177 351L161 336L149 319L139 301L130 280L123 257L118 236L118 216L135 205L153 216L168 231L182 248L194 267L205 287L212 306L217 327L217 347L211 367L193 376L174 367L159 352L146 333L135 314L125 291L118 271L112 251L108 231L106 210L110 189L130 186L149 199L164 213L178 228L193 247L205 265L216 283L224 302L231 322L235 343L236 364L233 385L224 405L206 415L186 409L168 394L155 378L141 357L130 336L121 317L113 297L105 275L98 252L92 230L88 208L86 183L89 161L106 149L127 160L143 172L160 187L176 204L191 220L204 236L219 255L231 272L243 291L253 311L261 332L267 353L272 373L277 393L285 412L299 427L320 429L339 419L354 404L369 386L381 366L391 348L400 328L410 306L419 281L427 256L433 230L438 205L441 183L441 158L431 138L409 140L392 151L373 167L355 184L337 202L321 220L307 237L291 256L278 273L266 292L256 312L247 331L240 351L232 371L222 389L203 399L183 393L166 379L151 361L138 340L128 319L118 296L111 277L105 257L98 231L95 207L94 187L101 166L121 165L141 179L159 195L177 213L193 232L207 250L219 267L231 286L241 306L248 325L253 347L257 368L259 388L260 409L261 430L262 450L265 470L271 490L288 502L309 498L328 487L345 471L359 455L374 433L387 413L400 388L410 368L419 347L428 324L437 299L445 272L453 245L460 218L466 190L470 164L473 141L474 120L471 96L460 79L437 82L419 94L399 110L378 130L357 150L337 169L318 187L301 204L285 218L267 235L248 251L231 267L216 282L201 296L185 309L165 305L152 289L144 270L142 250L162 252L174 269L183 287L186 307L168 316L155 300L145 281L138 261L138 241L159 244L172 260L183 277L190 296L192 316L176 328L160 315L148 297L139 276L133 255L132 235L153 233L168 248L180 264L190 283L197 303L199 324L188 341L169 334L155 318L143 299L134 279L128 257L125 235L132 216L151 223L167 238L181 255L192 273L201 293L207 313L208 334L201 353L180 356L163 342L151 326L140 308L130 286L123 266L118 246L115 225L118 205L139 203L157 217L173 234L187 252L199 271L209 289L216 308L220 328L221 349L216 369L200 383L180 377L163 362L149 344L138 325L129 306L121 286L113 264L107 242L104 222L102 200L110 180L130 181L147 194L163 208L178 224L191 241L203 257L215 276L226 296L233 315L239 337L241 357L241 378L238 398L231 417L215 429L195 426L178 415L162 399L148 379L135 359L126 340L116 319L107 296L98 271L91 246L85 220L81 196L79 175L81 153L95 137L116 144L134 156L152 172L170 190L187 208L203 225L217 242L232 260L244 277L255 296L265 315L273 334L280 353L288 373L298 391L317 401L337 394L355 379L370 360L383 339L393 318L403 294L410 275L416 255L421 235L426 210L427 189L422 167L401 163L381 176L363 192L345 210L328 229L314 247L301 265L289 284L280 302L273 321L267 341L263 361L260 381L258 401L256 422L254 442L249 462L237 479L217 483L198 475L180 461L164 444L150 425L138 407L126 385L113 359L105 340L96 318L88 296L80 272L73 247L67 223L62 198L58 175L55 153L55 126L58 106L73 92L97 100L114 113L133 129L152 147L170 165L188 183L205 199L220 214L238 232L254 247L270 264L284 280L299 297L312 313L327 328L347 327L363 312L374 294L383 275L388 255L389 235L369 229L354 243L342 259L331 277L323 296L319 317L323 337L343 342L360 328L372 311L382 291L389 272L395 250L397 230L386 213L367 222L352 237L338 255L326 273L318 292L311 313L309 333L314 353L332 362L351 352L365 335L377 317L386 299L394 279L401 258L405 237L407 216L399 197L378 202L361 216L346 232L333 248L322 265L311 284L303 304L297 325L295 346L298 366L308 384L329 389L347 378L362 362L374 345L386 324L395 303L404 281L412 257L417 234L421 212L421 190L411 172L391 176L372 190L355 206L339 223L325 240L313 257L300 276L291 294L283 314L277 334L273 355L271 375L272 395L275 416L282 435L298 449L318 448L338 436L354 420L367 404L380 384L391 365L402 343L412 318L423 290L432 261L438 241L442 221L448 192L450 167L450 146L443 124L423 121L405 131L385 147L369 161L353 176L338 192L320 211L303 229L288 246L273 264L261 280L249 297L238 317L228 335L218 353L203 368L183 367L165 354L151 336L139 316L129 295L122 276L115 253L110 230L109 207L119 189L141 196L157 209L173 226L188 244L200 262L212 282L221 301L227 321L231 341L231 361L227 381L216 399L195 403L176 392L159 375L146 357L136 338L125 316L115 292L108 272L102 251L97 231L92 206L92 185L97 164L119 162L137 173L155 189L170 204L184 219L200 238L214 256L226 273L236 292L246 312L253 332L258 353L262 374L265 395L267 415L272 436L281 455L298 466L319 462L336 451L353 434L366 418L381 396L392 376L404 352L415 325L423 305L430 284L437 262L443 240L449 218L453 196L456 175L458 148L457 127L446 108L422 111L401 125L384 140L367 156L350 173L333 189L318 205L299 224L283 240L267 259L253 275L241 291L228 309L217 327L205 343L186 350L167 339L152 321L141 302L132 282L125 260L120 240L120 220L136 208L153 219L168 233L182 250L193 267L203 287L211 307L215 328L214 348L205 367L185 370L169 358L155 343L143 324L133 304L123 281L116 257L110 234L108 214L112 194L133 191L151 204L168 220L183 238L197 256L208 273L218 293L225 313L230 335L232 355L230 375L222 394L205 405L184 399L168 386L154 368L140 348L129 327L119 303L111 283L104 263L99 242L94 222L91 197L92 174L105 157L127 165L145 179L160 193L175 208L189 224L205 243L218 261L231 280L241 299L249 318L256 338L261 359L264 379L267 399L271 419L277 439L289 455L309 459L329 451L347 435L362 417L376 398L387 379L398 358L410 333L417 314L424 295L431 274L437 253L443 232L448 211L451 190L455 163L455 140L449 119L430 112L412 121L391 137L374 152L358 168L342 184L326 199L312 214L295 232L281 248L266 266L251 284L239 302L228 319L218 337L205 353L185 357L168 346L153 330L143 312L134 294L126 275L120 255L116 235L116 214L132 200L152 212L168 228L183 246L196 265L206 283L215 303L220 324L222 344L218 365L206 381L186 381L168 368L153 350L141 332L132 314L124 294L116 273L109 251L104 229L102 205L105 185L125 179L143 189L158 203L173 219L188 235L200 252L213 271L223 289L231 308L238 329L242 349L243 370L241 390L236 410L224 427L203 431L183 421L165 405L151 386L138 366L129 348L119 328L109 305L100 280L92 254L86 228L81 203L78 181L79 156L88 136L108 138L129 151L147 167L166 185L184 203L200 221L215 237L227 253L241 271L253 290L264 309L273 329L281 349L289 369L299 387L317 397L338 391L355 376L369 358L382 337L392 317L402 294L409 275L417 249L422 224L425 202L424 180L411 164L392 171L375 184L357 200L340 218L324 236L311 254L299 271L289 290L279 310L272 330L267 352L264 373L263 394L263 414" fill="none" stroke="var(--curve)" stroke-width=".7" stroke-linejoin="round" stroke-linecap="round"></path></svg>
+  <div class="hero-text rise">
+    <h1><span>Think rigorously.</span><span>Build beautifully.</span></h1>
+    <p class="hero-sub">Programming · Mathematics · Physics · Machine Learning · Engineering</p>
+  </div>
+  <div class="hero-cta rise">
+    <a href="#posts" class="b1">Read articles</a>
+    <a href="about/" class="b2">About me</a>
+  </div>
+</section>
 
-  <ul class="posts">
-    <li class="post-row">
-      <time datetime="2026-10-14">14 October 2026</time>
-      <a href="sigmoid/">
-        <h2>Anatomy of the sigmoid</h2>
-        <p>Two horizontal asymptotes and a single inflection point: what they mean for a neural network and why 0.5 became the decision threshold. With interactive figures.</p>
+<section id="posts" class="posts">
+  <div class="wrap-s">
+    <div class="posts-head">
+      <h2 class="sec">Posts</h2>
+      <div class="search">
+        <label for="q">Search articles</label>
+        <div class="field">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input id="q" type="search" placeholder="e.g. sigmoid" autocomplete="off">
+        </div>
+      </div>
+    </div>
+    <div class="chips" role="group" aria-label="Filter by topic">
+      <button type="button" class="chip" data-topic="all" aria-pressed="true"><span>All</span><small>1</small></button><button type="button" class="chip" data-topic="math" aria-pressed="false"><span>Mathematics</span><small>0</small></button><button type="button" class="chip" data-topic="phys" aria-pressed="false"><span>Physics</span><small>0</small></button><button type="button" class="chip" data-topic="ml" aria-pressed="false"><span>Machine Learning</span><small>1</small></button><button type="button" class="chip" data-topic="cv" aria-pressed="false"><span>Computer Vision</span><small>0</small></button><button type="button" class="chip" data-topic="algo" aria-pressed="false"><span>Algorithms</span><small>0</small></button><button type="button" class="chip" data-topic="sys" aria-pressed="false"><span>Systems Engineering</span><small>0</small></button>
+    </div>
+
+    <a id="featured" class="featured" href="sigmoid/">
+      <span class="txt">
+        <span class="kicker">Featured · Machine Learning</span>
+        <span class="ttl">Anatomy of the sigmoid</span>
+        <span class="sum">Two horizontal asymptotes and a single inflection point: what they mean for a neural network and why 0.5 became the decision threshold.</span>
+        <span class="meta"><time datetime="2026-10-14">14 October 2026</time><span>9 min</span><span class="ul">Read →</span></span>
+      </span>
+      <span class="fig">
+        <svg viewBox="0 0 480 280" role="img" aria-label="The sigmoid between the asymptotes 0 and 1">
+<line x1="0" y1="30" x2="480" y2="30" stroke="var(--accent)" stroke-width="1.5"></line>
+<line x1="0" y1="250" x2="480" y2="250" stroke="var(--accent)" stroke-width="1.5"></line>
+<line x1="240" y1="30" x2="240" y2="250" stroke="var(--curve)" stroke-dasharray="4 4"></line>
+<path d="M0 249.8 L8 249.7 L16 249.7 L24 249.6 L32 249.5 L40 249.4 L48 249.2 L56 249.0 L64 248.7 L72 248.4 L80 248.0 L88 247.4 L96 246.7 L104 245.9 L112 244.9 L120 243.6 L128 241.9 L136 239.9 L144 237.4 L152 234.3 L160 230.6 L168 226.0 L176 220.5 L184 214.1 L192 206.5 L200 197.8 L208 187.9 L216 177.0 L224 165.2 L232 152.8 L240 140.0 L248 127.2 L256 114.8 L264 103.0 L272 92.1 L280 82.2 L288 73.5 L296 65.9 L304 59.5 L312 54.0 L320 49.4 L328 45.7 L336 42.6 L344 40.1 L352 38.1 L360 36.4 L368 35.1 L376 34.1 L384 33.3 L392 32.6 L400 32.0 L408 31.6 L416 31.3 L424 31.0 L432 30.8 L440 30.6 L448 30.5 L456 30.4 L464 30.3 L472 30.3 L480 30.2" fill="none" stroke="var(--fg)" stroke-width="2"></path>
+<circle cx="240" cy="140" r="4" fill="var(--bg)" stroke="var(--fg)" stroke-width="2"></circle>
+</svg>
+        <span class="formula math">σ(x) = 1 / (1 + e<sup>−x</sup>)</span>
+      </span>
+    </a>
+
+    <div class="found">
+      <span id="found" aria-live="polite" data-text="Posts found: ">Posts found: 1</span>
+      <button id="reset" type="button" class="ul" hidden>Reset filters</button>
+    </div>
+    <div id="post-list" class="list">
+      <a class="row" href="sigmoid/" data-topic="ml">
+        <span class="l"><span class="kicker">Machine Learning</span><span class="rt">Anatomy of the sigmoid</span><span class="ex">Two horizontal asymptotes and a single inflection point: what they mean for a neural network and why 0.5 became the decision threshold.</span></span>
+        <span class="r"><time datetime="2026-10-14">14 October 2026</time><span>9 min</span></span>
       </a>
-    </li>
-  </ul>
+      <p id="empty" class="empty" hidden>Nothing found. Try another query or topic.</p>
+    </div>
+  </div>
+</section>
+
+<section id="fields" class="fields">
+  <div class="wrap-m">
+    <div class="fields-head">
+      <h2 class="sec">Topics</h2>
+      <p>Six fields that overlap more often than you might think.</p>
+    </div>
+    <div class="tiles">
+      <button type="button" class="tile" data-topic="math"><span class="glyph math">∑</span><span class="nm"><b>Mathematics</b><span>Analysis, linear algebra, probability</span></span><span class="cnt">0</span></button>
+      <button type="button" class="tile" data-topic="phys"><span class="glyph math it">ℏ</span><span class="nm"><b>Physics</b><span>Mechanics, fields, the quantum world</span></span><span class="cnt">0</span></button>
+      <button type="button" class="tile" data-topic="ml"><span class="glyph math">∇</span><span class="nm"><b>Machine Learning</b><span>Boosting, neural networks, LLMs, scoring</span></span><span class="cnt">1</span></button>
+      <button type="button" class="tile" data-topic="cv"><span class="glyph math">◎</span><span class="nm"><b>Computer Vision</b><span>Detection, faces, Re-ID</span></span><span class="cnt">0</span></button>
+      <button type="button" class="tile" data-topic="algo"><span class="glyph math it">λ</span><span class="nm"><b>Algorithms</b><span>Data structures and complexity</span></span><span class="cnt">0</span></button>
+      <button type="button" class="tile" data-topic="sys"><span class="glyph math">⇄</span><span class="nm"><b>Systems Engineering</b><span>Architecture, Linux, Docker</span></span><span class="cnt">0</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="formula-sec">
+  <div class="wrap-xs">
+    <span class="kicker">Formula of the week</span>
+    <div class="bigmath math" role="img" aria-label="σ′(x) = σ(x)(1 − σ(x))">
+      <span>σ′(x)</span><span class="n">=</span><span>σ(x)</span><span class="n">(1 −</span><span>σ(x)</span><span class="n">)</span>
+    </div>
+    <p>The derivative of the sigmoid is expressed through the sigmoid itself. So backpropagation never recomputes the exponential: the value already obtained on the forward pass is enough.</p>
+    <a href="sigmoid/#s3" class="ul">See the derivation</a>
+  </div>
+</section>
+
+<section id="research" class="research">
+  <div class="wrap-m">
+    <h2 class="sec">Research and projects</h2>
+    <div class="cards">
+      <article><span class="kicker">Method · No. 010556</span><h3>The «Sharshara» model</h3><p>A scientific mathematical method registered with the Intellectual Property Center under the Ministry of Justice of Uzbekistan.</p></article>
+      <article><span class="kicker">NLP · Infrastructure</span><h3>An AI stack for the Uzbek language</h3><p>Corpus, inference and legal RAG for a low-resource language.</p></article>
+      <article><span class="kicker">CV · Real time</span><h3>A perimeter that sees</h3><p>Person detection, face recognition and re-identification across cameras.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="about-teaser on-bg2">
+  <div class="wrap-s">
+    <img src="../assets/img/javharbek.png" alt="Javharbek Abdulatipov" width="200" height="200">
+    <div class="txt">
+      <span class="kicker">About the author</span>
+      <h2>Javharbek Abdulatipov</h2>
+      <p>Hello. My name is Javharbek Abdulatipov, and I am Deputy Director of the Software Technologies Department at Xalq Banki. I work on machine learning, computer vision and banking systems development.</p>
+      <div class="btns">
+        <a href="about/" class="b1">More about me</a>
+        <a href="https://t.me/javharbek16" class="b2">Telegram</a>
+      </div>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer class="site-footer">
-  <span>© 2026 Javharbek</span>
-  <span><a href="https://javharbek.uz">javharbek.uz</a></span>
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../en/#posts">Articles</a>
+    <a href="../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
 </footer>
 
-<script src="../assets/js/lang.js" defer></script>
+<script src="../assets/js/site.js" defer></script>
 </body>
 </html>

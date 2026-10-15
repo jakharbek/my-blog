@@ -1,336 +1,574 @@
 #!/usr/bin/env python3
-"""Generate the three language versions of the site from one set of templates.
+"""Generate the site: three languages × (home, article, about).
 
 Run from the repository root:  python3 tools/build.py
-Output is committed, so GitHub Pages needs no build step.
+The output is committed, so GitHub Pages needs no build step.
+Article texts live in tools/content_sigmoid.py.
 """
+import json
 from pathlib import Path
 
+from content_sigmoid import ARTICLE, TABLE_ROWS
+
 ROOT = Path(__file__).resolve().parent.parent
-LANGS = ["ru", "uz", "en"]
+LANGS = ["ru", "en", "uz"]
 DATE_ISO = "2026-10-14"
-
-SITE = {
-    "ru": dict(
-        title="Javharbek — заметки о машинном обучении",
-        description="Заметки о машинном обучении, инфраструктуре и математике.",
-        nav_blog="Блог", nav_about="Обо мне", nav_sections="Разделы", nav_lang="Язык",
-        hero_h1="Машинное обучение, объяснённое до конца",
-        hero_p="Заметки инженера о математике под капотом моделей, инфраструктуре и кредитной аналитике.",
-        date="14 октября 2026",
-        post_title="Анатомия сигмоиды",
-        post_blurb="Две горизонтальные асимптоты и одна точка перегиба: что они значат для нейросети и почему 0.5 стал порогом решения. С интерактивными графиками.",
-        lang_name="Русский",
-    ),
-    "uz": dict(
-        title="Javharbek — mashinaviy o‘rganish haqida yozuvlar",
-        description="Mashinaviy o‘rganish, infratuzilma va matematika haqida yozuvlar.",
-        nav_blog="Blog", nav_about="Men haqimda", nav_sections="Bo‘limlar", nav_lang="Til",
-        hero_h1="Mashinaviy o‘rganish, oxirigacha tushuntirilgan",
-        hero_p="Modellar ostidagi matematika, infratuzilma va kredit tahlili haqida muhandis yozuvlari.",
-        date="2026-yil 14-oktabr",
-        post_title="Sigmoidaning anatomiyasi",
-        post_blurb="Ikki gorizontal asimptota va bitta burilish nuqtasi: ular neyron tarmoq uchun nimani anglatadi va nega 0.5 qaror chegarasiga aylandi. Interaktiv grafiklar bilan.",
-        lang_name="O‘zbekcha",
-    ),
-    "en": dict(
-        title="Javharbek — notes on machine learning",
-        description="Notes on machine learning, infrastructure and mathematics.",
-        nav_blog="Blog", nav_about="About", nav_sections="Sections", nav_lang="Language",
-        hero_h1="Machine learning, explained all the way down",
-        hero_p="An engineer's notes on the mathematics under the models, infrastructure and credit analytics.",
-        date="14 October 2026",
-        post_title="Anatomy of the sigmoid",
-        post_blurb="Two horizontal asymptotes and a single inflection point: what they mean for a neural network and why 0.5 became the decision threshold. With interactive figures.",
-        lang_name="English",
-    ),
-}
-
-ARTICLE = {
-"ru": dict(
-    meta_desc="Две горизонтальные асимптоты и единственная точка перегиба: что они значат в контексте сигмоидной функции и нейросетей. С интерактивными графиками.",
-    dek="У функции σ(x) = 1 / (1 + e<sup>−x</sup>) две горизонтальные асимптоты и одна точка перегиба. Это не два сухих факта из учебника, а всё, что нужно знать о том, почему она работает в нейросети и где ломается.",
-    h_road="Дорога между полом и потолком",
-    p_road1="Проще всего думать о сигмоиде как о дороге. Внизу пол на высоте 0, вверху потолок на высоте 1. Дорога идёт слева направо: сначала лежит почти на полу, потом плавно поднимается и ложится почти под потолок.",
-    p_road2="Главное слово здесь «почти». Дорога подходит к полу и потолку сколь угодно близко, но никогда их не касается. Линия, к которой кривая бесконечно приближается и которой никогда не достигает, называется асимптотой. У сигмоиды таких линий две, обе горизонтальные: <span class=\"red\">y = 0</span> при x → −∞ и <span class=\"red\">y = 1</span> при x → +∞.",
-    fig1_aria="Сигмоида между асимптотами y = 0 и y = 1",
-    fig1_label="Диапазон x", fig1_aria_input="Диапазон оси x",
-    fig1_cap="Расширяйте диапазон. Кривая всё плотнее прижимается к асимптотам, но щель между ними остаётся при любом x.",
-    p_table="Насколько маленькой становится эта щель, видно по числам.",
-    p_never="На x = 100 до единицы не хватает числа с сорока тремя нулями после запятой. Но это всё ещё не ноль, и не станет им ни при каком x. Вот это «никогда» и есть содержание слова «асимптота».",
-    h_steep="Самое крутое место",
-    p_steep1="Теперь пройдём по дороге пешком. Слева она почти плоская. Затем подъём становится всё круче и круче, достигает максимума ровно посередине, в точке x = 0 на высоте 0.5, и дальше снова выравнивается.",
-    p_steep2="Место, где «всё круче» сменяется на «всё положе», называется точкой перегиба. Формально там меняется знак второй производной: слева кривая выпукла вниз, справа выпукла вверх. У сигмоиды такое место ровно одно, поэтому вся кривая состоит из одного плавного S-движения без ступенек и плато посередине.",
-    fig2_aria="Крутизна сигмоиды и график её производной",
-    fig2_label="Положение x", fig2_aria_input="Положение точки на кривой",
-    fig2_cap="Чёрный отрезок — касательная в выбранной точке. Внизу — производная σ′(x) = σ(x)(1 − σ(x)); её максимум 0.25 стоит ровно под точкой перегиба.",
-    p_deriv="Производная тут удивительно удобна. Она выражается через саму функцию: <span class=\"formula\">σ′ = σ(1 − σ)</span>. Это значит, что при обратном распространении ошибки не нужно заново считать экспоненту, достаточно значения, которое сеть уже вычислила на прямом проходе.",
-    h_nn="Что это значит для нейросети",
-    p_nn0="Внутри сети нейрон на выходе получает произвольное число: −50, 3, 1000. Для бинарной классификации нужен ответ в виде вероятности от 0 до 1. Сигмоида берёт любое число и укладывает его на дорогу между полом и потолком.",
-    p_nn1="<strong>Асимптоты дают ограниченность.</strong> Выход всегда строго между 0 и 1, поэтому его можно читать как вероятность. Это же свойство и главный недостаток: на плоских участках большие входы перестают различаться. σ(10) и σ(100) отличаются в пятом знаке, производная там практически ноль. Если активации уходят в хвосты, градиент через них не проходит, и веса перестают обучаться. Это и есть затухающий градиент, причина, по которой сигмоида ушла из скрытых слоёв глубоких сетей.",
-    p_nn2="<strong>Точка перегиба даёт порог.</strong> x = 0 и σ = 0.5 — середина между «нет» и «да». Здесь производная максимальна, а значит, сеть наиболее чувствительна: небольшой сдвиг входа заметно меняет выход. В логистической регрессии граница решения w·x + b = 0 отображается ровно в эту точку. Поэтому 0.5 и стал стандартным порогом.",
-    p_nn3="<strong>Единственность перегиба даёт один переход.</strong> Кривая монотонна и не имеет промежуточных полок, поэтому между «нет» и «да» есть ровно одна граница, а не несколько.",
-    h_sum="Коротко",
-    sum=[
-        "Две горизонтальные асимптоты, 0 и 1: выход всегда можно читать как вероятность, но в хвостах функция насыщается и градиент затухает.",
-        "Одна точка перегиба в (0, 0.5): максимальная чувствительность, естественный порог решения и единственная граница между классами.",
-        "Производная выражается через саму функцию, σ′ = σ(1 − σ), что делает обратное распространение дешёвым.",
-        "Для сравнения, у tanh те же свойства, но асимптоты −1 и 1, перегиб в начале координат и наклон 1 вместо 0.25, поэтому в скрытых слоях она обучается быстрее. Сигмоида осталась там, где нужна именно вероятность: на выходе бинарного классификатора.",
-    ],
-),
-"uz": dict(
-    meta_desc="Ikki gorizontal asimptota va yagona burilish nuqtasi: ular sigmoida funksiyasi va neyron tarmoqlar kontekstida nimani anglatadi. Interaktiv grafiklar bilan.",
-    dek="σ(x) = 1 / (1 + e<sup>−x</sup>) funksiyasining ikkita gorizontal asimptotasi va bitta burilish nuqtasi bor. Bu darslikdagi ikki quruq fakt emas, balki u neyron tarmoqda nega ishlashi va qayerda buzilishi haqida bilish kerak bo‘lgan hamma narsa.",
-    h_road="Pol va shift orasidagi yo‘l",
-    p_road1="Sigmoidani yo‘l deb tasavvur qilish eng oson. Pastda 0 balandlikdagi pol, tepada 1 balandlikdagi shift. Yo‘l chapdan o‘ngga boradi: avval deyarli polda yotadi, so‘ng silliq ko‘tarilib deyarli shift ostiga yotadi.",
-    p_road2="Bu yerda asosiy so‘z «deyarli». Yo‘l polga ham, shiftga ham istalgancha yaqinlashadi, lekin hech qachon ularga tegmaydi. Egri chiziq cheksiz yaqinlashadigan, ammo hech qachon yetib bormaydigan chiziq asimptota deb ataladi. Sigmoidada bunday chiziq ikkita, ikkalasi ham gorizontal: x → −∞ da <span class=\"red\">y = 0</span> va x → +∞ da <span class=\"red\">y = 1</span>.",
-    fig1_aria="y = 0 va y = 1 asimptotalar orasidagi sigmoida",
-    fig1_label="x oralig‘i", fig1_aria_input="x o‘qi oralig‘i",
-    fig1_cap="Oraliqni kengaytiring. Egri chiziq asimptotalarga tobora zichroq yopishadi, lekin ular orasidagi oraliq istalgan x da saqlanib qoladi.",
-    p_table="Bu oraliq qanchalik kichik bo‘lishi raqamlarda ko‘rinadi.",
-    p_never="x = 100 da birgacha verguldan keyin qirq uchta nol bo‘lgan son yetmaydi. Lekin bu hali ham nol emas va hech qanday x da nol bo‘lmaydi. Ana shu «hech qachon» — «asimptota» so‘zining mazmuni.",
-    h_steep="Eng tik joy",
-    p_steep1="Endi yo‘l bo‘ylab piyoda yuramiz. Chapda u deyarli tekis. Keyin ko‘tarilish tobora tikroq bo‘lib boradi, aynan o‘rtada, x = 0 nuqtada 0.5 balandlikda maksimumga yetadi va yana tekislanadi.",
-    p_steep2="«Tobora tikroq» «tobora yotiqroq»ga almashadigan joy burilish nuqtasi deb ataladi. Rasman u yerda ikkinchi hosilaning ishorasi o‘zgaradi: chapda egri chiziq pastga qavariq, o‘ngda yuqoriga qavariq. Sigmoidada bunday joy aynan bitta, shuning uchun butun egri chiziq zinapoyasiz va o‘rtada tekisliksiz bitta silliq S-harakatdan iborat.",
-    fig2_aria="Sigmoidaning tikligi va hosilasining grafigi",
-    fig2_label="x holati", fig2_aria_input="Egri chiziqdagi nuqta holati",
-    fig2_cap="Qora kesma — tanlangan nuqtadagi urinma. Pastda — σ′(x) = σ(x)(1 − σ(x)) hosilasi; uning maksimumi 0.25 aynan burilish nuqtasi ostida turadi.",
-    p_deriv="Bu yerda hosila hayratlanarli darajada qulay. U funksiyaning o‘zi orqali ifodalanadi: <span class=\"formula\">σ′ = σ(1 − σ)</span>. Demak, xatoni teskari tarqatishda eksponentani qayta hisoblash shart emas, tarmoq to‘g‘ri o‘tishda allaqachon hisoblagan qiymat kifoya.",
-    h_nn="Bu neyron tarmoq uchun nimani anglatadi",
-    p_nn0="Tarmoq ichida chiqishdagi neyron ixtiyoriy sonni oladi: −50, 3, 1000. Binar tasniflash uchun 0 dan 1 gacha ehtimollik ko‘rinishidagi javob kerak. Sigmoida istalgan sonni olib, uni pol va shift orasidagi yo‘lga joylaydi.",
-    p_nn1="<strong>Asimptotalar chegaralanganlik beradi.</strong> Chiqish har doim qat’iy 0 va 1 orasida, shuning uchun uni ehtimollik sifatida o‘qish mumkin. Xuddi shu xususiyat asosiy kamchilik hamdir: tekis qismlarda katta kirishlar farqlanmay qoladi. σ(10) va σ(100) beshinchi raqamda farq qiladi, hosila u yerda deyarli nol. Aktivatsiyalar dumlarga ketsa, gradient ulardan o‘tmaydi va vaznlar o‘rganishni to‘xtatadi. Bu so‘nuvchi gradient — sigmoida chuqur tarmoqlarning yashirin qatlamlaridan ketganining sababi.",
-    p_nn2="<strong>Burilish nuqtasi chegara beradi.</strong> x = 0 va σ = 0.5 — «yo‘q» va «ha» o‘rtasidagi o‘rta nuqta. Bu yerda hosila maksimal, demak tarmoq eng sezgir: kirishning kichik siljishi chiqishni sezilarli o‘zgartiradi. Logistik regressiyada w·x + b = 0 qaror chegarasi aynan shu nuqtaga tushadi. Shuning uchun 0.5 standart chegaraga aylandi.",
-    p_nn3="<strong>Burilishning yagonaligi bitta o‘tish beradi.</strong> Egri chiziq monoton va oraliq tekisliklarsiz, shuning uchun «yo‘q» va «ha» orasida bir nechta emas, aynan bitta chegara bor.",
-    h_sum="Qisqacha",
-    sum=[
-        "Ikki gorizontal asimptota, 0 va 1: chiqishni har doim ehtimollik sifatida o‘qish mumkin, lekin dumlarda funksiya to‘yinadi va gradient so‘nadi.",
-        "(0, 0.5) dagi bitta burilish nuqtasi: maksimal sezgirlik, tabiiy qaror chegarasi va sinflar orasidagi yagona chegara.",
-        "Hosila funksiyaning o‘zi orqali ifodalanadi, σ′ = σ(1 − σ), bu teskari tarqatishni arzon qiladi.",
-        "Taqqoslash uchun, tanh da xuddi shu xususiyatlar, lekin asimptotalar −1 va 1, burilish koordinata boshida va qiyalik 0.25 o‘rniga 1, shuning uchun yashirin qatlamlarda u tezroq o‘rganadi. Sigmoida aynan ehtimollik kerak bo‘lgan joyda qoldi: binar tasniflagich chiqishida.",
-    ],
-),
-"en": dict(
-    meta_desc="Two horizontal asymptotes and a single inflection point: what they mean for the sigmoid function and for neural networks. With interactive figures.",
-    dek="The function σ(x) = 1 / (1 + e<sup>−x</sup>) has two horizontal asymptotes and one inflection point. These are not two dry textbook facts; they are everything you need to know about why it works inside a neural network and where it breaks.",
-    h_road="A road between the floor and the ceiling",
-    p_road1="The easiest way to think about the sigmoid is as a road. Below is a floor at height 0, above is a ceiling at height 1. The road runs left to right: it starts almost on the floor, then rises smoothly and settles almost under the ceiling.",
-    p_road2="The key word is “almost”. The road comes arbitrarily close to the floor and the ceiling but never touches them. A line that a curve approaches forever without ever reaching is called an asymptote. The sigmoid has two, both horizontal: <span class=\"red\">y = 0</span> as x → −∞ and <span class=\"red\">y = 1</span> as x → +∞.",
-    fig1_aria="Sigmoid between the asymptotes y = 0 and y = 1",
-    fig1_label="Range of x", fig1_aria_input="Range of the x axis",
-    fig1_cap="Widen the range. The curve hugs the asymptotes ever more tightly, but the gap between them remains for every x.",
-    p_table="The numbers show just how small that gap becomes.",
-    p_never="At x = 100 the distance to one is a number with forty-three zeros after the decimal point. But it is still not zero, and no x will ever make it zero. That “never” is the whole meaning of the word “asymptote”.",
-    h_steep="The steepest place",
-    p_steep1="Now walk the road. On the left it is almost flat. Then the climb gets steeper and steeper, peaks exactly in the middle, at x = 0 and height 0.5, and levels off again.",
-    p_steep2="The place where “getting steeper” turns into “getting flatter” is called the inflection point. Formally, the second derivative changes sign there: the curve is convex on the left and concave on the right. The sigmoid has exactly one such point, so the whole curve is a single smooth S-shaped move with no steps or plateaus in the middle.",
-    fig2_aria="Steepness of the sigmoid and the graph of its derivative",
-    fig2_label="Position x", fig2_aria_input="Position of the point on the curve",
-    fig2_cap="The black segment is the tangent at the chosen point. Below is the derivative σ′(x) = σ(x)(1 − σ(x)); its maximum of 0.25 sits directly under the inflection point.",
-    p_deriv="The derivative is remarkably convenient here. It is expressed through the function itself: <span class=\"formula\">σ′ = σ(1 − σ)</span>. So during backpropagation there is no need to recompute the exponential; the value the network already computed on the forward pass is enough.",
-    h_nn="What this means for a neural network",
-    p_nn0="Inside the network, an output neuron receives an arbitrary number: −50, 3, 1000. Binary classification needs an answer as a probability between 0 and 1. The sigmoid takes any number and lays it onto the road between the floor and the ceiling.",
-    p_nn1="<strong>The asymptotes give boundedness.</strong> The output is always strictly between 0 and 1, so it can be read as a probability. The same property is also the main drawback: on the flat parts, large inputs stop being distinguishable. σ(10) and σ(100) differ in the fifth decimal, and the derivative there is practically zero. When activations drift into the tails, no gradient passes through them and the weights stop learning. This is the vanishing gradient, the reason the sigmoid left the hidden layers of deep networks.",
-    p_nn2="<strong>The inflection point gives the threshold.</strong> x = 0 and σ = 0.5 is the midpoint between “no” and “yes”. The derivative is largest there, so the network is most sensitive: a small shift in the input visibly changes the output. In logistic regression the decision boundary w·x + b = 0 maps exactly to this point. That is why 0.5 became the standard threshold.",
-    p_nn3="<strong>A single inflection gives a single transition.</strong> The curve is monotonic with no intermediate shelves, so there is exactly one boundary between “no” and “yes”, not several.",
-    h_sum="In short",
-    sum=[
-        "Two horizontal asymptotes, 0 and 1: the output can always be read as a probability, but in the tails the function saturates and the gradient vanishes.",
-        "One inflection point at (0, 0.5): maximum sensitivity, a natural decision threshold and a single boundary between classes.",
-        "The derivative is expressed through the function itself, σ′ = σ(1 − σ), which makes backpropagation cheap.",
-        "For comparison, tanh has the same properties but asymptotes at −1 and 1, an inflection at the origin and a slope of 1 instead of 0.25, so it trains faster in hidden layers. The sigmoid stayed where a probability is exactly what is needed: the output of a binary classifier.",
-    ],
-),
-}
-
-TABLE_ROWS = [
-    ("2", "0.8808", "0.12"),
-    ("5", "0.9933", "6.7 × 10<sup>−3</sup>"),
-    ("10", "0.99995", "4.5 × 10<sup>−5</sup>"),
-    ("20", "0.999999998", "2.1 × 10<sup>−9</sup>"),
-    ("100", "1 − 3.7 × 10<sup>−44</sup>", "3.7 × 10<sup>−44</sup>"),
-]
+ATTRACTOR = (ROOT / "tools" / "attractor.txt").read_text().strip()
 
 FONTS = (
     '  <link rel="preconnect" href="https://fonts.googleapis.com">\n'
     '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
-    '  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap">\n'
+    '  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">\n'
 )
+THEME_BOOT = (
+    '  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>\n'
+)
+LANG_NAME = {"ru": "RU", "en": "EN", "uz": "UZ"}
+
+SITE = {
+    "ru": dict(
+        brand="Абдулатипов Ж.", title="Абдулатипов Ж. — программирование, математика, машинное обучение",
+        description="Блог Жавхарбека Абдулатипова: математика под капотом моделей, машинное обучение, компьютерное зрение, инженерия систем.",
+        navLabel="Основная навигация", langLabel="Язык", footLabel="Ссылки в подвале", filterLabel="Фильтр по разделу",
+        toDark="Тёмная тема", toLight="Светлая тема",
+        navPosts="Статьи", navFields="Разделы", navResearch="Исследования", navAbout="Обо мне", allArticles="Все статьи",
+        hero1="Мыслить строго.", hero2="Строить красиво.",
+        heroSub="Программирование · Математика · Физика · Машинное обучение · Инженерия", ctaRead="Читать статьи",
+        featKicker="Избранное · Машинное обучение", min="мин", read="Читать",
+        fieldsSub="Шесть направлений, которые пересекаются чаще, чем кажется.",
+        postsTitle="Записи", searchLabel="Поиск по статьям", searchPh="Например, сигмоида", all="Все",
+        found="Найдено записей: ", reset="Сбросить фильтры", empty="Ничего не найдено. Попробуйте другой запрос или раздел.",
+        formulaKicker="Формула недели",
+        formulaText="Производная сигмоиды выражается через саму сигмоиду. Поэтому при обратном распространении ошибки экспоненту не считают заново: достаточно значения, уже вычисленного на прямом проходе.",
+        derive="Разобрать вывод", researchTitle="Исследования и проекты",
+        aboutKicker="Об авторе", aboutMore="Подробнее обо мне",
+        about1="Здравствуйте. Меня зовут Жавхарбек Абдулатипов, я заместитель директора Департамента программных технологий Xalq Banki. Занимаюсь машинным обучением, компьютерным зрением и разработкой банковских систем.",
+        date="14 октября 2026",
+    ),
+    "en": dict(
+        brand="Abdulatipov J.", title="Abdulatipov J. — programming, mathematics, machine learning",
+        description="Javharbek Abdulatipov's blog: the mathematics under the models, machine learning, computer vision, systems engineering.",
+        navLabel="Main navigation", langLabel="Language", footLabel="Footer links", filterLabel="Filter by topic",
+        toDark="Dark theme", toLight="Light theme",
+        navPosts="Articles", navFields="Topics", navResearch="Research", navAbout="About me", allArticles="All articles",
+        hero1="Think rigorously.", hero2="Build beautifully.",
+        heroSub="Programming · Mathematics · Physics · Machine Learning · Engineering", ctaRead="Read articles",
+        featKicker="Featured · Machine Learning", min="min", read="Read",
+        fieldsSub="Six fields that overlap more often than you might think.",
+        postsTitle="Posts", searchLabel="Search articles", searchPh="e.g. sigmoid", all="All",
+        found="Posts found: ", reset="Reset filters", empty="Nothing found. Try another query or topic.",
+        formulaKicker="Formula of the week",
+        formulaText="The derivative of the sigmoid is expressed through the sigmoid itself. So backpropagation never recomputes the exponential: the value already obtained on the forward pass is enough.",
+        derive="See the derivation", researchTitle="Research and projects",
+        aboutKicker="About the author", aboutMore="More about me",
+        about1="Hello. My name is Javharbek Abdulatipov, and I am Deputy Director of the Software Technologies Department at Xalq Banki. I work on machine learning, computer vision and banking systems development.",
+        date="14 October 2026",
+    ),
+    "uz": dict(
+        brand="Abdulatipov J.", title="Abdulatipov J. — dasturlash, matematika, mashinaviy o‘qitish",
+        description="Javharbek Abdulatipov blogi: modellar ostidagi matematika, mashinaviy o‘qitish, kompyuter ko‘rishi, tizimlar muhandisligi.",
+        navLabel="Asosiy navigatsiya", langLabel="Til", footLabel="Pastki havolalar", filterLabel="Bo‘lim bo‘yicha saralash",
+        toDark="Qorong‘i mavzu", toLight="Yorug‘ mavzu",
+        navPosts="Maqolalar", navFields="Bo‘limlar", navResearch="Tadqiqotlar", navAbout="Men haqimda", allArticles="Barcha maqolalar",
+        hero1="Qat’iy fikrlash.", hero2="Go‘zal yaratish.",
+        heroSub="Dasturlash · Matematika · Fizika · Mashinaviy o‘qitish · Muhandislik", ctaRead="Maqolalarni o‘qish",
+        featKicker="Tanlangan · Mashinaviy o‘qitish", min="daq", read="O‘qish",
+        fieldsSub="Oltita yo‘nalish — ular o‘ylaganingizdan ko‘ra tez-tez kesishadi.",
+        postsTitle="Yozuvlar", searchLabel="Maqolalardan qidirish", searchPh="Masalan, sigmoida", all="Barchasi",
+        found="Topilgan yozuvlar: ", reset="Filtrlarni tozalash", empty="Hech narsa topilmadi. Boshqa so‘rov yoki bo‘limni sinab ko‘ring.",
+        formulaKicker="Hafta formulasi",
+        formulaText="Sigmoidaning hosilasi sigmoidaning o‘zi orqali ifodalanadi. Shuning uchun teskari tarqatishda eksponenta qayta hisoblanmaydi: to‘g‘ri o‘tishda olingan qiymat kifoya.",
+        derive="Isbotini ko‘rish", researchTitle="Tadqiqotlar va loyihalar",
+        aboutKicker="Muallif haqida", aboutMore="Men haqimda batafsil",
+        about1="Assalomu alaykum. Mening ismim Javharbek Abdulatipov, Xalq Banki Dasturiy texnologiyalar departamenti direktori o‘rinbosariman. Mashinaviy o‘qitish, kompyuter ko‘rishi va bank tizimlarini ishlab chiqish bilan shug‘ullanaman.",
+        date="2026-yil 14-oktabr",
+    ),
+}
+
+TOPICS = [
+    ("math", "∑", False, {"ru": ["Математика", "Анализ, линейная алгебра, вероятность"], "en": ["Mathematics", "Analysis, linear algebra, probability"], "uz": ["Matematika", "Analiz, chiziqli algebra, ehtimollar"]}),
+    ("phys", "ℏ", True, {"ru": ["Физика", "Механика, поля, квантовый мир"], "en": ["Physics", "Mechanics, fields, the quantum world"], "uz": ["Fizika", "Mexanika, maydonlar, kvant olami"]}),
+    ("ml", "∇", False, {"ru": ["Машинное обучение", "Бустинг, нейросети, LLM, скоринг"], "en": ["Machine Learning", "Boosting, neural networks, LLMs, scoring"], "uz": ["Mashinaviy o‘qitish", "Busting, neyron tarmoqlar, LLM, skoring"]}),
+    ("cv", "◎", False, {"ru": ["Компьютерное зрение", "Детекция, лица, Re-ID"], "en": ["Computer Vision", "Detection, faces, Re-ID"], "uz": ["Kompyuter ko‘rishi", "Aniqlash, yuzlar, Re-ID"]}),
+    ("algo", "λ", True, {"ru": ["Алгоритмы", "Структуры данных и сложность"], "en": ["Algorithms", "Data structures and complexity"], "uz": ["Algoritmlar", "Ma’lumotlar tuzilmalari va murakkablik"]}),
+    ("sys", "⇄", False, {"ru": ["Инженерия систем", "Архитектура, Linux, Docker"], "en": ["Systems Engineering", "Architecture, Linux, Docker"], "uz": ["Tizimlar muhandisligi", "Arxitektura, Linux, Docker"]}),
+]
+
+# Posts. Add new ones here; the first is featured.
+POSTS = [
+    dict(slug="sigmoid", topic="ml", date=DATE_ISO, mins=9,
+         title={"ru": "Анатомия сигмоиды", "en": "Anatomy of the sigmoid", "uz": "Sigmoidaning anatomiyasi"},
+         excerpt={"ru": "Две горизонтальные асимптоты и одна точка перегиба: что они значат для нейросети и почему 0.5 стал порогом решения.",
+                  "en": "Two horizontal asymptotes and a single inflection point: what they mean for a neural network and why 0.5 became the decision threshold.",
+                  "uz": "Ikki gorizontal asimptota va bitta burilish nuqtasi: ular neyron tarmoq uchun nimani anglatadi va nega 0.5 qaror chegarasiga aylandi."},
+         figAria={"ru": "Сигмоида между асимптотами 0 и 1", "en": "The sigmoid between the asymptotes 0 and 1", "uz": "0 va 1 asimptotalar orasidagi sigmoida"}),
+]
+
+RESEARCH = {
+    "ru": [["Метод · № 010556", "Модель «Шаршара»", "Научный математический метод, зарегистрированный в Центре интеллектуальной собственности при Министерстве юстиции Узбекистана."],
+           ["NLP · Инфраструктура", "AI-стек для узбекского языка", "Корпус, инференс и юридический RAG для языка с небольшим объёмом данных."],
+           ["CV · Реальное время", "Периметр, который видит", "Детекция людей, распознавание лиц и повторная идентификация между камерами."]],
+    "en": [["Method · No. 010556", "The «Sharshara» model", "A scientific mathematical method registered with the Intellectual Property Center under the Ministry of Justice of Uzbekistan."],
+           ["NLP · Infrastructure", "An AI stack for the Uzbek language", "Corpus, inference and legal RAG for a low-resource language."],
+           ["CV · Real time", "A perimeter that sees", "Person detection, face recognition and re-identification across cameras."]],
+    "uz": [["Usul · № 010556", "«Sharshara» modeli", "O‘zbekiston Adliya vazirligi huzuridagi Intellektual mulk markazida ro‘yxatdan o‘tgan ilmiy matematik usul."],
+           ["NLP · Infratuzilma", "O‘zbek tili uchun AI-stek", "Kam resursli til uchun korpus, inferens va yuridik RAG."],
+           ["CV · Real vaqt", "Ko‘ra oladigan perimetr", "Odamlarni aniqlash, yuzni tanish va kameralar orasida qayta identifikatsiya."]],
+}
+
+ABOUT = {
+    "ru": dict(
+        kicker="Обо мне", loc="Xalq Banki · Ташкент, Узбекистан",
+        about2="По образованию программист-математик. В этом блоге записываю то, в чём разбираюсь сам: формулы, код и заметки по ходу работы.",
+        experience="Опыт", education="Образование", degree="Бакалавр", fac1="Физико-математический факультет (Физмат)", fac2="Высшая школа точных наук",
+        programme="Направление «Математика и информатика»", uni="Национальный педагогический университет Узбекистана им. Низами",
+        stackTitle="Стек", contacts="Связаться со мной", write="Написать", now="н.в.",
+        dep="Заместитель директора, Департамент программных технологий", xq="Внутренние системы банка, проектирование ПО и баз данных, высоконагруженные сервисы, код-ревью",
+        oks="CRM, CMS и высоконагруженные сайты", fl="Фриланс", others=" и другие",
+        stats=[["2-е место", "Евразийская олимпиада по информатике, 2022"], ["1-е место", "Best Soft Challenge, 2017 · Минцифры РУз"], ["13+ лет", "в разработке программного обеспечения"]],
+        keys=["Языки", "Бэкенд", "Фронтенд", "Базы данных", "Очереди и интеграции", "Инфраструктура и DevOps", "Архитектура", "ML и анализ данных", "Компьютерное зрение", "LLM и NLP"],
+        db="Реляционные (OLTP): PostgreSQL, MySQL, Oracle Database\nАналитические (OLAP): ClickHouse\nНереляционные (NoSQL): Redis, Memcached, MongoDB\nПоисковые: Elasticsearch\nВекторные: pgvector, Qdrant",
+        arch="Микросервисы, CQRS, Event-driven, DDD, MVC, ООП, SOLID, паттерны проектирования",
+        ml="CatBoost, scikit-learn, pandas, NumPy, PyTorch, кредитный скоринг",
+        cv="OpenCV, YOLO, распознавание лиц, Re-ID, видеоаналитика в реальном времени",
+        llm="LLM-инфраструктура, RAG, эмбеддинги, векторный поиск, инференс на своих серверах",
+    ),
+    "en": dict(
+        kicker="About me", loc="Xalq Banki · Tashkent, Uzbekistan",
+        about2="By education, I am a programmer-mathematician. In this blog I write about what I work through myself: formulas, code and notes along the way.",
+        experience="Experience", education="Education", degree="Bachelor’s degree", fac1="Faculty of Physics and Mathematics", fac2="Higher School of Exact Sciences",
+        programme="Programme: Mathematics and Computer Science", uni="Nizami National Pedagogical University of Uzbekistan",
+        stackTitle="Stack", contacts="Get in touch", write="Email me", now="present",
+        dep="Deputy Director, Software Technologies Department", xq="Internal banking systems, software and database design, high-load services, code review",
+        oks="CRM, CMS and high-load websites", fl="Freelance", others=" and others",
+        stats=[["2nd place", "Eurasian Olympiad in Informatics, 2022"], ["1st place", "Best Soft Challenge, 2017 · Ministry of Digital Technologies"], ["13+ years", "in software development"]],
+        keys=["Languages", "Backend", "Frontend", "Databases", "Messaging & integration", "Infrastructure & DevOps", "Architecture", "ML & data analysis", "Computer vision", "LLM & NLP"],
+        db="Relational (OLTP): PostgreSQL, MySQL, Oracle Database\nAnalytical (OLAP): ClickHouse\nNon-relational (NoSQL): Redis, Memcached, MongoDB\nSearch: Elasticsearch\nVector: pgvector, Qdrant",
+        arch="Microservices, CQRS, event-driven, DDD, MVC, OOP, SOLID, design patterns",
+        ml="CatBoost, scikit-learn, pandas, NumPy, PyTorch, credit scoring",
+        cv="OpenCV, YOLO, face recognition, Re-ID, real-time video analytics",
+        llm="LLM infrastructure, RAG, embeddings, vector search, self-hosted inference",
+    ),
+    "uz": dict(
+        kicker="Men haqimda", loc="Xalq Banki · Toshkent, O‘zbekiston",
+        about2="Ma’lumotim bo‘yicha dasturchi-matematikman. Ushbu blogda o‘zim o‘rganayotgan narsalarni yozib boraman: formulalar, kod va ish jarayonidagi qaydlar.",
+        experience="Tajriba", education="Ta’lim", degree="Bakalavr", fac1="Fizika-matematika fakulteti", fac2="Aniq fanlar oliy maktabi",
+        programme="Yo‘nalish: «Matematika va informatika»", uni="Nizomiy nomidagi O‘zbekiston milliy pedagogika universiteti",
+        stackTitle="Stek", contacts="Men bilan bog‘lanish", write="Yozish", now="h.v.",
+        dep="Direktor o‘rinbosari, Dasturiy texnologiyalar departamenti", xq="Bankning ichki tizimlari, dasturiy ta’minot va ma’lumotlar bazalarini loyihalash, yuqori yuklamali servislar, kod-review",
+        oks="CRM, CMS va yuqori yuklamali saytlar", fl="Frilans", others=" va boshqalar",
+        stats=[["2-o‘rin", "Informatika bo‘yicha Yevroosiyo olimpiadasi, 2022"], ["1-o‘rin", "Best Soft Challenge, 2017 · Raqamli texnologiyalar vazirligi"], ["13+ yil", "dasturiy ta’minot ishlab chiqishda"]],
+        keys=["Tillar", "Backend", "Frontend", "Ma’lumotlar bazalari", "Navbatlar va integratsiya", "Infratuzilma va DevOps", "Arxitektura", "ML va ma’lumotlar tahlili", "Kompyuter ko‘rishi", "LLM va NLP"],
+        db="Relyatsion (OLTP): PostgreSQL, MySQL, Oracle Database\nAnalitik (OLAP): ClickHouse\nNorelyatsion (NoSQL): Redis, Memcached, MongoDB\nQidiruv: Elasticsearch\nVektor: pgvector, Qdrant",
+        arch="Mikroservislar, CQRS, Event-driven, DDD, MVC, OOP, SOLID, loyihalash patternlari",
+        ml="CatBoost, scikit-learn, pandas, NumPy, PyTorch, kredit skoringi",
+        cv="OpenCV, YOLO, yuzni tanish, Re-ID, real vaqtda videoanalitika",
+        llm="LLM-infratuzilma, RAG, embeddinglar, vektor qidiruv, o‘z serverlarida inferens",
+    ),
+}
+
+STACK_VALUES = [
+    "PHP, Java, Python, JavaScript, TypeScript, C#, SQL, Bash",
+    "Laravel, Symfony, Yii, CodeIgniter, Doctrine, Spring Boot, Spring Framework, Hibernate, FastAPI, .NET",
+    "React",
+    "{db}",
+    "Apache Kafka, RabbitMQ, REST, gRPC, WebSocket",
+    "Linux, Docker, Docker Compose, Kubernetes, Helm, Nginx, HAProxy, Git, GitLab CI, GitHub Actions, Jenkins, Ansible, Terraform, Bash, CI/CD, Prometheus, Grafana, ELK Stack, Zabbix, self-hosted",
+    "{arch}", "{ml}", "{cv}", "{llm}",
+]
+
+SOCIAL = [("LinkedIn", "https://www.linkedin.com/in/javharbek-abdulatipov"), ("GitHub", "https://github.com/jakharbek"), ("Telegram", "https://t.me/javharbek16")]
+EMAIL = "javhar_work@mail.ru"
+PHONE = "+998 90 929-44-63"
 
 
 def hreflang(path_fn):
-    out = []
-    for l in LANGS:
-        out.append(f'  <link rel="alternate" hreflang="{l}" href="{path_fn(l)}">')
+    out = [f'  <link rel="alternate" hreflang="{l}" href="{path_fn(l)}">' for l in LANGS]
     out.append(f'  <link rel="alternate" hreflang="x-default" href="{path_fn("en")}">')
     return "\n".join(out)
 
 
-def header(lang, rel, page):
+def head(lang, title, desc, rel, page, og_type="website"):
+    return f"""<!doctype html>
+<html lang="{lang}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{title}</title>
+  <meta name="description" content="{desc}">
+  <meta property="og:title" content="{title}">
+  <meta property="og:description" content="{desc}">
+  <meta property="og:type" content="{og_type}">
+  <meta property="og:image" content="{rel}assets/img/javharbek.png">
+{hreflang(lambda l: f"{rel}{l}/{page}")}
+  <link rel="icon" href="{rel}assets/favicon.svg" type="image/svg+xml">
+{THEME_BOOT}{FONTS}  <link rel="stylesheet" href="{rel}assets/css/site.css">
+</head>
+<body>
+"""
+
+
+def header(lang, rel, page, nav_items):
     s = SITE[lang]
-    items = []
-    for l in LANGS:
-        cur = ' aria-current="true"' if l == lang else ""
-        items.append(f'<a href="{rel}{l}/{page}" lang="{l}" hreflang="{l}"{cur}>{SITE[l]["lang_name"]}</a>')
+    langs = " ".join(
+        f'<a href="{rel}{l}/{page}" lang="{l}" hreflang="{l}"{" aria-current=\"true\"" if l == lang else ""}>{LANG_NAME[l]}</a>'
+        for l in LANGS
+    )
+    nav = "\n    ".join(f'<a href="{href}"{" aria-current=\"page\"" if cur else ""}>{label}</a>' for label, href, cur in nav_items)
+    labels = json.dumps({"toDark": s["toDark"], "toLight": s["toLight"]}, ensure_ascii=False).replace('"', "&quot;")
     return f"""<header class="site-header">
-  <a class="wordmark" href="{rel}{lang}/">Javharbek</a>
-  <nav class="site-nav" aria-label="{s['nav_sections']}">
-    <a href="{rel}{lang}/">{s['nav_blog']}</a>
-    <a href="https://javharbek.uz">{s['nav_about']}</a>
-    <a href="https://github.com/jakharbek">GitHub</a>
-  </nav>
-  <nav class="lang-nav" aria-label="{s['nav_lang']}">
-    {' '.join(items)}
-  </nav>
-</header>"""
+  <div class="wrap">
+    <a class="brand" href="{rel}{lang}/">{s['brand']}</a>
+    <nav class="nav" aria-label="{s['navLabel']}">
+    {nav}
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="{s['langLabel']}">{langs}</nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{labels}" aria-label="{s['toDark']}">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+"""
 
 
-FOOTER = """<footer class="site-footer">
-  <span>© 2026 Javharbek</span>
-  <span><a href="https://javharbek.uz">javharbek.uz</a></span>
-</footer>"""
+def footer(lang, rel):
+    s = SITE[lang]
+    links = "\n    ".join(f'<a href="{u}">{n}</a>' for n, u in SOCIAL)
+    return f"""<footer class="site-footer">
+  <nav aria-label="{s['footLabel']}">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="{rel}{lang}/#posts">{s['navPosts']}</a>
+    <a href="{rel}{lang}/about/">{s['navAbout']}</a>
+    {links}
+  </nav>
+</footer>
+
+<script src="{rel}assets/js/site.js" defer></script>
+"""
+
+
+def sigmoid_svg(aria):
+    # The sigmoid itself, drawn as the featured figure: asymptotes in the accent, curve in the foreground.
+    pts = []
+    import math
+    for i in range(0, 481, 8):
+        x = -7 + 14 * i / 480
+        y = 1 / (1 + math.exp(-x))
+        pts.append(f"{i} {round(250 - 220 * y, 1)}")
+    curve = "M" + " L".join(pts)
+    return f"""<svg viewBox="0 0 480 280" role="img" aria-label="{aria}">
+<line x1="0" y1="30" x2="480" y2="30" stroke="var(--accent)" stroke-width="1.5"></line>
+<line x1="0" y1="250" x2="480" y2="250" stroke="var(--accent)" stroke-width="1.5"></line>
+<line x1="240" y1="30" x2="240" y2="250" stroke="var(--curve)" stroke-dasharray="4 4"></line>
+<path d="{curve}" fill="none" stroke="var(--fg)" stroke-width="2"></path>
+<circle cx="240" cy="140" r="4" fill="var(--bg)" stroke="var(--fg)" stroke-width="2"></circle>
+</svg>"""
 
 
 def home(lang):
     s = SITE[lang]
     rel = "../"
-    return f"""<!doctype html>
-<html lang="{lang}">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{s['title']}</title>
-  <meta name="description" content="{s['description']}">
-  <meta property="og:title" content="Javharbek">
-  <meta property="og:description" content="{s['description']}">
-  <meta property="og:type" content="website">
-{hreflang(lambda l: f"../{l}/")}
-  <link rel="icon" href="{rel}assets/favicon.svg" type="image/svg+xml">
-{FONTS}  <link rel="stylesheet" href="{rel}assets/css/site.css">
-</head>
-<body>
-
-{header(lang, rel, "")}
-
+    nav = [(s["navPosts"], "#posts", False), (s["navFields"], "#fields", False), (s["navResearch"], "#research", False), (s["navAbout"], "about/", False)]
+    feat = POSTS[0]
+    chips = [f'<button type="button" class="chip" data-topic="all" aria-pressed="true"><span>{s["all"]}</span><small>{len(POSTS)}</small></button>']
+    for tid, _, _, names in TOPICS:
+        chips.append(f'<button type="button" class="chip" data-topic="{tid}" aria-pressed="false"><span>{names[lang][0]}</span><small>{sum(1 for p in POSTS if p["topic"] == tid)}</small></button>')
+    topic_name = {tid: names[lang][0] for tid, _, _, names in TOPICS}
+    rows = "\n".join(
+        f"""      <a class="row" href="{p['slug']}/" data-topic="{p['topic']}">
+        <span class="l"><span class="kicker">{topic_name[p['topic']]}</span><span class="rt">{p['title'][lang]}</span><span class="ex">{p['excerpt'][lang]}</span></span>
+        <span class="r"><time datetime="{p['date']}">{s['date']}</time><span>{p['mins']} {s['min']}</span></span>
+      </a>""" for p in POSTS)
+    tiles = "\n".join(
+        f"""      <button type="button" class="tile" data-topic="{tid}"><span class="glyph math{' it' if it else ''}">{glyph}</span><span class="nm"><b>{names[lang][0]}</b><span>{names[lang][1]}</span></span><span class="cnt">{sum(1 for p in POSTS if p['topic'] == tid)}</span></button>"""
+        for tid, glyph, it, names in TOPICS)
+    research = "\n".join(f'      <article><span class="kicker">{k}</span><h3>{t}</h3><p>{x}</p></article>' for k, t, x in RESEARCH[lang])
+    return head(lang, s["title"], s["description"], rel, "") + header(lang, rel, "", nav) + f"""
 <main>
-  <section class="hero">
-    <h1>{s['hero_h1']}</h1>
-    <p>{s['hero_p']}</p>
-  </section>
+<section id="top" class="hero">
+  <svg class="bg" viewBox="0 0 520 560" aria-hidden="true"><path class="attractor" d="{ATTRACTOR}" fill="none" stroke="var(--curve)" stroke-width=".7" stroke-linejoin="round" stroke-linecap="round"></path></svg>
+  <div class="hero-text rise">
+    <h1><span>{s['hero1']}</span><span>{s['hero2']}</span></h1>
+    <p class="hero-sub">{s['heroSub']}</p>
+  </div>
+  <div class="hero-cta rise">
+    <a href="#posts" class="b1">{s['ctaRead']}</a>
+    <a href="about/" class="b2">{s['navAbout']}</a>
+  </div>
+</section>
 
-  <ul class="posts">
-    <li class="post-row">
-      <time datetime="{DATE_ISO}">{s['date']}</time>
-      <a href="sigmoid/">
-        <h2>{s['post_title']}</h2>
-        <p>{s['post_blurb']}</p>
-      </a>
-    </li>
-  </ul>
+<section id="posts" class="posts">
+  <div class="wrap-s">
+    <div class="posts-head">
+      <h2 class="sec">{s['postsTitle']}</h2>
+      <div class="search">
+        <label for="q">{s['searchLabel']}</label>
+        <div class="field">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input id="q" type="search" placeholder="{s['searchPh']}" autocomplete="off">
+        </div>
+      </div>
+    </div>
+    <div class="chips" role="group" aria-label="{s['filterLabel']}">
+      {''.join(chips)}
+    </div>
+
+    <a id="featured" class="featured" href="{feat['slug']}/">
+      <span class="txt">
+        <span class="kicker">{s['featKicker']}</span>
+        <span class="ttl">{feat['title'][lang]}</span>
+        <span class="sum">{feat['excerpt'][lang]}</span>
+        <span class="meta"><time datetime="{feat['date']}">{s['date']}</time><span>{feat['mins']} {s['min']}</span><span class="ul">{s['read']} →</span></span>
+      </span>
+      <span class="fig">
+        {sigmoid_svg(feat['figAria'][lang])}
+        <span class="formula math">σ(x) = 1 / (1 + e<sup>−x</sup>)</span>
+      </span>
+    </a>
+
+    <div class="found">
+      <span id="found" aria-live="polite" data-text="{s['found']}">{s['found']}{len(POSTS)}</span>
+      <button id="reset" type="button" class="ul" hidden>{s['reset']}</button>
+    </div>
+    <div id="post-list" class="list">
+{rows}
+      <p id="empty" class="empty" hidden>{s['empty']}</p>
+    </div>
+  </div>
+</section>
+
+<section id="fields" class="fields">
+  <div class="wrap-m">
+    <div class="fields-head">
+      <h2 class="sec">{s['navFields']}</h2>
+      <p>{s['fieldsSub']}</p>
+    </div>
+    <div class="tiles">
+{tiles}
+    </div>
+  </div>
+</section>
+
+<section class="formula-sec">
+  <div class="wrap-xs">
+    <span class="kicker">{s['formulaKicker']}</span>
+    <div class="bigmath math" role="img" aria-label="σ′(x) = σ(x)(1 − σ(x))">
+      <span>σ′(x)</span><span class="n">=</span><span>σ(x)</span><span class="n">(1 −</span><span>σ(x)</span><span class="n">)</span>
+    </div>
+    <p>{s['formulaText']}</p>
+    <a href="sigmoid/#s3" class="ul">{s['derive']}</a>
+  </div>
+</section>
+
+<section id="research" class="research">
+  <div class="wrap-m">
+    <h2 class="sec">{s['researchTitle']}</h2>
+    <div class="cards">
+{research}
+    </div>
+  </div>
+</section>
+
+<section id="about" class="about-teaser on-bg2">
+  <div class="wrap-s">
+    <img src="{rel}assets/img/javharbek.png" alt="Javharbek Abdulatipov" width="200" height="200">
+    <div class="txt">
+      <span class="kicker">{s['aboutKicker']}</span>
+      <h2>Javharbek Abdulatipov</h2>
+      <p>{s['about1']}</p>
+      <div class="btns">
+        <a href="about/" class="b1">{s['aboutMore']}</a>
+        <a href="https://t.me/javharbek16" class="b2">Telegram</a>
+      </div>
+    </div>
+  </div>
+</section>
 </main>
 
-{FOOTER}
-
-<script src="{rel}assets/js/lang.js" defer></script>
-</body>
-</html>
-"""
+""" + footer(lang, rel) + "</body>\n</html>\n"
 
 
 def article(lang):
-    s, a = SITE[lang], ARTICLE[lang]
+    s, a, p = SITE[lang], ARTICLE[lang], POSTS[0]
     rel = "../../"
+    nav = [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navAbout"], f"{rel}{lang}/about/", False)]
     rows = "\n".join(f"        <tr><td>{x}</td><td>{y}</td><td>{g}</td></tr>" for x, y, g in TABLE_ROWS)
     summary = "\n".join(f"      <li>{li}</li>" for li in a["sum"])
-    return f"""<!doctype html>
-<html lang="{lang}">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{s['post_title']} — Javharbek</title>
-  <meta name="description" content="{a['meta_desc']}">
-  <meta property="og:title" content="{s['post_title']}">
-  <meta property="og:description" content="{s['post_blurb']}">
-  <meta property="og:type" content="article">
-{hreflang(lambda l: f"../../{l}/sigmoid/")}
-  <link rel="icon" href="{rel}assets/favicon.svg" type="image/svg+xml">
-{FONTS}  <link rel="stylesheet" href="{rel}assets/css/site.css">
-</head>
-<body>
+    toc = "\n".join(f'      <a href="#s{i+1}">{h}</a>' for i, h in enumerate(a["toc"]))
+    tags = "".join(f'<a href="{rel}{lang}/#posts">{t}</a>' for t in a["tags"])
+    return head(lang, f"{p['title'][lang]} — {s['brand']}", a["meta_desc"], rel, "sigmoid/", "article") + header(lang, rel, "sigmoid/", nav) + f"""<div class="progress" aria-hidden="true"><div id="progress"></div></div>
 
-{header(lang, rel, "sigmoid/")}
-
-<main class="article">
-  <header class="article-head">
-    <time datetime="{DATE_ISO}">{s['date']}</time>
-    <h1>{s['post_title']}</h1>
-    <p class="dek">{a['dek']}</p>
-  </header>
-
-  <h2>{a['h_road']}</h2>
-  <p>{a['p_road1']}</p>
-  <p>{a['p_road2']}</p>
-
-  <figure class="figure">
-    <canvas id="fig-asymptotes" width="1600" height="760" aria-label="{a['fig1_aria']}"></canvas>
-    <div class="figure-controls">
-      <label>{a['fig1_label']}
-        <input type="range" id="range" min="4" max="40" step="1" value="6" aria-label="{a['fig1_aria_input']}">
-        <output id="range-out" for="range">±6</output>
-      </label>
-    </div>
-    <p class="figcaption">{a['fig1_cap']}</p>
-  </figure>
-
-  <p>{a['p_table']}</p>
-  <div class="table-wrap">
-    <table class="data">
-      <thead><tr><th>x</th><th>σ(x)</th><th>1 − σ(x)</th></tr></thead>
-      <tbody>
-{rows}
-      </tbody>
-    </table>
+<main>
+<section class="art-head wrap-xs">
+  <span class="kicker">{a['kicker']}</span>
+  <h1>{p['title'][lang]}</h1>
+  <p class="dek">{a['dek']}</p>
+  <div class="author">
+    <img src="{rel}assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="{p['date']}">{s['date']}</time> · {p['mins']} {s['min']}</span></span>
   </div>
-  <p>{a['p_never']}</p>
+</section>
 
-  <h2>{a['h_steep']}</h2>
-  <p>{a['p_steep1']}</p>
-  <p>{a['p_steep2']}</p>
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="{a['tocTitle']}">
+    <span>{a['tocTitle']}</span>
+    <nav>
+{toc}
+    </nav>
+  </aside>
 
-  <figure class="figure">
-    <canvas id="fig-slope" width="1600" height="900" aria-label="{a['fig2_aria']}"></canvas>
-    <div class="figure-controls">
-      <label>{a['fig2_label']}
-        <input type="range" id="pos" min="-6" max="6" step="0.1" value="0" aria-label="{a['fig2_aria_input']}">
-        <output id="pos-out" for="pos">0.0</output>
-      </label>
-      <span>σ(x) = <span class="value" id="sig-out">0.5000</span></span>
-      <span>σ′(x) = <span class="value" id="slope-out">0.2500</span></span>
+  <article class="article">
+    <h2 id="s1">{a['h_road']}</h2>
+    <p>{a['p_road1']}</p>
+    <p>{a['p_road2']}</p>
+
+    <div class="eq"><div class="math">
+      <span>σ(x)</span><span class="n">=</span>
+      <span class="frac"><span class="n">1</span><span><span class="n">1 + </span>e<sup>−x</sup></span></span>
+    </div><span class="num">(1)</span></div>
+
+    <figure class="figure">
+      <canvas id="fig-asymptotes" width="1600" height="760" aria-label="{a['fig1_aria']}"></canvas>
+      <div class="figure-controls">
+        <label>{a['fig1_label']}
+          <input type="range" id="range" min="4" max="40" step="1" value="6" aria-label="{a['fig1_aria_input']}">
+          <output id="range-out" for="range">±6</output>
+        </label>
+      </div>
+      <figcaption class="figcaption">{a['fig1_cap']}</figcaption>
+    </figure>
+
+    <p>{a['p_table']}</p>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>x</th><th>σ(x)</th><th>1 − σ(x)</th></tr></thead>
+        <tbody>
+{rows}
+        </tbody>
+      </table>
     </div>
-    <p class="figcaption">{a['fig2_cap']}</p>
-  </figure>
+    <p>{a['p_never']}</p>
 
-  <p>{a['p_deriv']}</p>
+    <h2 id="s2">{a['h_steep']}</h2>
+    <p>{a['p_steep1']}</p>
+    <p>{a['p_steep2']}</p>
 
-  <h2>{a['h_nn']}</h2>
-  <p>{a['p_nn0']}</p>
-  <p>{a['p_nn1']}</p>
-  <p>{a['p_nn2']}</p>
-  <p>{a['p_nn3']}</p>
+    <figure class="figure">
+      <canvas id="fig-slope" width="1600" height="900" aria-label="{a['fig2_aria']}"></canvas>
+      <div class="figure-controls">
+        <label>{a['fig2_label']}
+          <input type="range" id="pos" min="-6" max="6" step="0.1" value="0" aria-label="{a['fig2_aria_input']}">
+          <output id="pos-out" for="pos">0.0</output>
+        </label>
+        <span>σ(x) = <span class="value" id="sig-out">0.5000</span></span>
+        <span>σ′(x) = <span class="value" id="slope-out">0.2500</span></span>
+      </div>
+      <figcaption class="figcaption">{a['fig2_cap']}</figcaption>
+    </figure>
 
-  <section class="takeaway">
-    <h2>{a['h_sum']}</h2>
-    <ul>
+    <h2 id="s3">{a['h_deriv']}</h2>
+    <p>{a['p_deriv']}</p>
+    <div class="eq"><div class="math">
+      <span>σ′(x)</span><span class="n">=</span><span>σ(x)</span><span class="n">(1 −</span><span>σ(x)</span><span class="n">)</span>
+    </div><span class="num">(2)</span></div>
+    <p>{a['p_deriv2']}</p>
+
+    <h2 id="s4">{a['h_nn']}</h2>
+    <p>{a['p_nn0']}</p>
+    <p>{a['p_nn1']}</p>
+    <p>{a['p_nn2']}</p>
+    <p>{a['p_nn3']}</p>
+
+    <section class="takeaway" id="s5">
+      <h2>{a['h_sum']}</h2>
+      <ul>
 {summary}
-    </ul>
-  </section>
+      </ul>
+    </section>
+
+    <div class="tags">{tags}</div>
+  </article>
+</div>
 </main>
 
-{FOOTER}
+""" + footer(lang, rel) + f'<script src="{rel}assets/js/sigmoid.js" defer></script>\n</body>\n</html>\n'
 
-<script src="{rel}assets/js/sigmoid.js" defer></script>
-</body>
-</html>
-"""
+
+def about(lang):
+    s, a = SITE[lang], ABOUT[lang]
+    rel = "../../"
+    nav = [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navAbout"], "./", True)]
+    stats = "\n".join(f"      <div><b>{b}</b><span>{t}</span></div>" for b, t in a["stats"])
+    jobs = [
+        ("2026 — " + a["now"], a["dep"], "Xalq Banki", ""),
+        ("2020 — 2026", "Software Engineer, Team Lead", "Xalq Banki · PHP + Java", a["xq"]),
+        ("2018 — 2020", "Software Engineer, Team Lead", "OKS Technologies", a["oks"]),
+        ("2017 — 2018", "Software Engineer, Team Lead", "Phoenix Systems", ""),
+        ("2016", "Software Engineer", "Sirdaryo Soft", ""),
+        ("2013 — 2015", "Software Engineer", a["fl"], ""),
+    ]
+    jobs_html = "\n".join(
+        f'      <div class="job"><span class="y">{y}</span><span class="d"><b>{r}</b><span>{o}</span>{f"<small>{d}</small>" if d else ""}</span></div>'
+        for y, r, o, d in jobs)
+    vals = [v.format(**a) for v in STACK_VALUES]
+    stack = "\n".join(f'        <div class="k"><span>{k}</span><span>{v}{a["others"]}</span></div>' for k, v in zip(a["keys"], vals))
+    social = "".join(f'<a href="{u}" class="b2">{n}</a>' for n, u in SOCIAL if n != "Telegram")
+    return head(lang, f"{s['navAbout']} — {s['brand']}", s["about1"], rel, "about/", "profile") + header(lang, rel, "about/", nav) + f"""
+<main>
+<section class="about-hero wrap-m">
+  <img src="{rel}assets/img/javharbek.png" alt="Javharbek Abdulatipov" width="300" height="300">
+  <div class="txt">
+    <span class="kicker">{a['kicker']}</span>
+    <h1>Javharbek Abdulatipov</h1>
+    <div class="roles"><span>Deputy Director</span><i aria-hidden="true">|</i><span>Senior AI/ML Engineer</span><i aria-hidden="true">|</i><span>Senior Software Engineer</span></div>
+    <span class="loc">{a['loc']}</span>
+    <div class="bio"><p>{s['about1']}</p><p>{a['about2']}</p></div>
+  </div>
+</section>
+
+<section class="wrap-m">
+  <div class="stats">
+{stats}
+  </div>
+</section>
+
+<section class="about-grid wrap-m">
+  <div>
+    <h2>{a['experience']}</h2>
+{jobs_html}
+  </div>
+  <div class="right-col">
+    <div class="edu">
+      <h2>{a['education']}</h2>
+      <b>{a['degree']}</b>
+      <span>{a['fac1']} → {a['fac2']}</span>
+      <span>{a['programme']}</span>
+      <span class="uni">{a['uni']}</span>
+    </div>
+    <div class="stack">
+      <h2>{a['stackTitle']}</h2>
+{stack}
+    </div>
+  </div>
+</section>
+
+<section class="contacts on-bg2">
+  <div class="wrap-s">
+    <h2>{a['contacts']}</h2>
+    <div class="btns">
+      <a href="https://t.me/javharbek16" class="b1">Telegram</a>
+      <a href="mailto:{EMAIL}" class="b2">{a['write']}</a>
+      <a href="tel:{PHONE.replace(' ', '').replace('-', '')}" class="b2">{PHONE}</a>
+      {social}
+    </div>
+  </div>
+</section>
+</main>
+
+""" + footer(lang, rel) + "</body>\n</html>\n"
 
 
 ROOT_INDEX = """<!doctype html>
@@ -338,16 +576,16 @@ ROOT_INDEX = """<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Javharbek</title>
+  <title>Javharbek Abdulatipov</title>
   <meta name="robots" content="noindex">
   <link rel="alternate" hreflang="ru" href="ru/">
-  <link rel="alternate" hreflang="uz" href="uz/">
   <link rel="alternate" hreflang="en" href="en/">
+  <link rel="alternate" hreflang="uz" href="uz/">
   <link rel="alternate" hreflang="x-default" href="en/">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <script>
     (function () {
-      var supported = ["ru", "uz", "en"], pick = "en";
+      var supported = ["ru", "en", "uz"], pick = "en";
       try {
         var saved = localStorage.getItem("lang");
         if (supported.indexOf(saved) !== -1) pick = saved;
@@ -363,18 +601,18 @@ ROOT_INDEX = """<!doctype html>
     })();
   </script>
   <style>
-    body{margin:0;font-family:"Figtree","Helvetica Neue",Helvetica,Arial,sans-serif;background:#fff;color:#000;padding:0 24px;-webkit-font-smoothing:antialiased}
-    @media (prefers-color-scheme:dark){body{background:#000;color:#fff}}
+    body{margin:0;font-family:"Manrope",system-ui,sans-serif;background:#fff;color:#171A20;padding:0 24px}
+    @media (prefers-color-scheme:dark){body{background:#0F1012;color:#EDEDED}}
     main{max-width:1200px;margin:0 auto;padding:20vh 0;text-align:center}
-    h1{font-size:clamp(32px,6vw,56px);font-weight:500;letter-spacing:-.03em;margin:0 0 24px}
-    nav{display:flex;gap:32px;justify-content:center;font-size:17px}
+    h1{font-size:clamp(32px,6vw,56px);font-weight:500;letter-spacing:-.01em;margin:0 0 24px}
+    nav{display:flex;gap:32px;justify-content:center;font-size:16px;font-weight:500}
     a{color:inherit;text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:.18em}
   </style>
 </head>
 <body>
 <main>
-  <h1>Javharbek</h1>
-  <nav><a href="ru/" lang="ru">Русский</a><a href="uz/" lang="uz">O‘zbekcha</a><a href="en/" lang="en">English</a></nav>
+  <h1>Javharbek Abdulatipov</h1>
+  <nav><a href="ru/" lang="ru">Русский</a><a href="en/" lang="en">English</a><a href="uz/" lang="uz">O‘zbekcha</a></nav>
 </main>
 </body>
 </html>
@@ -383,12 +621,13 @@ ROOT_INDEX = """<!doctype html>
 
 def main():
     for lang in LANGS:
-        (ROOT / lang).mkdir(exist_ok=True)
-        (ROOT / lang / "sigmoid").mkdir(exist_ok=True)
+        for sub in ("", "sigmoid", "about"):
+            (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)
         (ROOT / lang / "index.html").write_text(home(lang), encoding="utf-8")
         (ROOT / lang / "sigmoid" / "index.html").write_text(article(lang), encoding="utf-8")
+        (ROOT / lang / "about" / "index.html").write_text(about(lang), encoding="utf-8")
     (ROOT / "index.html").write_text(ROOT_INDEX, encoding="utf-8")
-    print("built:", ", ".join(f"{l}/ {l}/sigmoid/" for l in LANGS), "+ index.html")
+    print("built:", ", ".join(f"{l}/ {l}/sigmoid/ {l}/about/" for l in LANGS), "+ index.html")
 
 
 if __name__ == "__main__":

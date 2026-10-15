@@ -7,9 +7,8 @@
   const sig = (x) => 1 / (1 + Math.exp(-x));
   const dsig = (x) => { const s = sig(x); return s * (1 - s); };
   const token = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  const FONT = '"Figtree", "Helvetica Neue", Helvetica, Arial, sans-serif';
+  const FONT = '"Manrope", system-ui, sans-serif';
   const LANG = document.documentElement.lang || "ru";
-  try { localStorage.setItem("lang", LANG); } catch (e) {}
   const TXT = {
     ru: { gap: "щель", inflection: "точка перегиба (0, 0.5)", down: "выпукла вниз", up: "выпукла вверх" },
     uz: { gap: "oraliq", inflection: "burilish nuqtasi (0, 0.5)", down: "pastga qavariq", up: "yuqoriga qavariq" },
@@ -39,7 +38,7 @@
     const R = Number(rangeInput.value);
     rangeOut.value = "±" + R;
 
-    const fg = token("--fg"), fg2 = token("--fg-2"), rule = token("--rule"), accent = token("--accent"), bg = token("--bg");
+    const fg = token("--fg"), fg2 = token("--fg3"), rule = token("--line"), accent = token("--accent"), bg = token("--bg");
     const L = 110, RR = 40, T = 80, B = 96;
     const px = (x) => L + ((x + R) / (2 * R)) * (W - L - RR);
     const py = (y) => H - B - y * (H - T - B);
@@ -109,7 +108,7 @@
     sigOut.textContent = s.toFixed(4);
     slopeOut.textContent = d.toFixed(4);
 
-    const fg = token("--fg"), fg2 = token("--fg-2"), rule = token("--rule"), accent = token("--accent"), soft = token("--chart-soft"), bg = token("--bg");
+    const fg = token("--fg"), fg2 = token("--fg3"), rule = token("--line"), accent = token("--accent"), soft = token("--curve"), bg = token("--bg");
     const R = 6, L = 110, RR = 40;
     const top = { y0: 48, y1: 520 }, bot = { y0: 600, y1: 840 };
     const px = (v) => L + ((v + R) / (2 * R)) * (W - L - RR);
@@ -199,5 +198,6 @@
   const mq = window.matchMedia("(prefers-color-scheme: dark)");
   mq.addEventListener ? mq.addEventListener("change", drawAll) : mq.addListener(drawAll);
   new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  document.addEventListener("themechange", () => setTimeout(drawAll, 320));
   drawAll();
 })();
