@@ -106,13 +106,10 @@ POSTS = [
 
 RESEARCH = {
     "ru": [["Метод · № 010556", "Модель «Шаршара»", "Научный математический метод, зарегистрированный в Центре интеллектуальной собственности при Министерстве юстиции Узбекистана."],
-           ["NLP · Инфраструктура", "AI-стек для узбекского языка", "Корпус, инференс и юридический RAG для языка с небольшим объёмом данных."],
            ["CV · Реальное время", "Периметр, который видит", "Детекция людей, распознавание лиц и повторная идентификация между камерами."]],
     "en": [["Method · No. 010556", "The «Sharshara» model", "A scientific mathematical method registered with the Intellectual Property Center under the Ministry of Justice of Uzbekistan."],
-           ["NLP · Infrastructure", "An AI stack for the Uzbek language", "Corpus, inference and legal RAG for a low-resource language."],
            ["CV · Real time", "A perimeter that sees", "Person detection, face recognition and re-identification across cameras."]],
     "uz": [["Usul · № 010556", "«Sharshara» modeli", "O‘zbekiston Adliya vazirligi huzuridagi Intellektual mulk markazida ro‘yxatdan o‘tgan ilmiy matematik usul."],
-           ["NLP · Infratuzilma", "O‘zbek tili uchun AI-stek", "Kam resursli til uchun korpus, inferens va yuridik RAG."],
            ["CV · Real vaqt", "Ko‘ra oladigan perimetr", "Odamlarni aniqlash, yuzni tanish va kameralar orasida qayta identifikatsiya."]],
 }
 
