@@ -106,11 +106,14 @@ POSTS = [
 
 RESEARCH = {
     "ru": [["Метод · № 010556", "Модель «Шаршара»", "Научный математический метод, зарегистрированный в Центре интеллектуальной собственности при Министерстве юстиции Узбекистана."],
-           ["CV · Реальное время", "Периметр, который видит", "Детекция людей, распознавание лиц и повторная идентификация между камерами."]],
+           ["CV · Реальное время", "Периметр, который видит", "Детекция людей, распознавание лиц и повторная идентификация между камерами."],
+           ["Бизнес · Финансовый сектор", "Корпоративные системы", "Документооборот (DMS), управление кадрами (HRMS), создание и управление бизнес-процессами (BPMS), учёт и скоринг клиентов (CRM), корпоративные сайты и другие системы."]],
     "en": [["Method · No. 010556", "The «Sharshara» model", "A scientific mathematical method registered with the Intellectual Property Center under the Ministry of Justice of Uzbekistan."],
-           ["CV · Real time", "A perimeter that sees", "Person detection, face recognition and re-identification across cameras."]],
+           ["CV · Real time", "A perimeter that sees", "Person detection, face recognition and re-identification across cameras."],
+           ["Business · Financial sector", "Enterprise systems", "Document management (DMS), human resources (HRMS), business process design and management (BPMS), customer records and scoring (CRM), corporate websites and other systems."]],
     "uz": [["Usul · № 010556", "«Sharshara» modeli", "O‘zbekiston Adliya vazirligi huzuridagi Intellektual mulk markazida ro‘yxatdan o‘tgan ilmiy matematik usul."],
-           ["CV · Real vaqt", "Ko‘ra oladigan perimetr", "Odamlarni aniqlash, yuzni tanish va kameralar orasida qayta identifikatsiya."]],
+           ["CV · Real vaqt", "Ko‘ra oladigan perimetr", "Odamlarni aniqlash, yuzni tanish va kameralar orasida qayta identifikatsiya."],
+           ["Biznes · Moliya sektori", "Korporativ tizimlar", "Hujjat aylanmasi (DMS), kadrlar boshqaruvi (HRMS), biznes-jarayonlarni yaratish va boshqarish (BPMS), mijozlarni hisobga olish va skoring (CRM), korporativ saytlar va boshqa tizimlar."]],
 }
 
 ABOUT = {
