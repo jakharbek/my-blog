@@ -86,11 +86,11 @@ SITE = {
 }
 
 TOPICS = [
+    ("code", "{ }", False, {"ru": ["Программирование", "PHP, Java, Python, алгоритмы и структуры данных"], "en": ["Programming", "PHP, Java, Python, algorithms and data structures"], "uz": ["Dasturlash", "PHP, Java, Python, algoritmlar va ma’lumotlar tuzilmalari"]}),
+    ("ml", "∇", False, {"ru": ["ML / AI", "Бустинг, нейросети, LLM, скоринг"], "en": ["ML / AI", "Boosting, neural networks, LLMs, scoring"], "uz": ["ML / AI", "Busting, neyron tarmoqlar, LLM, skoring"]}),
     ("math", "∑", False, {"ru": ["Математика", "Анализ, линейная алгебра, вероятность"], "en": ["Mathematics", "Analysis, linear algebra, probability"], "uz": ["Matematika", "Analiz, chiziqli algebra, ehtimollar"]}),
     ("phys", "ℏ", True, {"ru": ["Физика", "Механика, поля, квантовый мир"], "en": ["Physics", "Mechanics, fields, the quantum world"], "uz": ["Fizika", "Mexanika, maydonlar, kvant olami"]}),
-    ("ml", "∇", False, {"ru": ["Машинное обучение", "Бустинг, нейросети, LLM, скоринг"], "en": ["Machine Learning", "Boosting, neural networks, LLMs, scoring"], "uz": ["Mashinaviy o‘qitish", "Busting, neyron tarmoqlar, LLM, skoring"]}),
     ("cv", "◎", False, {"ru": ["Компьютерное зрение", "Детекция, лица, Re-ID"], "en": ["Computer Vision", "Detection, faces, Re-ID"], "uz": ["Kompyuter ko‘rishi", "Aniqlash, yuzlar, Re-ID"]}),
-    ("algo", "λ", True, {"ru": ["Алгоритмы", "Структуры данных и сложность"], "en": ["Algorithms", "Data structures and complexity"], "uz": ["Algoritmlar", "Ma’lumotlar tuzilmalari va murakkablik"]}),
     ("sys", "⇄", False, {"ru": ["Инженерия систем", "Архитектура, Linux, Docker"], "en": ["Systems Engineering", "Architecture, Linux, Docker"], "uz": ["Tizimlar muhandisligi", "Arxitektura, Linux, Docker"]}),
 ]
 
