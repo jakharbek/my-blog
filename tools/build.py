@@ -43,7 +43,7 @@ SITE = {
         derive="Разобрать вывод", researchTitle="Исследования и проекты",
         aboutKicker="Об авторе", aboutMore="Подробнее обо мне",
         about1="Здравствуйте. Меня зовут Жавхарбек Абдулатипов, я заместитель директора Департамента программных технологий Xalq Banki. Занимаюсь машинным обучением, компьютерным зрением и разработкой банковских систем.",
-        date="14 октября 2026",
+        news="Новость", openSite="Открыть сайт ↗",
     ),
     "en": dict(
         brand="Abdulatipov J.", title="Abdulatipov J. — programming, mathematics, machine learning",
@@ -62,7 +62,7 @@ SITE = {
         derive="See the derivation", researchTitle="Research and projects",
         aboutKicker="About the author", aboutMore="More about me",
         about1="Hello. My name is Javharbek Abdulatipov, and I am Deputy Director of the Software Technologies Department at Xalq Banki. I work on machine learning, computer vision and banking systems development.",
-        date="14 October 2026",
+        news="News", openSite="Open the site ↗",
     ),
     "uz": dict(
         brand="Abdulatipov J.", title="Abdulatipov J. — dasturlash, matematika, mashinaviy o‘qitish",
@@ -81,7 +81,7 @@ SITE = {
         derive="Isbotini ko‘rish", researchTitle="Tadqiqotlar va loyihalar",
         aboutKicker="Muallif haqida", aboutMore="Men haqimda batafsil",
         about1="Assalomu alaykum. Mening ismim Javharbek Abdulatipov, Xalq Banki Dasturiy texnologiyalar departamenti direktori o‘rinbosariman. Mashinaviy o‘qitish, kompyuter ko‘rishi va bank tizimlarini ishlab chiqish bilan shug‘ullanaman.",
-        date="2026-yil 14-oktabr",
+        news="Yangilik", openSite="Saytni ochish ↗",
     ),
 }
 
@@ -94,7 +94,23 @@ TOPICS = [
     ("sys", "⇄", False, {"ru": ["Инженерия систем", "Архитектура, Linux, Docker"], "en": ["Systems Engineering", "Architecture, Linux, Docker"], "uz": ["Tizimlar muhandisligi", "Arxitektura, Linux, Docker"]}),
 ]
 
-# Posts. Add new ones here; the first is featured.
+MONTHS = {
+    "ru": ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"],
+    "en": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "uz": ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"],
+}
+
+
+def fmt_date(iso, lang):
+    y, m, d = (int(x) for x in iso.split("-"))
+    if lang == "uz":
+        return f"{y}-yil {d}-{MONTHS[lang][m - 1]}"
+    return f"{d} {MONTHS[lang][m - 1]} {y}"
+
+
+# Posts. Add new ones here; the list on the home page is sorted newest first.
+# A post with "url" is a news item: the row links to that page instead of an article.
+FEATURED = "sigmoid"
 POSTS = [
     dict(slug="sigmoid", topic="ml", date=DATE_ISO, mins=9,
          title={"ru": "Анатомия сигмоиды", "en": "Anatomy of the sigmoid", "uz": "Sigmoidaning anatomiyasi"},
@@ -102,7 +118,16 @@ POSTS = [
                   "en": "Two horizontal asymptotes and a single inflection point: what they mean for a neural network and why 0.5 became the decision threshold.",
                   "uz": "Ikki gorizontal asimptota va bitta burilish nuqtasi: ular neyron tarmoq uchun nimani anglatadi va nega 0.5 qaror chegarasiga aylandi."},
          figAria={"ru": "Сигмоида между асимптотами 0 и 1", "en": "The sigmoid between the asymptotes 0 and 1", "uz": "0 va 1 asimptotalar orasidagi sigmoida"}),
+    dict(slug="gradient-boosting-course", topic="ml", date="2026-10-26",
+         url="https://jakharbek.github.io/ml_gradient_boosting/",
+         title={"ru": "Открыт курс «Градиентный бустинг по косточкам»",
+                "en": "Course launched: «Gradient boosting, bone by bone»",
+                "uz": "«Gradiyentli busting: mayda detallarigacha» kursi ochildi"},
+         excerpt={"ru": "Интерактивный курс на русском: от первого дерева решений до XGBoost, LightGBM и CatBoost. Параметры меняются прямо на странице, код запускается на Python в браузере и повторяется в Jupyter.",
+                  "en": "An interactive course in Russian: from the first decision tree to XGBoost, LightGBM and CatBoost. Change parameters right on the page, run the code in Python in the browser and repeat it in Jupyter.",
+                  "uz": "Rus tilidagi interaktiv kurs: birinchi qaror daraxtidan XGBoost, LightGBM va CatBoost’gacha. Parametrlar sahifaning o‘zida o‘zgaradi, kod brauzerda Python’da ishlaydi va Jupyter’da takrorlanadi."}),
 ]
+POST = {p["slug"]: p for p in POSTS}
 
 RESEARCH = {
     "ru": [["Метод · № 010556", "Модель «Шаршара»", "Научный математический метод, зарегистрированный в Центре интеллектуальной собственности при Министерстве юстиции Узбекистана."],
@@ -272,16 +297,16 @@ def home(lang):
     s = SITE[lang]
     rel = "../"
     nav = [(s["navPosts"], "#posts", False), (s["navFields"], "#fields", False), (s["navResearch"], "#research", False), (s["navAbout"], "about/", False)]
-    feat = POSTS[0]
+    feat = POST[FEATURED]
     chips = [f'<button type="button" class="chip" data-topic="all" aria-pressed="true"><span>{s["all"]}</span><small>{len(POSTS)}</small></button>']
     for tid, _, _, names in TOPICS:
         chips.append(f'<button type="button" class="chip" data-topic="{tid}" aria-pressed="false"><span>{names[lang][0]}</span><small>{sum(1 for p in POSTS if p["topic"] == tid)}</small></button>')
     topic_name = {tid: names[lang][0] for tid, _, _, names in TOPICS}
     rows = "\n".join(
-        f"""      <a class="row" href="{p['slug']}/" data-topic="{p['topic']}">
-        <span class="l"><span class="kicker">{topic_name[p['topic']]}</span><span class="rt">{p['title'][lang]}</span><span class="ex">{p['excerpt'][lang]}</span></span>
-        <span class="r"><time datetime="{p['date']}">{s['date']}</time><span>{p['mins']} {s['min']}</span></span>
-      </a>""" for p in POSTS)
+        f"""      <a class="row" href="{p.get('url') or p['slug'] + '/'}" data-topic="{p['topic']}">
+        <span class="l"><span class="kicker">{s['news'] + ' · ' if 'url' in p else ''}{topic_name[p['topic']]}</span><span class="rt">{p['title'][lang]}</span><span class="ex">{p['excerpt'][lang]}</span></span>
+        <span class="r"><time datetime="{p['date']}">{fmt_date(p['date'], lang)}</time><span>{s['openSite'] if 'url' in p else f"{p['mins']} {s['min']}"}</span></span>
+      </a>""" for p in sorted(POSTS, key=lambda p: p["date"], reverse=True))
     tiles = "\n".join(
         f"""      <button type="button" class="tile" data-topic="{tid}"><span class="glyph math{' it' if it else ''}">{glyph}</span><span class="nm"><b>{names[lang][0]}</b><span>{names[lang][1]}</span></span><span class="cnt">{sum(1 for p in POSTS if p['topic'] == tid)}</span></button>"""
         for tid, glyph, it, names in TOPICS)
@@ -321,7 +346,7 @@ def home(lang):
         <span class="kicker">{s['featKicker']}</span>
         <span class="ttl">{feat['title'][lang]}</span>
         <span class="sum">{feat['excerpt'][lang]}</span>
-        <span class="meta"><time datetime="{feat['date']}">{s['date']}</time><span>{feat['mins']} {s['min']}</span><span class="ul">{s['read']} →</span></span>
+        <span class="meta"><time datetime="{feat['date']}">{fmt_date(feat['date'], lang)}</time><span>{feat['mins']} {s['min']}</span><span class="ul">{s['read']} →</span></span>
       </span>
       <span class="fig">
         {sigmoid_svg(feat['figAria'][lang])}
@@ -392,7 +417,7 @@ def home(lang):
 
 
 def article(lang):
-    s, a, p = SITE[lang], ARTICLE[lang], POSTS[0]
+    s, a, p = SITE[lang], ARTICLE[lang], POST["sigmoid"]
     rel = "../../"
     nav = [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navAbout"], f"{rel}{lang}/about/", False)]
     rows = "\n".join(f"        <tr><td>{x}</td><td>{y}</td><td>{g}</td></tr>" for x, y, g in TABLE_ROWS)
@@ -408,7 +433,7 @@ def article(lang):
   <p class="dek">{a['dek']}</p>
   <div class="author">
     <img src="{rel}assets/img/javharbek.png" alt="" width="44" height="44">
-    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="{p['date']}">{s['date']}</time> · {p['mins']} {s['min']}</span></span>
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="{p['date']}">{fmt_date(p['date'], lang)}</time> · {p['mins']} {s['min']}</span></span>
   </div>
 </section>
 
