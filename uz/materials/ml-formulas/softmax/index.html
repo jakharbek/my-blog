@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Softmax: logitlardan ehtimolliklarga — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Softmax batafsil: formula, harorat, siljishga invariantlik, sigmoida bilan bog‘liqlik, ehtimolliklar simpleksi, Yakobi matritsasi, log-sum-exp, softmax-regressiya, attention, barqaror kod.">
+  <meta property="og:title" content="Softmax: logitlardan ehtimolliklarga — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Softmax batafsil: formula, harorat, siljishga invariantlik, sigmoida bilan bog‘liqlik, ehtimolliklar simpleksi, Yakobi matritsasi, log-sum-exp, softmax-regressiya, attention, barqaror kod.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/softmax/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/softmax/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/softmax/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/softmax/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/softmax.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/softmax/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/softmax/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/softmax/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Aktivatsiya funksiyalari</span>
+  <h1>Softmax: logitlardan ehtimolliklarga</h1>
+  <p class="dek">Neyron tarmoqning xom ballarini K ta sinf bo‘yicha ehtimolliklar taqsimotiga aylantiradigan funksiya. Uni mayda detallarigacha tahlil qilamiz: eksponenta nima uchun kerak, nega faqat logitlar ayirmalari muhim, harorat nima qiladi, diag(s) − ssᵀ Yakobi matritsasi qanday tuzilgan, nega softmax silliq maksimumning gradiyenti va kodda NaN olmaslik uchun nima qilish kerak.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 35 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: kuchaytirilgan ovoz berish</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#properties"><span class="n">4</span>Xossalar</a>
+      <a href="#geometry"><span class="n">5</span>Geometriya: ehtimolliklar simpleksi</a>
+      <a href="#derivative"><span class="n">6</span>Hosila: Yakobi matritsasi</a>
+      <a href="#surface"><span class="n">7</span>3D manzara: logitlar tekisligi ustidagi softmax</a>
+      <a href="#lse"><span class="n">8</span>Log-sum-exp: silliq maksimum</a>
+      <a href="#training"><span class="n">9</span>O‘qitishda softmax</a>
+      <a href="#code"><span class="n">10</span>Kodda: barqarorlik, log-softmax va PyTorch</a>
+      <a href="#mistakes"><span class="n">11</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">12</span>Boshqa formulalar bilan bog‘liqlik</a>
+      <a href="#summary"><span class="n">13</span>Xulosa</a>
+      <a href="#quiz"><span class="n">14</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{softmax}(z)_i=s_i=\frac{e^{z_i}}{\sum_{j=1}^{K}e^{z_j}}$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>$K$ ta sinfli klassifikator oxirida $K$ ta son chiqaradi — <b>logitlar</b> (logits): masalan, «mushuk», «it», «qush» uchun $(2;\,1;\,0)$. Bular shunchaki ballar: ular manfiy bo‘lishi mumkin, yig‘indisi 1 ga teng emas va ulardan modelning qanchalik ishonchli ekani ko‘rinmaydi. Softmax bunday vektorni ehtimolliklar taqsimotiga aylantiradi: barcha sonlar musbat, yig‘indisi 1, tartib esa saqlanadi — balli katta bo‘lganning ehtimolligi ham katta.</p>
+    <p>U qayerda uchraydi:</p>
+    <ul class="flist"><li><b>ko‘p sinfli klassifikator chiqishi</b> — logistik regressiyadan ResNet va ViT’gacha: $\hat y=\operatorname{softmax}(Wx+b)$;</li><li><b>til modellari</b> — LLM har qadamda lug‘atdagi barcha tokenlar (o‘n minglab) uchun logit chiqaradi, softmax ulardan keyingi token taqsimotini yasaydi, harorat esa generatsiyaning «jasoratini» boshqaradi;</li><li><b>transformerlardagi attention (diqqat) mexanizmi</b> — $\operatorname{softmax}(QK^\top/\sqrt d)$ vaznlari qaysi tokenlarga qarashni hal qiladi;</li><li><b>ekspertlar aralashmasi (MoE)</b> — marshrutlovchi tokenni ekspertlar orasida softmax orqali taqsimlaydi;</li><li><b>mustahkamlab o‘qitish</b> — Bolsman siyosati $a$ harakatni $e^{Q(a)/T}$ ga proporsional ehtimollik bilan tanlaydi;</li><li><b>statistik fizika</b> — bu Bolsman — Gibbs taqsimoti $p_i\propto e^{-E_i/(kT)}$; «harorat» so‘zi ham shu yerdan.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>$s_i=e^{z_i}/\sum_j e^{z_j}$: eksponenta barcha sonlarni musbat qiladi va ayirmalarni nisbatlarga aylantiradi, yig‘indiga bo‘lish esa normallaydi. Barcha logitlarga bitta o‘zgarmas qo‘shilsa, softmax o‘zgarmaydi (shuning uchun kodda maksimum ayiriladi), uning hosilasi — $\operatorname{diag}(s)-ss^\top$ matritsa, ikki sinf uchun esa u logitlar ayirmasining <a href='../sigmoid/'>sigmoidasi</a> bilan ustma-ust tushadi.</p></div>
+
+    <h2 id="intuition">Intuitsiya: kuchaytirilgan ovoz berish</h2>
+    <p>Sinflarni nomzodlar, logitlarni esa ularning ballari deb tasavvur qiling. «Ovozlar» ulushini olish uchun ballarni musbat qilish va normallash kerak. Shunchaki yig‘indiga bo‘lib bo‘lmaydi: ballar manfiy, yig‘indi esa nol bo‘lishi mumkin. Eksponenta ikkala muammoni hal qiladi: $e^{z}$ doim musbat, ballar ayirmasi esa <i>nisbatga</i> aylanadi — har bir birlik ustunlik ulushni $e\approx2{,}718$ marta oshiradi.</p>
+    <p>Chapdagi logit-ustunlarning uchini torting va o‘ngdagi ehtimolliklar qanday o‘zgarishini kuzating. Keyin «Barcha logitlarga +1» tugmasini bosing: chapdagi ustunlar ko‘tariladi, o‘ngda esa hech narsa o‘zgarmaydi.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-bars" data-config="{&quot;z&quot;: [2, 1, 0], &quot;T&quot;: 1}"></div><figcaption><b>Rasm 1.</b> Logitlar va ehtimolliklar. $(2;\,1;\,0)$ logitlar $(0{,}665;\,0{,}245;\,0{,}090)$ ni beradi, eksponentalar yig‘indisi $11{,}11$. ±1 tugmalari barcha logitlarni siljitadi — ehtimolliklar joyida qoladi. Harorat slayderi: $T=0{,}1$ da birinchi sinfga $0{,}9999$ dan ko‘prog‘i tegadi, $T=10$ da taqsimot deyarli tekis, $(0{,}367;\,0{,}332;\,0{,}301)$. Punktir — $1/K$ darajasi.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>$(2;\,1;\,0)$ logitlar bittaga farq qiladi, ehtimolliklar esa $e$ marta: $0{,}665/0{,}245\approx0{,}245/0{,}090\approx2{,}718$. Softmax faqat logitlarning <i>ayirmalariga</i> qaraydi. $T$ harorat logitlarni bo‘ladi: $T&lt;1$ da ayirmalar o‘sadi va taqsimot keskinlashadi, $T&gt;1$ da — silliqlashadi.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <div class="eqd">$$s_i=\operatorname{softmax}(z)_i=\frac{e^{z_i}}{\sum_{j=1}^{K}e^{z_j}},\qquad i=1,\dots,K$$</div>
+    <dl class="symbols"><dt>$z=(z_1,\dots,z_K)$</dt><dd>logitlar vektori — oxirgi qatlamning xom chiqishlari, istalgan haqiqiy sonlar;</dd><dt>$e^{z_i}$</dt><dd>eksponenta: sonni musbat qiladi va logitlar ayirmalarini nisbatlarga aylantiradi;</dd><dt>$\sum_{j}e^{z_j}$</dt><dd>normallovchi yig‘indi (fizikada — statistik yig‘indi, partition function $Z$);</dd><dt>$s_i$</dt><dd>$i$-sinf ehtimolligi: $s_i\in(0;\,1)$ va $\sum_i s_i=1$.</dd></dl>
+    <p>Qo‘llanmadagi umumiy misolni ko‘rib chiqamiz — $z=(2;\,1;\,0)$ logitlar:</p>
+    <div class="eqd">$$\begin{gathered}e^{2}\approx7{,}389,\quad e^{1}\approx2{,}718,\quad e^{0}=1,\quad\textstyle\sum\approx11{,}107\\ \Longrightarrow\;s\approx\Bigl(\frac{7{,}389}{11{,}107};\,\frac{2{,}718}{11{,}107};\,\frac{1}{11{,}107}\Bigr)=(0{,}665;\,0{,}245;\,0{,}090)\end{gathered}$$</div>
+    <h3>Harorat</h3>
+    <p>Ko‘pincha softmax’dan oldin logitlar $T&gt;0$ songa — <b>haroratga</b> bo‘linadi:</p>
+    <div class="eqd">$$s_i(T)=\frac{e^{z_i/T}}{\sum_j e^{z_j/T}}$$</div>
+    <p>Jadval haroratning o‘sha $(2;\,1;\,0)$ vektor bilan nima qilishini ko‘rsatadi:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$i$</th><th class=num>$z_i$</th><th class=num>$e^{z_i}$</th><th class=num>$s_i,\ T=1$</th><th class=num>$s_i,\ T=0{,}5$</th><th class=num>$s_i,\ T=2$</th></tr></thead><tbody><tr><td>1</td><td class=num>2</td><td class=num>7,389</td><td class=num>0,665</td><td class=num>0,867</td><td class=num>0,506</td></tr><tr><td>2</td><td class=num>1</td><td class=num>2,718</td><td class=num>0,245</td><td class=num>0,117</td><td class=num>0,307</td></tr><tr><td>3</td><td class=num>0</td><td class=num>1,000</td><td class=num>0,090</td><td class=num>0,016</td><td class=num>0,186</td></tr><tr><td>Σ</td><td class=num></td><td class=num>11,107</td><td class=num>1</td><td class=num>1</td><td class=num>1</td></tr></tbody></table></div>
+    <p>Ikki limit nomni tushuntiradi. $T\to0$ da faqat eng katta logit yutadi: softmax $\operatorname{argmax}$ ning one-hot vektoriga intiladi (agar maksimum yagona bo‘lsa). $T\to\infty$ da ayirmalar yo‘qoladi va taqsimot tekis bo‘ladi, $s_i\to1/K$. Softmax — «yumshoq» (soft) argmax: qat’iy tanlov va to‘liq befarqlik orasidagi holat.</p>
+    <div class="callout note"><b>Nom haqida</b><p>Aniqroq aytganda, softmax max funksiyasini emas, argmax ning one-hot vektorini silliq yaqinlashtiradi. Silliq maksimum — bu log-sum-exp, softmax esa uning gradiyenti (<a href='#lse'>LSE haqidagi</a> bo‘limga qarang).</p></div>
+
+    <h2 id="properties">Xossalar</h2>
+    <ul class="flist"><li><b>Taqsimot</b>: istalgan logitlarda $s_i&gt;0$ va $\sum_i s_i=1$. Aynan 0 yoki 1 hech qachon chiqmaydi — faqat limitda (kompyuterda esa yaxlitlash tufayli).</li><li><b>Tartibni saqlaydi</b>: $z_i&gt;z_j\iff s_i&gt;s_j$, shuning uchun $\operatorname{argmax}s=\operatorname{argmax}z$. Faqat sinfni bashorat qilish uchun softmax’ni hisoblamasa ham bo‘ladi.</li><li><b>Nisbatlar</b>: $s_i/s_j=e^{z_i-z_j}$ — logitlar ayirmasi ehtimolliklar nisbatining logarifmiga teng. Aksincha, $z_i=\ln s_i+C$: logitlar ehtimolliklardan umumiy o‘zgarmas aniqligida tiklanadi.</li><li><b>Siljishga invariantlik</b>: istalgan $c$ son uchun $\operatorname{softmax}(z+c\mathbf 1)=\operatorname{softmax}(z)$. $K$ ta logitdan faqat $K-1$ ta ayirma ahamiyatli.</li><li><b>Masshtabga invariant emas</b>: $\operatorname{softmax}(az)$ $a&gt;1$ da keskinroq, $0&lt;a&lt;1$ da yassiroq. Bu o‘sha harorat, $a=1/T$.</li><li><b>Raqobat</b>: bitta logitning o‘sishi uning ehtimolligini oshiradi va qolganlarining hammasini kamaytiradi — massa yaratilmaydi, qayta taqsimlanadi.</li></ul>
+    <details class="deep"><summary>Nega siljish hech narsani o‘zgartirmaydi</summary><div class="deep-body">
+      <div class="eqd">$$\frac{e^{z_i+c}}{\sum_j e^{z_j+c}}=\frac{e^{c}\,e^{z_i}}{e^{c}\sum_j e^{z_j}}=\frac{e^{z_i}}{\sum_j e^{z_j}}$$</div>
+      <p>$e^c$ ko‘paytuvchi qisqaradi. Aynan shu xossa kodda barcha logitlardan $\max_j z_j$ ni ayirishga imkon beradi: natija o‘sha, eksponenta esa endi to‘lib ketmaydi.</p>
+    </div></details>
+    <h3>Ikki sinf — bu sigmoida</h3>
+    <div class="eqd">$$\operatorname{softmax}(z_1,z_2)_1=\frac{e^{z_1}}{e^{z_1}+e^{z_2}}=\frac{1}{1+e^{-(z_1-z_2)}}=\sigma(z_1-z_2)$$</div>
+    <p>Ikki sinf uchun softmax — logitlar ayirmasining <a href='../sigmoid/'>sigmoidasi</a>, shuning uchun binar klassifikatorga bitta chiqish yetarli. Bitta sinfni qolgan hammasiga qarshi qo‘ysak, $K$ ta sinf uchun ham shunga o‘xshash formula o‘rinli:</p>
+    <div class="eqd">$$s_i=\sigma\Bigl(z_i-\ln\sum_{j\ne i}e^{z_j}\Bigr)$$</div>
+    <p>Har bir ehtimollik — o‘z logitining qolganlarning «silliq maksimumidan» ustunligining sigmoidasi. Tekshirish uchun $s_i$ ning surat va maxrajini $e^{z_i}$ ga bo‘ling.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-sigmoid" data-config="{&quot;z1&quot;: 2, &quot;z2&quot;: 1, &quot;z3&quot;: 0}"></div><figcaption><b>Rasm 2.</b> $z_2=1$, $z_3=0$ qayd etilganda $s_1$ $z_1$ ning funksiyasi sifatida. Ko‘k egri — $m=\ln(e^{1}+e^{0})\approx1{,}313$ nuqtaga siljigan sigmoida: $z_1=2$ da $\sigma(0{,}687)\approx0{,}665$ chiqadi. To‘q sariq va firuza egrilar — $s_2$ va $s_3$: ular kamayib, massasini birinchi sinfga beradi. «Uchinchi sinf bor» belgisini olib tashlang — oddiy $\sigma(z_1-z_2)$ sigmoida qoladi.</figcaption></figure>
+
+    <h2 id="geometry">Geometriya: ehtimolliklar simpleksi</h2>
+    <p>$K$ ta sinf bo‘yicha barcha taqsimotlar <b>ehtimolliklar simpleksini</b> tashkil etadi:</p>
+    <div class="eqd">$$\Delta^{K-1}=\Bigl\{s\in\mathbb R^{K}:\ s_i\ge0,\ \textstyle\sum_i s_i=1\Bigr\}$$</div>
+    <p>$K=3$ da bu teng tomonli uchburchak. Uchlari — ishonchli javoblar $(1;\,0;\,0)$, $(0;\,1;\,0)$, $(0;\,0;\,1)$, markazi — tekis taqsimot $(\tfrac13;\,\tfrac13;\,\tfrac13)$, ichidagi nuqta esa uchlarning $s_i$ vaznli «aralashmasi» (barisentrik koordinatalar).</p>
+    <p>Softmax butun $\mathbb R^K$ logitlar fazosini simpleksning <i>ichki qismiga</i> akslantiradi: tomonlar va uchlarga yetib bo‘lmaydi. $z+c\mathbf 1$ to‘g‘ri chiziqning barcha nuqtalari bitta nuqtaga o‘tadi, shuning uchun mohiyatan softmax $(K-1)$ o‘lchovli logitlar ayirmalari fazosi bilan simpleks ichki qismi orasidagi o‘zaro bir qiymatli moslikdir. Teskari akslantirish — logarifm: siljish aniqligida $z=\ln s$.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-simplex" data-config="{&quot;z&quot;: [2, 1, 0]}"></div><figcaption><b>Rasm 3.</b> Uch sinf bo‘yicha taqsimot — uchburchakning nuqtasi; bo‘yoq qaysi sinf va qanchalik ishonch bilan yutayotganini ko‘rsatadi. Qora nuqtani torting: o‘ngda o‘sha ehtimolliklar ustunlarda, rasm ostida — shu nuqtani beradigan logitlar. Qora punktir — harorat o‘zgargandagi yo‘l: g‘olib uchdan ($T\to0$) markazga ($T\to\infty$). Ko‘k chiziq — faqat $z_1$ o‘zgargandagi yo‘l: qarama-qarshi tomondan 1-uchga. $z=(2;\,1;\,0)$ da markazlashtirilgan logitlar $(1;\,0;\,-1)$, entropiya $0{,}832$.</figcaption></figure>
+    <div class="callout intuition"><b>Entropiya — uchlardan uzoqlik</b><p>$H(s)=-\sum_i s_i\ln s_i$ entropiya noaniqlikni o‘lchaydi: u uchlar yonida 0 ga intiladi va markazda eng katta bo‘lib, $\ln K$ ga teng. $(0{,}665;\,0{,}245;\,0{,}090)$ uchun $0{,}832$ chiqadi, maksimum esa $\ln3\approx1{,}099$.</p></div>
+
+    <h2 id="derivative">Hosila: Yakobi matritsasi</h2>
+    <p>Softmax’ning $K$ ta kirishi va $K$ ta chiqishi bor, shuning uchun uning hosilasi son emas, balki $K\times K$ matritsa: $J_{ij}=\partial s_i/\partial z_j$ element $i$-ehtimollik $j$-logitga qanday javob berishini ko‘rsatadi.</p>
+    <details class="deep"><summary>Bo‘linma qoidasi bilan keltirib chiqarish</summary><div class="deep-body">
+      <p>$S=\sum_k e^{z_k}$ deb belgilaymiz; u holda $\partial S/\partial z_j=e^{z_j}$. $i=j$ uchun:</p>
+      <div class="eqd">$$\frac{\partial s_i}{\partial z_i}=\frac{e^{z_i}S-e^{z_i}e^{z_i}}{S^{2}}=s_i-s_i^{2}=s_i(1-s_i)$$</div>
+      <p>$i\ne j$ uchun $e^{z_i}$ surat $z_j$ ga bog‘liq emas:</p>
+      <div class="eqd">$$\frac{\partial s_i}{\partial z_j}=\frac{0\cdot S-e^{z_i}e^{z_j}}{S^{2}}=-s_is_j$$</div>
+    </div></details>
+    <details class="deep"><summary>Logarifm orqali keltirib chiqarish (qisqaroq)</summary><div class="deep-body">
+      <p>$\ln s_i=z_i-\ln S$. Eksponentalar yig‘indisi logarifmining hosilasi yana softmax: $\partial\ln S/\partial z_j=e^{z_j}/S=s_j$. Demak,</p>
+      <div class="eqd">$$\frac{\partial\ln s_i}{\partial z_j}=\delta_{ij}-s_j\quad\Longrightarrow\quad\frac{\partial s_i}{\partial z_j}=s_i(\delta_{ij}-s_j)$$</div>
+      <p>Bu yerda $\delta_{ij}$ — Kroneker belgisi: $i=j$ da 1, aks holda 0.</p>
+    </div></details>
+    <div class="eqd">$$J=\frac{\partial s}{\partial z}=\operatorname{diag}(s)-s\,s^{\top},\qquad J_{ij}=\begin{cases}s_i(1-s_i),&amp;i=j\\-s_is_j,&amp;i\ne j\end{cases}$$</div>
+    <p>Bu matritsaning xossalari:</p>
+    <ul class="flist"><li><b>diagonal</b> $s_i(1-s_i)$ — aynan sigmoidaning hosilasi: $\tfrac14$ dan oshmaydi, $s_i=\tfrac12$ da maksimal;</li><li><b>diagonaldan tashqaridagi</b> barcha elementlar manfiy: bitta logitni ko‘tarib, qolganlaridan ehtimollik olamiz;</li><li><b>simmetrik</b> va har bir satr (hamda ustun) yig‘indisi 0: $J\mathbf 1=s-s\,(s^\top\mathbf 1)=0$. Bu $\sum_i s_i=1$ tenglikning hosilasi, $\mathbf 1$ vektor esa hech narsani o‘zgartirmaydigan siljish yo‘nalishi. Shuning uchun $J$ xos (singulyar);</li><li><b>nomanfiy aniqlangan</b>: $v^\top Jv=\sum_i s_iv_i^2-\bigl(\sum_i s_iv_i\bigr)^2$ — $s$ taqsimotdagi $v$ kattalikning dispersiyasi, dispersiya esa manfiy bo‘lmaydi;</li><li><b>ishonch oshganda so‘nadi</b>: $s$ simpleks uchiga yaqin bo‘lsa, $J$ ning barcha elementlari nolga yaqin — sigmoidadagi kabi to‘yinish.</li></ul>
+    <figure class="viz"><div class="fv" data-viz="softmax-jacobian" data-config="{&quot;z&quot;: [2, 1, 0], &quot;j&quot;: 0}"></div><figcaption><b>Rasm 4.</b> Chapda — $z=(2;\,1;\,0)$ dagi Yakobi matritsasi: $(0{,}223;\,0{,}185;\,0{,}082)$ diagonal musbat (qizil), diagonaldan tashqarida manfiy $-0{,}163$, $-0{,}060$, $-0{,}022$ (ko‘k); har bir ustun yig‘indisi 0, iz $1-\sum s_i^2\approx0{,}4895$. O‘ngda — tanlangan ustun elementlari $z_j$ ning funksiyalari sifatida: diagonal element — $s_j=0{,}5$ bo‘lgan joyda cho‘qqisi $0{,}25$ bo‘lgan $s_j(1-s_j)$ qo‘ng‘iroq; qolganlari — manfiy «chuqurlar».</figcaption></figure>
+    <h3>Matritsasiz teskari o‘tish</h3>
+    <p>Backprop’da $J$ ning o‘zi emas, $J^\top g$ ko‘paytma kerak, bu yerda $g=\partial L/\partial s$ yuqoridan keladi. $\operatorname{diag}(s)-ss^\top$ tuzilishi tufayli bu $O(K^2)$ o‘rniga $O(K)$ amal turadi:</p>
+    <div class="eqd">$$\frac{\partial L}{\partial z}=J^{\top}g=s\odot\bigl(g-\langle g,s\rangle\,\mathbf 1\bigr)$$</div>
+    <p>$K\approx10^5$ tokenli LLM lug‘ati uchun bu har bir pozitsiyada $10^5$ va $10^{10}$ son orasidagi farq. Kross-entropiya bilan juftlikda esa yanada oddiy: $\partial L/\partial z=s-y$ (keltirib chiqarish — <a href='../cross-entropy/'>kross-entropiya</a> sahifasida).</p>
+
+    <h2 id="surface">3D manzara: logitlar tekisligi ustidagi softmax</h2>
+    <p>$z_3=0$ ni qayd etamiz — bu umumiylikni yo‘qotmaydi, chunki siljish bilan istalgan logitni nolga aylantirish mumkin, — va $s_1$ ni ikki o‘zgaruvchi $z_1$ va $z_2$ ning funksiyasi sifatida chizamiz. «Rampa» hosil bo‘ladi: $z_1$ ham $z_2$ dan, ham noldan katta bo‘lgan joyda sirt 1 ga yaqin, birinchi sinf yutqazgan joyda esa 0 ga yaqin. Chegara bo‘ylab u sigmoida bo‘yicha ko‘tariladi — bu «bittasi hammaga qarshi» formulasining amaldagi ko‘rinishi.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-surface" data-config="{&quot;z&quot;: [2, 1]}"></div><figcaption><b>Rasm 5.</b> Chapda — 3D’da $s_k(z_1,z_2,0)$ (sirtni aylantirish mumkin), qora nuqta — $s_1\approx0{,}665$ bo‘lgan $z=(2;\,1;\,0)$. O‘ngda — logitlar tekisligi: bo‘yoq g‘olib sinf va ishonchni ko‘rsatadi, chiziqlar — tanlangan funksiyaning $0{,}1$, $0{,}5$, $0{,}9$ sathlari. Nuqtani surish mumkin. $\partial s_1/\partial z_1$ ga o‘ting: bu $s_1=0{,}5$ chiziq bo‘ylab balandligi $0{,}25$ bo‘lgan qir.</figcaption></figure>
+    <p>Yuqoridan ko‘rinish logitlar tekisligini uchta sohaga bo‘ladi. Chegaralar — teng logitlar to‘plamlari: $z_1=z_2\ge0$ nur 1- va 2-sinflarni, $z_1=0$, $z_2\le0$ nur 1- va 3-sinflarni, $z_2=0$, $z_1\le0$ nur 2- va 3-sinflarni ajratadi. Uchala nur ham $s=(\tfrac13;\,\tfrac13;\,\tfrac13)$ bo‘lgan koordinatalar boshidan chiqadi.</p>
+    <div class="callout note"><b>Gradiyent qayerda oqadi</b><p>$\partial s_1/\partial z_1=s_1(1-s_1)$ sirt «o‘z» va «begona» sohalar ichkarisida deyarli tekis va deyarli nol. Softmax orqali gradiyent faqat model ikkilanayotgan joyda — chegaralar yaqinida oqadi.</p></div>
+
+    <h2 id="lse">Log-sum-exp: silliq maksimum</h2>
+    <p>Softmax’ning «boshlang‘ich funksiyasi» bor — log-sum-exp funksiyasi:</p>
+    <div class="eqd">$$\operatorname{LSE}(z)=\ln\sum_{j=1}^{K}e^{z_j},\qquad\frac{\partial\operatorname{LSE}}{\partial z_i}=\frac{e^{z_i}}{\sum_j e^{z_j}}=s_i,\qquad\nabla\operatorname{LSE}(z)=\operatorname{softmax}(z)$$</div>
+    <p>LSE — silliq maksimum: eng katta eksponenta yig‘indida ustunlik qiladi va logarifm deyarli uning ko‘rsatkichini qaytaradi. Aniqroq,</p>
+    <div class="eqd">$$\max_j z_j\;\le\;\operatorname{LSE}(z)\;\le\;\max_j z_j+\ln K$$</div>
+    <p>Chap tengsizlik o‘rinli, chunki yig‘indi eng katta qo‘shiluvchisidan kichik emas, o‘ng tengsizlik — chunki $K$ ta qo‘shiluvchining har biri eng kattasidan oshmaydi. $(2;\,1;\,0)$ uchun: $\operatorname{LSE}=\ln11{,}107\approx2{,}408$ — $2$ va $2+\ln3\approx3{,}099$ orasida. Harorat bilan $\operatorname{LSE}_T(z)=T\ln\sum_j e^{z_j/T}$ da oraliq $T\ln K$ gacha qisqaradi: $T\to0$ da LSE oddiy maksimumga, uning gradiyenti $\operatorname{softmax}(z/T)$ esa argmax ning one-hot vektoriga aylanadi.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-lse" data-config="{&quot;T&quot;: 1, &quot;x&quot;: 1}"></div><figcaption><b>Rasm 6.</b> Yuqorida — $\operatorname{LSE}_T(x,0)=T\ln(e^{x/T}+1)$ va $\max(x,0)$; oraliq $T\ln2$ dan oshmaydi va $x=0$ da eng katta. $T=1$, $x=1$ da: $\operatorname{LSE}\approx1{,}3133$, oraliq $0{,}3133$. Pastda — $x$ bo‘yicha hosila: bu $\sigma(x/T)$, ya’ni $\operatorname{softmax}(x/T,\,0)$ ning birinchi komponentasi, silliq pog‘ona. $T$ ni kamaytiring — LSE siniq chiziqqa, softmax esa pog‘onaga yopishadi.</figcaption></figure>
+    <details class="deep"><summary>LSE va kross-entropiyaning qavariqligi</summary><div class="deep-body">
+      <p>LSE gessiani — softmax’ning hosilasi, ya’ni o‘sha Yakobi matritsasi: $\nabla^2\operatorname{LSE}=\operatorname{diag}(s)-ss^\top$. U nomanfiy aniqlangan, demak LSE — qavariq funksiya. Bundan kross-entropiyaning logitlar bo‘yicha qavariqligi kelib chiqadi: $-\ln s_y=\operatorname{LSE}(z)-z_y$ — qavariq funksiyadan chiziqli funksiya ayirmasi.</p>
+    </div></details>
+    <div class="callout key"><b>Bog‘lashga arziydigan uchta formula</b><p>$\operatorname{softmax}=\nabla\operatorname{LSE}$; $\ln s_i=z_i-\operatorname{LSE}(z)$ (log-softmax); $\mathrm{CE}=\operatorname{LSE}(z)-z_y$. Qo‘llanmadagi misol uchun: $2{,}408-2=0{,}408$. $K=2$ va $z=(x;\,0)$ da esa LSE softplus $\ln(1+e^{x})$ ga — <a href='../relu/'>ReLU</a> ning silliq ko‘rinishiga aylanadi.</p></div>
+
+    <h2 id="training">O‘qitishda softmax</h2>
+    <p>Softmax’li eng oddiy model — ko‘p sinfli logistik (softmax-) regressiya: $K$ ta chiziqli funksiya logitlarni, softmax ehtimolliklarni beradi, yo‘qotish esa — <a href='../cross-entropy/'>kross-entropiya</a>:</p>
+    <div class="eqd">$$s=\operatorname{softmax}(Wx+b),\qquad L=-\ln s_y,\qquad\frac{\partial L}{\partial W}=(s-y)\,x^{\top},\qquad\frac{\partial L}{\partial b}=s-y$$</div>
+    <p>Bu yerda $y$ — to‘g‘ri sinfning one-hot vektori. Butun Yakobi matritsasi logarifm bilan juftlikda «bashorat − haqiqat» ayirmasiga qisqardi.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-regression" data-config="{}"></div><figcaption><b>Rasm 7.</b> Har biri 30 nuqtadan iborat uchta sinf. Model $W=0$, $b=0$ dan boshlaydi: barcha ehtimolliklar $\tfrac13$, $\mathrm{CE}=\ln3\approx1{,}099$, aniqlik $33{,}3\%$. «Boshlash» ni bosing: butun to‘plam bo‘yicha $0{,}15$ qadamli gradiyentli tushish. Birinchi qadamdan keyinoq aniqlik $94{,}4\%$, 200 qadamdan keyin $\mathrm{CE}\approx0{,}181$ va aniqlik $95{,}6\%$. Bo‘yoq yorqinligi — model ishonchi; istalgan nuqtadagi ehtimolliklarni ko‘rish uchun kursorni olib boring.</figcaption></figure>
+    <div class="callout note"><b>Chegaralar — to‘g‘ri chiziqlar</b><p>$i$ va $j$ sinflar orasidagi chegara — $z_i=z_j$ bo‘lgan to‘plam, ya’ni $(w_i-w_j)^\top x+b_i-b_j=0$: to‘g‘ri chiziq (umumiy holda gipertekislik). Softmax modelni nochiziqli qilmaydi — u faqat ballarni ehtimolliklarga aylantiradi. Egri chegaralar logitlarni neyron tarmoq hisoblaganda paydo bo‘ladi.</p></div>
+    <h3>Transformer ichidagi softmax: attention</h3>
+    <div class="eqd">$$\operatorname{Attention}(Q,K,V)=\operatorname{softmax}\Bigl(\frac{QK^{\top}}{\sqrt{d}}\Bigr)V$$</div>
+    <p>$\operatorname{softmax}(\cdot)$ ning har bir satri — bitta tokenning diqqati qolgan tokenlar bo‘yicha taqsimoti, vaznlar yig‘indisi 1. $\sqrt d$ ga bo‘lish — bu harorat: komponentalari mustaqil, o‘rtachasi nol va dispersiyasi bir bo‘lgan $d$ o‘lchovli vektorlarning skalyar ko‘paytmasi dispersiyasi $d$ ga teng. Masshtablashsiz attention logitlari katta bo‘ladi, softmax deyarli one-hot gacha to‘yinadi, Yakobi matritsasi — u bilan birga gradiyentlar ham — deyarli nolga aylanadi.</p>
+    <h3>Matn generatsiyasidagi harorat</h3>
+    <p>Til modeli keyingi tokenni $\operatorname{softmax}(z/T)$ dan tanlaydi. $T\to0$ da (ochko‘z tanlov) eng ehtimolli token olinadi, $T&lt;1$ da matn oldindan aytib bo‘ladiganroq, $T&gt;1$ da — xilma-xilroq va xavfliroq. $T&gt;1$ harorat bilimlar distillyatsiyasida ham ishlaydi (Xinton va boshq., 2015): o‘qituvchining «yumshoq» ehtimolliklari one-hot belgilardan ko‘ra ko‘proq axborot tashiydi.</p>
+    <div class="callout history"><b>Nom qayerdan kelgan</b><p>Formula statistik fizikadan kelgan: Bolsman — Gibbs taqsimoti $p_i\propto e^{-E_i/(kT)}$ $T$ haroratda $E_i$ energiyali holat ehtimolligini beradi; logit minus ishorali energiya rolini o‘ynaydi. «Softmax» so‘zini 1990 yilda Jon Braydl tarmoq chiqishlarining ehtimoliy talqinini tasvirlab taklif qilgan. Ekonometrikada xuddi shu model multinomial logit deb ataladi.</p></div>
+
+    <h2 id="code">Kodda: barqarorlik, log-softmax va PyTorch</h2>
+    <p>Sodda formula katta logitlarda buziladi: $e^{1000}$ — istalgan suzuvchi nuqtali formatda cheksizlik va $\infty/\infty=\text{NaN}$ chiqadi. GPU’da o‘qitishning asosiy formati bo‘lgan float32 da chegara yaqinroq: $e^{x}$ allaqachon $x&gt;88{,}72$ da to‘lib ketadi (eng katta float32 soni $\approx3{,}4\cdot10^{38}$). Juda manfiy logitlarda muammo teskari: eksponentalar nolga aylanadi va $0/0$ chiqadi.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-overflow" data-config="{&quot;c&quot;: 0}"></div><figcaption><b>Rasm 8.</b> $c$ $-800$ dan $800$ gacha bo‘lganda $(2+c;\,1+c;\,c)$ logitlar; to‘g‘ri javob doim $(0{,}665;\,0{,}245;\,0{,}090)$. float32 da sodda formula faqat $-99\le c\le86$ da to‘g‘ri: $c=87$ da $e^{89}$ soni float32 ga sig‘maydi va NaN chiqadi; $c\le-106$ da barcha eksponentalar nolga teng, $0/0$; ular orasida esa subnormal sonlar aniqlikni yo‘qotadi — $c=-105$ da ishonchli, lekin yolg‘on $(1;\,0;\,0)$ javob chiqadi. float64 da zaxira kattaroq ($-741\le c\le707$), lekin chegara bor. Maksimum ayirilganda javob hamma joyda to‘g‘ri.</figcaption></figure>
+    <p>Davo — siljishga invariantlik: $m=\max_j z_j$ ni ayiramiz. Eng katta ko‘rsatkich 0 ga, $e^0=1$ ga teng bo‘ladi, maxraj 1 va $K$ orasida yotadi — na to‘lib ketish, na nolga bo‘lish:</p>
+    <div class="eqd">$$s_i=\frac{e^{z_i-m}}{\sum_j e^{z_j-m}},\qquad\ln s_i=(z_i-m)-\ln\sum_j e^{z_j-m}$$</div>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+np.set_printoptions(precision=3)
+
+def softmax(z, axis=-1, T=1.0):
+    &quot;&quot;&quot;Barqaror softmax: maksimumni ayiramiz, natija o‘zgarmaydi.&quot;&quot;&quot;
+    z = np.asarray(z, dtype=float) / T
+    z = z - z.max(axis=axis, keepdims=True)
+    e = np.exp(z)
+    return e / e.sum(axis=axis, keepdims=True)
+
+def log_softmax(z, axis=-1):
+    # log s_i = z_i − logsumexp(z): juda kichik ehtimolliklarda ham log(0) siz
+    z = np.asarray(z, dtype=float)
+    m = z.max(axis=axis, keepdims=True)
+    return z - m - np.log(np.exp(z - m).sum(axis=axis, keepdims=True))
+
+def softmax_backward(s, g):
+    # J^T g = s * (g − &lt;g, s&gt;): K×K matritsa o‘rniga O(K)
+    return s * (g - (g * s).sum(axis=-1, keepdims=True))
+
+z = np.array([2.0, 1.0, 0.0])
+print(softmax(z))            # [0.665 0.245 0.09 ]
+print(softmax(z + 1000))     # [0.665 0.245 0.09 ] — siljish muhim emas
+print(softmax(z, T=0.5))     # [0.867 0.117 0.016] — keskinroq
+print(log_softmax([0.0, -800.0]))  # [0. -800.], np.log(softmax(...)) esa -inf beradi</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn.functional as F
+
+z = torch.tensor([2.0, 1.0, 0.0], requires_grad=True)
+s = F.softmax(z, dim=-1)          # tensor([0.6652, 0.2447, 0.0900])
+s[0].backward()                   # Yakobi matritsasining birinchi satri
+print(z.grad)                     # tensor([ 0.2227, -0.1628, -0.0599])
+
+# O‘qitishda alohida softmax kerak emas:
+logits = torch.randn(4, 3)        # batch: 4 ta misol, 3 ta sinf
+target = torch.tensor([0, 2, 1, 0])
+loss = F.cross_entropy(logits, target)   # ichida — log_softmax + NLL
+log_p = F.log_softmax(logits, dim=-1)    # ehtimolliklar logarifmlari kerak bo‘lsa</code></pre>
+    <div class="callout key"><b>Qoida</b><p>Agar keyin logarifm kelsa, $\ln(\operatorname{softmax}(z))$ ni ikki qadamda hisoblamang: kichik ehtimollik 0 ga yaxlitlanadi va $-\infty$ chiqadi. <code>log_softmax</code> dan yoki to‘g‘ridan-to‘g‘ri logitlardagi yo‘qotishdan foydalaning: PyTorch’da <code>F.cross_entropy</code> / <code>nn.CrossEntropyLoss</code>, Keras’da <code>from_logits=True</code>.</p></div>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b><code>nn.CrossEntropyLoss</code> dan oldin softmax</b>. Bu yo‘qotish logitlarni kutadi va log-softmax’ni o‘zi qo‘llaydi. Ikki karra softmax ehtimolliklarni siqadi: uch sinf uchun ikkinchi softmax $e/(e+2)\approx0{,}576$ dan ko‘p bermaydi, yo‘qotish $0{,}551$ dan pastga tushmaydi, gradiyentlar buziladi.</li><li><b>Noto‘g‘ri o‘q</b>. $(N,K)$ shaklli batch uchun misollar bo‘yicha (<code>dim=0</code>) emas, sinflar bo‘yicha (<code>dim=-1</code>) normallash kerak. Istisno chiqmaydi — model shunchaki bema’ni narsani o‘rganadi.</li><li><b>Sodda eksponenta</b> maksimumni ayirmasdan — katta logitlarda NaN, ayniqsa aralash aniqlikda: float16 da $e^{x}$ allaqachon $x&gt;11{,}09$ da to‘lib ketadi.</li><li><b>Multi-label uchun softmax</b>. Agar obyektda bir vaqtda bir nechta belgi bo‘lishi mumkin bo‘lsa (rasmda mushuk <i>va</i> it), sinflar raqobatlashmaydi — har bir chiqishda sigmoida va <a href='../bce/'>BCE</a> kerak.</li><li><b>Softmax ehtimolligini kafolat deb bilish</b>. $s_{\max}=0{,}99$ «99% hollarda haq» degani emas: chuqur tarmoqlar ko‘pincha o‘ziga haddan tashqari ishonadi. Kalibrlash — alohida vazifa; eng oddiy usul — temperature scaling, validatsiyada bitta $T$ ni tanlash.</li><li><b>Turli misollar logitlarini solishtirish</b>. Logitlar siljish aniqligida aniqlangan, shuning uchun «bir misolda logit 5, boshqasida 3 dan katta» hech narsani anglatmaydi. Ehtimolliklarni yoki bitta misol ichidagi logitlar ayirmalarini solishtiring.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘liqlik</h2>
+    <ul class="flist"><li><a href='../sigmoid/'>Sigmoida</a>: $\operatorname{softmax}(z_1,z_2)_1=\sigma(z_1-z_2)$, Yakobi matritsasining $s_i(1-s_i)$ diagonali esa sigmoidaning hosilasi.</li><li><a href='../cross-entropy/'>Kross-entropiya</a>: softmax’ning tabiiy jufti; birgalikda $s-y$ gradiyentni beradi, $\mathrm{CE}=\operatorname{LSE}(z)-z_y$.</li><li><a href='../bce/'>BCE</a>: ikki sinf uchun kross-entropiyaning xususiy holi, bunda softmax sigmoidaga keladi.</li><li><a href='../focal/'>Focal Loss</a>: $-\ln p_t$ ni $(1-p_t)^\gamma$ ga ko‘paytiradi, bu yerda $p_t$ — to‘g‘ri sinfning softmax-ehtimolligi.</li><li><a href='../relu/'>ReLU</a>: softplus $\ln(1+e^{x})=\operatorname{LSE}(x,0)$ — $\max(x,0)$ ning silliq varianti.</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) $s_i=e^{z_i}/\sum_je^{z_j}$ istalgan logitlarni $K$ ta sinf bo‘yicha taqsimotga aylantiradi va tartibni saqlaydi. 2) Faqat logitlar ayirmalari muhim: $s_i/s_j=e^{z_i-z_j}$, siljish hech narsani o‘zgartirmaydi — maksimumni ayiradigan barqaror formula shundan. 3) Harorat keskinlikni boshqaradi: $T\to0$ — argmax, $T\to\infty$ — tekis taqsimot. 4) $\operatorname{diag}(s)-ss^\top$ Yakobi matritsasi simmetrik, xos va ishonch oshganda so‘nadi; teskari o‘tish $O(K)$ turadi. 5) Softmax — LSE silliq maksimumining gradiyenti, kross-entropiya bilan juftlikda esa $s-y$ gradiyentni beradi.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. $(2;\,1;\,0)$ logitlar $s\approx(0{,}665;\,0{,}245;\,0{,}090)$ ni beradi. $(102;\,101;\,100)$ nima beradi?</legend><div class="opts"><button type="button" data-ok="0">Deyarli $(1;\,0;\,0)$</button><button type="button" data-ok="1">$(0{,}665;\,0{,}245;\,0{,}090)$</button><button type="button" data-ok="0">$(\tfrac13;\,\tfrac13;\,\tfrac13)$</button><button type="button" data-ok="0">Javob yo‘q: to‘lib ketish</button></div><div class="explain" hidden>Umumiy $100$ o‘zgarmas qisqaradi: softmax faqat ayirmalarga bog‘liq. (float32 dagi sodda kod bu yerda haqiqatan to‘lib ketadi — shuning uchun maksimum ayiriladi.)</div></fieldset><fieldset class="q"><legend>2. $T\to0$ da $\operatorname{softmax}(z/T)$ bilan nima bo‘ladi?</legend><div class="opts"><button type="button" data-ok="0">Tekis taqsimotga intiladi</button><button type="button" data-ok="1">Eng katta logitning one-hot vektoriga intiladi</button><button type="button" data-ok="0">O‘zgarmaydi</button><button type="button" data-ok="0">Barcha ehtimolliklar 0 ga intiladi</button></div><div class="explain" hidden>Logitlar ayirmalari kichik $T$ ga bo‘linib o‘sadi, butun massa eng katta logitga o‘tadi (agar u yagona bo‘lsa).</div></fieldset><fieldset class="q"><legend>3. $\operatorname{softmax}(z_1,z_2)_1$ nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$\sigma(z_1)$</button><button type="button" data-ok="1">$\sigma(z_1-z_2)$</button><button type="button" data-ok="0">$\sigma(z_1+z_2)$</button><button type="button" data-ok="0">$z_1/(z_1+z_2)$</button></div><div class="explain" hidden>$e^{z_1}/(e^{z_1}+e^{z_2})$ ning surat va maxrajini $e^{z_1}$ ga bo‘ling: $1/(1+e^{-(z_1-z_2)})$ chiqadi.</div></fieldset><fieldset class="q"><legend>4. Softmax Yakobi matritsasining istalgan ustuni elementlari yig‘indisi nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">1</button><button type="button" data-ok="1">0</button><button type="button" data-ok="0">$s_j$</button><button type="button" data-ok="0">$\tfrac14$</button></div><div class="explain" hidden>$\sum_i\partial s_i/\partial z_j=\partial\bigl(\sum_i s_i\bigr)/\partial z_j=\partial1/\partial z_j=0$.</div></fieldset><fieldset class="q"><legend>5. Barqaror softmax’da nima uchun $\max_j z_j$ ayiriladi?</legend><div class="opts"><button type="button" data-ok="0">Taqsimotni keskinroq qilish uchun</button><button type="button" data-ok="1">Eksponenta to‘lib ketmasligi uchun; natija o‘zgarmaydi</button><button type="button" data-ok="0">Yig‘indini 1 ga tenglash uchun</button><button type="button" data-ok="0">O‘qitishni tezlashtirish uchun</button></div><div class="explain" hidden>Ayirgandan keyin eng katta ko‘rsatkich 0, maxraj 1 va $K$ orasida yotadi, siljishga invariantlik tufayli esa javob o‘sha.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../leaky-relu/"><span class="kicker">← Oldingi formula</span><span class="big">Leaky ReLU</span><span class="kicker">«oqadigan» ReLU</span></a>
+<a class="next" href="../mae/"><span class="kicker">Keyingi formula →</span><span class="big">MAE</span><span class="kicker">mean absolute error</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

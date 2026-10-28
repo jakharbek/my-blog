@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kategorial kross-entropiya — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Kross-entropiya batafsil: −log p, haqqoniylik bilan bog‘liqlik, entropiya va KL-divergensiya, s − y gradiyent, qavariqlik, 3D landshaft, belgilarni silliqlash, CE va MSE, perpleksiya, barqaror kod.">
+  <meta property="og:title" content="Kategorial kross-entropiya — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Kross-entropiya batafsil: −log p, haqqoniylik bilan bog‘liqlik, entropiya va KL-divergensiya, s − y gradiyent, qavariqlik, 3D landshaft, belgilarni silliqlash, CE va MSE, perpleksiya, barqaror kod.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/cross-entropy/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/cross-entropy.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/cross-entropy/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/cross-entropy/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/cross-entropy/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Yo‘qotishlar — klassifikatsiya</span>
+  <h1>Kategorial kross-entropiya</h1>
+  <p class="dek">Klassifikatsiya va til modellarining asosiy yo‘qotishi. Uni mayda detallarigacha tahlil qilamiz: nega jarima — minus logarifm, kross-entropiya qanday qilib entropiya va KL-divergensiyaga ajraladi, nega softmax bilan juftlikda gradiyent shunchaki s − y, yo‘qotishlar landshafti qanday ko‘rinadi, belgilar nima uchun silliqlanadi va perpleksiya nima.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 35 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: hayrat uchun jarima</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#information"><span class="n">4</span>Entropiya, kross-entropiya va KL-divergensiya</a>
+      <a href="#gradient"><span class="n">5</span>Hosila: nega softmax + CE s − y ni beradi</a>
+      <a href="#landscape"><span class="n">6</span>3D’da yo‘qotishlar landshafti</a>
+      <a href="#smoothing"><span class="n">7</span>Belgilarni silliqlash</a>
+      <a href="#training"><span class="n">8</span>CE va MSE: nega klassifikatorlar kross-entropiyada o‘qitiladi</a>
+      <a href="#llm"><span class="n">9</span>Til modellari va perpleksiya</a>
+      <a href="#code"><span class="n">10</span>Kodda</a>
+      <a href="#mistakes"><span class="n">11</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">12</span>Boshqa formulalar bilan bog‘liqlik</a>
+      <a href="#summary"><span class="n">13</span>Xulosa</a>
+      <a href="#quiz"><span class="n">14</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{CE}=-\sum_{k=1}^{K}y_k\log\hat{y}_k$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>Model sinflar ehtimolliklarini chiqardi — masalan, «mushuk», «it», «qush» uchun $(0{,}665;\,0{,}245;\,0{,}090)$, — rasmda esa mushuk. Bu qanchalik yaxshi? Bitta son kerak: to‘g‘ri javob ehtimolligi qancha katta bo‘lsa, u shuncha kichik bo‘lsin va uni gradiyentli tushish bilan minimallashtirish mumkin bo‘lsin. Standart javob — <b>kategorial kross-entropiya</b> (categorical cross-entropy, CE): bu yerda $\mathrm{CE}=-\ln0{,}665\approx0{,}408$.</p>
+    <p>U qayerda uchraydi:</p>
+    <ul class="flist"><li><b>ko‘p sinfli klassifikatorlarni o‘qitish</b> — logistik regressiyadan ResNet va ViT’gacha: oxirgi qatlam logitlarni chiqaradi, <a href='../softmax/'>softmax</a> ularni ehtimolliklarga aylantiradi, CE javobni baholaydi;</li><li><b>til modellari</b> — GPT, LLaMA, Qwen’ni oldindan o‘qitish — keyingi token CE sini minimallashtirish: sinflar — lug‘at tokenlari, $e^{\mathrm{CE}}$ esa mashhur perpleksiya;</li><li><b>bilimlar distillyatsiyasi</b> — o‘quvchi o‘qituvchining «yumshoq» ehtimolliklarigacha bo‘lgan CE ni minimallashtiradi;</li><li><b>statistika</b> — CE ni minimallashtirish kategorial taqsimot uchun maksimal haqqoniylik usuliga teng kuchli;</li><li><b>axborot nazariyasi</b> — ma’lumotlar $p$ taqsimotdan kelib, $q$ model bo‘yicha kodlansa, CE kodning o‘rtacha uzunligiga teng.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>$\mathrm{CE}=-\sum_k y_k\ln\hat y_k$; one-hot belgi uchun bu to‘g‘ri sinf ehtimolligining minus logarifmi. Ishonchli xato qimmatga tushadi: $-\ln0{,}1\approx2{,}303$, $-\ln0{,}9\approx0{,}105$ ga qarshi. Softmax bilan juftlikda logitlar bo‘yicha gradiyent shunchaki $s-y$, to‘yinishsiz. Kross-entropiya = entropiya + KL-divergensiya, $e^{\mathrm{CE}}$ esa perpleksiya.</p></div>
+
+    <h2 id="intuition">Intuitsiya: hayrat uchun jarima</h2>
+    <p>Model ehtimolliklarni oldindan e’lon qiladi, keyin to‘g‘ri javobni bilib oladi, deylik. Agar u to‘g‘ri sinfga $p$ ehtimollik bergan bo‘lsa, uning «hayrati» $-\ln p$ ga teng: $p=1$ da hayrat yo‘q, $p=0{,}5$ da u $\ln2\approx0{,}693$, $p\to0$ da esa cheksizlikkacha o‘sadi. Kross-entropiya — modelning ma’lumotlardagi o‘rtacha hayrati.</p>
+    <p>Nega aynan logarifm? Birinchidan, u mustaqil misollar ehtimolliklari ko‘paytmasini yig‘indiga aylantiradi. Ikkinchidan, u halollikni rag‘batlantiradi: faqat model sodir bo‘lgan natijaga bergan ehtimollikka bog‘liq jarimalar orasida uch va undan ortiq natijada faqat logarifmik jarima (chiziqli almashtirish aniqligida) model o‘zining haqiqiy ehtimolliklarini aytganda o‘rtacha minimal bo‘ladi.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-surprise" data-config="{&quot;p&quot;: 0.665}"></div><figcaption><b>Rasm 1.</b> Yuqorida — $-\ln p$ jarima (ko‘k) va taqqoslash uchun $(1-p)^2$ kvadratik xato; pastda — ularning $p$ bo‘yicha hosilalari. Nuqtani torting. $p=0{,}665$ da yo‘qotish $0{,}408$ nat yoki $0{,}589$ bit, hosila $-1{,}504$. Ishonchli to‘g‘ri javob ($p=0{,}9$, jarima $0{,}105$) va ishonchli xato ($p=0{,}1$, jarima $2{,}303$) belgilangan.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>Ishonchli xato ($p=0{,}1$) ishonchli to‘g‘ri javobdan ($p=0{,}9$) 22 marta qimmat. $p=0{,}01$ da jarima allaqachon $4{,}605$ va chegarasiz o‘sadi, $(1-p)^2$ kvadratik xato esa birdan kichikligicha qoladi ($0{,}980$). $-1/p$ hosila $p\to0$ da modul bo‘yicha chegarasiz o‘sadi: javob qancha yomon bo‘lsa, turtki shuncha kuchli.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <div class="eqd">$$\mathrm{CE}(y,\hat y)=-\sum_{k=1}^{K}y_k\ln\hat y_k$$</div>
+    <dl class="symbols"><dt>$y=(y_1,\dots,y_K)$</dt><dd>haqiqiy taqsimot; odatda one-hot: to‘g‘ri $c$ sinf uchun $y_c=1$, qolganlari uchun $0$;</dd><dt>$\hat y_k$</dt><dd>$k$-sinfning bashorat qilingan ehtimolligi, odatda $\hat y=s=\operatorname{softmax}(z)$;</dd><dt>$\ln$</dt><dd>natural logarifm: CE natlarda (nats) o‘lchanadi; $\log_2$ bilan — bitlarda, $1$ nat $\approx1{,}443$ bit;</dd><dt>$-$</dt><dd>ehtimollik logarifmi manfiy, minus yo‘qotishni nomanfiy qiladi.</dd></dl>
+    <p>One-hot belgida yig‘indidan bitta qo‘shiluvchi qoladi. $s=\operatorname{softmax}(z)$ ni qo‘yib, to‘g‘ridan-to‘g‘ri logitlar orqali formula olamiz:</p>
+    <div class="eqd">$$\mathrm{CE}=-\ln s_c=-z_c+\ln\sum_{j=1}^{K}e^{z_j}=\operatorname{LSE}(z)-z_c$$</div>
+    <p>Oxirgi ko‘rinish amalda asosiysi: yo‘qotish aniq softmax’siz hisoblanadi. $N$ ta misoldan iborat batch uchun yo‘qotishlar o‘rtachalanadi:</p>
+    <div class="eqd">$$\mathcal L=-\frac1N\sum_{n=1}^{N}\ln s^{(n)}_{c_n}$$</div>
+    <p>Qo‘llanmadagi misol — $(2;\,1;\,0)$ logitlar, to‘g‘ri sinf birinchisi:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$k$</th><th class=num>$z_k$</th><th class=num>$s_k$</th><th class=num>$y_k$</th><th class=num>$-y_k\ln s_k$</th><th class=num>$s_k-y_k$</th></tr></thead><tbody><tr><td>1</td><td class=num>2</td><td class=num>0,665</td><td class=num>1</td><td class=num>0,408</td><td class=num>−0,335</td></tr><tr><td>2</td><td class=num>1</td><td class=num>0,245</td><td class=num>0</td><td class=num>0</td><td class=num>0,245</td></tr><tr><td>3</td><td class=num>0</td><td class=num>0,090</td><td class=num>0</td><td class=num>0</td><td class=num>0,090</td></tr><tr><td>Σ</td><td class=num></td><td class=num>1</td><td class=num>1</td><td class=num>0,408</td><td class=num>0</td></tr></tbody></table></div>
+    <p>Natija: $\mathrm{CE}\approx0{,}408$, gradiyent $s-y\approx(-0{,}335;\,0{,}245;\,0{,}090)$. Agar uchinchi sinf to‘g‘ri bo‘lganda, yo‘qotish $-\ln0{,}090\approx2{,}408$ bo‘lardi — model ishonch bilan xato qilgan.</p>
+    <details class="deep"><summary>CE va maksimal haqqoniylik</summary><div class="deep-body">
+      <p>$\theta$ parametrli model $c_n$ sinfga $q_\theta(c_n\mid x_n)$ ehtimollik bersin. Tanlanma haqqoniyligi — $\prod_n q_\theta(c_n\mid x_n)$ ko‘paytma. Logarifm ko‘paytmani yig‘indiga, ishorani almashtirish esa maksimallashtirishni minimallashtirishga aylantiradi:</p>
+      <div class="eqd">$$\arg\max_\theta\prod_{n=1}^{N}q_\theta(c_n\mid x_n)=\arg\min_\theta\Bigl(-\frac1N\sum_{n=1}^{N}\ln q_\theta(c_n\mid x_n)\Bigr)=\arg\min_\theta\mathcal L$$</div>
+      <p>O‘rtacha CE ni minimallashtirish — kategorial taqsimot uchun maksimal haqqoniylik bahosini izlash bilan bir xil. Shuning uchun CE ixtiyoriy tanlov emas, balki ehtimoliy klassifikatorning «tug‘ma» yo‘qotishi.</p>
+    </div></details>
+
+    <h2 id="information">Entropiya, kross-entropiya va KL-divergensiya</h2>
+    <p>Nom axborot nazariyasidan kelgan. Hodisalar $p$ taqsimotdan kelsin, biz esa ularni $q$ modelga asoslanib kodlaylik. U holda:</p>
+    <div class="eqd">$$H(p)=-\sum_k p_k\ln p_k,\qquad H(p,q)=-\sum_k p_k\ln q_k,\qquad\mathrm{KL}(p\,\|\,q)=\sum_k p_k\ln\frac{p_k}{q_k}$$</div>
+    <div class="eqd">$$H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$$</div>
+    <p>$H(p)$ — ma’lumotlarning o‘zidagi yo‘qotib bo‘lmaydigan noaniqlik (entropiya), $\mathrm{KL}(p\,\|\,q)\ge0$ — $q$ modelning haqiqatdan farq qilgani uchun jarima (Gibbs tengsizligi; tenglik faqat $q=p$ da). Shuning uchun kross-entropiyaning $q$ bo‘yicha minimumiga $q=p$ da erishiladi va u $H(p)$ ga teng. One-hot belgi uchun $H(y)=0$ va CE KL-divergensiya bilan ustma-ust tushadi.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-kl" data-config="{&quot;p&quot;: [0.7, 0.2, 0.1], &quot;q&quot;: [0.25, 0.5, 0.25]}"></div><figcaption><b>Rasm 2.</b> Uch sinfli simpleksda maqsad $p$ (qora nuqta) va bashorat $q$ (qizil); ikkala nuqtani ham surish mumkin. Bo‘yoq va sath chiziqlari — barcha mumkin bo‘lgan $q'$ bashoratlar uchun $\mathrm{KL}(p\,\|\,q')$ ($0{,}05$, $0{,}25$, $0{,}75$ sathlar): eng och rang $p$ nuqtaning o‘zida. O‘ngda — $H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$ yoyilmasi. $p=(0{,}7;\,0{,}2;\,0{,}1)$ va $q=(0{,}25;\,0{,}5;\,0{,}25)$ da: $H(p)\approx0{,}802$, $\mathrm{KL}\approx0{,}446$, $H(p,q)\approx1{,}248$ nat ($1{,}800$ bit). $q$ ni $p$ ustiga qo‘ying — KL yo‘qoladi; $p$ ni uchga suring — $H(p)$ yo‘qoladi.</figcaption></figure>
+    <details class="deep"><summary>Nega KL ≥ 0</summary><div class="deep-body">
+      <p>Botiq logarifm uchun Iensen tengsizligi bo‘yicha (yig‘indilar $p_k&gt;0$ bo‘lgan $k$ lar bo‘yicha):</p>
+      <div class="eqd">$$-\mathrm{KL}(p\,\|\,q)=\sum_k p_k\ln\frac{q_k}{p_k}\le\ln\sum_k p_k\frac{q_k}{p_k}=\ln\sum_{k:\,p_k&gt;0}q_k\le\ln1=0$$</div>
+      <p>Tenglik faqat barcha $k$ uchun $q_k=p_k$ bo‘lganda bajariladi.</p>
+    </div></details>
+    <div class="callout note"><b>Bitlar yoki natlar</b><p>$\log_2$ bilan kross-entropiya bitlarda o‘lchanadi — bu $q$ bo‘yicha qurilgan optimal kodda har bir hodisaga to‘g‘ri keladigan o‘rtacha bitlar soni. Mashinali o‘qitishda natural logarifm olinadi: hosilalar soddaroq, minimum esa o‘sha. O‘tkazish: $1$ nat $=1/\ln2\approx1{,}443$ bit.</p></div>
+
+    <h2 id="gradient">Hosila: nega softmax + CE s − y ni beradi</h2>
+    <p>Yo‘qotishning logitlar bo‘yicha gradiyentini hisoblaylik. Softmax’ning Yakobi matritsasi orqali borish mumkin, lekin $\mathrm{CE}=\operatorname{LSE}(z)-z_c$ ko‘rinishi orqali qisqaroq: LSE ning hosilasi — softmax (<a href='../softmax/'>softmax</a> sahifasiga qarang), $z_c$ ning $z_k$ bo‘yicha hosilasi esa $y_k$ ga teng.</p>
+    <div class="eqd">$$\frac{\partial\,\mathrm{CE}}{\partial z_k}=\frac{\partial\operatorname{LSE}(z)}{\partial z_k}-\frac{\partial z_c}{\partial z_k}=s_k-y_k$$</div>
+    <details class="deep"><summary>Yakobi matritsasi orqali keltirib chiqarish (zanjir qoidasi)</summary><div class="deep-body">
+      <p>Ehtimolliklar bo‘yicha hosila: $\partial\,\mathrm{CE}/\partial s_i=-y_i/s_i$. Softmax Yakobi matritsasi: $\partial s_i/\partial z_k=s_i(\delta_{ik}-s_k)$. Zanjir qoidasi bo‘yicha:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{CE}}{\partial z_k}=\sum_i\Bigl(-\frac{y_i}{s_i}\Bigr)s_i(\delta_{ik}-s_k)=-\sum_i y_i\delta_{ik}+s_k\sum_i y_i=s_k-y_k$$</div>
+      <p>Oxirgi qadamda $\sum_i y_i=1$ dan foydalanildi. Yakobi matritsasidagi $s_i$ ko‘paytuvchilar logarifmdagi $1/s_i$ maxrajlar bilan qisqardi — butun matritsa ayirmaga aylandi. Formula faqat one-hot uchun emas, yig‘indisi 1 bo‘lgan istalgan $y$ maqsad uchun o‘rinli (masalan, belgilar silliqlanganda).</p>
+    </div></details>
+    <p>Bu formulaning uchta muhim natijasi bor:</p>
+    <ul class="flist"><li><b>gradiyent chegaralangan</b>: har bir $s_k-y_k$ komponenta $(-1;\,1)$ da yotadi, ularning yig‘indisi esa 0 — to‘g‘ri logit qolganlari birgalikda pastga tortilgancha yuqoriga tortiladi;</li><li><b>xatoda to‘yinish yo‘q</b>: agar model ishonch bilan xato qilsa ($s_c\to0$), to‘g‘ri logit bo‘yicha gradiyent nolga emas, $-1$ ga intiladi. Softmax ustidagi MSE bilan solishtiring: u yerda Yakobi matritsasidan kelgan ko‘paytuvchilar gradiyentni aynan xato katta bo‘lganda so‘ndiradi (<a href='#training'>CE va MSE haqidagi</a> bo‘lim);</li><li><b>muvaffaqiyatda so‘nish</b>: $s\to y$ da gradiyent 0 ga intiladi — yaxshi o‘rganilgan misollar o‘qitishga deyarli ta’sir qilmaydi.</li></ul>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-gradient" data-config="{&quot;z&quot;: [2, 1, 0], &quot;k&quot;: 0, &quot;eta&quot;: 1}"></div><figcaption><b>Rasm 3.</b> $(2;\,1;\,0)$ logitli va birinchi sinfi to‘g‘ri bo‘lgan bitta misol. O‘ngda ustunlar — $s$ bashorat, qora tokchalar — $y$ maqsad, strelkalar va sonlar — $s_k-y_k$. «Qadam» ni bosing: logitlar $\eta=1$ bilan $z\leftarrow z-\eta(s-y)$ qoidasi bo‘yicha yangilanadi va yo‘qotish kamayadi: $0{,}408\to0{,}258\to0{,}187\to0{,}146$, 10 qadamdan keyin $0{,}058$. 3-sinfni to‘g‘ri qiling — yo‘qotish $2{,}408$, gradiyent esa $(0{,}665;\,0{,}245;\,-0{,}910)$ bo‘ladi.</figcaption></figure>
+    <details class="deep"><summary>Ikkinchi hosila: CE logitlar bo‘yicha qavariq</summary><div class="deep-body">
+      <p>$s_k-y_k$ ni yana bir marta differensiallaymiz: CE ning logitlar bo‘yicha gessiani softmax Yakobi matritsasiga teng, $\nabla^2_z\,\mathrm{CE}=\operatorname{diag}(s)-ss^\top$. Bu matritsa nomanfiy aniqlangan, shuning uchun CE — logitlarning qavariq funksiyasi, $z=Wx+b$ softmax-regressiyada esa yo‘qotish $(W,b)$ bo‘yicha qavariq: yomon lokal minimumlar yo‘q. $\mathbf 1$ yo‘nalishda matritsa xos — barcha logitlarni siljitish yo‘qotishni o‘zgartirmaydi.</p>
+    </div></details>
+
+    <h2 id="landscape">3D’da yo‘qotishlar landshafti</h2>
+    <p>Uchinchi logitni $z_3=0$ da qayd etamiz va yo‘qotishni qolgan ikkitasining funksiyasi sifatida chizamiz. To‘g‘ri sinf 1 uchun:</p>
+    <div class="eqd">$$\mathrm{CE}(z_1,z_2)=\ln\bigl(e^{z_1}+e^{z_2}+1\bigr)-z_1=\ln\bigl(1+e^{z_2-z_1}+e^{-z_1}\bigr)$$</div>
+    <p>$z_1$ ham $z_2$ dan, ham noldan ancha katta bo‘lgan joyda logarifm ostidagi ikkala eksponenta kichik va yo‘qotish 0 ga yaqin. Birinchi sinf yutqazgan joyda yo‘qotish deyarli chiziqli — taxminan $\max(z_2,0)-z_1$ kabi o‘sadi. Asta pastga tushadigan, lekin nolga yetmaydigan qavariq «vodiy» hosil bo‘ladi.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-landscape" data-config="{&quot;z&quot;: [2, 1], &quot;k&quot;: 0}"></div><figcaption><b>Rasm 4.</b> Chapda — tanlangan to‘g‘ri sinf uchun $\mathrm{CE}(z_1,z_2,0)$ sirt (uni aylantirish mumkin). O‘ngda — yuqoridan ko‘rinish: rang va sath chiziqlari — yo‘qotish, strelkalar — $z_1$ va $z_2$ bo‘yicha $-(s-y)$ antigradiyent. Qizil nuqtani surish mumkin. «Boshlash» $(2;\,1)$ nuqtadan $z_1$, $z_2$ bo‘yicha $0{,}8$ qadamli gradiyentli tushishni ishga tushiradi: yo‘qotish 5 qadamda $0{,}408\to0{,}132$, 10 qadamda $0{,}079$, 79 qadamda $0{,}013$, nuqta esa o‘ngga-pastga ketaveradi — minimumga yetib bo‘lmaydi.</figcaption></figure>
+    <div class="callout warn"><b>Minimum yo‘q</b><p>One-hot maqsad uchun CE ning quyi chegarasi 0, lekin unga faqat to‘g‘ri logitning cheksiz ustunligida erishiladi. Agar model o‘qitish ma’lumotlarini ideal ajrata olsa, CE logitlar o‘sishi hisobiga kamayishda davom etadi va vaznlar cheksizlikka ketadi. Buni vaznlarni regulyarizatsiya qilish, erta to‘xtatish va belgilarni silliqlash bilan davolaydilar.</p></div>
+
+    <h2 id="smoothing">Belgilarni silliqlash</h2>
+    <p>Belgilarni silliqlash (label smoothing) one-hot maqsadni tekis taqsimot bilan aralashmaga almashtiradi:</p>
+    <div class="eqd">$$y^{\mathrm{LS}}_k=(1-\varepsilon)\,y_k+\frac{\varepsilon}{K}$$</div>
+    <p>To‘g‘ri sinf $1-\varepsilon+\varepsilon/K$, qolganlarining har biri $\varepsilon/K$ oladi. Endi yo‘qotishning haqiqiy minimumi bor: $s=y^{\mathrm{LS}}$ bo‘lganda $s-y^{\mathrm{LS}}$ gradiyent nolga aylanadi. Agar barcha noto‘g‘ri logitlar teng bo‘lib, to‘g‘ri logit ulardan $m$ ga oldinda bo‘lsa, optimal ustunlik chekli:</p>
+    <div class="eqd">$$s_c=\frac{e^{m}}{e^{m}+K-1}=1-\varepsilon+\frac{\varepsilon}{K}\quad\Longrightarrow\quad m^{*}=\ln\Bigl(1+\frac{K(1-\varepsilon)}{\varepsilon}\Bigr)$$</div>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-smoothing" data-config="{&quot;eps&quot;: 0.1, &quot;K&quot;: 3}"></div><figcaption><b>Rasm 5.</b> Yo‘qotish va uning hosilasi to‘g‘ri logitning $m$ ustunligi funksiyalari sifatida (qolgan $K-1$ ta logit teng). Silliqlashsiz (punktir) yo‘qotish monoton kamayadi va faqat $m\to\infty$ da 0 ga intiladi, hosila doim manfiy. $K=3$ da $\varepsilon=0{,}1$ silliqlash bilan minimum paydo bo‘ladi: $m^*=\ln28\approx3{,}332$, bu yerda to‘g‘ri sinf ehtimolligi $0{,}9333$ maqsadga, yo‘qotish esa maqsad entropiyasi $H(y^{\mathrm{LS}})\approx0{,}291$ ga teng. $K=10$ da: $m^*\approx4{,}511$.</figcaption></figure>
+    <p>Belgilarni silliqlash (Segedi va boshq., 2016, Inception-v3) logitlar o‘sishini cheklaydi va odatda kalibrlashni yaxshilaydi; u, masalan, asl Transformer’da $\varepsilon=0{,}1$ bilan ishlatilgan. Bahosi — model endi hech qachon 100% ishonchli emas, logitlaridagi sinflar o‘xshashligi haqidagi axborot qisman o‘chadi, bu esa distillyatsiyaga xalaqit berishi mumkin (Myuller va boshq., 2019).</p>
+
+    <h2 id="training">CE va MSE: nega klassifikatorlar kross-entropiyada o‘qitiladi</h2>
+    <p>Nega klassifikatorni ehtimolliklar va one-hot belgi orasidagi $\|s-y\|^2$ kvadratik xato bilan o‘qitmaslik kerak? Logitlar bo‘yicha gradiyentlarni solishtiramiz:</p>
+    <div class="eqd">$$\frac{\partial\,\mathrm{CE}}{\partial z}=s-y,\qquad\frac{\partial\,\|s-y\|^2}{\partial z}=J^{\top}\,2(s-y)=2\,s\odot\bigl((s-y)-\langle s-y,\,s\rangle\,\mathbf 1\bigr)$$</div>
+    <p>MSE gradiyentida Yakobi matritsasidan kelgan $s$ ko‘paytuvchi turadi. Agar model ishonch bilan xato qilsa — deyarli butun massa bitta noto‘g‘ri sinfda bo‘lsa, — gradiyent deyarli nolga aylanadi: kichik $s_k$ lar uchun $s_k$ ko‘paytuvchi kichik, noto‘g‘ri sevimli sinf uchun esa qavs deyarli nol. Model o‘zining qo‘pol xatosini «eshitmaydi». CE gradiyentida bunday ko‘paytuvchi yo‘q.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-train" data-config="{}"></div><figcaption><b>Rasm 6.</b> Bir xil ma’lumotlar va bir xil «ishonchli noto‘g‘ri» boshlanish: vaznlar begona sinflar markazlariga yo‘nalgan, aniqlik $3{,}3\%$. Softmax-regressiyaning ikki nusxasi $0{,}5$ qadamli gradiyentli tushish bilan parallel o‘qitiladi — biri CE da, ikkinchisi MSE da. Boshlanishda logitlar bo‘yicha gradiyentning o‘rtacha normasi: CE da $1{,}3$, MSE da $0{,}13$. 10 qadamdan keyin aniqlik $85{,}6\%$ ga qarshi $5{,}6\%$, 50 qadamdan keyin — $93{,}3\%$ ga qarshi $25{,}6\%$; MSE faqat yuzinchi qadamga kelib yetib oladi ($90{,}0\%$), ikki yuzinchi qadamda esa ikkala model $95{,}6\%$ beradi.</figcaption></figure>
+    <div class="callout note"><b>Kvadratik xato baribir qachon ishlatiladi</b><p>Ehtimolliklar va belgi orasidagi kvadratik xato Brayer bahosi (Brier score) deb ataladi va kalibrlash <i>metrikasi</i> sifatida foydali. Klassifikatorlarni o‘qitish uchun deyarli doim CE olinadi: u logitlar bo‘yicha qavariq va xatolarda to‘yinmaydi.</p></div>
+
+    <h2 id="llm">Til modellari va perpleksiya</h2>
+    <p>Til modeli har bir $t$ pozitsiyada keyingi tokenning $V$ ta tokenli (o‘n minglab) lug‘at bo‘yicha taqsimotini bashorat qiladi. Bu $V$ ta sinfga klassifikatsiya, yo‘qotish esa pozitsiyalar bo‘yicha o‘rtacha kross-entropiya:</p>
+    <div class="eqd">$$\mathcal L=-\frac1T\sum_{t=1}^{T}\ln p_\theta(x_t\mid x_{&lt;t}),\qquad\mathrm{PPL}=e^{\mathcal L}=\Bigl(\prod_{t=1}^{T}\frac{1}{p_\theta(x_t\mid x_{&lt;t})}\Bigr)^{1/T}$$</div>
+    <p><b>Perpleksiya</b> — CE ning eksponentasi, ya’ni $1/p_t$ qiymatlarning o‘rta geometrigi. Uni «variantlarning samarali soni» deb o‘qiydilar: doim $k$ ta token orasidan tekis tanlaydigan modelning perpleksiyasi aynan $k$. Til haqida hech narsa bilmaydigan model (lug‘at bo‘yicha tekis taqsimot) uchun $\mathcal L=\ln V$ va $\mathrm{PPL}=V$.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-perplexity" data-config="{&quot;lambda&quot;: 1}"></div><figcaption><b>Rasm 7.</b> Gapning har bir tokenidagi $-\ln p_t$ yo‘qotish (o‘quv misoli: ehtimolliklar qo‘lda berilgan). To‘q sariq chiziq — o‘rtacha, ya’ni CE; punktir — $V=50\,000$ lug‘at uchun $\ln V$. $\lambda=1$ da: $\mathrm{CE}\approx1{,}086$, perpleksiya $\approx2{,}963$ — model o‘rtacha uchta variant orasida ikkilanadi; eng qimmati birinchi so‘z ($p=0{,}05$, jarima $3{,}00$). $\lambda$ slayderi logitlarni ko‘paytiradi: $\lambda=0{,}5$ da perpleksiya allaqachon $\approx263{,}5$, $\lambda=0$ da taqsimot tekis, $\mathrm{CE}=\ln50\,000\approx10{,}82$ va perpleksiya $50\,000$.</figcaption></figure>
+    <div class="callout note"><b>Perpleksiyalarni ehtiyotkorlik bilan solishtiring</b><p>Perpleksiya tokenizatorga bog‘liq: bir xil matnda yirikroq tokenli model kamroq bashorat qiladi va har biri qiyinroq. Faqat bir xil lug‘atli modellarni bir xil ma’lumotlarda solishtirish mumkin — yoki belgi yoki bayt boshiga bitlarga o‘tish kerak.</p></div>
+
+    <h2 id="code">Kodda</h2>
+    <p>Asosiy qoida — CE ni logitlardan log-softmax orqali hisoblash: $\mathrm{CE}=\operatorname{LSE}(z)-z_c$. «Avval softmax, keyin logarifm» yo‘li ishonchli xatolarda $\ln0=-\infty$ beradi: $(0;\,800;\,0)$ logitlar va to‘g‘ri birinchi sinf uchun sodda kod <code>inf</code> qaytaradi, barqarori esa aniq $800$ javobini.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+np.set_printoptions(precision=3)
+
+def log_softmax(z):
+    z = z - z.max(axis=-1, keepdims=True)          # barqarorlik: max-hiyla
+    return z - np.log(np.exp(z).sum(axis=-1, keepdims=True))
+
+def cross_entropy(logits, y):
+    &quot;&quot;&quot;Batch bo‘yicha o‘rtacha CE. logits: (N, K), y: (N,) — sinf raqamlari.&quot;&quot;&quot;
+    logp = log_softmax(logits)
+    return -logp[np.arange(len(y)), y].mean()
+
+def cross_entropy_grad(logits, y):
+    # dCE/dz = (softmax(z) − onehot(y)) / N
+    s = np.exp(log_softmax(logits))
+    s[np.arange(len(y)), y] -= 1
+    return s / len(y)
+
+z = np.array([[2.0, 1.0, 0.0]])
+print(cross_entropy(z, np.array([0])))        # ≈ 0.4076
+print(cross_entropy(z, np.array([2])))        # ≈ 2.4076 — ishonchli xato
+print(cross_entropy_grad(z, np.array([0])))   # [[-0.335  0.245  0.09 ]]
+print(cross_entropy(z + 1000, np.array([0]))) # ≈ 0.4076 — to‘lib ketishsiz</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn.functional as F
+
+logits = torch.tensor([[2.0, 1.0, 0.0]], requires_grad=True)
+target = torch.tensor([0])                  # one-hot emas, sinf raqami
+loss = F.cross_entropy(logits, target)      # tensor(0.4076): log_softmax + NLL
+loss.backward()
+print(logits.grad)                          # tensor([[-0.3348,  0.2447,  0.0900]])
+
+F.cross_entropy(logits, target, label_smoothing=0.1)   # tensor(0.5076)
+
+# Til modeli: logitlar (B, T, V), tokenlar (B, T)
+B, T, V = 2, 5, 50000
+lm_logits = torch.randn(B, T, V)
+tokens = torch.randint(0, V, (B, T))
+loss = F.cross_entropy(lm_logits.reshape(-1, V), tokens.reshape(-1))
+print(torch.exp(loss))                      # perpleksiya: tasodifiy logitlarda V tartibida</code></pre>
+    <div class="callout key"><b>PyTorch uchun tekshiruv ro‘yxati</b><p><code>F.cross_entropy</code> / <code>nn.CrossEntropyLoss</code> <b>logitlarni</b> (softmax’siz!) va <code>long</code> turidagi sinf raqamlarini — yoki logitlar bilan bir xil shakldagi ehtimolliklarni qabul qiladi. Foydali parametrlar: <code>label_smoothing</code>, <code>weight</code> (nomutanosiblikda sinflar vaznlari), <code>ignore_index</code> (masalan, padding). Sinflar ikkinchi o‘lchovda turishi kerak, shuning uchun $(B,T,V)$ shaklli logitlarni <code>reshape</code> bilan $(BT,V)$ ga aylantirish eng oson.</p></div>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b><code>CrossEntropyLoss</code> dan oldin softmax</b> — ikki karra softmax: ehtimolliklar siqiladi, yo‘qotish nolgacha tusha olmaydi, gradiyentlar buziladi. Logitlarni bering.</li><li><b>log-softmax o‘rniga <code>np.log(softmax(z))</code></b> — ishonchli xatoda ehtimollik 0 gacha yaxlitlanadi, yo‘qotish <code>inf</code>, gradiyent NaN bo‘ladi. <code>clip(p, 1e-7, 1)</code> «yamog‘i» cheksizlikdan qutqaradi, lekin gradiyentni kesadi; to‘g‘risi — LSE.</li><li><b>One-hot va sinf raqamlarini chalkashtirish</b>. Keras’da bular turli funksiyalar: <code>categorical_crossentropy</code> one-hot kutadi, <code>sparse_categorical_crossentropy</code> — raqamlarni. PyTorch’da raqamlar <code>long</code> turida, ehtimoliy maqsadlar esa logitlar bilan bir xil shaklda bo‘lishi kerak.</li><li><b>O‘rtacha o‘rniga yig‘indi</b>. <code>reduction='sum'</code> bilan yo‘qotish va gradiyent batch o‘lchami bilan o‘sadi va tanlangan o‘qitish tezligi mos kelmay qoladi.</li><li><b>Sinflar nomutanosibligiga e’tiborsizlik</b>. CE misollar bo‘yicha o‘rtachalaydi, shuning uchun kam uchraydigan sinf gradiyentga deyarli ta’sir qilmaydi. Sinflar vaznlari (<code>weight</code>) yoki <a href='../focal/'>Focal Loss</a> yordam beradi.</li><li><b>Solishtirib bo‘lmaydigan sonlar</b>: natlar va bitlardagi yo‘qotishlar, turli tokenizatorli modellarning perpleksiyalari.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘liqlik</h2>
+    <ul class="flist"><li><a href='../softmax/'>Softmax</a>: $s$ ehtimolliklarni beradi; CE bilan birga — $s-y$ gradiyentni, $\mathrm{CE}=\operatorname{LSE}(z)-z_c$.</li><li><a href='../bce/'>BCE</a>: bitta chiqishli $K=2$ holi: $-\bigl[y\ln\hat y+(1-y)\ln(1-\hat y)\bigr]$.</li><li><a href='../sigmoid/'>Sigmoida</a>: ikki sinf uchun softmax sigmoidaga keladi va CE BCE ga aylanadi.</li><li><a href='../focal/'>Focal Loss</a>: $-(1-p_t)^\gamma\ln p_t$ — oson misollarda susaytirilgan kross-entropiya.</li><li><a href='../mse/'>MSE</a>: softmax ustida ishonchli xatolarda to‘yinadi (<a href='#training'>solishtirish haqidagi</a> bo‘limga qarang).</li><li><a href='../adam/'>Adam</a>: chuqur tarmoqlarda CE odatda shu optimizator bilan minimallashtiriladi.</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) One-hot belgi uchun $\mathrm{CE}=-\ln s_c$ — modelning to‘g‘ri javobdan hayrati; ma’lumotlar bo‘yicha o‘rtachasi — $N$ ga bo‘lingan minus log-haqqoniylik. 2) $H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$: $q$ bo‘yicha minimum $q=p$ da. 3) Softmax bilan logitlar bo‘yicha gradiyent $s-y$: chegaralangan, xatolarda to‘yinmaydi va muvaffaqiyatda yo‘qoladi; CE logitlar bo‘yicha qavariq. 4) One-hot maqsadlarda minimumga erishib bo‘lmaydi — logitlar o‘sadi; belgilarni silliqlash optimumni chekli qiladi. 5) CE ni logitlardan log-sum-exp orqali hisoblang; $e^{\mathrm{CE}}$ — perpleksiya.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. Model to‘g‘ri sinfga $0{,}25$ ehtimollik berdi. CE nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0{,}25$</button><button type="button" data-ok="0">$0{,}75$</button><button type="button" data-ok="1">$\approx1{,}386$</button><button type="button" data-ok="0">$\approx0{,}288$</button></div><div class="explain" hidden>$-\ln0{,}25=\ln4\approx1{,}386$ nat (aynan 2 bit).</div></fieldset><fieldset class="q"><legend>2. Ehtimolliklar softmax’dan olingan bo‘lsa, CE ning logitlar bo‘yicha gradiyenti nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$-y/s$</button><button type="button" data-ok="1">$s-y$</button><button type="button" data-ok="0">$\operatorname{diag}(s)-ss^\top$</button><button type="button" data-ok="0">$(s-y)^2$</button></div><div class="explain" hidden>$\mathrm{CE}=\operatorname{LSE}(z)-z_c$, $\nabla\operatorname{LSE}=s$ esa; $-y/s$ — logitlar emas, ehtimolliklar bo‘yicha gradiyent.</div></fieldset><fieldset class="q"><legend>3. Model 10 ta sinfda tekis javob beradi. CE va perpleksiya nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0$ va $1$</button><button type="button" data-ok="1">$\ln10\approx2{,}303$ va $10$</button><button type="button" data-ok="0">$0{,}1$ va $10$</button><button type="button" data-ok="0">$1$ va $e$</button></div><div class="explain" hidden>Har bir sinfga $0{,}1$, demak $\mathrm{CE}=-\ln0{,}1=\ln10$, $\mathrm{PPL}=e^{\ln10}=10$.</div></fieldset><fieldset class="q"><legend>4. Qanday $q$ bashoratda $H(p,q)$ kross-entropiya eng kichik?</legend><div class="opts"><button type="button" data-ok="1">$q=p$</button><button type="button" data-ok="0">$q$ — $p$ ning eng ehtimolli sinfi one-hot vektori</button><button type="button" data-ok="0">$q$ — tekis taqsimot</button><button type="button" data-ok="0">Minimum yo‘q</button></div><div class="explain" hidden>$H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$, KL esa nomanfiy va faqat $q=p$ da nolga teng.</div></fieldset><fieldset class="q"><legend>5. $K=3$ da $\varepsilon=0{,}1$ bilan belgilarni silliqlash. O‘qitish to‘g‘ri sinfning qaysi ehtimolligiga intiladi?</legend><div class="opts"><button type="button" data-ok="0">$1$</button><button type="button" data-ok="0">$0{,}9$</button><button type="button" data-ok="1">$\approx0{,}933$</button><button type="button" data-ok="0">$\approx0{,}967$</button></div><div class="explain" hidden>To‘g‘ri sinf uchun maqsad $1-\varepsilon+\varepsilon/K=0{,}9+0{,}0333\approx0{,}933$; bu nuqtada $s-y=0$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../bce/"><span class="kicker">← Oldingi formula</span><span class="big">BCE</span><span class="kicker">binar kross-entropiya</span></a>
+<a class="next" href="../adam/"><span class="kicker">Keyingi formula →</span><span class="big">Adam</span><span class="kicker">adaptive moment estimation</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>
