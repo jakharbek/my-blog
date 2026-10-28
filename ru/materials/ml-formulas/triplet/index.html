@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Triplet Loss: свой ближе чужого — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="Triplet Loss подробно: формула и зазор, лёгкие, полутрудные и трудные тройки, градиенты и 3D-поверхность потерь, batch-hard и batch-all, обучение эмбеддингов, нормализация, FaceNet и Re-ID, код NumPy и PyTorch.">
+  <meta property="og:title" content="Triplet Loss: свой ближе чужого — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="Triplet Loss подробно: формула и зазор, лёгкие, полутрудные и трудные тройки, градиенты и 3D-поверхность потерь, batch-hard и batch-all, обучение эмбеддингов, нормализация, FaceNet и Re-ID, код NumPy и PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/triplet/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/triplet.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/triplet/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/triplet/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/triplet/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Следующий уровень</span>
+  <h1>Triplet Loss: свой ближе чужого</h1>
+  <p class="dek">Функция потерь, которая учит не классы, а расстояния: якорь должен быть ближе к «своему», чем к «чужому», хотя бы на зазор m. Разбираем по косточкам формулу, три режима троек, градиенты, майнинг batch-hard, нормализацию на сфере и то, как на этой математике держатся FaceNet и повторная идентификация людей (Re-ID).</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем она нужна</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: свой ближе чужого</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#regimes"><span class="n">4</span>Три режима: лёгкие, полутрудные, трудные</a>
+      <a href="#gradients"><span class="n">5</span>Градиенты: куда тянет каждую точку</a>
+      <a href="#mining"><span class="n">6</span>Майнинг: какие тройки брать</a>
+      <a href="#training"><span class="n">7</span>Как это работает в обучении</a>
+      <a href="#sphere"><span class="n">8</span>Нормализация на сфере и выбор зазора</a>
+      <a href="#code"><span class="n">9</span>В коде: батч-майнинг и устойчивость</a>
+      <a href="#mistakes"><span class="n">10</span>Частые ошибки</a>
+      <a href="#links"><span class="n">11</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">12</span>Итоги</a>
+      <a href="#quiz"><span class="n">13</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$L(a,p,n)=\max\bigl(0,\;d(a,p)-d(a,n)+m\bigr)$$</div>
+
+    <h2 id="why">Зачем она нужна</h2>
+    <p>Обычный классификатор знает фиксированный список классов. Но система распознавания лиц должна узнавать людей, которых не было в обучающей выборке, а система повторной идентификации (re-identification, Re-ID) — находить того же человека на записи другой камеры, в другом ракурсе и при другом свете. Переобучать сеть ради каждого нового человека невозможно.</p>
+    <p>Выход — учить не классы, а <b>метрику</b> (metric learning). Сеть $f$ превращает изображение в вектор-эмбеддинг (embedding) $f(x)\in\mathbb R^d$ так, чтобы снимки одного человека оказывались рядом, а разных — далеко. Тогда «кто это?» сводится к поиску ближайших соседей по расстоянию, и новый человек добавляется одним эмбеддингом в базу.</p>
+    <p>Triplet Loss задаёт это требование напрямую. Берём тройку: <b>якорь</b> $a$ (anchor), <b>свой</b> $p$ (positive, тот же человек) и <b>чужой</b> $n$ (negative, другой человек). Требуем, чтобы свой был ближе чужого хотя бы на зазор $m$ (margin).</p>
+    <ul class="flist"><li><b>распознавание лиц</b> — FaceNet (Google, 2015): 128-мерные эмбеддинги, зазор $0{,}2$, точность $99{,}63\%$ на наборе LFW;</li><li><b>повторная идентификация людей между камерами</b> — batch-hard triplet loss (Херманс и др., 2017) и библиотека torchreid, где он дополняет кросс-энтропию при обучении OSNet;</li><li><b>поиск похожих изображений, товаров, голосов</b> и вообще любой поиск по смыслу, где вопрос звучит «что ближе к этому образцу?».</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>$L=\max\bigl(0,\,d(a,p)-d(a,n)+m\bigr)$. Если чужой дальше своего больше чем на $m$, потеря равна нулю и тройка ничему не учит. Иначе градиент тянет своего к якорю и отталкивает чужого. Почти все случайные тройки лёгкие, поэтому главное искусство — выбирать трудные (майнинг), например самого далёкого своего и самого близкого чужого в батче (batch-hard).</p></div>
+
+    <h2 id="intuition">Интуиция: свой ближе чужого</h2>
+    <p>Нарисуем эмбеддинги на плоскости. Вокруг якоря $a$ проведём окружность через своего $p$ — её радиус $d(a,p)$. Добавим вторую, шире на зазор: радиус $d(a,p)+m$. Требование формулы простое: <b>чужой должен лежать за внешней окружностью</b>. Попал в оранжевое кольцо или внутрь — потеря положительна.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-play" data-config="{&quot;a&quot;: [-0.5, 0], &quot;p&quot;: [0.4, 0], &quot;n&quot;: [0.1, 0.8], &quot;m&quot;: 0.2}"></div><figcaption><b>Рисунок 1.</b> Тяните якорь, своего и чужого. Оранжевые стрелки — направления, в которых градиентный спуск сдвинет каждую точку. В начальном положении $d(a,p)=0{,}9$, $d(a,n)=1{,}0$, $m=0{,}2$: чужой внутри кольца, $L=0{,}9-1{,}0+0{,}2=0{,}1$. Вытащите его за кольцо — стрелки исчезнут.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Стрелки у своего и чужого всегда направлены вдоль линий к якорю, а их длины в обычной (не квадратной) метрике одинаковы и равны 1: важна не величина ошибки, а сам факт нарушения. Включите квадраты расстояний — длины стрелок станут пропорциональны расстояниям.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <p>Запишем потерю полностью — с сетью, расстояниями и усреднением по тройкам:</p>
+    <div class="eqd">$$\mathcal L=\frac{1}{|T|}\sum_{(a,p,n)\in T}\max\Bigl(0,\;\bigl\|f(x_a)-f(x_p)\bigr\|-\bigl\|f(x_a)-f(x_n)\bigr\|+m\Bigr)$$</div>
+    <dl class="symbols"><dt>$f(x)$</dt><dd>эмбеддинг: выход сети для изображения $x$, вектор из $\mathbb R^d$ (в FaceNet $d=128$), часто нормированный на единичную длину;</dd><dt>$d(a,p)$</dt><dd>расстояние до своего, $\|f(x_a)-f(x_p)\|$; его хотим уменьшить;</dd><dt>$d(a,n)$</dt><dd>расстояние до чужого, $\|f(x_a)-f(x_n)\|$; его хотим увеличить;</dd><dt>$m&gt;0$</dt><dd>зазор: чужой должен быть дальше своего не просто, а с запасом $m$;</dd><dt>$\max(0,\cdot)$</dt><dd>шарнир (hinge): выполненное требование не штрафуется и не даёт градиента;</dd><dt>$T$</dt><dd>множество троек, по которому усредняем, — обычно тройки внутри батча (см. раздел о майнинге).</dd></dl>
+    <p>Удобно ввести одну переменную — разность расстояний $\Delta=d(a,p)-d(a,n)$. Тогда $L=\max(0,\Delta+m)$: это <a href="../relu/">ReLU</a>, сдвинутая на $m$. Отрицательная $\Delta$ значит, что свой уже ближе; но пока $\Delta&gt;-m$, запаса не хватает.</p>
+    <p>Примеры при $m=0{,}2$: $d(a,p)=0{,}4$, $d(a,n)=1{,}1$ дают $\Delta=-0{,}7$ и $L=\max(0;\,-0{,}5)=0$ — тройка уже разделена. $d(a,p)=0{,}9$, $d(a,n)=1{,}0$ дают $\Delta=-0{,}1$ и $L=0{,}1$: свой ближе, но зазора мало.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-hinge" data-config="{&quot;m&quot;: 0.2, &quot;delta&quot;: -0.1}"></div><figcaption><b>Рисунок 2.</b> Потеря как функция $\Delta$ (сверху) и её производная (снизу). Производная — ступенька: 0 для выполненных троек и 1 для нарушенных, без промежуточных значений. Пунктир — «мягкий зазор» (soft margin) $\ln(1+e^{\Delta})$ из работы Херманса и др.: он никогда не обнуляется, а его производная — <a href="../sigmoid/">сигмоида</a> $\sigma(\Delta)$. При $\Delta=-0{,}1$: hinge даёт $0{,}1$, мягкий вариант — $0{,}644$.</figcaption></figure>
+    <div class="callout note"><b>Зазор — относительный</b><p>Triplet Loss не требует, чтобы свои были ближе какого-то фиксированного порога, — только ближе чужих. Поэтому у разных людей кластеры могут иметь разный размер. Порог для ответа «это тот же человек» подбирают потом, на валидации.</p></div>
+
+    <h2 id="regimes">Три режима: лёгкие, полутрудные, трудные</h2>
+    <p>Каждая тройка попадает в один из трёх режимов в зависимости от $d(a,p)$ и $d(a,n)$:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Режим</th><th>Условие</th><th>$L$</th><th>Градиент</th></tr></thead><tbody><tr><td>лёгкая (easy)</td><td>$d(a,n)\ge d(a,p)+m$</td><td>$0$</td><td>нет</td></tr><tr><td>полутрудная (semi-hard)</td><td>$d(a,p)&lt;d(a,n)&lt;d(a,p)+m$</td><td>от $0$ до $m$</td><td>есть</td></tr><tr><td>трудная (hard)</td><td>$d(a,n)\le d(a,p)$</td><td>не меньше $m$</td><td>есть</td></tr></tbody></table></div>
+    <p>На плоскости $(d(a,p),\,d(a,n))$ границы режимов — две параллельные прямые: $d(a,n)=d(a,p)$ и $d(a,n)=d(a,p)+m$. Потеря — плоскость, наклонённая под углом к этим прямым, обрезанная нулём выше верхней из них.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-regimes" data-config="{&quot;m&quot;: 0.2, &quot;pt&quot;: [0.9, 1.0]}"></div><figcaption><b>Рисунок 3.</b> Потеря на плоскости $(d(a,p),\,d(a,n))$: чем насыщеннее красный, тем она больше. Точки — все 576 троек батча из рисунка 5 (4 человека по 4 снимка). При $m=0{,}2$ из них 510 лёгких, 31 полутрудная и 35 трудных: только 66 троек из 576 дают градиент. Увеличьте зазор — полоса полутрудных расширится.</figcaption></figure>
+    <div class="callout warn"><b>Почему случайные тройки бесполезны</b><p>Как только сеть немного обучилась, подавляющее большинство случайных троек становится лёгкими: их потеря и градиент равны нулю. Усреднение по ним разбавляет полезный сигнал, и обучение почти останавливается. Отсюда майнинг — целенаправленный выбор трудных и полутрудных троек.</p></div>
+
+    <h2 id="gradients">Градиенты: куда тянет каждую точку</h2>
+    <p>Для активной тройки ($L&gt;0$) потеря равна $d(a,p)-d(a,n)+m$, и всё сводится к градиенту расстояния. Для евклидовой нормы $\nabla_u\|u-v\|=\frac{u-v}{\|u-v\|}$ — единичный вектор от $v$ к $u$.</p>
+    <details class="deep"><summary>Вывод градиентов по трём точкам</summary><div class="deep-body">
+      <p>Обозначим $a,p,n$ эмбеддинги и $d_{ap}=\|a-p\|$, $d_{an}=\|a-n\|$. Дифференцируем $d_{ap}=\sqrt{(a-p)^\top(a-p)}$ по правилу цепочки:</p>
+      <div class="eqd">$$\nabla_a d_{ap}=\frac{1}{2d_{ap}}\cdot2(a-p)=\frac{a-p}{d_{ap}},\qquad \nabla_p d_{ap}=\frac{p-a}{d_{ap}}$$</div>
+      <p>Аналогично для $d_{an}$. Подставляем в $L=d_{ap}-d_{an}+m$:</p>
+      <div class="eqd">$$\nabla_p L=\frac{p-a}{d_{ap}},\qquad \nabla_n L=-\frac{n-a}{d_{an}},\qquad \nabla_a L=\frac{a-p}{d_{ap}}-\frac{a-n}{d_{an}}$$</div>
+      <p>Сумма трёх градиентов равна нулю: сдвиг всех трёх точек на один вектор не меняет расстояний, значит, и потеря не меняется. Для квадратов расстояний $L=d_{ap}^2-d_{an}^2+m$ получаем $\nabla_pL=2(p-a)$, $\nabla_nL=-2(n-a)$ и $\nabla_aL=2(n-p)$ — у якоря градиент вообще не зависит от его положения.</p>
+    </div></details>
+    <p>Шаг градиентного спуска идёт против градиента: свой $p$ сдвигается <b>к якорю</b>, чужой $n$ — <b>от якоря</b>, а якорь — к своему и от чужого. В обычной метрике длины этих сдвигов равны 1 при любых расстояниях; в квадратной — пропорциональны расстояниям.</p>
+    <p>Это видно на 3D-поверхности. Закрепим якорь в начале координат и своего на расстоянии $0{,}6$; как зависит потеря от положения чужого $n=(x,y)$? Получается перевёрнутый конус: в центре $L=0{,}6+m$, к краю круга радиуса $0{,}6+m$ — ноль. Склон конуса везде одинаковый, $|\nabla L|=1$.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-surface" data-config="{&quot;m&quot;: 0.4, &quot;who&quot;: &quot;neg&quot;}"></div><figcaption><b>Рисунок 4.</b> Потеря как функция положения чужого (или своего) при закреплённом якоре; поверхность можно вращать. Справа — срез вдоль луча из якоря: сама потеря и норма градиента. При $m=0{,}4$ и обычном расстоянии конус имеет высоту $1{,}0$ и радиус $1{,}0$. Переключитесь на $d^2$: поверхность станет параболоидом высотой $0{,}76$ и радиусом $0{,}872$, а градиент у самого якоря обнулится. Для своего (чужой на расстоянии $1{,}2$) — воронка: потеря растёт за окружностью радиуса $0{,}8$.</figcaption></figure>
+    <div class="callout warn"><b>Квадрат расстояния и трудные чужие</b><p>С квадратами расстояний сила отталкивания $2\,d(a,n)$ тем слабее, чем ближе чужой к якорю — то есть именно для самых опасных ошибок. В обычной метрике она постоянна. Поэтому в Re-ID (Херманс и др., 2017) рекомендуют обычное евклидово расстояние; FaceNet использует квадраты, но на нормированных векторах и с полутрудными тройками.</p></div>
+
+    <h2 id="mining">Майнинг: какие тройки брать</h2>
+    <p>В наборе из $N$ изображений троек порядка $N^3$ — перебрать их все нельзя, да и почти все лёгкие. Тройки выбирают <b>онлайн</b>, внутри батча. Батч строят по схеме $P\times K$: $P$ человек, по $K$ снимков каждого. Внутри такого батча</p>
+    <div class="eqd">$$|T|=\underbrace{PK}_{\text{якорей}}\cdot\underbrace{(K-1)}_{\text{своих}}\cdot\underbrace{(P-1)K}_{\text{чужих}}$$</div>
+    <p>При $P=4$, $K=4$ это 576 троек, при $P=18$, $K=4$ (батч Херманса и др. для набора Market-1501) — уже 14 688. Основные стратегии:</p>
+    <ul class="flist"><li><b>batch-all</b> — берём все тройки батча и усредняем потерю только по активным ($L&gt;0$), чтобы лёгкие не разбавляли сигнал;</li><li><b>batch-hard</b> — для каждого якоря одна тройка: <i>самый далёкий свой</i> и <i>самый близкий чужой</i>; $PK$ троек, самые информативные;</li><li><b>semi-hard</b> (FaceNet) — для пары $(a,p)$ берут чужого, который дальше своего, но внутри зазора; так обучение мягче на старте.</li></ul>
+    <div class="eqd">$$\mathcal L_{\text{BH}}=\frac{1}{PK}\sum_{a}\max\Bigl(0,\;\max_{p:\,y_p=y_a}d(a,p)-\min_{n:\,y_n\ne y_a}d(a,n)+m\Bigr)$$</div>
+    <figure class="viz"><div class="fv" data-viz="triplet-mining" data-config="{&quot;anchor&quot;: 1, &quot;m&quot;: 0.2, &quot;strategy&quot;: &quot;hard&quot;}"></div><figcaption><b>Рисунок 5.</b> Батч $P=4$, $K=4$ в пространстве эмбеддингов. Выберите якорь и стратегию. В режиме batch-hard жирные линии ведут к самому далёкому своему и самому близкому чужому, пунктирная окружность — радиус $d_{\max}(a,p)+m$. При $m=0{,}2$ batch-hard даёт $L=0{,}353$, batch-all — $0{,}306$ по 66 активным тройкам из 576. У первого якоря из 36 троек 34 лёгкие и 2 полутрудные.</figcaption></figure>
+    <div class="callout warn"><b>Опасность самых трудных</b><p>Самые трудные тройки часто оказываются ошибками разметки или почти неразличимыми снимками. В начале обучения, когда эмбеддинги случайны, погоня за ними может «схлопнуть» модель: все $f(x)$ стягиваются в одну точку, где $L=m$ для любой тройки. Помогают полутрудные тройки на старте, нормировка эмбеддингов, мягкий зазор и комбинация с кросс-энтропией.</p></div>
+
+    <h2 id="training">Как это работает в обучении</h2>
+    <p>Соберём всё вместе. Пусть у каждого снимка два признака: $x_1$ — помеха (ракурс, освещение), которая сильно меняется у одного и того же человека, и $x_2$ — признак личности, слегка искривлённый помехой. Во входном пространстве два снимка одного человека могут быть дальше друг от друга, чем снимки разных людей: верно упорядочены только $62{,}7\%$ троек.</p>
+    <p>Маленькая сеть $f:\mathbb R^2\to\mathbb R^2$ (12 нейронов tanh) учится с batch-hard triplet loss при $m=0{,}5$ и оптимизатором <a href="../adam/">Adam</a>. Ей не говорят, где какой человек должен оказаться, — только что свои ближе чужих.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-train" data-config="{&quot;m&quot;: 0.5}"></div><figcaption><b>Рисунок 6.</b> Слева — входы 4 человек по 12 снимков, справа — их эмбеддинги, внизу — потеря. Нажмите «Пуск». В начале $L=1{,}266$, все 48 якорей активны, верно упорядочено $64{,}9\%$ троек. К шагу 60 упорядочены все $100\%$, но зазора ещё не хватает 42 якорям; к шагу 300 активных остаётся 4, к шагу 600 потеря равна нулю. Сеть «выпрямила» полосы: помеха $x_1$ больше не влияет на расстояния.</figcaption></figure>
+    <p>Так же устроена Re-ID: запрос (query) — снимок человека с одной камеры, галерея (gallery) — снимки со всех остальных. Эмбеддинги галереи сортируют по расстоянию до запроса и смотрят, на каком месте первый верный ответ. Метрики — Rank-1 (верный ответ на первом месте) и mAP (средняя точность по всем верным).</p>
+    <div class="callout history"><b>Откуда это пошло</b><p>Идея зазора между своими и чужими — из метода ближайших соседей с большим зазором (LMNN, Вайнбергер и Сол, 2005). Пары своих и чужих с зазором ввели в контрастной потере (Хадселл, Чопра и Лекун, 2006). Шрофф, Калениченко и Филбин сделали тройки основой FaceNet (2015), а Херманс, Байер и Лейбе в работе «In Defense of the Triplet Loss for Person Re-Identification» (2017) показали, что с batch-hard майнингом тройки хорошо работают и в Re-ID.</p></div>
+
+    <h2 id="sphere">Нормализация на сфере и выбор зазора</h2>
+    <p>Без ограничений сеть может увеличивать все расстояния, просто растягивая пространство: в обычной метрике зазор $m$ теряет смысл, если масштаб не фиксирован. Поэтому эмбеддинги часто нормируют: $\hat f=f/\|f\|$, все точки лежат на единичной сфере. Для единичных векторов</p>
+    <div class="eqd">$$\|u-v\|^{2}=\|u\|^2+\|v\|^2-2\,u^\top v=2-2\cos\theta$$</div>
+    <p>где $\theta$ — угол между векторами. Квадрат расстояния меняется от 0 (совпадают) до 4 (противоположны), и зазор $m=0{,}2$ в FaceNet — это $5\%$ всего диапазона. Требование $d^2(a,n)\ge d^2(a,p)+m$ превращается в требование к углам: $\cos\theta_{an}\le\cos\theta_{ap}-m/2$.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-sphere" data-config="{&quot;a&quot;: 0, &quot;p&quot;: 40, &quot;n&quot;: -45, &quot;m&quot;: 0.2}"></div><figcaption><b>Рисунок 7.</b> Нормированные эмбеддинги на единичной окружности (тяните точки по ней) и квадрат расстояния как функция угла. Оранжевая дуга — зона, где чужой нарушал бы зазор. При $\theta_{ap}=40^\circ$ и $m=0{,}2$ чужой должен быть не ближе $48{,}2^\circ$ от якоря; в начальном положении он на $45^\circ$: $d^2(a,p)=0{,}468$, $d^2(a,n)=0{,}586$, $L=0{,}082$.</figcaption></figure>
+    <div class="callout note"><b>Как выбрать зазор</b><p>Зазор измеряется в единицах расстояния, поэтому зависит от нормировки и от того, квадрат расстояния или нет. Для нормированных эмбеддингов типичны $0{,}2$ (FaceNet, $d^2$) и $0{,}3$ (torchreid, $d$). Слишком маленький зазор почти не требует разделения, слишком большой может быть недостижим и держит все тройки активными.</p></div>
+
+    <h2 id="code">В коде: батч-майнинг и устойчивость</h2>
+    <p>Ключ к эффективности — матрица всех попарных расстояний батча, из которой майнинг берётся масками без циклов. Численная тонкость: $\|u-v\|$ не дифференцируема при $u=v$ (производная корня в нуле бесконечна), а через формулу $\|u\|^2-2u^\top v+\|v\|^2$ из-за округления может получиться крошечное отрицательное число. Поэтому под корень ставят $\max(\cdot,\varepsilon)$, а <code>nn.TripletMarginLoss</code> добавляет $\varepsilon=10^{-6}$ к разности векторов.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def pairwise_dist(E, eps=1e-12):
+    &quot;&quot;&quot;Матрица евклидовых расстояний между строками E (n × d).&quot;&quot;&quot;
+    sq = (E * E).sum(1)
+    d2 = sq[:, None] - 2.0 * E @ E.T + sq[None, :]
+    return np.sqrt(np.maximum(d2, eps))     # max: защита от −1e-16 и корня из нуля
+
+def batch_hard_triplet(E, labels, margin=0.3):
+    D = pairwise_dist(E)
+    same = labels[:, None] == labels[None, :]
+    hardest_pos = np.where(same, D, 0.0).max(1)       # самый далёкий «свой»
+    hardest_neg = np.where(same, np.inf, D).min(1)    # самый близкий «чужой»
+    return np.maximum(hardest_pos - hardest_neg + margin, 0.0).mean()
+
+E = np.array([[0.0, 0.0], [0.9, 0.0], [0.6, 0.8]])   # якорь, свой, чужой
+labels = np.array([0, 0, 1])
+print(batch_hard_triplet(E, labels, margin=0.2))      # ≈ 0.1152 = (0.1 + 0.2456 + 0) / 3</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+# 1) Тройки собраны заранее: готовая потеря
+loss_fn = nn.TripletMarginLoss(margin=0.2, p=2)
+a = torch.tensor([[0.0, 0.0]], requires_grad=True)
+p = torch.tensor([[0.9, 0.0]], requires_grad=True)
+n = torch.tensor([[0.6, 0.8]], requires_grad=True)
+loss = loss_fn(a, p, n)            # max(0, 0.9 − 1.0 + 0.2) ≈ 0.1
+loss.backward()
+print(p.grad, n.grad)              # ≈ [1, 0] и [−0.6, −0.8]: единичные векторы
+
+# 2) Майнинг внутри батча P × K (batch-hard)
+def batch_hard(emb, labels, margin=0.3, normalize=True):
+    if normalize:
+        emb = F.normalize(emb, dim=1)          # точки на единичной сфере
+    D = torch.cdist(emb, emb)                  # n × n евклидовых расстояний
+    same = labels[:, None] == labels[None, :]
+    pos = (D * same).max(1).values             # самый далёкий «свой»
+    neg = D.masked_fill(same, float(&quot;inf&quot;)).min(1).values   # самый близкий «чужой»
+    return F.relu(pos - neg + margin).mean()</code></pre>
+    <div class="callout key"><b>Практика</b><p>Батч $P\times K$ (например, $P=16$, $K=4$) нужен обязательно: без нескольких снимков одного человека в батче не будет своих. Triplet loss обычно комбинируют с кросс-энтропией по личностям — так обучение быстрее и устойчивее.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>Случайные батчи вместо $P\times K$.</b> В случайном батче у многих якорей нет ни одного своего, и тройки не собираются.</li><li><b>Обучение только на случайных тройках.</b> Почти все они лёгкие, градиент нулевой, и потеря «застывает» на маленьком значении, хотя модель плохая.</li><li><b>Самые трудные тройки с первого шага</b> без нормировки и разогрева — риск схлопывания всех эмбеддингов в точку.</li><li><b>Зазор без учёта масштаба.</b> Без нормировки сеть растягивает пространство; на сфере $m$ нужно соотносить с максимумом расстояния (2 для $d$, 4 для $d^2$).</li><li><b>Корень из нуля.</b> Расстояние точки до самой себя на диагонали матрицы даёт NaN в градиенте, если не добавить $\varepsilon$ или не маскировать диагональ.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <p>Ближайший родственник — <b>контрастная потеря</b> (contrastive loss): она работает с парами и абсолютными порогами, а не с относительным сравнением. Для пары с меткой $y=1$ (свои) и $y=0$ (чужие):</p>
+    <div class="eqd">$$L_{\text{contr}}=y\,d^{2}+(1-y)\,\max(0,\;m-d)^{2}$$</div>
+    <ul class="flist"><li><a href="../relu/">ReLU</a>: шарнир $\max(0,\Delta+m)$ — это ReLU от сдвинутой разности расстояний; его производная — ступенька.</li><li><a href="../sigmoid/">Сигмоида</a>: производная мягкого зазора $\ln(1+e^\Delta)$ равна $\sigma(\Delta)$.</li><li><a href="../softmax/">Softmax</a> и <a href="../cross-entropy/">кросс-энтропия</a>: N-pair loss и InfoNCE обобщают тройку на одного своего против многих чужих через softmax по сходствам; ArcFace переносит зазор в угол внутри softmax.</li><li><a href="../mse/">MSE</a>: квадрат евклидова расстояния — та же сумма квадратов разностей.</li><li><a href="../focal/">Focal Loss</a>: та же идея «учиться на трудных», только через вес примера, а не через выбор троек.</li><li><a href="../adam/">Adam</a>: оптимизатор симуляции на рисунке 6.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $L=\max(0,\,d(a,p)-d(a,n)+m)$: свой должен быть ближе чужого с запасом $m$; это ReLU от $\Delta+m$. 2) Режимы: лёгкие ($L=0$, нет градиента), полутрудные ($0&lt;L&lt;m$), трудные ($L\ge m$). 3) Градиенты — единичные векторы вдоль линий к якорю (для $d^2$ — пропорциональные расстояниям), их сумма равна нулю. 4) Тройки выбирают в батче $P\times K$: batch-all, batch-hard, semi-hard. 5) Нормировка на сфере даёт $d^2=2-2\cos\theta$ и осмысленный зазор. 6) На этом держатся FaceNet и Re-ID: эмбеддинг плюс поиск ближайших соседей.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. $m=0{,}2$, $d(a,p)=0{,}9$, $d(a,n)=1{,}0$. Чему равна потеря?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="1">$0{,}1$</button><button type="button" data-ok="0">$0{,}2$</button><button type="button" data-ok="0">$0{,}3$</button></div><div class="explain" hidden>$\max(0;\,0{,}9-1{,}0+0{,}2)=0{,}1$: свой ближе, но запас $0{,}1$ меньше зазора $0{,}2$.</div></fieldset><fieldset class="q"><legend>2. Тройка с $d(a,p)=0{,}5$, $d(a,n)=0{,}4$ при $m=0{,}2$ — это…</legend><div class="opts"><button type="button" data-ok="0">лёгкая</button><button type="button" data-ok="0">полутрудная</button><button type="button" data-ok="1">трудная</button><button type="button" data-ok="0">невозможная</button></div><div class="explain" hidden>Чужой ближе своего: $d(a,n)\le d(a,p)$, это трудная тройка; $L=0{,}3\ge m$.</div></fieldset><fieldset class="q"><legend>3. Куда направлен шаг градиентного спуска для чужого $n$ в активной тройке (обычная метрика)?</legend><div class="opts"><button type="button" data-ok="0">К якорю, длина $d(a,n)$</button><button type="button" data-ok="1">От якоря, единичной длины</button><button type="button" data-ok="0">К своему $p$</button><button type="button" data-ok="0">Шага нет</button></div><div class="explain" hidden>$\nabla_nL=-(n-a)/d(a,n)$, шаг идёт против градиента: $+(n-a)/d(a,n)$ — единичный вектор от якоря.</div></fieldset><fieldset class="q"><legend>4. Что выбирает batch-hard для каждого якоря?</legend><div class="opts"><button type="button" data-ok="0">Случайного своего и случайного чужого</button><button type="button" data-ok="0">Самого близкого своего и самого далёкого чужого</button><button type="button" data-ok="1">Самого далёкого своего и самого близкого чужого</button><button type="button" data-ok="0">Все тройки с $L&gt;0$</button></div><div class="explain" hidden>Худший случай для якоря: $\max d(a,p)$ и $\min d(a,n)$ — самая информативная тройка.</div></fieldset><fieldset class="q"><legend>5. Для единичных векторов под углом $90^\circ$ квадрат расстояния равен…</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$1$</button><button type="button" data-ok="1">$2$</button><button type="button" data-ok="0">$4$</button></div><div class="explain" hidden>$d^2=2-2\cos90^\circ=2$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../sgd/"><span class="kicker">← Предыдущая формула</span><span class="big">SGD → Momentum → RMSProp</span><span class="kicker">основа под Adam</span></a>
+<a class="next" href="../focal/"><span class="kicker">Следующая формула →</span><span class="big">Focal Loss</span><span class="kicker">несбалансированные классы</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

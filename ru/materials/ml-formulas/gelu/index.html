@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>GELU: вход, умноженный на вероятность — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="GELU подробно: формула x·Φ(x), стохастический смысл, минимум, производная и вторая производная, tanh-приближение, семейство x·Φ(x/s) в 3D, обучение сети, код NumPy и PyTorch.">
+  <meta property="og:title" content="GELU: вход, умноженный на вероятность — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="GELU подробно: формула x·Φ(x), стохастический смысл, минимум, производная и вторая производная, tanh-приближение, семейство x·Φ(x/s) в 3D, обучение сети, код NumPy и PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/gelu/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/gelu/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/gelu/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/gelu/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/gelu.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/gelu/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/gelu/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/gelu/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Следующий уровень</span>
+  <h1>GELU: вход, умноженный на вероятность</h1>
+  <p class="dek">Активация BERT, GPT и ViT. Разбираем по косточкам, почему это не просто «сглаженная ReLU»: откуда берётся нормальная функция распределения Φ, как GELU получается усреднением случайной маски, где у неё минимум, чему равна производная Φ(x) + xφ(x) и насколько точны приближения через tanh и сигмоиду.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем она нужна</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: вход, умноженный на вероятность</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#origin"><span class="n">4</span>Откуда она взялась: шумная маска в среднем</a>
+      <a href="#properties"><span class="n">5</span>Свойства и форма</a>
+      <a href="#derivative"><span class="n">6</span>Производная: Φ(x) + x·φ(x)</a>
+      <a href="#approx"><span class="n">7</span>Быстрые приближения: tanh и сигмоида</a>
+      <a href="#space"><span class="n">8</span>Семейство x·Φ(x/s) в 3D: от ReLU к прямой</a>
+      <a href="#training"><span class="n">9</span>GELU в обучении и в трансформере</a>
+      <a href="#code"><span class="n">10</span>В коде: точно, быстро и устойчиво</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{GELU}(x)=x\cdot\Phi(x)=\frac{x}{2}\Bigl(1+\operatorname{erf}\frac{x}{\sqrt2}\Bigr)$$</div>
+
+    <h2 id="why">Зачем она нужна</h2>
+    <p>Функция активации — это нелинейность, которая стоит после каждого линейного слоя. Без неё сколько угодно слоёв схлопываются в одно умножение на матрицу. Долгое время стандартом была <a href="../relu/">ReLU</a>: $\max(0,x)$ — пропустить положительное, обнулить отрицательное. GELU (Gaussian Error Linear Unit, Хендрикс и Гимпел, 2016) решает ту же задачу мягче: вход не пропускается или режется, а <b>умножается на вероятность</b> того, что его стоит пропустить.</p>
+    <p>Где она встречается:</p>
+    <ul class="flist"><li><b>BERT, RoBERTa, GPT, GPT-2, GPT-3</b> — в каждом блоке прямого распространения (feed-forward, FFN) трансформера: $\operatorname{FFN}(h)=W_2\,\operatorname{GELU}(W_1h+b_1)+b_2$;</li><li><b>Vision Transformer (ViT)</b> и многие модели компьютерного зрения после него;</li><li><b>GeGLU</b> — вентильный вариант $\operatorname{GELU}(xW)\odot(xV)$, например в Gemma; его родственник SwiGLU с <a href="../silu/">SiLU</a> стоит в LLaMA и Qwen;</li><li><b>везде, где важна гладкость</b>: у GELU есть все производные, нет излома в нуле и нет «мёртвой» зоны с нулевым градиентом, как у ReLU.</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>$\operatorname{GELU}(x)=x\,\Phi(x)$, где $\Phi$ — функция распределения стандартного нормального закона. Большие положительные $x$ проходят почти целиком, большие отрицательные — почти обнуляются, около нуля работает плавный переход. У функции есть минимум $\approx-0{,}170$ в точке $x\approx-0{,}752$, производная $\Phi(x)+x\varphi(x)$ лежит в пределах от $-0{,}129$ до $1{,}129$, а на практике её часто считают через tanh-приближение с ошибкой не больше $4{,}7\cdot10^{-4}$.</p></div>
+
+    <h2 id="intuition">Интуиция: вход, умноженный на вероятность</h2>
+    <p>Представьте вентиль, который решает, какую долю сигнала $x$ пропустить дальше. У ReLU вентиль жёсткий: при $x&gt;0$ он открыт полностью, при $x&lt;0$ закрыт. У GELU вентиль приоткрыт на $\Phi(x)$ — на долю от 0 до 1, которая плавно растёт вместе с $x$. Большой положительный сигнал проходит почти целиком, большой отрицательный почти гасится, а около нуля сигнал проходит наполовину: $\Phi(0)=0{,}5$.</p>
+    <p>Потяните точку. Серая полоса — вход $x$ целиком, синяя — та его часть, которая прошла: её длина равна $x\cdot\Phi(x)$. Пунктир бирюзового цвета — сама доля $\Phi(x)$.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-explorer" data-config="{&quot;x&quot;: 1}"></div><figcaption><b>Рисунок 1.</b> GELU, доля $\Phi(x)$ и производная. При $x=1$ пропускается доля $\Phi(1)\approx0{,}841$, поэтому $\operatorname{GELU}(1)\approx0{,}841$; при $x=-1$ пропускается только $0{,}159$, и выход равен $-0{,}159$. Кружок отмечает минимум функции.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Для отрицательных $x$ выход не равен нулю: он отрицательный и маленький. Сначала, при уменьшении $x$ от нуля, он убывает (вход растёт по модулю быстрее, чем падает доля), а примерно с $x=-0{,}75$ снова поднимается к нулю: доля $\Phi(x)$ гаснет быстрее, чем растёт $|x|$. Отсюда неглубокая «ямка» — главное отличие формы GELU от ReLU.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <p>Вся сложность GELU спрятана в $\Phi$. Разберём её на части.</p>
+    <div class="eqd">$$\operatorname{GELU}(x)=x\cdot\Phi(x),\qquad \Phi(x)=\int_{-\infty}^{x}\varphi(t)\,dt,\qquad \varphi(t)=\frac{1}{\sqrt{2\pi}}\,e^{-t^{2}/2}$$</div>
+    <dl class="symbols"><dt>$\varphi(t)$</dt><dd>плотность стандартного нормального распределения $N(0,1)$ — колокол Гаусса с максимумом $1/\sqrt{2\pi}\approx0{,}399$ в нуле;</dd><dt>$\Phi(x)$</dt><dd>функция распределения: площадь под колоколом левее точки $x$, то есть вероятность $P(\varepsilon\le x)$ для $\varepsilon\sim N(0,1)$; растёт от 0 до 1, $\Phi(0)=\tfrac12$;</dd><dt>$x\cdot\Phi(x)$</dt><dd>вход, умноженный на эту вероятность.</dd></dl>
+    <p>Интеграл от гауссианы не выражается через элементарные функции, поэтому для него есть специальное имя — функция ошибок (error function), отсюда «Gaussian <i>Error</i> Linear Unit»:</p>
+    <div class="eqd">$$\operatorname{erf}(z)=\frac{2}{\sqrt\pi}\int_0^{z}e^{-t^2}\,dt,\qquad \Phi(x)=\frac12\Bigl(1+\operatorname{erf}\frac{x}{\sqrt2}\Bigr)\quad\Longrightarrow\quad\operatorname{GELU}(x)=\frac{x}{2}\Bigl(1+\operatorname{erf}\frac{x}{\sqrt2}\Bigr)$$</div>
+    <p>Множитель $1/\sqrt2$ переводит стандартную нормальную величину с плотностью $e^{-t^2/2}$ к ядру $e^{-t^2}$, под которое определена erf. Сама erf нечётная, меняется от $-1$ до $1$, поэтому $\tfrac12(1+\operatorname{erf})$ меняется от 0 до 1.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\Phi(x)$</th><th class=num>$\operatorname{GELU}(x)$</th><th class=num>$\operatorname{GELU}'(x)$</th><th class=num>$\operatorname{ReLU}(x)$</th></tr></thead><tbody><tr><td class=num>−3</td><td class=num>0,0013</td><td class=num>−0,0040</td><td class=num>−0,0119</td><td class=num>0</td></tr><tr><td class=num>−2</td><td class=num>0,0228</td><td class=num>−0,0455</td><td class=num>−0,0852</td><td class=num>0</td></tr><tr><td class=num>−1</td><td class=num>0,1587</td><td class=num>−0,1587</td><td class=num>−0,0833</td><td class=num>0</td></tr><tr><td class=num>−0,5</td><td class=num>0,3085</td><td class=num>−0,1543</td><td class=num>0,1325</td><td class=num>0</td></tr><tr><td class=num>0</td><td class=num>0,5000</td><td class=num>0,0000</td><td class=num>0,5000</td><td class=num>0</td></tr><tr><td class=num>0,5</td><td class=num>0,6915</td><td class=num>0,3457</td><td class=num>0,8675</td><td class=num>0,5</td></tr><tr><td class=num>1</td><td class=num>0,8413</td><td class=num>0,8413</td><td class=num>1,0833</td><td class=num>1</td></tr><tr><td class=num>2</td><td class=num>0,9772</td><td class=num>1,9545</td><td class=num>1,0852</td><td class=num>2</td></tr><tr><td class=num>3</td><td class=num>0,9987</td><td class=num>2,9960</td><td class=num>1,0119</td><td class=num>3</td></tr></tbody></table></div>
+    <p>Таблица показывает три вещи. Справа GELU быстро догоняет ReLU: при $x=3$ разница всего $0{,}004$. Слева выход отрицательный, но маленький: самое глубокое значение в таблице — $-0{,}159$ при $x=-1$. Производная в нуле равна $0{,}5$, а при $x\ge1$ она больше единицы — функция растёт чуть быстрее прямой $y=x$, догоняя её.</p>
+
+    <h2 id="origin">Откуда она взялась: шумная маска в среднем</h2>
+    <p>Авторы GELU объединили две идеи. <b>ReLU</b> умножает вход на детерминированную маску: $x\cdot\mathbb 1[x&gt;0]$. <b>Dropout</b> умножает вход на случайную маску, которая от входа не зависит. А что если маска случайна, но <i>зависит</i> от входа: чем больше $x$, тем вероятнее, что его пропустят?</p>
+    <div class="eqd">$$m\sim\operatorname{Bernoulli}\bigl(\Phi(x)\bigr),\qquad \mathbb E\,[\,x\cdot m\,]=x\cdot P(m=1)=x\,\Phi(x)=\operatorname{GELU}(x)$$</div>
+    <p>Такую маску легко получить: возьмите шум $\varepsilon\sim N(0,1)$ и положите $m=1$, если $\varepsilon\le x$. Тогда $P(m=1)=\Phi(x)$ по определению функции распределения. Почему нормальный закон? После нормализаций (BatchNorm, LayerNorm) входы нейронов распределены примерно как $N(0,1)$, и $\Phi(x)$ отвечает на естественный вопрос: какая доля типичных входов меньше данного $x$.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-mask" data-config="{&quot;x&quot;: 0.5, &quot;seed&quot;: 3}"></div><figcaption><b>Рисунок 2.</b> Слева оранжевые точки — среднее $x\cdot m$ по $n$ случайным маскам в 25 точках от $-3$ до $3$, справа — шум $\varepsilon$ и доля $\Phi(x_0)$, при которой маска открыта. Нажмите «Пуск»: при $n=20$ наибольшее отклонение от GELU равно $0{,}146$, при $n=2000$ — уже $0{,}0125$; ошибка среднего убывает как $1/\sqrt n$. В точке $x_0=0{,}5$ доля открытых масок приближается к $\Phi(0{,}5)\approx0{,}691$.</figcaption></figure>
+    <div class="callout note"><b>GELU сама не случайна</b><p>Шумная маска — только объяснение формы. В сети стоит детерминированное среднее $x\Phi(x)$: случайности при обучении и выводе нет (если нужен шум, отдельно добавляют dropout).</p></div>
+
+    <h2 id="properties">Свойства и форма</h2>
+    <ul class="flist"><li><b>Область значений</b> — $[-0{,}170;\,+\infty)$: снизу функция ограничена, сверху нет.</li><li><b>Гладкость</b>: GELU бесконечно дифференцируема; $\operatorname{GELU}(0)=0$, $\operatorname{GELU}'(0)=\tfrac12$.</li><li><b>Немонотонность</b>: функция убывает на $(-\infty;\,-0{,}752)$ и возрастает правее; минимум $\approx-0{,}170$.</li><li><b>Асимптоты</b>: $\operatorname{GELU}(x)-x\to0$ при $x\to+\infty$ и $\operatorname{GELU}(x)\to0$ при $x\to-\infty$, причём слева хвост гаснет как гауссиана: $x\Phi(x)\approx-\varphi(x)$, уже $\operatorname{GELU}(-4)\approx-1{,}3\cdot10^{-4}$.</li><li><b>Тождество</b>: $\operatorname{GELU}(x)-\operatorname{GELU}(-x)=x$, потому что $\Phi(x)+\Phi(-x)=1$.</li><li><b>Выпуклость</b>: только на отрезке $[-\sqrt2;\,\sqrt2]$; за его пределами функция вогнута (знак второй производной — в следующем разделе).</li></ul>
+    <h3>GELU = ReLU минус чётная «ямка»</h3>
+    <p>Из тождества следует удобная запись. Для $x&gt;0$: $x\Phi(x)=x-x\Phi(-x)$; для $x&lt;0$: $x\Phi(x)=-|x|\Phi(-|x|)$. В обоих случаях</p>
+    <div class="eqd">$$\operatorname{GELU}(x)=\operatorname{ReLU}(x)-|x|\,\Phi(-|x|)$$</div>
+    <p>Поправка $|x|\Phi(-|x|)$ чётная: она одинакова слева и справа от нуля, достигает максимума $0{,}170$ при $|x|=0{,}752$ и быстро гаснет. Тем же свойством обладает <a href="../silu/">SiLU</a> $x\,\sigma(x)$, только её «ямка» шире и глубже: $0{,}278$ при $|x|=1{,}278$.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-family" data-config="{&quot;x&quot;: -1}"></div><figcaption><b>Рисунок 3.</b> Сверху — GELU, SiLU и ReLU, снизу — разности $\operatorname{ReLU}-f$. Наведите курсор на любой из графиков. При $x=-1$: $\operatorname{GELU}=-0{,}159$, $\operatorname{SiLU}=-0{,}269$. Точки на нижнем графике — наибольшие отличия от ReLU: $0{,}170$ у GELU и $0{,}278$ у SiLU; это и глубины их минимумов.</figcaption></figure>
+    <div class="callout note"><b>Связь с сигмоидой</b><p>Функции распределения нормального и логистического законов очень похожи: $\Phi(x)\approx\sigma(1{,}702\,x)$ с ошибкой не больше $0{,}0095$. Поэтому GELU почти совпадает с $x\,\sigma(1{,}702x)$ — это SiLU с растянутой сигмоидой. Подробнее о самой $\sigma$ — на странице <a href="../sigmoid/">сигмоиды</a>.</p></div>
+
+    <h2 id="derivative">Производная: Φ(x) + x·φ(x)</h2>
+    <p>Производная нужна при обратном распространении ошибки. Выведем её и найдём минимум функции.</p>
+    <details class="deep"><summary>Вывод первой и второй производной</summary><div class="deep-body">
+      <p>Главный факт: производная функции распределения — плотность, $\Phi'(x)=\varphi(x)$ (основная теорема анализа для интеграла с переменным верхним пределом). По правилу производной произведения:</p>
+      <div class="eqd">$$\operatorname{GELU}'(x)=(x)'\cdot\Phi(x)+x\cdot\Phi'(x)=\Phi(x)+x\,\varphi(x)$$</div>
+      <p>У гауссианы $\varphi'(x)=-x\,\varphi(x)$. Дифференцируем ещё раз:</p>
+      <div class="eqd">$$\operatorname{GELU}''(x)=\varphi(x)+\varphi(x)+x\cdot\bigl(-x\,\varphi(x)\bigr)=\varphi(x)\,\bigl(2-x^{2}\bigr)$$</div>
+      <p>Знак $\operatorname{GELU}''$ совпадает со знаком $2-x^2$: функция выпукла на $(-\sqrt2;\,\sqrt2)$ и вогнута вне этого отрезка, а производная $\operatorname{GELU}'$ имеет экстремумы в точках $x=\pm\sqrt2$.</p>
+    </div></details>
+    <div class="eqd">$$\operatorname{GELU}'(x)=\underbrace{\Phi(x)}_{\text{доля}}+\underbrace{x\,\varphi(x)}_{\text{изменение доли}}$$</div>
+    <p>У производной два слагаемых. Первое — сама доля $\Phi(x)$: так вела бы себя производная, если бы вентиль не зависел от $x$. Второе — поправка от того, что вентиль открывается при росте $x$; она положительна справа от нуля и отрицательна слева. Сравните с ReLU, у которой производная — ступенька 0/1.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-derivative" data-config="{&quot;x&quot;: -0.75}"></div><figcaption><b>Рисунок 4.</b> Производная GELU (оранжевая) и два её слагаемых. Наибольшее значение $\Phi(\sqrt2)+\sqrt2\,\varphi(\sqrt2)\approx1{,}129$, наименьшее $\approx-0{,}129$ при $x=-\sqrt2$ — сумма этих чисел равна 1, ведь $\operatorname{GELU}'(x)+\operatorname{GELU}'(-x)=1$. Производная обращается в ноль при $x\approx-0{,}752$; в начальной точке $x=-0{,}75$ она уже почти нулевая. Включите вторую производную: её нули — в $\pm\sqrt2$.</figcaption></figure>
+    <h3>Где минимум</h3>
+    <p>Минимум — там, где $\operatorname{GELU}'(x)=0$, то есть $\Phi(x)=-x\,\varphi(x)$. Это уравнение не решается в элементарных функциях; метод Ньютона $x_{k+1}=x_k-\operatorname{GELU}'(x_k)/\operatorname{GELU}''(x_k)$ от $x_0=-1$ даёт $-0{,}6557$, $-0{,}7448$, $-0{,}75175$, $-0{,}751792$ — каждая итерация примерно удваивает число верных знаков.</p>
+    <div class="eqd">$$x^{*}\approx-0{,}7518,\qquad \operatorname{GELU}(x^{*})=x^{*}\Phi(x^{*})=-(x^{*})^{2}\varphi(x^{*})\approx-0{,}1700$$</div>
+    <p>Второе равенство следует из условия минимума $\Phi(x^*)=-x^*\varphi(x^*)$. В минимуме пропускается доля $\Phi(x^*)\approx0{,}226$.</p>
+    <div class="callout intuition"><b>Отрицательный градиент слева</b><p>При $x&lt;-0{,}752$ производная отрицательна: если увеличить вход, выход <i>уменьшится</i>. ReLU в этой зоне даёт ровно ноль, а GELU — маленький, но ненулевой сигнал (не меньше $-0{,}129$). Он затухает как гауссиана: $\operatorname{GELU}'(-3)\approx-0{,}012$, $\operatorname{GELU}'(-4)\approx-0{,}0005$.</p></div>
+
+    <h2 id="approx">Быстрые приближения: tanh и сигмоида</h2>
+    <p>В 2016 году функция erf была медленной или вовсе отсутствовала во фреймворках, поэтому авторы предложили два приближения. Первое использует tanh:</p>
+    <div class="eqd">$$\operatorname{GELU}(x)\approx\frac{x}{2}\Bigl(1+\tanh\Bigl[\sqrt{2/\pi}\,\bigl(x+0{,}044715\,x^{3}\bigr)\Bigr]\Bigr)$$</div>
+    <p>Именно эта формула записана в исходном коде BERT и GPT-2 (в библиотеке Hugging Face она называется <code>gelu_new</code>, в PyTorch — <code>approximate="tanh"</code>). Наибольшая ошибка — $4{,}7\cdot10^{-4}$ при $|x|\approx2{,}70$. Второе приближение — через сигмоиду:</p>
+    <div class="eqd">$$\operatorname{GELU}(x)\approx x\,\sigma(1{,}702\,x)$$</div>
+    <p>Оно грубее: ошибка до $0{,}020$ при $|x|\approx2{,}27$. Обе ошибки — чётные функции, потому что все три формулы удовлетворяют тождеству $f(x)-f(-x)=x$.</p>
+    <details class="deep"><summary>Откуда берутся √(2/π) и 0,044715</summary><div class="deep-body">
+      <p>Нужно приблизить $\operatorname{erf}(z)$ функцией $\tanh(u)$. Разложим обе около нуля: $\operatorname{erf}(z)=\frac{2}{\sqrt\pi}\bigl(z-\frac{z^3}{3}+\dots\bigr)$ и $\tanh u=u-\frac{u^3}{3}+\dots$. Возьмём $u=\frac{2}{\sqrt\pi}(z+cz^3)$ и приравняем коэффициенты.</p>
+      <div class="eqd">$$z^{1}:\ \ \frac{2}{\sqrt\pi}=\frac{2}{\sqrt\pi};\qquad z^{3}:\ \ \frac{2c}{\sqrt\pi}-\frac{8}{3\pi\sqrt\pi}=-\frac{2}{3\sqrt\pi}\ \Longrightarrow\ c=\frac{4}{3\pi}-\frac13$$</div>
+      <p>Подставляя $z=x/\sqrt2$, получаем $\sqrt{2/\pi}\,(x+c'x^3)$ с $c'=c/2=\frac{2}{3\pi}-\frac16\approx0{,}0455$. Совпадение рядов даёт точность только около нуля, поэтому авторы подобрали коэффициент численно по всей оси: $0{,}044715$. С тейлоровским $0{,}0455$ максимальная ошибка $7{,}5\cdot10^{-4}$, с $0{,}044715$ — $4{,}7\cdot10^{-4}$, а без кубического члена ($c'=0$) — $0{,}034$.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="gelu-approx" data-config="{&quot;c&quot;: 0.044715, &quot;x&quot;: 1}"></div><figcaption><b>Рисунок 5.</b> Сверху — точная GELU и два приближения, снизу — модуль ошибки в логарифмической шкале (провалы — точки, где ошибка меняет знак). Двигайте коэффициент $c$: при $c=0{,}044715$ максимальная ошибка $4{,}7\cdot10^{-4}$, при $c=0$ — $0{,}034$. При $x=1$: точное значение $0{,}8413$, tanh-приближение $0{,}8412$, сигмоидное $0{,}8458$.</figcaption></figure>
+    <div class="callout warn"><b>Это разные функции</b><p>Модель, обученная с tanh-приближением, в выводе должна использовать его же. Разница не больше $4{,}7\cdot10^{-4}$ на нейрон, но в сотнях слоёв и тысячах нейронов она даёт заметное расхождение логитов при конвертации весов и ломает побитовые тесты.</p></div>
+
+    <h2 id="space">Семейство x·Φ(x/s) в 3D: от ReLU к прямой</h2>
+    <p>Шум в маске не обязан быть единичным. Если $\varepsilon\sim N(0,s^2)$, то $P(\varepsilon\le x)=\Phi(x/s)$, и получается целое семейство функций с «температурой» $s$:</p>
+    <div class="eqd">$$f(x,s)=x\,\Phi\Bigl(\frac{x}{s}\Bigr)=s\cdot\operatorname{GELU}\Bigl(\frac{x}{s}\Bigr)$$</div>
+    <ul class="flist"><li>$s\to0$: шума нет, $\Phi(x/s)$ превращается в ступеньку, и $f\to\operatorname{ReLU}(x)$;</li><li>$s=1$: обычная GELU;</li><li>$s\to\infty$: шум заглушает вход, $\Phi(x/s)\to\tfrac12$, и $f\to x/2$ — прямая, нелинейность исчезает.</li></ul>
+    <p>Второе равенство показывает, что все члены семейства подобны: минимум находится в точке $x=-0{,}752\,s$ и равен $-0{,}170\,s$. На поверхности это прямая бирюзовая линия на дне «оврага».</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-surface" data-config="{&quot;s&quot;: 1}"></div><figcaption><b>Рисунок 6.</b> Поверхность $f(x,s)=x\,\Phi(x/s)$ (её можно вращать) и срез при текущем $s$. Оранжевая линия — срез, бирюзовая — линия минимумов. При $s=1$ минимум в $x=-0{,}752$ равен $-0{,}170$. Переключитесь на производную: при малых $s$ она становится ступенькой ReLU, при больших — прижимается к $\tfrac12$.</figcaption></figure>
+    <p>В сети GELU применяется к вектору поэлементно: $h=\operatorname{GELU}(W_1x+b_1)$. Каждая координата — своя «складка» вдоль гиперплоскости $w_j^\top x+b_j=0$, но в отличие от ReLU складка гладкая, с небольшим отрицательным провалом перед изломом.</p>
+
+    <h2 id="training">GELU в обучении и в трансформере</h2>
+    <p>Сеть с одним скрытым слоем строит ответ как сумму «кирпичиков» $w_{2j}\,f(w_{1j}x+b_{1j})$. У ReLU каждый кирпичик — ломаная с одним изломом, и сумма — тоже ломаная. У GELU кирпичики гладкие, поэтому гладкую зависимость можно описать меньшим их числом.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-train" data-config="{&quot;h&quot;: 4}"></div><figcaption><b>Рисунок 7.</b> Одна и та же сеть из 4 нейронов с одинаковой инициализацией, обучение Adam с шагом $0{,}03$ на 40 точках зашумлённой кривой $\sin1{,}5x+0{,}3x$. Справа — среднеквадратичная ошибка (MSE) в логарифмической шкале. За 2000 шагов GELU-сеть снижает MSE с $7{,}06$ до $0{,}0042$ — это уже уровень шума в данных ($0{,}0051$), а ReLU-сеть застревает на $0{,}0083$: четырёх изломов не хватает. Кнопка «Нейроны» показывает отдельные кирпичики.</figcaption></figure>
+    <p>Обучение использует ту же производную: градиент, приходящий к нейрону, умножается на $\operatorname{GELU}'(z)=\Phi(z)+z\varphi(z)$. В отличие от ReLU, нейрон с отрицательным $z$ продолжает получать сигнал, поэтому GELU-сети реже страдают от «мёртвых» нейронов.</p>
+    <h3>Блок прямого распространения трансформера</h3>
+    <p>В BERT и GPT после каждого слоя внимания (attention) стоит двухслойный перцептрон, который обрабатывает каждый токен отдельно:</p>
+    <div class="eqd">$$\operatorname{FFN}(h)=W_2\,\operatorname{GELU}(W_1h+b_1)+b_2,\qquad W_1\in\mathbb R^{4d\times d},\ \ W_2\in\mathbb R^{d\times4d}$$</div>
+    <p>В BERT-base $d=768$, так что на каждый токен в каждом из 12 слоёв приходится $4d=3072$ вычисления GELU. Перед FFN стоит LayerNorm, поэтому входы $W_1h+b_1$ в начале обучения порядка единицы — ровно та область, где у GELU есть и «ямка», и плавный переход. Поэтому скорость самой активации важна, и вместо точной erf часто берут tanh-приближение.</p>
+    <div class="callout history"><b>Как GELU стала стандартом</b><p>Хендрикс и Гимпел предложили GELU в 2016 году и показали, что на задачах зрения, речи и текста она не хуже ReLU и ELU. Широкую известность ей принесли GPT (2018) и BERT (2018), затем GPT-2, GPT-3 и Vision Transformer (2020). В 2020 году Шазир показал, что вентильные варианты GeGLU и SwiGLU ещё лучше, и новые LLM чаще используют их.</p></div>
+
+    <h2 id="code">В коде: точно, быстро и устойчиво</h2>
+    <p>В NumPy нет функции erf, поэтому её берут из SciPy. Чтобы не терять точность при больших отрицательных $x$, функцию распределения удобно считать через дополнительную функцию ошибок: $\Phi(x)=\tfrac12\operatorname{erfc}(-x/\sqrt2)$. Формула $\tfrac12(1+\operatorname{erf})$ при $x=-10$ вычитает почти равные числа и даёт ровно 0, хотя истинное значение $\operatorname{GELU}(-10)\approx-7{,}6\cdot10^{-23}$; для самой активации это неважно, но та же $\Phi$ часто нужна и в других формулах.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+from scipy.special import erfc        # в самой NumPy функции erf нет
+
+SQRT2 = np.sqrt(2.0)
+
+def gelu(x):
+    &quot;&quot;&quot;Точная GELU: x·Φ(x), где Φ(x) = ½·erfc(−x/√2) — без вычитания близких чисел.&quot;&quot;&quot;
+    x = np.asarray(x, dtype=float)
+    return x * 0.5 * erfc(-x / SQRT2)
+
+def gelu_grad(x):
+    &quot;&quot;&quot;Производная: Φ(x) + x·φ(x).&quot;&quot;&quot;
+    x = np.asarray(x, dtype=float)
+    cdf = 0.5 * erfc(-x / SQRT2)
+    pdf = np.exp(-0.5 * x * x) / np.sqrt(2.0 * np.pi)
+    return cdf + x * pdf
+
+def gelu_tanh(x):
+    # приближение из исходного кода BERT и GPT-2
+    return 0.5 * x * (1.0 + np.tanh(np.sqrt(2.0 / np.pi) * (x + 0.044715 * x**3)))
+
+x = np.array([-3.0, -1.0, 0.0, 1.0, 3.0])
+print(gelu(x))        # ≈ [-0.00405 -0.15866  0.  0.84134  2.99595]
+print(gelu_grad(x))   # ≈ [-0.01195 -0.08332  0.5 1.08332  1.01195]
+print(np.abs(gelu_tanh(x) - gelu(x)).max())   # ≈ 4.1e-04 (в точках x = ±3)</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+x = torch.tensor([-1.0, 0.0, 1.0], requires_grad=True)
+y = F.gelu(x)                          # −0.1587, 0.0000, 0.8413
+y.sum().backward()
+print(x.grad)                          # −0.0833, 0.5000, 1.0833 = Φ(x) + x·φ(x)
+print(F.gelu(x, approximate=&quot;tanh&quot;))   # −0.1588, 0.0000, 0.8412
+
+# Блок FFN трансформера (как в BERT и GPT): d → 4d → d
+class FeedForward(nn.Module):
+    def __init__(self, d_model=768, mult=4, p_drop=0.1):
+        super().__init__()
+        self.fc1 = nn.Linear(d_model, mult * d_model)
+        self.act = nn.GELU()           # для весов GPT-2: nn.GELU(approximate=&quot;tanh&quot;)
+        self.fc2 = nn.Linear(mult * d_model, d_model)
+        self.drop = nn.Dropout(p_drop)
+
+    def forward(self, h):
+        return self.drop(self.fc2(self.act(self.fc1(h))))</code></pre>
+    <div class="callout key"><b>Правило</b><p>Выбирайте вариант GELU так же, как его выбрали при обучении весов: <code>nn.GELU()</code> — точная, <code>nn.GELU(approximate="tanh")</code> — приближённая. Для новой модели разницы в качестве почти нет; tanh-вариант бывает быстрее на старом железе.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>Считать, что выход GELU неотрицателен</b>, как у ReLU. Он может быть до $-0{,}170$; если дальше идёт логарифм, корень или деление, это нужно учитывать.</li><li><b>Смешивать точную GELU и tanh-приближение</b> между обучением и выводом или при конвертации модели (ONNX, TensorRT, другой фреймворк). Ошибка мала, но накапливается по слоям.</li><li><b>Путать $x\,\sigma(1{,}702x)$ с GELU.</b> Это быстрая аппроксимация с ошибкой до $0{,}02$, по сути <a href="../silu/">SiLU</a> с параметром $\beta=1{,}702$.</li><li><b>Думать, что GELU полностью избавляет от затухающих градиентов.</b> При $x\to-\infty$ производная гаснет как гауссиана: уже $\operatorname{GELU}'(-4)\approx-0{,}0005$. Нормализация входов по-прежнему нужна.</li><li><b>Писать $\Phi$ как $\tfrac12(1+\operatorname{erf}(x))$, забыв деление на $\sqrt2$.</b> Получится функция распределения $N(0,\tfrac12)$, то есть $x\Phi(\sqrt2x)$ — другая кривая.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href="../relu/">ReLU</a>: предел $x\,\Phi(x/s)$ при $s\to0$ и «скелет» GELU: $\operatorname{GELU}=\operatorname{ReLU}-|x|\Phi(-|x|)$.</li><li><a href="../silu/">SiLU / Swish</a>: та же схема «вход × мягкий вентиль», но с сигмоидой вместо $\Phi$; $x\,\sigma(1{,}702x)\approx\operatorname{GELU}(x)$.</li><li><a href="../sigmoid/">Сигмоида</a>: $\sigma(1{,}702x)$ приближает $\Phi(x)$ с ошибкой не больше $0{,}0095$ — связь логит- и пробит-моделей.</li><li><a href="../tanh/">tanh</a>: основа самого популярного приближения GELU.</li><li><a href="../leaky-relu/">Leaky ReLU</a>: другой способ пропустить сигнал при $x&lt;0$ — постоянным маленьким наклоном вместо гладкой «ямки».</li><li><a href="../adam/">Adam</a> и <a href="../mse/">MSE</a>: оптимизатор и потеря из симуляции на рисунке 7.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $\operatorname{GELU}(x)=x\,\Phi(x)$: вход, умноженный на вероятность $P(\varepsilon\le x)$ для $\varepsilon\sim N(0,1)$; это среднее от случайной маски, зависящей от входа. 2) $\operatorname{GELU}=\operatorname{ReLU}-|x|\Phi(-|x|)$: гладкая ReLU с минимумом $-0{,}170$ при $x=-0{,}752$. 3) $\operatorname{GELU}'=\Phi+x\varphi\in(-0{,}129;\,1{,}129)$, $\operatorname{GELU}''=\varphi\,(2-x^2)$. 4) tanh-приближение с коэффициентом $0{,}044715$ ошибается не больше чем на $4{,}7\cdot10^{-4}$, но это другая функция. 5) $x\,\Phi(x/s)$ соединяет ReLU ($s\to0$) и $x/2$ ($s\to\infty$). 6) Стоит в FFN-блоках BERT, GPT и ViT.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Чему примерно равна $\operatorname{GELU}(-1)$?</legend><div class="opts"><button type="button" data-ok="0">$-1$</button><button type="button" data-ok="1">$-0{,}159$</button><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$0{,}841$</button></div><div class="explain" hidden>$\operatorname{GELU}(-1)=-1\cdot\Phi(-1)=-0{,}159$: пропускается только 15,9% отрицательного входа.</div></fieldset><fieldset class="q"><legend>2. Чему равна производная GELU в нуле?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$0{,}25$</button><button type="button" data-ok="1">$0{,}5$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>$\operatorname{GELU}'(0)=\Phi(0)+0\cdot\varphi(0)=\tfrac12$.</div></fieldset><fieldset class="q"><legend>3. Где находится минимум GELU?</legend><div class="opts"><button type="button" data-ok="0">В нуле, значение 0</button><button type="button" data-ok="1">При $x\approx-0{,}75$, значение $\approx-0{,}17$</button><button type="button" data-ok="0">При $x=-1$, значение $-0{,}159$</button><button type="button" data-ok="0">Минимума нет</button></div><div class="explain" hidden>Минимум там, где $\Phi(x)+x\varphi(x)=0$: $x^*\approx-0{,}752$, $\operatorname{GELU}(x^*)\approx-0{,}170$. Точка $x=-1$ лежит левее, на убывающей ветви.</div></fieldset><fieldset class="q"><legend>4. Что означает $\Phi(x)$ в формуле GELU?</legend><div class="opts"><button type="button" data-ok="0">Плотность нормального распределения в точке $x$</button><button type="button" data-ok="1">Вероятность того, что $\varepsilon\sim N(0,1)$ не больше $x$ — доля, в которой вход пропускается</button><button type="button" data-ok="0">Сигмоиду от $x$</button><button type="button" data-ok="0">Дисперсию входов</button></div><div class="explain" hidden>$\Phi$ — функция распределения: $\Phi(x)=P(\varepsilon\le x)$. GELU — среднее $x\cdot m$ для маски $m=\mathbb 1[\varepsilon\le x]$.</div></fieldset><fieldset class="q"><legend>5. Чему равна $\operatorname{GELU}(3)-\operatorname{GELU}(-3)$?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$2{,}996$</button><button type="button" data-ok="1">$3$</button><button type="button" data-ok="0">$6$</button></div><div class="explain" hidden>$x\Phi(x)-(-x)\Phi(-x)=x\bigl(\Phi(x)+\Phi(-x)\bigr)=x$, так что разность равна ровно 3.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../silu/"><span class="kicker">← Предыдущая формула</span><span class="big">SiLU / Swish</span><span class="kicker">активация Qwen и LLaMA</span></a>
+<a class="next" href="../sgd/"><span class="kicker">Следующая формула →</span><span class="big">SGD → Momentum → RMSProp</span><span class="kicker">основа под Adam</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

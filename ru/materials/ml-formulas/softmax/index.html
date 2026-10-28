@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Softmax: от логитов к вероятностям — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="Softmax подробно: формула, температура, инвариантность к сдвигу, связь с сигмоидой, симплекс вероятностей, матрица Якоби, log-sum-exp, softmax-регрессия, внимание, устойчивый код.">
+  <meta property="og:title" content="Softmax: от логитов к вероятностям — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="Softmax подробно: формула, температура, инвариантность к сдвигу, связь с сигмоидой, симплекс вероятностей, матрица Якоби, log-sum-exp, softmax-регрессия, внимание, устойчивый код.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/softmax/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/softmax/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/softmax/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/softmax/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/softmax.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/softmax/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/softmax/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/softmax/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Функции активации</span>
+  <h1>Softmax: от логитов к вероятностям</h1>
+  <p class="dek">Функция, которая превращает сырые баллы нейросети в распределение вероятностей на K классах. Разбираем её по косточкам: зачем экспонента, почему важны только разности логитов, что делает температура, как устроена матрица Якоби diag(s) − ssᵀ, почему softmax — это градиент гладкого максимума и как не получить NaN в коде.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем он нужен</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: голосование с усилением</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#properties"><span class="n">4</span>Свойства</a>
+      <a href="#geometry"><span class="n">5</span>Геометрия: симплекс вероятностей</a>
+      <a href="#derivative"><span class="n">6</span>Производная: матрица Якоби</a>
+      <a href="#surface"><span class="n">7</span>3D-картина: softmax над плоскостью логитов</a>
+      <a href="#lse"><span class="n">8</span>Log-sum-exp: гладкий максимум</a>
+      <a href="#training"><span class="n">9</span>Softmax в обучении</a>
+      <a href="#code"><span class="n">10</span>В коде: устойчивость, log-softmax и PyTorch</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{softmax}(z)_i=s_i=\frac{e^{z_i}}{\sum_{j=1}^{K}e^{z_j}}$$</div>
+
+    <h2 id="why">Зачем он нужен</h2>
+    <p>Классификатор на $K$ классов в конце выдаёт $K$ чисел — <b>логитов</b> (logits): например, $(2;\,1;\,0)$ для «кошка», «собака», «птица». Это просто баллы: они бывают отрицательными, не складываются в 1, и по ним не видно, насколько модель уверена. Softmax превращает такой вектор в распределение вероятностей: все числа положительны, в сумме дают 1, а порядок сохраняется — у кого балл больше, у того и вероятность больше.</p>
+    <p>Где он встречается:</p>
+    <ul class="flist"><li><b>выход многоклассового классификатора</b> — от логистической регрессии до ResNet и ViT: $\hat y=\operatorname{softmax}(Wx+b)$;</li><li><b>языковые модели</b> — на каждом шаге LLM выдаёт логиты для всех токенов словаря (десятки тысяч), softmax делает из них распределение следующего токена, а температура регулирует «смелость» генерации;</li><li><b>механизм внимания (attention)</b> в трансформерах — веса $\operatorname{softmax}(QK^\top/\sqrt d)$ решают, на какие токены смотреть;</li><li><b>смесь экспертов (MoE)</b> — маршрутизатор распределяет токен между экспертами через softmax;</li><li><b>обучение с подкреплением</b> — больцмановская политика выбирает действие $a$ с вероятностью, пропорциональной $e^{Q(a)/T}$;</li><li><b>статистическая физика</b> — это распределение Больцмана — Гиббса $p_i\propto e^{-E_i/(kT)}$; отсюда и слово «температура».</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>$s_i=e^{z_i}/\sum_j e^{z_j}$: экспонента делает все числа положительными и превращает разности в отношения, деление на сумму нормирует. Softmax не меняется, если прибавить одну константу ко всем логитам (поэтому в коде вычитают максимум), его производная — матрица $\operatorname{diag}(s)-ss^\top$, а для двух классов он совпадает с <a href='../sigmoid/'>сигмоидой</a> разности логитов.</p></div>
+
+    <h2 id="intuition">Интуиция: голосование с усилением</h2>
+    <p>Представьте, что классы — кандидаты, а логиты — их баллы. Чтобы получить доли «голосов», баллы нужно сделать положительными и нормировать. Просто разделить на сумму нельзя: баллы бывают отрицательными, а сумма — нулевой. Экспонента решает обе проблемы: $e^{z}$ всегда положительна, а разница баллов превращается в <i>отношение</i> — каждая единица преимущества умножает долю на $e\approx2{,}718$.</p>
+    <p>Потяните верхушки столбиков-логитов слева и посмотрите, как меняются вероятности справа. Потом нажмите «+1 ко всем логитам»: столбики слева поднимутся, а справа ничего не изменится.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-bars" data-config="{&quot;z&quot;: [2, 1, 0], &quot;T&quot;: 1}"></div><figcaption><b>Рисунок 1.</b> Логиты и вероятности. Для логитов $(2;\,1;\,0)$ получаем $(0{,}665;\,0{,}245;\,0{,}090)$, сумма экспонент $11{,}11$. Кнопки ±1 сдвигают все логиты — вероятности стоят на месте. Ползунок температуры: при $T=0{,}1$ первому классу достаётся больше $0{,}9999$, при $T=10$ распределение почти равномерное, $(0{,}367;\,0{,}332;\,0{,}301)$. Пунктир — уровень $1/K$.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Логиты $(2;\,1;\,0)$ отличаются на единицу, а вероятности — в $e$ раз: $0{,}665/0{,}245\approx0{,}245/0{,}090\approx2{,}718$. Softmax смотрит только на <i>разности</i> логитов. Температура $T$ делит логиты: при $T&lt;1$ разности растут и распределение заостряется, при $T&gt;1$ — сглаживается.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <div class="eqd">$$s_i=\operatorname{softmax}(z)_i=\frac{e^{z_i}}{\sum_{j=1}^{K}e^{z_j}},\qquad i=1,\dots,K$$</div>
+    <dl class="symbols"><dt>$z=(z_1,\dots,z_K)$</dt><dd>вектор логитов — сырые выходы последнего слоя, любые действительные числа;</dd><dt>$e^{z_i}$</dt><dd>экспонента: делает число положительным и превращает разности логитов в отношения;</dd><dt>$\sum_{j}e^{z_j}$</dt><dd>нормирующая сумма (в физике — статистическая сумма, partition function $Z$);</dd><dt>$s_i$</dt><dd>вероятность $i$-го класса: $s_i\in(0;\,1)$ и $\sum_i s_i=1$.</dd></dl>
+    <p>Пройдём сквозной пример шпаргалки — логиты $z=(2;\,1;\,0)$:</p>
+    <div class="eqd">$$\begin{gathered}e^{2}\approx7{,}389,\quad e^{1}\approx2{,}718,\quad e^{0}=1,\quad\textstyle\sum\approx11{,}107\\ \Longrightarrow\;s\approx\Bigl(\frac{7{,}389}{11{,}107};\,\frac{2{,}718}{11{,}107};\,\frac{1}{11{,}107}\Bigr)=(0{,}665;\,0{,}245;\,0{,}090)\end{gathered}$$</div>
+    <h3>Температура</h3>
+    <p>Часто логиты перед softmax делят на число $T&gt;0$ — <b>температуру</b>:</p>
+    <div class="eqd">$$s_i(T)=\frac{e^{z_i/T}}{\sum_j e^{z_j/T}}$$</div>
+    <p>Таблица показывает, что температура делает с тем же вектором $(2;\,1;\,0)$:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$i$</th><th class=num>$z_i$</th><th class=num>$e^{z_i}$</th><th class=num>$s_i,\ T=1$</th><th class=num>$s_i,\ T=0{,}5$</th><th class=num>$s_i,\ T=2$</th></tr></thead><tbody><tr><td>1</td><td class=num>2</td><td class=num>7,389</td><td class=num>0,665</td><td class=num>0,867</td><td class=num>0,506</td></tr><tr><td>2</td><td class=num>1</td><td class=num>2,718</td><td class=num>0,245</td><td class=num>0,117</td><td class=num>0,307</td></tr><tr><td>3</td><td class=num>0</td><td class=num>1,000</td><td class=num>0,090</td><td class=num>0,016</td><td class=num>0,186</td></tr><tr><td>Σ</td><td class=num></td><td class=num>11,107</td><td class=num>1</td><td class=num>1</td><td class=num>1</td></tr></tbody></table></div>
+    <p>Два предела объясняют название. При $T\to0$ выигрывает только наибольший логит: softmax стремится к one-hot вектору $\operatorname{argmax}$ (если максимум единственный). При $T\to\infty$ разности исчезают, и распределение становится равномерным, $s_i\to1/K$. Softmax — «мягкий» (soft) argmax: промежуточное состояние между жёстким выбором и полным безразличием.</p>
+    <div class="callout note"><b>О названии</b><p>Строго говоря, softmax гладко приближает не функцию max, а one-hot вектор argmax. Гладкий максимум — это log-sum-exp, и softmax — его градиент (см. раздел <a href='#lse'>о LSE</a>).</p></div>
+
+    <h2 id="properties">Свойства</h2>
+    <ul class="flist"><li><b>Распределение</b>: $s_i&gt;0$ и $\sum_i s_i=1$ при любых логитах. Ровно 0 или 1 не получается никогда — только в пределе (а на компьютере — из-за округления).</li><li><b>Сохраняет порядок</b>: $z_i&gt;z_j\iff s_i&gt;s_j$, поэтому $\operatorname{argmax}s=\operatorname{argmax}z$. Чтобы просто предсказать класс, softmax можно не считать.</li><li><b>Отношения</b>: $s_i/s_j=e^{z_i-z_j}$ — разность логитов равна логарифму отношения вероятностей. Обратно, $z_i=\ln s_i+C$: логиты восстанавливаются по вероятностям с точностью до общей константы.</li><li><b>Инвариантность к сдвигу</b>: $\operatorname{softmax}(z+c\mathbf 1)=\operatorname{softmax}(z)$ для любого числа $c$. Из $K$ логитов значимы только $K-1$ разностей.</li><li><b>Нет инвариантности к масштабу</b>: $\operatorname{softmax}(az)$ при $a&gt;1$ острее, при $0&lt;a&lt;1$ — площе. Это та же температура, $a=1/T$.</li><li><b>Конкуренция</b>: рост одного логита увеличивает его вероятность и уменьшает все остальные — масса перераспределяется, а не создаётся.</li></ul>
+    <details class="deep"><summary>Почему сдвиг ничего не меняет</summary><div class="deep-body">
+      <div class="eqd">$$\frac{e^{z_i+c}}{\sum_j e^{z_j+c}}=\frac{e^{c}\,e^{z_i}}{e^{c}\sum_j e^{z_j}}=\frac{e^{z_i}}{\sum_j e^{z_j}}$$</div>
+      <p>Множитель $e^c$ сокращается. Именно это позволяет в коде вычесть $\max_j z_j$ из всех логитов: результат тот же, а экспонента больше не переполняется.</p>
+    </div></details>
+    <h3>Два класса — это сигмоида</h3>
+    <div class="eqd">$$\operatorname{softmax}(z_1,z_2)_1=\frac{e^{z_1}}{e^{z_1}+e^{z_2}}=\frac{1}{1+e^{-(z_1-z_2)}}=\sigma(z_1-z_2)$$</div>
+    <p>Для двух классов softmax — это <a href='../sigmoid/'>сигмоида</a> разности логитов, поэтому бинарному классификатору хватает одного выхода. Похожая формула верна и для $K$ классов, если смотреть на один класс против всех остальных:</p>
+    <div class="eqd">$$s_i=\sigma\Bigl(z_i-\ln\sum_{j\ne i}e^{z_j}\Bigr)$$</div>
+    <p>Каждая вероятность — сигмоида от отрыва своего логита от «гладкого максимума» остальных. Чтобы проверить, разделите числитель и знаменатель $s_i$ на $e^{z_i}$.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-sigmoid" data-config="{&quot;z1&quot;: 2, &quot;z2&quot;: 1, &quot;z3&quot;: 0}"></div><figcaption><b>Рисунок 2.</b> $s_1$ как функция $z_1$ при фиксированных $z_2=1$, $z_3=0$. Синяя кривая — сигмоида, сдвинутая в точку $m=\ln(e^{1}+e^{0})\approx1{,}313$: при $z_1=2$ получаем $\sigma(0{,}687)\approx0{,}665$. Оранжевая и бирюзовая кривые — $s_2$ и $s_3$: они убывают, отдавая массу первому классу. Снимите галочку «Есть третий класс» — останется обычная сигмоида $\sigma(z_1-z_2)$.</figcaption></figure>
+
+    <h2 id="geometry">Геометрия: симплекс вероятностей</h2>
+    <p>Все распределения на $K$ классах образуют <b>вероятностный симплекс</b>:</p>
+    <div class="eqd">$$\Delta^{K-1}=\Bigl\{s\in\mathbb R^{K}:\ s_i\ge0,\ \textstyle\sum_i s_i=1\Bigr\}$$</div>
+    <p>Для $K=3$ это равносторонний треугольник. Вершины — уверенные ответы $(1;\,0;\,0)$, $(0;\,1;\,0)$, $(0;\,0;\,1)$, центр — равномерное распределение $(\tfrac13;\,\tfrac13;\,\tfrac13)$, а точка внутри — «смесь» вершин с весами $s_i$ (барицентрические координаты).</p>
+    <p>Softmax отображает всё пространство логитов $\mathbb R^K$ на <i>внутренность</i> симплекса: границы и вершины недостижимы. Все точки прямой $z+c\mathbf 1$ переходят в одну точку, поэтому по сути softmax — взаимно однозначное соответствие между $(K-1)$-мерным пространством разностей логитов и внутренностью симплекса. Обратное отображение — логарифм: $z=\ln s$ с точностью до сдвига.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-simplex" data-config="{&quot;z&quot;: [2, 1, 0]}"></div><figcaption><b>Рисунок 3.</b> Распределение на трёх классах — точка треугольника; заливка показывает, какой класс побеждает и насколько уверенно. Перетащите чёрную точку: справа те же вероятности столбиками, под рисунком — логиты, которые дают эту точку. Чёрный пунктир — путь при изменении температуры: от вершины-победителя ($T\to0$) к центру ($T\to\infty$). Синяя линия — путь, если менять только $z_1$: от противоположной стороны к вершине 1. При $z=(2;\,1;\,0)$ центрированные логиты равны $(1;\,0;\,-1)$, энтропия $0{,}832$.</figcaption></figure>
+    <div class="callout intuition"><b>Энтропия — удалённость от вершин</b><p>Энтропия $H(s)=-\sum_i s_i\ln s_i$ измеряет неуверенность: она стремится к 0 у вершин и максимальна в центре, где равна $\ln K$. Для $(0{,}665;\,0{,}245;\,0{,}090)$ получаем $0{,}832$ при максимуме $\ln3\approx1{,}099$.</p></div>
+
+    <h2 id="derivative">Производная: матрица Якоби</h2>
+    <p>У softmax $K$ входов и $K$ выходов, поэтому его производная — не число, а матрица $K\times K$: элемент $J_{ij}=\partial s_i/\partial z_j$ показывает, как $i$-я вероятность откликается на $j$-й логит.</p>
+    <details class="deep"><summary>Вывод по правилу частного</summary><div class="deep-body">
+      <p>Обозначим $S=\sum_k e^{z_k}$; тогда $\partial S/\partial z_j=e^{z_j}$. Для $i=j$:</p>
+      <div class="eqd">$$\frac{\partial s_i}{\partial z_i}=\frac{e^{z_i}S-e^{z_i}e^{z_i}}{S^{2}}=s_i-s_i^{2}=s_i(1-s_i)$$</div>
+      <p>Для $i\ne j$ числитель $e^{z_i}$ от $z_j$ не зависит:</p>
+      <div class="eqd">$$\frac{\partial s_i}{\partial z_j}=\frac{0\cdot S-e^{z_i}e^{z_j}}{S^{2}}=-s_is_j$$</div>
+    </div></details>
+    <details class="deep"><summary>Вывод через логарифм (короче)</summary><div class="deep-body">
+      <p>$\ln s_i=z_i-\ln S$. Производная логарифма суммы экспонент — снова softmax: $\partial\ln S/\partial z_j=e^{z_j}/S=s_j$. Значит,</p>
+      <div class="eqd">$$\frac{\partial\ln s_i}{\partial z_j}=\delta_{ij}-s_j\quad\Longrightarrow\quad\frac{\partial s_i}{\partial z_j}=s_i(\delta_{ij}-s_j)$$</div>
+      <p>Здесь $\delta_{ij}$ — символ Кронекера: 1 при $i=j$ и 0 иначе.</p>
+    </div></details>
+    <div class="eqd">$$J=\frac{\partial s}{\partial z}=\operatorname{diag}(s)-s\,s^{\top},\qquad J_{ij}=\begin{cases}s_i(1-s_i),&amp;i=j\\-s_is_j,&amp;i\ne j\end{cases}$$</div>
+    <p>Свойства этой матрицы:</p>
+    <ul class="flist"><li><b>диагональ</b> $s_i(1-s_i)$ — ровно производная сигмоиды: не больше $\tfrac14$, максимум при $s_i=\tfrac12$;</li><li><b>вне диагонали</b> все элементы отрицательны: подняв один логит, мы отнимаем вероятность у остальных;</li><li><b>симметрична</b>, и каждая строка (и столбец) в сумме даёт 0: $J\mathbf 1=s-s\,(s^\top\mathbf 1)=0$. Это производная равенства $\sum_i s_i=1$, а вектор $\mathbf 1$ — направление сдвига, который ничего не меняет. Поэтому $J$ вырождена;</li><li><b>неотрицательно определена</b>: $v^\top Jv=\sum_i s_iv_i^2-\bigl(\sum_i s_iv_i\bigr)^2$ — дисперсия величины $v$ при распределении $s$, а дисперсия не бывает отрицательной;</li><li><b>затухает при уверенности</b>: когда $s$ близок к вершине симплекса, все элементы $J$ близки к нулю — насыщение, как у сигмоиды.</li></ul>
+    <figure class="viz"><div class="fv" data-viz="softmax-jacobian" data-config="{&quot;z&quot;: [2, 1, 0], &quot;j&quot;: 0}"></div><figcaption><b>Рисунок 4.</b> Слева — матрица Якоби при $z=(2;\,1;\,0)$: диагональ $(0{,}223;\,0{,}185;\,0{,}082)$ положительна (красный), вне диагонали — отрицательные $-0{,}163$, $-0{,}060$, $-0{,}022$ (синий); каждый столбец в сумме даёт 0, след $1-\sum s_i^2\approx0{,}4895$. Справа — элементы выбранного столбца как функции $z_j$: диагональный — колокол $s_j(1-s_j)$ с вершиной $0{,}25$ там, где $s_j=0{,}5$; остальные — отрицательные «ямы».</figcaption></figure>
+    <h3>Обратный проход без матрицы</h3>
+    <p>В backprop нужна не сама $J$, а произведение $J^\top g$, где $g=\partial L/\partial s$ пришёл сверху. Благодаря структуре $\operatorname{diag}(s)-ss^\top$ это стоит $O(K)$ операций вместо $O(K^2)$:</p>
+    <div class="eqd">$$\frac{\partial L}{\partial z}=J^{\top}g=s\odot\bigl(g-\langle g,s\rangle\,\mathbf 1\bigr)$$</div>
+    <p>Для словаря LLM с $K\approx10^5$ токенов это разница между $10^5$ и $10^{10}$ чисел на каждую позицию. А в паре с кросс-энтропией всё ещё проще: $\partial L/\partial z=s-y$ (вывод — на странице <a href='../cross-entropy/'>кросс-энтропии</a>).</p>
+
+    <h2 id="surface">3D-картина: softmax над плоскостью логитов</h2>
+    <p>Зафиксируем $z_3=0$ — это не теряет общности, ведь сдвигом любой логит можно сделать нулём, — и нарисуем $s_1$ как функцию двух переменных $z_1$ и $z_2$. Получается «рампа»: поверхность близка к 1, где $z_1$ больше и $z_2$, и нуля, и к 0 там, где первый класс проигрывает. Поперёк границы она поднимается по сигмоиде — это формула «один против всех» в действии.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-surface" data-config="{&quot;z&quot;: [2, 1]}"></div><figcaption><b>Рисунок 5.</b> Слева — $s_k(z_1,z_2,0)$ в 3D (поверхность можно вращать), чёрная точка — $z=(2;\,1;\,0)$ с $s_1\approx0{,}665$. Справа — плоскость логитов: заливка показывает класс-победитель и уверенность, линии — уровни $0{,}1$, $0{,}5$, $0{,}9$ выбранной функции. Точку можно перетаскивать. Переключитесь на $\partial s_1/\partial z_1$: это гребень высотой $0{,}25$ вдоль линии $s_1=0{,}5$.</figcaption></figure>
+    <p>Вид сверху делит плоскость логитов на три области. Границы — множества равных логитов: луч $z_1=z_2\ge0$ разделяет классы 1 и 2, луч $z_1=0$, $z_2\le0$ — классы 1 и 3, луч $z_2=0$, $z_1\le0$ — классы 2 и 3. Все три луча выходят из начала координат, где $s=(\tfrac13;\,\tfrac13;\,\tfrac13)$.</p>
+    <div class="callout note"><b>Где течёт градиент</b><p>Поверхность $\partial s_1/\partial z_1=s_1(1-s_1)$ почти плоская и почти нулевая в глубине «своей» и «чужой» областей. Градиент через softmax течёт только там, где модель сомневается, — вблизи границ.</p></div>
+
+    <h2 id="lse">Log-sum-exp: гладкий максимум</h2>
+    <p>У softmax есть «первообразная» — функция log-sum-exp:</p>
+    <div class="eqd">$$\operatorname{LSE}(z)=\ln\sum_{j=1}^{K}e^{z_j},\qquad\frac{\partial\operatorname{LSE}}{\partial z_i}=\frac{e^{z_i}}{\sum_j e^{z_j}}=s_i,\qquad\nabla\operatorname{LSE}(z)=\operatorname{softmax}(z)$$</div>
+    <p>LSE — гладкий максимум: наибольшая экспонента доминирует в сумме, и логарифм возвращает почти её показатель. Точнее,</p>
+    <div class="eqd">$$\max_j z_j\;\le\;\operatorname{LSE}(z)\;\le\;\max_j z_j+\ln K$$</div>
+    <p>Левое неравенство верно, потому что сумма не меньше своего наибольшего слагаемого, правое — потому что каждое из $K$ слагаемых не больше наибольшего. Для $(2;\,1;\,0)$: $\operatorname{LSE}=\ln11{,}107\approx2{,}408$ — между $2$ и $2+\ln3\approx3{,}099$. С температурой $\operatorname{LSE}_T(z)=T\ln\sum_j e^{z_j/T}$ зазор сжимается до $T\ln K$: при $T\to0$ LSE становится обычным максимумом, а его градиент $\operatorname{softmax}(z/T)$ — one-hot вектором argmax.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-lse" data-config="{&quot;T&quot;: 1, &quot;x&quot;: 1}"></div><figcaption><b>Рисунок 6.</b> Сверху — $\operatorname{LSE}_T(x,0)=T\ln(e^{x/T}+1)$ и $\max(x,0)$; зазор не больше $T\ln2$ и максимален при $x=0$. При $T=1$, $x=1$: $\operatorname{LSE}\approx1{,}3133$, зазор $0{,}3133$. Снизу — производная по $x$: это $\sigma(x/T)$, первая компонента $\operatorname{softmax}(x/T,\,0)$, гладкая ступенька. Уменьшайте $T$ — LSE прижимается к ломаной, а softmax — к ступеньке.</figcaption></figure>
+    <details class="deep"><summary>Выпуклость LSE и кросс-энтропии</summary><div class="deep-body">
+      <p>Гессиан LSE — это производная softmax, то есть та же матрица Якоби: $\nabla^2\operatorname{LSE}=\operatorname{diag}(s)-ss^\top$. Она неотрицательно определена, значит LSE — выпуклая функция. Отсюда выпуклость кросс-энтропии по логитам: $-\ln s_y=\operatorname{LSE}(z)-z_y$ — выпуклая функция минус линейная.</p>
+    </div></details>
+    <div class="callout key"><b>Три формулы, которые стоит связать</b><p>$\operatorname{softmax}=\nabla\operatorname{LSE}$; $\ln s_i=z_i-\operatorname{LSE}(z)$ (log-softmax); $\mathrm{CE}=\operatorname{LSE}(z)-z_y$. Для примера шпаргалки: $2{,}408-2=0{,}408$. А при $K=2$ и $z=(x;\,0)$ LSE превращается в softplus $\ln(1+e^{x})$ — гладкую версию <a href='../relu/'>ReLU</a>.</p></div>
+
+    <h2 id="training">Softmax в обучении</h2>
+    <p>Простейшая модель с softmax — многоклассовая логистическая (softmax-) регрессия: $K$ линейных функций дают логиты, softmax — вероятности, потеря — <a href='../cross-entropy/'>кросс-энтропия</a>:</p>
+    <div class="eqd">$$s=\operatorname{softmax}(Wx+b),\qquad L=-\ln s_y,\qquad\frac{\partial L}{\partial W}=(s-y)\,x^{\top},\qquad\frac{\partial L}{\partial b}=s-y$$</div>
+    <p>Здесь $y$ — one-hot вектор правильного класса. Вся матрица Якоби в паре с логарифмом сократилась до разности «предсказание − правда».</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-regression" data-config="{}"></div><figcaption><b>Рисунок 7.</b> Три класса по 30 точек. Модель начинает с $W=0$, $b=0$: все вероятности равны $\tfrac13$, $\mathrm{CE}=\ln3\approx1{,}099$, точность $33{,}3\%$. Нажмите «Пуск»: градиентный спуск с шагом $0{,}15$ по всей выборке. Уже после первого шага точность $94{,}4\%$, после 200 шагов $\mathrm{CE}\approx0{,}181$ и точность $95{,}6\%$. Яркость заливки — уверенность модели; наведите курсор, чтобы увидеть вероятности в любой точке.</figcaption></figure>
+    <div class="callout note"><b>Границы — прямые</b><p>Граница между классами $i$ и $j$ — множество, где $z_i=z_j$, то есть $(w_i-w_j)^\top x+b_i-b_j=0$: прямая (в общем случае гиперплоскость). Softmax не делает модель нелинейной — он только переводит баллы в вероятности. Кривые границы появляются, когда логиты считает нейросеть.</p></div>
+    <h3>Softmax внутри трансформера: внимание</h3>
+    <div class="eqd">$$\operatorname{Attention}(Q,K,V)=\operatorname{softmax}\Bigl(\frac{QK^{\top}}{\sqrt{d}}\Bigr)V$$</div>
+    <p>Каждая строка $\operatorname{softmax}(\cdot)$ — распределение внимания одного токена по всем остальным, сумма весов 1. Деление на $\sqrt d$ — это температура: скалярное произведение $d$-мерных векторов с независимыми компонентами нулевого среднего и единичной дисперсии имеет дисперсию $d$. Без масштабирования логиты внимания велики, softmax насыщается до почти one-hot, а матрица Якоби — и с ней градиенты — почти обнуляется.</p>
+    <h3>Температура при генерации текста</h3>
+    <p>Языковая модель выбирает следующий токен из $\operatorname{softmax}(z/T)$. При $T\to0$ (жадный выбор) берётся самый вероятный токен, при $T&lt;1$ текст предсказуемее, при $T&gt;1$ — разнообразнее и рискованнее. Температура $T&gt;1$ работает и при дистилляции знаний (Хинтон и др., 2015): «мягкие» вероятности учителя несут больше информации, чем one-hot метки.</p>
+    <div class="callout history"><b>Откуда название</b><p>Формула пришла из статистической физики: распределение Больцмана — Гиббса $p_i\propto e^{-E_i/(kT)}$ задаёт вероятность состояния с энергией $E_i$ при температуре $T$; логит играет роль энергии со знаком минус. Слово «softmax» предложил Джон Брайдл в 1990 году, описывая вероятностную интерпретацию выходов сети. В эконометрике та же модель называется мультиномиальным логитом.</p></div>
+
+    <h2 id="code">В коде: устойчивость, log-softmax и PyTorch</h2>
+    <p>Наивная формула ломается на больших логитах: $e^{1000}$ — бесконечность в любом формате с плавающей точкой, и получается $\infty/\infty=\text{NaN}$. Во float32, основном формате обучения на GPU, предел ближе: $e^{x}$ переполняется уже при $x&gt;88{,}72$ (наибольшее число float32 $\approx3{,}4\cdot10^{38}$). На очень отрицательных логитах беда обратная: экспоненты обнуляются, и выходит $0/0$.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-overflow" data-config="{&quot;c&quot;: 0}"></div><figcaption><b>Рисунок 8.</b> Логиты $(2+c;\,1+c;\,c)$ при $c$ от $-800$ до $800$; правильный ответ всегда $(0{,}665;\,0{,}245;\,0{,}090)$. Наивная формула во float32 верна только при $-99\le c\le86$: при $c=87$ число $e^{89}$ не помещается во float32 и получается NaN; при $c\le-106$ все экспоненты равны нулю, $0/0$; а между ними денормализованные числа теряют точность — при $c=-105$ выходит уверенный, но ложный ответ $(1;\,0;\,0)$. Во float64 запас больше ($-741\le c\le707$), но предел тоже есть. С вычитанием максимума ответ верен везде.</figcaption></figure>
+    <p>Лекарство — инвариантность к сдвигу: вычтем $m=\max_j z_j$. Наибольший показатель станет равен 0, $e^0=1$, знаменатель окажется между 1 и $K$ — ни переполнения, ни деления на ноль:</p>
+    <div class="eqd">$$s_i=\frac{e^{z_i-m}}{\sum_j e^{z_j-m}},\qquad\ln s_i=(z_i-m)-\ln\sum_j e^{z_j-m}$$</div>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+np.set_printoptions(precision=3)
+
+def softmax(z, axis=-1, T=1.0):
+    &quot;&quot;&quot;Устойчивый softmax: вычитаем максимум, результат не меняется.&quot;&quot;&quot;
+    z = np.asarray(z, dtype=float) / T
+    z = z - z.max(axis=axis, keepdims=True)
+    e = np.exp(z)
+    return e / e.sum(axis=axis, keepdims=True)
+
+def log_softmax(z, axis=-1):
+    # log s_i = z_i − logsumexp(z): без log(0) даже для крошечных вероятностей
+    z = np.asarray(z, dtype=float)
+    m = z.max(axis=axis, keepdims=True)
+    return z - m - np.log(np.exp(z - m).sum(axis=axis, keepdims=True))
+
+def softmax_backward(s, g):
+    # J^T g = s * (g − &lt;g, s&gt;): O(K) вместо матрицы K×K
+    return s * (g - (g * s).sum(axis=-1, keepdims=True))
+
+z = np.array([2.0, 1.0, 0.0])
+print(softmax(z))            # [0.665 0.245 0.09 ]
+print(softmax(z + 1000))     # [0.665 0.245 0.09 ] — сдвиг не важен
+print(softmax(z, T=0.5))     # [0.867 0.117 0.016] — острее
+print(log_softmax([0.0, -800.0]))  # [0. -800.], а np.log(softmax(...)) даст -inf</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn.functional as F
+
+z = torch.tensor([2.0, 1.0, 0.0], requires_grad=True)
+s = F.softmax(z, dim=-1)          # tensor([0.6652, 0.2447, 0.0900])
+s[0].backward()                   # первая строка матрицы Якоби
+print(z.grad)                     # tensor([ 0.2227, -0.1628, -0.0599])
+
+# Для обучения softmax отдельно не нужен:
+logits = torch.randn(4, 3)        # батч: 4 примера, 3 класса
+target = torch.tensor([0, 2, 1, 0])
+loss = F.cross_entropy(logits, target)   # внутри — log_softmax + NLL
+log_p = F.log_softmax(logits, dim=-1)    # если нужны логарифмы вероятностей</code></pre>
+    <div class="callout key"><b>Правило</b><p>Если дальше идёт логарифм, не считайте $\ln(\operatorname{softmax}(z))$ в два шага: маленькая вероятность округлится до 0, и получится $-\infty$. Используйте <code>log_softmax</code> или сразу потерю на логитах: <code>F.cross_entropy</code> / <code>nn.CrossEntropyLoss</code> в PyTorch, <code>from_logits=True</code> в Keras.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>Softmax перед <code>nn.CrossEntropyLoss</code></b>. Эта потеря ждёт логиты и сама применяет log-softmax. Двойной softmax зажимает вероятности: для трёх классов второй softmax не даёт больше $e/(e+2)\approx0{,}576$, потеря не опускается ниже $0{,}551$, градиенты искажены.</li><li><b>Не та ось</b>. Для батча формы $(N,K)$ нормировать нужно по классам (<code>dim=-1</code>), а не по примерам (<code>dim=0</code>). Исключения не будет — модель просто учит бессмыслицу.</li><li><b>Наивная экспонента</b> без вычитания максимума — NaN на больших логитах, особенно в смешанной точности: во float16 $e^{x}$ переполняется уже при $x&gt;11{,}09$.</li><li><b>Softmax для multi-label</b>. Если у объекта может быть несколько меток сразу (кот <i>и</i> собака на фото), классы не конкурируют — нужна сигмоида на каждом выходе и <a href='../bce/'>BCE</a>.</li><li><b>Вероятность softmax как гарантия</b>. $s_{\max}=0{,}99$ не значит «прав в 99% случаев»: глубокие сети часто переуверены. Калибровка — отдельная задача; простейший способ — temperature scaling, подбор одного $T$ на валидации.</li><li><b>Сравнение логитов разных примеров</b>. Логиты определены с точностью до сдвига, поэтому «логит 5 у одного примера больше, чем 3 у другого» ничего не значит. Сравнивайте вероятности или разности логитов внутри одного примера.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href='../sigmoid/'>Сигмоида</a>: $\operatorname{softmax}(z_1,z_2)_1=\sigma(z_1-z_2)$, а диагональ якобиана $s_i(1-s_i)$ — производная сигмоиды.</li><li><a href='../cross-entropy/'>Кросс-энтропия</a>: естественная пара softmax; вместе дают градиент $s-y$, а $\mathrm{CE}=\operatorname{LSE}(z)-z_y$.</li><li><a href='../bce/'>BCE</a>: частный случай кросс-энтропии для двух классов, где softmax сводится к сигмоиде.</li><li><a href='../focal/'>Focal Loss</a>: домножает $-\ln p_t$ на $(1-p_t)^\gamma$, где $p_t$ — softmax-вероятность правильного класса.</li><li><a href='../relu/'>ReLU</a>: softplus $\ln(1+e^{x})=\operatorname{LSE}(x,0)$ — гладкий вариант $\max(x,0)$.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $s_i=e^{z_i}/\sum_je^{z_j}$ превращает любые логиты в распределение на $K$ классах и сохраняет порядок. 2) Важны только разности логитов: $s_i/s_j=e^{z_i-z_j}$, сдвиг ничего не меняет — отсюда устойчивая формула с вычитанием максимума. 3) Температура управляет остротой: $T\to0$ — argmax, $T\to\infty$ — равномерное распределение. 4) Якобиан $\operatorname{diag}(s)-ss^\top$ симметричен, вырожден и затухает при уверенности; обратный проход стоит $O(K)$. 5) Softmax — градиент гладкого максимума LSE, а в паре с кросс-энтропией даёт градиент $s-y$.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Логиты $(2;\,1;\,0)$ дают $s\approx(0{,}665;\,0{,}245;\,0{,}090)$. Что даст $(102;\,101;\,100)$?</legend><div class="opts"><button type="button" data-ok="0">Почти $(1;\,0;\,0)$</button><button type="button" data-ok="1">$(0{,}665;\,0{,}245;\,0{,}090)$</button><button type="button" data-ok="0">$(\tfrac13;\,\tfrac13;\,\tfrac13)$</button><button type="button" data-ok="0">Ответа нет: переполнение</button></div><div class="explain" hidden>Общая константа $100$ сокращается: softmax зависит только от разностей. (Наивный код во float32 здесь действительно переполнится — поэтому и вычитают максимум.)</div></fieldset><fieldset class="q"><legend>2. Что происходит с $\operatorname{softmax}(z/T)$ при $T\to0$?</legend><div class="opts"><button type="button" data-ok="0">Стремится к равномерному распределению</button><button type="button" data-ok="1">Стремится к one-hot вектору наибольшего логита</button><button type="button" data-ok="0">Не меняется</button><button type="button" data-ok="0">Все вероятности стремятся к 0</button></div><div class="explain" hidden>Разности логитов делятся на малое $T$ и растут, вся масса уходит к максимальному логиту (если он единственный).</div></fieldset><fieldset class="q"><legend>3. Чему равен $\operatorname{softmax}(z_1,z_2)_1$?</legend><div class="opts"><button type="button" data-ok="0">$\sigma(z_1)$</button><button type="button" data-ok="1">$\sigma(z_1-z_2)$</button><button type="button" data-ok="0">$\sigma(z_1+z_2)$</button><button type="button" data-ok="0">$z_1/(z_1+z_2)$</button></div><div class="explain" hidden>Разделите числитель и знаменатель $e^{z_1}/(e^{z_1}+e^{z_2})$ на $e^{z_1}$: получится $1/(1+e^{-(z_1-z_2)})$.</div></fieldset><fieldset class="q"><legend>4. Чему равна сумма элементов любого столбца матрицы Якоби softmax?</legend><div class="opts"><button type="button" data-ok="0">1</button><button type="button" data-ok="1">0</button><button type="button" data-ok="0">$s_j$</button><button type="button" data-ok="0">$\tfrac14$</button></div><div class="explain" hidden>$\sum_i\partial s_i/\partial z_j=\partial\bigl(\sum_i s_i\bigr)/\partial z_j=\partial1/\partial z_j=0$.</div></fieldset><fieldset class="q"><legend>5. Зачем в устойчивом softmax вычитают $\max_j z_j$?</legend><div class="opts"><button type="button" data-ok="0">Чтобы распределение стало острее</button><button type="button" data-ok="1">Чтобы экспонента не переполнялась; результат не меняется</button><button type="button" data-ok="0">Чтобы сумма стала равна 1</button><button type="button" data-ok="0">Чтобы обучение шло быстрее</button></div><div class="explain" hidden>После вычитания наибольший показатель равен 0, знаменатель лежит между 1 и $K$, а по инвариантности к сдвигу ответ тот же.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../leaky-relu/"><span class="kicker">← Предыдущая формула</span><span class="big">Leaky ReLU</span><span class="kicker">«протекающий» ReLU</span></a>
+<a class="next" href="../mae/"><span class="kicker">Следующая формула →</span><span class="big">MAE</span><span class="kicker">mean absolute error</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

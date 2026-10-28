@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tanh: the hyperbolic tangent — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="Tanh in depth: the formula through exponentials, sinh and cosh, the link to the sigmoid, the derivative, the Taylor series, zero-centring and SGD, a tanh network in 3D, activation distributions, RNN and LSTM, stable code.">
+  <meta property="og:title" content="Tanh: the hyperbolic tangent — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="Tanh in depth: the formula through exponentials, sinh and cosh, the link to the sigmoid, the derivative, the Taylor series, zero-centring and SGD, a tanh network in 3D, activation distributions, RNN and LSTM, stable code.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/tanh/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/tanh/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/tanh/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/tanh/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/tanh.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/tanh/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/tanh/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/tanh/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Activation functions</span>
+  <h1>Tanh: the hyperbolic tangent</h1>
+  <p class="dek">An S-shaped function centred at zero. We take it apart bone by bone: which exponentials it is built from, why it is a “stretched sigmoid”, where the derivative 1 − tanh² comes from, why a neuron wants zero-centred outputs, and what tanh does to the gradient in deep and recurrent networks.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: a sigmoid standing on zero</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties and shape</a>
+      <a href="#derivative"><span class="n">5</span>The derivative: tanh′ = 1 − tanh²</a>
+      <a href="#centered"><span class="n">6</span>Zero-centring: why tanh trains better than the sigmoid</a>
+      <a href="#space"><span class="n">7</span>Tanh on the plane: folds, ridges and hills</a>
+      <a href="#training"><span class="n">8</span>Tanh in training: activations through layers and curve fitting</a>
+      <a href="#rnn"><span class="n">9</span>Tanh in recurrent networks and LSTM</a>
+      <a href="#code"><span class="n">10</span>In code: stable and without surprises</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#links"><span class="n">12</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\tanh(x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p>The sigmoid turns a number into a share between 0 and 1. Inside a network, though, we often need not a share but a <i>signed signal</i>: “above normal” or “below normal”, “amplify” or “damp”. The hyperbolic tangent is the same smooth S-curve, but with outputs in $(-1,\,1)$ and its centre at zero.</p>
+    <p>Where it appears:</p>
+    <ul class="flist"><li><b>recurrent networks</b> — in a plain RNN $h_t=\tanh(Wh_{t-1}+Ux_t+b)$; in LSTM and GRU, tanh produces the candidate for the memory and bounds the cell’s output;</li><li><b>hidden layers of classic networks</b> — before the ReLU era tanh was the standard, and it is still good in small networks and physics-informed models (PINN) where smoothness matters;</li><li><b>a generator’s output</b> — if images are normalized to $[-1,\,1]$, the last layer of a GAN generator (DCGAN, for example) uses tanh;</li><li><b>bounding actions and logits</b> — in reinforcement learning (SAC) actions are squashed into $(-1,\,1)$ with tanh, and Gemma 2 “soft-caps” its logits: $c\cdot\tanh(z/c)$;</li><li><b>inside other activations</b> — the popular approximation of <a href='../gelu/'>GELU</a> is written through tanh.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>$\tanh$ squeezes the whole real line into $(-1,\,1)$, passes through the origin and is odd: $\tanh(-x)=-\tanh x$. It is a stretched sigmoid: $\tanh x=2\sigma(2x)-1$. Its derivative $1-\tanh^2x$ never exceeds 1 — four times the sigmoid’s maximum — but on the tails tanh saturates just the same, and the gradient fades.</p></div>
+
+    <h2 id="intuition">Intuition: a sigmoid standing on zero</h2>
+    <p>Picture a volume knob with a sign: zero is silence, turning right makes it louder, turning left makes it louder in antiphase. As long as you stay near zero, the output faithfully follows the input: $\tanh x\approx x$. Further out the knob gets stiffer: the output runs into $\pm1$ and stops growing. This is <b>saturation</b>.</p>
+    <p>Drag the point. The orange line is the tangent; its slope is the derivative. The grey dashed curve is the sigmoid: the same shape, but shifted up, half as tall and four times flatter.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-explorer" data-config="{&quot;x&quot;: 1}"></div><figcaption><b>Figure 1.</b> tanh, its tangent and its derivative (below). Drag the blue point, or use the arrow keys when it has focus. The maximum of the derivative is $1$ at $x=0$; for the sigmoid it is $0.25$. At $x=1$: $\tanh 1=0.7616$, $\tanh' 1=0.4200$.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>At $x=2$ tanh is already $0.964$, while the derivative is only $0.071$, 14 times smaller than at the centre. For $|x|&gt;2.99$ the derivative drops below $0.01$: the input keeps growing while the output barely moves.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <p>The formula holds two exponentials: the growing $e^{x}$ and the decaying $e^{-x}$. The numerator is their difference, the denominator their sum. Halves of these expressions have names of their own — the hyperbolic sine and cosine:</p>
+    <div class="eqd">$$\begin{aligned}\sinh x&amp;=\frac{e^{x}-e^{-x}}{2}\\[4pt]\cosh x&amp;=\frac{e^{x}+e^{-x}}{2}\\[4pt]\tanh x&amp;=\frac{\sinh x}{\cosh x}\end{aligned}$$</div>
+    <dl class="symbols"><dt>$e^{x}-e^{-x}$</dt><dd>the difference is odd: it changes sign under $x\to-x$; for $x&gt;0$ it is positive;</dd><dt>$e^{x}+e^{-x}$</dt><dd>the sum is always positive and at least 2 — the denominator never vanishes;</dd><dt>$|\sinh x|&lt;\cosh x$</dt><dd>the difference is always smaller in absolute value than the sum, hence $|\tanh x|&lt;1$;</dd><dt>$x\to\pm\infty$</dt><dd>one of the exponentials becomes negligible, and the fraction tends to $\pm1$.</dd></dl>
+    <p>Multiplying the numerator and the denominator by $e^{x}$ or by $e^{-x}$ gives forms convenient for computation, and the last form links tanh to the sigmoid:</p>
+    <div class="eqd">$$\begin{aligned}\tanh x&amp;=\frac{e^{2x}-1}{e^{2x}+1}=\frac{1-e^{-2x}}{1+e^{-2x}}\\[4pt]&amp;=2\sigma(2x)-1\end{aligned}$$</div>
+    <figure class="viz"><div class="fv" data-viz="tanh-construction" data-config="{&quot;x&quot;: 1, &quot;t&quot;: 3}"></div><figcaption><b>Figure 2.</b> Left: $\sinh$ and $\cosh$ are the half-difference and the half-sum of the exponentials; tanh is their ratio. At $x_0=1$: $\sinh 1=1.175$, $\cosh 1=1.543$, the ratio is $0.7616=\tanh 1$. Right: press “Play” — the sigmoid turns into tanh in three steps: squeeze it horizontally by 2, stretch it vertically by 2, lower it by 1.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\tanh x$</th><th class=num>$\tanh' x$</th><th class=num>$\sigma(x)$</th></tr></thead><tbody><tr><td class=num>−3</td><td class=num>−0.9951</td><td class=num>0.0099</td><td class=num>0.0474</td></tr><tr><td class=num>−2</td><td class=num>−0.9640</td><td class=num>0.0707</td><td class=num>0.1192</td></tr><tr><td class=num>−1</td><td class=num>−0.7616</td><td class=num>0.4200</td><td class=num>0.2689</td></tr><tr><td class=num>−0.5</td><td class=num>−0.4621</td><td class=num>0.7864</td><td class=num>0.3775</td></tr><tr><td class=num>0</td><td class=num>0.0000</td><td class=num>1.0000</td><td class=num>0.5000</td></tr><tr><td class=num>0.5</td><td class=num>0.4621</td><td class=num>0.7864</td><td class=num>0.6225</td></tr><tr><td class=num>1</td><td class=num>0.7616</td><td class=num>0.4200</td><td class=num>0.7311</td></tr><tr><td class=num>2</td><td class=num>0.9640</td><td class=num>0.0707</td><td class=num>0.8808</td></tr><tr><td class=num>3</td><td class=num>0.9951</td><td class=num>0.0099</td><td class=num>0.9526</td></tr></tbody></table></div>
+    <p>The table shows the oddness, $\tanh(-x)=-\tanh x$, while the derivative is an even function. The sigmoid is listed for comparison: its values are symmetric not about zero but about $0.5$.</p>
+
+    <h2 id="properties">Properties and shape</h2>
+    <ul class="flist"><li><b>Domain</b>: all real numbers; <b>range</b>: the open interval $(-1,\,1)$ — the values $\pm1$ are never reached.</li><li><b>Oddness</b>: $\tanh(-x)=-\tanh x$; the graph is symmetric about the origin, $\tanh 0=0$.</li><li><b>Monotonicity</b>: strictly increasing, since $\tanh' x=1-\tanh^2x&gt;0$ for every $x$.</li><li><b>Asymptotes</b>: $\lim_{x\to\pm\infty}\tanh x=\pm1$.</li><li><b>Inflection point</b>: a single one, at $x=0$; the function is convex for $x&lt;0$ and concave for $x&gt;0$.</li><li><b>Lipschitz with constant 1</b>: $|\tanh a-\tanh b|\le|a-b|$; in particular $|\tanh x|\le|x|$, with equality only at $x=0$.</li><li><b>Almost the identity near zero</b>: $\tanh x=x-\tfrac{x^3}{3}+\dots$ — with small weights a tanh network behaves almost linearly.</li></ul>
+    <details class="deep"><summary>Why tanh x = 2σ(2x) − 1</summary><div class="deep-body">
+      <p>Substitute the definition of the sigmoid $\sigma(u)=1/(1+e^{-u})$ with $u=2x$:</p>
+      <div class="eqd">$$2\sigma(2x)-1=\frac{2}{1+e^{-2x}}-\frac{1+e^{-2x}}{1+e^{-2x}}=\frac{1-e^{-2x}}{1+e^{-2x}}=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}=\tanh x$$</div>
+      <p>In the second-to-last step the numerator and the denominator are multiplied by $e^{x}$. Conversely, $\sigma(x)=\tfrac12\bigl(1+\tanh\tfrac x2\bigr)$. So a network with tanh hidden units can be rewritten as one with sigmoid hidden units of the same expressive power — only the weight scales and biases change. The difference lies in how training goes (see the section on centring).</p>
+    </div></details>
+    <details class="deep"><summary>The inverse function and the addition formula</summary><div class="deep-body">
+      <p>Solve $y=\tanh x$ for $x$: from $y=\frac{e^{2x}-1}{e^{2x}+1}$ we get $e^{2x}=\frac{1+y}{1-y}$, hence</p>
+      <div class="eqd">$$\operatorname{artanh}y=\frac12\ln\frac{1+y}{1-y},\qquad -1&lt;y&lt;1$$</div>
+      <p>For example, $\operatorname{artanh}0.5\approx0.549$. Another useful identity is the addition formula:</p>
+      <div class="eqd">$$\tanh(a+b)=\frac{\tanh a+\tanh b}{1+\tanh a\,\tanh b}$$</div>
+      <p>This is exactly the relativistic addition of velocities (as fractions of the speed of light): $0.5c$ and $0.5c$ give not $c$ but $\frac{0.5+0.5}{1+0.25}c=0.8c$. In the “world of tanh” the sum of two numbers from $(-1,\,1)$ never leaves it.</p>
+    </div></details>
+    <h3>A soft limiter: c · tanh(x / c)</h3>
+    <p>Near zero the function $c\tanh(x/c)$ barely changes its input ($\approx x$), while large values are smoothly pressed towards $\pm c$. Unlike the hard cut $\operatorname{clip}(x,-c,c)$, it has no kinks, and its derivative never drops to zero abruptly. Gemma 2 bounds its attention logits ($c=50$) and final logits ($c=30$) this way, so that they do not blow up during training.</p>
+
+    <h2 id="derivative">The derivative: tanh′ = 1 − tanh²</h2>
+    <p>The key formula of the page. Let us derive it in three ways — each one is useful somewhere else.</p>
+    <details class="deep"><summary>Method 1. The quotient rule</summary><div class="deep-body">
+      <p>Let $u=e^{x}-e^{-x}$ and $v=e^{x}+e^{-x}$. Then $u'=v$ and $v'=u$, and by the quotient rule:</p>
+      <div class="eqd">$$\tanh' x=\frac{u'v-uv'}{v^{2}}=\frac{v^{2}-u^{2}}{v^{2}}=1-\Bigl(\frac{u}{v}\Bigr)^{2}=1-\tanh^{2}x$$</div>
+    </div></details>
+    <details class="deep"><summary>Method 2. Through the fundamental hyperbolic identity</summary><div class="deep-body">
+      <p>For hyperbolic functions $\cosh^2x-\sinh^2x=1$ (check it by substituting the exponentials), $\sinh' x=\cosh x$ and $\cosh' x=\sinh x$. Then</p>
+      <div class="eqd">$$\tanh' x=\frac{\cosh x\cdot\cosh x-\sinh x\cdot\sinh x}{\cosh^{2}x}=\frac{1}{\cosh^{2}x}=\operatorname{sech}^{2}x$$</div>
+      <p>Dividing the identity by $\cosh^2x$ gives $1-\tanh^2x=\operatorname{sech}^2x$ — the same formula in another notation. The $\operatorname{sech}^2$ form is useful in code for large $|x|$.</p>
+    </div></details>
+    <details class="deep"><summary>Method 3. Through the sigmoid</summary><div class="deep-body">
+      <p>From $\tanh x=2\sigma(2x)-1$ by the chain rule:</p>
+      <div class="eqd">$$\tanh' x=2\cdot\sigma'(2x)\cdot2=4\sigma(2x)\bigl(1-\sigma(2x)\bigr)$$</div>
+      <p>This shows at once why the maximum of the derivative is $4\cdot\tfrac14=1$ rather than $\tfrac14$ as for the sigmoid: twice the output range and a twice-compressed input scale give a factor of 4.</p>
+    </div></details>
+    <div class="eqd">$$\tanh' x=1-\tanh^{2}x$$</div>
+    <p>In practice: on the forward pass the network has already computed $t=\tanh z$. On the backward pass the derivative costs a single multiplication $1-t^2$ — no new exponentials. That is why frameworks keep the output of tanh, not its input, for the backward pass.</p>
+    <h3>The second derivative and the sharpest bends</h3>
+    <p>Differentiating once more: $\tanh'' x=-2\tanh x\,(1-\tanh^2x)$. It vanishes only at $x=0$ (the inflection point), and its extrema are at $\tanh^2x=\tfrac13$, i.e. $x=\pm\operatorname{artanh}\tfrac{1}{\sqrt3}\approx\pm0.658$, with values $\mp\tfrac{4}{3\sqrt3}\approx\mp0.770$. On $[-0.66,\,0.66]$ tanh is still nearly straight; beyond that its slope falls quickly.</p>
+    <h3>The Taylor series around zero</h3>
+    <div class="eqd">$$\tanh x=x-\frac{x^{3}}{3}+\frac{2x^{5}}{15}-\frac{17x^{7}}{315}+\frac{62x^{9}}{2835}-\dots,\qquad |x|&lt;\frac{\pi}{2}$$</div>
+    <p>The series converges only for $|x|&lt;\pi/2\approx1.571$: the denominator $\cosh x$ vanishes at the complex points $x=\pm i\pi/2$, and the radius of convergence equals the distance to the nearest one. That is half the sigmoid’s radius ($\pi$), since tanh is squeezed horizontally by a factor of 2.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-taylor" data-config="{&quot;order&quot;: 3, &quot;x&quot;: 1}"></div><figcaption><b>Figure 3.</b> Taylor polynomials of orders 1–9 and the convergence band $|x|&lt;\pi/2$. At $x=1$ the third-order approximation gives $0.6667$ instead of $0.7616$, and the ninth-order one gives $0.7679$. At $x=2$, outside the band, the polynomials diverge: order 3 gives $-0.667$, order 9 already $7.889$.</figcaption></figure>
+
+    <h2 id="centered">Zero-centring: why tanh trains better than the sigmoid</h2>
+    <p>Consider a neuron of the next layer: $z=\sum_i w_ia_i+b$, where $a_i$ are the outputs of the previous layer. The gradient of the loss with respect to a weight is</p>
+    <div class="eqd">$$\frac{\partial L}{\partial w_i}=\delta\cdot a_i,\qquad \delta=\frac{\partial L}{\partial z}$$</div>
+    <p>If all $a_i&gt;0$ (sigmoid outputs), then on a single example <b>all components of the gradient share one sign</b> — the sign of $\delta$. An SGD step moves all the neuron’s weights either up or down. If reaching the optimum requires raising some weights and lowering others, the only way is to zigzag.</p>
+    <p>A second view is through the shape of the loss surface. For a linear layer with MSE the Hessian is $\mathbb E[aa^\top]=\operatorname{Cov}(a)+\mu\mu^\top$, where $\mu$ is the mean input. A non-zero mean adds one large eigenvalue along $\mu$, and the “valley” stretches. For the inputs $\sigma(z)$ below the eigenvalues are $0.034$ and $0.530$ (condition number 15.5); for $\tanh(z)$ they are $0.340$ and $0.415$ (1.22).</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-zigzag" data-config="{&quot;steps&quot;: 50}"></div><figcaption><b>Figure 4.</b> We train the two weights $w=(w_1,\,w_2)$ of a linear neuron on 100 examples; the inputs are $\sigma(z)$ on the left and $\tanh(z)$ on the right, for the same random $z$. SGD with step $0.5$ starts at $(-1,\,1)$ and heads for $w^*=(1,\,-1)$. On the left every step points “up-right” or “down-left” (the teal quadrants), and the path saws across the valley; on the right it goes almost straight. After 50 steps the distance to the optimum is $1.252$ versus $0.000$; an accuracy of $0.1$ takes 194 steps versus 21.</figcaption></figure>
+    <div class="callout key"><b>Takeaway</b><p>Zero-centred activations make the next layer’s loss surface “rounder”, and gradient descent heads for the minimum more directly. This is one reason tanh in hidden layers trains faster than the sigmoid (LeCun et al., “Efficient BackProp”, 1998). The same idea underlies input normalization and BatchNorm.</p></div>
+
+    <h2 id="space">Tanh on the plane: folds, ridges and hills</h2>
+    <p>A neuron with two inputs computes $\tanh(w_1x_1+w_2x_2+b)$. On the plane this is a <b>fold</b>: the surface goes from $-1$ to $+1$ across the line $w^\top x+b=0$ and stays constant along it. The sum of two opposite folds gives a <b>ridge</b>, and four folds plus one more tanh at the output give a <b>hill</b> that differs from $-1$ only inside a square.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-surface" data-config="{&quot;mode&quot;: &quot;four&quot;, &quot;k&quot;: 2}"></div><figcaption><b>Figure 5.</b> A small tanh network. “1 neuron” is $\tanh(k(0.8x_1+0.6x_2))$; “2 neurons” is $\tanh(k(x_1+1))-\tanh(k(x_1-1))-1$; “4 + output” is the sum $s$ of four such folds along $x_1$ and $x_2$, followed by $\tanh(2(s-3))$. At $k=2$ the top of the hill is $f(0,\,0)=0.937$, and far away $f=-1.000$. The dashed lines are where the input of each hidden neuron is zero.</figcaption></figure>
+    <p>This is how the <b>universal approximation theorem</b> works (Cybenko, 1989; Hornik, 1991): a network with one hidden layer of sufficiently many tanh neurons approximates any continuous function on a closed bounded set to any accuracy. Hills are made of folds, and any landscape can be made of hills. The theorem says such weights <i>exist</i>, but not how many neurons are needed or whether training will find them.</p>
+
+    <h2 id="training">Tanh in training: activations through layers and curve fitting</h2>
+    <h3>What happens to the signal in a deep network</h3>
+    <p>Let the weights of each layer be random with variance $g^2/n$, where $n$ is the number of inputs of a neuron. If $g$ is small, the signal fades from layer to layer and tanh acts almost linearly. If $g$ is large, the neurons’ inputs are large and tanh goes into saturation: outputs stick to $\pm1$ and the derivatives are almost zero.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-layers" data-config="{&quot;act&quot;: &quot;tanh&quot;, &quot;g&quot;: 1}"></div><figcaption><b>Figure 6.</b> A random network of 10 layers of 100 neurons with inputs $N(0,1)$; each layer shows a histogram of 2000 activations (20 examples × 100 neurons), the orange point is the mean. tanh with $g=1$: the mean of the last layer is $0.013$, and the spread gradually shrinks to $0.225$; with $g=0.5$ the signal fades: the spread drops to $0.001$; with $g=3$ almost half the neurons are saturated ($48\%$ of values with $|a|&gt;0.95$). With $g=5/3$ the spread stays around $0.65$, with $10\%$ saturated. For the sigmoid the mean on every layer is about $0.5$ ($0.516$ on the last one) — the outputs are not centred.</figcaption></figure>
+    <p>Hence the recommended initialization for tanh is Xavier–Glorot ($\operatorname{Var}w=\frac{2}{n_\text{in}+n_\text{out}}$) with gain $g=5/3$ (in PyTorch, <code>calculate_gain('tanh')</code>): the factor compensates for tanh squeezing the signal.</p>
+    <h3>A tanh network fits a curve</h3>
+    <p>A hidden layer of $H$ neurons and a linear output: $\hat y(x)=\sum_{k=1}^{H}v_k\tanh(w_kx+b_k)+c$. Each term is a “step” with smooth edges; training moves, stretches and scales the steps until their sum lies on the data.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-fit" data-config="{&quot;h&quot;: 5}"></div><figcaption><b>Figure 7.</b> 40 points of $y=0.8\sin(2.2x)+0.3x$ with noise ($\sigma=0.08$), full-batch gradients and <a href='../adam/'>Adam</a> with step $0.05$. The teal curves are the contributions of individual neurons, the blue one is their sum. With 5 neurons the MSE drops from $1.059$ to a plateau of $0.038$ (step 400); then one neuron “finds its role”, and by step 800 the error is $0.0041$. With 3 neurons the network gets stuck at $0.106$; with 8 it reaches $0.0039$ by step 400.</figcaption></figure>
+    <div class="callout note"><b>A plateau means saturation</b><p>Long plateaus on the loss curve often mean that some neurons work on the flat tails of tanh: their derivative is small, and the gradient barely moves their parameters. Input normalization, careful initialization and adaptive optimizers such as Adam help.</p></div>
+
+    <h2 id="rnn">Tanh in recurrent networks and LSTM</h2>
+    <p>A plain recurrent network updates its state with the same formula at every step: $h_t=\tanh(Wh_{t-1}+Ux_t+b)$. Here tanh works as a fuse: however long the text, the state stays in $(-1,\,1)$ and does not “explode”. But boundedness is paid for with the gradient:</p>
+    <div class="eqd">$$\frac{\partial h_T}{\partial h_t}=\prod_{s=t+1}^{T}\operatorname{diag}\bigl(1-h_s^{2}\bigr)\,W$$</div>
+    <p>Every factor contains $1-h_s^2\le1$. If the weights are small, the product decays exponentially. If the weights are large, the states are pressed against $\pm1$, $1-h_s^2\to0$ — and the gradient fades too. It survives only in a narrow window between these regimes.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-rnn" data-config="{&quot;w&quot;: 1}"></div><figcaption><b>Figure 8.</b> A scalar RNN $h_t=\tanh(wh_{t-1}+x_t)$, 30 steps, inputs $x_t\sim N(0,\,0.2^2)$ (grey bars). Below: $|\partial h_{30}/\partial h_t|$ on a log scale. With $w=1$ the gradient from the first step to the last shrinks to $3.1\cdot10^{-4}$; with $w=0.5$ to $5.7\cdot10^{-11}$; with $w=1.2$ to $1.3\cdot10^{-3}$; and with $w=2$ and $w=3$, when the state is saturated, to $7.2\cdot10^{-18}$ and $1.6\cdot10^{-38}$.</figcaption></figure>
+    <p>LSTM solves this with a separate “highway” — the cell state $c_t$, which is updated by addition rather than through tanh:</p>
+    <div class="eqd">$$\begin{aligned}g_t&amp;=\tanh\bigl(W_g[h_{t-1},x_t]+b_g\bigr)\\c_t&amp;=f_t\odot c_{t-1}+i_t\odot g_t\\h_t&amp;=o_t\odot\tanh(c_t)\end{aligned}$$</div>
+    <p>Here $f_t,i_t,o_t\in(0,\,1)$ are gates built on <a href='../sigmoid/'>sigmoids</a>, and tanh plays two roles: the candidate $g_t\in(-1,\,1)$ can both increase and decrease the memory (a sigmoid could only add), and $\tanh(c_t)$ bounds the output. Along the chain $c_{t-1}\to c_t$ the gradient is multiplied by $f_t$, with no $\tanh'$ factor, so with $f_t\approx1$ it reaches distant steps.</p>
+    <div class="callout history"><b>A bit of history</b><p>In 1998 Yann LeCun recommended the scaled tangent $1.7159\tanh(2x/3)$: it gives $f(\pm1)=\pm1$ and an output variance close to one. LSTM (Hochreiter and Schmidhuber, 1997) made tanh the standard of recurrent networks for two decades. In convolutional networks it was displaced by <a href='../relu/'>ReLU</a>: in AlexNet (2012) a ReLU network reached 25% training error on CIFAR-10 six times faster than one with tanh.</p></div>
+
+    <h2 id="code">In code: stable and without surprises</h2>
+    <p>The naive formula through exponentials computes $e^{1000}=\infty$ at $x=1000$, and the result is $\infty/\infty=\text{nan}$. The built-in <code>np.tanh</code> and <code>torch.tanh</code> are stable: for $x\gtrsim19$ they return exactly $1.0$ in float64. But then $1-\tanh^2 x$ gives exactly 0, although the true value at $x=20$ is about $1.7\cdot10^{-17}$. If you need the derivative on the far tails, compute it through $\operatorname{sech}^2$ in a stable form.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def tanh_grad_from_output(t):
+    &quot;&quot;&quot;The derivative from the already computed output t = tanh(x): one multiplication.&quot;&quot;&quot;
+    return 1.0 - t * t
+
+def tanh_grad(x):
+    &quot;&quot;&quot;sech²x = 4e^(−2|x|) / (1 + e^(−2|x|))²:
+    no overflow and no loss of precision.&quot;&quot;&quot;
+    e = np.exp(-2.0 * np.abs(x))
+    return 4.0 * e / (1.0 + e) ** 2
+
+def naive_tanh(x):
+    return (np.exp(x) - np.exp(-x)) / (np.exp(x) + np.exp(-x))
+
+print(naive_tanh(1000.0))       # nan: inf / inf (plus an overflow warning)
+print(np.tanh(1000.0))          # 1.0 — the built-in function is stable
+print(1 - np.tanh(20.0) ** 2)   # 0.0: tanh(20) rounds to 1 in float64
+print(tanh_grad(20.0))          # 1.699e-17 — the correct value</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+x = torch.tensor([-2.0, 0.0, 2.0], requires_grad=True)
+y = torch.tanh(x)               # tensor([-0.9640,  0.0000,  0.9640])
+y.sum().backward()
+print(x.grad)                   # tensor([0.0707, 1.0000, 0.0707]) = 1 − tanh²
+
+# Initialization for tanh: gain 5/3
+layer = nn.Linear(256, 256)
+nn.init.xavier_uniform_(layer.weight, gain=nn.init.calculate_gain(&quot;tanh&quot;))
+
+# A recurrent network with tanh and gradient clipping against explosions
+rnn = nn.RNN(input_size=32, hidden_size=64, nonlinearity=&quot;tanh&quot;, batch_first=True)
+out, h = rnn(torch.randn(8, 100, 32))   # 8 sequences of length 100
+out.pow(2).mean().backward()
+nn.utils.clip_grad_norm_(rnn.parameters(), max_norm=1.0)</code></pre>
+    <div class="callout key"><b>The rule</b><p>Use the built-in tanh and automatic differentiation; on the backward pass, the formula $1-t^2$ from the stored output. For tanh networks, Xavier initialization with gain $5/3$; for RNNs, gradient-norm clipping.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>tanh at the output instead of the sigmoid for a probability.</b> The output of tanh lies in $(-1,\,1)$ and is not a probability. Binary classification needs the <a href='../sigmoid/'>sigmoid</a> and <a href='../bce/'>BCE</a>; tanh at the output is appropriate when the targets are scaled to $[-1,\,1]$.</li><li><b>The derivative of the input instead of the output.</b> The formula $1-t^2$ applies to the <i>output</i> $t=\tanh x$. A common slip is $1-x^2$ of the input: at $x=2$ it gives $-3$ instead of $0.071$.</li><li><b>Unnormalized inputs and large weights.</b> If the features are in the hundreds or the weights are too large, tanh is saturated from the first steps and hardly learns. Standardize the data and use an initialization meant for tanh.</li><li><b>“tanh solves vanishing gradients”.</b> It is better than the sigmoid (a derivative up to 1 and centring), but it saturates too. For deep networks use the ReLU family, normalization and residual connections; for sequences, LSTM/GRU.</li><li><b>A home-made tanh through exp.</b> It returns nan for large $|x|$. Use <code>np.tanh</code> or <code>torch.tanh</code>.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href='../sigmoid/'>Sigmoid</a>: $\tanh x=2\sigma(2x)-1$ and $\sigma(x)=\tfrac12(1+\tanh\tfrac x2)$; the derivatives are related by $\tanh' x=4\sigma'(2x)$.</li><li><a href='../relu/'>ReLU</a>: does not saturate for $x&gt;0$ and displaced tanh from deep convolutional networks.</li><li><a href='../gelu/'>GELU</a>: the popular approximation $0.5x\bigl(1+\tanh\bigl(\sqrt{2/\pi}\,(x+0.044715x^3)\bigr)\bigr)$.</li><li><a href='../silu/'>SiLU</a>: $x\sigma(x)=\tfrac x2\bigl(1+\tanh\tfrac x2\bigr)$ — the same S-curve acting as a “soft gate”.</li><li><a href='../mse/'>MSE</a>: the natural partner for a tanh output when the targets lie in $[-1,\,1]$.</li><li><a href='../adam/'>Adam</a>: the optimizer of Figure 7; it gets through plateaus caused by saturation well.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $\tanh x=\frac{e^x-e^{-x}}{e^x+e^{-x}}=\frac{\sinh x}{\cosh x}=2\sigma(2x)-1$ maps $\mathbb R$ onto $(-1,\,1)$, is odd and passes through zero. 2) $\tanh'=1-\tanh^2\le1$, with the maximum at zero and saturation on the tails. 3) The Taylor series $x-\frac{x^3}{3}+\dots$ converges for $|x|&lt;\pi/2$. 4) Zero-centred outputs make the next layer train faster than with the sigmoid. 5) A sum of tanh folds approximates any continuous function; initialize with Xavier and gain $5/3$. 6) In an RNN tanh keeps the state bounded, but the gradient through time fades — hence LSTM.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. We know that $\tanh 0.5\approx0.462$. What is $\tanh(-0.5)$?</legend><div class="opts"><button type="button" data-ok="0">$0.538$</button><button type="button" data-ok="1">$-0.462$</button><button type="button" data-ok="0">$0.462$</button><button type="button" data-ok="0">$-0.538$</button></div><div class="explain" hidden>tanh is odd: $\tanh(-x)=-\tanh x=-0.462$. The answer $0.538=1-0.462$ is the symmetry of the sigmoid, not of the tangent.</div></fieldset><fieldset class="q"><legend>2. A neuron output $t=\tanh z=0.8$. What is the derivative $\tanh' z$?</legend><div class="opts"><button type="button" data-ok="0">$0.2$</button><button type="button" data-ok="1">$0.36$</button><button type="button" data-ok="0">$0.64$</button><button type="button" data-ok="0">$0.16$</button></div><div class="explain" hidden>$\tanh' z=1-t^2=1-0.64=0.36$. No need to recompute an exponential.</div></fieldset><fieldset class="q"><legend>3. Which identity is correct?</legend><div class="opts"><button type="button" data-ok="0">$\tanh x=\sigma(2x)-1$</button><button type="button" data-ok="0">$\tanh x=2\sigma(x)-1$</button><button type="button" data-ok="1">$\tanh x=2\sigma(2x)-1$</button><button type="button" data-ok="0">$\tanh x=\sigma(x)/2$</button></div><div class="explain" hidden>The sigmoid is squeezed horizontally by 2, stretched vertically by 2 and lowered by 1: $2\sigma(2x)-1$.</div></fieldset><fieldset class="q"><legend>4. Why does tanh in hidden layers usually train faster than the sigmoid?</legend><div class="opts"><button type="button" data-ok="0">It is faster to compute</button><button type="button" data-ok="1">Its outputs are zero-centred and its derivative reaches 1, not 0.25</button><button type="button" data-ok="0">It does not saturate</button><button type="button" data-ok="0">It has no derivative at zero</button></div><div class="explain" hidden>Centring makes the next layer’s loss surface “rounder”, and a four times larger maximum derivative weakens the gradient less. tanh saturates just like the sigmoid.</div></fieldset><fieldset class="q"><legend>5. In a tanh RNN the recurrent weight was made very large. What happens to the gradient over many steps?</legend><div class="opts"><button type="button" data-ok="0">It explodes: the factors are $|w|&gt;1$</button><button type="button" data-ok="1">It vanishes: the states saturate and $1-h^2\to0$</button><button type="button" data-ok="0">It stays equal to 1</button><button type="button" data-ok="0">It becomes negative</button></div><div class="explain" hidden>Each factor is $w(1-h_s^2)$. With a large $w$ the state is pressed against $\pm1$ and $1-h_s^2$ becomes tiny — in Figure 8 at $w=3$ the gradient drops to $1.6\cdot10^{-38}$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../sigmoid/"><span class="kicker">← Previous formula</span><span class="big">Sigmoid</span><span class="kicker">logistic function</span></a>
+<a class="next" href="../relu/"><span class="kicker">Next formula →</span><span class="big">ReLU</span><span class="kicker">rectified linear unit</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

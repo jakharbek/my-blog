@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Adam: инерция, масштаб и поправка смещения — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="Adam подробно: моменты m и v, вывод поправки смещения, масштабная инвариантность, шаг и отношение сигнал/шум, гонка оптимизаторов в 3D, AdamW против L2, разогрев и косинусное расписание, код на NumPy и PyTorch.">
+  <meta property="og:title" content="Adam: инерция, масштаб и поправка смещения — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="Adam подробно: моменты m и v, вывод поправки смещения, масштабная инвариантность, шаг и отношение сигнал/шум, гонка оптимизаторов в 3D, AdamW против L2, разогрев и косинусное расписание, код на NumPy и PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/adam/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/adam/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/adam/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/adam/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/adam.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/adam/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/adam/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/adam/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Оптимизатор</span>
+  <h1>Adam: инерция, масштаб и поправка смещения</h1>
+  <p class="dek">Оптимизатор по умолчанию для нейросетей и основа AdamW, которым обучают языковые модели. Разбираем по косточкам оба момента, выводим поправку смещения, смотрим, почему шаг Adam не зависит от масштаба градиента и сам уменьшается в шуме, гоняем пять оптимизаторов по поверхностям в 3D и разбираемся, чем AdamW лучше L2-регуляризации.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 40 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем нужен Adam</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: компас и спидометр</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#bias"><span class="n">4</span>Поправка смещения: откуда 1 − βᵗ</a>
+      <a href="#properties"><span class="n">5</span>Свойства шага</a>
+      <a href="#math"><span class="n">6</span>Математика за формулой</a>
+      <a href="#landscape"><span class="n">7</span>Гонка оптимизаторов в 3D</a>
+      <a href="#adamw"><span class="n">8</span>AdamW: правильное затухание весов</a>
+      <a href="#training"><span class="n">9</span>Adam в обучении: разогрев и расписание</a>
+      <a href="#code"><span class="n">10</span>В коде: с нуля и в PyTorch</a>
+      <a href="#practice"><span class="n">11</span>Гиперпараметры и практика</a>
+      <a href="#mistakes"><span class="n">12</span>Частые ошибки</a>
+      <a href="#links"><span class="n">13</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">14</span>Итоги</a>
+      <a href="#quiz"><span class="n">15</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\theta_t=\theta_{t-1}-\eta\,\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}$$</div>
+
+    <h2 id="why">Зачем нужен Adam</h2>
+    <p>У нейросети миллионы весов, и их градиенты живут в очень разных масштабах: у эмбеддингов редких токенов — редкие крупные толчки, у последних слоёв — постоянные мелкие, у слоёв нормализации — третьи. Обычный <a href="../sgd/">SGD</a> делает шаг $\eta g$, и один темп $\eta$ для всех одновременно слишком велик для одних весов и слишком мал для других. К тому же мини-батчевый градиент шумит, а поверхность потерь полна вытянутых оврагов и плато.</p>
+    <p>Adam (adaptive moment estimation, Кингма и Ба, 2014) решает обе задачи одной формулой:</p>
+    <ul class="flist"><li><b>первый момент</b> $m_t$ — экспоненциальное среднее градиентов: инерция, которая гасит шум и зигзаги (как <a href="../sgd/">Momentum</a>);</li><li><b>второй момент</b> $v_t$ — экспоненциальное среднее квадратов градиента: типичный размер градиента каждого веса, на который делится шаг (как RMSProp);</li><li><b>поправка смещения</b> — деление на $1-\beta^t$, которое убирает систематическую недооценку моментов на первых шагах.</li></ul>
+    <p>Результат: шаг каждого веса порядка $\eta$ независимо от масштаба его градиента, без ручной подстройки под каждый слой. Поэтому Adam — оптимизатор по умолчанию в большинстве задач, а его вариант AdamW обучает трансформеры и большие языковые модели.</p>
+    <div class="callout key"><b>Главное за минуту</b><p>$m_t$ — куда идти (сглаженный градиент), $\sqrt{v_t}$ — насколько крупно шагать (среднеквадратичный градиент), $1-\beta^t$ — поправка за старт с нуля. Шаг $\eta\,\hat m_t/(\sqrt{\hat v_t}+\epsilon)$ безразмерен: умножьте градиенты на 1000 — шаги не изменятся. При чистом сигнале шаг $\approx\eta$, в шуме — меньше. AdamW выносит затухание весов из градиента.</p></div>
+
+    <h2 id="intuition">Интуиция: компас и спидометр</h2>
+    <p>Представьте, что вы ведёте машину по бездорожью по показаниям дрожащего компаса. Глупо поворачивать руль при каждом его рывке — разумнее следить за усреднённым направлением. Это $m_t$. А скорость стоит выбирать по тому, насколько обычно сильны рывки: на ровной дороге можно ехать уверенно, на ухабах — осторожно. Это $\sqrt{v_t}$: шаг Adam — направление, делённое на типичную силу толчков.</p>
+    <p>На рисунке — поток градиентов одного веса: среднее $+0{,}5$ до шага 100 и $-0{,}5$ после, плюс шум. Оранжевая линия — сглаженный градиент $\hat m_t$, бирюзовые — коридор $\pm\sqrt{\hat v_t}$, внизу — итоговый шаг в единицах $\eta$.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-moments" data-config="{&quot;b1&quot;: 0.9, &quot;b2&quot;: 0.999, &quot;sigma&quot;: 1, &quot;t&quot;: 1}"></div><figcaption><b>Рисунок 1.</b> Моменты Adam на шумном градиенте ($\sigma=1$). Ползунок $t$ выбирает шаг для таблицы под рисунком. На первом шаге $\hat m_1/\sqrt{\hat v_1}=1$ ровно — шаг равен $\eta$ в сторону, противоположную $g_1$, каким бы ни был $g_1$; без поправки отношение было бы $3{,}16$. После смены знака среднего $\hat m_t$ становится отрицательным навсегда с шага 109, а $\sqrt{\hat v_t}$ почти не меняется ($\approx1{,}1$): величина шага определяется отношением сигнала к шуму, $0{,}5/\sqrt{1{,}25}\approx0{,}45$. Даже на шаге 200 шаг без поправки (штрих) в $2{,}35$ раза больше правильного.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Уберите шум ($\sigma=0$): шаг сразу становится ровно $\pm1$ — Adam при чистом сигнале ходит шагами $\eta$, как знаковый метод. Увеличьте шум — шаг сжимается. Уменьшите $\beta_1$ до нуля — $\hat m_t$ превращается в сам градиент, и шаг скачет между $\pm1$.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <div class="eqd">$$\begin{aligned}g_t&amp;=\nabla_\theta L(\theta_{t-1})\\ m_t&amp;=\beta_1 m_{t-1}+(1-\beta_1)\,g_t\\ v_t&amp;=\beta_2 v_{t-1}+(1-\beta_2)\,g_t^2\\ \hat m_t&amp;=\frac{m_t}{1-\beta_1^{\,t}},\qquad \hat v_t=\frac{v_t}{1-\beta_2^{\,t}}\\ \theta_t&amp;=\theta_{t-1}-\eta\,\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}\end{aligned}$$</div>
+    <dl class="symbols"><dt>$g_t$</dt><dd>градиент на мини-батче шага $t$ (шаги нумеруются с 1);</dd><dt>$m_t$</dt><dd>первый момент: экспоненциальное скользящее среднее (EMA) градиента, $m_0=0$;</dd><dt>$v_t$</dt><dd>второй момент: EMA поэлементного квадрата градиента, $v_0=0$; у каждого веса свои $m$ и $v$;</dd><dt>$\beta_1,\ \beta_2$</dt><dd>коэффициенты затухания, по умолчанию $0{,}9$ и $0{,}999$: память примерно $1/(1-\beta)$ шагов — 10 и 1000;</dd><dt>$1-\beta^t$</dt><dd>поправка смещения: компенсирует старт моментов с нуля;</dd><dt>$\eta$</dt><dd>темп обучения (learning rate), по умолчанию $10^{-3}$; здесь он задаёт типичную длину шага в единицах весов;</dd><dt>$\epsilon$</dt><dd>маленькая добавка ($10^{-8}$) против деления на ноль.</dd></dl>
+    <p>Пройдём три шага руками для градиентов $0{,}5$, $-0{,}2$, $0{,}4$ при стандартных $\beta_1=0{,}9$, $\beta_2=0{,}999$. Последний столбец — каким был бы шаг без поправки смещения.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$t$</th><th class=num>$g_t$</th><th class=num>$m_t$</th><th class=num>$v_t$</th><th class=num>$\hat m_t$</th><th class=num>$\sqrt{\hat v_t}$</th><th class=num>шаг $/\eta$</th><th class=num>без поправки</th></tr></thead><tbody><tr><td class=num>1</td><td class=num>0,5</td><td class=num>0,05</td><td class=num>0,00025</td><td class=num>0,5</td><td class=num>0,5</td><td class=num>1,000</td><td class=num>3,162</td></tr><tr><td class=num>2</td><td class=num>−0,2</td><td class=num>0,025</td><td class=num>0,00029</td><td class=num>0,1316</td><td class=num>0,3807</td><td class=num>0,346</td><td class=num>1,469</td></tr><tr><td class=num>3</td><td class=num>0,4</td><td class=num>0,0625</td><td class=num>0,00045</td><td class=num>0,2306</td><td class=num>0,3873</td><td class=num>0,596</td><td class=num>2,948</td></tr></tbody></table></div>
+    <div class="callout note"><b>Первый шаг в деталях</b><p>$g_1=0{,}5$: $m_1=0{,}1\cdot0{,}5=0{,}05$ и $v_1=0{,}001\cdot0{,}25=0{,}00025$ — оба момента занижены, в 10 и в 1000 раз. Поправка возвращает $\hat m_1=0{,}5$ и $\hat v_1=0{,}25$, отношение $\hat m_1/\sqrt{\hat v_1}=1$: вес сдвигается ровно на $\eta$. Без поправки было бы $m_1/\sqrt{v_1}=0{,}05/0{,}0158\approx3{,}16$ — шаг завышен в $3{,}16$ раза, потому что $\sqrt{v_1}$ занижен сильнее ($\sqrt{1000}\approx31{,}6$ раза), чем $m_1$ (10 раз). Если бы поправили только $m$, шаг вырос бы в $31{,}6$ раза; только $v$ — уменьшился бы в 10.</p></div>
+    <p>Обратите внимание на третий шаг: градиенты меняли знак, поэтому $\hat m_3=0{,}23$ заметно меньше типичного размера градиента $\sqrt{\hat v_3}=0{,}39$, и Adam шагает лишь на $0{,}6\eta$. Чем согласованнее градиенты, тем ближе шаг к $\eta$.</p>
+
+    <h2 id="bias">Поправка смещения: откуда 1 − βᵗ</h2>
+    <p>Моменты стартуют с нуля и первые шаги «помнят» этот ноль. Раскроем рекурсию для $m_t$:</p>
+    <div class="eqd">$$m_t=(1-\beta_1)\sum_{i=1}^{t}\beta_1^{\,t-i}\,g_i$$</div>
+    <p>Это взвешенная сумма градиентов, но сумма весов равна не 1, а $(1-\beta_1)(1+\beta_1+\dots+\beta_1^{t-1})=1-\beta_1^t$. Недостающая доля $\beta_1^t$ досталась начальному нулю. Отсюда и поправка.</p>
+    <details class="deep"><summary>Вывод: несмещённость $\hat m_t$ и $\hat v_t$</summary><div class="deep-body">
+      <p>Пусть градиенты стационарны: $\mathbb E[g_i]=\mu$, $\mathbb E[g_i^2]=s$ для всех $i$. Тогда по линейности ожидания</p>
+      <div class="eqd">$$\mathbb E[m_t]=(1-\beta_1)\sum_{i=1}^{t}\beta_1^{\,t-i}\mu=\mu\,(1-\beta_1^{\,t}),\qquad \mathbb E[v_t]=s\,(1-\beta_2^{\,t})$$</div>
+      <p>Деление на $1-\beta^t$ даёт $\mathbb E[\hat m_t]=\mu$ и $\mathbb E[\hat v_t]=s$ — оценки несмещённые с первого шага. Если градиенты нестационарны, остаётся смещение порядка изменения $\mu$ за окно памяти; Кингма и Ба отмечают, что его можно держать малым, потому что веса далёкого прошлого экспоненциально малы.</p>
+      <p>Поправка нужна только в начале: $\beta_1^t&lt;0{,}01$ уже при $t\ge44$, а вот $\beta_2^t&lt;0{,}01$ — лишь при $t\ge4603$. Поэтому важнее всего она для второго момента.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="adam-bias" data-config="{&quot;b1&quot;: 0.9, &quot;b2&quot;: 0.999}"></div><figcaption><b>Рисунок 2.</b> Множители поправки $1/(1-\beta_1^t)$ и $1/(1-\beta_2^t)$ (обе оси логарифмические) и отношение шага без поправки к шагу с поправкой при постоянном градиенте, $(1-\beta_1^t)/\sqrt{1-\beta_2^t}$. При стандартных $\beta$ первые множители — 10 и 1000; шаг без поправки завышен в $3{,}16$ раза на первом шаге, сильнее всего — в $6{,}57$ раза — на 12-м, всё ещё в $2{,}35$ раза на 200-м и в $1{,}26$ раза на 1000-м. При $\beta_2=0{,}99$ первые шаги совпадают ($0{,}1/\sqrt{0{,}01}=1$), но к 13-му шагу завышение достигает $2{,}13$.</figcaption></figure>
+    <div class="callout warn"><b>Зачем это важно на практике</b><p>Без поправки ранние шаги Adam в несколько раз длиннее задуманного — ровно тогда, когда веса только что инициализированы и потери максимальны. Это одна из причин, по которой трансформеры без разогрева темпа (warmup) расходятся на первых сотнях шагов; сама поправка этот риск убирает лишь частично, потому что $\hat v_t$ на первых шагах оценён всего по нескольким градиентам.</p></div>
+
+    <h2 id="properties">Свойства шага</h2>
+    <h3>Масштабная инвариантность</h3>
+    <p>Умножим все градиенты веса на $c&gt;0$. Тогда $m_t$ умножится на $c$, $v_t$ — на $c^2$, $\sqrt{v_t}$ — на $c$, и отношение $\hat m_t/\sqrt{\hat v_t}$ не изменится. Шаг Adam — однородная функция нулевой степени от градиентов (пока $\sqrt{\hat v_t}\gg\epsilon$). Эффективный темп каждого веса $\eta/(\sqrt{\hat v_t}+\epsilon)$ подстраивается сам: большой у весов с мелкими градиентами, маленький — у весов с крупными.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-scale" data-config="{&quot;eps&quot;: 1e-08}"></div><figcaption><b>Рисунок 3.</b> Четыре параметра с одинаковым шумным градиентом $c\,(1+0{,}5\xi_t)$, но масштабами $c$ от $10^{-3}$ до $10^{3}$; столбики — длина шага на сотом шаге (шкала логарифмическая). Шаги SGD различаются в $10^6$ раз, шаги Adam одинаковы: $8{,}8\cdot10^{-4}=0{,}88\,\eta$, а эффективный темп $\eta/(\sqrt{\hat v}+\epsilon)$ меняется от $8{,}8\cdot10^{-7}$ до $0{,}88$. Уменьшите общий масштаб $k$ до $10^{-6}$: градиент порядка $10^{-9}$ становится меньше $\epsilon=10^{-8}$, и его шаг падает в 10 раз — так $\epsilon$ отключает адаптацию для совсем малых градиентов.</figcaption></figure>
+    <h3>Шаг и отношение сигнал/шум</h3>
+    <p>Пусть градиент веса стационарен со средним $\mu$ и стандартным отклонением $\sigma$. Тогда $\hat m_t\approx\mu$, $\hat v_t\approx\mu^2+\sigma^2$ (второй момент — это квадрат среднего плюс дисперсия), и средний шаг</p>
+    <div class="eqd">$$\frac{|\Delta\theta|}{\eta}\approx\frac{|\mu|}{\sqrt{\mu^2+\sigma^2}}=\frac{\mathrm{SNR}}{\sqrt{1+\mathrm{SNR}^2}},\qquad \mathrm{SNR}=\frac{|\mu|}{\sigma}$$</div>
+    <p>При чистом сигнале ($\sigma\ll|\mu|$) шаг $\approx\eta$, в сильном шуме ($\sigma\gg|\mu|$) он пропорционален отношению сигнал/шум. Это автоматическое «торможение»: у минимума средний градиент стремится к нулю, а шум остаётся — и Adam сам укорачивает шаги.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-snr" data-config="{&quot;b1&quot;: 0.9, &quot;b2&quot;: 0.999, &quot;snr&quot;: 0.3}"></div><figcaption><b>Рисунок 4.</b> Средний шаг Adam (в единицах $\eta$) в зависимости от отношения сигнал/шум $\mu/\sigma$: сплошная — формула выше, точки — симуляция 20 000 шагов с разбросом $\pm$ одно стандартное отклонение, штрих — шаг SGD, растущий пропорционально $\mu$. При $\mu/\sigma=0{,}3$ формула даёт $0{,}287$, симуляция — $0{,}298$ с разбросом $\pm0{,}216$. Разброс при слабом сигнале близок к $\sqrt{(1-\beta_1)/(1+\beta_1)}\approx0{,}23$: уменьшите $\beta_1$ — шаги станут хаотичнее.</figcaption></figure>
+    <details class="deep"><summary>Насколько большим бывает шаг</summary><div class="deep-body">
+      <p>Обычно $|\hat m_t|\le\sqrt{\hat v_t}$ и шаг не больше $\eta$, но это не теорема. Если градиент был нулём и вдруг стал $g$, то при больших $t$ получаем $m_t=(1-\beta_1)g$, $v_t=(1-\beta_2)g^2$, и шаг равен $\eta(1-\beta_1)/\sqrt{1-\beta_2}\approx3{,}16\,\eta$ — этот случай разбирают Кингма и Ба. Точная верхняя граница следует из неравенства Коши — Буняковского для взвешенных сумм:</p>
+      <div class="eqd">$$\frac{|m_t|}{\sqrt{v_t}}\le\frac{1-\beta_1}{\sqrt{(1-\beta_2)\,(1-\beta_1^2/\beta_2)}}\approx7{,}27$$</div>
+      <p>(при $\beta_1^2&lt;\beta_2$). Она достигается, когда градиент растёт в $\beta_2/\beta_1\approx1{,}11$ раза за шаг. Значит, шаг Adam ограничен величиной порядка $\eta$ при любых градиентах — встроенная защита от их взрыва.</p>
+    </div></details>
+    <h3>Особые случаи</h3>
+    <ul class="flist"><li>$\beta_1=\beta_2=0$: $\hat m_t=g_t$, $\sqrt{\hat v_t}=|g_t|$, шаг $\eta\operatorname{sign}(g_t)$ — знаковый градиентный спуск (signSGD).</li><li>$\beta_1=0$: RMSProp с поправкой смещения.</li><li>$\epsilon\gg\sqrt{\hat v_t}$: шаг $\approx(\eta/\epsilon)\,\hat m_t$ — SGD с инерцией и темпом $\eta/\epsilon$.</li><li>Adam — <b>диагональный</b> предобусловливатель: он масштабирует каждую координату отдельно и не умеет поворачивать оси (см. рисунок 6 на странице <a href="../sgd/">SGD</a>).</li></ul>
+
+    <h2 id="math">Математика за формулой</h2>
+    <p>Соберём вместе то, что прячется за четырьмя строками.</p>
+    <ul class="flist"><li><b>EMA как взвешенное среднее.</b> $\hat m_t=\sum_i w_i g_i$ с весами $w_i=(1-\beta_1)\beta_1^{t-i}/(1-\beta_1^t)$, которые положительны и в сумме дают 1. Вес убывает вдвое примерно каждые $\ln2/(1-\beta)$ шагов: 7 для $\beta_1=0{,}9$ и 693 для $\beta_2=0{,}999$.</li><li><b>Эффективное окно</b> $1/(1-\beta)$: $m$ усредняет примерно 10 последних градиентов, $v$ — примерно 1000. Направление реагирует быстро, масштаб — медленно и потому устойчиво.</li><li><b>Второй момент — не дисперсия.</b> $v$ оценивает $\mathbb E[g^2]=\mu^2+\sigma^2$, то есть «нецентрированный» размер градиента. Поэтому при чистом сигнале шаг $\approx\eta$, а не бесконечен.</li><li><b>Связь с методом Ньютона.</b> Иногда говорят, что $\sqrt v$ аппроксимирует кривизну. Это верно лишь отчасти: $v$ — оценка диагонали эмпирической матрицы Фишера (по градиентам мини-батчей), которая для некоторых потерь у минимума близка к гессиану, но Adam берёт из неё квадратный корень. Надёжнее понимать Adam как нормировку шага, а не как приближение Ньютона.</li></ul>
+    <details class="deep"><summary>Сходимость: контрпример и AMSGrad</summary><div class="deep-body">
+      <p>Исходное доказательство сходимости Adam для выпуклых задач содержало ошибку. Редди, Кейл и Кумар (2018) построили простую выпуклую задачу, на которой Adam сходится к худшей точке: редкий, но большой градиент быстро «забывается» в $v_t$, потому что $\beta_2$-память конечна, и эффективный темп $\eta/\sqrt{\hat v_t}$ может расти.</p>
+      <p>Их исправление, AMSGrad, использует $\hat v_t=\max(\hat v_{t-1},v_t)$ — эффективный темп больше не растёт, и сходимость в выпуклом случае доказывается. На практике AMSGrad редко заметно лучше Adam (в PyTorch — флаг <code>amsgrad=True</code>). Для невыпуклых задач гарантии получены при убывающем темпе и достаточно большом $\beta_2$.</p>
+    </div></details>
+
+    <h2 id="landscape">Гонка оптимизаторов в 3D</h2>
+    <p>Сравним пять методов на двух поверхностях. Первая — плато с ямой: $f=1-e^{-q(x,y)}$, $q=0{,}2(x-1)^2+1{,}2(y-0{,}5)^2$. Вдали от ямы $f\approx1$, градиент крошечный, а сама яма вытянута. Вторая — банан Розенброка.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-race" data-config="{&quot;fn&quot;: &quot;plateau&quot;}"></div><figcaption><b>Рисунок 5.</b> Слева поверхность в 3D (её можно вращать), справа вид сверху; старт можно перетаскивать, «Пуск» проигрывает гонку. В точке старта $(-2{,}4;\,-1{,}5)$ градиент порядка $4\cdot10^{-3}$: SGD с $\eta=0{,}3$ ползёт по плато и достигает $f&lt;0{,}01$ лишь за 246 шагов, Momentum — за 61, RMSProp — за 44, Adam — за 58, AdamW — за 53. Но AdamW останавливается не в минимуме $(1;\,0{,}5)$, а в $(0{,}979;\,0{,}498)$, где $f=9\cdot10^{-5}$: затухание весов тянет к нулю. На Розенброке за 2000 шагов: Momentum — 416 шагов, Adam — 717, AdamW — 818, а SGD и RMSProp не доходят до $f&lt;0{,}01$.</figcaption></figure>
+    <div class="callout intuition"><b>Чему учит гонка</b><p>Адаптивные методы выигрывают там, где градиенты плохо масштабированы: на плато их шаг остаётся порядка $\eta$, пока у SGD он пропорционален крошечному градиенту. Но хорошо настроенная инерция может их обогнать (Розенброк), а затухание весов сдвигает решение — это не баг, а регуляризация. Универсального победителя нет.</p></div>
+
+    <h2 id="adamw">AdamW: правильное затухание весов</h2>
+    <p>Классическая $L_2$-регуляризация добавляет к потерям $\tfrac\lambda2\|\theta\|^2$, то есть к градиенту — $\lambda\theta$. Для SGD это то же самое, что на каждом шаге умножать веса на $1-\eta\lambda$ (затухание весов, weight decay). Для Adam — нет: слагаемое $\lambda\theta$ попадает в $m$ и $v$ и делится на $\sqrt{\hat v_t}$. Лошчилов и Хаттер (2017) предложили отделить затухание от градиента:</p>
+    <div class="eqd">$$\text{Adam}+L_2:\quad \begin{aligned}g_t&amp;=\nabla L(\theta_{t-1})+\lambda\,\theta_{t-1}\\ \theta_t&amp;=\theta_{t-1}-\eta\,\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}\end{aligned}$$</div>
+    <div class="eqd">$$\text{AdamW}:\quad \theta_t=\theta_{t-1}-\eta\Bigl(\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}+\lambda\,\theta_{t-1}\Bigr)$$</div>
+    <p>В AdamW моменты считаются по градиенту одних лишь потерь, а все веса затухают с одной и той же скоростью $\eta\lambda$ за шаг. В Adam с $L_2$ затухание каждого веса делится на его $\sqrt{\hat v_t}$: веса с крупными градиентами почти не регуляризуются, а веса без градиента потерь сжимаются с постоянной скоростью $\approx\eta$ за шаг, независимо от $\lambda$.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-adamw" data-config="{&quot;lam&quot;: 0.1}"></div><figcaption><b>Рисунок 6.</b> Три веса, стартующие с $\theta=1$; градиент данных у них знакопеременный, $\pm c$ (в среднем ноль), с $c=0$, $0{,}1$ и $10$. Темп $\eta=0{,}01$, $\lambda=0{,}1$, 1000 шагов. AdamW (фиолетовые) уменьшает все три одинаково, до $0{,}37\approx e^{-\eta\lambda t}=e^{-1}$. Adam с $L_2$ (оранжевые) обнуляет вес без градиента (ниже $0{,}01$ уже к шагу 213), сжимает вес с $c=0{,}1$ до $0{,}0003$ и почти не трогает вес с $c=10$ — у того остаётся $0{,}889$.</figcaption></figure>
+    <div class="callout key"><b>Вывод</b><p>В Adam регуляризация $L_2$ и затухание весов — разные вещи. Если вы хотите затухание, используйте <code>AdamW</code>; в PyTorch <code>torch.optim.Adam(weight_decay=…)</code> реализует именно $L_2$ внутри градиента. По умолчанию у <code>AdamW</code> $\lambda=0{,}01$; языковые модели обычно обучают с $\lambda=0{,}1$ и не применяют затухание к смещениям и весам нормализаций.</p></div>
+
+    <h2 id="training">Adam в обучении: разогрев и расписание</h2>
+    <p>Даже адаптивному методу нужен график темпа. Самая распространённая схема для трансформеров — <b>линейный разогрев</b> (warmup) от нуля до $\eta_{\max}$ за первые сотни или тысячи шагов, затем <b>косинусное снижение</b> до $\eta_{\min}$:</p>
+    <div class="eqd">$$\eta_t=\eta_{\max}\,\frac{t}{T_w}\qquad(t\le T_w)$$</div>
+    <div class="eqd">$$\eta_t=\eta_{\min}+\tfrac12(\eta_{\max}-\eta_{\min})\bigl(1+\cos\pi p\bigr),\quad p=\frac{t-T_w}{T-T_w}$$</div>
+    <figure class="viz"><div class="fv" data-viz="adam-schedule" data-config="{&quot;warm&quot;: 200, &quot;minr&quot;: 0.1}"></div><figcaption><b>Рисунок 7.</b> Adam на шумной квадратичной задаче (10 параметров с кривизнами от $0{,}01$ до 1, шум градиента $0{,}05$), $\eta_{\max}=0{,}05$, 2000 шагов. Вверху — темп, внизу — потери (логарифмическая шкала). С постоянным $\eta$ потери застревают на шумовом уровне $5{,}6\cdot10^{-3}$ (среднее за последние 100 шагов); с разогревом на 200 шагов и косинусом до $0{,}1\,\eta_{\max}$ — $7{,}1\cdot10^{-4}$, в $7{,}9$ раза ниже. Разогрев здесь лишь немного задерживает старт; его польза проявляется в глубоких сетях.</figcaption></figure>
+    <p>Почему снижение помогает: из раздела о свойствах шаг Adam у минимума пропорционален $\eta$, умноженному на отношение сигнал/шум. Чем меньше $\eta$, тем меньше облако, в котором веса дрожат вокруг минимума.</p>
+    <p>Почему разогрев нужен: на первых шагах $\hat v_t$ оценён по нескольким градиентам и сильно шумит, а веса только что инициализированы, и градиенты особенно велики. Лю и соавторы (RAdam, 2019) показали, что дисперсия эффективного темпа $\eta/\sqrt{\hat v_t}$ в начале обучения велика, и предложили выпрямлять её аналитически; разогрев решает ту же проблему проще.</p>
+    <div class="callout note"><b>Типичный рецепт для языковых моделей</b><p>AdamW с $\beta_1=0{,}9$, $\beta_2=0{,}95$, $\lambda=0{,}1$, обрезка градиента по норме 1, разогрев на ~2000 шагов и косинус до 10% от $\eta_{\max}$ — так, например, описано обучение LLaMA. Меньшее $\beta_2$ (окно 20 шагов вместо 1000) быстрее реагирует на всплески градиента и делает обучение больших моделей устойчивее.</p></div>
+
+    <h2 id="code">В коде: с нуля и в PyTorch</h2>
+    <p>Реализация с нуля — двадцать строк. Флаг <code>decoupled</code> переключает затухание весов между AdamW и $L_2$ внутри градиента.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+class Adam:
+    &quot;&quot;&quot;Adam; при weight_decay &gt; 0 и decoupled=True — AdamW. Как в torch.optim.&quot;&quot;&quot;
+    def __init__(self, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0, decoupled=True):
+        self.lr, (self.b1, self.b2), self.eps = lr, betas, eps
+        self.wd, self.decoupled = weight_decay, decoupled
+        self.m = self.v = None
+        self.t = 0
+
+    def step(self, theta, g):
+        if self.m is None:
+            self.m, self.v = np.zeros_like(theta), np.zeros_like(theta)
+        if self.wd and not self.decoupled:
+            g = g + self.wd * theta                        # L2 внутри градиента (Adam)
+        self.t += 1
+        self.m = self.b1 * self.m + (1 - self.b1) * g      # инерция
+        self.v = self.b2 * self.v + (1 - self.b2) * g * g  # масштаб
+        m_hat = self.m / (1 - self.b1 ** self.t)           # поправка смещения
+        v_hat = self.v / (1 - self.b2 ** self.t)
+        if self.wd and self.decoupled:
+            theta = theta - self.lr * self.wd * theta      # AdamW: затухание отдельно
+        return theta - self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
+
+# Три шага из таблицы: g = 0.5, −0.2, 0.4 (lr = 1, чтобы шаг был в единицах η)
+opt, th = Adam(lr=1.0), np.zeros(1)
+for g in [0.5, -0.2, 0.4]:
+    new = opt.step(th, np.array([g]))
+    print(f&quot;t={opt.t}: m̂={opt.m[0] / (1 - 0.9 ** opt.t):.4f}  шаг/η={th[0] - new[0]:.4f}&quot;)
+    th = new
+# t=1: m̂=0.5000  шаг/η=1.0000
+# t=2: m̂=0.1316  шаг/η=0.3456
+# t=3: m̂=0.2306  шаг/η=0.5955
+
+# Масштабная инвариантность: градиенты ×1000 дают те же шаги
+rng = np.random.default_rng(0)
+a, b, x, y = Adam(lr=0.01), Adam(lr=0.01), np.zeros(1), np.zeros(1)
+for t in range(100):
+    g = rng.normal(1.0, 0.5, size=1)
+    x, y = a.step(x, g), b.step(y, 1000 * g)
+print(x, y, abs(x - y))   # [-0.95081564] [-0.95081565] [8.6e-09] — разница только из-за ε</code></pre>
+    <p>Выход совпадает с таблицей из раздела «Формула по косточкам», а <code>torch.optim.Adam</code> на том же первом шаге сдвигает вес ровно на $\eta$. Типичный цикл обучения с AdamW, раздельными группами затухания, разогревом и косинусом:</p>
+    <pre class="code"><span class="lang">python</span><code>import math
+import torch
+import torch.nn.functional as F
+
+decay = [p for p in model.parameters() if p.ndim &gt;= 2]     # матрицы весов
+no_decay = [p for p in model.parameters() if p.ndim &lt; 2]   # смещения и нормализации
+opt = torch.optim.AdamW([{&quot;params&quot;: decay, &quot;weight_decay&quot;: 0.1},
+                         {&quot;params&quot;: no_decay, &quot;weight_decay&quot;: 0.0}],
+                        lr=3e-4, betas=(0.9, 0.95), eps=1e-8)
+
+total, warmup = 10_000, 500
+def lr_factor(step):                       # множитель к lr: разогрев, затем косинус до 10%
+    if step &lt; warmup:
+        return (step + 1) / warmup
+    p = (step - warmup) / (total - warmup)
+    return 0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * p))
+sched = torch.optim.lr_scheduler.LambdaLR(opt, lr_factor)
+
+for step, (x, y) in zip(range(total), loader):
+    loss = F.mse_loss(model(x), y)
+    opt.zero_grad(set_to_none=True)
+    loss.backward()
+    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # обрезка градиента
+    opt.step()
+    sched.step()                          # расписание — после каждого шага</code></pre>
+    <div class="callout warn"><b>Память</b><p>Adam хранит $m$ и $v$ — два числа на каждый параметр. Для модели на 7 млрд параметров это $2\cdot7\cdot10^9\cdot4$ байта $=56$ ГБ в float32 только под состояние оптимизатора. Отсюда 8-битные оптимизаторы, шардирование состояния (ZeRO) и экономные варианты вроде Adafactor.</p></div>
+
+    <h2 id="practice">Гиперпараметры и практика</h2>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Параметр</th><th>По умолчанию</th><th>Типичный диапазон и смысл</th></tr></thead><tbody><tr><td>$\eta$</td><td>$10^{-3}$</td><td>$10^{-4}$–$3\cdot10^{-3}$; трансформеры — около $3\cdot10^{-4}$ и меньше с ростом модели; дообучение — $10^{-5}$–$5\cdot10^{-5}$</td></tr><tr><td>$\beta_1$</td><td>$0{,}9$</td><td>почти никогда не меняют; окно направления 10 шагов</td></tr><tr><td>$\beta_2$</td><td>$0{,}999$</td><td>$0{,}95$–$0{,}98$ для больших трансформеров: быстрее реагирует на всплески</td></tr><tr><td>$\epsilon$</td><td>$10^{-8}$</td><td>больше ($10^{-6}$ и выше) — при низкой точности или нестабильности; слишком большой $\epsilon$ превращает Adam в SGD с инерцией</td></tr><tr><td>$\lambda$ (AdamW)</td><td>$0{,}01$</td><td>$0{,}01$–$0{,}1$; не применять к смещениям и нормализациям</td></tr><tr><td>разогрев</td><td>—</td><td>от сотен до нескольких тысяч шагов, 1–5% обучения</td></tr></tbody></table></div>
+    <ul class="flist"><li><b>Начните с умолчаний.</b> $\eta=10^{-3}$ (или $3\cdot10^{-4}$ для трансформеров), $\beta=(0{,}9;\,0{,}999)$, AdamW с $\lambda=0{,}01$. Подбирать в первую очередь стоит $\eta$, затем $\lambda$ и расписание.</li><li><b>Обрезка градиента</b> по норме ($1{,}0$) почти бесплатна и спасает от редких выбросов.</li><li><b>Сохраняйте состояние оптимизатора</b> (<code>opt.state_dict()</code>) вместе с весами: при продолжении обучения с нулевыми $m$ и $v$ первые шаги снова будут «холодными».</li><li><b>Когда SGD лучше.</b> На задачах компьютерного зрения хорошо настроенный SGD с инерцией часто даёт лучшее обобщение (Уилсон и др., 2017). Для трансформеров, рекомендательных систем с эмбеддингами и задач с разреженными градиентами выигрывает Adam.</li></ul>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b><code>Adam(weight_decay=…)</code> вместо <code>AdamW</code>.</b> Это $L_2$ внутри градиента: затухание делится на $\sqrt{\hat v_t}$ и работает неравномерно (рисунок 6).</li><li><b>Темп от SGD.</b> $\eta=0{,}1$ хорош для SGD с инерцией, но для Adam это шаг около $0{,}1$ в единицах весов на каждом шаге — обучение почти наверняка разойдётся.</li><li><b>Затухание для всех параметров.</b> Смещения и веса LayerNorm/BatchNorm обычно исключают из weight decay: их сжатие к нулю вредит, а не регуляризует.</li><li><b>Неудачный $\epsilon$.</b> Слишком маленький в float16 округляется до нуля, слишком большой ($\gtrsim\sqrt{\hat v}$) молча отключает адаптацию — шаг становится $(\eta/\epsilon)\hat m$.</li><li><b>Без разогрева на трансформере.</b> Большой $\eta$ с первых шагов при шумной оценке $\hat v_t$ часто приводит к взрыву потерь в начале обучения.</li><li><b>Расписание не на том шаге.</b> <code>scheduler.step()</code> раз за эпоху там, где расписание рассчитано на шаги (или наоборот), растягивает разогрев в сотни раз.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href="../sgd/">SGD, Momentum и RMSProp</a>: числитель Adam — EMA-инерция, знаменатель — $\sqrt v$ из RMSProp; там же условие устойчивости и число обусловленности.</li><li><a href="../cross-entropy/">Кросс-энтропия</a> и <a href="../softmax/">softmax</a>: потеря, которую AdamW минимизирует в языковых моделях; её градиент по логитам $s-y$ и есть $g_t$ последнего слоя.</li><li><a href="../mse/">MSE</a> и <a href="../huber/">Huber</a>: от масштаба целевой переменной зависит масштаб градиента — Adam к нему нечувствителен, SGD — нет.</li><li><a href="../gelu/">GELU</a> и <a href="../silu/">SiLU</a>: активации трансформеров, которые обучаются AdamW.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) Adam хранит два экспоненциальных средних: $m_t$ градиента (направление, окно ~10 шагов) и $v_t$ его квадрата (масштаб, окно ~1000 шагов). 2) Оба стартуют с нуля и занижены в $1-\beta^t$ раз; поправка делает их несмещёнными, без неё ранние шаги завышены — в $3{,}16$ раза на первом шаге. 3) Шаг $\eta\,\hat m_t/(\sqrt{\hat v_t}+\epsilon)$ не зависит от масштаба градиента, порядка $\eta$ при чистом сигнале и пропорционален отношению сигнал/шум в шуме. 4) AdamW отделяет затухание весов от градиента — все веса затухают равномерно. 5) На практике: AdamW, разогрев, косинус, обрезка градиента; $\eta$ — главный гиперпараметр.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Первый шаг Adam с поправкой смещения, $g_1=-3$. Как изменится вес?</legend><div class="opts"><button type="button" data-ok="0">Уменьшится на $3\eta$</button><button type="button" data-ok="1">Увеличится на $\eta$</button><button type="button" data-ok="0">Уменьшится на $\eta$</button><button type="button" data-ok="0">Увеличится на $3\eta$</button></div><div class="explain" hidden>$\hat m_1=g_1=-3$, $\sqrt{\hat v_1}=|g_1|=3$, шаг $-\eta\cdot(-3)/3=+\eta$: вес растёт на $\eta$, каким бы ни был $|g_1|$.</div></fieldset><fieldset class="q"><legend>2. Сколько последних шагов примерно «помнит» $v_t$ при $\beta_2=0{,}999$?</legend><div class="opts"><button type="button" data-ok="0">10</button><button type="button" data-ok="0">100</button><button type="button" data-ok="1">1000</button><button type="button" data-ok="0">10 000</button></div><div class="explain" hidden>Эффективное окно $1/(1-\beta_2)=1000$ шагов.</div></fieldset><fieldset class="q"><legend>3. Все градиенты модели умножили на 100 (например, потерю умножили на 100). Что станет с шагами Adam?</legend><div class="opts"><button type="button" data-ok="0">Вырастут в 100 раз</button><button type="button" data-ok="0">Вырастут в 10 раз</button><button type="button" data-ok="1">Почти не изменятся</button><button type="button" data-ok="0">Уменьшатся в 100 раз</button></div><div class="explain" hidden>$\hat m$ и $\sqrt{\hat v}$ вырастут в 100 раз, их отношение не изменится (пока $\epsilon$ пренебрежимо мал).</div></fieldset><fieldset class="q"><legend>4. Чем AdamW отличается от Adam с $L_2$-регуляризацией?</legend><div class="opts"><button type="button" data-ok="0">Ничем, это синонимы</button><button type="button" data-ok="1">Затухание весов не проходит через $m$ и $v$ и не делится на $\sqrt{\hat v}$</button><button type="button" data-ok="0">AdamW не использует поправку смещения</button><button type="button" data-ok="0">AdamW использует знак градиента</button></div><div class="explain" hidden>В AdamW веса умножаются на $1-\eta\lambda$ отдельно от адаптивного шага, поэтому затухание одинаково для всех весов.</div></fieldset><fieldset class="q"><legend>5. Во сколько раз завышен первый шаг Adam без поправки смещения при $\beta_1=0{,}9$, $\beta_2=0{,}999$?</legend><div class="opts"><button type="button" data-ok="0">В $0{,}1$ раза (занижен в 10)</button><button type="button" data-ok="0">Не завышен</button><button type="button" data-ok="1">В $3{,}16$ раза</button><button type="button" data-ok="0">В 1000 раз</button></div><div class="explain" hidden>$m_1/\sqrt{v_1}=(1-\beta_1)g/(\sqrt{1-\beta_2}\,|g|)=0{,}1/0{,}0316\approx3{,}16$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../cross-entropy/"><span class="kicker">← Предыдущая формула</span><span class="big">Categorical CE</span><span class="kicker">категориальная кросс-энтропия</span></a>
+<a class="next" href="../silu/"><span class="kicker">Следующая формула →</span><span class="big">SiLU / Swish</span><span class="kicker">активация Qwen и LLaMA</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

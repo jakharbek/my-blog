@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RMSE: the root mean squared error — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="RMSE in depth: formula, link to MSE and MAE, the inequality MAE ≤ RMSE ≤ √n·MAE, the bias–spread decomposition, 3D geometry, derivative, loss landscape, training, RMSLE, code in NumPy, scikit-learn and PyTorch.">
+  <meta property="og:title" content="RMSE: the root mean squared error — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="RMSE in depth: formula, link to MSE and MAE, the inequality MAE ≤ RMSE ≤ √n·MAE, the bias–spread decomposition, 3D geometry, derivative, loss landscape, training, RMSLE, code in NumPy, scikit-learn and PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/rmse/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/rmse/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/rmse/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/rmse/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/rmse.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/rmse/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/rmse/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/rmse/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Losses — regression</span>
+  <h1>RMSE: the root mean squared error</h1>
+  <p class="dek">The most popular regression metric — and one of the most misread. We take it apart bone by bone: why the square root, what the gap between RMSE and MAE means, why RMSE is a distance between vectors, how it splits into bias and spread, and how its gradient differs from the gradient of MSE while the minimum stays the same.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why it is needed</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: the side of the mean square</a>
+      <a href="#anatomy"><span class="n">3</span>The formula bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties</a>
+      <a href="#gap"><span class="n">5</span>RMSE versus MAE: what the gap says</a>
+      <a href="#geometry"><span class="n">6</span>Geometry: RMSE as a distance</a>
+      <a href="#derivative"><span class="n">7</span>Derivative and gradient</a>
+      <a href="#training"><span class="n">8</span>The RMSE(w, b) landscape and training</a>
+      <a href="#evaluation"><span class="n">9</span>RMSE in model evaluation</a>
+      <a href="#variants"><span class="n">10</span>Variants: RMSLE, weighted and normalised RMSE</a>
+      <a href="#code"><span class="n">11</span>In code</a>
+      <a href="#mistakes"><span class="n">12</span>Common mistakes</a>
+      <a href="#links"><span class="n">13</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">14</span>Summary</a>
+      <a href="#quiz"><span class="n">15</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2}$$</div>
+
+    <h2 id="why">Why it is needed</h2>
+    <p>A model predicts the price of a flat, the demand for a product, tomorrow’s temperature. How do you say with a single number how wrong it is? A plain mean of the errors will not do: misses up and down cancel out. <a href="../mse/">MSE</a> squares the errors — but then the answer is in “dollars squared” or “degrees squared”, and “the MSE is 1,417,000” tells a client nothing. RMSE takes the square root and brings the error back to the units of the target, keeping everything people like about MSE.</p>
+    <p>Where it shows up:</p>
+    <ul class="flist"><li><b>evaluating regression models</b> — the most common metric in reports, papers and Kaggle competitions;</li><li><b>time-series forecasting</b> — weather, demand, energy use; it usually sits next to <a href="../mae/">MAE</a> and <a href="../mape/">MAPE</a>;</li><li><b>recommender systems</b> — the famous Netflix Prize (2006–2009) scored rating predictions by RMSE;</li><li><b>physics and metrology</b> — the root-mean-square error of measurements, GPS accuracy, the “RMS” value of a signal;</li><li><b>training models</b> — minimising RMSE and minimising MSE give the same model, but their gradients differ (see the section on the derivative).</li></ul>
+    <div class="callout key"><b>The gist in a minute</b><p>RMSE is <a href="../mse/">MSE</a> under a square root: an error in the units of $y$ that, like MSE, punishes large misses harder. Always $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$, and $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — squared bias plus the variance of the residuals. The minimum of RMSE coincides with the minimum of MSE, while the gradient is $2\,\mathrm{RMSE}$ times smaller.</p></div>
+
+    <h2 id="intuition">Intuition: the side of the mean square</h2>
+    <p>Draw every error $r_i=y_i-\hat y_i$ as a square with side $|r_i|$. Its area $r_i^2$ is the object’s contribution to MSE. Add up the areas and divide by $n$ — that is the mean area, i.e. MSE. And RMSE is <b>the side of the square whose area equals the mean area</b>.</p>
+    <p>Drag the blue points — the forecasts. On the right all the error squares are nested in one corner: the blue square has side RMSE, the dashed teal one has side MAE.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-squares" data-config="{}"></div><figcaption><b>Figure 1.</b> The running example: $y=(3,\,5,\,8)$, $\hat y=(2.5,\,5,\,10)$. The error $-2$ gives a square of area 4, the error $0.5$ one of area $0.25$; the mean area is $\mathrm{MSE}\approx1.417$ and its side is $\mathrm{RMSE}\approx1.190$. The MAE side is shorter — $0.833$.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>A big square pulls the mean area harder than a long side pulls the mean length: the error $-2$ is $80\%$ of the sum of absolute values but $94\%$ of the sum of squares. That is why RMSE exceeds MAE — and the more uneven the errors, the larger the gap. Make all three errors equal in magnitude and the blue square will coincide with the teal one.</p></div>
+
+    <h2 id="anatomy">The formula bone by bone</h2>
+    <p>Read the name from right to left and you get the recipe: the <i>root</i> of the <i>mean</i> of the <i>squared error</i>.</p>
+    <div class="eqd">$$r_i=y_i-\hat y_i\;\xrightarrow{\;(\cdot)^2\;}\;r_i^2\ge0\;\xrightarrow{\;\frac1n\sum\;}\;\mathrm{MSE}\;\xrightarrow{\;\sqrt{\cdot}\;}\;\mathrm{RMSE}$$</div>
+    <dl class="symbols"><dt>$y_i$</dt><dd>the true value of the $i$-th object (the actual);</dd><dt>$\hat y_i$</dt><dd>the model’s forecast for that object;</dd><dt>$r_i=y_i-\hat y_i$</dt><dd>the error, or residual; its sign shows whether we under-estimated ($r_i&gt;0$) or over-estimated ($r_i&lt;0$);</dd><dt>$r_i^2$</dt><dd>squaring removes the sign and makes large errors disproportionately heavy: an error twice as large weighs four times as much;</dd><dt>$\frac1n\sum_{i=1}^n$</dt><dd>the mean over all $n$ objects is MSE, in squared units;</dd><dt>$\sqrt{\cdot}$</dt><dd>the root brings back the original units: if $y$ is in dollars, so is RMSE.</dd></dl>
+    <p>The running example step by step:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$i$</th><th class=num>$y_i$</th><th class=num>$\hat y_i$</th><th class=num>$r_i$</th><th class=num>$r_i^2$</th><th class=num>$|r_i|$</th></tr></thead><tbody><tr><td>1</td><td class=num>3</td><td class=num>2.5</td><td class=num>0.5</td><td class=num>0.25</td><td class=num>0.5</td></tr><tr><td>2</td><td class=num>5</td><td class=num>5</td><td class=num>0</td><td class=num>0</td><td class=num>0</td></tr><tr><td>3</td><td class=num>8</td><td class=num>10</td><td class=num>−2</td><td class=num>4</td><td class=num>2</td></tr><tr><td>mean</td><td class=num></td><td class=num></td><td class=num>−0.5</td><td class=num>1.417</td><td class=num>0.833</td></tr></tbody></table></div>
+    <div class="eqd">$$\mathrm{RMSE}=\sqrt{\frac{0.25+0+4}{3}}=\sqrt{1.417}\approx1.190,\qquad \mathrm{MAE}=\frac{0.5+0+2}{3}\approx0.833$$</div>
+    <p>It helps to recognise the same quantity in other forms:</p>
+    <div class="eqd">$$\mathrm{RMSE}=\sqrt{\mathrm{MSE}}=\frac{\|y-\hat y\|_2}{\sqrt n}=M_2\bigl(|r_1|,\dots,|r_n|\bigr)$$</div>
+    <p>The second form is the Euclidean distance between the vector of actuals and the vector of forecasts divided by $\sqrt n$ (we will come back to it in 3D). The third is the <b>quadratic mean</b> (the power mean of order 2) of the absolute errors. MAE is their arithmetic mean $M_1$, and the largest error is the limiting case $M_\infty$. The power mean inequality immediately gives $\mathrm{MAE}\le\mathrm{RMSE}\le\max_i|r_i|$.</p>
+    <div class="callout note"><b>Why the square and not the absolute value</b><p>You can average absolute values — that is <a href="../mae/">MAE</a>. The square is chosen because it is smooth (differentiable everywhere), tied to variance and to the normal distribution (minimising MSE is maximum likelihood under Gaussian noise), and gives closed-form solutions (least squares). The root on top is only for readability: it does not change the ranking of models.</p></div>
+
+    <h2 id="properties">Properties</h2>
+    <ul class="flist"><li><b>Non-negativity</b>: $\mathrm{RMSE}\ge0$, and $\mathrm{RMSE}=0$ only for a perfect forecast $\hat y=y$.</li><li><b>Units</b> — the same as those of $y$. Convert prices from thousands of dollars to dollars and RMSE grows exactly 1000 times: $\mathrm{RMSE}(c\,y,\,c\,\hat y)=|c|\,\mathrm{RMSE}(y,\hat y)$.</li><li><b>Shifts do not matter</b>: add the same number to the actuals and the forecasts and RMSE stays the same. So RMSE does not say whether the error is large <i>relative to the level</i> of the series — that is what <a href="../mape/">MAPE</a> and normalised variants are for.</li><li><b>The same ranking as MSE</b>: the root is strictly increasing, so comparing models by RMSE and by MSE always gives the same order, and both have their minimum at the same point.</li><li><b>Sensitivity to outliers</b>: a single error of size $E$ makes RMSE at least $E/\sqrt n$, however many perfect forecasts surround it.</li><li><b>Non-additivity</b>: the RMSE of the whole sample is not the mean of the RMSEs of its parts. Squares add up: $\mathrm{RMSE}^2=\sum_g \tfrac{n_g}{n}\,\mathrm{RMSE}_g^2$.</li><li><b>It is a norm (up to the factor $1/\sqrt n$)</b>: for error vectors $a$ and $b$ the triangle inequality holds, $\mathrm{RMSE}(a+b)\le\mathrm{RMSE}(a)+\mathrm{RMSE}(b)$.</li></ul>
+    <h3>Bias and spread: Pythagoras for errors</h3>
+    <p>The residuals split into a systematic part — the mean $\bar r$ (the model over- or under-estimates on average) — and a random part, the spread around the mean $\sigma_r$. Then</p>
+    <div class="eqd">$$\mathrm{RMSE}^2=\underbrace{\bar r^{\,2}}_{\text{bias}^2}+\underbrace{\sigma_r^2}_{\text{residual variance}},\qquad \bar r=\frac1n\sum_i r_i,\quad \sigma_r^2=\frac1n\sum_i\bigl(r_i-\bar r\bigr)^2$$</div>
+    <details class="deep"><summary>Deriving the decomposition</summary><div class="deep-body">
+      <p>Write $r_i=\bar r+(r_i-\bar r)$ and expand the square:</p>
+      <div class="eqd">$$\frac1n\sum_i r_i^2=\frac1n\sum_i\Bigl(\bar r^{\,2}+2\bar r\,(r_i-\bar r)+(r_i-\bar r)^2\Bigr)=\bar r^{\,2}+\frac{2\bar r}{n}\underbrace{\sum_i(r_i-\bar r)}_{=\,0}+\sigma_r^2$$</div>
+      <p>The middle term vanishes: deviations from the mean sum to zero. It is the same algebra as in $\operatorname{Var}X=\mathbb E X^2-(\mathbb E X)^2$.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="rmse-pythagoras" data-config="{&quot;bias&quot;: 1, &quot;sd&quot;: 1.5}"></div><figcaption><b>Figure 2.</b> On the left, 40 residuals with bias $\bar r$ and spread $\sigma_r$; on the right, a right triangle with legs $|\bar r|$ and $\sigma_r$ — its hypotenuse is RMSE. With $\bar r=1$ and $\sigma_r=1.5$ we get $\mathrm{RMSE}=\sqrt{1+2.25}\approx1.80$.</figcaption></figure>
+    <p>In the running example $\bar r=-0.5$ (the model over-estimates by $0.5$ on average), $\sigma_r\approx1.080$, and $0.25+1.167=1.417=\mathrm{MSE}$. The practical takeaway: bias can be removed for free — shift the forecasts by $\bar r$ estimated on validation data, and RMSE drops to $\sigma_r$ (here from $1.190$ to $1.080$).</p>
+    <div class="callout note"><b>RMSE and the standard deviation</b><p>If the mean residual is zero (which is always the case for linear regression with an intercept on its training data), RMSE equals the standard deviation of the residuals. That is why RMSE is called the model’s “standard error”. If, in addition, the errors are normal, about $68\%$ of the residuals lie within $\pm\mathrm{RMSE}$ and about $95\%$ within $\pm2\,\mathrm{RMSE}$.</p></div>
+
+    <h2 id="gap">RMSE versus MAE: what the gap says</h2>
+    <p><a href="../mae/">MAE</a> answers “how far off are we on average”, RMSE answers “how large is a typical error, counting the big ones”. Their ratio $\mathrm{RMSE}/\mathrm{MAE}$ is dimensionless and scale-free: it describes only the <b>shape</b> of the error distribution.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Errors</th><th>MAE</th><th>RMSE</th><th>RMSE / MAE</th></tr></thead><tbody><tr><td>uniform on $[-a,\,a]$</td><td>$a/2$</td><td>$a/\sqrt3$</td><td>$2/\sqrt3\approx1.155$</td></tr><tr><td>normal $N(0,\,\sigma^2)$</td><td>$\sigma\sqrt{2/\pi}$</td><td>$\sigma$</td><td>$\sqrt{\pi/2}\approx1.253$</td></tr><tr><td>Laplace with scale $b$</td><td>$b$</td><td>$\sqrt2\,b$</td><td>$\sqrt2\approx1.414$</td></tr><tr><td>all $|r_i|$ equal $c$</td><td>$c$</td><td>$c$</td><td>$1$</td></tr><tr><td>one error $E$, the other $n-1$ are zero</td><td>$E/n$</td><td>$E/\sqrt n$</td><td>$\sqrt n$</td></tr></tbody></table></div>
+    <details class="deep"><summary>Where √(π/2) comes from for normal errors</summary><div class="deep-body">
+      <p>For $r\sim N(0,\sigma^2)$ we have $\mathbb E\,r^2=\sigma^2$, and the mean absolute value is twice the integral over the positive half-line:</p>
+      <div class="eqd">$$\mathbb E|r|=2\int_0^\infty \frac{x}{\sigma\sqrt{2\pi}}\,e^{-x^2/2\sigma^2}\,dx=\frac{2\sigma^2}{\sigma\sqrt{2\pi}}=\sigma\sqrt{\frac{2}{\pi}}$$</div>
+      <p>Hence $\sigma/\bigl(\sigma\sqrt{2/\pi}\bigr)=\sqrt{\pi/2}\approx1.2533$. On a finite sample it holds approximately: in Figure 3 with $n=2000$ we get $1.248$.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="rmse-vs-mae" data-config="{&quot;dist&quot;: &quot;normal&quot;, &quot;eps&quot;: 0}"></div><figcaption><b>Figure 3.</b> 2000 errors with unit variance (fixed generator seed). For normal errors the ratio is $1.248$ (theory $1.253$), for Laplace errors $1.392$ ($1.414$), for uniform ones $1.153$ ($1.155$). Add outliers: each error is multiplied by 10 with probability $\varepsilon$. Already at $\varepsilon=5\%$ RMSE jumps from $1.009$ to $2.817$, while MAE only moves from $0.809$ to $1.258$.</figcaption></figure>
+    <p>For such a mixture MSE grows $1+99\varepsilon$ times ($(1-\varepsilon)\cdot1+\varepsilon\cdot100$) while MAE grows only $1+9\varepsilon$ times, so the theoretical ratio is $\sqrt{1+99\varepsilon}\,/\bigl((1+9\varepsilon)\,\mathrm{MAE}_0\bigr)$, where $\mathrm{MAE}_0$ is the MAE of the original distribution.</p>
+    <h3>The bounds: MAE ≤ RMSE ≤ √n · MAE</h3>
+    <div class="eqd">$$\mathrm{MAE}\;\le\;\mathrm{RMSE}\;\le\;\sqrt n\;\mathrm{MAE}$$</div>
+    <p>The left equality holds only when all $|r_i|$ are equal; the right one when the whole error sits in a single object and all other forecasts are perfect. In the running example the ratio is $1.190/0.833\approx1.43$ against the maximum $\sqrt3\approx1.73$: the errors are clearly uneven.</p>
+    <details class="deep"><summary>Proof of both bounds</summary><div class="deep-body">
+      <p>The left bound is the Cauchy–Schwarz inequality for the vectors $(|r_1|,\dots,|r_n|)$ and $(1,\dots,1)$:</p>
+      <div class="eqd">$$\sum_i|r_i|\cdot1\le\sqrt{\sum_i r_i^2}\cdot\sqrt n\quad\Longrightarrow\quad\frac1n\sum_i|r_i|\le\sqrt{\frac1n\sum_i r_i^2}$$</div>
+      <p>Equality holds when the vectors are proportional, i.e. all $|r_i|$ are equal. The right bound follows from the fact that the sum of squares of non-negative numbers does not exceed the square of their sum:</p>
+      <div class="eqd">$$\sum_i r_i^2\le\Bigl(\sum_i|r_i|\Bigr)^2\quad\Longrightarrow\quad\sqrt{\frac1n\sum_i r_i^2}\le\frac{1}{\sqrt n}\sum_i|r_i|=\sqrt n\,\mathrm{MAE}$$</div>
+      <p>Equality holds when all products $|r_i|\,|r_j|$ with $i\ne j$ are zero, i.e. there is at most one non-zero error. If the total absolute error is split equally among $k$ of the $n$ objects, the ratio is exactly $\sqrt{n/k}$.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="rmse-bounds" data-config="{&quot;r&quot;: [0.5, -2], &quot;n&quot;: 10, &quot;k&quot;: 1}"></div><figcaption><b>Figure 4.</b> On the left, two errors $(r_1,\,r_2)$. Points with the same MAE lie on the diamond $|r_1|+|r_2|=2\,\mathrm{MAE}$, points with the same RMSE on the circle of radius $\sqrt2\,\mathrm{RMSE}$. The diamond is squeezed between the circles $\mathrm{RMSE}=\mathrm{MAE}$ (touching it where $|r_1|=|r_2|$) and $\mathrm{RMSE}=\sqrt2\,\mathrm{MAE}$ (through the vertices on the axes). For the point $(0.5,\,-2)$: $\mathrm{MAE}=1.25$, $\mathrm{RMSE}\approx1.458$. On the right, the ratio $\sqrt{n/k}$ when the error is split equally among $k$ of the $n$ objects.</figcaption></figure>
+    <div class="callout key"><b>How to read the gap</b><p>$\mathrm{RMSE}\approx\mathrm{MAE}$ — the errors are of about the same size. $\mathrm{RMSE}/\mathrm{MAE}\approx1.25$ — typical of normal noise. Clearly above $1.4$ — heavy tails or a few large misses: look at the largest residuals before trusting the averages.</p></div>
+
+    <h2 id="geometry">Geometry: RMSE as a distance</h2>
+    <p>Write the actuals and the forecasts as points of $n$-dimensional space: $y=(y_1,\dots,y_n)$ and $\hat y=(\hat y_1,\dots,\hat y_n)$. The sum of squared errors is the square of the ordinary Euclidean distance between them, so</p>
+    <div class="eqd">$$\mathrm{RMSE}(y,\hat y)=\frac{\|y-\hat y\|_2}{\sqrt n}$$</div>
+    <p>Dividing by $\sqrt n$ makes the distance comparable across sample sizes: if every error equals $c$, then $\|y-\hat y\|=c\sqrt n$ and RMSE is exactly $c$. All forecasts with the same RMSE form a sphere of radius $\sqrt n\,\mathrm{RMSE}$ centred at $y$. With $n=3$ we can draw it.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-vectors" data-config="{}"></div><figcaption><b>Figure 5.</b> The running example in $\mathbb R^3$: actual $y=(3,\,5,\,8)$, forecast $\hat y=(2.5,\,5,\,10)$; the orange segment is the error vector of length $\sqrt{4.25}\approx2.062$, and $\mathrm{RMSE}=2.062/\sqrt3\approx1.190$. The grey sphere holds all forecasts with the same RMSE. The dashed diagonal holds the constant forecasts $(c,\,c,\,c)$; its point closest to $y$ is $\bar y\cdot\mathbf 1$, $\bar y=16/3$. Move the sliders and rotate the scene.</figcaption></figure>
+    <h3>The best constant is the mean, and its RMSE is the standard deviation</h3>
+    <p>Which constant forecast $\hat y_i=c$ minimises RMSE? Geometrically it is the orthogonal projection of $y$ onto the diagonal, i.e. $c=\bar y$. Its RMSE is the standard deviation of the target:</p>
+    <div class="eqd">$$\min_c\,\mathrm{RMSE}(y,\,c\mathbf 1)=\mathrm{RMSE}(y,\,\bar y\mathbf 1)=\sqrt{\frac1n\sum_i\bigl(y_i-\bar y\bigr)^2}=\sigma_y$$</div>
+    <p>This is the main reference point for reading RMSE: a model whose RMSE is not below $\sigma_y$ is no better than “always predict the mean”. In the example $\sigma_y\approx2.055$, and the model achieves $1.190$. The coefficient of determination follows from the same picture:</p>
+    <div class="eqd">$$R^2=1-\frac{\mathrm{MSE}}{\sigma_y^2}=1-\frac{\mathrm{RMSE}^2}{\sigma_y^2}=1-\frac{1.417}{4.222}\approx0.66$$</div>
+
+    <h2 id="derivative">Derivative and gradient</h2>
+    <p>Let the forecasts depend on model parameters $\theta$. The derivative of $\sqrt u$ is $1/(2\sqrt u)$, so by the chain rule the gradient of RMSE is the gradient of MSE divided by $2\,\mathrm{RMSE}$:</p>
+    <div class="eqd">$$\nabla_\theta\,\mathrm{RMSE}=\frac{\nabla_\theta\,\mathrm{MSE}}{2\,\mathrm{RMSE}}$$</div>
+    <details class="deep"><summary>Step-by-step derivation</summary><div class="deep-body">
+      <p>Differentiate with respect to one forecast $\hat y_j$. Only the term $(y_j-\hat y_j)^2$ depends on it:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MSE}}{\partial\hat y_j}=\frac1n\cdot2\,(y_j-\hat y_j)\cdot(-1)=-\frac{2}{n}\,r_j$$</div>
+      <p>The chain rule for $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{RMSE}}{\partial\hat y_j}=\frac{1}{2\sqrt{\mathrm{MSE}}}\cdot\Bigl(-\frac{2}{n}\,r_j\Bigr)=-\frac{r_j}{n\,\mathrm{RMSE}}=\frac{\hat y_j-y_j}{n\,\mathrm{RMSE}}$$</div>
+      <p>For a parameter $\theta$ one more chain-rule factor appears, $\partial\hat y_j/\partial\theta$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{RMSE}}{\partial\theta}=\frac{1}{n\,\mathrm{RMSE}}\sum_{j=1}^{n}(\hat y_j-y_j)\,\frac{\partial\hat y_j}{\partial\theta}$$</div>
+    </div></details>
+    <div class="eqd">$$\frac{\partial\,\mathrm{RMSE}}{\partial\hat y_j}=\frac{\hat y_j-y_j}{n\,\mathrm{RMSE}}$$</div>
+    <p>What follows from this:</p>
+    <ul class="flist"><li><b>Same direction, different length.</b> The gradients of RMSE and MSE differ only by the positive factor $1/(2\,\mathrm{RMSE})$. Hence the two functions share their stationary points and their minimum.</li><li><b>The gradient with respect to the forecasts has constant length</b>: $\|\nabla_{\hat y}\mathrm{RMSE}\|=1/\sqrt n$ for any errors (the sum of the squared components is $\sum_j r_j^2/(n^2\,\mathrm{MSE})=1/n$). The RMSE gradient points only in the direction of $y$, and its length does not depend on how far away we are.</li><li><b>In the running example</b> $\partial\,\mathrm{RMSE}/\partial\hat y=(-0.140,\;0,\;0.560)$, while for MSE it is $(-0.333,\;0,\;1.333)$, exactly $2\cdot1.190=2.380$ times larger.</li><li><b>There is no derivative at zero.</b> At $\hat y=y$ the function $\|y-\hat y\|/\sqrt n$ has a kink, like $|x|$ at zero (the tip of a cone), and the formula divides by $\mathrm{RMSE}=0$. In automatic differentiation this turns into NaN (see the code section).</li></ul>
+    <h3>A one-dimensional slice: the constant forecast</h3>
+    <p>Take the constant model $\hat y_i=c$ on the example data $y=(3,\,5,\,8)$. Then $\mathrm{MSE}(c)=(c-\bar y)^2+\sigma_y^2$ is a parabola and RMSE is a hyperbola:</p>
+    <div class="eqd">$$\mathrm{RMSE}(c)=\sqrt{(c-\bar y)^2+\sigma_y^2},\qquad \mathrm{RMSE}'(c)=\frac{c-\bar y}{\sqrt{(c-\bar y)^2+\sigma_y^2}}\in(-1,\,1)$$</div>
+    <p>Near the minimum the hyperbola looks like a parabola (RMSE behaves like MSE), far away like the lines $|c-\bar y|$ (like MAE). The derivative moves smoothly from $-1$ to $1$ and never leaves these bounds, whereas the derivative of MSE grows linearly without bound.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-derivative" data-config="{&quot;c&quot;: 8}"></div><figcaption><b>Figure 6.</b> Top: RMSE, MSE and MAE of the constant forecast $c$ (the points on the axis are the data); bottom: the derivatives. At $c=8$: $\mathrm{RMSE}\approx3.367$, $\mathrm{RMSE}'\approx0.792$, $\mathrm{MSE}'\approx5.333$; their ratio is $2\,\mathrm{RMSE}\approx6.733$. The minima of RMSE and MSE are at $\bar y\approx5.333$, the minimum of MAE at the median 5.</figcaption></figure>
+    <p>The second derivative $\mathrm{RMSE}''(c)=\sigma_y^2/\mathrm{RMSE}(c)^3&gt;0$: the function is strictly convex as long as $\sigma_y&gt;0$. In general RMSE is convex in the forecasts (as a norm), and therefore in the parameters of a linear model: linear regression has no local minima for either MSE or RMSE.</p>
+
+    <h2 id="training">The RMSE(w, b) landscape and training</h2>
+    <p>A linear model $\hat y=wx+b$ on 14 points. Over the parameter plane $(w,\,b)$ RMSE forms a bowl. Switch the surface to MSE: the level lines stay the same (the level $\mathrm{RMSE}=1.5$ is the level $\mathrm{MSE}=2.25$), only the height changes: MSE grows quadratically, while far from the minimum RMSE grows almost linearly, like a cone.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-landscape" data-config="{&quot;eta&quot;: 0.1}"></div><figcaption><b>Figure 7.</b> Left: the surface (rotatable); right: the top view with RMSE level lines; bottom: RMSE by step. Drag the black starting point: the arrows show the first step $-\eta\nabla$ for MSE (blue) and for RMSE (orange) — same direction, but the orange one is $2\,\mathrm{RMSE}\approx5.4$ times shorter. Press “Play”: with $\eta=0.1$ descent on MSE gets within $0.01$ of the minimum $0.904$ in 61 steps, descent on RMSE in 140. Set $\eta=0.14$: descent on MSE diverges, while descent on RMSE reaches the target in 100 steps.</figcaption></figure>
+    <p>Why. A step on RMSE is a step on MSE with a variable learning rate:</p>
+    <div class="eqd">$$\theta\leftarrow\theta-\eta\,\nabla\mathrm{RMSE}=\theta-\underbrace{\frac{\eta}{2\,\mathrm{RMSE}(\theta)}}_{\eta_{\text{eff}}}\,\nabla\mathrm{MSE}$$</div>
+    <p>While the errors are large the effective step is small — which is why descent on RMSE tolerates a too-large $\eta$ better. Near the minimum $\eta_{\text{eff}}\to\eta/(2\,\mathrm{RMSE}_{\min})$; here $\mathrm{RMSE}_{\min}\approx0.904$, and the step is almost half that of MSE — hence the slow finish. Descent on MSE is stable only for $\eta&lt;2/\lambda_{\max}\approx0.133$, where $\lambda_{\max}\approx15.0$ is the largest eigenvalue of the Hessian of MSE.</p>
+    <div class="callout warn"><b>RMSE on mini-batches</b><p>The root of a batch mean is not the root of the full-sample mean: $\mathbb E\sqrt{\mathrm{MSE}_{\text{batch}}}\le\sqrt{\mathbb E\,\mathrm{MSE}_{\text{batch}}}$ (Jensen’s inequality). The batch-averaged RMSE is systematically too low, and SGD steps on batch RMSE optimise exactly that average rather than the RMSE of the whole sample. Usually one trains on MSE and computes RMSE over the whole validation set.</p></div>
+
+    <h2 id="evaluation">RMSE in model evaluation</h2>
+    <p>As a quality metric RMSE answers “by how many units of $y$ is the model typically off, with emphasis on big misses”. For the number to mean something, compare it:</p>
+    <ul class="flist"><li><b>with a baseline</b> — the “always the mean” forecast has RMSE $\sigma_y$, the “same as yesterday” forecast of a time series has its own; the model should be clearly better;</li><li><b>with the scale of the task</b> — an error of 5000 is great for flats and awful for cups of coffee. The dimensionless version is $\mathrm{NRMSE}=\mathrm{RMSE}/\sigma_y=\sqrt{1-R^2}$ (sometimes one divides by the range or the mean of $y$);</li><li><b>with MAE</b> — the ratio $\mathrm{RMSE}/\mathrm{MAE}$ shows whether there are large misses;</li><li><b>only on the same data</b> — RMSEs on different test sets are not comparable if their $y$ spreads differ.</li></ul>
+    <h3>Cross-validation: average the squares</h3>
+    <p>With $K$ folds people often take the mean of the fold RMSEs. That is not the RMSE over all objects: the mean of roots is at most the root of the mean. The overall estimate is the root of the weighted mean MSE:</p>
+    <div class="eqd">$$\mathrm{RMSE}_{\text{CV}}=\sqrt{\sum_{k=1}^{K}\frac{n_k}{n}\,\mathrm{MSE}_k}\;\ge\;\sum_{k=1}^{K}\frac{n_k}{n}\,\mathrm{RMSE}_k$$</div>
+    <p>For example, two folds of equal size with RMSE $1$ and $3$: the mean is $2$, while the overall RMSE is $\sqrt{(1+9)/2}=\sqrt5\approx2.24$.</p>
+    <div class="callout history"><b>The Netflix Prize</b><p>In 2006 Netflix promised a million dollars to the team that would improve the RMSE of its Cinematch recommender on the test ratings by $10\%$ — from $0.9525$ to $0.8572$ on the five-star scale. In 2009 the prize went to BellKor’s Pragmatic Chaos with RMSE $0.8567$. For a tenth of a “star” of RMSE the participants spent three years building ensembles of hundreds of models — a good illustration that the metric determines what exactly gets optimised.</p></div>
+
+    <h2 id="variants">Variants: RMSLE, weighted and normalised RMSE</h2>
+    <p><b>RMSLE</b> (root mean squared logarithmic error) is RMSE on a log scale:</p>
+    <div class="eqd">$$\mathrm{RMSLE}=\sqrt{\frac1n\sum_{i=1}^{n}\bigl(\ln(1+\hat y_i)-\ln(1+y_i)\bigr)^2}$$</div>
+    <p>The logarithm turns ratios into differences: the error is determined by <i>how many times</i> $1+\hat y$ differs from $1+y$, not <i>by how much</i>. That is why RMSLE suits non-negative targets that span many scales (prices, sales, views) and punishes an under-forecast harder than an over-forecast of the same absolute size. In the running example $\mathrm{RMSLE}\approx0.139$.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-rmsle" data-config="{&quot;y&quot;: 10, &quot;yhat&quot;: 5}"></div><figcaption><b>Figure 8.</b> The squared log error for an actual $y=10$. A forecast of 5 (5 too low) costs $0.367$, a forecast of 15 (the same 5 too high) costs $0.140$, $2.6$ times less. The dashed curve is the mirror image, the dotted one the squared error in units of $1+y$ for comparison. Bottom: the derivative with respect to $\hat y$ — steeper on the low side.</figcaption></figure>
+    <p>Two more useful modifications:</p>
+    <ul class="flist"><li><b>weighted RMSE</b> $\sqrt{\sum_i w_i r_i^2/\sum_i w_i}$ — when objects are not equally important (expensive goods, recent observations);</li><li><b>NRMSE</b> $=\mathrm{RMSE}/\sigma_y=\sqrt{1-R^2}$ — a dimensionless version for comparing tasks of different scales.</li></ul>
+    <div class="callout note"><b>RMSLE is RMSE on logarithms</b><p>RMSLE equals the RMSE between $\ln(1+y)$ and $\ln(1+\hat y)$. So if a competition is scored by RMSLE, it makes sense to train with MSE on the target $\ln(1+y)$ and return forecasts via $e^{z}-1$.</p></div>
+
+    <h2 id="code">In code</h2>
+    <p>In NumPy RMSE is one line; below we also check the formulas of this page on the running example.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+
+r    = y - y_hat                   # residuals: [ 0.5  0.  -2. ]
+mse  = np.mean(r ** 2)             # 1.4167
+rmse = np.sqrt(mse)                # 1.1902
+mae  = np.mean(np.abs(r))          # 0.8333
+
+# The same via the Euclidean norm: ‖y − ŷ‖ / √n
+print(np.linalg.norm(r) / np.sqrt(len(r)))     # 1.1902
+
+# Decomposition: RMSE² = bias² + residual variance
+print(r.mean() ** 2 + r.var(), mse)            # 1.4167 1.4167
+
+# Gradient with respect to the forecasts: ∂RMSE/∂ŷ = (ŷ − y) / (n · RMSE)
+print((y_hat - y) / (len(y) * rmse))           # [-0.14  0.    0.56]
+
+# The “always the mean” baseline: its RMSE is the standard deviation of y
+print(np.std(y))                               # 2.0548</code></pre>
+    <p>scikit-learn has ready-made functions (since version 1.4; before that one wrote <code>mean_squared_error(..., squared=False)</code>). Note the difference between the mean fold RMSE and the RMSE over all objects:</p>
+    <pre class="code"><span class="lang">python</span><code>from sklearn.metrics import root_mean_squared_error, root_mean_squared_log_error
+from sklearn.datasets import make_regression
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import KFold, cross_val_score, cross_val_predict
+
+print(root_mean_squared_error(y, y_hat))       # 1.1902  (scikit-learn ≥ 1.4)
+print(root_mean_squared_log_error(y, y_hat))   # 0.1392  — RMSLE
+
+X, t = make_regression(n_samples=200, n_features=5, noise=10.0, random_state=0)
+cv = KFold(5, shuffle=True, random_state=0)
+# scorers are “higher is better”, so RMSE comes with a minus sign
+scores = cross_val_score(LinearRegression(), X, t, cv=cv,
+                         scoring=&quot;neg_root_mean_squared_error&quot;)
+print(-scores.mean())                          # 10.560 — mean RMSE of the folds
+pred = cross_val_predict(LinearRegression(), X, t, cv=cv)
+print(root_mean_squared_error(t, pred))        # 10.614 — RMSE over all objects</code></pre>
+    <p>In PyTorch RMSE as a loss needs care at zero:</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+
+y     = torch.tensor([3.0, 5.0, 8.0])
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+
+rmse = torch.sqrt(torch.mean((y_hat - y) ** 2))
+rmse.backward()
+print(rmse.item(), y_hat.grad)   # 1.1902  tensor([-0.1400,  0.0000,  0.5601])
+
+# A perfect forecast: the derivative of √u at zero is infinite → NaN gradient
+p = y.clone().requires_grad_(True)
+torch.sqrt(torch.mean((p - y) ** 2)).backward()
+print(p.grad)                    # tensor([nan, nan, nan])
+
+def rmse_loss(pred, target, eps=1e-8):
+    &quot;&quot;&quot;RMSE as a loss: eps under the root removes the NaN.&quot;&quot;&quot;
+    return torch.sqrt(torch.mean((pred - target) ** 2) + eps)</code></pre>
+    <div class="callout key"><b>Rule of thumb</b><p>To train a neural network one usually minimises MSE: the same minimum, a gradient that is smooth at zero, no division by RMSE. RMSE is computed for the report — over the whole validation set at once, not as a mean over batches.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>The mean RMSE over batches or folds as the final RMSE.</b> The root is non-linear: average MSE and take the root at the end.</li><li><b>Comparing RMSE across different data.</b> RMSE depends on the scale and spread of $y$; compare models on the same test set or use a normalised RMSE.</li><li><b>“The model is off by RMSE on average”.</b> The mean absolute error is MAE; RMSE is never smaller, and with heavy tails it is noticeably larger.</li><li><b>RMSE as a loss without protecting zero.</b> The derivative of $\sqrt u$ at zero is infinite: a perfect batch gives NaN gradients. Add $\varepsilon$ under the root or train on MSE.</li><li><b>Ignoring outliers.</b> One error of 100 units among 99 perfect forecasts gives $\mathrm{RMSE}=10$ with $\mathrm{MAE}=1$. If outliers are noise rather than important events, look at MAE, <a href="../huber/">Huber</a> or error quantiles.</li><li><b>RMSE on logarithms instead of the original scale.</b> If the model is trained on $\ln(1+y)$, its RMSE is the RMSLE of the original task, not the RMSE in dollars; transform the forecasts back before computing RMSE.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href="../mse/">MSE</a>: $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ — the same minimum and the same ranking of models, a gradient $2\,\mathrm{RMSE}$ times smaller.</li><li><a href="../mae/">MAE</a>: $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; the best constant for MAE is the median, for RMSE the mean.</li><li><a href="../huber/">Huber</a>: quadratic near zero and linear in the tails — a compromise between MSE (and hence RMSE) and MAE.</li><li><a href="../mape/">MAPE</a>: a relative error instead of an absolute one; RMSLE is its quadratic relative on a log scale.</li><li><a href="../sgd/">SGD</a>: descent on RMSE is descent on MSE with learning rate $\eta/(2\,\mathrm{RMSE})$.</li><li><a href="../adam/">Adam</a>: divides the step by the root of a running mean of squared gradients — the same “root mean square” (RMS) idea as in RMSE.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ is the typical size of an error in the units of $y$ with emphasis on big misses. 2) $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; the ratio RMSE/MAE is a tail indicator ($\approx1.25$ for normal noise). 3) $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — bias and spread as the legs of a triangle. 4) Geometrically it is the distance $\|y-\hat y\|/\sqrt n$; the best constant is the mean, with RMSE equal to $\sigma_y$. 5) $\nabla\mathrm{RMSE}=\nabla\mathrm{MSE}/(2\,\mathrm{RMSE})$: a shared minimum, a different step, no derivative at zero.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. The model’s errors are $(1,\,-1,\,1,\,-1)$. What are MAE and RMSE?</legend><div class="opts"><button type="button" data-ok="1">$\mathrm{MAE}=1$, $\mathrm{RMSE}=1$</button><button type="button" data-ok="0">$\mathrm{MAE}=0$, $\mathrm{RMSE}=1$</button><button type="button" data-ok="0">$\mathrm{MAE}=1$, $\mathrm{RMSE}=2$</button><button type="button" data-ok="0">$\mathrm{MAE}=1$, $\mathrm{RMSE}=\sqrt2$</button></div><div class="explain" hidden>All $|r_i|=1$, so the squares are 1 as well: $\mathrm{MSE}=1$, $\mathrm{RMSE}=1=\mathrm{MAE}$. This is the equality case of $\mathrm{MAE}\le\mathrm{RMSE}$.</div></fieldset><fieldset class="q"><legend>2. Out of 100 objects 99 forecasts are perfect and one is off by 50. What is RMSE?</legend><div class="opts"><button type="button" data-ok="0">$0.5$</button><button type="button" data-ok="1">$5$</button><button type="button" data-ok="0">$50$</button><button type="button" data-ok="0">$\sqrt{50}\approx7.07$</button></div><div class="explain" hidden>$\mathrm{MSE}=50^2/100=25$, $\mathrm{RMSE}=5$. Meanwhile $\mathrm{MAE}=0.5$, and $\mathrm{RMSE}=\sqrt{100}\cdot\mathrm{MAE}$ — the upper bound is attained.</div></fieldset><fieldset class="q"><legend>3. The mean residual is $\bar r=3$ and the standard deviation of the residuals is $\sigma_r=4$. What is RMSE?</legend><div class="opts"><button type="button" data-ok="0">$7$</button><button type="button" data-ok="1">$5$</button><button type="button" data-ok="0">$4$</button><button type="button" data-ok="0">$3.5$</button></div><div class="explain" hidden>$\mathrm{RMSE}=\sqrt{\bar r^{\,2}+\sigma_r^2}=\sqrt{9+16}=5$ — the hypotenuse of a triangle with legs 3 and 4.</div></fieldset><fieldset class="q"><legend>4. How are the gradients of RMSE and MSE with respect to the parameters related?</legend><div class="opts"><button type="button" data-ok="0">They are equal</button><button type="button" data-ok="0">$\nabla\mathrm{RMSE}=2\,\mathrm{RMSE}\cdot\nabla\mathrm{MSE}$</button><button type="button" data-ok="1">$\nabla\mathrm{RMSE}=\nabla\mathrm{MSE}/(2\,\mathrm{RMSE})$: same direction, different length</button><button type="button" data-ok="0">They point in opposite directions</button></div><div class="explain" hidden>By the chain rule $(\sqrt u)'=1/(2\sqrt u)$. The factor is positive, so the direction and the minimum are shared.</div></fieldset><fieldset class="q"><legend>5. Five folds of equal size gave RMSE $1$, $1$, $1$, $1$ and $3$. What is the RMSE over all objects?</legend><div class="opts"><button type="button" data-ok="0">$1.4$</button><button type="button" data-ok="1">$\sqrt{2.6}\approx1.61$</button><button type="button" data-ok="0">$3$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>Squares are averaged: $(1+1+1+1+9)/5=2.6$, the root is $\approx1.61$. The mean of the RMSEs themselves, $1.4$, understates the error.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../mse/"><span class="kicker">← Previous formula</span><span class="big">MSE</span><span class="kicker">mean squared error</span></a>
+<a class="next" href="../mape/"><span class="kicker">Next formula →</span><span class="big">MAPE</span><span class="kicker">mean absolute percentage error</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

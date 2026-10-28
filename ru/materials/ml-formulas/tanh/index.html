@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tanh: гиперболический тангенс — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="Tanh подробно: формула через экспоненты, sinh и cosh, связь с сигмоидой, вывод производной, ряд Тейлора, центрированность и SGD, сеть из tanh в 3D, распределение активаций, RNN и LSTM, устойчивый код.">
+  <meta property="og:title" content="Tanh: гиперболический тангенс — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="Tanh подробно: формула через экспоненты, sinh и cosh, связь с сигмоидой, вывод производной, ряд Тейлора, центрированность и SGD, сеть из tanh в 3D, распределение активаций, RNN и LSTM, устойчивый код.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/tanh/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/tanh/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/tanh/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/tanh/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/tanh.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/tanh/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/tanh/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/tanh/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Функции активации</span>
+  <h1>Tanh: гиперболический тангенс</h1>
+  <p class="dek">S-образная функция, центрированная в нуле. Разбираем её по косточкам: из каких экспонент она собрана, почему это «растянутая сигмоида», откуда производная 1 − tanh², зачем нейрону центрированные выходы и что tanh делает с градиентом в глубоких и рекуррентных сетях.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем он нужен</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: сигмоида, поставленная на ноль</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#properties"><span class="n">4</span>Свойства и форма</a>
+      <a href="#derivative"><span class="n">5</span>Производная: tanh′ = 1 − tanh²</a>
+      <a href="#centered"><span class="n">6</span>Центрированность: почему tanh учится лучше сигмоиды</a>
+      <a href="#space"><span class="n">7</span>Tanh на плоскости: складки, гребни и холмы</a>
+      <a href="#training"><span class="n">8</span>Tanh в обучении: активации по слоям и подгонка кривой</a>
+      <a href="#rnn"><span class="n">9</span>Tanh в рекуррентных сетях и LSTM</a>
+      <a href="#code"><span class="n">10</span>В коде: устойчиво и без сюрпризов</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\tanh(x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}$$</div>
+
+    <h2 id="why">Зачем он нужен</h2>
+    <p>Сигмоида превращает число в долю от 0 до 1. Но внутри сети нам часто нужна не доля, а <i>сигнал со знаком</i>: «больше обычного» или «меньше обычного», «усилить» или «ослабить». Гиперболический тангенс (hyperbolic tangent) — это та же плавная S-кривая, но с выходом в интервале $(-1;\,1)$ и центром в нуле.</p>
+    <p>Где он встречается:</p>
+    <ul class="flist"><li><b>рекуррентные сети</b> — в простой RNN $h_t=\tanh(Wh_{t-1}+Ux_t+b)$, в LSTM и GRU tanh формирует кандидата в память и ограничивает выход ячейки;</li><li><b>скрытые слои классических сетей</b> — до эпохи ReLU tanh был стандартом и до сих пор хорош в маленьких сетях и физически информированных моделях (PINN), где нужна гладкость;</li><li><b>выход генератора</b> — если картинки нормированы в $[-1;\,1]$, последний слой генератора GAN (например, DCGAN) берёт tanh;</li><li><b>ограничение действий и логитов</b> — в обучении с подкреплением (SAC) действие сжимают в $(-1;\,1)$ через tanh, а в Gemma 2 логиты «мягко обрезают»: $c\cdot\tanh(z/c)$;</li><li><b>внутри других активаций</b> — популярное приближение <a href='../gelu/'>GELU</a> записано через tanh.</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>$\tanh$ сжимает всю числовую прямую в $(-1;\,1)$, проходит через начало координат и нечётна: $\tanh(-x)=-\tanh x$. Это растянутая сигмоида: $\tanh x=2\sigma(2x)-1$. Производная $1-\tanh^2x$ не больше 1 — в 4 раза больше максимума сигмоиды, — но на хвостах tanh так же насыщается, и градиент гаснет.</p></div>
+
+    <h2 id="intuition">Интуиция: сигмоида, поставленная на ноль</h2>
+    <p>Представьте регулятор громкости со знаком: ноль — тишина, вправо — громче, влево — громче в противофазе. Пока вы крутите возле нуля, выход послушно следует за входом: $\tanh x\approx x$. Чем дальше, тем туже ход: выход упирается в $\pm1$ и больше не растёт. Это <b>насыщение</b> (saturation).</p>
+    <p>Потяните точку. Оранжевая прямая — касательная, её наклон и есть производная. Серый пунктир — сигмоида: та же форма, но сдвинута вверх, вдвое ниже и вчетверо положе.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-explorer" data-config="{&quot;x&quot;: 1}"></div><figcaption><b>Рисунок 1.</b> tanh, его касательная и производная (снизу). Тяните синюю точку или нажимайте стрелки, когда она в фокусе. Максимум производной — $1$ при $x=0$, у сигмоиды он равен $0{,}25$. При $x=1$: $\tanh 1=0{,}7616$, $\tanh' 1=0{,}4200$.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>При $x=2$ tanh уже $0{,}964$, а производная — $0{,}071$, в 14 раз меньше, чем в центре. При $|x|&gt;2{,}99$ производная падает ниже $0{,}01$: дальше вход растёт, а выход почти стоит на месте.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <p>В формуле две экспоненты: растущая $e^{x}$ и убывающая $e^{-x}$. Числитель — их разность, знаменатель — сумма. Половины этих выражений имеют собственные имена — гиперболический синус и косинус:</p>
+    <div class="eqd">$$\begin{aligned}\sinh x&amp;=\frac{e^{x}-e^{-x}}{2}\\[4pt]\cosh x&amp;=\frac{e^{x}+e^{-x}}{2}\\[4pt]\tanh x&amp;=\frac{\sinh x}{\cosh x}\end{aligned}$$</div>
+    <dl class="symbols"><dt>$e^{x}-e^{-x}$</dt><dd>разность нечётна: при замене $x\to-x$ меняет знак; при $x&gt;0$ положительна;</dd><dt>$e^{x}+e^{-x}$</dt><dd>сумма всегда положительна и не меньше 2 — знаменатель никогда не обращается в ноль;</dd><dt>$|\sinh x|&lt;\cosh x$</dt><dd>разность по модулю всегда меньше суммы, поэтому $|\tanh x|&lt;1$;</dd><dt>$x\to\pm\infty$</dt><dd>одна из экспонент становится пренебрежимо малой, и дробь стремится к $\pm1$.</dd></dl>
+    <p>Умножив числитель и знаменатель на $e^{x}$ или на $e^{-x}$, получим формы, удобные для вычислений, а последняя форма связывает tanh с сигмоидой:</p>
+    <div class="eqd">$$\begin{aligned}\tanh x&amp;=\frac{e^{2x}-1}{e^{2x}+1}=\frac{1-e^{-2x}}{1+e^{-2x}}\\[4pt]&amp;=2\sigma(2x)-1\end{aligned}$$</div>
+    <figure class="viz"><div class="fv" data-viz="tanh-construction" data-config="{&quot;x&quot;: 1, &quot;t&quot;: 3}"></div><figcaption><b>Рисунок 2.</b> Слева: $\sinh$ и $\cosh$ — полусумма и полуразность экспонент; tanh — их отношение. При $x_0=1$: $\sinh 1=1{,}175$, $\cosh 1=1{,}543$, отношение $0{,}7616=\tanh 1$. Справа: нажмите «Пуск» — сигмоида за три шага превращается в tanh: сжимаем по горизонтали в 2 раза, растягиваем по вертикали в 2 раза, опускаем на 1.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\tanh x$</th><th class=num>$\tanh' x$</th><th class=num>$\sigma(x)$</th></tr></thead><tbody><tr><td class=num>−3</td><td class=num>−0,9951</td><td class=num>0,0099</td><td class=num>0,0474</td></tr><tr><td class=num>−2</td><td class=num>−0,9640</td><td class=num>0,0707</td><td class=num>0,1192</td></tr><tr><td class=num>−1</td><td class=num>−0,7616</td><td class=num>0,4200</td><td class=num>0,2689</td></tr><tr><td class=num>−0,5</td><td class=num>−0,4621</td><td class=num>0,7864</td><td class=num>0,3775</td></tr><tr><td class=num>0</td><td class=num>0,0000</td><td class=num>1,0000</td><td class=num>0,5000</td></tr><tr><td class=num>0,5</td><td class=num>0,4621</td><td class=num>0,7864</td><td class=num>0,6225</td></tr><tr><td class=num>1</td><td class=num>0,7616</td><td class=num>0,4200</td><td class=num>0,7311</td></tr><tr><td class=num>2</td><td class=num>0,9640</td><td class=num>0,0707</td><td class=num>0,8808</td></tr><tr><td class=num>3</td><td class=num>0,9951</td><td class=num>0,0099</td><td class=num>0,9526</td></tr></tbody></table></div>
+    <p>Таблица показывает нечётность: $\tanh(-x)=-\tanh x$, а производная — чётная функция. Рядом для сравнения сигмоида: её значения симметричны не относительно нуля, а относительно $0{,}5$.</p>
+
+    <h2 id="properties">Свойства и форма</h2>
+    <ul class="flist"><li><b>Область определения</b> — все действительные числа; <b>область значений</b> — открытый интервал $(-1;\,1)$: значения $\pm1$ не достигаются.</li><li><b>Нечётность</b>: $\tanh(-x)=-\tanh x$, график симметричен относительно начала координат, $\tanh 0=0$.</li><li><b>Монотонность</b>: строго возрастает, потому что $\tanh' x=1-\tanh^2x&gt;0$ при любом $x$.</li><li><b>Асимптоты</b>: $\lim_{x\to\pm\infty}\tanh x=\pm1$.</li><li><b>Точка перегиба</b> — единственная, $x=0$: при $x&lt;0$ функция выпукла вниз, при $x&gt;0$ — вверх.</li><li><b>Липшицевость с константой 1</b>: $|\tanh a-\tanh b|\le|a-b|$; в частности, $|\tanh x|\le|x|$, равенство только при $x=0$.</li><li><b>Почти тождество около нуля</b>: $\tanh x=x-\tfrac{x^3}{3}+\dots$ — при малых весах сеть из tanh ведёт себя почти как линейная.</li></ul>
+    <details class="deep"><summary>Почему tanh x = 2σ(2x) − 1</summary><div class="deep-body">
+      <p>Подставим определение сигмоиды $\sigma(u)=1/(1+e^{-u})$ при $u=2x$:</p>
+      <div class="eqd">$$2\sigma(2x)-1=\frac{2}{1+e^{-2x}}-\frac{1+e^{-2x}}{1+e^{-2x}}=\frac{1-e^{-2x}}{1+e^{-2x}}=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}=\tanh x$$</div>
+      <p>В предпоследнем шаге числитель и знаменатель умножены на $e^{x}$. Обратно: $\sigma(x)=\tfrac12\bigl(1+\tanh\tfrac x2\bigr)$. Значит, сеть со скрытыми tanh можно переписать в сеть со скрытыми сигмоидами той же выразительности — меняются только масштабы весов и сдвиги. Разница — в том, как идёт обучение (раздел о центрированности).</p>
+    </div></details>
+    <details class="deep"><summary>Обратная функция и формула сложения</summary><div class="deep-body">
+      <p>Решим $y=\tanh x$ относительно $x$: из $y=\frac{e^{2x}-1}{e^{2x}+1}$ получаем $e^{2x}=\frac{1+y}{1-y}$, откуда</p>
+      <div class="eqd">$$\operatorname{artanh}y=\frac12\ln\frac{1+y}{1-y},\qquad -1&lt;y&lt;1$$</div>
+      <p>Например, $\operatorname{artanh}0{,}5\approx0{,}549$. Ещё одно полезное тождество — формула сложения:</p>
+      <div class="eqd">$$\tanh(a+b)=\frac{\tanh a+\tanh b}{1+\tanh a\,\tanh b}$$</div>
+      <p>Это ровно релятивистское сложение скоростей (в долях скорости света): $0{,}5c$ и $0{,}5c$ дают не $c$, а $\frac{0{,}5+0{,}5}{1+0{,}25}c=0{,}8c$. Сумма двух чисел из $(-1;\,1)$ «в мире tanh» никогда не выходит за его пределы.</p>
+    </div></details>
+    <h3>Мягкий ограничитель: c · tanh(x / c)</h3>
+    <p>Функция $c\tanh(x/c)$ около нуля почти не меняет вход ($\approx x$), а большие значения плавно прижимает к $\pm c$. В отличие от жёсткой обрезки $\operatorname{clip}(x,-c,c)$, у неё нет изломов и производная нигде не обнуляется скачком. Так в Gemma 2 ограничивают логиты внимания ($c=50$) и итоговые логиты ($c=30$), чтобы они не разрастались во время обучения.</p>
+
+    <h2 id="derivative">Производная: tanh′ = 1 − tanh²</h2>
+    <p>Главная формула страницы. Выведем её тремя способами — каждый пригодится в другом месте.</p>
+    <details class="deep"><summary>Способ 1. Производная частного</summary><div class="deep-body">
+      <p>Пусть $u=e^{x}-e^{-x}$, $v=e^{x}+e^{-x}$. Тогда $u'=v$ и $v'=u$, и по правилу дифференцирования дроби:</p>
+      <div class="eqd">$$\tanh' x=\frac{u'v-uv'}{v^{2}}=\frac{v^{2}-u^{2}}{v^{2}}=1-\Bigl(\frac{u}{v}\Bigr)^{2}=1-\tanh^{2}x$$</div>
+    </div></details>
+    <details class="deep"><summary>Способ 2. Через основное гиперболическое тождество</summary><div class="deep-body">
+      <p>Для гиперболических функций $\cosh^2x-\sinh^2x=1$ (проверьте подстановкой экспонент), $\sinh' x=\cosh x$ и $\cosh' x=\sinh x$. Тогда</p>
+      <div class="eqd">$$\tanh' x=\frac{\cosh x\cdot\cosh x-\sinh x\cdot\sinh x}{\cosh^{2}x}=\frac{1}{\cosh^{2}x}=\operatorname{sech}^{2}x$$</div>
+      <p>Деля тождество на $\cosh^2x$, получаем $1-\tanh^2x=\operatorname{sech}^2x$ — та же формула в другой записи. Форма через $\operatorname{sech}^2$ полезна в коде при больших $|x|$.</p>
+    </div></details>
+    <details class="deep"><summary>Способ 3. Через сигмоиду</summary><div class="deep-body">
+      <p>Из $\tanh x=2\sigma(2x)-1$ по правилу цепочки:</p>
+      <div class="eqd">$$\tanh' x=2\cdot\sigma'(2x)\cdot2=4\sigma(2x)\bigl(1-\sigma(2x)\bigr)$$</div>
+      <p>Отсюда сразу видно, почему максимум производной равен $4\cdot\tfrac14=1$, а не $\tfrac14$, как у сигмоиды: вдвое больший размах выхода и вдвое более сжатая шкала входа дают множитель 4.</p>
+    </div></details>
+    <div class="eqd">$$\tanh' x=1-\tanh^{2}x$$</div>
+    <p>На практике: на прямом проходе сеть уже посчитала $t=\tanh z$. На обратном проходе производная обходится одним умножением $1-t^2$ — без новых экспонент. Именно поэтому фреймворки хранят для обратного прохода выход tanh, а не его вход.</p>
+    <h3>Вторая производная и самые крутые изгибы</h3>
+    <p>Дифференцируя ещё раз: $\tanh'' x=-2\tanh x\,(1-\tanh^2x)$. Она равна нулю только при $x=0$ (точка перегиба), а экстремумы достигаются при $\tanh^2x=\tfrac13$, то есть $x=\pm\operatorname{artanh}\tfrac{1}{\sqrt3}\approx\pm0{,}658$; значения там $\mp\tfrac{4}{3\sqrt3}\approx\mp0{,}770$. На отрезке $[-0{,}66;\,0{,}66]$ tanh ещё почти прямая, дальше его наклон быстро падает.</p>
+    <h3>Ряд Тейлора около нуля</h3>
+    <div class="eqd">$$\tanh x=x-\frac{x^{3}}{3}+\frac{2x^{5}}{15}-\frac{17x^{7}}{315}+\frac{62x^{9}}{2835}-\dots,\qquad |x|&lt;\frac{\pi}{2}$$</div>
+    <p>Ряд сходится только при $|x|&lt;\pi/2\approx1{,}571$: знаменатель $\cosh x$ обращается в ноль в комплексных точках $x=\pm i\pi/2$, и радиус сходимости равен расстоянию до ближайшей из них. Это в два раза меньше, чем у сигмоиды ($\pi$), — ведь tanh «сжат» по горизонтали в 2 раза.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-taylor" data-config="{&quot;order&quot;: 3, &quot;x&quot;: 1}"></div><figcaption><b>Рисунок 3.</b> Многочлены Тейлора порядков 1–9 и полоса сходимости $|x|&lt;\pi/2$. При $x=1$ приближение 3-го порядка даёт $0{,}6667$ вместо $0{,}7616$, а 9-го — $0{,}7679$. При $x=2$, за пределами полосы, многочлены расходятся: 3-й порядок даёт $-0{,}667$, 9-й — уже $7{,}889$.</figcaption></figure>
+
+    <h2 id="centered">Центрированность: почему tanh учится лучше сигмоиды</h2>
+    <p>Рассмотрим нейрон следующего слоя: $z=\sum_i w_ia_i+b$, где $a_i$ — выходы предыдущего слоя. Градиент потери по весу равен</p>
+    <div class="eqd">$$\frac{\partial L}{\partial w_i}=\delta\cdot a_i,\qquad \delta=\frac{\partial L}{\partial z}$$</div>
+    <p>Если все $a_i&gt;0$ (выходы сигмоиды), то на одном примере <b>все компоненты градиента имеют один знак</b> — знак $\delta$. Шаг SGD двигает все веса нейрона либо вверх, либо вниз. А если к оптимуму нужно одни веса увеличить, а другие уменьшить, остаётся идти зигзагом.</p>
+    <p>Второй взгляд — через форму поверхности потерь. Для линейного слоя с MSE матрица Гессе равна $\mathbb E[aa^\top]=\operatorname{Cov}(a)+\mu\mu^\top$, где $\mu$ — среднее входов. Ненулевое среднее добавляет одно большое собственное значение вдоль $\mu$, и «долина» вытягивается. Для входов $\sigma(z)$ ниже собственные значения $0{,}034$ и $0{,}530$ (число обусловленности 15,5), для $\tanh(z)$ — $0{,}340$ и $0{,}415$ (1,22).</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-zigzag" data-config="{&quot;steps&quot;: 50}"></div><figcaption><b>Рисунок 4.</b> Обучаем два веса $w=(w_1;\,w_2)$ линейного нейрона по 100 примерам; входы — $\sigma(z)$ слева и $\tanh(z)$ справа от одних и тех же случайных $z$. SGD с шагом $0{,}5$ стартует из $(-1;\,1)$ к $w^*=(1;\,-1)$. Слева каждый шаг направлен «вправо-вверх» или «влево-вниз» (бирюзовые квадранты), путь пилит долину; справа идёт почти напрямую. Через 50 шагов расстояние до оптимума $1{,}252$ против $0{,}000$; точность $0{,}1$ достигается за 194 шага против 21.</figcaption></figure>
+    <div class="callout key"><b>Вывод</b><p>Центрированные активации делают поверхность потерь следующего слоя «круглее», и градиентный спуск идёт к минимуму прямее. Это одна из причин, по которым tanh в скрытых слоях обучается быстрее сигмоиды (ЛеКун и др., «Efficient BackProp», 1998). Та же идея лежит в основе нормализации входов и BatchNorm.</p></div>
+
+    <h2 id="space">Tanh на плоскости: складки, гребни и холмы</h2>
+    <p>Нейрон с двумя входами считает $\tanh(w_1x_1+w_2x_2+b)$. На плоскости это <b>складка</b>: поверхность переходит от $-1$ к $+1$ поперёк прямой $w^\top x+b=0$ и не меняется вдоль неё. Сумма двух противоположных складок даёт <b>гребень</b>, а четыре складки и ещё один tanh на выходе — <b>холм</b>, отличный от $-1$ только в квадрате.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-surface" data-config="{&quot;mode&quot;: &quot;four&quot;, &quot;k&quot;: 2}"></div><figcaption><b>Рисунок 5.</b> Маленькая сеть из tanh. «1 нейрон» — $\tanh(k(0{,}8x_1+0{,}6x_2))$; «2 нейрона» — $\tanh(k(x_1+1))-\tanh(k(x_1-1))-1$; «4 + выход» — сумма $s$ четырёх таких складок по $x_1$ и $x_2$, затем $\tanh(2(s-3))$. При $k=2$ на вершине холма $f(0;\,0)=0{,}937$, а вдали $f=-1{,}000$. Пунктир — прямые, на которых вход каждого скрытого нейрона равен нулю.</figcaption></figure>
+    <p>Так работает <b>теорема об универсальной аппроксимации</b> (Цыбенко, 1989; Хорник, 1991): сеть с одним скрытым слоем из достаточно большого числа нейронов с tanh приближает любую непрерывную функцию на ограниченном замкнутом множестве с любой точностью. Холмы складываются из складок, а из холмов можно собрать любой рельеф. Теорема говорит, что такие веса <i>существуют</i>, но не говорит, сколько нужно нейронов и найдёт ли их обучение.</p>
+
+    <h2 id="training">Tanh в обучении: активации по слоям и подгонка кривой</h2>
+    <h3>Что происходит с сигналом в глубокой сети</h3>
+    <p>Пусть веса слоя выбраны случайно с дисперсией $g^2/n$, где $n$ — число входов нейрона. Если $g$ мал, сигнал затухает от слоя к слою и tanh работает как почти линейная функция. Если $g$ велик, входы нейронов большие, и tanh уходит в насыщение: выходы прилипают к $\pm1$, производные почти нулевые.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-layers" data-config="{&quot;act&quot;: &quot;tanh&quot;, &quot;g&quot;: 1}"></div><figcaption><b>Рисунок 6.</b> Случайная сеть из 10 слоёв по 100 нейронов, входы $N(0,1)$; на каждом слое — гистограмма 2000 активаций (20 примеров × 100 нейронов), оранжевая точка — среднее. tanh при $g=1$: среднее последнего слоя $0{,}013$, а разброс постепенно сжимается до $0{,}225$; при $g=0{,}5$ сигнал гаснет: разброс падает до $0{,}001$, при $g=3$ насыщена почти половина нейронов ($48\%$ значений с $|a|&gt;0{,}95$). При $g=5/3$ разброс держится около $0{,}65$, насыщено $10\%$. У сигмоиды среднее на каждом слое около $0{,}5$ ($0{,}516$ на последнем) — выходы не центрированы.</figcaption></figure>
+    <p>Поэтому для tanh рекомендуют инициализацию Ксавье — Глоро ($\operatorname{Var}w=\frac{2}{n_\text{in}+n_\text{out}}$) с усилением $g=5/3$ (в PyTorch — <code>calculate_gain('tanh')</code>): множитель компенсирует то, что tanh сжимает сигнал.</p>
+    <h3>Сеть из tanh подгоняет кривую</h3>
+    <p>Скрытый слой из $H$ нейронов и линейный выход: $\hat y(x)=\sum_{k=1}^{H}v_k\tanh(w_kx+b_k)+c$. Каждое слагаемое — «ступенька» с плавными краями; обучение двигает, растягивает и масштабирует ступеньки так, чтобы их сумма легла на данные.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-fit" data-config="{&quot;h&quot;: 5}"></div><figcaption><b>Рисунок 7.</b> 40 точек $y=0{,}8\sin(2{,}2x)+0{,}3x$ с шумом ($\sigma=0{,}08$), полный градиент и <a href='../adam/'>Adam</a> с шагом $0{,}05$. Бирюзовые кривые — вклады отдельных нейронов, синяя — их сумма. С 5 нейронами MSE падает с $1{,}059$ до плато $0{,}038$ (шаг 400), затем один из нейронов «находит свою роль», и к шагу 800 ошибка $0{,}0041$. С 3 нейронами сеть застревает на $0{,}106$, с 8 — уже к шагу 400 достигает $0{,}0039$.</figcaption></figure>
+    <div class="callout note"><b>Плато — это насыщение</b><p>Длинные плато на кривой потерь часто означают, что часть нейронов работает на плоских хвостах tanh: их производная мала, и градиент почти не сдвигает их параметры. Помогают нормализация входов, аккуратная инициализация и адаптивные оптимизаторы вроде Adam.</p></div>
+
+    <h2 id="rnn">Tanh в рекуррентных сетях и LSTM</h2>
+    <p>Простая рекуррентная сеть обновляет состояние по одной и той же формуле на каждом шаге: $h_t=\tanh(Wh_{t-1}+Ux_t+b)$. Tanh здесь работает как предохранитель: каким бы длинным ни был текст, состояние остаётся в $(-1;\,1)$ и не «взрывается». Но за ограниченность приходится платить градиентом:</p>
+    <div class="eqd">$$\frac{\partial h_T}{\partial h_t}=\prod_{s=t+1}^{T}\operatorname{diag}\bigl(1-h_s^{2}\bigr)\,W$$</div>
+    <p>Каждый множитель содержит $1-h_s^2\le1$. Если веса малы, произведение затухает экспоненциально. Если веса велики, состояния прижимаются к $\pm1$, $1-h_s^2\to0$ — и градиент тоже гаснет. Выживает он только в узком окне между этими режимами.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-rnn" data-config="{&quot;w&quot;: 1}"></div><figcaption><b>Рисунок 8.</b> Скалярная RNN $h_t=\tanh(wh_{t-1}+x_t)$, 30 шагов, входы $x_t\sim N(0;\,0{,}2^2)$ (серые столбики). Снизу — $|\partial h_{30}/\partial h_t|$ в логарифмической шкале. При $w=1$ градиент от первого шага до последнего уменьшается до $3{,}1\cdot10^{-4}$; при $w=0{,}5$ — до $5{,}7\cdot10^{-11}$; при $w=1{,}2$ — $1{,}3\cdot10^{-3}$; а при $w=2$ и $w=3$, когда состояние насыщено, — до $7{,}2\cdot10^{-18}$ и $1{,}6\cdot10^{-38}$.</figcaption></figure>
+    <p>LSTM решает эту проблему отдельной «магистралью» — состоянием ячейки $c_t$, которое обновляется сложением, а не через tanh:</p>
+    <div class="eqd">$$\begin{aligned}g_t&amp;=\tanh\bigl(W_g[h_{t-1},x_t]+b_g\bigr)\\c_t&amp;=f_t\odot c_{t-1}+i_t\odot g_t\\h_t&amp;=o_t\odot\tanh(c_t)\end{aligned}$$</div>
+    <p>Здесь $f_t,i_t,o_t\in(0;\,1)$ — вентили на <a href='../sigmoid/'>сигмоидах</a>, а tanh выполняет две роли: кандидат $g_t\in(-1;\,1)$ может и увеличить, и уменьшить память (сигмоида умела бы только добавлять), а $\tanh(c_t)$ ограничивает выход. Вдоль цепочки $c_{t-1}\to c_t$ градиент умножается на $f_t$, без множителя $\tanh'$, поэтому при $f_t\approx1$ он доходит до далёких шагов.</p>
+    <div class="callout history"><b>Немного истории</b><p>Ян ЛеКун в 1998 году советовал масштабированный тангенс $1{,}7159\tanh(2x/3)$: он даёт $f(\pm1)=\pm1$ и почти единичную дисперсию выхода. LSTM (Хохрайтер и Шмидхубер, 1997) сделала tanh стандартом рекуррентных сетей на два десятилетия. В свёрточных сетях его вытеснил <a href='../relu/'>ReLU</a>: в AlexNet (2012) сеть с ReLU достигла ошибки 25% на обучающей выборке CIFAR-10 в 6 раз быстрее, чем с tanh.</p></div>
+
+    <h2 id="code">В коде: устойчиво и без сюрпризов</h2>
+    <p>Наивная формула через экспоненты при $x=1000$ вычисляет $e^{1000}=\infty$, и получается $\infty/\infty=\text{nan}$. Встроенные <code>np.tanh</code> и <code>torch.tanh</code> устойчивы: при $x\gtrsim19$ они возвращают ровно $1{,}0$ в float64. Но тогда $1-\tanh^2 x$ даёт ровно 0, хотя истинное значение при $x=20$ — около $1{,}7\cdot10^{-17}$. Если нужна производная на далёких хвостах, считайте её через $\operatorname{sech}^2$ в устойчивой форме.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def tanh_grad_from_output(t):
+    &quot;&quot;&quot;Производная через уже посчитанный выход t = tanh(x): одно умножение.&quot;&quot;&quot;
+    return 1.0 - t * t
+
+def tanh_grad(x):
+    &quot;&quot;&quot;sech²x = 4e^(−2|x|) / (1 + e^(−2|x|))²:
+    без переполнения и без потери точности.&quot;&quot;&quot;
+    e = np.exp(-2.0 * np.abs(x))
+    return 4.0 * e / (1.0 + e) ** 2
+
+def naive_tanh(x):
+    return (np.exp(x) - np.exp(-x)) / (np.exp(x) + np.exp(-x))
+
+print(naive_tanh(1000.0))       # nan: inf / inf (и предупреждение о переполнении)
+print(np.tanh(1000.0))          # 1.0 — встроенная функция устойчива
+print(1 - np.tanh(20.0) ** 2)   # 0.0: tanh(20) в float64 округляется до 1
+print(tanh_grad(20.0))          # 1.699e-17 — верное значение</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+x = torch.tensor([-2.0, 0.0, 2.0], requires_grad=True)
+y = torch.tanh(x)               # tensor([-0.9640,  0.0000,  0.9640])
+y.sum().backward()
+print(x.grad)                   # tensor([0.0707, 1.0000, 0.0707]) = 1 − tanh²
+
+# Инициализация под tanh: усиление 5/3
+layer = nn.Linear(256, 256)
+nn.init.xavier_uniform_(layer.weight, gain=nn.init.calculate_gain(&quot;tanh&quot;))
+
+# Рекуррентная сеть с tanh и обрезка градиента от взрыва
+rnn = nn.RNN(input_size=32, hidden_size=64, nonlinearity=&quot;tanh&quot;, batch_first=True)
+out, h = rnn(torch.randn(8, 100, 32))   # 8 последовательностей длины 100
+out.pow(2).mean().backward()
+nn.utils.clip_grad_norm_(rnn.parameters(), max_norm=1.0)</code></pre>
+    <div class="callout key"><b>Правило</b><p>Используйте встроенный tanh и автоматическое дифференцирование; на обратном проходе — формулу $1-t^2$ от сохранённого выхода. Для tanh-сетей — инициализация Ксавье с усилением $5/3$, для RNN — обрезка нормы градиента.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>tanh на выходе вместо сигмоиды для вероятности.</b> Выход tanh лежит в $(-1;\,1)$ и не является вероятностью. Для бинарной классификации нужна <a href='../sigmoid/'>сигмоида</a> и <a href='../bce/'>BCE</a>; tanh на выходе уместен, если цели нормированы в $[-1;\,1]$.</li><li><b>Производная по входу вместо выхода.</b> Формула $1-t^2$ применяется к <i>выходу</i> $t=\tanh x$. Частая опечатка — $1-x^2$ от входа: при $x=2$ она даёт $-3$ вместо $0{,}071$.</li><li><b>Ненормированные входы и крупные веса.</b> Если признаки порядка сотен или веса слишком велики, tanh с первых шагов насыщен и почти не учится. Стандартизируйте данные и берите инициализацию под tanh.</li><li><b>«tanh решает проблему затухания».</b> Он лучше сигмоиды (производная до 1 и центрированность), но тоже насыщается. Для глубоких сетей — ReLU-семейство, нормализация и остаточные связи; для последовательностей — LSTM/GRU.</li><li><b>Самописный tanh через exp.</b> Даёт nan при больших $|x|$. Пользуйтесь <code>np.tanh</code>, <code>torch.tanh</code>.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href='../sigmoid/'>Сигмоида</a>: $\tanh x=2\sigma(2x)-1$ и $\sigma(x)=\tfrac12(1+\tanh\tfrac x2)$; производные связаны как $\tanh' x=4\sigma'(2x)$.</li><li><a href='../relu/'>ReLU</a>: не насыщается при $x&gt;0$ и вытеснил tanh из глубоких свёрточных сетей.</li><li><a href='../gelu/'>GELU</a>: популярное приближение $0{,}5x\bigl(1+\tanh\bigl(\sqrt{2/\pi}\,(x+0{,}044715x^3)\bigr)\bigr)$.</li><li><a href='../silu/'>SiLU</a>: $x\sigma(x)=\tfrac x2\bigl(1+\tanh\tfrac x2\bigr)$ — та же S-кривая в роли «мягкого вентиля».</li><li><a href='../mse/'>MSE</a>: естественная пара для выхода tanh при целях в $[-1;\,1]$.</li><li><a href='../adam/'>Adam</a>: оптимизатор из рисунка 7, хорошо проходит плато, созданные насыщением.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $\tanh x=\frac{e^x-e^{-x}}{e^x+e^{-x}}=\frac{\sinh x}{\cosh x}=2\sigma(2x)-1$ отображает $\mathbb R$ в $(-1;\,1)$, нечётен и проходит через ноль. 2) $\tanh'=1-\tanh^2\le1$, максимум в нуле, на хвостах — насыщение. 3) Ряд Тейлора $x-\frac{x^3}{3}+\dots$ сходится при $|x|&lt;\pi/2$. 4) Центрированные выходы делают обучение следующего слоя быстрее, чем у сигмоиды. 5) Сумма tanh-складок приближает любую непрерывную функцию; инициализация — Ксавье с усилением $5/3$. 6) В RNN tanh держит состояние ограниченным, но градиент через время гаснет — отсюда LSTM.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Известно, что $\tanh 0{,}5\approx0{,}462$. Чему равен $\tanh(-0{,}5)$?</legend><div class="opts"><button type="button" data-ok="0">$0{,}538$</button><button type="button" data-ok="1">$-0{,}462$</button><button type="button" data-ok="0">$0{,}462$</button><button type="button" data-ok="0">$-0{,}538$</button></div><div class="explain" hidden>tanh нечётен: $\tanh(-x)=-\tanh x=-0{,}462$. Ответ $0{,}538=1-0{,}462$ — это симметрия сигмоиды, а не тангенса.</div></fieldset><fieldset class="q"><legend>2. Нейрон выдал $t=\tanh z=0{,}8$. Чему равна производная $\tanh' z$?</legend><div class="opts"><button type="button" data-ok="0">$0{,}2$</button><button type="button" data-ok="1">$0{,}36$</button><button type="button" data-ok="0">$0{,}64$</button><button type="button" data-ok="0">$0{,}16$</button></div><div class="explain" hidden>$\tanh' z=1-t^2=1-0{,}64=0{,}36$. Экспоненту заново считать не нужно.</div></fieldset><fieldset class="q"><legend>3. Какое тождество верно?</legend><div class="opts"><button type="button" data-ok="0">$\tanh x=\sigma(2x)-1$</button><button type="button" data-ok="0">$\tanh x=2\sigma(x)-1$</button><button type="button" data-ok="1">$\tanh x=2\sigma(2x)-1$</button><button type="button" data-ok="0">$\tanh x=\sigma(x)/2$</button></div><div class="explain" hidden>Сигмоиду сжимают в 2 раза по горизонтали, растягивают в 2 раза по вертикали и опускают на 1: $2\sigma(2x)-1$.</div></fieldset><fieldset class="q"><legend>4. Почему tanh в скрытых слоях обычно обучается быстрее сигмоиды?</legend><div class="opts"><button type="button" data-ok="0">Он считается быстрее</button><button type="button" data-ok="1">Его выходы центрированы и производная до 1, а не до 0,25</button><button type="button" data-ok="0">Он не насыщается</button><button type="button" data-ok="0">У него нет производной в нуле</button></div><div class="explain" hidden>Центрированность делает поверхность потерь следующего слоя «круглее», а вчетверо больший максимум производной меньше ослабляет градиент. Насыщается tanh так же, как сигмоида.</div></fieldset><fieldset class="q"><legend>5. В RNN с tanh рекуррентный вес сделали очень большим. Что будет с градиентом через много шагов?</legend><div class="opts"><button type="button" data-ok="0">Взорвётся: множители $|w|&gt;1$</button><button type="button" data-ok="1">Затухнет: состояния насытятся, и $1-h^2\to0$</button><button type="button" data-ok="0">Останется равным 1</button><button type="button" data-ok="0">Станет отрицательным</button></div><div class="explain" hidden>Каждый множитель равен $w(1-h_s^2)$. При большом $w$ состояние прижимается к $\pm1$, и $1-h_s^2$ становится очень мал — на рисунке 8 при $w=3$ градиент падает до $1{,}6\cdot10^{-38}$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../sigmoid/"><span class="kicker">← Предыдущая формула</span><span class="big">Sigmoid</span><span class="kicker">логистическая функция</span></a>
+<a class="next" href="../relu/"><span class="kicker">Следующая формула →</span><span class="big">ReLU</span><span class="kicker">rectified linear unit</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Softmax: from logits to probabilities — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="Softmax in depth: formula, temperature, shift invariance, link to the sigmoid, the probability simplex, the Jacobian, log-sum-exp, softmax regression, attention, stable code.">
+  <meta property="og:title" content="Softmax: from logits to probabilities — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="Softmax in depth: formula, temperature, shift invariance, link to the sigmoid, the probability simplex, the Jacobian, log-sum-exp, softmax regression, attention, stable code.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/softmax/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/softmax/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/softmax/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/softmax/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/softmax.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/softmax/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/softmax/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/softmax/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Activation functions</span>
+  <h1>Softmax: from logits to probabilities</h1>
+  <p class="dek">The function that turns a network’s raw scores into a probability distribution over K classes. We take it apart bone by bone: why the exponential, why only logit differences matter, what temperature does, how the Jacobian diag(s) − ssᵀ is built, why softmax is the gradient of a smooth maximum, and how to avoid NaN in code.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: a vote with amplification</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties</a>
+      <a href="#geometry"><span class="n">5</span>Geometry: the probability simplex</a>
+      <a href="#derivative"><span class="n">6</span>The derivative: the Jacobian matrix</a>
+      <a href="#surface"><span class="n">7</span>The 3D picture: softmax over the logit plane</a>
+      <a href="#lse"><span class="n">8</span>Log-sum-exp: a smooth maximum</a>
+      <a href="#training"><span class="n">9</span>Softmax in training</a>
+      <a href="#code"><span class="n">10</span>In code: stability, log-softmax and PyTorch</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#links"><span class="n">12</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{softmax}(z)_i=s_i=\frac{e^{z_i}}{\sum_{j=1}^{K}e^{z_j}}$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p>A classifier with $K$ classes ends with $K$ numbers — <b>logits</b>: for example, $(2,\,1,\,0)$ for “cat”, “dog”, “bird”. They are just scores: they can be negative, they do not add up to 1, and they do not tell how sure the model is. Softmax turns such a vector into a probability distribution: all numbers are positive, they sum to 1, and the order is preserved — a higher score means a higher probability.</p>
+    <p>Where it appears:</p>
+    <ul class="flist"><li><b>the output of a multi-class classifier</b> — from logistic regression to ResNet and ViT: $\hat y=\operatorname{softmax}(Wx+b)$;</li><li><b>language models</b> — at every step an LLM outputs logits for every token in its vocabulary (tens of thousands), softmax turns them into the distribution of the next token, and temperature controls how bold the generation is;</li><li><b>attention</b> in transformers — the weights $\operatorname{softmax}(QK^\top/\sqrt d)$ decide which tokens to look at;</li><li><b>mixture of experts (MoE)</b> — the router distributes a token among experts through a softmax;</li><li><b>reinforcement learning</b> — a Boltzmann policy picks action $a$ with probability proportional to $e^{Q(a)/T}$;</li><li><b>statistical physics</b> — it is the Boltzmann–Gibbs distribution $p_i\propto e^{-E_i/(kT)}$; hence the word “temperature”.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>$s_i=e^{z_i}/\sum_j e^{z_j}$: the exponential makes every number positive and turns differences into ratios, and dividing by the sum normalizes. Softmax does not change when one constant is added to all logits (which is why code subtracts the maximum), its derivative is the matrix $\operatorname{diag}(s)-ss^\top$, and for two classes it coincides with the <a href='../sigmoid/'>sigmoid</a> of the logit difference.</p></div>
+
+    <h2 id="intuition">Intuition: a vote with amplification</h2>
+    <p>Think of the classes as candidates and of the logits as their scores. To get shares of the “vote”, the scores must be made positive and normalized. Simply dividing by the sum does not work: scores can be negative and the sum can be zero. The exponential solves both problems: $e^{z}$ is always positive, and a difference in scores becomes a <i>ratio</i> — every unit of advantage multiplies the share by $e\approx2.718$.</p>
+    <p>Drag the tops of the logit bars on the left and watch the probabilities on the right. Then press “+1 to every logit”: the bars on the left rise, while nothing changes on the right.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-bars" data-config="{&quot;z&quot;: [2, 1, 0], &quot;T&quot;: 1}"></div><figcaption><b>Figure 1.</b> Logits and probabilities. The logits $(2,\,1,\,0)$ give $(0.665,\,0.245,\,0.090)$, and the sum of exponentials is $11.11$. The ±1 buttons shift every logit — the probabilities stay put. The temperature slider: at $T=0.1$ the first class gets more than $0.9999$, at $T=10$ the distribution is almost uniform, $(0.367,\,0.332,\,0.301)$. The dashed line is the level $1/K$.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>The logits $(2,\,1,\,0)$ differ by one, while the probabilities differ by a factor of $e$: $0.665/0.245\approx0.245/0.090\approx2.718$. Softmax only looks at logit <i>differences</i>. The temperature $T$ divides the logits: for $T&lt;1$ the differences grow and the distribution sharpens, for $T&gt;1$ it flattens.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <div class="eqd">$$s_i=\operatorname{softmax}(z)_i=\frac{e^{z_i}}{\sum_{j=1}^{K}e^{z_j}},\qquad i=1,\dots,K$$</div>
+    <dl class="symbols"><dt>$z=(z_1,\dots,z_K)$</dt><dd>the vector of logits — raw outputs of the last layer, any real numbers;</dd><dt>$e^{z_i}$</dt><dd>the exponential: makes the number positive and turns logit differences into ratios;</dd><dt>$\sum_{j}e^{z_j}$</dt><dd>the normalizing sum (in physics, the partition function $Z$);</dd><dt>$s_i$</dt><dd>the probability of class $i$: $s_i\in(0,\,1)$ and $\sum_i s_i=1$.</dd></dl>
+    <p>Let us walk through the cheat sheet’s running example — the logits $z=(2,\,1,\,0)$:</p>
+    <div class="eqd">$$\begin{gathered}e^{2}\approx7.389,\quad e^{1}\approx2.718,\quad e^{0}=1,\quad\textstyle\sum\approx11.107\\ \Longrightarrow\;s\approx\Bigl(\frac{7.389}{11.107},\,\frac{2.718}{11.107},\,\frac{1}{11.107}\Bigr)=(0.665,\,0.245,\,0.090)\end{gathered}$$</div>
+    <h3>Temperature</h3>
+    <p>Logits are often divided by a number $T&gt;0$, the <b>temperature</b>, before the softmax:</p>
+    <div class="eqd">$$s_i(T)=\frac{e^{z_i/T}}{\sum_j e^{z_j/T}}$$</div>
+    <p>The table shows what temperature does to the same vector $(2,\,1,\,0)$:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$i$</th><th class=num>$z_i$</th><th class=num>$e^{z_i}$</th><th class=num>$s_i,\ T=1$</th><th class=num>$s_i,\ T=0.5$</th><th class=num>$s_i,\ T=2$</th></tr></thead><tbody><tr><td>1</td><td class=num>2</td><td class=num>7.389</td><td class=num>0.665</td><td class=num>0.867</td><td class=num>0.506</td></tr><tr><td>2</td><td class=num>1</td><td class=num>2.718</td><td class=num>0.245</td><td class=num>0.117</td><td class=num>0.307</td></tr><tr><td>3</td><td class=num>0</td><td class=num>1.000</td><td class=num>0.090</td><td class=num>0.016</td><td class=num>0.186</td></tr><tr><td>Σ</td><td class=num></td><td class=num>11.107</td><td class=num>1</td><td class=num>1</td><td class=num>1</td></tr></tbody></table></div>
+    <p>Two limits explain the name. As $T\to0$ only the largest logit wins: softmax tends to the one-hot vector of the $\operatorname{argmax}$ (if the maximum is unique). As $T\to\infty$ the differences vanish and the distribution becomes uniform, $s_i\to1/K$. Softmax is a “soft” argmax: something between a hard choice and complete indifference.</p>
+    <div class="callout note"><b>About the name</b><p>Strictly speaking, softmax smoothly approximates not the max function but the one-hot argmax vector. The smooth maximum is log-sum-exp, and softmax is its gradient (see the section <a href='#lse'>on LSE</a>).</p></div>
+
+    <h2 id="properties">Properties</h2>
+    <ul class="flist"><li><b>A distribution</b>: $s_i&gt;0$ and $\sum_i s_i=1$ for any logits. Exactly 0 or 1 never happens — only in the limit (and on a computer, through rounding).</li><li><b>Order-preserving</b>: $z_i&gt;z_j\iff s_i&gt;s_j$, so $\operatorname{argmax}s=\operatorname{argmax}z$. To merely predict the class you can skip the softmax.</li><li><b>Ratios</b>: $s_i/s_j=e^{z_i-z_j}$ — the logit difference is the logarithm of the probability ratio. Conversely, $z_i=\ln s_i+C$: logits are recovered from probabilities up to a common constant.</li><li><b>Shift invariance</b>: $\operatorname{softmax}(z+c\mathbf 1)=\operatorname{softmax}(z)$ for any number $c$. Of $K$ logits only $K-1$ differences matter.</li><li><b>No scale invariance</b>: $\operatorname{softmax}(az)$ is sharper for $a&gt;1$ and flatter for $0&lt;a&lt;1$. This is the same temperature, $a=1/T$.</li><li><b>Competition</b>: raising one logit increases its probability and decreases all the others — mass is redistributed, not created.</li></ul>
+    <details class="deep"><summary>Why a shift changes nothing</summary><div class="deep-body">
+      <div class="eqd">$$\frac{e^{z_i+c}}{\sum_j e^{z_j+c}}=\frac{e^{c}\,e^{z_i}}{e^{c}\sum_j e^{z_j}}=\frac{e^{z_i}}{\sum_j e^{z_j}}$$</div>
+      <p>The factor $e^c$ cancels. This is exactly what lets code subtract $\max_j z_j$ from every logit: the result is the same, and the exponential no longer overflows.</p>
+    </div></details>
+    <h3>Two classes are a sigmoid</h3>
+    <div class="eqd">$$\operatorname{softmax}(z_1,z_2)_1=\frac{e^{z_1}}{e^{z_1}+e^{z_2}}=\frac{1}{1+e^{-(z_1-z_2)}}=\sigma(z_1-z_2)$$</div>
+    <p>For two classes softmax is the <a href='../sigmoid/'>sigmoid</a> of the logit difference, which is why a binary classifier needs only one output. A similar formula holds for $K$ classes if we look at one class against all the others:</p>
+    <div class="eqd">$$s_i=\sigma\Bigl(z_i-\ln\sum_{j\ne i}e^{z_j}\Bigr)$$</div>
+    <p>Every probability is a sigmoid of how far its logit is ahead of the “smooth maximum” of the rest. To check it, divide the numerator and the denominator of $s_i$ by $e^{z_i}$.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-sigmoid" data-config="{&quot;z1&quot;: 2, &quot;z2&quot;: 1, &quot;z3&quot;: 0}"></div><figcaption><b>Figure 2.</b> $s_1$ as a function of $z_1$ with $z_2=1$, $z_3=0$ fixed. The blue curve is a sigmoid shifted to the point $m=\ln(e^{1}+e^{0})\approx1.313$: at $z_1=2$ we get $\sigma(0.687)\approx0.665$. The orange and teal curves are $s_2$ and $s_3$: they decrease, handing their mass to the first class. Untick “There is a third class” and an ordinary sigmoid $\sigma(z_1-z_2)$ remains.</figcaption></figure>
+
+    <h2 id="geometry">Geometry: the probability simplex</h2>
+    <p>All distributions over $K$ classes form the <b>probability simplex</b>:</p>
+    <div class="eqd">$$\Delta^{K-1}=\Bigl\{s\in\mathbb R^{K}:\ s_i\ge0,\ \textstyle\sum_i s_i=1\Bigr\}$$</div>
+    <p>For $K=3$ it is an equilateral triangle. The vertices are confident answers $(1,\,0,\,0)$, $(0,\,1,\,0)$, $(0,\,0,\,1)$, the centre is the uniform distribution $(\tfrac13,\,\tfrac13,\,\tfrac13)$, and a point inside is a “mixture” of the vertices with weights $s_i$ (barycentric coordinates).</p>
+    <p>Softmax maps the whole logit space $\mathbb R^K$ onto the <i>interior</i> of the simplex: the edges and vertices are out of reach. All points of the line $z+c\mathbf 1$ land on one point, so in essence softmax is a one-to-one correspondence between the $(K-1)$-dimensional space of logit differences and the interior of the simplex. The inverse map is the logarithm: $z=\ln s$ up to a shift.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-simplex" data-config="{&quot;z&quot;: [2, 1, 0]}"></div><figcaption><b>Figure 3.</b> A distribution over three classes is a point of the triangle; the shading shows which class wins and how confidently. Drag the black point: on the right are the same probabilities as bars, below are the logits that produce this point. The black dashed line is the path as the temperature changes: from the winning vertex ($T\to0$) to the centre ($T\to\infty$). The blue line is the path when only $z_1$ changes: from the opposite edge to vertex 1. At $z=(2,\,1,\,0)$ the centred logits are $(1,\,0,\,-1)$ and the entropy is $0.832$.</figcaption></figure>
+    <div class="callout intuition"><b>Entropy is the distance from the vertices</b><p>The entropy $H(s)=-\sum_i s_i\ln s_i$ measures uncertainty: it tends to 0 near the vertices and is largest at the centre, where it equals $\ln K$. For $(0.665,\,0.245,\,0.090)$ it is $0.832$, with a maximum of $\ln3\approx1.099$.</p></div>
+
+    <h2 id="derivative">The derivative: the Jacobian matrix</h2>
+    <p>Softmax has $K$ inputs and $K$ outputs, so its derivative is not a number but a $K\times K$ matrix: the entry $J_{ij}=\partial s_i/\partial z_j$ shows how the $i$-th probability responds to the $j$-th logit.</p>
+    <details class="deep"><summary>Derivation with the quotient rule</summary><div class="deep-body">
+      <p>Let $S=\sum_k e^{z_k}$; then $\partial S/\partial z_j=e^{z_j}$. For $i=j$:</p>
+      <div class="eqd">$$\frac{\partial s_i}{\partial z_i}=\frac{e^{z_i}S-e^{z_i}e^{z_i}}{S^{2}}=s_i-s_i^{2}=s_i(1-s_i)$$</div>
+      <p>For $i\ne j$ the numerator $e^{z_i}$ does not depend on $z_j$:</p>
+      <div class="eqd">$$\frac{\partial s_i}{\partial z_j}=\frac{0\cdot S-e^{z_i}e^{z_j}}{S^{2}}=-s_is_j$$</div>
+    </div></details>
+    <details class="deep"><summary>Derivation through the logarithm (shorter)</summary><div class="deep-body">
+      <p>$\ln s_i=z_i-\ln S$. The derivative of the log of a sum of exponentials is softmax again: $\partial\ln S/\partial z_j=e^{z_j}/S=s_j$. Hence</p>
+      <div class="eqd">$$\frac{\partial\ln s_i}{\partial z_j}=\delta_{ij}-s_j\quad\Longrightarrow\quad\frac{\partial s_i}{\partial z_j}=s_i(\delta_{ij}-s_j)$$</div>
+      <p>Here $\delta_{ij}$ is the Kronecker delta: 1 if $i=j$ and 0 otherwise.</p>
+    </div></details>
+    <div class="eqd">$$J=\frac{\partial s}{\partial z}=\operatorname{diag}(s)-s\,s^{\top},\qquad J_{ij}=\begin{cases}s_i(1-s_i),&amp;i=j\\-s_is_j,&amp;i\ne j\end{cases}$$</div>
+    <p>Properties of this matrix:</p>
+    <ul class="flist"><li><b>the diagonal</b> $s_i(1-s_i)$ is exactly the derivative of the sigmoid: at most $\tfrac14$, largest at $s_i=\tfrac12$;</li><li><b>off the diagonal</b> every entry is negative: raising one logit takes probability away from the others;</li><li><b>it is symmetric</b>, and every row (and column) sums to 0: $J\mathbf 1=s-s\,(s^\top\mathbf 1)=0$. This is the derivative of $\sum_i s_i=1$, and the vector $\mathbf 1$ is the shift direction that changes nothing. Hence $J$ is singular;</li><li><b>it is positive semi-definite</b>: $v^\top Jv=\sum_i s_iv_i^2-\bigl(\sum_i s_iv_i\bigr)^2$ is the variance of $v$ under the distribution $s$, and a variance is never negative;</li><li><b>it fades with confidence</b>: when $s$ is close to a vertex of the simplex, every entry of $J$ is close to zero — saturation, as with the sigmoid.</li></ul>
+    <figure class="viz"><div class="fv" data-viz="softmax-jacobian" data-config="{&quot;z&quot;: [2, 1, 0], &quot;j&quot;: 0}"></div><figcaption><b>Figure 4.</b> On the left, the Jacobian at $z=(2,\,1,\,0)$: the diagonal $(0.223,\,0.185,\,0.082)$ is positive (red), the off-diagonal entries $-0.163$, $-0.060$, $-0.022$ are negative (blue); every column sums to 0, and the trace is $1-\sum s_i^2\approx0.4895$. On the right, the entries of the chosen column as functions of $z_j$: the diagonal one is the bell $s_j(1-s_j)$ peaking at $0.25$ where $s_j=0.5$; the others are negative “dips”.</figcaption></figure>
+    <h3>A backward pass without the matrix</h3>
+    <p>Backprop needs not $J$ itself but the product $J^\top g$, where $g=\partial L/\partial s$ comes from above. Thanks to the structure $\operatorname{diag}(s)-ss^\top$ it costs $O(K)$ operations instead of $O(K^2)$:</p>
+    <div class="eqd">$$\frac{\partial L}{\partial z}=J^{\top}g=s\odot\bigl(g-\langle g,s\rangle\,\mathbf 1\bigr)$$</div>
+    <p>For an LLM vocabulary of $K\approx10^5$ tokens this is the difference between $10^5$ and $10^{10}$ numbers per position. Paired with cross-entropy it gets simpler still: $\partial L/\partial z=s-y$ (derived on the <a href='../cross-entropy/'>cross-entropy</a> page).</p>
+
+    <h2 id="surface">The 3D picture: softmax over the logit plane</h2>
+    <p>Fix $z_3=0$ — no loss of generality, since a shift can make any logit zero — and draw $s_1$ as a function of the two variables $z_1$ and $z_2$. The result is a “ramp”: the surface is close to 1 where $z_1$ exceeds both $z_2$ and zero, and close to 0 where the first class loses. Across the boundary it rises along a sigmoid — the one-against-all formula in action.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-surface" data-config="{&quot;z&quot;: [2, 1]}"></div><figcaption><b>Figure 5.</b> On the left, $s_k(z_1,z_2,0)$ in 3D (the surface can be rotated); the black point is $z=(2,\,1,\,0)$ with $s_1\approx0.665$. On the right, the logit plane: the shading shows the winning class and its confidence, the lines are the levels $0.1$, $0.5$, $0.9$ of the chosen function. The point can be dragged. Switch to $\partial s_1/\partial z_1$: it is a ridge of height $0.25$ along the line $s_1=0.5$.</figcaption></figure>
+    <p>The top view splits the logit plane into three regions. The boundaries are the sets of equal logits: the ray $z_1=z_2\ge0$ separates classes 1 and 2, the ray $z_1=0$, $z_2\le0$ separates classes 1 and 3, and the ray $z_2=0$, $z_1\le0$ separates classes 2 and 3. All three rays start at the origin, where $s=(\tfrac13,\,\tfrac13,\,\tfrac13)$.</p>
+    <div class="callout note"><b>Where the gradient flows</b><p>The surface $\partial s_1/\partial z_1=s_1(1-s_1)$ is almost flat and almost zero deep inside the class’s “own” and “foreign” regions. Gradient flows through softmax only where the model is in doubt — near the boundaries.</p></div>
+
+    <h2 id="lse">Log-sum-exp: a smooth maximum</h2>
+    <p>Softmax has an “antiderivative” — the log-sum-exp function:</p>
+    <div class="eqd">$$\operatorname{LSE}(z)=\ln\sum_{j=1}^{K}e^{z_j},\qquad\frac{\partial\operatorname{LSE}}{\partial z_i}=\frac{e^{z_i}}{\sum_j e^{z_j}}=s_i,\qquad\nabla\operatorname{LSE}(z)=\operatorname{softmax}(z)$$</div>
+    <p>LSE is a smooth maximum: the largest exponential dominates the sum, and the logarithm returns almost its exponent. More precisely,</p>
+    <div class="eqd">$$\max_j z_j\;\le\;\operatorname{LSE}(z)\;\le\;\max_j z_j+\ln K$$</div>
+    <p>The left inequality holds because a sum is at least its largest term, the right one because each of the $K$ terms is at most the largest. For $(2,\,1,\,0)$: $\operatorname{LSE}=\ln11.107\approx2.408$ — between $2$ and $2+\ln3\approx3.099$. With a temperature, $\operatorname{LSE}_T(z)=T\ln\sum_j e^{z_j/T}$, the gap shrinks to $T\ln K$: as $T\to0$ LSE becomes the ordinary maximum, and its gradient $\operatorname{softmax}(z/T)$ becomes the one-hot argmax vector.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-lse" data-config="{&quot;T&quot;: 1, &quot;x&quot;: 1}"></div><figcaption><b>Figure 6.</b> Top: $\operatorname{LSE}_T(x,0)=T\ln(e^{x/T}+1)$ and $\max(x,0)$; the gap is at most $T\ln2$ and is largest at $x=0$. At $T=1$, $x=1$: $\operatorname{LSE}\approx1.3133$, the gap is $0.3133$. Bottom: the derivative in $x$ — it is $\sigma(x/T)$, the first component of $\operatorname{softmax}(x/T,\,0)$, a smooth step. Decrease $T$ and LSE hugs the broken line while softmax hugs the step.</figcaption></figure>
+    <details class="deep"><summary>Convexity of LSE and of cross-entropy</summary><div class="deep-body">
+      <p>The Hessian of LSE is the derivative of softmax, i.e. the same Jacobian: $\nabla^2\operatorname{LSE}=\operatorname{diag}(s)-ss^\top$. It is positive semi-definite, so LSE is a convex function. Hence cross-entropy is convex in the logits: $-\ln s_y=\operatorname{LSE}(z)-z_y$ is a convex function minus a linear one.</p>
+    </div></details>
+    <div class="callout key"><b>Three formulas worth connecting</b><p>$\operatorname{softmax}=\nabla\operatorname{LSE}$; $\ln s_i=z_i-\operatorname{LSE}(z)$ (log-softmax); $\mathrm{CE}=\operatorname{LSE}(z)-z_y$. For the cheat sheet’s example: $2.408-2=0.408$. And for $K=2$, $z=(x,\,0)$, LSE becomes softplus $\ln(1+e^{x})$ — a smooth version of <a href='../relu/'>ReLU</a>.</p></div>
+
+    <h2 id="training">Softmax in training</h2>
+    <p>The simplest model with a softmax is multinomial logistic (softmax) regression: $K$ linear functions give the logits, softmax gives the probabilities, and the loss is <a href='../cross-entropy/'>cross-entropy</a>:</p>
+    <div class="eqd">$$s=\operatorname{softmax}(Wx+b),\qquad L=-\ln s_y,\qquad\frac{\partial L}{\partial W}=(s-y)\,x^{\top},\qquad\frac{\partial L}{\partial b}=s-y$$</div>
+    <p>Here $y$ is the one-hot vector of the correct class. The whole Jacobian, paired with the logarithm, has collapsed into the difference “prediction − truth”.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-regression" data-config="{}"></div><figcaption><b>Figure 7.</b> Three classes of 30 points each. The model starts at $W=0$, $b=0$: every probability is $\tfrac13$, $\mathrm{CE}=\ln3\approx1.099$, accuracy $33.3\%$. Press “Play”: full-batch gradient descent with step $0.15$. After the very first step the accuracy is $94.4\%$; after 200 steps $\mathrm{CE}\approx0.181$ and the accuracy is $95.6\%$. The brightness of the shading is the model’s confidence; hover to see the probabilities at any point.</figcaption></figure>
+    <div class="callout note"><b>The boundaries are straight</b><p>The boundary between classes $i$ and $j$ is the set where $z_i=z_j$, that is $(w_i-w_j)^\top x+b_i-b_j=0$: a line (a hyperplane in general). Softmax does not make the model non-linear — it only turns scores into probabilities. Curved boundaries appear when a neural network computes the logits.</p></div>
+    <h3>Softmax inside the transformer: attention</h3>
+    <div class="eqd">$$\operatorname{Attention}(Q,K,V)=\operatorname{softmax}\Bigl(\frac{QK^{\top}}{\sqrt{d}}\Bigr)V$$</div>
+    <p>Each row of $\operatorname{softmax}(\cdot)$ is how one token spreads its attention over the others, with weights summing to 1. Dividing by $\sqrt d$ is a temperature: the dot product of $d$-dimensional vectors with independent zero-mean, unit-variance components has variance $d$. Without the scaling the attention logits are large, softmax saturates to nearly one-hot, and the Jacobian — and with it the gradients — nearly vanishes.</p>
+    <h3>Temperature in text generation</h3>
+    <p>A language model draws the next token from $\operatorname{softmax}(z/T)$. As $T\to0$ (greedy decoding) the most likely token is taken; with $T&lt;1$ the text is more predictable, with $T&gt;1$ more diverse and riskier. A temperature $T&gt;1$ also appears in knowledge distillation (Hinton et al., 2015): the teacher’s “soft” probabilities carry more information than one-hot labels.</p>
+    <div class="callout history"><b>Where the name comes from</b><p>The formula came from statistical physics: the Boltzmann–Gibbs distribution $p_i\propto e^{-E_i/(kT)}$ gives the probability of a state with energy $E_i$ at temperature $T$; a logit plays the role of minus the energy. The word “softmax” was coined by John Bridle in 1990, when describing a probabilistic interpretation of network outputs. In econometrics the same model is called the multinomial logit.</p></div>
+
+    <h2 id="code">In code: stability, log-softmax and PyTorch</h2>
+    <p>The naive formula breaks on large logits: $e^{1000}$ is infinity in any floating-point format, giving $\infty/\infty=\text{NaN}$. In float32, the main training format on GPUs, the limit is closer: $e^{x}$ overflows already for $x&gt;88.72$ (the largest float32 is $\approx3.4\cdot10^{38}$). On very negative logits the trouble is the opposite: the exponentials underflow to zero, giving $0/0$.</p>
+    <figure class="viz"><div class="fv" data-viz="softmax-overflow" data-config="{&quot;c&quot;: 0}"></div><figcaption><b>Figure 8.</b> The logits $(2+c,\,1+c,\,c)$ for $c$ from $-800$ to $800$; the correct answer is always $(0.665,\,0.245,\,0.090)$. In float32 the naive formula is right only for $-99\le c\le86$: at $c=87$ the number $e^{89}$ does not fit in float32 and the result is NaN; at $c\le-106$ every exponential is zero, $0/0$; and in between, subnormal numbers lose precision — at $c=-105$ the output is a confident but false $(1,\,0,\,0)$. float64 has more room ($-741\le c\le707$), but a limit as well. With the maximum subtracted the answer is right everywhere.</figcaption></figure>
+    <p>The cure is shift invariance: subtract $m=\max_j z_j$. The largest exponent becomes 0, $e^0=1$, and the denominator lies between 1 and $K$ — no overflow, no division by zero:</p>
+    <div class="eqd">$$s_i=\frac{e^{z_i-m}}{\sum_j e^{z_j-m}},\qquad\ln s_i=(z_i-m)-\ln\sum_j e^{z_j-m}$$</div>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+np.set_printoptions(precision=3)
+
+def softmax(z, axis=-1, T=1.0):
+    &quot;&quot;&quot;Stable softmax: subtract the maximum, the result does not change.&quot;&quot;&quot;
+    z = np.asarray(z, dtype=float) / T
+    z = z - z.max(axis=axis, keepdims=True)
+    e = np.exp(z)
+    return e / e.sum(axis=axis, keepdims=True)
+
+def log_softmax(z, axis=-1):
+    # log s_i = z_i − logsumexp(z): no log(0) even for tiny probabilities
+    z = np.asarray(z, dtype=float)
+    m = z.max(axis=axis, keepdims=True)
+    return z - m - np.log(np.exp(z - m).sum(axis=axis, keepdims=True))
+
+def softmax_backward(s, g):
+    # J^T g = s * (g − &lt;g, s&gt;): O(K) instead of a K×K matrix
+    return s * (g - (g * s).sum(axis=-1, keepdims=True))
+
+z = np.array([2.0, 1.0, 0.0])
+print(softmax(z))            # [0.665 0.245 0.09 ]
+print(softmax(z + 1000))     # [0.665 0.245 0.09 ] — the shift does not matter
+print(softmax(z, T=0.5))     # [0.867 0.117 0.016] — sharper
+print(log_softmax([0.0, -800.0]))  # [0. -800.], while np.log(softmax(...)) gives -inf</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn.functional as F
+
+z = torch.tensor([2.0, 1.0, 0.0], requires_grad=True)
+s = F.softmax(z, dim=-1)          # tensor([0.6652, 0.2447, 0.0900])
+s[0].backward()                   # the first row of the Jacobian
+print(z.grad)                     # tensor([ 0.2227, -0.1628, -0.0599])
+
+# For training you do not need a separate softmax:
+logits = torch.randn(4, 3)        # a batch: 4 examples, 3 classes
+target = torch.tensor([0, 2, 1, 0])
+loss = F.cross_entropy(logits, target)   # log_softmax + NLL inside
+log_p = F.log_softmax(logits, dim=-1)    # if you need log-probabilities</code></pre>
+    <div class="callout key"><b>The rule</b><p>If a logarithm follows, do not compute $\ln(\operatorname{softmax}(z))$ in two steps: a small probability rounds to 0 and you get $-\infty$. Use <code>log_softmax</code> or a loss on logits directly: <code>F.cross_entropy</code> / <code>nn.CrossEntropyLoss</code> in PyTorch, <code>from_logits=True</code> in Keras.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>A softmax before <code>nn.CrossEntropyLoss</code></b>. This loss expects logits and applies log-softmax itself. A double softmax squeezes the probabilities: for three classes the second softmax never exceeds $e/(e+2)\approx0.576$, the loss cannot drop below $0.551$, and the gradients are distorted.</li><li><b>The wrong axis</b>. For a batch of shape $(N,K)$ normalize over classes (<code>dim=-1</code>), not over examples (<code>dim=0</code>). No exception is raised — the model simply learns nonsense.</li><li><b>A naive exponential</b> without subtracting the maximum — NaN on large logits, especially in mixed precision: in float16 $e^{x}$ overflows already for $x&gt;11.09$.</li><li><b>Softmax for multi-label</b>. If an object can carry several labels at once (a cat <i>and</i> a dog in a photo), the classes do not compete — use a sigmoid on every output and <a href='../bce/'>BCE</a>.</li><li><b>A softmax probability as a guarantee</b>. $s_{\max}=0.99$ does not mean “right 99% of the time”: deep networks are often overconfident. Calibration is a separate task; the simplest method is temperature scaling, fitting a single $T$ on validation data.</li><li><b>Comparing logits of different examples</b>. Logits are defined up to a shift, so “a logit of 5 for one example is more than 3 for another” means nothing. Compare probabilities, or logit differences within one example.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href='../sigmoid/'>Sigmoid</a>: $\operatorname{softmax}(z_1,z_2)_1=\sigma(z_1-z_2)$, and the Jacobian’s diagonal $s_i(1-s_i)$ is the derivative of the sigmoid.</li><li><a href='../cross-entropy/'>Cross-entropy</a>: softmax’s natural partner; together they give the gradient $s-y$, and $\mathrm{CE}=\operatorname{LSE}(z)-z_y$.</li><li><a href='../bce/'>BCE</a>: the two-class special case of cross-entropy, where softmax reduces to the sigmoid.</li><li><a href='../focal/'>Focal Loss</a>: multiplies $-\ln p_t$ by $(1-p_t)^\gamma$, where $p_t$ is the softmax probability of the correct class.</li><li><a href='../relu/'>ReLU</a>: softplus $\ln(1+e^{x})=\operatorname{LSE}(x,0)$ is a smooth version of $\max(x,0)$.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $s_i=e^{z_i}/\sum_je^{z_j}$ turns any logits into a distribution over $K$ classes and preserves their order. 2) Only logit differences matter: $s_i/s_j=e^{z_i-z_j}$, and a shift changes nothing — hence the stable formula that subtracts the maximum. 3) Temperature controls sharpness: $T\to0$ gives argmax, $T\to\infty$ the uniform distribution. 4) The Jacobian $\operatorname{diag}(s)-ss^\top$ is symmetric, singular and fades with confidence; the backward pass costs $O(K)$. 5) Softmax is the gradient of the smooth maximum LSE, and paired with cross-entropy it gives the gradient $s-y$.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. The logits $(2,\,1,\,0)$ give $s\approx(0.665,\,0.245,\,0.090)$. What do $(102,\,101,\,100)$ give?</legend><div class="opts"><button type="button" data-ok="0">Almost $(1,\,0,\,0)$</button><button type="button" data-ok="1">$(0.665,\,0.245,\,0.090)$</button><button type="button" data-ok="0">$(\tfrac13,\,\tfrac13,\,\tfrac13)$</button><button type="button" data-ok="0">No answer: overflow</button></div><div class="explain" hidden>The common constant $100$ cancels: softmax depends only on differences. (Naive float32 code would indeed overflow here — that is why the maximum is subtracted.)</div></fieldset><fieldset class="q"><legend>2. What happens to $\operatorname{softmax}(z/T)$ as $T\to0$?</legend><div class="opts"><button type="button" data-ok="0">It tends to the uniform distribution</button><button type="button" data-ok="1">It tends to the one-hot vector of the largest logit</button><button type="button" data-ok="0">It does not change</button><button type="button" data-ok="0">All probabilities tend to 0</button></div><div class="explain" hidden>The logit differences are divided by a small $T$ and grow, so all the mass goes to the largest logit (if it is unique).</div></fieldset><fieldset class="q"><legend>3. What is $\operatorname{softmax}(z_1,z_2)_1$?</legend><div class="opts"><button type="button" data-ok="0">$\sigma(z_1)$</button><button type="button" data-ok="1">$\sigma(z_1-z_2)$</button><button type="button" data-ok="0">$\sigma(z_1+z_2)$</button><button type="button" data-ok="0">$z_1/(z_1+z_2)$</button></div><div class="explain" hidden>Divide the numerator and the denominator of $e^{z_1}/(e^{z_1}+e^{z_2})$ by $e^{z_1}$: you get $1/(1+e^{-(z_1-z_2)})$.</div></fieldset><fieldset class="q"><legend>4. What is the sum of the entries of any column of the softmax Jacobian?</legend><div class="opts"><button type="button" data-ok="0">1</button><button type="button" data-ok="1">0</button><button type="button" data-ok="0">$s_j$</button><button type="button" data-ok="0">$\tfrac14$</button></div><div class="explain" hidden>$\sum_i\partial s_i/\partial z_j=\partial\bigl(\sum_i s_i\bigr)/\partial z_j=\partial1/\partial z_j=0$.</div></fieldset><fieldset class="q"><legend>5. Why does a stable softmax subtract $\max_j z_j$?</legend><div class="opts"><button type="button" data-ok="0">To sharpen the distribution</button><button type="button" data-ok="1">So that the exponential does not overflow; the result is unchanged</button><button type="button" data-ok="0">To make the sum equal 1</button><button type="button" data-ok="0">To speed up training</button></div><div class="explain" hidden>After the subtraction the largest exponent is 0, the denominator lies between 1 and $K$, and by shift invariance the answer is the same.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../leaky-relu/"><span class="kicker">← Previous formula</span><span class="big">Leaky ReLU</span><span class="kicker">“leaky” ReLU</span></a>
+<a class="next" href="../mae/"><span class="kicker">Next formula →</span><span class="big">MAE</span><span class="kicker">mean absolute error</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

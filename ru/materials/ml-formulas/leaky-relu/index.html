@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Leaky ReLU: «протекающий» ReLU — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="Leaky ReLU подробно: формула в трёх записях, производная и субградиент, умирающий ReLU и оживление нейрона, кусочно-линейная сеть в 3D, инициализация Хе для α, PReLU, RReLU, ELU и SELU, код на NumPy и PyTorch.">
+  <meta property="og:title" content="Leaky ReLU: «протекающий» ReLU — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="Leaky ReLU подробно: формула в трёх записях, производная и субградиент, умирающий ReLU и оживление нейрона, кусочно-линейная сеть в 3D, инициализация Хе для α, PReLU, RReLU, ELU и SELU, код на NumPy и PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/leaky-relu/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/leaky-relu/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/leaky-relu/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/leaky-relu/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/leaky-relu.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/leaky-relu/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/leaky-relu/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/leaky-relu/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Функции активации</span>
+  <h1>Leaky ReLU: «протекающий» ReLU</h1>
+  <p class="dek">ReLU с крошечной поправкой: слева от нуля функция не обнуляет сигнал, а умножает его на маленький α. Разбираем по косточкам, почему этого хватает, чтобы нейроны не умирали, откуда берётся инициализация Хе с множителем 1 + α², как сеть из таких нейронов режет пространство на плоские куски и как PReLU учит α сам.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 30 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем он нужен</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: дверь, которая не закрывается до конца</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#properties"><span class="n">4</span>Свойства</a>
+      <a href="#derivative"><span class="n">5</span>Производная: ступенька вместо обрыва</a>
+      <a href="#dying"><span class="n">6</span>Умирающий ReLU и как Leaky его лечит</a>
+      <a href="#space"><span class="n">7</span>Сеть из Leaky ReLU: кусочно-линейный рельеф</a>
+      <a href="#depth"><span class="n">8</span>Глубокие сети: инициализация Хе для Leaky ReLU</a>
+      <a href="#family"><span class="n">9</span>PReLU, RReLU и вся семья</a>
+      <a href="#code"><span class="n">10</span>В коде</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{LReLU}(x)=\max(\alpha x,\,x)=\begin{cases}x, &amp; x&gt;0\\ \alpha x, &amp; x\le 0\end{cases}$$</div>
+
+    <h2 id="why">Зачем он нужен</h2>
+    <p><a href="../relu/">ReLU</a> — самая популярная активация глубокого обучения: $\max(0,x)$ считается мгновенно, а справа от нуля градиент не затухает. Но у него есть слабое место. Слева от нуля ReLU не приглушает сигнал, а <b>обнуляет</b> его — и вместе с ним градиент. Нейрон, у которого вход отрицателен на всех примерах, выдаёт 0, получает нулевой градиент и больше никогда не учится. Это «умирающий ReLU» (dying ReLU).</p>
+    <p>Leaky ReLU — минимальная поправка: слева от нуля график не горизонтален, а слегка наклонён, $\alpha x$ с маленьким $\alpha$ (обычно от $0{,}01$ до $0{,}3$). Сигнал «протекает» сквозь закрытую дверь — отсюда и название (leaky — «протекающий»).</p>
+    <p>Где он встречается:</p>
+    <ul class="flist"><li><b>дискриминаторы GAN</b> — в DCGAN (Рэдфорд и др., 2015) все слои дискриминатора используют Leaky ReLU с $\alpha=0{,}2$;</li><li><b>детекторы YOLO</b> — сеть Darknet в YOLOv2 и YOLOv3 построена на Leaky ReLU с $\alpha=0{,}1$;</li><li><b>графовые сети</b> — коэффициенты внимания в GAT считаются через Leaky ReLU с $\alpha=0{,}2$;</li><li><b>свёрточные сети с PReLU</b> — вариант с обучаемым $\alpha$ (Хе и др., 2015) помог впервые опустить ошибку top-5 на ImageNet ниже человеческой;</li><li><b>любая сеть, где ReLU «умирает»</b> — замена занимает одну строку и почти ничего не стоит.</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>$\operatorname{LReLU}(x)=x$ при $x&gt;0$ и $\alpha x$ при $x\le0$. Производная — ступенька: $1$ справа и $\alpha$ слева, поэтому градиент никогда не обнуляется целиком. Функция остаётся кусочно-линейной, монотонной и почти такой же дешёвой, как ReLU. При $\alpha=0$ это ReLU, при $\alpha=1$ — тождественная функция, при обучаемом $\alpha$ — PReLU.</p></div>
+
+    <h2 id="intuition">Интуиция: дверь, которая не закрывается до конца</h2>
+    <p>ReLU похож на дверь: положительный сигнал проходит целиком, отрицательный упирается в закрытую створку. Leaky ReLU оставляет щель — отрицательный сигнал проходит, но ослабленным в $1/\alpha$ раз. При $\alpha=0{,}1$ вход $-2$ превращается в $-0{,}2$.</p>
+    <p>Потяните точку по графику. Оранжевый «треугольник наклона» показывает производную: шаг на 1 вдоль оси $x$ меняет значение на $\alpha$ слева от нуля и на 1 справа. Ниже — сама производная: две горизонтальные ступеньки с разрывом в нуле. Подвигайте ползунок $\alpha$: от ReLU ($\alpha=0$) через «протекающий» вариант к прямой $y=x$ ($\alpha=1$).</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-explorer" data-config="{&quot;alpha&quot;: 0.1, &quot;x&quot;: -2}"></div><figcaption><b>Рисунок 1.</b> Leaky ReLU и его производная при $\alpha=0{,}1$. В точке $x=-2$ значение равно $-0{,}2$, производная — $0{,}1$. Серый пунктир — ReLU, точечная линия — $y=x$. В нуле производная не определена: слева она равна $\alpha$, справа — 1.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Слева график не плоский, но очень пологий: при $\alpha=0{,}01$ вход $-100$ даёт всего $-1$. Вся нелинейность Leaky ReLU сосредоточена в одной точке — изломе в нуле, где наклон меняется с $\alpha$ на 1. Выразительная сила сети из таких нейронов берётся именно из этих изломов.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <p>Одну и ту же функцию полезно уметь записывать тремя способами — каждый пригодится в своём месте.</p>
+    <h3>1. По случаям</h3>
+    <div class="eqd">$$\operatorname{LReLU}_\alpha(x)=\begin{cases}x, &amp; x&gt;0,\\ \alpha x, &amp; x\le 0.\end{cases}$$</div>
+    <dl class="symbols"><dt>$x$</dt><dd>вход нейрона — обычно пре-активация $z=w^\top h+b$;</dd><dt>$\alpha$</dt><dd>наклон отрицательной части, гиперпараметр; обычно $0&lt;\alpha&lt;1$;</dd><dt>$\alpha x$</dt><dd>«протечка»: отрицательный вход не обнуляется, а сжимается в $1/\alpha$ раз.</dd></dl>
+    <p>В точке $x=0$ обе ветки дают ноль, поэтому неважно, к какой из них отнести ноль: функция непрерывна.</p>
+    <h3>2. Через максимум</h3>
+    <div class="eqd">$$\operatorname{LReLU}_\alpha(x)=\max(\alpha x,\;x)\qquad(\alpha\le 1)$$</div>
+    <p>При $x&gt;0$ и $\alpha\le1$ выполняется $x\ge\alpha x$, а при $x&lt;0$ — наоборот, $\alpha x\ge x$. Значит, максимум сам выбирает нужную ветку. Но только при $\alpha\le1$: при $\alpha=2$ справа победит $2x$, и получится другая функция. Запись удобна в коде (<code>np.maximum(alpha * x, x)</code>), но про условие легко забыть.</p>
+    <h3>3. Линейная часть плюс модуль</h3>
+    <div class="eqd">$$\operatorname{LReLU}_\alpha(x)=\frac{1+\alpha}{2}\,x+\frac{1-\alpha}{2}\,|x|$$</div>
+    <p>Проверка: при $x&gt;0$ получаем $\frac{1+\alpha}{2}x+\frac{1-\alpha}{2}x=x$, при $x&lt;0$ — $\frac{1+\alpha}{2}x-\frac{1-\alpha}{2}x=\alpha x$. Эта форма верна при любом $\alpha$ и объясняет главное: Leaky ReLU — это линейная функция плюс «немного модуля». Вся нелинейность сидит во втором слагаемом, и её доля $\frac{1-\alpha}{2}$ уменьшается с ростом $\alpha$. При $\alpha=1$ нелинейность исчезает полностью.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-parts" data-config="{&quot;alpha&quot;: 0.2}"></div><figcaption><b>Рисунок 2.</b> Слева — Leaky ReLU как верхняя огибающая двух прямых $y=x$ и $y=\alpha x$. Сдвиньте $\alpha$ выше 1: огибающая (чёрный пунктир) отрывается от настоящего Leaky ReLU (синяя линия). Справа — разложение на линейную часть и модуль; при $\alpha=0{,}2$ коэффициенты равны $0{,}6$ и $0{,}4$.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\alpha=0{,}01$</th><th class=num>$\alpha=0{,}2$</th><th class=num>$\operatorname{LReLU}'(x)$</th></tr></thead><tbody><tr><td class=num>−5</td><td class=num>−0,05</td><td class=num>−1</td><td class=num>$\alpha$</td></tr><tr><td class=num>−2</td><td class=num>−0,02</td><td class=num>−0,4</td><td class=num>$\alpha$</td></tr><tr><td class=num>−0,5</td><td class=num>−0,005</td><td class=num>−0,1</td><td class=num>$\alpha$</td></tr><tr><td class=num>0,5</td><td class=num>0,5</td><td class=num>0,5</td><td class=num>$1$</td></tr><tr><td class=num>2</td><td class=num>2</td><td class=num>2</td><td class=num>$1$</td></tr><tr><td class=num>5</td><td class=num>5</td><td class=num>5</td><td class=num>$1$</td></tr></tbody></table></div>
+    <p>Справа от нуля все варианты совпадают с ReLU; они различаются только тем, сколько отрицательного сигнала «протекает».</p>
+
+    <h2 id="properties">Свойства</h2>
+    <ul class="flist"><li><b>Область определения и значений</b> — вся числовая прямая $\mathbb R$ (при $\alpha&gt;0$). У ReLU значения только $[0;\,+\infty)$.</li><li><b>Непрерывность и кусочная линейность</b>: две прямые, склеенные в нуле. Функция дифференцируема везде, кроме $x=0$.</li><li><b>Строгая монотонность</b> при $\alpha&gt;0$: больший вход даёт больший выход. Поэтому функция обратима: $\operatorname{LReLU}_\alpha^{-1}(y)=y$ при $y&gt;0$ и $y/\alpha$ при $y\le0$, то есть $\operatorname{LReLU}_{1/\alpha}$. У ReLU обратной нет: все отрицательные входы склеены в ноль.</li><li><b>Положительная однородность</b>: $\operatorname{LReLU}(cx)=c\,\operatorname{LReLU}(x)$ при $c\ge0$. Масштаб входа просто переносится на выход — отсюда простые формулы инициализации.</li><li><b>Липшицевость</b> с константой $\max(1,\alpha)$, то есть 1 при $\alpha\le1$: $|\operatorname{LReLU}(a)-\operatorname{LReLU}(b)|\le|a-b|$.</li><li><b>Неограниченность</b> сверху и снизу, но вниз функция растёт в $1/\alpha$ раз медленнее.</li><li><b>Частные случаи</b>: $\alpha=0$ — ReLU, $\alpha=1$ — тождественная функция, $\alpha=-1$ — модуль $|x|$ (уже не монотонный).</li></ul>
+    <h3>Среднее и разброс выхода</h3>
+    <p>Пусть вход нейрона $z\sim N(0,1)$. Тогда</p>
+    <div class="eqd">$$\mathbb E\bigl[\operatorname{LReLU}(z)\bigr]=\frac{1-\alpha}{\sqrt{2\pi}},\qquad \mathbb E\bigl[\operatorname{LReLU}(z)^2\bigr]=\frac{1+\alpha^2}{2}$$</div>
+    <p>При $\alpha=0{,}01$ среднее равно $0{,}395$ (у ReLU — $0{,}399$), при $\alpha=0{,}2$ — $0{,}319$. Чем больше $\alpha$, тем ближе выходы к нулевому среднему; это немного облегчает обучение следующего слоя. Второй момент $\frac{1+\alpha^2}{2}$ понадобится в разделе об инициализации.</p>
+    <details class="deep"><summary>Откуда эти формулы</summary><div class="deep-body">
+      <p>Для $z\sim N(0,1)$ известно, что $\mathbb E[z\,\mathbf 1_{z&gt;0}]=\varphi(0)=1/\sqrt{2\pi}$, а по симметрии $\mathbb E[z\,\mathbf 1_{z&lt;0}]=-1/\sqrt{2\pi}$. Поэтому</p>
+      <div class="eqd">$$\mathbb E[\operatorname{LReLU}(z)]=\mathbb E[z\mathbf 1_{z&gt;0}]+\alpha\,\mathbb E[z\mathbf 1_{z&lt;0}]=\frac{1}{\sqrt{2\pi}}-\frac{\alpha}{\sqrt{2\pi}}$$</div>
+      <p>Аналогично $\mathbb E[z^2\mathbf 1_{z&gt;0}]=\mathbb E[z^2\mathbf 1_{z&lt;0}]=\tfrac12$, откуда $\mathbb E[\operatorname{LReLU}(z)^2]=\tfrac12+\tfrac{\alpha^2}{2}$. Вторая формула верна для любого симметричного распределения с единичной дисперсией, первая — только для нормального.</p>
+    </div></details>
+
+    <h2 id="derivative">Производная: ступенька вместо обрыва</h2>
+    <p>На каждой ветке функция линейна, поэтому производная — просто наклон ветки:</p>
+    <div class="eqd">$$\operatorname{LReLU}'_\alpha(x)=\begin{cases}1, &amp; x&gt;0,\\ \alpha, &amp; x&lt;0.\end{cases}$$</div>
+    <details class="deep"><summary>Вывод по определению</summary><div class="deep-body">
+      <p>При $x&gt;0$ для достаточно малых $h$ точка $x+h$ тоже положительна, и $\frac{\operatorname{LReLU}(x+h)-\operatorname{LReLU}(x)}{h}=\frac{(x+h)-x}{h}=1$. При $x&lt;0$ так же получаем $\frac{\alpha(x+h)-\alpha x}{h}=\alpha$.</p>
+      <p>В нуле односторонние пределы разные:</p>
+      <div class="eqd">$$\lim_{h\to0^+}\frac{\operatorname{LReLU}(h)-0}{h}=1,\qquad \lim_{h\to0^-}\frac{\alpha h-0}{h}=\alpha$$</div>
+      <p>При $\alpha\ne1$ они не совпадают, поэтому производной в нуле нет — это точка излома.</p>
+    </div></details>
+    <p>Что делать с нулём на практике? В точке излома есть <b>субградиент</b> (subgradient): при $0\le\alpha\le1$ любое число $g\in[\alpha;\,1]$ задаёт прямую $y=gx$, которая лежит не выше графика. Библиотеки выбирают одно значение по соглашению — в PyTorch при $x=0$ берётся $\alpha$. Точно в ноль вход попадает редко, так что выбор почти ни на что не влияет.</p>
+    <h3>Почему ступенька лучше обрыва</h3>
+    <p>По цепному правилу градиент по весу $w_j$ нейрона $a=\operatorname{LReLU}(z)$, $z=\sum_j w_jx_j+b$, равен</p>
+    <div class="eqd">$$\frac{\partial L}{\partial w_j}=\frac{\partial L}{\partial a}\cdot\operatorname{LReLU}'(z)\cdot x_j$$</div>
+    <p>У ReLU средний множитель равен 0 при $z&lt;0$, у Leaky ReLU — $\alpha$. Слева градиент в $1/\alpha$ раз слабее, но не равен нулю: нейрон, «застрявший» в отрицательной зоне, продолжает получать сигнал об ошибке.</p>
+    <h3>Производная по α: шаг к PReLU</h3>
+    <p>Если сделать $\alpha$ обучаемым параметром, понадобится производная по нему. Она тоже простая:</p>
+    <div class="eqd">$$\frac{\partial\operatorname{LReLU}_\alpha(x)}{\partial\alpha}=\begin{cases}0, &amp; x&gt;0,\\ x, &amp; x\le 0\end{cases}\;=\;\min(0,\,x)$$</div>
+    <p>Наклон $\alpha$ учится только на примерах, попавших в левую ветку, — так устроен PReLU (раздел 9). Вторая производная по $x$ равна нулю везде, кроме нуля: вся кривизна сосредоточена в изломе, и в смысле обобщённых функций $\operatorname{LReLU}''(x)=(1-\alpha)\,\delta(x)$.</p>
+
+    <h2 id="dying">Умирающий ReLU и как Leaky его лечит</h2>
+    <p>Как умирает нейрон. Пусть после неудачного большого шага (слишком большой темп обучения, выброс в данных, неудачная инициализация) сдвиг $b$ нейрона стал сильно отрицательным. Тогда $z=w^\top x+b&lt;0$ на всех примерах, ReLU выдаёт 0, производная $\operatorname{ReLU}'(z)=0$ — и градиенты по $w$, $b$ и по выходному весу $v$ обнуляются одновременно. Градиентный спуск больше никогда не сдвинет этот нейрон: он мёртв. В конспектах курса CS231n отмечают, что при слишком большом темпе обучения мёртвой может оказаться до 40% сети.</p>
+    <p>Ниже — самый чистый эксперимент. Один нейрон $f(x)=v\cdot\operatorname{act}(wx+b)$ должен выучить «шарнир» $y=1{,}5\max(0,\,x-1)$ по 41 точке отрезка $[-3;\,3]$. Старт: $w=1$, $b=-4$, $v=1$ — излом в точке $x=4$, за пределами данных, поэтому на всех примерах $z&lt;0$. Обучение — градиентный спуск по MSE с шагом $0{,}1$.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-revive" data-config="{&quot;alpha&quot;: 0.1}"></div><figcaption><b>Рисунок 3.</b> Нажмите «Пуск». Нейрон ReLU (чёрный пунктир) заморожен: все его градиенты равны нулю, и ошибка навсегда остаётся $1{,}09$. Нейрон Leaky ReLU с $\alpha=0{,}1$ получает слабый градиент, его прямая наклоняется и сдвигается, и на 24-м шаге излом входит в область данных. Через 1500 шагов ошибка равна $0{,}0549$. При $\alpha=0{,}01$ оживление занимает 135 шагов, зато итоговая ошибка — $0{,}00082$.</figcaption></figure>
+    <p>Обратите внимание на компромисс. Большой $\alpha$ быстро возвращает нейрон к жизни, но левая ветка остаётся наклонной: при $\alpha=0{,}1$ итоговая модель слева имеет наклон $\alpha v w\approx0{,}116$ вместо нуля, отсюда остаточная ошибка. Маленький $\alpha$ почти не искажает форму функции, но оживляет медленнее.</p>
+    <div class="callout warn"><b>Leaky — не гарантия</b><p>Ненулевой градиент не означает, что нейрон обязательно вернётся: он может так и остаться на левой ветке, работая как линейная функция $\alpha(w^\top x+b)$. Leaky ReLU гарантирует другое — нейрон никогда не замерзает намертво и продолжает учиться. Против самой причины гибели помогают умеренный темп обучения, разогрев (warmup), нормализация и правильная инициализация.</p></div>
+
+    <h2 id="space">Сеть из Leaky ReLU: кусочно-линейный рельеф</h2>
+    <p>В сети с двумя входами каждый нейрон $\operatorname{LReLU}(w_k^\top x+b_k)$ «сгибает» плоскость вдоль прямой $w_k^\top x+b_k=0$: по одну сторону от неё наклон в $1/\alpha$ раз меньше, чем по другую. Сумма нейронов $f(x)=\sum_k v_k\operatorname{LReLU}(w_k^\top x+b_k)$ — многогранная поверхность: внутри каждой области, где набор включённых нейронов не меняется, она плоская, а на прямых-изломах меняет наклон.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-surface" data-config="{&quot;alpha&quot;: 0.1}"></div><figcaption><b>Рисунок 4.</b> Сеть из шести нейронов Leaky ReLU. Слева — поверхность $f(x_1,x_2)$ в 3D (её можно вращать), справа — вид сверху с шестью прямыми изломов. Они делят квадрат $[-3;\,3]^2$ на 19 линейных областей. Тяните оранжевую точку: в центре, в точке $(0{,}2;\,-0{,}3)$, выключены все шесть нейронов, но градиент не нулевой: $|\nabla f|=0{,}100$. Поставьте $\alpha=0$: центральная область станет плоской — это 5% квадрата, где у сети из ReLU градиент по входу равен нулю. При $\alpha=1$ вся сеть превращается в одну плоскость.</figcaption></figure>
+    <p>Число областей не зависит от $\alpha$ (пока $\alpha\ne1$): его задают только прямые изломов. Зато от $\alpha$ зависит, что происходит там, где все нейроны выключены. У ReLU там плато с нулевым градиентом, и примеры, попавшие на него, ничего не сообщают сети. У Leaky ReLU плато наклонено, и градиент там, как правило, не нулевой.</p>
+    <div class="callout note"><b>Сколько областей может быть</b><p>$n$ прямых общего положения делят плоскость не более чем на $1+n+\binom n2$ частей: для $n=6$ это 22. В квадрате на рисунке видно 19 из них. У глубоких сетей число линейных областей может расти с глубиной экспоненциально — это одно из объяснений их выразительной силы.</p></div>
+
+    <h2 id="depth">Глубокие сети: инициализация Хе для Leaky ReLU</h2>
+    <p>В глубокой сети сигнал проходит через десятки слоёв $z_{l+1}=W_{l+1}\operatorname{LReLU}(z_l)$. Если на каждом слое дисперсия умножается на число, хоть немного отличное от 1, через 50 слоёв это превратится во взрыв или исчезновение сигнала. Посчитаем этот множитель.</p>
+    <details class="deep"><summary>Вывод множителя</summary><div class="deep-body">
+      <p>Пусть веса $W_{ij}$ независимы, $\mathbb E W_{ij}=0$, $\operatorname{Var}W_{ij}=s^2$, а входы $z_l$ симметричны относительно нуля. Для одного выхода $z_{l+1,i}=\sum_{j=1}^{n}W_{ij}h_j$, где $h_j=\operatorname{LReLU}(z_{l,j})$:</p>
+      <div class="eqd">$$\operatorname{Var}z_{l+1}=n\,s^2\,\mathbb E[h^2]=n\,s^2\,\frac{1+\alpha^2}{2}\operatorname{Var}z_l$$</div>
+      <p>Последнее равенство — второй момент из раздела о свойствах: половина $z_l^2$ приходит с положительной ветки целиком, половина — с отрицательной, умноженная на $\alpha^2$. Чтобы дисперсия сохранялась, множитель должен быть равен 1:</p>
+      <div class="eqd">$$s^2=\frac{2}{(1+\alpha^2)\,n_{\text{in}}}\qquad\Longleftrightarrow\qquad g=\sqrt n\,s=\sqrt{\frac{2}{1+\alpha^2}}$$</div>
+      <p>На обратном проходе градиент умножается на $W^\top$ и на $\operatorname{LReLU}'(z)$, а $\mathbb E[\operatorname{LReLU}'(z)^2]=\frac{1+\alpha^2}{2}$ — тот же множитель. Поэтому одна и та же инициализация сохраняет и прямой сигнал, и градиенты.</p>
+    </div></details>
+    <div class="eqd">$$\operatorname{Var}z_{l+1}=\frac{g^2(1+\alpha^2)}{2}\,\operatorname{Var}z_l,\qquad g_{\text{He}}=\sqrt{\frac{2}{1+\alpha^2}}$$</div>
+    <p>При $\alpha=0$ получается знаменитое $g=\sqrt2$ инициализации Хе (Kaiming) для ReLU. Для Leaky ReLU коэффициент чуть меньше: $1{,}414$ при $\alpha=0{,}01$, $1{,}387$ при $\alpha=0{,}2$, $1{,}355$ при $\alpha=0{,}3$.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-init" data-config="{&quot;alpha&quot;: 0.3, &quot;depth&quot;: 50}"></div><figcaption><b>Рисунок 5.</b> RMS пре-активаций на каждом слое случайной сети ширины 256 (вертикальная шкала логарифмическая). По умолчанию $\alpha=0{,}3$, а веса инициализированы «как для ReLU», $g=\sqrt2$: множитель дисперсии равен $1{,}09$ за слой, и к 50-му слою RMS вырастает до $11{,}6$ (теория — $11{,}7$). С правильным $g=\sqrt{2/(1+\alpha^2)}$ множитель равен 1, и на 50-м слое RMS равен $1{,}34$ (теория — $1{,}35$). При $g=1$ множитель $0{,}545$, и сигнал гаснет до $3{,}45\cdot10^{-7}$.</figcaption></figure>
+    <div class="callout note"><b>В PyTorch</b><p>Ровно это делает <code>nn.init.kaiming_normal_(w, a=alpha, nonlinearity='leaky_relu')</code>: стандартное отклонение $\sqrt{2/((1+a^2)\,n_{\text{in}})}$. По умолчанию там <code>a=0</code>, то есть инициализация для обычного ReLU, — для Leaky ReLU параметр <code>a</code> нужно передать явно.</p></div>
+
+    <h2 id="family">PReLU, RReLU и вся семья</h2>
+    <p>Как выбрать $\alpha$? Есть три ответа.</p>
+    <ul class="flist"><li><b>Фиксированный $\alpha$</b> — классический Leaky ReLU (Маас, Ханнун, Ын, 2013, $\alpha=0{,}01$). Сегодня часто берут $0{,}1$–$0{,}3$: в сравнении Сюй и др. (2015) «сильно протекающий» вариант с $\alpha=1/5{,}5\approx0{,}18$ работал лучше, чем $0{,}01$.</li><li><b>Обучаемый $\alpha$</b> — PReLU (Parametric ReLU, Хе и др., 2015). $\alpha$ становится параметром — один на слой или по одному на канал — и учится градиентным спуском вместе с весами. Начальное значение в PyTorch — $0{,}25$.</li><li><b>Случайный $\alpha$</b> — RReLU (Randomized ReLU): при обучении $\alpha$ для каждого примера берётся из равномерного распределения $U(1/8;\,1/3)$ (границы по умолчанию в PyTorch), при выводе — среднее $\frac{1/8+1/3}{2}=\frac{11}{48}\approx0{,}229$. Шум действует как регуляризация.</li></ul>
+    <p>У PReLU градиент по $\alpha$ — это $\min(0,\,z)$ из раздела о производной: наклон учится только на отрицательных входах. Посмотрим, как градиентный спуск находит сразу и вес, и наклон.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-prelu" data-config="{&quot;w&quot;: 0.5, &quot;a&quot;: 1.3}"></div><figcaption><b>Рисунок 6.</b> Модель $\operatorname{PReLU}_\alpha(wx)$ с двумя параметрами учится на 31 точке, сгенерированной «учителем» $w^*=1{,}5$, $\alpha^*=0{,}2$ с шумом. Справа — поверхность ошибки $L(w,\alpha)$ (чем светлее, тем меньше). Из старта $(0{,}5;\,1{,}3)$ градиентный спуск с шагом $0{,}05$ за 87 шагов приходит в $w=1{,}521$, $\alpha=0{,}209$ с ошибкой $0{,}0158$ — это минимум для этих зашумлённых данных (у самого учителя ошибка $0{,}0170$). Перетащите старт в другое место.</figcaption></figure>
+    <p>PReLU добавляет всего по одному параметру на канал, но в работе Хе и др. он вместе с новой инициализацией позволил обучить очень глубокие свёрточные сети и получить ошибку top-5 $4{,}94\%$ на ImageNet — ниже оценки человеческой ошибки $5{,}1\%$. Авторы отмечают, что к $\alpha$ не стоит применять затухание весов (weight decay): оно тянет $\alpha$ к нулю, то есть обратно к ReLU.</p>
+    <h3>Гладкие родственники</h3>
+    <p>Излом в нуле можно сгладить. ELU заменяет левую прямую экспонентой $\alpha(e^x-1)$, которая насыщается на уровне $-\alpha$. SELU добавляет масштаб: $\lambda\approx1{,}0507$ и $\alpha\approx1{,}6733$ подобраны так, чтобы активации сами поддерживали нулевое среднее и единичную дисперсию. <a href="../gelu/">GELU</a> и <a href="../silu/">SiLU</a> — гладкие и даже немонотонные функции, которые сегодня стоят в трансформерах.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-zoo" data-config="{&quot;cmp&quot;: &quot;elu&quot;, &quot;x&quot;: -2}"></div><figcaption><b>Рисунок 7.</b> Leaky ReLU с $\alpha=0{,}1$ рядом с родственниками. Наведите курсор: при $x=-2$ Leaky ReLU даёт $-0{,}2$, ELU — $-0{,}865$, SELU — $-1{,}520$, GELU — $-0{,}046$, SiLU — $-0{,}238$. Переключитесь на производные: у Leaky ReLU и SELU это ступенька с разрывом в нуле (у SELU слева $\lambda\alpha\approx1{,}758$, справа $\lambda\approx1{,}051$), у ELU, GELU и SiLU — непрерывная кривая.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Функция</th><th>При $x\le0$</th><th>Производная слева</th><th>Особенность</th></tr></thead><tbody><tr><td>ReLU</td><td>$0$</td><td>$0$</td><td>нулевой градиент, «мёртвые» нейроны</td></tr><tr><td>Leaky ReLU</td><td>$\alpha x$</td><td>$\alpha$</td><td>фиксированный наклон, обычно $0{,}01$–$0{,}3$</td></tr><tr><td>PReLU</td><td>$\alpha x$, $\alpha$ обучается</td><td>$\alpha$</td><td>+1 параметр на слой или канал</td></tr><tr><td>RReLU</td><td>$\alpha x$, $\alpha\sim U(\tfrac18;\,\tfrac13)$</td><td>$\alpha$</td><td>шум как регуляризация</td></tr><tr><td>ELU</td><td>$\alpha(e^{x}-1)$</td><td>$\alpha e^{x}$</td><td>гладкая при $\alpha=1$, насыщение на $-\alpha$</td></tr><tr><td>SELU</td><td>$\lambda\alpha(e^{x}-1)$</td><td>$\lambda\alpha e^{x}$</td><td>самонормализация, $\lambda\approx1{,}0507$</td></tr></tbody></table></div>
+
+    <h2 id="code">В коде</h2>
+    <p>В NumPy Leaky ReLU — одна строка. Надёжнее писать <code>np.where</code>, чем <code>np.maximum(alpha * x, x)</code>: вторая запись тихо ломается при $\alpha&gt;1$.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def leaky_relu(x, alpha=0.01):
+    # where, а не maximum(alpha * x, x): эта запись верна при любом alpha
+    return np.where(x &gt; 0, x, alpha * x)
+
+def leaky_relu_grad(x, alpha=0.01):
+    return np.where(x &gt; 0, 1.0, alpha)      # в нуле берём alpha, как PyTorch
+
+def he_std(n_in, alpha=0.01):
+    # инициализация Хе для Leaky ReLU: Var w = 2 / ((1 + alpha²) · n_in)
+    return np.sqrt(2.0 / ((1.0 + alpha**2) * n_in))
+
+x = np.array([-3.0, -0.5, 0.0, 2.0])
+print(leaky_relu(x))        # [-0.03  -0.005  0.     2.   ]
+print(leaky_relu_grad(x))   # [0.01 0.01 0.01 1.  ]
+print(he_std(256, 0.2))     # 0.08667...</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+act = nn.LeakyReLU(negative_slope=0.01)   # 0.01 — значение по умолчанию
+x = torch.tensor([-3.0, 0.0, 2.0], requires_grad=True)
+act(x).sum().backward()
+print(x.grad)                    # tensor([0.0100, 0.0100, 1.0000]) — в нуле α
+
+prelu = nn.PReLU(num_parameters=1, init=0.25)   # α — обучаемый параметр
+print(prelu(torch.tensor([-2.0, 3.0])))         # tensor([-0.5000, 3.0000])
+
+lin = nn.Linear(256, 256)
+# std = √(2 / ((1 + a²) · 256)); по умолчанию a=0, то есть «как для ReLU»
+nn.init.kaiming_normal_(lin.weight, a=0.2, nonlinearity=&quot;leaky_relu&quot;)
+print(nn.init.calculate_gain(&quot;leaky_relu&quot;, 0.2))  # 1.3867504905630728</code></pre>
+    <div class="callout key"><b>Значения по умолчанию в библиотеках разные</b><p>PyTorch <code>nn.LeakyReLU</code>: <code>negative_slope=0.01</code>. TensorFlow <code>tf.nn.leaky_relu</code>: <code>alpha=0.2</code>. Keras <code>layers.LeakyReLU</code>: $0{,}3$. Одна и та же «Leaky ReLU» в трёх фреймворках — три разные функции. При переносе модели указывайте $\alpha$ явно.</p></div>
+    <p>С численной точки зрения Leaky ReLU безопасен: ни экспонент, ни деления, ни переполнений. Единственная тонкость — <code>inplace=True</code> в PyTorch: он экономит память, но перезаписывает вход, который может понадобиться другим операциям графа.</p>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>Запись <code>max(alpha * x, x)</code> при $\alpha&gt;1$.</b> Формула верна только при $\alpha\le1$; при больших $\alpha$ получается другая функция. Безопасная запись — <code>where(x &gt; 0, x, alpha * x)</code>.</li><li><b>Слишком большой $\alpha$.</b> При $\alpha\to1$ доля нелинейности $\frac{1-\alpha}{2}$ стремится к нулю, функция становится почти линейной, и глубокая сеть теряет выразительность. Разумный диапазон — от $0{,}01$ до $0{,}3$.</li><li><b>Инициализация «как для ReLU» без поправки на $\alpha$.</b> Множитель дисперсии $1+\alpha^2$ за слой: при $\alpha=0{,}3$ за 50 слоёв сигнал вырастает примерно в 8 раз (рисунок 5). Передавайте $\alpha$ в <code>kaiming_normal_(..., a=alpha)</code>.</li><li><b>Надежда, что Leaky ReLU сам вылечит нестабильное обучение.</b> Он убирает нулевой градиент, но не причину: слишком большой темп обучения по-прежнему опасен.</li><li><b>Затухание весов на $\alpha$ у PReLU.</b> Оно тянет $\alpha$ к нулю, и PReLU превращается в ReLU. Исключайте $\alpha$ из группы параметров с weight decay.</li><li><b>Разные значения по умолчанию</b> в PyTorch ($0{,}01$), TensorFlow ($0{,}2$) и Keras ($0{,}3$): при переносе модели между фреймворками результат молча меняется.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href="../relu/">ReLU</a>: частный случай $\alpha=0$; там же — подробнее об «умирающем ReLU».</li><li><a href="../silu/">SiLU / Swish</a> и <a href="../gelu/">GELU</a>: гладкие активации, у которых слева тоже проходит небольшой отрицательный сигнал, но затем он гаснет.</li><li><a href="../sigmoid/">Сигмоида</a> и <a href="../tanh/">tanh</a>: насыщающиеся активации; у Leaky ReLU насыщения нет вовсе, а значит, нет и затухания градиента из-за насыщения.</li><li><a href="../mse/">MSE</a>: функция потерь в экспериментах на рисунках 3 и 6.</li><li><a href="../sgd/">SGD</a> и <a href="../adam/">Adam</a>: слишком большой шаг оптимизатора — главная причина гибели ReLU-нейронов.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $\operatorname{LReLU}_\alpha(x)=x$ при $x&gt;0$ и $\alpha x$ при $x\le0$; это $\max(\alpha x,x)$ при $\alpha\le1$ и $\frac{1+\alpha}{2}x+\frac{1-\alpha}{2}|x|$ при любом $\alpha$. 2) Производная — ступенька из $\alpha$ и $1$: градиент не обнуляется, нейрон не замерзает. 3) Компромисс: больший $\alpha$ быстрее оживляет нейроны, но приближает функцию к линейной. 4) Сеть из Leaky ReLU — кусочно-линейная функция без плоских «мёртвых» плато. 5) Инициализация: $\operatorname{Var}w=\frac{2}{(1+\alpha^2)\,n_{\text{in}}}$. 6) PReLU учит $\alpha$ по градиенту $\min(0,z)$.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Чему равно $\operatorname{LReLU}(-5)$ при $\alpha=0{,}2$?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="1">$-1$</button><button type="button" data-ok="0">$-5$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>Вход отрицательный, поэтому работает ветка $\alpha x=0{,}2\cdot(-5)=-1$.</div></fieldset><fieldset class="q"><legend>2. Чему равна производная Leaky ReLU при $x&lt;0$?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$1$</button><button type="button" data-ok="1">$\alpha$</button><button type="button" data-ok="0">$\alpha x$</button></div><div class="explain" hidden>Слева функция — прямая $\alpha x$, её наклон равен $\alpha$. Поэтому градиент не обнуляется.</div></fieldset><fieldset class="q"><legend>3. При каких $\alpha$ верно $\operatorname{LReLU}_\alpha(x)=\max(\alpha x,x)$?</legend><div class="opts"><button type="button" data-ok="0">При любом $\alpha$</button><button type="button" data-ok="1">Только при $\alpha\le1$</button><button type="button" data-ok="0">Только при $\alpha&gt;1$</button><button type="button" data-ok="0">Только при $\alpha=0{,}01$</button></div><div class="explain" hidden>При $\alpha\le1$ справа $x\ge\alpha x$, слева $\alpha x\ge x$. При $\alpha&gt;1$ справа максимум выберет $\alpha x$ — получится другая функция.</div></fieldset><fieldset class="q"><legend>4. Сеть с Leaky ReLU ($\alpha=0{,}3$) инициализирована «как для ReLU», $g=\sqrt2$. Каков множитель дисперсии за слой?</legend><div class="opts"><button type="button" data-ok="0">$1$</button><button type="button" data-ok="1">$1{,}09$</button><button type="button" data-ok="0">$0{,}545$</button><button type="button" data-ok="0">$2$</button></div><div class="explain" hidden>$g^2(1+\alpha^2)/2=2\cdot1{,}09/2=1{,}09$. За 50 слоёв RMS вырастает примерно в $1{,}09^{24{,}5}\approx8{,}3$ раза.</div></fieldset><fieldset class="q"><legend>5. Нейрон ReLU получает $z&lt;0$ на всех примерах. Что верно?</legend><div class="opts"><button type="button" data-ok="1">Градиенты по его параметрам равны нулю, и градиентный спуск его больше не изменит</button><button type="button" data-ok="0">Градиент маленький, но не нулевой</button><button type="button" data-ok="0">Нейрон выдаёт отрицательные значения</button><button type="button" data-ok="0">Достаточно уменьшить темп обучения, и он оживёт</button></div><div class="explain" hidden>$\operatorname{ReLU}'(z)=0$ при $z&lt;0$, поэтому все градиенты обнуляются — это мёртвый нейрон. Уменьшение шага тут не поможет: шаг, умноженный на ноль, остаётся нулём.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../relu/"><span class="kicker">← Предыдущая формула</span><span class="big">ReLU</span><span class="kicker">rectified linear unit</span></a>
+<a class="next" href="../softmax/"><span class="kicker">Следующая формула →</span><span class="big">Softmax</span><span class="kicker">«мягкий максимум»</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

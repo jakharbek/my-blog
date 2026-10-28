@@ -6,7 +6,9 @@ The output is committed, so GitHub Pages needs no build step.
 Article texts live in tools/content_sigmoid.py, materials in tools/content_formulas.py.
 """
 import html
+import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import content_formulas as formulas
@@ -650,7 +652,7 @@ def materials_index(lang):
     rows = "\n".join(
         f"""      <a class="row" href="{m['slug']}/">
         <span class="l"><span class="kicker">{topic_name[m['topic']]}</span><span class="rt">{m['module'].PAGE[lang]['title']}</span><span class="ex">{m['module'].PAGE[lang]['excerpt']}</span></span>
-        <span class="r"><time datetime="{m['date']}">{fmt_date(m['date'], lang)}</time><span>{sum(len(g['cards']) for g in m['module'].GROUPS if not g.get('upcoming'))} {m['module'].PAGE[lang]['count']}</span></span>
+        <span class="r"><time datetime="{m['date']}">{fmt_date(m['date'], lang)}</time><span>{sum(1 for g in m['module'].GROUPS for c in g['cards'] if c['tex'])} {m['module'].PAGE[lang]['count']}</span></span>
       </a>""" for m in sorted(MATERIALS, key=lambda m: m["date"], reverse=True))
     return head(lang, f"{s['navMaterials']} — {s['brand']}", s["materialsDek"], rel, "materials/") + header(lang, rel, "materials/", materials_nav(lang, rel, True)) + f"""
 <main>
@@ -684,6 +686,8 @@ def formula_card(c, lang):
     rows.append(f'<div class="fc-key">{c["key"][lang]}</div>')
     body = "\n          ".join(rows)
     shown = f'<div class="fc-formula">{tex(c["tex"])}</div>' if c["tex"] else f'<p class="fc-lead">{c["lead"][lang]}</p>'
+    if c["id"] in FORMULA_IDS:
+        shown += f'\n        <a class="ul fc-full" href="{c["id"]}/">{f.PAGE[lang]["full"]}</a>'
     return f"""      <article class="fcard" id="{c['id']}">
         <div class="fc-top"><h3><span>{tr(c['name'], lang)}</span><small>{c['alt'][lang]}</small></h3><span class="fc-tag mono">{tr(c['tag'], lang)}</span></div>
         {shown}
@@ -702,9 +706,10 @@ def material_formulas(lang):
     m = next(x for x in MATERIALS if x["slug"] == "ml-formulas")
     rel = "../../../"
     page = "materials/ml-formulas/"
-    done = [g for g in f.GROUPS if not g.get("upcoming")]
-    by_id = {g["id"]: len(g["cards"]) for g in f.GROUPS}
-    counts = [sum(len(g["cards"]) for g in done), by_id["act"], by_id["reg"] + by_id["cls"], by_id["opt"]]
+    kinds = {"act": {"silu", "gelu"}, "loss": {"triplet", "focal"}, "opt": {"sgd"}}
+    ids = {g["id"]: [c["id"] for c in g["cards"]] for g in f.GROUPS}
+    counts = [sum(1 for g in f.GROUPS for c in g["cards"] if c["tex"]),
+              len(ids["act"]) + len(kinds["act"]), len(ids["reg"]) + len(ids["cls"]) + len(kinds["loss"]), len(ids["opt"]) + len(kinds["opt"])]
     stats = "".join(f"<span><b>{n}</b> {t}</span>" for n, t in zip(counts, pg["stats"]))
     chips = [f'<button type="button" class="chip" data-group="all" aria-pressed="true"><span>{pg["all"]}</span></button>']
     chips += [f'<button type="button" class="chip" data-group="{g["id"]}" aria-pressed="false"><span>{g["title"][lang]}</span><small>{len(g["cards"])}</small></button>' for g in f.GROUPS]
@@ -757,6 +762,149 @@ def material_formulas(lang):
 """ + footer(lang, rel) + f'<script src="{rel}assets/js/materials.js" defer></script>\n</body>\n</html>\n'
 
 
+
+# ---------- formula pages: materials/ml-formulas/<id>/ ----------
+# Each page is a module tools/formulas/<id>.py with META and SECTIONS (see tools/formulas/README.md).
+FORMULA_DIR = ROOT / "tools" / "formulas"
+FORMULA_IDS = sorted(p.stem for p in FORMULA_DIR.glob("*.py") if not p.stem.startswith("_"))
+CARD_ORDER = [c["id"] for g in formulas.GROUPS for c in g["cards"]]
+CARD = {c["id"]: (g, c) for g in formulas.GROUPS for c in g["cards"]}
+
+FX_UI = {
+    "ru": dict(sheet="Шпаргалка", prev="← Предыдущая формула", next="Следующая формула →", toc="Содержание", min="мин чтения", quiz_right="Верно.", quiz_wrong="Не совсем."),
+    "en": dict(sheet="Cheat sheet", prev="← Previous formula", next="Next formula →", toc="Contents", min="min read", quiz_right="Correct.", quiz_wrong="Not quite."),
+    "uz": dict(sheet="Qo‘llanma", prev="← Oldingi formula", next="Keyingi formula →", toc="Mundarija", min="daq o‘qish", quiz_right="To‘g‘ri.", quiz_wrong="Unchalik emas."),
+}
+
+
+def load_formula(fid):
+    spec = importlib.util.spec_from_file_location(f"formula_{fid.replace('-', '_')}", FORMULA_DIR / f"{fid}.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def attr_json(data):
+    return html.escape(json.dumps(data, ensure_ascii=False), quote=True)
+
+
+def render_blocks(blocks, lang, ind="    "):
+    out = []
+    for b in blocks:
+        kind = b[0]
+        if kind == "p":
+            out.append(f"<p>{b[1]}</p>")
+        elif kind == "h3":
+            out.append(f"<h3>{b[1]}</h3>")
+        elif kind == "eq":
+            out.append(f'<div class="eqd">{tex(b[1])}</div>')
+        elif kind == "symbols":
+            rows = "".join(f"<dt>{tex(t, False)}</dt><dd>{d}</dd>" for t, d in b[1])
+            out.append(f'<dl class="symbols">{rows}</dl>')
+        elif kind == "viz":
+            name, cfg, cap = b[1], b[2], b[3] if len(b) > 3 else ""
+            capt = f"<figcaption>{cap}</figcaption>" if cap else ""
+            out.append(f'<figure class="viz"><div class="fv" data-viz="{name}" data-config="{attr_json(cfg)}"></div>{capt}</figure>')
+        elif kind == "callout":
+            k, title, body = b[1], b[2], b[3]
+            out.append(f'<div class="callout {k}">{f"<b>{title}</b>" if title else ""}<p>{body}</p></div>')
+        elif kind == "code":
+            out.append(f'<pre class="code"><span class="lang">{b[1]}</span><code>{html.escape(b[2])}</code></pre>')
+        elif kind == "table":
+            heads, rows = b[1], b[2]
+            num = set((b[3] or {}).get("num", [])) if len(b) > 3 else set()
+            th = "".join(f'<th{" class=num" if i in num else ""}>{h}</th>' for i, h in enumerate(heads))
+            trs = "".join("<tr>" + "".join(f'<td{" class=num" if i in num else ""}>{c}</td>' for i, c in enumerate(r)) + "</tr>" for r in rows)
+            out.append(f'<div class="table-wrap"><table class="data"><thead><tr>{th}</tr></thead><tbody>{trs}</tbody></table></div>')
+        elif kind in ("ul", "ol"):
+            out.append(f'<{kind} class="flist">' + "".join(f"<li>{i}</li>" for i in b[1]) + f"</{kind}>")
+        elif kind == "deep":
+            out.append(f'<details class="deep"><summary>{b[1]}</summary><div class="deep-body">\n' + render_blocks(b[2], lang, ind + "  ") + f"\n{ind}</div></details>")
+        elif kind == "quiz":
+            qs = []
+            for i, q in enumerate(b[1]):
+                ans = q["answer"]
+                opts = "".join(f'<button type="button" data-ok="{1 if j == ans else 0}">{o}</button>' for j, o in enumerate(q["options"]))
+                qs.append(f'<fieldset class="q"><legend>{i + 1}. {q["q"]}</legend><div class="opts">{opts}</div><div class="explain" hidden>{q["explain"]}</div></fieldset>')
+            ui = FX_UI[lang]
+            out.append(f'<div class="quiz" data-right="{ui["quiz_right"]}" data-wrong="{ui["quiz_wrong"]}">' + "".join(qs) + "</div>")
+        else:
+            raise ValueError(f"unknown block {kind!r}")
+    return "\n".join(ind + x for x in out)
+
+
+def formula_page(lang, fid, mod):
+    s, ui, pg = SITE[lang], FX_UI[lang], formulas.PAGE[lang]
+    meta, sections = mod.META, mod.SECTIONS[lang]
+    group, card = CARD[fid]
+    rel = "../../../../"
+    page = f"materials/ml-formulas/{fid}/"
+    nav = [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navMaterials"], f"{rel}{lang}/materials/", False), (ui["sheet"], "../", False), (s["navAbout"], f"{rel}{lang}/about/", False)]
+    toc = "\n".join(f'      <a href="#{sec["id"]}"><span class="n">{i + 1}</span>{sec["title"]}</a>' for i, sec in enumerate(sections))
+    body = "\n\n".join(f'    <h2 id="{sec["id"]}">{sec["title"]}</h2>\n' + render_blocks(sec["blocks"], lang) for sec in sections)
+    order = [x for x in CARD_ORDER if x in FORMULA_IDS]
+    i = order.index(fid)
+    def nav_card(other, cls, label):
+        _, c = CARD[other]
+        return f'<a class="{cls}" href="../{other}/"><span class="kicker">{label}</span><span class="big">{tr(c["name"], lang)}</span><span class="kicker">{c["alt"][lang]}</span></a>'
+    links = []
+    if i > 0:
+        links.append(nav_card(order[i - 1], "prev", ui["prev"]))
+    if i + 1 < len(order):
+        links.append(nav_card(order[i + 1], "next", ui["next"]))
+    extra = (f'  <link rel="stylesheet" href="{KATEX}/katex.min.css">\n'
+             f'  <script defer src="{KATEX}/katex.min.js"></script>\n'
+             f'  <script defer src="{KATEX}/contrib/auto-render.min.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/viz.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/formulas/{fid}.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/materials.js"></script>\n')
+    title = meta["title"][lang]
+    return head(lang, f"{title} — {pg['title']} — {s['brand']}", html.escape(meta["description"][lang], quote=True), rel, page, "article", extra) + header(lang, rel, page, nav) + f"""<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">{pg['title']}</a> · {group['title'][lang]}</span>
+  <h1>{title}</h1>
+  <p class="dek">{meta['dek'][lang]}</p>
+  <div class="author">
+    <img src="{rel}assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="{meta['date']}">{fmt_date(meta['date'], lang)}</time> · {meta['minutes']} {ui['min']}</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="{ui['toc']}">
+    <span>{ui['toc']}</span>
+    <nav>
+{toc}
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">{tex(meta['hero'])}</div>
+
+{body}
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="{ui['sheet']}">
+  <div class="wrap-m">
+    {chr(10).join(links)}
+  </div>
+</nav>
+</main>
+
+""" + footer(lang, rel) + "</body>\n</html>\n"
+
+
+def build_formula(fid):
+    mod = load_formula(fid)
+    assert fid in CARD, f"{fid}: no card with this id in content_formulas.py"
+    for lang in LANGS:
+        d = ROOT / lang / "materials" / "ml-formulas" / fid
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "index.html").write_text(formula_page(lang, fid, mod), encoding="utf-8")
+
 ROOT_INDEX = """<!doctype html>
 <html lang="en">
 <head>
@@ -806,13 +954,21 @@ ROOT_INDEX = """<!doctype html>
 
 
 def main():
+    # python3 tools/build.py --only <id>  builds just one formula page (all three languages)
+    if "--only" in sys.argv:
+        fid = sys.argv[sys.argv.index("--only") + 1]
+        build_formula(fid)
+        print(f"built: {fid} in", ", ".join(f"{l}/materials/ml-formulas/{fid}/" for l in LANGS))
+        return
+    for fid in FORMULA_IDS:
+        build_formula(fid)
     for lang in LANGS:
         pages = {"": home, "sigmoid": article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas}
         for sub, render in pages.items():
             (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)
             (ROOT / lang / sub / "index.html").write_text(render(lang), encoding="utf-8")
     (ROOT / "index.html").write_text(ROOT_INDEX, encoding="utf-8")
-    print("built:", ", ".join(f"{l}/" + "{" + ", ".join(pages) + "}" for l in LANGS), "+ index.html")
+    print("built:", ", ".join(f"{l}/" + "{" + ", ".join(pages) + "}" for l in LANGS), "+ index.html,", len(FORMULA_IDS), "formula pages")
 
 
 if __name__ == "__main__":

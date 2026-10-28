@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ReLU: выпрямленная линейная функция — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="ReLU подробно: формула и её записи, сумма изломов, субградиент в нуле, softplus, линейные области сети в 3D, обучение ломаной, умирающие нейроны, инициализация Хе, код на NumPy и PyTorch.">
+  <meta property="og:title" content="ReLU: выпрямленная линейная функция — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="ReLU подробно: формула и её записи, сумма изломов, субградиент в нуле, softplus, линейные области сети в 3D, обучение ломаной, умирающие нейроны, инициализация Хе, код на NumPy и PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/relu/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/relu/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/relu/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/relu/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/relu.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/relu/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/relu/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/relu/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Функции активации</span>
+  <h1>ReLU: выпрямленная линейная функция</h1>
+  <p class="dek">Самая простая нелинейность и рабочая лошадка глубокого обучения. Разбираем по косточкам: почему одного излома хватает, чтобы собрать любую ломаную, что такое производная в точке излома, как сеть из ReLU режет пространство на линейные куски, почему нейроны «умирают» и откуда в инициализации Хе двойка.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем он нужен</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: выпрямитель</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#properties"><span class="n">4</span>Свойства</a>
+      <a href="#derivative"><span class="n">5</span>Производная, субградиент и гладкие родственники</a>
+      <a href="#space"><span class="n">6</span>ReLU-сеть в пространстве: линейные области</a>
+      <a href="#training"><span class="n">7</span>ReLU в обучении: сеть рисует ломаную</a>
+      <a href="#dying"><span class="n">8</span>Умирающий ReLU</a>
+      <a href="#init"><span class="n">9</span>Инициализация Хе: откуда двойка</a>
+      <a href="#code"><span class="n">10</span>В коде</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{ReLU}(x)=\max(0,\,x)$$</div>
+
+    <h2 id="why">Зачем он нужен</h2>
+    <p>Без нелинейности нейросеть бесполезна: композиция линейных слоёв — снова линейная функция, сколько слоёв ни ставь. Нужна функция, которая «ломает» линейность, но при этом дёшево считается и не душит градиент. ReLU (rectified linear unit, «выпрямленная линейная функция») делает минимально возможное: положительное пропускает как есть, отрицательное заменяет нулём.</p>
+    <p>Где он встречается:</p>
+    <ul class="flist"><li><b>свёрточные сети</b> — AlexNet, VGG, ResNet: ReLU после каждой свёртки;</li><li><b>полносвязные сети и табличные модели</b> — выбор по умолчанию для скрытых слоёв;</li><li><b>исходный Transformer</b> (2017) — блок FFN: $\max(0,\,xW_1+b_1)W_2+b_2$; современные LLM перешли на его гладкие родственники <a href='../gelu/'>GELU</a> и <a href='../silu/'>SiLU</a>;</li><li><b>мобильные сети</b> — ReLU6 $=\min(\max(0,x),\,6)$ в MobileNet удобна для вычислений с малой разрядностью;</li><li><b>внутри других формул</b> — $\max(0,\cdot)$ это и hinge-потеря SVM, и <a href='../triplet/'>triplet loss</a>, и положительная часть числа $x^+$.</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>$\operatorname{ReLU}(x)=\max(0,x)$: ноль слева, прямая $y=x$ справа. Производная — ступенька: 0 при $x&lt;0$ и 1 при $x&gt;0$; в нуле производной нет, библиотеки берут 0. Справа градиент проходит без ослабления — поэтому глубокие сети с ReLU учатся быстро. Плата — «мёртвые» нейроны, у которых вход всегда отрицателен.</p></div>
+
+    <h2 id="intuition">Интуиция: выпрямитель</h2>
+    <p>Название пришло из электроники: диод-выпрямитель пропускает ток в одну сторону и не пропускает в другую. Нейрон с ReLU — это датчик: пока признак ниже порога, он молчит; как только порог пройден, отвечает пропорционально тому, насколько сильно.</p>
+    <p>Потяните точку. Справа от нуля касательная совпадает с самой функцией (наклон 1), слева лежит на оси (наклон 0). В нуле единственной касательной нет: любая прямая с наклоном от 0 до 1 касается графика снизу — это <b>опорные прямые</b>.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-explorer" data-config="{&quot;x&quot;: 1.5}"></div><figcaption><b>Рисунок 1.</b> ReLU, касательная и производная (снизу). При $x=1{,}5$: $\operatorname{ReLU}=1{,}5$, $\operatorname{ReLU}'=1$. Подведите точку к нулю: производная не определена, множество наклонов опорных прямых — отрезок $[0;\,1]$ (субдифференциал); PyTorch и TensorFlow берут из него 0.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>У ReLU нет насыщения справа: при $x=100$ производная та же 1, что и при $x=0{,}1$. У <a href='../sigmoid/'>сигмоиды</a> и <a href='../tanh/'>tanh</a> при $|x|=5$ производная уже меньше $0{,}01$. Зато слева ReLU «насыщен» полностью: производная ровно 0.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <p>Одну и ту же функцию полезно узнавать в разных записях — каждая подсвечивает своё свойство:</p>
+    <div class="eqd">$$\operatorname{ReLU}(x)=\max(0,x)=\begin{cases}x, &amp; x&gt;0\\0, &amp; x\le0\end{cases}=\frac{x+|x|}{2}=x\cdot\mathbb 1[x&gt;0]$$</div>
+    <dl class="symbols"><dt>$\max(0,x)$</dt><dd>сравнение с нулём — одна операция, без экспонент и делений;</dd><dt>$\frac{x+|x|}{2}$</dt><dd>при $x&gt;0$ слагаемые равны и дают $x$, при $x&lt;0$ они взаимно уничтожаются;</dd><dt>$x\cdot\mathbb 1[x&gt;0]$</dt><dd><b>вентиль</b>: вход умножается на 0 или 1 в зависимости от знака. Для каждого примера сеть с ReLU — это линейная сеть, в которой часть нейронов выключена.</dd></dl>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\operatorname{ReLU}(x)$</th><th class=num>$\operatorname{ReLU}'(x)$</th></tr></thead><tbody><tr><td class=num>−3</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>−1</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>−0,5</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>0</td><td class=num>0</td><td class=num>[0; 1]</td></tr><tr><td class=num>0,5</td><td class=num>0,5</td><td class=num>1</td></tr><tr><td class=num>1</td><td class=num>1</td><td class=num>1</td></tr><tr><td class=num>2,5</td><td class=num>2,5</td><td class=num>1</td></tr></tbody></table></div>
+    <h3>Из изломов — любая ломаная</h3>
+    <p>Нейрон $v\cdot\operatorname{ReLU}(x-c)$ — это «шарнир» (hinge): ноль до точки $c$, затем прямая с наклоном $v$. Складывая шарниры с разными $c$, получаем ломаную: в каждой точке $c_k$ наклон меняется ровно на $v_k$. Например, $\operatorname{ReLU}(x+1)-2\operatorname{ReLU}(x)+\operatorname{ReLU}(x-1)$ — «шапочка» высотой 1.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-hinges" data-config="{&quot;v1&quot;: 1, &quot;v2&quot;: -2, &quot;v3&quot;: 1}"></div><figcaption><b>Рисунок 2.</b> Сумма трёх шарниров с изломами в $-1$, $0$, $1$. При весах $(1;\,-2;\,1)$ получается шапочка: наклоны участков $0,\ 1,\ -1,\ 0$, высота $f(0)=1$. Снизу — производная: ступенчатая функция, которая в точке $c_k$ прыгает ровно на $v_k$.</figcaption></figure>
+    <p>Это и есть главный секрет ReLU-сетей: любая непрерывная кусочно-линейная функция на прямой с $m$ изломами — это линейная функция плюс $m$ шарниров, то есть сеть с одним скрытым слоем из $m$ нейронов (плюс линейная часть, которую тоже можно выразить двумя нейронами: $x=\operatorname{ReLU}(x)-\operatorname{ReLU}(-x)$). А ломаными можно сколь угодно точно приблизить любую непрерывную функцию на отрезке.</p>
+
+    <h2 id="properties">Свойства</h2>
+    <ul class="flist"><li><b>Область значений</b> — $[0;\,+\infty)$: сверху не ограничена, в отличие от сигмоиды и tanh.</li><li><b>Кусочная линейность</b>: два линейных куска, один излом в нуле.</li><li><b>Непрерывность и липшицевость</b> с константой 1: $|\operatorname{ReLU}(a)-\operatorname{ReLU}(b)|\le|a-b|$.</li><li><b>Выпуклость</b>: график лежит не выше любой хорды — максимум двух линейных функций всегда выпукл.</li><li><b>Положительная однородность</b>: $\operatorname{ReLU}(\alpha x)=\alpha\operatorname{ReLU}(x)$ при $\alpha\ge0$. Масштаб можно переносить между слоями: умножив веса слоя на $\alpha&gt;0$, а следующего — на $1/\alpha$, получим ту же сеть.</li><li><b>Идемпотентность</b>: $\operatorname{ReLU}(\operatorname{ReLU}(x))=\operatorname{ReLU}(x)$.</li><li><b>Разложение числа</b>: $x=\operatorname{ReLU}(x)-\operatorname{ReLU}(-x)$ и $|x|=\operatorname{ReLU}(x)+\operatorname{ReLU}(-x)$.</li><li><b>Разреженность</b> (sparsity): если входы нейронов симметричны относительно нуля, примерно половина выходов — точные нули.</li></ul>
+    <details class="deep"><summary>Доказательства: выпуклость и однородность</summary><div class="deep-body">
+      <p>Выпуклость. Для $t\in[0;1]$ и любых $a,b$: $\max(0,\,ta+(1-t)b)\le\max\bigl(0,\,t\max(0,a)+(1-t)\max(0,b)\bigr)=t\max(0,a)+(1-t)\max(0,b)$, потому что $a\le\max(0,a)$, $b\le\max(0,b)$, а правая часть неотрицательна.</p>
+      <p>Однородность. При $\alpha&gt;0$ знак $\alpha x$ совпадает со знаком $x$, поэтому $\max(0,\alpha x)=\alpha\max(0,x)$; при $\alpha=0$ обе части равны 0. При $\alpha&lt;0$ равенство нарушается: $\operatorname{ReLU}(-x)\ne-\operatorname{ReLU}(x)$ — функция не нечётна.</p>
+    </div></details>
+
+    <h2 id="derivative">Производная, субградиент и гладкие родственники</h2>
+    <div class="eqd">$$\operatorname{ReLU}'(x)=\begin{cases}1, &amp; x&gt;0\\0, &amp; x&lt;0\end{cases},\qquad \partial\operatorname{ReLU}(0)=[0,\,1]$$</div>
+    <details class="deep"><summary>Почему в нуле производной нет</summary><div class="deep-body">
+      <p>Производная — предел разностного отношения. Справа и слева от нуля он разный:</p>
+      <div class="eqd">$$\lim_{h\to0^+}\frac{\operatorname{ReLU}(h)-0}{h}=\lim_{h\to0^+}\frac{h}{h}=1,\qquad \lim_{h\to0^-}\frac{\operatorname{ReLU}(h)-0}{h}=\lim_{h\to0^-}\frac{0}{h}=0$$</div>
+      <p>Односторонние производные не совпадают, значит, обычной производной нет. Для выпуклых функций есть замена — <b>субградиент</b>: число $g$, для которого $f(y)\ge f(x)+g(y-x)$ при всех $y$, то есть прямая с наклоном $g$ лежит под графиком. В нуле так ведут себя все $g\in[0;1]$: это множество называют субдифференциалом $\partial\operatorname{ReLU}(0)$.</p>
+    </div></details>
+    <p>Почему это не мешает обучению: вход нейрона ровно равен нулю с вероятностью 0 для непрерывных данных, а в редких точных нулях подойдёт любое значение из $[0;1]$ — сходимость субградиентных методов это допускает. Библиотеки по соглашению берут 0.</p>
+    <p>Вторая производная равна нулю везде, кроме нуля (в смысле обобщённых функций $\operatorname{ReLU}''=\delta(x)$). Поэтому внутри каждой линейной области сеть из ReLU — аффинная функция входа, а её градиент по входу кусочно-постоянен.</p>
+    <h3>Softplus: сглаженный ReLU</h3>
+    <p>Если излом мешает (например, нужна гладкая функция для оптимизации второго порядка или физической модели), его можно скруглить:</p>
+    <div class="eqd">$$\operatorname{softplus}_\beta(x)=\frac1\beta\ln\bigl(1+e^{\beta x}\bigr),\qquad \operatorname{softplus}_\beta'(x)=\sigma(\beta x)$$</div>
+    <p>Разность $\operatorname{softplus}_\beta(x)-\operatorname{ReLU}(x)=\frac1\beta\ln\bigl(1+e^{-\beta|x|}\bigr)$ максимальна в нуле и равна $\frac{\ln2}{\beta}$; при $\beta\to\infty$ softplus стремится к ReLU, а производная-<a href='../sigmoid/'>сигмоида</a> — к ступеньке. В нуле она всегда равна $\sigma(0)=0{,}5$ — середине субдифференциала $[0;1]$.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-smooth" data-config="{&quot;beta&quot;: 1}"></div><figcaption><b>Рисунок 3.</b> Сверху ReLU и $\operatorname{softplus}_\beta$, снизу их производные. При $\beta=1$ наибольший разрыв $\ln2\approx0{,}693$, при $\beta=4$ — $0{,}173$, при $\beta=32$ — $0{,}022$. Производная softplus в нуле всегда $0{,}5$.</figcaption></figure>
+
+    <h2 id="space">ReLU-сеть в пространстве: линейные области</h2>
+    <p>Нейрон первого слоя с двумя входами выключен по одну сторону прямой $w^\top x+b=0$ и линеен по другую. Каждая такая прямая — линия сгиба. $H$ нейронов разрезают плоскость на области, и в каждой области набор включённых нейронов (<b>паттерн активаций</b>) постоянен, а значит, сеть — обычная аффинная функция. Поверхность выхода — многогранник, склеенный из плоских граней.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-surface" data-config="{&quot;arch&quot;: &quot;n4&quot;, &quot;seed&quot;: 3}"></div><figcaption><b>Рисунок 4.</b> Слева — выход сети $f(x_1,x_2)=\sum_k v_k\operatorname{ReLU}(w_k^\top x+b_k)$ в 3D: плоские грани и рёбра-сгибы. Справа — вид сверху: цвет — номер линейной области, пунктир — прямые нейронов, тонкие линии — уровни $f$ (они ломаются на границах). При 4 нейронах в окне 10 областей из возможных 11 ($1+H+\tfrac{H(H-1)}{2}$); при 8 нейронах — 25 из 37. Два слоя по 4 нейрона дают уже 30 областей: границы второго слоя изгибаются на границах первого.</figcaption></figure>
+    <p>$H$ прямых общего положения делят плоскость максимум на $1+H+\binom H2$ частей — число областей одного слоя растёт полиномиально. Глубина работает иначе: каждый следующий слой «складывает» уже разрезанное пространство, и число областей может расти экспоненциально с числом слоёв (Монтуфар и др., 2014). Это одно из объяснений, почему глубокие сети выразительнее широких при том же числе нейронов.</p>
+    <div class="callout note"><b>Универсальная аппроксимация</b><p>Сеть с одним скрытым слоем ReLU и достаточным числом нейронов приближает любую непрерывную функцию на ограниченном замкнутом множестве с любой точностью (Лешно и др., 1993: подходит любая непрерывная активация, не являющаяся многочленом). Для ReLU это видно буквально: ломаные — из шарниров, многогранные поверхности — из складок.</p></div>
+
+    <h2 id="training">ReLU в обучении: сеть рисует ломаную</h2>
+    <p>Обучим один скрытый слой $\hat y(x)=\sum_{k=1}^{H}v_k\operatorname{ReLU}(w_kx+b_k)+c$ на точках синусоиды. Каждый нейрон — шарнир с изломом в $x=-b_k/w_k$; градиентный спуск сдвигает изломы туда, где кривая изгибается, и подбирает наклоны.</p>
+    <div class="eqd">$$\frac{\partial\hat y}{\partial b_k}=v_k\,\mathbb 1[w_kx+b_k&gt;0],\qquad \frac{\partial\hat y}{\partial w_k}=v_k\,x\,\mathbb 1[w_kx+b_k&gt;0]$$</div>
+    <p>Градиент по параметрам нейрона приходит только от тех точек, где нейрон включён. Если таких точек нет совсем, нейрон перестаёт учиться — это и есть «умирание».</p>
+    <figure class="viz"><div class="fv" data-viz="relu-fit" data-config="{&quot;h&quot;: 6}"></div><figcaption><b>Рисунок 5.</b> 40 точек $y=\sin(1{,}6x)$ с шумом ($\sigma=0{,}08$), полный градиент и <a href='../adam/'>Adam</a> с шагом $0{,}02$. Бирюзовые линии — шарниры, точки внизу — их изломы, красный пунктир — мёртвые нейроны. С 6 нейронами MSE падает с $3{,}102$ до $0{,}267$ к шагу 100, $0{,}012$ к шагу 300 и $0{,}0090$ к шагу 1500; по дороге один нейрон умирает. С 3 нейронами ломаная слишком грубая — $0{,}265$; с 12 итог $0{,}0101$, но мёртвы уже 4 из 12.</figcaption></figure>
+    <div class="callout note"><b>Что видно на рисунке</b><p>Сеть из ReLU не умеет рисовать гладкое — только ломаные. Изломы собираются там, где синусоида сильнее всего изгибается, а на почти прямых участках их нет. Лишние нейроны не обязательно помогают: часть из них умирает или дублирует соседей.</p></div>
+
+    <h2 id="dying">Умирающий ReLU</h2>
+    <p>Нейрон «мёртв», если на всех обучающих примерах $w^\top x+b\le0$. Тогда его выход всегда 0, градиенты по $w$ и $b$ всегда 0 (см. формулу выше), и никакой шаг оптимизатора его не оживит: при обучении на тех же данных он останется выключенным навсегда.</p>
+    <p>Как это происходит: один большой шаг градиентного спуска сильно уменьшает сдвиг $b$ или поворачивает $w$ так, что гиперплоскость нейрона уходит за пределы облака данных. Чем больше шаг обучения, тем чаще это случается.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-dead" data-config="{&quot;lr&quot;: 0.3}"></div><figcaption><b>Рисунок 6.</b> Сеть из 64 нейронов ReLU на 128 точках $y=\sin(3x_1)+x_2$, $x\in[-1;1]^2$, мини-батчи по 16, обычный SGD, 600 шагов, одна и та же инициализация Хе. Справа — нейроны: синие живы (яркость — доля точек, где нейрон включён), красные мертвы. При $\eta=0{,}3$ уже за первые 5 шагов умирает $91\%$ нейронов, к концу — $97\%$, MSE застревает на $0{,}137$. При $\eta=0{,}2$ мертва четверть ($27\%$), MSE $0{,}004$; при $\eta=0{,}1$ и $0{,}03$ мёртвых нет (MSE $0{,}005$ и $0{,}041$ — малый шаг просто медленнее).</figcaption></figure>
+    <p>Как лечить:</p>
+    <ul class="flist"><li><b>умеренный шаг обучения</b>, разогрев (warm-up) и обрезка градиента;</li><li><b>адаптивные оптимизаторы</b> (<a href='../adam/'>Adam</a>) и нормализация (BatchNorm, LayerNorm): они держат входы нейронов около нуля;</li><li><b>активации с ненулевым наклоном слева</b> — <a href='../leaky-relu/'>Leaky ReLU</a>, PReLU, ELU, <a href='../gelu/'>GELU</a>, <a href='../silu/'>SiLU</a>: градиент слева не равен нулю, и нейрон может вернуться;</li><li><b>аккуратная инициализация</b>: сдвиги 0 (иногда небольшой положительный), веса по Хе. Сильно отрицательные сдвиги убивают нейроны ещё до обучения.</li></ul>
+
+    <h2 id="init">Инициализация Хе: откуда двойка</h2>
+    <p>Пусть $z=\sum_{j=1}^{n}w_jh_j$, веса независимы, $\mathbb Ew_j=0$, $\operatorname{Var}w_j=c/n$. Тогда $\operatorname{Var}z=c\cdot q$, где $q=\mathbb E[h^2]$ — средний квадрат входов. Если $z$ симметрична относительно нуля, ReLU обнуляет ровно половину её распределения, и</p>
+    <div class="eqd">$$q_{l}=\mathbb E\bigl[\operatorname{ReLU}(z)^2\bigr]=\frac12\operatorname{Var}z=\frac c2\,q_{l-1}\qquad\Longrightarrow\qquad q_L=q_0\Bigl(\frac c2\Bigr)^{L}$$</div>
+    <p>При $c=1$ (как для tanh) сигнал вдвое слабеет на каждом слое, при $c=3$ — растёт в полтора раза. Сохраняет масштаб только $c=2$: это <b>инициализация Хе</b> (He et al., 2015), $\operatorname{Var}w=2/n_\text{in}$. Обратный проход ведёт себя так же, поэтому градиенты тоже не затухают и не взрываются.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-depth" data-config="{&quot;c&quot;: 2}"></div><figcaption><b>Рисунок 7.</b> Средний квадрат активаций $q_l$ на каждом из 30 слоёв случайной сети ширины 100 (логарифмическая шкала), оранжевый пунктир — теория $q_0(c/2)^l$. При $c=2$ отношение $q_{30}/q_0=2{,}66$; при $c=1$ — $2{,}47\cdot10^{-9}$ (теория $9{,}3\cdot10^{-10}$); при $c=3$ — $5{,}1\cdot10^5$ (теория $1{,}9\cdot10^5$). Множитель $\approx2{,}66$ во всех трёх случаях один и тот же: веса одинаковые, а ReLU положительно однороден, поэтому $c$ лишь умножает весь сигнал на $(c/2)^{L/2}$; отклонение от теории — случайная флуктуация конечной ширины. Активна $51\%$ нейронов последнего слоя.</figcaption></figure>
+    <div class="callout history"><b>Немного истории</b><p>Идея выпрямителя давняя: её использовал ещё Фукусима (1969). В глубокое обучение ReLU вошёл в 2010–2011 годах (Наир и Хинтон; Глоро, Борд и Бенжио), а в AlexNet (2012) сеть с ReLU достигла ошибки 25% на обучающей выборке CIFAR-10 в 6 раз быстрее, чем с tanh. В 2015 году Хе и соавторы вывели инициализацию $2/n$ и обучили сети с ReLU-семейством глубиной в десятки слоёв.</p></div>
+
+    <h2 id="code">В коде</h2>
+    <p>ReLU не переполняется и не теряет точность: сравнение с нулём точно в любой арифметике. Внимание стоит уделить другому: соглашению в нуле, мёртвым нейронам и инициализации.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def relu(x):
+    return np.maximum(0.0, x)
+
+def relu_grad(x):
+    # субградиент: в точке 0 берём 0, как PyTorch и TensorFlow
+    return (x &gt; 0).astype(float)
+
+x = np.array([-3.0, 0.0, 2.5])
+print(relu(x), relu_grad(x))     # [0.  0.  2.5] [0. 0. 1.]
+
+# «Мёртвые» нейроны: ни одного положительного входа на всём наборе данных
+rng = np.random.default_rng(0)
+X = rng.normal(size=(1000, 20))
+W = rng.normal(size=(20, 64)) * np.sqrt(2 / 20)   # инициализация Хе
+for b0 in (0.0, -5.0):
+    Z = X @ W + b0
+    dead = np.mean((Z &gt; 0).sum(axis=0) == 0)
+    print(b0, f&quot;{dead:.0%}&quot;)     # 0.0 0%  и  -5.0 66%</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+x = torch.tensor([-1.0, 0.0, 2.0], requires_grad=True)
+torch.relu(x).sum().backward()
+print(x.grad)                    # tensor([0., 0., 1.]) — в нуле 0
+
+# Инициализация Хе: Var w = 2 / fan_in
+layer = nn.Linear(512, 512)
+nn.init.kaiming_normal_(layer.weight, mode=&quot;fan_in&quot;, nonlinearity=&quot;relu&quot;)
+nn.init.zeros_(layer.bias)
+
+# Блок FFN исходного Transformer: Linear → ReLU → Linear
+ffn = nn.Sequential(nn.Linear(512, 2048), nn.ReLU(), nn.Linear(2048, 512))
+# nn.ReLU(inplace=True) экономит память, но портит вход, если он ещё нужен</code></pre>
+    <div class="callout key"><b>Правило</b><p>ReLU — плюс инициализация Хе (<code>kaiming_normal_</code> с <code>nonlinearity='relu'</code>), сдвиги 0, разумный шаг обучения. Время от времени проверяйте долю нейронов, которые ни разу не включились на батче: если она растёт, уменьшите шаг или перейдите на Leaky ReLU / GELU.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>ReLU на выходе регрессии, где цель может быть отрицательной.</b> Сеть физически не сможет выдать $y&lt;0$. На выходе регрессии — линейный слой; ReLU на выходе уместен только для заведомо неотрицательных величин (и то лучше softplus).</li><li><b>Инициализация как для tanh.</b> С $\operatorname{Var}w=1/n$ сигнал в глубокой ReLU-сети затухает как $2^{-L}$: через 30 слоёв в $2^{30}\approx10^9$ раз (рисунок 7). Берите инициализацию Хе.</li><li><b>Слишком большой шаг обучения.</b> Массово убивает нейроны, и восстановить их нельзя (рисунок 6). Симптом — потери застыли, а доля нулевых активаций близка к 100%.</li><li><b>«Производная ReLU в нуле равна 1/2» или «не определена — значит, ошибка».</b> Математически в нуле есть субдифференциал $[0;1]$, любое его значение допустимо; библиотеки берут 0. На обучение это не влияет.</li><li><b><code>inplace=True</code> там, где вход нужен дальше.</b> Операция затирает вход; если он используется в остаточной связи или для обратного прохода другой операции, PyTorch выдаст ошибку или результат будет неверным.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href='../leaky-relu/'>Leaky ReLU</a>: $\max(\alpha x,x)$ — ненулевой наклон $\alpha$ слева лечит умирание.</li><li><a href='../gelu/'>GELU</a> и <a href='../silu/'>SiLU</a>: $x\Phi(x)$ и $x\sigma(x)$ — гладкие «вентили» вместо жёсткого $x\cdot\mathbb 1[x&gt;0]$; вдали от нуля ведут себя как ReLU.</li><li><a href='../sigmoid/'>Сигмоида</a>: производная softplus — это $\sigma(\beta x)$; ReLU вытеснил сигмоиду из скрытых слоёв из-за насыщения.</li><li><a href='../tanh/'>tanh</a>: насыщается с обеих сторон; для tanh — инициализация Ксавье, для ReLU — Хе.</li><li><a href='../huber/'>Huber</a> и <a href='../triplet/'>Triplet loss</a>: срезка $\max(0,\cdot)$ встречается и в функциях потерь.</li><li><a href='../adam/'>Adam</a> и <a href='../sgd/'>SGD</a>: от выбора оптимизатора и шага зависит, сколько нейронов умрёт.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $\operatorname{ReLU}(x)=\max(0,x)=\frac{x+|x|}2$ — вентиль: вход умножается на $\mathbb 1[x&gt;0]$. 2) Производная — ступенька 0/1, в нуле субдифференциал $[0;1]$, на практике 0; справа нет насыщения. 3) Сумма шарниров $v_k\operatorname{ReLU}(x-c_k)$ — любая ломаная; на плоскости сеть из ReLU — многогранник из линейных областей, глубина умножает их число. 4) softplus — гладкий ReLU, его производная — сигмоида. 5) Большой шаг обучения убивает нейроны навсегда. 6) Инициализация Хе $\operatorname{Var}w=2/n_\text{in}$ компенсирует то, что ReLU обнуляет половину сигнала.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Чему равно $\operatorname{ReLU}(x)-\operatorname{ReLU}(-x)$?</legend><div class="opts"><button type="button" data-ok="0">$|x|$</button><button type="button" data-ok="1">$x$</button><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$2\operatorname{ReLU}(x)$</button></div><div class="explain" hidden>При $x&gt;0$ получаем $x-0=x$, при $x&lt;0$ — $0-(-x)=x$. А сумма $\operatorname{ReLU}(x)+\operatorname{ReLU}(-x)=|x|$.</div></fieldset><fieldset class="q"><legend>2. Что вернёт PyTorch как градиент ReLU в точке $x=0$?</legend><div class="opts"><button type="button" data-ok="0">$1$</button><button type="button" data-ok="0">$0{,}5$</button><button type="button" data-ok="1">$0$</button><button type="button" data-ok="0">nan</button></div><div class="explain" hidden>Математически в нуле субдифференциал $[0;1]$; по соглашению PyTorch и TensorFlow берут 0.</div></fieldset><fieldset class="q"><legend>3. Сеть с одним скрытым слоем из 5 нейронов ReLU и одним входом $x$. Каким может быть её график?</legend><div class="opts"><button type="button" data-ok="0">Любой гладкой кривой</button><button type="button" data-ok="1">Ломаной не более чем с 5 изломами</button><button type="button" data-ok="0">Только прямой</button><button type="button" data-ok="0">Ступенчатой функцией</button></div><div class="explain" hidden>Каждый нейрон — шарнир с одним изломом в $x=-b_k/w_k$, сумма шарниров — непрерывная ломаная не более чем с 5 изломами.</div></fieldset><fieldset class="q"><legend>4. Почему нейрон ReLU может «умереть» навсегда?</legend><div class="opts"><button type="button" data-ok="0">Его вес становится бесконечным</button><button type="button" data-ok="1">Если вход отрицателен на всех примерах, градиенты по его весам и сдвигу равны нулю</button><button type="button" data-ok="0">Из-за переполнения экспоненты</button><button type="button" data-ok="0">Потому что производная ReLU не больше 0,25</button></div><div class="explain" hidden>Градиент по параметрам нейрона содержит множитель $\mathbb 1[w^\top x+b&gt;0]$. Если он равен нулю на всех данных, оптимизатор нейрон не сдвинет.</div></fieldset><fieldset class="q"><legend>5. Какую дисперсию весов предлагает инициализация Хе для слоя с $n_\text{in}$ входами?</legend><div class="opts"><button type="button" data-ok="0">$1/n_\text{in}$</button><button type="button" data-ok="1">$2/n_\text{in}$</button><button type="button" data-ok="0">$2/(n_\text{in}+n_\text{out})$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>ReLU обнуляет половину симметричного распределения: $\mathbb E[\operatorname{ReLU}(z)^2]=\tfrac12\operatorname{Var}z$. Чтобы средний квадрат не менялся от слоя к слою, нужно $\operatorname{Var}w=2/n_\text{in}$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../tanh/"><span class="kicker">← Предыдущая формула</span><span class="big">Tanh</span><span class="kicker">гиперболический тангенс</span></a>
+<a class="next" href="../leaky-relu/"><span class="kicker">Следующая формула →</span><span class="big">Leaky ReLU</span><span class="kicker">«протекающий» ReLU</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

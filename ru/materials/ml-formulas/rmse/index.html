@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RMSE: корень из среднеквадратичной ошибки — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="RMSE подробно: формула, связь с MSE и MAE, неравенство MAE ≤ RMSE ≤ √n·MAE, разложение на смещение и разброс, геометрия в 3D, производная, ландшафт потерь, обучение, RMSLE, код на NumPy, scikit-learn и PyTorch.">
+  <meta property="og:title" content="RMSE: корень из среднеквадратичной ошибки — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="RMSE подробно: формула, связь с MSE и MAE, неравенство MAE ≤ RMSE ≤ √n·MAE, разложение на смещение и разброс, геометрия в 3D, производная, ландшафт потерь, обучение, RMSLE, код на NumPy, scikit-learn и PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/rmse/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/rmse/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/rmse/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/rmse/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/rmse.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/rmse/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/rmse/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/rmse/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Потери — регрессия</span>
+  <h1>RMSE: корень из среднеквадратичной ошибки</h1>
+  <p class="dek">Самая популярная метрика регрессии — и одна из самых неверно читаемых. Разбираем её по косточкам: зачем корень, что означает разрыв между RMSE и MAE, почему RMSE — это расстояние между векторами, как она раскладывается на смещение и разброс и чем её градиент отличается от градиента MSE при общем минимуме.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем она нужна</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: сторона среднего квадрата</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#properties"><span class="n">4</span>Свойства</a>
+      <a href="#gap"><span class="n">5</span>RMSE против MAE: что говорит разрыв</a>
+      <a href="#geometry"><span class="n">6</span>Геометрия: RMSE как расстояние</a>
+      <a href="#derivative"><span class="n">7</span>Производная и градиент</a>
+      <a href="#training"><span class="n">8</span>Ландшафт RMSE(w, b) и обучение</a>
+      <a href="#evaluation"><span class="n">9</span>RMSE в оценке моделей</a>
+      <a href="#variants"><span class="n">10</span>Варианты: RMSLE, взвешенная и нормированная RMSE</a>
+      <a href="#code"><span class="n">11</span>В коде</a>
+      <a href="#mistakes"><span class="n">12</span>Частые ошибки</a>
+      <a href="#links"><span class="n">13</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">14</span>Итоги</a>
+      <a href="#quiz"><span class="n">15</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2}$$</div>
+
+    <h2 id="why">Зачем она нужна</h2>
+    <p>Модель предсказывает цену квартиры, спрос на товар, температуру завтра. Как одним числом сказать, насколько она ошибается? Простое среднее ошибок не годится: промахи вверх и вниз гасят друг друга. <a href="../mse/">MSE</a> возводит ошибки в квадрат — но тогда ответ получается в «рублях в квадрате» или «градусах в квадрате», и фраза «MSE равна 1 417 000» заказчику ничего не скажет. RMSE извлекает корень и возвращает ошибку в единицы целевой переменной, сохраняя всё, за что любят MSE.</p>
+    <p>Где она встречается:</p>
+    <ul class="flist"><li><b>оценка регрессионных моделей</b> — самая распространённая метрика в отчётах, статьях и соревнованиях Kaggle;</li><li><b>прогнозирование временных рядов</b> — погода, спрос, энергопотребление; рядом с ней обычно стоят <a href="../mae/">MAE</a> и <a href="../mape/">MAPE</a>;</li><li><b>рекомендательные системы</b> — знаменитый Netflix Prize (2006–2009) оценивал предсказания рейтингов именно по RMSE;</li><li><b>физика и метрология</b> — среднеквадратичная погрешность измерений, точность GPS, «RMS»-значение сигнала;</li><li><b>обучение моделей</b> — минимизация RMSE и MSE даёт одну и ту же модель, но градиенты у них разные (об этом — в разделе про производную).</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>RMSE — это <a href="../mse/">MSE</a> под корнем: ошибка в единицах $y$, которая, как и MSE, сильнее наказывает крупные промахи. Всегда $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$, а $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — квадрат смещения плюс дисперсия остатков. Минимум RMSE совпадает с минимумом MSE, а градиент в $2\,\mathrm{RMSE}$ раз меньше.</p></div>
+
+    <h2 id="intuition">Интуиция: сторона среднего квадрата</h2>
+    <p>Нарисуем каждую ошибку $r_i=y_i-\hat y_i$ квадратом со стороной $|r_i|$. Его площадь $r_i^2$ — это вклад объекта в MSE. Сложим площади и разделим на $n$ — получится средняя площадь, то есть MSE. А RMSE — это <b>сторона квадрата, площадь которого равна средней площади</b>.</p>
+    <p>Потяните синие точки — прогнозы. Справа квадраты всех ошибок вложены в один угол: синий квадрат имеет сторону RMSE, бирюзовый пунктирный — сторону MAE.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-squares" data-config="{}"></div><figcaption><b>Рисунок 1.</b> Сквозной пример: $y=(3;\,5;\,8)$, $\hat y=(2{,}5;\,5;\,10)$. Ошибка $-2$ даёт квадрат площадью 4, ошибка $0{,}5$ — площадью $0{,}25$; средняя площадь $\mathrm{MSE}\approx1{,}417$, её сторона $\mathrm{RMSE}\approx1{,}190$. Сторона MAE меньше — $0{,}833$.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Большой квадрат тянет среднюю площадь сильнее, чем длинная сторона тянет среднюю длину: на ошибку $-2$ приходится $80\%$ суммы модулей, но $94\%$ суммы квадратов. Поэтому RMSE больше MAE — и тем больше, чем неравномернее ошибки. Сделайте все три ошибки одинаковыми по модулю — и синий квадрат совпадёт с бирюзовым.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <p>Название, прочитанное справа налево, и есть рецепт: <i>root</i> (корень) из <i>mean</i> (среднего) от <i>squared error</i> (квадрата ошибки).</p>
+    <div class="eqd">$$r_i=y_i-\hat y_i\;\xrightarrow{\;(\cdot)^2\;}\;r_i^2\ge0\;\xrightarrow{\;\frac1n\sum\;}\;\mathrm{MSE}\;\xrightarrow{\;\sqrt{\cdot}\;}\;\mathrm{RMSE}$$</div>
+    <dl class="symbols"><dt>$y_i$</dt><dd>истинное значение $i$-го объекта (факт);</dd><dt>$\hat y_i$</dt><dd>прогноз модели для этого объекта;</dd><dt>$r_i=y_i-\hat y_i$</dt><dd>ошибка, или остаток (residual); знак показывает, недооценили мы ($r_i&gt;0$) или переоценили ($r_i&lt;0$);</dd><dt>$r_i^2$</dt><dd>квадрат убирает знак и делает крупные ошибки непропорционально тяжёлыми: вдвое большая ошибка весит вчетверо больше;</dd><dt>$\frac1n\sum_{i=1}^n$</dt><dd>среднее по всем $n$ объектам — это MSE, в квадратных единицах;</dd><dt>$\sqrt{\cdot}$</dt><dd>корень возвращает исходные единицы: если $y$ в рублях, то и RMSE в рублях.</dd></dl>
+    <p>Сквозной пример по шагам:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$i$</th><th class=num>$y_i$</th><th class=num>$\hat y_i$</th><th class=num>$r_i$</th><th class=num>$r_i^2$</th><th class=num>$|r_i|$</th></tr></thead><tbody><tr><td>1</td><td class=num>3</td><td class=num>2,5</td><td class=num>0,5</td><td class=num>0,25</td><td class=num>0,5</td></tr><tr><td>2</td><td class=num>5</td><td class=num>5</td><td class=num>0</td><td class=num>0</td><td class=num>0</td></tr><tr><td>3</td><td class=num>8</td><td class=num>10</td><td class=num>−2</td><td class=num>4</td><td class=num>2</td></tr><tr><td>среднее</td><td class=num></td><td class=num></td><td class=num>−0,5</td><td class=num>1,417</td><td class=num>0,833</td></tr></tbody></table></div>
+    <div class="eqd">$$\mathrm{RMSE}=\sqrt{\frac{0{,}25+0+4}{3}}=\sqrt{1{,}417}\approx1{,}190,\qquad \mathrm{MAE}=\frac{0{,}5+0+2}{3}\approx0{,}833$$</div>
+    <p>Ту же величину полезно узнавать в других записях:</p>
+    <div class="eqd">$$\mathrm{RMSE}=\sqrt{\mathrm{MSE}}=\frac{\|y-\hat y\|_2}{\sqrt n}=M_2\bigl(|r_1|,\dots,|r_n|\bigr)$$</div>
+    <p>Вторая запись — евклидово расстояние между вектором фактов и вектором прогнозов, делённое на $\sqrt n$ (к ней мы вернёмся в 3D). Третья — <b>среднее квадратичное</b> (quadratic mean, степенное среднее порядка 2) модулей ошибок. MAE — их среднее арифметическое $M_1$, а наибольшая ошибка — предельный случай $M_\infty$. Неравенство о степенных средних сразу даёт $\mathrm{MAE}\le\mathrm{RMSE}\le\max_i|r_i|$.</p>
+    <div class="callout note"><b>Почему квадрат, а не модуль</b><p>Можно усреднять модули — это <a href="../mae/">MAE</a>. Квадрат выбирают потому, что он гладкий (дифференцируем везде), связан с дисперсией и нормальным распределением (минимизация MSE — это метод максимального правдоподобия при гауссовом шуме) и даёт явные формулы (метод наименьших квадратов). Корень сверху нужен только для чтения: на порядок моделей он не влияет.</p></div>
+
+    <h2 id="properties">Свойства</h2>
+    <ul class="flist"><li><b>Неотрицательность</b>: $\mathrm{RMSE}\ge0$, и $\mathrm{RMSE}=0$ только при идеальном прогнозе $\hat y=y$.</li><li><b>Единицы измерения</b> — те же, что у $y$. Перевели цены из тысяч рублей в рубли — RMSE выросла ровно в 1000 раз: $\mathrm{RMSE}(c\,y,\,c\,\hat y)=|c|\,\mathrm{RMSE}(y,\hat y)$.</li><li><b>Сдвиг не влияет</b>: прибавив одно и то же число к фактам и прогнозам, получим ту же RMSE. Поэтому RMSE не говорит, велика ли ошибка <i>относительно уровня</i> ряда — для этого есть <a href="../mape/">MAPE</a> и нормированные варианты.</li><li><b>Тот же порядок, что у MSE</b>: корень строго возрастает, поэтому сравнение моделей по RMSE и по MSE всегда даёт один и тот же порядок, а минимум у них в одной точке.</li><li><b>Чувствительность к выбросам</b>: одна ошибка величины $E$ даёт RMSE не меньше $E/\sqrt n$, сколько бы идеальных прогнозов ни было вокруг.</li><li><b>Неаддитивность</b>: RMSE всей выборки — не среднее RMSE её частей. Складываются квадраты: $\mathrm{RMSE}^2=\sum_g \tfrac{n_g}{n}\,\mathrm{RMSE}_g^2$.</li><li><b>Это норма (с точностью до множителя $1/\sqrt n$)</b>: для векторов ошибок $a$ и $b$ выполняется неравенство треугольника $\mathrm{RMSE}(a+b)\le\mathrm{RMSE}(a)+\mathrm{RMSE}(b)$.</li></ul>
+    <h3>Смещение и разброс: теорема Пифагора для ошибок</h3>
+    <p>Остатки можно разделить на систематическую часть — среднее $\bar r$ (модель в среднем завышает или занижает) — и случайную, разброс вокруг среднего $\sigma_r$. Тогда</p>
+    <div class="eqd">$$\mathrm{RMSE}^2=\underbrace{\bar r^{\,2}}_{\text{смещение}^2}+\underbrace{\sigma_r^2}_{\text{дисперсия остатков}},\qquad \bar r=\frac1n\sum_i r_i,\quad \sigma_r^2=\frac1n\sum_i\bigl(r_i-\bar r\bigr)^2$$</div>
+    <details class="deep"><summary>Вывод разложения</summary><div class="deep-body">
+      <p>Запишем $r_i=\bar r+(r_i-\bar r)$ и раскроем квадрат:</p>
+      <div class="eqd">$$\frac1n\sum_i r_i^2=\frac1n\sum_i\Bigl(\bar r^{\,2}+2\bar r\,(r_i-\bar r)+(r_i-\bar r)^2\Bigr)=\bar r^{\,2}+\frac{2\bar r}{n}\underbrace{\sum_i(r_i-\bar r)}_{=\,0}+\sigma_r^2$$</div>
+      <p>Средний член исчезает: отклонения от среднего в сумме дают ноль. Это та же алгебра, что в формуле $\operatorname{Var}X=\mathbb E X^2-(\mathbb E X)^2$.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="rmse-pythagoras" data-config="{&quot;bias&quot;: 1, &quot;sd&quot;: 1.5}"></div><figcaption><b>Рисунок 2.</b> Слева — 40 остатков со смещением $\bar r$ и разбросом $\sigma_r$, справа — прямоугольный треугольник с катетами $|\bar r|$ и $\sigma_r$: его гипотенуза и есть RMSE. При $\bar r=1$ и $\sigma_r=1{,}5$ получаем $\mathrm{RMSE}=\sqrt{1+2{,}25}\approx1{,}80$.</figcaption></figure>
+    <p>В сквозном примере $\bar r=-0{,}5$ (модель в среднем завышает на $0{,}5$), $\sigma_r\approx1{,}080$, и $0{,}25+1{,}167=1{,}417=\mathrm{MSE}$. Практический вывод: смещение убирается бесплатно — сдвиньте прогнозы на $\bar r$, оценённое на валидации, и RMSE снизится до $\sigma_r$ (здесь — с $1{,}190$ до $1{,}080$).</p>
+    <div class="callout note"><b>RMSE и стандартное отклонение</b><p>Если среднее остатков равно нулю (так всегда бывает у линейной регрессии со свободным членом на обучающей выборке), RMSE совпадает со стандартным отклонением остатков. Поэтому RMSE называют «стандартной ошибкой» модели. Если к тому же ошибки нормальны, около $68\%$ остатков лежат в пределах $\pm\mathrm{RMSE}$ и около $95\%$ — в пределах $\pm2\,\mathrm{RMSE}$.</p></div>
+
+    <h2 id="gap">RMSE против MAE: что говорит разрыв</h2>
+    <p><a href="../mae/">MAE</a> отвечает на вопрос «на сколько в среднем ошибаемся», RMSE — «каков типичный размер ошибки с учётом крупных». Их отношение $\mathrm{RMSE}/\mathrm{MAE}$ безразмерно и не зависит от масштаба: оно описывает только <b>форму</b> распределения ошибок.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Ошибки</th><th>MAE</th><th>RMSE</th><th>RMSE / MAE</th></tr></thead><tbody><tr><td>равномерное на $[-a;\,a]$</td><td>$a/2$</td><td>$a/\sqrt3$</td><td>$2/\sqrt3\approx1{,}155$</td></tr><tr><td>нормальное $N(0,\,\sigma^2)$</td><td>$\sigma\sqrt{2/\pi}$</td><td>$\sigma$</td><td>$\sqrt{\pi/2}\approx1{,}253$</td></tr><tr><td>Лапласа с масштабом $b$</td><td>$b$</td><td>$\sqrt2\,b$</td><td>$\sqrt2\approx1{,}414$</td></tr><tr><td>все $|r_i|$ равны $c$</td><td>$c$</td><td>$c$</td><td>$1$</td></tr><tr><td>одна ошибка $E$, остальные $n-1$ нулевые</td><td>$E/n$</td><td>$E/\sqrt n$</td><td>$\sqrt n$</td></tr></tbody></table></div>
+    <details class="deep"><summary>Откуда √(π/2) для нормальных ошибок</summary><div class="deep-body">
+      <p>Для $r\sim N(0,\sigma^2)$ имеем $\mathbb E\,r^2=\sigma^2$, а среднее модуля — интеграл по положительной полуоси, умноженный на 2:</p>
+      <div class="eqd">$$\mathbb E|r|=2\int_0^\infty \frac{x}{\sigma\sqrt{2\pi}}\,e^{-x^2/2\sigma^2}\,dx=\frac{2\sigma^2}{\sigma\sqrt{2\pi}}=\sigma\sqrt{\frac{2}{\pi}}$$</div>
+      <p>Отсюда $\sigma/\bigl(\sigma\sqrt{2/\pi}\bigr)=\sqrt{\pi/2}\approx1{,}2533$. На конечной выборке это верно приближённо: на рисунке 3 при $n=2000$ получается $1{,}248$.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="rmse-vs-mae" data-config="{&quot;dist&quot;: &quot;normal&quot;, &quot;eps&quot;: 0}"></div><figcaption><b>Рисунок 3.</b> 2000 ошибок с единичной дисперсией (фиксированное зерно генератора). Для нормальных ошибок отношение $1{,}248$ (теория $1{,}253$), для лапласовских — $1{,}392$ ($1{,}414$), для равномерных — $1{,}153$ ($1{,}155$). Добавьте выбросы: каждая ошибка с вероятностью $\varepsilon$ умножается на 10. Уже при $\varepsilon=5\%$ RMSE вырастает с $1{,}009$ до $2{,}817$, а MAE — только с $0{,}809$ до $1{,}258$.</figcaption></figure>
+    <p>Для такой смеси MSE растёт в $1+99\varepsilon$ раз ($(1-\varepsilon)\cdot1+\varepsilon\cdot100$), а MAE — лишь в $1+9\varepsilon$ раз, поэтому теоретическое отношение равно $\sqrt{1+99\varepsilon}\,/\bigl((1+9\varepsilon)\,\mathrm{MAE}_0\bigr)$, где $\mathrm{MAE}_0$ — MAE исходного распределения.</p>
+    <h3>Границы: MAE ≤ RMSE ≤ √n · MAE</h3>
+    <div class="eqd">$$\mathrm{MAE}\;\le\;\mathrm{RMSE}\;\le\;\sqrt n\;\mathrm{MAE}$$</div>
+    <p>Левое равенство достигается, только когда все $|r_i|$ одинаковы; правое — когда вся ошибка сосредоточена в одном объекте, а остальные прогнозы идеальны. В сквозном примере отношение $1{,}190/0{,}833\approx1{,}43$ при максимуме $\sqrt3\approx1{,}73$: ошибки заметно неравномерны.</p>
+    <details class="deep"><summary>Доказательство обеих границ</summary><div class="deep-body">
+      <p>Левая граница — неравенство Коши — Буняковского для векторов $(|r_1|,\dots,|r_n|)$ и $(1,\dots,1)$:</p>
+      <div class="eqd">$$\sum_i|r_i|\cdot1\le\sqrt{\sum_i r_i^2}\cdot\sqrt n\quad\Longrightarrow\quad\frac1n\sum_i|r_i|\le\sqrt{\frac1n\sum_i r_i^2}$$</div>
+      <p>Равенство — когда векторы пропорциональны, то есть все $|r_i|$ равны. Правая граница следует из того, что сумма квадратов неотрицательных чисел не больше квадрата их суммы:</p>
+      <div class="eqd">$$\sum_i r_i^2\le\Bigl(\sum_i|r_i|\Bigr)^2\quad\Longrightarrow\quad\sqrt{\frac1n\sum_i r_i^2}\le\frac{1}{\sqrt n}\sum_i|r_i|=\sqrt n\,\mathrm{MAE}$$</div>
+      <p>Равенство — когда все произведения $|r_i|\,|r_j|$ при $i\ne j$ равны нулю, то есть ненулевая ошибка не больше чем одна. Если общая абсолютная ошибка поровну разделена между $k$ объектами из $n$, отношение равно ровно $\sqrt{n/k}$.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="rmse-bounds" data-config="{&quot;r&quot;: [0.5, -2], &quot;n&quot;: 10, &quot;k&quot;: 1}"></div><figcaption><b>Рисунок 4.</b> Слева — две ошибки $(r_1;\,r_2)$. Точки с одинаковой MAE лежат на ромбе $|r_1|+|r_2|=2\,\mathrm{MAE}$, с одинаковой RMSE — на окружности радиуса $\sqrt2\,\mathrm{RMSE}$. Ромб зажат между окружностями $\mathrm{RMSE}=\mathrm{MAE}$ (касается её при $|r_1|=|r_2|$) и $\mathrm{RMSE}=\sqrt2\,\mathrm{MAE}$ (проходит через вершины на осях). Для точки $(0{,}5;\,-2)$: $\mathrm{MAE}=1{,}25$, $\mathrm{RMSE}\approx1{,}458$. Справа — отношение $\sqrt{n/k}$, когда ошибка поровну разделена между $k$ объектами из $n$.</figcaption></figure>
+    <div class="callout key"><b>Как читать разрыв</b><p>$\mathrm{RMSE}\approx\mathrm{MAE}$ — ошибки примерно одного размера. $\mathrm{RMSE}/\mathrm{MAE}\approx1{,}25$ — типично для нормального шума. Заметно больше $1{,}4$ — тяжёлые хвосты или несколько крупных промахов: посмотрите на самые большие остатки, прежде чем доверять средним.</p></div>
+
+    <h2 id="geometry">Геометрия: RMSE как расстояние</h2>
+    <p>Запишем факты и прогнозы как точки $n$-мерного пространства: $y=(y_1,\dots,y_n)$ и $\hat y=(\hat y_1,\dots,\hat y_n)$. Сумма квадратов ошибок — квадрат обычного евклидова расстояния между ними, поэтому</p>
+    <div class="eqd">$$\mathrm{RMSE}(y,\hat y)=\frac{\|y-\hat y\|_2}{\sqrt n}$$</div>
+    <p>Деление на $\sqrt n$ делает расстояние сравнимым для выборок разного размера: если каждая ошибка равна $c$, то $\|y-\hat y\|=c\sqrt n$, а RMSE равна ровно $c$. Все прогнозы с одной и той же RMSE образуют сферу радиуса $\sqrt n\,\mathrm{RMSE}$ с центром в $y$. При $n=3$ это можно нарисовать.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-vectors" data-config="{}"></div><figcaption><b>Рисунок 5.</b> Сквозной пример в $\mathbb R^3$: факт $y=(3;\,5;\,8)$, прогноз $\hat y=(2{,}5;\,5;\,10)$; оранжевый отрезок — вектор ошибки длиной $\sqrt{4{,}25}\approx2{,}062$, и $\mathrm{RMSE}=2{,}062/\sqrt3\approx1{,}190$. Серая сфера — все прогнозы с той же RMSE. Пунктирная диагональ — константные прогнозы $(c;\,c;\,c)$; ближайшая к $y$ точка на ней — $\bar y\cdot\mathbf 1$, $\bar y=16/3$. Двигайте ползунки и вращайте сцену.</figcaption></figure>
+    <h3>Лучшая константа — среднее, а её RMSE — стандартное отклонение</h3>
+    <p>Какой константный прогноз $\hat y_i=c$ минимизирует RMSE? Геометрически — ортогональная проекция $y$ на диагональ, то есть $c=\bar y$. Её RMSE — стандартное отклонение целевой переменной:</p>
+    <div class="eqd">$$\min_c\,\mathrm{RMSE}(y,\,c\mathbf 1)=\mathrm{RMSE}(y,\,\bar y\mathbf 1)=\sqrt{\frac1n\sum_i\bigl(y_i-\bar y\bigr)^2}=\sigma_y$$</div>
+    <p>Это главный ориентир при чтении RMSE: модель, у которой RMSE не меньше $\sigma_y$, ничем не лучше прогноза «всегда среднее». В примере $\sigma_y\approx2{,}055$, а модель даёт $1{,}190$. Отсюда же коэффициент детерминации:</p>
+    <div class="eqd">$$R^2=1-\frac{\mathrm{MSE}}{\sigma_y^2}=1-\frac{\mathrm{RMSE}^2}{\sigma_y^2}=1-\frac{1{,}417}{4{,}222}\approx0{,}66$$</div>
+
+    <h2 id="derivative">Производная и градиент</h2>
+    <p>Пусть прогнозы зависят от параметров модели $\theta$. Производная корня $\sqrt u$ равна $1/(2\sqrt u)$, поэтому по цепному правилу градиент RMSE — это градиент MSE, делённый на $2\,\mathrm{RMSE}$:</p>
+    <div class="eqd">$$\nabla_\theta\,\mathrm{RMSE}=\frac{\nabla_\theta\,\mathrm{MSE}}{2\,\mathrm{RMSE}}$$</div>
+    <details class="deep"><summary>Вывод по шагам</summary><div class="deep-body">
+      <p>Возьмём производную по одному прогнозу $\hat y_j$. От него зависит только слагаемое $(y_j-\hat y_j)^2$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MSE}}{\partial\hat y_j}=\frac1n\cdot2\,(y_j-\hat y_j)\cdot(-1)=-\frac{2}{n}\,r_j$$</div>
+      <p>Цепное правило для $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{RMSE}}{\partial\hat y_j}=\frac{1}{2\sqrt{\mathrm{MSE}}}\cdot\Bigl(-\frac{2}{n}\,r_j\Bigr)=-\frac{r_j}{n\,\mathrm{RMSE}}=\frac{\hat y_j-y_j}{n\,\mathrm{RMSE}}$$</div>
+      <p>Для параметра $\theta$ добавляется ещё один множитель цепного правила, $\partial\hat y_j/\partial\theta$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{RMSE}}{\partial\theta}=\frac{1}{n\,\mathrm{RMSE}}\sum_{j=1}^{n}(\hat y_j-y_j)\,\frac{\partial\hat y_j}{\partial\theta}$$</div>
+    </div></details>
+    <div class="eqd">$$\frac{\partial\,\mathrm{RMSE}}{\partial\hat y_j}=\frac{\hat y_j-y_j}{n\,\mathrm{RMSE}}$$</div>
+    <p>Что из этого следует:</p>
+    <ul class="flist"><li><b>Направление то же, длина другая.</b> Градиенты RMSE и MSE отличаются только положительным множителем $1/(2\,\mathrm{RMSE})$. Поэтому у функций одни и те же стационарные точки и один минимум.</li><li><b>Длина градиента по прогнозам постоянна</b>: $\|\nabla_{\hat y}\mathrm{RMSE}\|=1/\sqrt n$ при любых ошибках (сумма квадратов компонент равна $\sum_j r_j^2/(n^2\,\mathrm{MSE})=1/n$). Градиент RMSE указывает только направление к $y$, а его длина не зависит от того, насколько мы далеко.</li><li><b>В сквозном примере</b> $\partial\,\mathrm{RMSE}/\partial\hat y=(-0{,}140;\;0;\;0{,}560)$, а у MSE — $(-0{,}333;\;0;\;1{,}333)$, ровно в $2\cdot1{,}190=2{,}380$ раза больше.</li><li><b>В нуле производной нет.</b> При $\hat y=y$ функция $\|y-\hat y\|/\sqrt n$ имеет излом, как $|x|$ в нуле (вершина конуса), а формула делит на $\mathrm{RMSE}=0$. В автоматическом дифференцировании это превращается в NaN (см. раздел с кодом).</li></ul>
+    <h3>Одномерный разрез: константный прогноз</h3>
+    <p>Возьмём модель-константу $\hat y_i=c$ на данных примера $y=(3;\,5;\,8)$. Тогда $\mathrm{MSE}(c)=(c-\bar y)^2+\sigma_y^2$ — парабола, а RMSE — гипербола:</p>
+    <div class="eqd">$$\mathrm{RMSE}(c)=\sqrt{(c-\bar y)^2+\sigma_y^2},\qquad \mathrm{RMSE}'(c)=\frac{c-\bar y}{\sqrt{(c-\bar y)^2+\sigma_y^2}}\in(-1;\,1)$$</div>
+    <p>Возле минимума гипербола похожа на параболу (RMSE ведёт себя как MSE), вдали — на прямые $|c-\bar y|$ (как MAE). Производная плавно меняется от $-1$ до $1$ и никогда не выходит за эти пределы, а производная MSE растёт линейно и неограниченно.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-derivative" data-config="{&quot;c&quot;: 8}"></div><figcaption><b>Рисунок 6.</b> Вверху — RMSE, MSE и MAE константного прогноза $c$ (точки на оси — данные), внизу — производные. При $c=8$: $\mathrm{RMSE}\approx3{,}367$, $\mathrm{RMSE}'\approx0{,}792$, $\mathrm{MSE}'\approx5{,}333$; их отношение $2\,\mathrm{RMSE}\approx6{,}733$. Минимумы RMSE и MSE — в $\bar y\approx5{,}333$, минимум MAE — в медиане 5.</figcaption></figure>
+    <p>Вторая производная $\mathrm{RMSE}''(c)=\sigma_y^2/\mathrm{RMSE}(c)^3&gt;0$: функция строго выпукла, пока $\sigma_y&gt;0$. В общем случае RMSE выпукла по прогнозам (как норма), а значит, и по параметрам линейной модели: у линейной регрессии нет локальных минимумов ни для MSE, ни для RMSE.</p>
+
+    <h2 id="training">Ландшафт RMSE(w, b) и обучение</h2>
+    <p>Линейная модель $\hat y=wx+b$ на 14 точках. Над плоскостью параметров $(w,\,b)$ RMSE образует чашу. Переключите поверхность на MSE: линии уровня останутся теми же (уровень $\mathrm{RMSE}=1{,}5$ — это уровень $\mathrm{MSE}=2{,}25$), изменится только высота: MSE растёт квадратично, а RMSE вдали от минимума — почти линейно, как конус.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-landscape" data-config="{&quot;eta&quot;: 0.1}"></div><figcaption><b>Рисунок 7.</b> Слева — поверхность (вращается), справа — вид сверху с линиями уровня RMSE, внизу — RMSE по шагам. Перетащите чёрную стартовую точку: стрелки показывают первый шаг $-\eta\nabla$ для MSE (синяя) и для RMSE (оранжевая) — направление одно, но оранжевая короче в $2\,\mathrm{RMSE}\approx5{,}4$ раз. Нажмите «Пуск»: при $\eta=0{,}1$ спуск по MSE подходит к минимуму $0{,}904$ с точностью $0{,}01$ за 61 шаг, спуск по RMSE — за 140. Поставьте $\eta=0{,}14$: спуск по MSE разойдётся, а спуск по RMSE дойдёт до цели за 100 шагов.</figcaption></figure>
+    <p>Почему так. Шаг по RMSE — это шаг по MSE с переменным темпом обучения (learning rate):</p>
+    <div class="eqd">$$\theta\leftarrow\theta-\eta\,\nabla\mathrm{RMSE}=\theta-\underbrace{\frac{\eta}{2\,\mathrm{RMSE}(\theta)}}_{\eta_{\text{эфф}}}\,\nabla\mathrm{MSE}$$</div>
+    <p>Пока ошибки велики, эффективный шаг мал — поэтому спуск по RMSE устойчивее к слишком большому $\eta$. Возле минимума $\eta_{\text{эфф}}\to\eta/(2\,\mathrm{RMSE}_{\min})$; здесь $\mathrm{RMSE}_{\min}\approx0{,}904$, и шаг почти вдвое меньше, чем у MSE, — отсюда медленный финиш. Спуск по MSE устойчив лишь при $\eta&lt;2/\lambda_{\max}\approx0{,}133$, где $\lambda_{\max}\approx15{,}0$ — наибольшее собственное значение гессиана MSE.</p>
+    <div class="callout warn"><b>RMSE на мини-батчах</b><p>Корень из среднего по батчу — не корень из среднего по всей выборке: $\mathbb E\sqrt{\mathrm{MSE}_{\text{batch}}}\le\sqrt{\mathbb E\,\mathrm{MSE}_{\text{batch}}}$ (неравенство Йенсена). Средняя по батчам RMSE систематически занижена, а шаги SGD по батчевой RMSE оптимизируют именно это среднее, а не RMSE всей выборки. Обычно учат на MSE, а RMSE считают по всей валидационной выборке.</p></div>
+
+    <h2 id="evaluation">RMSE в оценке моделей</h2>
+    <p>Как метрика качества RMSE отвечает на вопрос «на сколько единиц $y$ типично ошибается модель, с упором на крупные промахи». Чтобы число что-то значило, его сравнивают:</p>
+    <ul class="flist"><li><b>с бейзлайном</b> — у прогноза «всегда среднее» RMSE равна $\sigma_y$, у прогноза «как вчера» во временных рядах — своя; модель должна быть заметно лучше;</li><li><b>с масштабом задачи</b> — ошибка в 5000 рублей отлична для квартир и ужасна для чашек кофе. Безразмерный вариант — $\mathrm{NRMSE}=\mathrm{RMSE}/\sigma_y=\sqrt{1-R^2}$ (иногда делят на размах или среднее $y$);</li><li><b>с MAE</b> — по отношению $\mathrm{RMSE}/\mathrm{MAE}$ видно, есть ли крупные промахи;</li><li><b>только на одних и тех же данных</b> — RMSE на разных тестовых выборках несравнимы, если у них разный разброс $y$.</li></ul>
+    <h3>Кросс-валидация: усредняйте квадраты</h3>
+    <p>При $K$ фолдах часто берут среднее RMSE по фолдам. Это не RMSE по всем объектам: среднее корней не больше корня из среднего. Общая оценка — корень из взвешенного среднего MSE:</p>
+    <div class="eqd">$$\mathrm{RMSE}_{\text{CV}}=\sqrt{\sum_{k=1}^{K}\frac{n_k}{n}\,\mathrm{MSE}_k}\;\ge\;\sum_{k=1}^{K}\frac{n_k}{n}\,\mathrm{RMSE}_k$$</div>
+    <p>Например, два фолда равного размера с RMSE $1$ и $3$: среднее равно $2$, а общая RMSE — $\sqrt{(1+9)/2}=\sqrt5\approx2{,}24$.</p>
+    <div class="callout history"><b>Netflix Prize</b><p>В 2006 году Netflix пообещал миллион долларов команде, которая улучшит RMSE их рекомендательной системы Cinematch на тестовых оценках на $10\%$ — с $0{,}9525$ до $0{,}8572$ по пятизвёздочной шкале. Приз в 2009 году получила команда BellKor’s Pragmatic Chaos с RMSE $0{,}8567$. Ради десятой доли «звезды» участники три года строили ансамбли из сотен моделей — хорошая иллюстрация того, что метрика определяет, что именно оптимизируют.</p></div>
+
+    <h2 id="variants">Варианты: RMSLE, взвешенная и нормированная RMSE</h2>
+    <p><b>RMSLE</b> (root mean squared logarithmic error) — RMSE в логарифмической шкале:</p>
+    <div class="eqd">$$\mathrm{RMSLE}=\sqrt{\frac1n\sum_{i=1}^{n}\bigl(\ln(1+\hat y_i)-\ln(1+y_i)\bigr)^2}$$</div>
+    <p>Логарифм превращает отношения в разности: ошибка определяется тем, <i>во сколько раз</i> $1+\hat y$ отличается от $1+y$, а не <i>на сколько</i>. Поэтому RMSLE подходит для неотрицательных целей с большим разбросом масштабов (цены, продажи, просмотры) и наказывает недобор сильнее, чем перебор на ту же абсолютную величину. В сквозном примере $\mathrm{RMSLE}\approx0{,}139$.</p>
+    <figure class="viz"><div class="fv" data-viz="rmse-rmsle" data-config="{&quot;y&quot;: 10, &quot;yhat&quot;: 5}"></div><figcaption><b>Рисунок 8.</b> Квадрат логарифмической ошибки при факте $y=10$. Прогноз 5 (недобор на 5) стоит $0{,}367$, прогноз 15 (перебор на те же 5) — $0{,}140$, в $2{,}6$ раза меньше. Пунктир — зеркальное отражение кривой, точки — квадратичная ошибка в долях $1+y$ для сравнения. Внизу — производная по $\hat y$: на недоборе она круче.</figcaption></figure>
+    <p>Ещё две полезные модификации:</p>
+    <ul class="flist"><li><b>взвешенная RMSE</b> $\sqrt{\sum_i w_i r_i^2/\sum_i w_i}$ — когда объекты неравноценны (дорогие товары, свежие наблюдения);</li><li><b>NRMSE</b> $=\mathrm{RMSE}/\sigma_y=\sqrt{1-R^2}$ — безразмерная версия для сравнения задач разного масштаба.</li></ul>
+    <div class="callout note"><b>RMSLE — это RMSE на логарифмах</b><p>RMSLE равна RMSE между $\ln(1+y)$ и $\ln(1+\hat y)$. Поэтому, если метрика соревнования — RMSLE, разумно обучать модель на MSE по цели $\ln(1+y)$, а прогноз возвращать через $e^{z}-1$.</p></div>
+
+    <h2 id="code">В коде</h2>
+    <p>В NumPy RMSE — одна строка; ниже заодно проверяются формулы этой страницы на сквозном примере.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+
+r    = y - y_hat                   # остатки: [ 0.5  0.  -2. ]
+mse  = np.mean(r ** 2)             # 1.4167
+rmse = np.sqrt(mse)                # 1.1902
+mae  = np.mean(np.abs(r))          # 0.8333
+
+# То же через евклидову норму: ‖y − ŷ‖ / √n
+print(np.linalg.norm(r) / np.sqrt(len(r)))     # 1.1902
+
+# Разложение: RMSE² = смещение² + дисперсия остатков
+print(r.mean() ** 2 + r.var(), mse)            # 1.4167 1.4167
+
+# Градиент по прогнозам: ∂RMSE/∂ŷ = (ŷ − y) / (n · RMSE)
+print((y_hat - y) / (len(y) * rmse))           # [-0.14  0.    0.56]
+
+# Бейзлайн «всегда среднее»: его RMSE — стандартное отклонение y
+print(np.std(y))                               # 2.0548</code></pre>
+    <p>В scikit-learn есть готовые функции (с версии 1.4; раньше писали <code>mean_squared_error(..., squared=False)</code>). Обратите внимание на разницу между средним RMSE фолдов и RMSE по всем объектам:</p>
+    <pre class="code"><span class="lang">python</span><code>from sklearn.metrics import root_mean_squared_error, root_mean_squared_log_error
+from sklearn.datasets import make_regression
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import KFold, cross_val_score, cross_val_predict
+
+print(root_mean_squared_error(y, y_hat))       # 1.1902  (scikit-learn ≥ 1.4)
+print(root_mean_squared_log_error(y, y_hat))   # 0.1392  — RMSLE
+
+X, t = make_regression(n_samples=200, n_features=5, noise=10.0, random_state=0)
+cv = KFold(5, shuffle=True, random_state=0)
+# scorer «чем больше, тем лучше», поэтому RMSE идёт со знаком минус
+scores = cross_val_score(LinearRegression(), X, t, cv=cv,
+                         scoring=&quot;neg_root_mean_squared_error&quot;)
+print(-scores.mean())                          # 10.560 — среднее RMSE фолдов
+pred = cross_val_predict(LinearRegression(), X, t, cv=cv)
+print(root_mean_squared_error(t, pred))        # 10.614 — RMSE по всем объектам</code></pre>
+    <p>В PyTorch RMSE как функция потерь требует осторожности в нуле:</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+
+y     = torch.tensor([3.0, 5.0, 8.0])
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+
+rmse = torch.sqrt(torch.mean((y_hat - y) ** 2))
+rmse.backward()
+print(rmse.item(), y_hat.grad)   # 1.1902  tensor([-0.1400,  0.0000,  0.5601])
+
+# Идеальный прогноз: производная √u в нуле бесконечна → градиент NaN
+p = y.clone().requires_grad_(True)
+torch.sqrt(torch.mean((p - y) ** 2)).backward()
+print(p.grad)                    # tensor([nan, nan, nan])
+
+def rmse_loss(pred, target, eps=1e-8):
+    &quot;&quot;&quot;RMSE как функция потерь: eps под корнем убирает NaN.&quot;&quot;&quot;
+    return torch.sqrt(torch.mean((pred - target) ** 2) + eps)</code></pre>
+    <div class="callout key"><b>Правило</b><p>Для обучения нейросети обычно минимизируют MSE: минимум тот же, градиент гладкий в нуле, нет деления на RMSE. RMSE считают для отчёта — по всей валидационной выборке сразу, а не как среднее по батчам.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>Среднее RMSE по батчам или фолдам как итоговая RMSE.</b> Корень нелинеен: усредняйте MSE, а корень берите в конце.</li><li><b>Сравнение RMSE на разных данных.</b> RMSE зависит от масштаба и разброса $y$; сравнивайте модели на одной тестовой выборке или используйте нормированную RMSE.</li><li><b>«Модель ошибается в среднем на RMSE».</b> Средняя абсолютная ошибка — это MAE; RMSE не меньше её, а на тяжёлых хвостах заметно больше.</li><li><b>RMSE как потеря без защиты нуля.</b> Производная $\sqrt u$ в нуле бесконечна: идеальный батч даёт NaN в градиентах. Добавляйте $\varepsilon$ под корень или учите на MSE.</li><li><b>Игнорирование выбросов.</b> Одна ошибка в 100 единиц среди 99 идеальных прогнозов даёт $\mathrm{RMSE}=10$ при $\mathrm{MAE}=1$. Если выбросы — шум, а не важные события, смотрите MAE, <a href="../huber/">Huber</a> или квантили ошибок.</li><li><b>RMSE по логарифмам вместо исходной шкалы.</b> Если модель учится на $\ln(1+y)$, её RMSE — это RMSLE исходной задачи, а не RMSE в рублях; переводите прогнозы обратно, прежде чем считать RMSE.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href="../mse/">MSE</a>: $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ — тот же минимум и тот же порядок моделей, градиент в $2\,\mathrm{RMSE}$ раз меньше.</li><li><a href="../mae/">MAE</a>: $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; лучшая константа для MAE — медиана, для RMSE — среднее.</li><li><a href="../huber/">Huber</a>: квадратичная возле нуля и линейная на хвостах — компромисс между MSE (а значит, RMSE) и MAE.</li><li><a href="../mape/">MAPE</a>: относительная ошибка вместо абсолютной; RMSLE — её квадратичный родственник в логарифмической шкале.</li><li><a href="../sgd/">SGD</a>: спуск по RMSE — это спуск по MSE с темпом обучения $\eta/(2\,\mathrm{RMSE})$.</li><li><a href="../adam/">Adam</a>: делит шаг на корень из скользящего среднего квадратов градиента — та же идея «корня из среднего квадрата» (RMS), что и в RMSE.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ — типичный размер ошибки в единицах $y$ с упором на крупные промахи. 2) $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; отношение RMSE/MAE — индикатор хвостов ($\approx1{,}25$ для нормального шума). 3) $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — смещение и разброс как катеты. 4) Геометрически это расстояние $\|y-\hat y\|/\sqrt n$; лучшая константа — среднее, её RMSE равна $\sigma_y$. 5) $\nabla\mathrm{RMSE}=\nabla\mathrm{MSE}/(2\,\mathrm{RMSE})$: минимум общий, шаг другой, в нуле производной нет.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Ошибки модели: $(1;\,-1;\,1;\,-1)$. Чему равны MAE и RMSE?</legend><div class="opts"><button type="button" data-ok="1">$\mathrm{MAE}=1$, $\mathrm{RMSE}=1$</button><button type="button" data-ok="0">$\mathrm{MAE}=0$, $\mathrm{RMSE}=1$</button><button type="button" data-ok="0">$\mathrm{MAE}=1$, $\mathrm{RMSE}=2$</button><button type="button" data-ok="0">$\mathrm{MAE}=1$, $\mathrm{RMSE}=\sqrt2$</button></div><div class="explain" hidden>Все $|r_i|=1$, поэтому и квадраты равны 1: $\mathrm{MSE}=1$, $\mathrm{RMSE}=1=\mathrm{MAE}$. Это случай равенства в $\mathrm{MAE}\le\mathrm{RMSE}$.</div></fieldset><fieldset class="q"><legend>2. На 100 объектах 99 прогнозов идеальны, а один ошибается на 50. Чему равна RMSE?</legend><div class="opts"><button type="button" data-ok="0">$0{,}5$</button><button type="button" data-ok="1">$5$</button><button type="button" data-ok="0">$50$</button><button type="button" data-ok="0">$\sqrt{50}\approx7{,}07$</button></div><div class="explain" hidden>$\mathrm{MSE}=50^2/100=25$, $\mathrm{RMSE}=5$. При этом $\mathrm{MAE}=0{,}5$, и $\mathrm{RMSE}=\sqrt{100}\cdot\mathrm{MAE}$ — верхняя граница достигнута.</div></fieldset><fieldset class="q"><legend>3. Средний остаток модели $\bar r=3$, стандартное отклонение остатков $\sigma_r=4$. Чему равна RMSE?</legend><div class="opts"><button type="button" data-ok="0">$7$</button><button type="button" data-ok="1">$5$</button><button type="button" data-ok="0">$4$</button><button type="button" data-ok="0">$3{,}5$</button></div><div class="explain" hidden>$\mathrm{RMSE}=\sqrt{\bar r^{\,2}+\sigma_r^2}=\sqrt{9+16}=5$ — гипотенуза треугольника с катетами 3 и 4.</div></fieldset><fieldset class="q"><legend>4. Как связаны градиенты RMSE и MSE по параметрам модели?</legend><div class="opts"><button type="button" data-ok="0">Совпадают</button><button type="button" data-ok="0">$\nabla\mathrm{RMSE}=2\,\mathrm{RMSE}\cdot\nabla\mathrm{MSE}$</button><button type="button" data-ok="1">$\nabla\mathrm{RMSE}=\nabla\mathrm{MSE}/(2\,\mathrm{RMSE})$: то же направление, другая длина</button><button type="button" data-ok="0">Направлены в противоположные стороны</button></div><div class="explain" hidden>По цепному правилу $(\sqrt u)'=1/(2\sqrt u)$. Множитель положителен, поэтому направление и минимум общие.</div></fieldset><fieldset class="q"><legend>5. Пять фолдов одинакового размера дали RMSE $1$, $1$, $1$, $1$ и $3$. Какова RMSE по всем объектам?</legend><div class="opts"><button type="button" data-ok="0">$1{,}4$</button><button type="button" data-ok="1">$\sqrt{2{,}6}\approx1{,}61$</button><button type="button" data-ok="0">$3$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>Усредняются квадраты: $(1+1+1+1+9)/5=2{,}6$, корень $\approx1{,}61$. Среднее самих RMSE, $1{,}4$, занижает ошибку.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../mse/"><span class="kicker">← Предыдущая формула</span><span class="big">MSE</span><span class="kicker">mean squared error</span></a>
+<a class="next" href="../mape/"><span class="kicker">Следующая формула →</span><span class="big">MAPE</span><span class="kicker">mean absolute percentage error</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

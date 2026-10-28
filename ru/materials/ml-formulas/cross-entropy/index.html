@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Категориальная кросс-энтропия — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="Кросс-энтропия подробно: −log p, связь с правдоподобием, энтропия и KL-дивергенция, градиент s − y, выпуклость, ландшафт в 3D, сглаживание меток, CE против MSE, перплексия, устойчивый код.">
+  <meta property="og:title" content="Категориальная кросс-энтропия — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="Кросс-энтропия подробно: −log p, связь с правдоподобием, энтропия и KL-дивергенция, градиент s − y, выпуклость, ландшафт в 3D, сглаживание меток, CE против MSE, перплексия, устойчивый код.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/cross-entropy/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/cross-entropy.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/cross-entropy/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/cross-entropy/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/cross-entropy/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Потери — классификация</span>
+  <h1>Категориальная кросс-энтропия</h1>
+  <p class="dek">Главная потеря классификации и языковых моделей. Разбираем её по косточкам: почему штраф — минус логарифм, как кросс-энтропия раскладывается на энтропию и KL-дивергенцию, почему в паре с softmax градиент равен просто s − y, как выглядит ландшафт потерь, зачем сглаживают метки и что такое перплексия.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем она нужна</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: штраф за удивление</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#information"><span class="n">4</span>Энтропия, кросс-энтропия и KL-дивергенция</a>
+      <a href="#gradient"><span class="n">5</span>Производная: почему softmax + CE дают s − y</a>
+      <a href="#landscape"><span class="n">6</span>Ландшафт потерь в 3D</a>
+      <a href="#smoothing"><span class="n">7</span>Сглаживание меток</a>
+      <a href="#training"><span class="n">8</span>CE против MSE: почему классификаторы учат на кросс-энтропии</a>
+      <a href="#llm"><span class="n">9</span>Языковые модели и перплексия</a>
+      <a href="#code"><span class="n">10</span>В коде</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{CE}=-\sum_{k=1}^{K}y_k\log\hat{y}_k$$</div>
+
+    <h2 id="why">Зачем она нужна</h2>
+    <p>Модель выдала вероятности классов — например, $(0{,}665;\,0{,}245;\,0{,}090)$ для «кошка», «собака», «птица», — а на картинке кошка. Насколько это хорошо? Нужно одно число, которое тем меньше, чем больше вероятность правильного ответа, и которое можно минимизировать градиентным спуском. Стандартный ответ — <b>категориальная кросс-энтропия</b> (categorical cross-entropy, CE): здесь $\mathrm{CE}=-\ln0{,}665\approx0{,}408$.</p>
+    <p>Где она встречается:</p>
+    <ul class="flist"><li><b>обучение многоклассовых классификаторов</b> — от логистической регрессии до ResNet и ViT: последний слой выдаёт логиты, <a href='../softmax/'>softmax</a> превращает их в вероятности, CE оценивает ответ;</li><li><b>языковые модели</b> — предобучение GPT, LLaMA, Qwen — это минимизация CE следующего токена: классы — токены словаря, а $e^{\mathrm{CE}}$ — знаменитая перплексия;</li><li><b>дистилляция знаний</b> — ученик минимизирует CE до «мягких» вероятностей учителя;</li><li><b>статистика</b> — минимизация CE равносильна методу максимального правдоподобия для категориального распределения;</li><li><b>теория информации</b> — CE равна средней длине кода, если кодировать данные по модели $q$, а приходят они из распределения $p$.</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>$\mathrm{CE}=-\sum_k y_k\ln\hat y_k$; для one-hot метки это минус логарифм вероятности правильного класса. Уверенная ошибка стоит дорого: $-\ln0{,}1\approx2{,}303$ против $-\ln0{,}9\approx0{,}105$. В паре с softmax градиент по логитам — просто $s-y$, без насыщения. Кросс-энтропия = энтропия + KL-дивергенция, а $e^{\mathrm{CE}}$ — перплексия.</p></div>
+
+    <h2 id="intuition">Интуиция: штраф за удивление</h2>
+    <p>Пусть модель заранее объявляет вероятности, а потом узнаёт правильный ответ. Если правильному классу она дала вероятность $p$, её «удивление» равно $-\ln p$: при $p=1$ удивления нет, при $p=0{,}5$ оно равно $\ln2\approx0{,}693$, а при $p\to0$ растёт до бесконечности. Кросс-энтропия — среднее удивление модели на данных.</p>
+    <p>Почему именно логарифм? Во-первых, он превращает произведение вероятностей независимых примеров в сумму. Во-вторых, он поощряет честность: среди штрафов, зависящих только от вероятности, которую модель дала случившемуся исходу, при трёх и более исходах лишь логарифмический (с точностью до линейного преобразования) минимален в среднем тогда, когда модель называет свои истинные вероятности.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-surprise" data-config="{&quot;p&quot;: 0.665}"></div><figcaption><b>Рисунок 1.</b> Сверху — штраф $-\ln p$ (синий) и квадратичная ошибка $(1-p)^2$ для сравнения; снизу — их производные по $p$. Тяните точку. При $p=0{,}665$ потеря $0{,}408$ ната, или $0{,}589$ бита, производная $-1{,}504$. Отмечены уверенный правильный ответ ($p=0{,}9$, штраф $0{,}105$) и уверенная ошибка ($p=0{,}1$, штраф $2{,}303$).</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Уверенная ошибка ($p=0{,}1$) стоит в 22 раза больше уверенного правильного ответа ($p=0{,}9$). При $p=0{,}01$ штраф уже $4{,}605$ и растёт без предела, а квадратичная ошибка $(1-p)^2$ так и остаётся меньше единицы ($0{,}980$). Производная $-1/p$ неограниченно растёт по модулю при $p\to0$: чем хуже ответ, тем сильнее толчок.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <div class="eqd">$$\mathrm{CE}(y,\hat y)=-\sum_{k=1}^{K}y_k\ln\hat y_k$$</div>
+    <dl class="symbols"><dt>$y=(y_1,\dots,y_K)$</dt><dd>истинное распределение; обычно one-hot: $y_c=1$ для правильного класса $c$ и $0$ для остальных;</dd><dt>$\hat y_k$</dt><dd>предсказанная вероятность класса $k$, как правило $\hat y=s=\operatorname{softmax}(z)$;</dd><dt>$\ln$</dt><dd>натуральный логарифм: CE измеряется в натах (nats); с $\log_2$ — в битах, $1$ нат $\approx1{,}443$ бита;</dd><dt>$-$</dt><dd>логарифм вероятности отрицателен, минус делает потерю неотрицательной.</dd></dl>
+    <p>Для one-hot метки в сумме выживает одно слагаемое. Подставив $s=\operatorname{softmax}(z)$, получаем формулу прямо через логиты:</p>
+    <div class="eqd">$$\mathrm{CE}=-\ln s_c=-z_c+\ln\sum_{j=1}^{K}e^{z_j}=\operatorname{LSE}(z)-z_c$$</div>
+    <p>Последняя форма — главная на практике: потеря считается без явного softmax. Для батча из $N$ примеров потери усредняют:</p>
+    <div class="eqd">$$\mathcal L=-\frac1N\sum_{n=1}^{N}\ln s^{(n)}_{c_n}$$</div>
+    <p>Пример шпаргалки — логиты $(2;\,1;\,0)$, правильный класс первый:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$k$</th><th class=num>$z_k$</th><th class=num>$s_k$</th><th class=num>$y_k$</th><th class=num>$-y_k\ln s_k$</th><th class=num>$s_k-y_k$</th></tr></thead><tbody><tr><td>1</td><td class=num>2</td><td class=num>0,665</td><td class=num>1</td><td class=num>0,408</td><td class=num>−0,335</td></tr><tr><td>2</td><td class=num>1</td><td class=num>0,245</td><td class=num>0</td><td class=num>0</td><td class=num>0,245</td></tr><tr><td>3</td><td class=num>0</td><td class=num>0,090</td><td class=num>0</td><td class=num>0</td><td class=num>0,090</td></tr><tr><td>Σ</td><td class=num></td><td class=num>1</td><td class=num>1</td><td class=num>0,408</td><td class=num>0</td></tr></tbody></table></div>
+    <p>Итог: $\mathrm{CE}\approx0{,}408$, градиент $s-y\approx(-0{,}335;\,0{,}245;\,0{,}090)$. Если бы правильным был третий класс, потеря была бы $-\ln0{,}090\approx2{,}408$ — модель уверенно ошиблась.</p>
+    <details class="deep"><summary>CE и максимальное правдоподобие</summary><div class="deep-body">
+      <p>Пусть модель с параметрами $\theta$ назначает классу $c_n$ вероятность $q_\theta(c_n\mid x_n)$. Правдоподобие выборки — произведение $\prod_n q_\theta(c_n\mid x_n)$. Логарифм превращает произведение в сумму, а смена знака — максимизацию в минимизацию:</p>
+      <div class="eqd">$$\arg\max_\theta\prod_{n=1}^{N}q_\theta(c_n\mid x_n)=\arg\min_\theta\Bigl(-\frac1N\sum_{n=1}^{N}\ln q_\theta(c_n\mid x_n)\Bigr)=\arg\min_\theta\mathcal L$$</div>
+      <p>Минимизировать среднюю CE — то же, что искать оценку максимального правдоподобия для категориального распределения. Поэтому CE — не произвольный выбор, а «родная» потеря вероятностного классификатора.</p>
+    </div></details>
+
+    <h2 id="information">Энтропия, кросс-энтропия и KL-дивергенция</h2>
+    <p>Название пришло из теории информации. Пусть события приходят из распределения $p$, а мы кодируем их, исходя из модели $q$. Тогда:</p>
+    <div class="eqd">$$H(p)=-\sum_k p_k\ln p_k,\qquad H(p,q)=-\sum_k p_k\ln q_k,\qquad\mathrm{KL}(p\,\|\,q)=\sum_k p_k\ln\frac{p_k}{q_k}$$</div>
+    <div class="eqd">$$H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$$</div>
+    <p>$H(p)$ — неустранимая неопределённость самих данных (энтропия), $\mathrm{KL}(p\,\|\,q)\ge0$ — штраф за то, что модель $q$ отличается от правды (неравенство Гиббса; равенство только при $q=p$). Поэтому минимум кросс-энтропии по $q$ достигается при $q=p$ и равен $H(p)$. Для one-hot метки $H(y)=0$, и CE совпадает с KL-дивергенцией.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-kl" data-config="{&quot;p&quot;: [0.7, 0.2, 0.1], &quot;q&quot;: [0.25, 0.5, 0.25]}"></div><figcaption><b>Рисунок 2.</b> Цель $p$ (чёрная точка) и прогноз $q$ (красная) в симплексе трёх классов; обе точки можно тянуть. Заливка и линии уровня — $\mathrm{KL}(p\,\|\,q')$ для всех возможных прогнозов $q'$ (уровни $0{,}05$, $0{,}25$, $0{,}75$): светлее всего в самой точке $p$. Справа — разложение $H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$. При $p=(0{,}7;\,0{,}2;\,0{,}1)$ и $q=(0{,}25;\,0{,}5;\,0{,}25)$: $H(p)\approx0{,}802$, $\mathrm{KL}\approx0{,}446$, $H(p,q)\approx1{,}248$ ната ($1{,}800$ бита). Положите $q$ на $p$ — KL исчезнет; утащите $p$ в вершину — исчезнет $H(p)$.</figcaption></figure>
+    <details class="deep"><summary>Почему KL ≥ 0</summary><div class="deep-body">
+      <p>По неравенству Йенсена для вогнутого логарифма (суммы — по $k$ с $p_k&gt;0$):</p>
+      <div class="eqd">$$-\mathrm{KL}(p\,\|\,q)=\sum_k p_k\ln\frac{q_k}{p_k}\le\ln\sum_k p_k\frac{q_k}{p_k}=\ln\sum_{k:\,p_k&gt;0}q_k\le\ln1=0$$</div>
+      <p>Равенство — только когда $q_k=p_k$ для всех $k$.</p>
+    </div></details>
+    <div class="callout note"><b>Биты или наты</b><p>С $\log_2$ кросс-энтропия измеряется в битах — это буквально среднее число бит на событие при оптимальном коде, построенном по $q$. В машинном обучении берут натуральный логарифм: производные проще, а минимум тот же. Перевод: $1$ нат $=1/\ln2\approx1{,}443$ бита.</p></div>
+
+    <h2 id="gradient">Производная: почему softmax + CE дают s − y</h2>
+    <p>Посчитаем градиент потери по логитам. Можно идти через матрицу Якоби softmax, но короче — через форму $\mathrm{CE}=\operatorname{LSE}(z)-z_c$: производная LSE — это softmax (см. страницу <a href='../softmax/'>softmax</a>), а производная $z_c$ по $z_k$ равна $y_k$.</p>
+    <div class="eqd">$$\frac{\partial\,\mathrm{CE}}{\partial z_k}=\frac{\partial\operatorname{LSE}(z)}{\partial z_k}-\frac{\partial z_c}{\partial z_k}=s_k-y_k$$</div>
+    <details class="deep"><summary>Вывод через матрицу Якоби (цепное правило)</summary><div class="deep-body">
+      <p>Производная по вероятностям: $\partial\,\mathrm{CE}/\partial s_i=-y_i/s_i$. Якобиан softmax: $\partial s_i/\partial z_k=s_i(\delta_{ik}-s_k)$. По цепному правилу:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{CE}}{\partial z_k}=\sum_i\Bigl(-\frac{y_i}{s_i}\Bigr)s_i(\delta_{ik}-s_k)=-\sum_i y_i\delta_{ik}+s_k\sum_i y_i=s_k-y_k$$</div>
+      <p>На последнем шаге использовано $\sum_i y_i=1$. Множители $s_i$ из якобиана сократились со знаменателями $1/s_i$ из логарифма — вся матрица схлопнулась в разность. Формула верна для любой цели $y$ с суммой 1, не только one-hot (например, при сглаживании меток).</p>
+    </div></details>
+    <p>У этой формулы три важных следствия:</p>
+    <ul class="flist"><li><b>градиент ограничен</b>: каждая компонента $s_k-y_k$ лежит в $(-1;\,1)$, а их сумма равна 0 — правильный логит тянется вверх ровно настолько, насколько остальные в сумме тянутся вниз;</li><li><b>нет насыщения на ошибке</b>: если модель уверенно ошибается ($s_c\to0$), градиент по правильному логиту стремится к $-1$, а не к нулю. Сравните с MSE поверх softmax, где множители из якобиана гасят градиент как раз тогда, когда ошибка велика (раздел <a href='#training'>про CE и MSE</a>);</li><li><b>затухание на успехе</b>: когда $s\to y$, градиент стремится к 0 — хорошо выученные примеры почти не влияют на обучение.</li></ul>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-gradient" data-config="{&quot;z&quot;: [2, 1, 0], &quot;k&quot;: 0, &quot;eta&quot;: 1}"></div><figcaption><b>Рисунок 3.</b> Один пример с логитами $(2;\,1;\,0)$ и правильным первым классом. Справа столбики — прогноз $s$, чёрные полки — цель $y$, стрелки и числа — $s_k-y_k$. Нажмите «Шаг»: логиты обновляются по правилу $z\leftarrow z-\eta(s-y)$ с $\eta=1$, и потеря падает: $0{,}408\to0{,}258\to0{,}187\to0{,}146$, после 10 шагов $0{,}058$. Сделайте правильным класс 3 — потеря станет $2{,}408$, а градиент $(0{,}665;\,0{,}245;\,-0{,}910)$.</figcaption></figure>
+    <details class="deep"><summary>Вторая производная: CE выпукла по логитам</summary><div class="deep-body">
+      <p>Продифференцируем $s_k-y_k$ ещё раз: гессиан CE по логитам равен якобиану softmax, $\nabla^2_z\,\mathrm{CE}=\operatorname{diag}(s)-ss^\top$. Эта матрица неотрицательно определена, поэтому CE — выпуклая функция логитов, а у softmax-регрессии $z=Wx+b$ потеря выпукла по $(W,b)$: плохих локальных минимумов нет. В направлении $\mathbf 1$ матрица вырождена — сдвиг всех логитов не меняет потерю.</p>
+    </div></details>
+
+    <h2 id="landscape">Ландшафт потерь в 3D</h2>
+    <p>Зафиксируем третий логит $z_3=0$ и нарисуем потерю как функцию двух других. Для правильного класса 1:</p>
+    <div class="eqd">$$\mathrm{CE}(z_1,z_2)=\ln\bigl(e^{z_1}+e^{z_2}+1\bigr)-z_1=\ln\bigl(1+e^{z_2-z_1}+e^{-z_1}\bigr)$$</div>
+    <p>Где $z_1$ намного больше и $z_2$, и нуля, обе экспоненты под логарифмом малы, и потеря близка к 0. Где первый класс проигрывает, потеря растёт почти линейно — примерно как $\max(z_2,0)-z_1$. Получается выпуклая «долина», которая плавно уходит вниз, но нуля не достигает.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-landscape" data-config="{&quot;z&quot;: [2, 1], &quot;k&quot;: 0}"></div><figcaption><b>Рисунок 4.</b> Слева — поверхность $\mathrm{CE}(z_1,z_2,0)$ для выбранного правильного класса (её можно вращать). Справа — вид сверху: цвет и линии уровня — потеря, стрелки — антиградиент $-(s-y)$ по $z_1$ и $z_2$. Красную точку можно тянуть. «Пуск» запускает градиентный спуск по $z_1$, $z_2$ с шагом $0{,}8$ из точки $(2;\,1)$: потеря $0{,}408\to0{,}132$ за 5 шагов, $0{,}079$ за 10 и $0{,}013$ за 79, а точка всё уходит вправо-вниз — минимум недостижим.</figcaption></figure>
+    <div class="callout warn"><b>Минимума нет</b><p>Для one-hot цели нижняя грань CE равна 0, но достигается она только при бесконечном отрыве правильного логита. Если модель может разделить обучающие данные идеально, CE продолжает уменьшаться за счёт роста логитов, и веса уходят в бесконечность. Это лечат регуляризацией весов, ранней остановкой и сглаживанием меток.</p></div>
+
+    <h2 id="smoothing">Сглаживание меток</h2>
+    <p>Сглаживание меток (label smoothing) заменяет one-hot цель смесью с равномерным распределением:</p>
+    <div class="eqd">$$y^{\mathrm{LS}}_k=(1-\varepsilon)\,y_k+\frac{\varepsilon}{K}$$</div>
+    <p>Правильный класс получает $1-\varepsilon+\varepsilon/K$, каждый из остальных — $\varepsilon/K$. Теперь у потери есть настоящий минимум: градиент $s-y^{\mathrm{LS}}$ обнуляется, когда $s=y^{\mathrm{LS}}$. Если все неправильные логиты равны, а правильный опережает их на $m$, оптимальный отрыв конечен:</p>
+    <div class="eqd">$$s_c=\frac{e^{m}}{e^{m}+K-1}=1-\varepsilon+\frac{\varepsilon}{K}\quad\Longrightarrow\quad m^{*}=\ln\Bigl(1+\frac{K(1-\varepsilon)}{\varepsilon}\Bigr)$$</div>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-smoothing" data-config="{&quot;eps&quot;: 0.1, &quot;K&quot;: 3}"></div><figcaption><b>Рисунок 5.</b> Потеря и её производная как функции отрыва $m$ правильного логита (остальные $K-1$ логитов равны). Без сглаживания (пунктир) потеря монотонно убывает и стремится к 0 только при $m\to\infty$, производная всё время отрицательна. Со сглаживанием $\varepsilon=0{,}1$ при $K=3$ появляется минимум: $m^*=\ln28\approx3{,}332$, где вероятность правильного класса равна цели $0{,}9333$, а потеря — энтропии цели $H(y^{\mathrm{LS}})\approx0{,}291$. При $K=10$: $m^*\approx4{,}511$.</figcaption></figure>
+    <p>Сглаживание меток (Сегеди и др., 2016, Inception-v3) ограничивает рост логитов и обычно улучшает калибровку; оно стоит, например, в оригинальном Transformer с $\varepsilon=0{,}1$. Цена — модель больше никогда не уверена на 100%, а информация о сходстве классов в её логитах частично стирается, что может мешать дистилляции (Мюллер и др., 2019).</p>
+
+    <h2 id="training">CE против MSE: почему классификаторы учат на кросс-энтропии</h2>
+    <p>Почему бы не обучать классификатор квадратичной ошибкой $\|s-y\|^2$ между вероятностями и one-hot меткой? Сравним градиенты по логитам:</p>
+    <div class="eqd">$$\frac{\partial\,\mathrm{CE}}{\partial z}=s-y,\qquad\frac{\partial\,\|s-y\|^2}{\partial z}=J^{\top}\,2(s-y)=2\,s\odot\bigl((s-y)-\langle s-y,\,s\rangle\,\mathbf 1\bigr)$$</div>
+    <p>У MSE в градиенте стоит множитель $s$ из матрицы Якоби. Если модель уверенно ошибается — почти вся масса у одного неправильного класса, — градиент почти обнуляется: для маленьких $s_k$ мал множитель $s_k$, а для неправильного класса-фаворита почти нулевой оказывается скобка. Модель «не слышит» собственную грубую ошибку. В градиенте CE такого множителя нет.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-train" data-config="{}"></div><figcaption><b>Рисунок 6.</b> Одни и те же данные и один и тот же «уверенно неправильный» старт: веса направлены на центры чужих классов, точность $3{,}3\%$. Две копии softmax-регрессии обучаются параллельно градиентным спуском с шагом $0{,}5$ — одна на CE, другая на MSE. Средняя норма градиента по логитам на старте: $1{,}3$ у CE и $0{,}13$ у MSE. Через 10 шагов точность $85{,}6\%$ против $5{,}6\%$, через 50 — $93{,}3\%$ против $25{,}6\%$; MSE подтягивается только к сотому шагу ($90{,}0\%$), а к двухсотому обе модели дают $95{,}6\%$.</figcaption></figure>
+    <div class="callout note"><b>Когда квадратичную ошибку всё же используют</b><p>Квадратичная ошибка между вероятностями и меткой называется оценкой Брайера (Brier score) и полезна как <i>метрика</i> калибровки. Для обучения классификаторов почти всегда берут CE: она выпукла по логитам и не насыщается на ошибках.</p></div>
+
+    <h2 id="llm">Языковые модели и перплексия</h2>
+    <p>Языковая модель на каждой позиции $t$ предсказывает распределение следующего токена по словарю из $V$ токенов (десятки тысяч). Это классификация на $V$ классов, и потеря — средняя кросс-энтропия по позициям:</p>
+    <div class="eqd">$$\mathcal L=-\frac1T\sum_{t=1}^{T}\ln p_\theta(x_t\mid x_{&lt;t}),\qquad\mathrm{PPL}=e^{\mathcal L}=\Bigl(\prod_{t=1}^{T}\frac{1}{p_\theta(x_t\mid x_{&lt;t})}\Bigr)^{1/T}$$</div>
+    <p><b>Перплексия</b> — экспонента от CE, то есть среднее геометрическое величин $1/p_t$. Её читают как «эффективное число вариантов»: модель, которая всегда равномерно выбирает из $k$ токенов, имеет перплексию ровно $k$. Модель, ничего не знающая о языке (равномерное распределение по словарю), имеет $\mathcal L=\ln V$ и $\mathrm{PPL}=V$.</p>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-perplexity" data-config="{&quot;lambda&quot;: 1}"></div><figcaption><b>Рисунок 7.</b> Потеря $-\ln p_t$ на каждом токене предложения (учебный пример: вероятности заданы вручную). Оранжевая линия — среднее, то есть CE; пунктир — $\ln V$ для словаря $V=50\,000$. При $\lambda=1$: $\mathrm{CE}\approx1{,}086$, перплексия $\approx2{,}963$ — в среднем модель колеблется между тремя вариантами; дороже всего первое слово ($p=0{,}05$, штраф $3{,}00$). Ползунок $\lambda$ умножает логиты: при $\lambda=0{,}5$ перплексия уже $\approx263{,}5$, при $\lambda=0$ распределение равномерное, $\mathrm{CE}=\ln50\,000\approx10{,}82$ и перплексия $50\,000$.</figcaption></figure>
+    <div class="callout note"><b>Сравнивайте перплексии осторожно</b><p>Перплексия зависит от токенизатора: на одном и том же тексте модель с более крупными токенами делает меньше предсказаний, и каждое труднее. Сравнивать можно модели с одинаковым словарём на одних и тех же данных — или переходить к битам на символ или байт.</p></div>
+
+    <h2 id="code">В коде</h2>
+    <p>Главное правило — считать CE по логитам через log-softmax: $\mathrm{CE}=\operatorname{LSE}(z)-z_c$. Путь «softmax, потом логарифм» на уверенных ошибках даёт $\ln0=-\infty$: для логитов $(0;\,800;\,0)$ и правильного первого класса наивный код возвращает <code>inf</code>, а устойчивый — точный ответ $800$.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+np.set_printoptions(precision=3)
+
+def log_softmax(z):
+    z = z - z.max(axis=-1, keepdims=True)          # устойчивость: max-трюк
+    return z - np.log(np.exp(z).sum(axis=-1, keepdims=True))
+
+def cross_entropy(logits, y):
+    &quot;&quot;&quot;Средняя CE по батчу. logits: (N, K), y: (N,) — номера классов.&quot;&quot;&quot;
+    logp = log_softmax(logits)
+    return -logp[np.arange(len(y)), y].mean()
+
+def cross_entropy_grad(logits, y):
+    # dCE/dz = (softmax(z) − onehot(y)) / N
+    s = np.exp(log_softmax(logits))
+    s[np.arange(len(y)), y] -= 1
+    return s / len(y)
+
+z = np.array([[2.0, 1.0, 0.0]])
+print(cross_entropy(z, np.array([0])))        # ≈ 0.4076
+print(cross_entropy(z, np.array([2])))        # ≈ 2.4076 — уверенная ошибка
+print(cross_entropy_grad(z, np.array([0])))   # [[-0.335  0.245  0.09 ]]
+print(cross_entropy(z + 1000, np.array([0]))) # ≈ 0.4076 — без переполнения</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn.functional as F
+
+logits = torch.tensor([[2.0, 1.0, 0.0]], requires_grad=True)
+target = torch.tensor([0])                  # номер класса, а не one-hot
+loss = F.cross_entropy(logits, target)      # tensor(0.4076): log_softmax + NLL
+loss.backward()
+print(logits.grad)                          # tensor([[-0.3348,  0.2447,  0.0900]])
+
+F.cross_entropy(logits, target, label_smoothing=0.1)   # tensor(0.5076)
+
+# Языковая модель: логиты (B, T, V), токены (B, T)
+B, T, V = 2, 5, 50000
+lm_logits = torch.randn(B, T, V)
+tokens = torch.randint(0, V, (B, T))
+loss = F.cross_entropy(lm_logits.reshape(-1, V), tokens.reshape(-1))
+print(torch.exp(loss))                      # перплексия: порядка V для случайных логитов</code></pre>
+    <div class="callout key"><b>Чек-лист PyTorch</b><p><code>F.cross_entropy</code> / <code>nn.CrossEntropyLoss</code> принимает <b>логиты</b> (без softmax!) и номера классов типа <code>long</code> — или вероятности той же формы, что и логиты. Полезные параметры: <code>label_smoothing</code>, <code>weight</code> (веса классов при дисбалансе), <code>ignore_index</code> (например, паддинг). Классы должны стоять во втором измерении, поэтому логиты формы $(B,T,V)$ проще всего превратить в $(BT,V)$ через <code>reshape</code>.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>Softmax перед <code>CrossEntropyLoss</code></b> — двойной softmax: вероятности зажаты, потеря не опускается до нуля, градиенты искажены. Подавайте логиты.</li><li><b><code>np.log(softmax(z))</code> вместо log-softmax</b> — на уверенной ошибке вероятность округляется до 0, потеря становится <code>inf</code>, градиент — NaN. «Заплатка» <code>clip(p, 1e-7, 1)</code> спасает от бесконечности, но обрезает градиент; правильнее LSE.</li><li><b>Путаница one-hot и номеров классов</b>. В Keras это разные функции: <code>categorical_crossentropy</code> ждёт one-hot, <code>sparse_categorical_crossentropy</code> — номера. В PyTorch номера должны иметь тип <code>long</code>, а вероятностные цели — ту же форму, что логиты.</li><li><b>Сумма вместо среднего</b>. С <code>reduction='sum'</code> потеря и градиент растут с размером батча, и подобранный темп обучения перестаёт подходить.</li><li><b>Дисбаланс классов без внимания</b>. CE усредняет по примерам, поэтому редкий класс почти не влияет на градиент. Помогают веса классов (<code>weight</code>) или <a href='../focal/'>Focal Loss</a>.</li><li><b>Несопоставимые числа</b>: потери в натах и битах, перплексии моделей с разными токенизаторами.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href='../softmax/'>Softmax</a>: даёт вероятности $s$; вместе с CE — градиент $s-y$, а $\mathrm{CE}=\operatorname{LSE}(z)-z_c$.</li><li><a href='../bce/'>BCE</a>: случай $K=2$ с одним выходом: $-\bigl[y\ln\hat y+(1-y)\ln(1-\hat y)\bigr]$.</li><li><a href='../sigmoid/'>Сигмоида</a>: для двух классов softmax сводится к сигмоиде, и CE превращается в BCE.</li><li><a href='../focal/'>Focal Loss</a>: $-(1-p_t)^\gamma\ln p_t$ — кросс-энтропия, ослабленная на лёгких примерах.</li><li><a href='../mse/'>MSE</a>: поверх softmax насыщается на уверенных ошибках (см. раздел <a href='#training'>о сравнении</a>).</li><li><a href='../adam/'>Adam</a>: оптимизатор, которым обычно минимизируют CE в глубоких сетях.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) Для one-hot метки $\mathrm{CE}=-\ln s_c$ — удивление модели правильным ответом; среднее по данным — минус логарифм правдоподобия, делённый на $N$. 2) $H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$: минимум по $q$ — при $q=p$. 3) С softmax градиент по логитам равен $s-y$: он ограничен, не насыщается на ошибках и исчезает на успехе; CE выпукла по логитам. 4) На one-hot целях минимум недостижим — логиты растут; сглаживание меток делает оптимум конечным. 5) Считайте CE по логитам через log-sum-exp; $e^{\mathrm{CE}}$ — перплексия.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Правильному классу модель дала вероятность $0{,}25$. Чему равна CE?</legend><div class="opts"><button type="button" data-ok="0">$0{,}25$</button><button type="button" data-ok="0">$0{,}75$</button><button type="button" data-ok="1">$\approx1{,}386$</button><button type="button" data-ok="0">$\approx0{,}288$</button></div><div class="explain" hidden>$-\ln0{,}25=\ln4\approx1{,}386$ ната (ровно 2 бита).</div></fieldset><fieldset class="q"><legend>2. Чему равен градиент CE по логитам, если вероятности получены softmax?</legend><div class="opts"><button type="button" data-ok="0">$-y/s$</button><button type="button" data-ok="1">$s-y$</button><button type="button" data-ok="0">$\operatorname{diag}(s)-ss^\top$</button><button type="button" data-ok="0">$(s-y)^2$</button></div><div class="explain" hidden>$\mathrm{CE}=\operatorname{LSE}(z)-z_c$, а $\nabla\operatorname{LSE}=s$; $-y/s$ — это градиент по вероятностям, а не по логитам.</div></fieldset><fieldset class="q"><legend>3. Модель отвечает равномерно на 10 классах. Чему равны CE и перплексия?</legend><div class="opts"><button type="button" data-ok="0">$0$ и $1$</button><button type="button" data-ok="1">$\ln10\approx2{,}303$ и $10$</button><button type="button" data-ok="0">$0{,}1$ и $10$</button><button type="button" data-ok="0">$1$ и $e$</button></div><div class="explain" hidden>Каждому классу — $0{,}1$, так что $\mathrm{CE}=-\ln0{,}1=\ln10$, а $\mathrm{PPL}=e^{\ln10}=10$.</div></fieldset><fieldset class="q"><legend>4. При каком прогнозе $q$ кросс-энтропия $H(p,q)$ минимальна?</legend><div class="opts"><button type="button" data-ok="1">$q=p$</button><button type="button" data-ok="0">$q$ — one-hot вектор наиболее вероятного класса $p$</button><button type="button" data-ok="0">$q$ — равномерное распределение</button><button type="button" data-ok="0">Минимума нет</button></div><div class="explain" hidden>$H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$, а KL неотрицательна и равна нулю только при $q=p$.</div></fieldset><fieldset class="q"><legend>5. Сглаживание меток с $\varepsilon=0{,}1$ при $K=3$. К какой вероятности правильного класса стремится обучение?</legend><div class="opts"><button type="button" data-ok="0">$1$</button><button type="button" data-ok="0">$0{,}9$</button><button type="button" data-ok="1">$\approx0{,}933$</button><button type="button" data-ok="0">$\approx0{,}967$</button></div><div class="explain" hidden>Цель для правильного класса $1-\varepsilon+\varepsilon/K=0{,}9+0{,}0333\approx0{,}933$; в этой точке $s-y=0$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../bce/"><span class="kicker">← Предыдущая формула</span><span class="big">BCE</span><span class="kicker">бинарная кросс-энтропия</span></a>
+<a class="next" href="../adam/"><span class="kicker">Следующая формула →</span><span class="big">Adam</span><span class="kicker">adaptive moment estimation</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

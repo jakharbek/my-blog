@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Leaky ReLU: «oqadigan» ReLU — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Leaky ReLU batafsil: formulaning uch yozuvi, hosila va subgradiyent, o‘layotgan ReLU va neyronning jonlanishi, 3D’da bo‘lak-chiziqli tarmoq, α uchun He initsializatsiyasi, PReLU, RReLU, ELU va SELU, NumPy va PyTorch’da kod.">
+  <meta property="og:title" content="Leaky ReLU: «oqadigan» ReLU — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Leaky ReLU batafsil: formulaning uch yozuvi, hosila va subgradiyent, o‘layotgan ReLU va neyronning jonlanishi, 3D’da bo‘lak-chiziqli tarmoq, α uchun He initsializatsiyasi, PReLU, RReLU, ELU va SELU, NumPy va PyTorch’da kod.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/leaky-relu/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/leaky-relu/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/leaky-relu/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/leaky-relu/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/leaky-relu.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/leaky-relu/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/leaky-relu/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/leaky-relu/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Aktivatsiya funksiyalari</span>
+  <h1>Leaky ReLU: «oqadigan» ReLU</h1>
+  <p class="dek">Kichik tuzatishli ReLU: noldan chapda funksiya signalni nolga aylantirmaydi, uni kichik α ga ko‘paytiradi. Mayda detallarigacha tahlil qilamiz: nega shu neyronlar o‘lmasligi uchun yetarli, 1 + α² ko‘paytuvchili He initsializatsiyasi qayerdan keladi, bunday neyronlardan iborat tarmoq fazoni qanday tekis bo‘laklarga kesadi va PReLU α ni o‘zi qanday o‘rganadi.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 30 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: oxirigacha yopilmaydigan eshik</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#properties"><span class="n">4</span>Xossalar</a>
+      <a href="#derivative"><span class="n">5</span>Hosila: jarlik o‘rniga zina</a>
+      <a href="#dying"><span class="n">6</span>O‘layotgan ReLU va Leaky uni qanday davolaydi</a>
+      <a href="#space"><span class="n">7</span>Leaky ReLU’lardan iborat tarmoq: bo‘lak-chiziqli relyef</a>
+      <a href="#depth"><span class="n">8</span>Chuqur tarmoqlar: Leaky ReLU uchun He initsializatsiyasi</a>
+      <a href="#family"><span class="n">9</span>PReLU, RReLU va butun oila</a>
+      <a href="#code"><span class="n">10</span>Kodda</a>
+      <a href="#mistakes"><span class="n">11</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">12</span>Boshqa formulalar bilan bog‘lanishlar</a>
+      <a href="#summary"><span class="n">13</span>Xulosa</a>
+      <a href="#quiz"><span class="n">14</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{LReLU}(x)=\max(\alpha x,\,x)=\begin{cases}x, &amp; x&gt;0\\ \alpha x, &amp; x\le 0\end{cases}$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p><a href="../relu/">ReLU</a> — chuqur o‘qitishdagi eng mashhur aktivatsiya: $\max(0,x)$ bir zumda hisoblanadi, noldan o‘ngda esa gradiyent so‘nmaydi. Lekin uning zaif joyi bor. Noldan chapda ReLU signalni susaytirmaydi, balki uni <b>nolga aylantiradi</b> — u bilan birga gradiyentni ham. Kirishi barcha misollarda manfiy bo‘lgan neyron 0 chiqaradi, nol gradiyent oladi va boshqa hech qachon o‘rganmaydi. Bu «o‘layotgan ReLU» (dying ReLU).</p>
+    <p>Leaky ReLU — eng kichik tuzatish: noldan chapda grafik gorizontal emas, biroz qiya — kichik $\alpha$ bilan $\alpha x$ (odatda $0{,}01$ dan $0{,}3$ gacha). Signal yopiq eshikdan «sizib o‘tadi» — nomi shundan (leaky — «oqadigan»).</p>
+    <p>U qayerda uchraydi:</p>
+    <ul class="flist"><li><b>GAN diskriminatorlari</b> — DCGAN’da (Redford va boshq., 2015) diskriminatorning barcha qatlamlari $\alpha=0{,}2$ li Leaky ReLU’dan foydalanadi;</li><li><b>YOLO detektorlari</b> — YOLOv2 va YOLOv3 dagi Darknet tarmog‘i $\alpha=0{,}1$ li Leaky ReLU asosida qurilgan;</li><li><b>graf tarmoqlari</b> — GAT’dagi e’tibor koeffitsiyentlari $\alpha=0{,}2$ li Leaky ReLU orqali hisoblanadi;</li><li><b>PReLU’li konvolyutsion tarmoqlar</b> — o‘rganiladigan $\alpha$ li variant (Xe va boshq., 2015) ImageNet’da top-5 xatoni ilk bor inson darajasidan pastga tushirishga yordam berdi;</li><li><b>ReLU «o‘ladigan» istalgan tarmoq</b> — almashtirish bitta qator va deyarli hech narsaga tushmaydi.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>$x&gt;0$ da $\operatorname{LReLU}(x)=x$, $x\le0$ da $\alpha x$. Hosila — zina: o‘ngda $1$, chapda $\alpha$, shuning uchun gradiyent hech qachon butunlay nolga aylanmaydi. Funksiya bo‘lak-chiziqli, monoton va deyarli ReLU kabi arzon bo‘lib qoladi. $\alpha=0$ da bu ReLU, $\alpha=1$ da ayniy funksiya, o‘rganiladigan $\alpha$ da — PReLU.</p></div>
+
+    <h2 id="intuition">Intuitsiya: oxirigacha yopilmaydigan eshik</h2>
+    <p>ReLU eshikka o‘xshaydi: musbat signal to‘liq o‘tadi, manfiysi yopiq tabaqaga uriladi. Leaky ReLU tirqish qoldiradi — manfiy signal o‘tadi, lekin $1/\alpha$ marta susaygan holda. $\alpha=0{,}1$ da $-2$ kirish $-0{,}2$ ga aylanadi.</p>
+    <p>Nuqtani grafik bo‘ylab torting. To‘q sariq «qiyalik uchburchagi» hosilani ko‘rsatadi: $x$ o‘qi bo‘ylab 1 ga qadam qiymatni noldan chapda $\alpha$ ga, o‘ngda 1 ga o‘zgartiradi. Pastda — hosilaning o‘zi: nolda uzilishga ega ikki gorizontal zina. $\alpha$ surgichini suring: ReLU’dan ($\alpha=0$) «oqadigan» variant orqali $y=x$ to‘g‘ri chiziqqacha ($\alpha=1$).</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-explorer" data-config="{&quot;alpha&quot;: 0.1, &quot;x&quot;: -2}"></div><figcaption><b>1-rasm.</b> $\alpha=0{,}1$ dagi Leaky ReLU va uning hosilasi. $x=-2$ nuqtada qiymat $-0{,}2$, hosila $0{,}1$. Kulrang punktir — ReLU, nuqtali chiziq — $y=x$. Nolda hosila aniqlanmagan: chapda u $\alpha$ ga, o‘ngda 1 ga teng.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>Chapda grafik yassi emas, lekin juda qiya emas: $\alpha=0{,}01$ da $-100$ kirish atigi $-1$ beradi. Leaky ReLU’ning butun nochiziqliligi bitta nuqtada — qiyalik $\alpha$ dan 1 ga o‘zgaradigan noldagi sinishda jamlangan. Bunday neyronlardan iborat tarmoqning ifodalash kuchi aynan shu sinishlardan keladi.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <p>Bitta funksiyani uch xil yozishni bilish foydali — har biri o‘z joyida kerak bo‘ladi.</p>
+    <h3>1. Hollar bo‘yicha</h3>
+    <div class="eqd">$$\operatorname{LReLU}_\alpha(x)=\begin{cases}x, &amp; x&gt;0,\\ \alpha x, &amp; x\le 0.\end{cases}$$</div>
+    <dl class="symbols"><dt>$x$</dt><dd>neyron kirishi — odatda $z=w^\top h+b$ pre-aktivatsiya;</dd><dt>$\alpha$</dt><dd>manfiy qismning qiyaligi, giperparametr; odatda $0&lt;\alpha&lt;1$;</dd><dt>$\alpha x$</dt><dd>«sizish»: manfiy kirish nolga aylanmaydi, $1/\alpha$ marta siqiladi.</dd></dl>
+    <p>$x=0$ nuqtada ikkala tarmoq ham nol beradi, shuning uchun nolni qaysi tarmoqqa qo‘shish muhim emas: funksiya uzluksiz.</p>
+    <h3>2. Maksimum orqali</h3>
+    <div class="eqd">$$\operatorname{LReLU}_\alpha(x)=\max(\alpha x,\;x)\qquad(\alpha\le 1)$$</div>
+    <p>$x&gt;0$ va $\alpha\le1$ da $x\ge\alpha x$, $x&lt;0$ da esa aksincha, $\alpha x\ge x$. Demak, maksimum kerakli tarmoqni o‘zi tanlaydi. Lekin faqat $\alpha\le1$ da: $\alpha=2$ da o‘ngda $2x$ yutadi va boshqa funksiya hosil bo‘ladi. Bu yozuv kodda qulay (<code>np.maximum(alpha * x, x)</code>), lekin shartni unutish oson.</p>
+    <h3>3. Chiziqli qism plyus modul</h3>
+    <div class="eqd">$$\operatorname{LReLU}_\alpha(x)=\frac{1+\alpha}{2}\,x+\frac{1-\alpha}{2}\,|x|$$</div>
+    <p>Tekshiruv: $x&gt;0$ da $\frac{1+\alpha}{2}x+\frac{1-\alpha}{2}x=x$, $x&lt;0$ da — $\frac{1+\alpha}{2}x-\frac{1-\alpha}{2}x=\alpha x$. Bu shakl istalgan $\alpha$ da to‘g‘ri va asosiysini tushuntiradi: Leaky ReLU — chiziqli funksiya plyus «ozgina modul». Butun nochiziqlilik ikkinchi qo‘shiluvchida, uning ulushi $\frac{1-\alpha}{2}$ esa $\alpha$ o‘sishi bilan kamayadi. $\alpha=1$ da nochiziqlilik butunlay yo‘qoladi.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-parts" data-config="{&quot;alpha&quot;: 0.2}"></div><figcaption><b>2-rasm.</b> Chapda — $y=x$ va $y=\alpha x$ ikki to‘g‘ri chiziqning yuqori o‘ramasi sifatidagi Leaky ReLU. $\alpha$ ni 1 dan yuqoriga suring: o‘rama (qora punktir) haqiqiy Leaky ReLU’dan (ko‘k chiziq) ajralib ketadi. O‘ngda — chiziqli qism va modulga ajratish; $\alpha=0{,}2$ da koeffitsiyentlar $0{,}6$ va $0{,}4$.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\alpha=0{,}01$</th><th class=num>$\alpha=0{,}2$</th><th class=num>$\operatorname{LReLU}'(x)$</th></tr></thead><tbody><tr><td class=num>−5</td><td class=num>−0,05</td><td class=num>−1</td><td class=num>$\alpha$</td></tr><tr><td class=num>−2</td><td class=num>−0,02</td><td class=num>−0,4</td><td class=num>$\alpha$</td></tr><tr><td class=num>−0,5</td><td class=num>−0,005</td><td class=num>−0,1</td><td class=num>$\alpha$</td></tr><tr><td class=num>0,5</td><td class=num>0,5</td><td class=num>0,5</td><td class=num>$1$</td></tr><tr><td class=num>2</td><td class=num>2</td><td class=num>2</td><td class=num>$1$</td></tr><tr><td class=num>5</td><td class=num>5</td><td class=num>5</td><td class=num>$1$</td></tr></tbody></table></div>
+    <p>Noldan o‘ngda barcha variantlar ReLU bilan ustma-ust tushadi; ular faqat qancha manfiy signal «sizib o‘tishi» bilan farqlanadi.</p>
+
+    <h2 id="properties">Xossalar</h2>
+    <ul class="flist"><li><b>Aniqlanish va qiymatlar sohasi</b> — butun son o‘qi $\mathbb R$ ($\alpha&gt;0$ da). ReLU’ning qiymatlari faqat $[0;\,+\infty)$.</li><li><b>Uzluksizlik va bo‘lak-chiziqlilik</b>: nolda yopishtirilgan ikki to‘g‘ri chiziq. Funksiya $x=0$ dan boshqa hamma joyda differensiallanuvchi.</li><li><b>Qat’iy monotonlik</b> $\alpha&gt;0$ da: katta kirish katta chiqish beradi. Shuning uchun funksiya teskarilanuvchi: $y&gt;0$ da $\operatorname{LReLU}_\alpha^{-1}(y)=y$, $y\le0$ da $y/\alpha$, ya’ni $\operatorname{LReLU}_{1/\alpha}$. ReLU’ning teskarisi yo‘q: barcha manfiy kirishlar nolga yopishtirilgan.</li><li><b>Musbat bir jinslilik</b>: $c\ge0$ da $\operatorname{LReLU}(cx)=c\,\operatorname{LReLU}(x)$. Kirish masshtabi shunchaki chiqishga o‘tadi — initsializatsiyaning sodda formulalari shundan.</li><li><b>Lipshits sharti</b> $\max(1,\alpha)$ konstanta bilan, ya’ni $\alpha\le1$ da 1: $|\operatorname{LReLU}(a)-\operatorname{LReLU}(b)|\le|a-b|$.</li><li><b>Chegaralanmaganlik</b> yuqoridan ham, pastdan ham, lekin pastga funksiya $1/\alpha$ marta sekinroq o‘sadi.</li><li><b>Xususiy hollar</b>: $\alpha=0$ — ReLU, $\alpha=1$ — ayniy funksiya, $\alpha=-1$ — $|x|$ modul (endi monoton emas).</li></ul>
+    <h3>Chiqishning o‘rtachasi va tarqoqligi</h3>
+    <p>Neyron kirishi $z\sim N(0,1)$ bo‘lsin. U holda</p>
+    <div class="eqd">$$\mathbb E\bigl[\operatorname{LReLU}(z)\bigr]=\frac{1-\alpha}{\sqrt{2\pi}},\qquad \mathbb E\bigl[\operatorname{LReLU}(z)^2\bigr]=\frac{1+\alpha^2}{2}$$</div>
+    <p>$\alpha=0{,}01$ da o‘rtacha $0{,}395$ ga teng (ReLU’da — $0{,}399$), $\alpha=0{,}2$ da — $0{,}319$. $\alpha$ qancha katta bo‘lsa, chiqishlar nol o‘rtachaga shuncha yaqin; bu keyingi qatlamni o‘qitishni biroz yengillashtiradi. $\frac{1+\alpha^2}{2}$ ikkinchi moment initsializatsiya bo‘limida kerak bo‘ladi.</p>
+    <details class="deep"><summary>Bu formulalar qayerdan keladi</summary><div class="deep-body">
+      <p>$z\sim N(0,1)$ uchun $\mathbb E[z\,\mathbf 1_{z&gt;0}]=\varphi(0)=1/\sqrt{2\pi}$ ekani ma’lum, simmetriya bo‘yicha esa $\mathbb E[z\,\mathbf 1_{z&lt;0}]=-1/\sqrt{2\pi}$. Shuning uchun</p>
+      <div class="eqd">$$\mathbb E[\operatorname{LReLU}(z)]=\mathbb E[z\mathbf 1_{z&gt;0}]+\alpha\,\mathbb E[z\mathbf 1_{z&lt;0}]=\frac{1}{\sqrt{2\pi}}-\frac{\alpha}{\sqrt{2\pi}}$$</div>
+      <p>Xuddi shunday $\mathbb E[z^2\mathbf 1_{z&gt;0}]=\mathbb E[z^2\mathbf 1_{z&lt;0}]=\tfrac12$, bundan $\mathbb E[\operatorname{LReLU}(z)^2]=\tfrac12+\tfrac{\alpha^2}{2}$. Ikkinchi formula birlik dispersiyali istalgan simmetrik taqsimot uchun to‘g‘ri, birinchisi — faqat normal taqsimot uchun.</p>
+    </div></details>
+
+    <h2 id="derivative">Hosila: jarlik o‘rniga zina</h2>
+    <p>Har bir tarmoqda funksiya chiziqli, shuning uchun hosila — shunchaki tarmoq qiyaligi:</p>
+    <div class="eqd">$$\operatorname{LReLU}'_\alpha(x)=\begin{cases}1, &amp; x&gt;0,\\ \alpha, &amp; x&lt;0.\end{cases}$$</div>
+    <details class="deep"><summary>Ta’rif bo‘yicha keltirib chiqarish</summary><div class="deep-body">
+      <p>$x&gt;0$ da yetarlicha kichik $h$ uchun $x+h$ nuqta ham musbat, va $\frac{\operatorname{LReLU}(x+h)-\operatorname{LReLU}(x)}{h}=\frac{(x+h)-x}{h}=1$. $x&lt;0$ da xuddi shunday $\frac{\alpha(x+h)-\alpha x}{h}=\alpha$ ni olamiz.</p>
+      <p>Nolda bir tomonlama limitlar har xil:</p>
+      <div class="eqd">$$\lim_{h\to0^+}\frac{\operatorname{LReLU}(h)-0}{h}=1,\qquad \lim_{h\to0^-}\frac{\alpha h-0}{h}=\alpha$$</div>
+      <p>$\alpha\ne1$ da ular mos kelmaydi, shuning uchun nolda hosila yo‘q — bu sinish nuqtasi.</p>
+    </div></details>
+    <p>Amalda nol bilan nima qilish kerak? Sinish nuqtasida <b>subgradiyent</b> (subgradient) bor: $0\le\alpha\le1$ da istalgan $g\in[\alpha;\,1]$ son grafikdan yuqorida yotmaydigan $y=gx$ to‘g‘ri chiziqni beradi. Kutubxonalar kelishuv bo‘yicha bitta qiymatni tanlaydi — PyTorch’da $x=0$ da $\alpha$ olinadi. Kirish aynan nolga kamdan-kam tushadi, shuning uchun tanlov deyarli hech narsaga ta’sir qilmaydi.</p>
+    <h3>Nega zina jarlikdan yaxshi</h3>
+    <p>Zanjir qoidasiga ko‘ra $a=\operatorname{LReLU}(z)$, $z=\sum_j w_jx_j+b$ neyronning $w_j$ vazni bo‘yicha gradiyent</p>
+    <div class="eqd">$$\frac{\partial L}{\partial w_j}=\frac{\partial L}{\partial a}\cdot\operatorname{LReLU}'(z)\cdot x_j$$</div>
+    <p>ReLU’da $z&lt;0$ da o‘rta ko‘paytuvchi 0 ga teng, Leaky ReLU’da — $\alpha$ ga. Chapda gradiyent $1/\alpha$ marta kuchsizroq, lekin nolga teng emas: manfiy zonada «qolib ketgan» neyron xato haqidagi signalni olishda davom etadi.</p>
+    <h3>α bo‘yicha hosila: PReLU sari qadam</h3>
+    <p>Agar $\alpha$ ni o‘rganiladigan parametrga aylantirsak, u bo‘yicha hosila kerak bo‘ladi. U ham sodda:</p>
+    <div class="eqd">$$\frac{\partial\operatorname{LReLU}_\alpha(x)}{\partial\alpha}=\begin{cases}0, &amp; x&gt;0,\\ x, &amp; x\le 0\end{cases}\;=\;\min(0,\,x)$$</div>
+    <p>$\alpha$ qiyalik faqat chap tarmoqqa tushgan misollardan o‘rganadi — PReLU shunday tuzilgan (9-bo‘lim). $x$ bo‘yicha ikkinchi hosila noldan boshqa hamma joyda nolga teng: butun egrilik sinishda jamlangan, umumlashgan funksiyalar ma’nosida $\operatorname{LReLU}''(x)=(1-\alpha)\,\delta(x)$.</p>
+
+    <h2 id="dying">O‘layotgan ReLU va Leaky uni qanday davolaydi</h2>
+    <p>Neyron qanday o‘ladi. Muvaffaqiyatsiz katta qadamdan keyin (juda katta o‘qitish tezligi, ma’lumotlardagi chetga chiqish, yomon initsializatsiya) neyronning $b$ siljishi kuchli manfiy bo‘lib qolgan bo‘lsin. U holda barcha misollarda $z=w^\top x+b&lt;0$, ReLU 0 chiqaradi, $\operatorname{ReLU}'(z)=0$ — va $w$, $b$ hamda chiqish vazni $v$ bo‘yicha gradiyentlar birdaniga nolga aylanadi. Gradiyent tushish bu neyronni boshqa hech qachon siljitmaydi: u o‘lik. CS231n kursi konspektlarida o‘qitish tezligi juda katta bo‘lsa, tarmoqning 40% gachasi o‘lik bo‘lib qolishi mumkinligi qayd etilgan.</p>
+    <p>Quyida eng toza tajriba. Bitta $f(x)=v\cdot\operatorname{act}(wx+b)$ neyron $[-3;\,3]$ kesmadagi 41 nuqta bo‘yicha $y=1{,}5\max(0,\,x-1)$ «sharnir»ni o‘rganishi kerak. Start: $w=1$, $b=-4$, $v=1$ — sinish $x=4$ nuqtada, ma’lumotlardan tashqarida, shuning uchun barcha misollarda $z&lt;0$. O‘qitish — $0{,}1$ qadamli MSE bo‘yicha gradiyent tushish.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-revive" data-config="{&quot;alpha&quot;: 0.1}"></div><figcaption><b>3-rasm.</b> «Boshlash»ni bosing. ReLU neyron (qora punktir) muzlagan: uning barcha gradiyentlari nolga teng va xato abadiy $1{,}09$ bo‘lib qoladi. $\alpha=0{,}1$ li Leaky ReLU neyron kuchsiz gradiyent oladi, uning to‘g‘ri chizig‘i qiyshayadi va suriladi, 24-qadamda sinish ma’lumotlar sohasiga kiradi. 1500 qadamdan keyin xato $0{,}0549$ ga teng. $\alpha=0{,}01$ da jonlanish 135 qadam oladi, lekin yakuniy xato — $0{,}00082$.</figcaption></figure>
+    <p>Murosaga e’tibor bering. Katta $\alpha$ neyronni tez hayotga qaytaradi, lekin chap tarmoq qiya bo‘lib qoladi: $\alpha=0{,}1$ da yakuniy model chapda nol o‘rniga $\alpha v w\approx0{,}116$ qiyalikka ega, qoldiq xato shundan. Kichik $\alpha$ funksiya shaklini deyarli buzmaydi, lekin sekinroq jonlantiradi.</p>
+    <div class="callout warn"><b>Leaky — kafolat emas</b><p>Nol bo‘lmagan gradiyent neyron albatta qaytadi degani emas: u chap tarmoqda $\alpha(w^\top x+b)$ chiziqli funksiya sifatida ishlab qolishi mumkin. Leaky ReLU boshqa narsani kafolatlaydi — neyron hech qachon butunlay muzlamaydi va o‘rganishda davom etadi. O‘limning o‘z sababiga qarshi mo‘tadil o‘qitish tezligi, qizdirish (warmup), normallashtirish va to‘g‘ri initsializatsiya yordam beradi.</p></div>
+
+    <h2 id="space">Leaky ReLU’lardan iborat tarmoq: bo‘lak-chiziqli relyef</h2>
+    <p>Ikki kirishli tarmoqda har bir $\operatorname{LReLU}(w_k^\top x+b_k)$ neyron tekislikni $w_k^\top x+b_k=0$ to‘g‘ri chiziq bo‘ylab «bukadi»: uning bir tomonida qiyalik ikkinchisidagidan $1/\alpha$ marta kichik. $f(x)=\sum_k v_k\operatorname{LReLU}(w_k^\top x+b_k)$ neyronlar yig‘indisi — ko‘p yoqli sirt: faol neyronlar to‘plami o‘zgarmaydigan har bir soha ichida u tekis, sinish chiziqlarida esa qiyaligini o‘zgartiradi.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-surface" data-config="{&quot;alpha&quot;: 0.1}"></div><figcaption><b>4-rasm.</b> Oltita Leaky ReLU neyrondan iborat tarmoq. Chapda — 3D’dagi $f(x_1,x_2)$ sirt (uni aylantirish mumkin), o‘ngda — oltita sinish chizig‘i bilan yuqoridan ko‘rinish. Ular $[-3;\,3]^2$ kvadratni 19 ta chiziqli sohaga bo‘ladi. To‘q sariq nuqtani torting: markazda, $(0{,}2;\,-0{,}3)$ nuqtada oltala neyron ham o‘chgan, lekin gradiyent nol emas: $|\nabla f|=0{,}100$. $\alpha=0$ qiling: markaziy soha tekis bo‘lib qoladi — bu kvadratning 5% i, u yerda ReLU tarmog‘ining kirish bo‘yicha gradiyenti nolga teng. $\alpha=1$ da butun tarmoq bitta tekislikka aylanadi.</figcaption></figure>
+    <p>Sohalar soni $\alpha$ ga bog‘liq emas ($\alpha\ne1$ ekan): uni faqat sinish chiziqlari belgilaydi. Lekin barcha neyronlar o‘chgan joyda nima bo‘lishi $\alpha$ ga bog‘liq. ReLU’da u yerda nol gradiyentli plato bo‘ladi va unga tushgan misollar tarmoqqa hech narsa bildirmaydi. Leaky ReLU’da plato qiya va u yerda gradiyent, odatda, nolga teng emas.</p>
+    <div class="callout note"><b>Sohalar nechta bo‘lishi mumkin</b><p>Umumiy vaziyatdagi $n$ ta to‘g‘ri chiziq tekislikni ko‘pi bilan $1+n+\binom n2$ qismga bo‘ladi: $n=6$ uchun bu 22. Rasmdagi kvadratda ulardan 19 tasi ko‘rinadi. Chuqur tarmoqlarda chiziqli sohalar soni chuqurlik bilan eksponensial o‘sishi mumkin — bu ularning ifodalash kuchining tushuntirishlaridan biri.</p></div>
+
+    <h2 id="depth">Chuqur tarmoqlar: Leaky ReLU uchun He initsializatsiyasi</h2>
+    <p>Chuqur tarmoqda signal o‘nlab $z_{l+1}=W_{l+1}\operatorname{LReLU}(z_l)$ qatlamlardan o‘tadi. Agar har bir qatlamda dispersiya 1 dan ozgina bo‘lsa ham farq qiladigan songa ko‘paytirilsa, 50 qatlamdan keyin bu signalning portlashi yoki yo‘qolishiga aylanadi. Shu ko‘paytuvchini hisoblaymiz.</p>
+    <details class="deep"><summary>Ko‘paytuvchini keltirib chiqarish</summary><div class="deep-body">
+      <p>$W_{ij}$ vaznlar mustaqil, $\mathbb E W_{ij}=0$, $\operatorname{Var}W_{ij}=s^2$, $z_l$ kirishlar esa nolga nisbatan simmetrik bo‘lsin. $h_j=\operatorname{LReLU}(z_{l,j})$ bo‘lgan bitta $z_{l+1,i}=\sum_{j=1}^{n}W_{ij}h_j$ chiqish uchun:</p>
+      <div class="eqd">$$\operatorname{Var}z_{l+1}=n\,s^2\,\mathbb E[h^2]=n\,s^2\,\frac{1+\alpha^2}{2}\operatorname{Var}z_l$$</div>
+      <p>Oxirgi tenglik — xossalar bo‘limidagi ikkinchi moment: $z_l^2$ ning yarmi musbat tarmoqdan to‘liq keladi, yarmi — manfiy tarmoqdan $\alpha^2$ ga ko‘paytirilgan holda. Dispersiya saqlanishi uchun ko‘paytuvchi 1 ga teng bo‘lishi kerak:</p>
+      <div class="eqd">$$s^2=\frac{2}{(1+\alpha^2)\,n_{\text{in}}}\qquad\Longleftrightarrow\qquad g=\sqrt n\,s=\sqrt{\frac{2}{1+\alpha^2}}$$</div>
+      <p>Teskari o‘tishda gradiyent $W^\top$ ga va $\operatorname{LReLU}'(z)$ ga ko‘paytiriladi, $\mathbb E[\operatorname{LReLU}'(z)^2]=\frac{1+\alpha^2}{2}$ esa — o‘sha ko‘paytuvchi. Shuning uchun bitta initsializatsiya ham to‘g‘ri signalni, ham gradiyentlarni saqlaydi.</p>
+    </div></details>
+    <div class="eqd">$$\operatorname{Var}z_{l+1}=\frac{g^2(1+\alpha^2)}{2}\,\operatorname{Var}z_l,\qquad g_{\text{He}}=\sqrt{\frac{2}{1+\alpha^2}}$$</div>
+    <p>$\alpha=0$ da ReLU uchun mashhur He (Kaiming) initsializatsiyasining $g=\sqrt2$ qiymati chiqadi. Leaky ReLU uchun koeffitsiyent biroz kichikroq: $\alpha=0{,}01$ da $1{,}414$, $\alpha=0{,}2$ da $1{,}387$, $\alpha=0{,}3$ da $1{,}355$.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-init" data-config="{&quot;alpha&quot;: 0.3, &quot;depth&quot;: 50}"></div><figcaption><b>5-rasm.</b> Kengligi 256 bo‘lgan tasodifiy tarmoqning har bir qatlamidagi pre-aktivatsiyalar RMS qiymati (vertikal shkala logarifmik). Standart holatda $\alpha=0{,}3$, vaznlar esa «ReLU uchun» initsializatsiya qilingan, $g=\sqrt2$: dispersiya ko‘paytuvchisi har qatlamda $1{,}09$, 50-qatlamgacha RMS $11{,}6$ gacha o‘sadi (nazariya — $11{,}7$). To‘g‘ri $g=\sqrt{2/(1+\alpha^2)}$ bilan ko‘paytuvchi 1 ga teng va 50-qatlamda RMS $1{,}34$ (nazariya — $1{,}35$). $g=1$ da ko‘paytuvchi $0{,}545$, signal esa $3{,}45\cdot10^{-7}$ gacha so‘nadi.</figcaption></figure>
+    <div class="callout note"><b>PyTorch’da</b><p>Aynan shuni <code>nn.init.kaiming_normal_(w, a=alpha, nonlinearity='leaky_relu')</code> bajaradi: standart chetlanish $\sqrt{2/((1+a^2)\,n_{\text{in}})}$. U yerda standart qiymat <code>a=0</code>, ya’ni oddiy ReLU uchun initsializatsiya — Leaky ReLU uchun <code>a</code> parametrini aniq berish kerak.</p></div>
+
+    <h2 id="family">PReLU, RReLU va butun oila</h2>
+    <p>$\alpha$ ni qanday tanlash kerak? Uchta javob bor.</p>
+    <ul class="flist"><li><b>Qat’iy $\alpha$</b> — klassik Leaky ReLU (Maas, Hannun, In, 2013, $\alpha=0{,}01$). Bugun ko‘pincha $0{,}1$–$0{,}3$ olinadi: Syuy va boshq. (2015) taqqoslashida $\alpha=1/5{,}5\approx0{,}18$ li «kuchli oqadigan» variant $0{,}01$ dan yaxshiroq ishlagan.</li><li><b>O‘rganiladigan $\alpha$</b> — PReLU (Parametric ReLU, Xe va boshq., 2015). $\alpha$ parametrga aylanadi — qatlamga bitta yoki har kanalga bittadan — va vaznlar bilan birga gradiyent tushish orqali o‘rganiladi. PyTorch’da boshlang‘ich qiymat — $0{,}25$.</li><li><b>Tasodifiy $\alpha$</b> — RReLU (Randomized ReLU): o‘qitishda $\alpha$ har bir misol uchun $U(1/8;\,1/3)$ tekis taqsimotdan olinadi (PyTorch’dagi standart chegaralar), xulosa chiqarishda — o‘rtacha $\frac{1/8+1/3}{2}=\frac{11}{48}\approx0{,}229$. Shovqin regulyarizatsiya vazifasini bajaradi.</li></ul>
+    <p>PReLU’da $\alpha$ bo‘yicha gradiyent — hosila bo‘limidagi $\min(0,\,z)$: qiyalik faqat manfiy kirishlardan o‘rganadi. Gradiyent tushish vaznni ham, qiyalikni ham birdaniga qanday topishini ko‘raylik.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-prelu" data-config="{&quot;w&quot;: 0.5, &quot;a&quot;: 1.3}"></div><figcaption><b>6-rasm.</b> Ikki parametrli $\operatorname{PReLU}_\alpha(wx)$ model $w^*=1{,}5$, $\alpha^*=0{,}2$ «o‘qituvchi» shovqin bilan yaratgan 31 nuqtadan o‘rganadi. O‘ngda — $L(w,\alpha)$ xato sirti (qancha och bo‘lsa, shuncha kichik). $(0{,}5;\,1{,}3)$ startdan $0{,}05$ qadamli gradiyent tushish 87 qadamda $w=1{,}521$, $\alpha=0{,}209$ ga $0{,}0158$ xato bilan yetib keladi — bu shovqinli ma’lumotlar uchun minimum (o‘qituvchining o‘z xatosi $0{,}0170$). Startni boshqa joyga torting.</figcaption></figure>
+    <p>PReLU har bir kanalga atigi bitta parametr qo‘shadi, lekin Xe va boshqalarning ishida yangi initsializatsiya bilan birga u juda chuqur konvolyutsion tarmoqlarni o‘qitish va ImageNet’da $4{,}94\%$ top-5 xatoga erishish imkonini berdi — bu insonning taxminiy $5{,}1\%$ xatosidan past. Mualliflar $\alpha$ ga vaznlar so‘nishini (weight decay) qo‘llamaslikni ta’kidlaydi: u $\alpha$ ni nolga, ya’ni ReLU’ga qaytaradi.</p>
+    <h3>Silliq qarindoshlar</h3>
+    <p>Noldagi sinishni silliqlash mumkin. ELU chap to‘g‘ri chiziqni $-\alpha$ darajasida to‘yinadigan $\alpha(e^x-1)$ eksponenta bilan almashtiradi. SELU masshtab qo‘shadi: $\lambda\approx1{,}0507$ va $\alpha\approx1{,}6733$ aktivatsiyalar nol o‘rtacha va birlik dispersiyani o‘zi saqlaydigan qilib tanlangan. <a href="../gelu/">GELU</a> va <a href="../silu/">SiLU</a> — bugungi transformerlarda turadigan silliq va hatto nomonoton funksiyalar.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-zoo" data-config="{&quot;cmp&quot;: &quot;elu&quot;, &quot;x&quot;: -2}"></div><figcaption><b>7-rasm.</b> $\alpha=0{,}1$ li Leaky ReLU qarindoshlari yonida. Kursorni olib boring: $x=-2$ da Leaky ReLU $-0{,}2$, ELU — $-0{,}865$, SELU — $-1{,}520$, GELU — $-0{,}046$, SiLU — $-0{,}238$ beradi. Hosilalarga o‘ting: Leaky ReLU va SELU’da bu nolda uzilishli zina (SELU’da chapda $\lambda\alpha\approx1{,}758$, o‘ngda $\lambda\approx1{,}051$), ELU, GELU va SiLU’da — uzluksiz egri chiziq.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Funksiya</th><th>$x\le0$ da</th><th>Chapdagi hosila</th><th>Xususiyati</th></tr></thead><tbody><tr><td>ReLU</td><td>$0$</td><td>$0$</td><td>nol gradiyent, «o‘lik» neyronlar</td></tr><tr><td>Leaky ReLU</td><td>$\alpha x$</td><td>$\alpha$</td><td>qat’iy qiyalik, odatda $0{,}01$–$0{,}3$</td></tr><tr><td>PReLU</td><td>$\alpha x$, $\alpha$ o‘rganiladi</td><td>$\alpha$</td><td>qatlam yoki kanalga +1 parametr</td></tr><tr><td>RReLU</td><td>$\alpha x$, $\alpha\sim U(\tfrac18;\,\tfrac13)$</td><td>$\alpha$</td><td>regulyarizatsiya sifatida shovqin</td></tr><tr><td>ELU</td><td>$\alpha(e^{x}-1)$</td><td>$\alpha e^{x}$</td><td>$\alpha=1$ da silliq, $-\alpha$ da to‘yinadi</td></tr><tr><td>SELU</td><td>$\lambda\alpha(e^{x}-1)$</td><td>$\lambda\alpha e^{x}$</td><td>o‘z-o‘zini normallashtirish, $\lambda\approx1{,}0507$</td></tr></tbody></table></div>
+
+    <h2 id="code">Kodda</h2>
+    <p>NumPy’da Leaky ReLU — bitta qator. <code>np.maximum(alpha * x, x)</code> dan ko‘ra <code>np.where</code> yozish ishonchliroq: ikkinchi yozuv $\alpha&gt;1$ da jimgina buziladi.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def leaky_relu(x, alpha=0.01):
+    # maximum(alpha * x, x) emas, where: bu yozuv istalgan alpha da to‘g‘ri
+    return np.where(x &gt; 0, x, alpha * x)
+
+def leaky_relu_grad(x, alpha=0.01):
+    return np.where(x &gt; 0, 1.0, alpha)      # nolda alpha olinadi, PyTorch’dagidek
+
+def he_std(n_in, alpha=0.01):
+    # Leaky ReLU uchun He initsializatsiyasi: Var w = 2 / ((1 + alpha²) · n_in)
+    return np.sqrt(2.0 / ((1.0 + alpha**2) * n_in))
+
+x = np.array([-3.0, -0.5, 0.0, 2.0])
+print(leaky_relu(x))        # [-0.03  -0.005  0.     2.   ]
+print(leaky_relu_grad(x))   # [0.01 0.01 0.01 1.  ]
+print(he_std(256, 0.2))     # 0.08667...</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+act = nn.LeakyReLU(negative_slope=0.01)   # 0.01 — standart qiymat
+x = torch.tensor([-3.0, 0.0, 2.0], requires_grad=True)
+act(x).sum().backward()
+print(x.grad)                    # tensor([0.0100, 0.0100, 1.0000]) — nolda α
+
+prelu = nn.PReLU(num_parameters=1, init=0.25)   # α — o‘rganiladigan parametr
+print(prelu(torch.tensor([-2.0, 3.0])))         # tensor([-0.5000, 3.0000])
+
+lin = nn.Linear(256, 256)
+# std = √(2 / ((1 + a²) · 256)); standart a=0, ya’ni «ReLU uchun»
+nn.init.kaiming_normal_(lin.weight, a=0.2, nonlinearity=&quot;leaky_relu&quot;)
+print(nn.init.calculate_gain(&quot;leaky_relu&quot;, 0.2))  # 1.3867504905630728</code></pre>
+    <div class="callout key"><b>Kutubxonalardagi standart qiymatlar har xil</b><p>PyTorch <code>nn.LeakyReLU</code>: <code>negative_slope=0.01</code>. TensorFlow <code>tf.nn.leaky_relu</code>: <code>alpha=0.2</code>. Keras <code>layers.LeakyReLU</code>: $0{,}3$. Uchta freymvorkdagi bitta «Leaky ReLU» — uchta har xil funksiya. Modelni ko‘chirishda $\alpha$ ni aniq ko‘rsating.</p></div>
+    <p>Hisoblash nuqtai nazaridan Leaky ReLU xavfsiz: eksponenta ham, bo‘lish ham, to‘lib ketish ham yo‘q. Yagona nozik joy — PyTorch’dagi <code>inplace=True</code>: u xotirani tejaydi, lekin grafning boshqa amallariga kerak bo‘lishi mumkin bo‘lgan kirishni qayta yozadi.</p>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b>$\alpha&gt;1$ da <code>max(alpha * x, x)</code> yozuvi.</b> Formula faqat $\alpha\le1$ da to‘g‘ri; katta $\alpha$ larda boshqa funksiya chiqadi. Xavfsiz yozuv — <code>where(x &gt; 0, x, alpha * x)</code>.</li><li><b>Juda katta $\alpha$.</b> $\alpha\to1$ da nochiziqlilik ulushi $\frac{1-\alpha}{2}$ nolga intiladi, funksiya deyarli chiziqli bo‘lib qoladi va chuqur tarmoq ifodalash kuchini yo‘qotadi. Oqilona oraliq — $0{,}01$ dan $0{,}3$ gacha.</li><li><b>$\alpha$ ga tuzatishsiz «ReLU uchun» initsializatsiya.</b> Har qatlamda dispersiya ko‘paytuvchisi $1+\alpha^2$: $\alpha=0{,}3$ da 50 qatlamda signal taxminan 8 marta o‘sadi (5-rasm). $\alpha$ ni <code>kaiming_normal_(..., a=alpha)</code> ga bering.</li><li><b>Leaky ReLU beqaror o‘qitishni o‘zi davolaydi degan umid.</b> U nol gradiyentni yo‘qotadi, lekin sababini emas: juda katta o‘qitish tezligi baribir xavfli.</li><li><b>PReLU’ning $\alpha$ siga vaznlar so‘nishi.</b> U $\alpha$ ni nolga tortadi va PReLU ReLU’ga aylanadi. $\alpha$ ni weight decay qo‘llanadigan parametrlar guruhidan chiqaring.</li><li><b>Har xil standart qiymatlar</b> PyTorch ($0{,}01$), TensorFlow ($0{,}2$) va Keras’da ($0{,}3$): modelni freymvorklar o‘rtasida ko‘chirganda natija jimgina o‘zgaradi.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘lanishlar</h2>
+    <ul class="flist"><li><a href="../relu/">ReLU</a>: $\alpha=0$ xususiy hol; «o‘layotgan ReLU» haqida batafsil — o‘sha yerda.</li><li><a href="../silu/">SiLU / Swish</a> va <a href="../gelu/">GELU</a>: chapda ham kichik manfiy signalni o‘tkazadigan, lekin keyin uni so‘ndiradigan silliq aktivatsiyalar.</li><li><a href="../sigmoid/">Sigmoida</a> va <a href="../tanh/">tanh</a>: to‘yinadigan aktivatsiyalar; Leaky ReLU’da to‘yinish umuman yo‘q, demak, to‘yinish tufayli gradiyent so‘nishi ham yo‘q.</li><li><a href="../mse/">MSE</a>: 3 va 6-rasmlardagi tajribalarning yo‘qotish funksiyasi.</li><li><a href="../sgd/">SGD</a> va <a href="../adam/">Adam</a>: optimizatorning juda katta qadami — ReLU neyronlari o‘limining asosiy sababi.</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) $x&gt;0$ da $\operatorname{LReLU}_\alpha(x)=x$, $x\le0$ da $\alpha x$; bu $\alpha\le1$ da $\max(\alpha x,x)$ ga va istalgan $\alpha$ da $\frac{1+\alpha}{2}x+\frac{1-\alpha}{2}|x|$ ga teng. 2) Hosila — $\alpha$ va $1$ dan iborat zina: gradiyent nolga aylanmaydi, neyron muzlamaydi. 3) Murosa: katta $\alpha$ neyronlarni tezroq jonlantiradi, lekin funksiyani chiziqliga yaqinlashtiradi. 4) Leaky ReLU tarmog‘i — tekis «o‘lik» platolarsiz bo‘lak-chiziqli funksiya. 5) Initsializatsiya: $\operatorname{Var}w=\frac{2}{(1+\alpha^2)\,n_{\text{in}}}$. 6) PReLU $\alpha$ ni $\min(0,z)$ gradiyent orqali o‘rganadi.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. $\alpha=0{,}2$ da $\operatorname{LReLU}(-5)$ nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="1">$-1$</button><button type="button" data-ok="0">$-5$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>Kirish manfiy, shuning uchun $\alpha x=0{,}2\cdot(-5)=-1$ tarmog‘i ishlaydi.</div></fieldset><fieldset class="q"><legend>2. $x&lt;0$ da Leaky ReLU hosilasi nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$1$</button><button type="button" data-ok="1">$\alpha$</button><button type="button" data-ok="0">$\alpha x$</button></div><div class="explain" hidden>Chapda funksiya — $\alpha x$ to‘g‘ri chiziq, uning qiyaligi $\alpha$. Shuning uchun gradiyent nolga aylanmaydi.</div></fieldset><fieldset class="q"><legend>3. Qaysi $\alpha$ larda $\operatorname{LReLU}_\alpha(x)=\max(\alpha x,x)$ to‘g‘ri?</legend><div class="opts"><button type="button" data-ok="0">Istalgan $\alpha$ da</button><button type="button" data-ok="1">Faqat $\alpha\le1$ da</button><button type="button" data-ok="0">Faqat $\alpha&gt;1$ da</button><button type="button" data-ok="0">Faqat $\alpha=0{,}01$ da</button></div><div class="explain" hidden>$\alpha\le1$ da o‘ngda $x\ge\alpha x$, chapda $\alpha x\ge x$. $\alpha&gt;1$ da o‘ngda maksimum $\alpha x$ ni tanlaydi — boshqa funksiya chiqadi.</div></fieldset><fieldset class="q"><legend>4. Leaky ReLU’li ($\alpha=0{,}3$) tarmoq «ReLU uchun», $g=\sqrt2$ bilan initsializatsiya qilingan. Har qatlamdagi dispersiya ko‘paytuvchisi qancha?</legend><div class="opts"><button type="button" data-ok="0">$1$</button><button type="button" data-ok="1">$1{,}09$</button><button type="button" data-ok="0">$0{,}545$</button><button type="button" data-ok="0">$2$</button></div><div class="explain" hidden>$g^2(1+\alpha^2)/2=2\cdot1{,}09/2=1{,}09$. 50 qatlamda RMS taxminan $1{,}09^{24{,}5}\approx8{,}3$ marta o‘sadi.</div></fieldset><fieldset class="q"><legend>5. ReLU neyron barcha misollarda $z&lt;0$ oladi. Qaysi biri to‘g‘ri?</legend><div class="opts"><button type="button" data-ok="1">Uning parametrlari bo‘yicha gradiyentlar nolga teng va gradiyent tushish uni boshqa o‘zgartirmaydi</button><button type="button" data-ok="0">Gradiyent kichik, lekin nol emas</button><button type="button" data-ok="0">Neyron manfiy qiymatlar chiqaradi</button><button type="button" data-ok="0">O‘qitish tezligini kamaytirish kifoya, u jonlanadi</button></div><div class="explain" hidden>$z&lt;0$ da $\operatorname{ReLU}'(z)=0$, shuning uchun barcha gradiyentlar nolga aylanadi — bu o‘lik neyron. Qadamni kamaytirish yordam bermaydi: nolga ko‘paytirilgan qadam nolligicha qoladi.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../relu/"><span class="kicker">← Oldingi formula</span><span class="big">ReLU</span><span class="kicker">rectified linear unit</span></a>
+<a class="next" href="../softmax/"><span class="kicker">Keyingi formula →</span><span class="big">Softmax</span><span class="kicker">«yumshoq maksimum»</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

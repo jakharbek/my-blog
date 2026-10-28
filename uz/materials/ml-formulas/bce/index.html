@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BCE: binar kross-entropiya — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Binar kross-entropiya batafsil: Bernulli o‘xshashligi, entropiya va KL, σ(z) − y gradiyentini keltirib chiqarish, MSE bilan taqqoslash, 3D yo‘qotish landshafti, barqaror BCEWithLogits, pos_weight, belgilarni silliqlash va kalibrlash.">
+  <meta property="og:title" content="BCE: binar kross-entropiya — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Binar kross-entropiya batafsil: Bernulli o‘xshashligi, entropiya va KL, σ(z) − y gradiyentini keltirib chiqarish, MSE bilan taqqoslash, 3D yo‘qotish landshafti, barqaror BCEWithLogits, pos_weight, belgilarni silliqlash va kalibrlash.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/bce/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/bce/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/bce/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/bce/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/bce.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/bce/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/bce/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/bce/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Yo‘qotishlar — klassifikatsiya</span>
+  <h1>BCE: binar kross-entropiya</h1>
+  <p class="dek">Binar klassifikatsiyaning asosiy yo‘qotish funksiyasi. Uni mayda detallarigacha tahlil qilamiz: u qayerdan keladi (haqiqatga o‘xshashlik va axborot nazariyasi), nega sigmoida bilan birga uning gradiyenti shunchaki «bashorat − haqiqat», nega u MSE’dan yaxshiroq, 3D’da uning landshafti qanday ko‘rinadi, uni log(0) siz qanday hisoblash mumkin va u sinf vaznlari, belgilarni silliqlash va kalibrlash bilan qanday bog‘liq.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 50 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: kutilmaganlik uchun jarima</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#likelihood"><span class="n">4</span>U qayerdan keladi: maksimal o‘xshashlik</a>
+      <a href="#information"><span class="n">5</span>Axborot nazariyasi nigohi: kutilmaganlik, entropiya, KL</a>
+      <a href="#properties"><span class="n">6</span>Xossalar</a>
+      <a href="#derivative"><span class="n">7</span>Hosila: nega σ′ qisqaradi</a>
+      <a href="#vs-mse"><span class="n">8</span>Nega MSE emas: to‘yinish va qavariq emaslik</a>
+      <a href="#landscape"><span class="n">9</span>3D’da yo‘qotish landshafti</a>
+      <a href="#training"><span class="n">10</span>O‘qitishda BCE</a>
+      <a href="#stability"><span class="n">11</span>Hisoblash barqarorligi: BCEWithLogits</a>
+      <a href="#weights"><span class="n">12</span>Sinflar nomutanosibligi: vaznlar va pos_weight</a>
+      <a href="#smoothing"><span class="n">13</span>Belgilarni silliqlash</a>
+      <a href="#calibration"><span class="n">14</span>Kalibrlash: BCE halollikni rag‘batlantiradi</a>
+      <a href="#mistakes"><span class="n">15</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">16</span>Boshqa formulalar bilan bog‘lanishlar</a>
+      <a href="#summary"><span class="n">17</span>Xulosa</a>
+      <a href="#quiz"><span class="n">18</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{BCE}=-\frac{1}{n}\sum_{i=1}^{n}\Bigl[y_i\log\hat{y}_i+(1-y_i)\log\bigl(1-\hat{y}_i\bigr)\Bigr]$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>Binar klassifikatsiya modeli $\hat y\in(0;\,1)$ sonini chiqaradi — obyektning 1-sinfga tegishli bo‘lish ehtimolligini: xat — spam, tranzaksiya — firibgarlik, suratda o‘sma bor. Model o‘rganishi uchun <b>yo‘qotish funksiyasi</b> (loss) kerak: bashorat qanchalik yomon bo‘lsa, shunchalik katta bo‘ladigan va differensiallanadigan bitta son. Binar kross-entropiya (binary cross-entropy, BCE; statistikada — log loss, manfiy log-o‘xshashlik) — bunday masala uchun standart tanlov.</p>
+    <p>U qayerda turadi:</p>
+    <ul class="flist"><li><b>logistik regressiya va istalgan binar klassifikator chiqishi</b> — <a href='../sigmoid/'>sigmoida</a> + BCE juftligi;</li><li><b>multi-label klassifikatsiya</b> — har bir belgining (foto teglari, toksiklik toifalari) o‘z sigmoidasi va o‘z BCE’si bor, belgilar mustaqil;</li><li><b>gradiyentli busting</b> — XGBoost’dagi <code>binary:logistic</code>, LightGBM’dagi <code>binary</code>, CatBoost’dagi <code>Logloss</code> — daraxtlarning «xom» hisobi bo‘yicha xuddi shu BCE;</li><li><b>GAN diskriminatori</b> BCE bilan o‘qitiladi: «haqiqiy» — 1, «generatsiya qilingan» — 0;</li><li><b>RLHF va DPO’dagi mukofot modellari</b> — $-\log\sigma(r_{\text{yaxshi}}-r_{\text{yomon}})$ yo‘qotishi baholar ayirmasi uchun 1 belgili BCE’dir (Bredli — Terri modeli);</li><li><b>metrika</b> — musobaqalar va hisobotlardagi log loss: u nafaqat «topdimi», balki ehtimolliklarning halolligini ham baholaydi.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>BCE — model <i>to‘g‘ri</i> javobga bergan ehtimollikning $-\log$ i. Ishonchli to‘g‘ri javob deyarli 0 turadi, «50 ga 50» javob — $\ln2\approx0{,}693$, ishonchli xato — istalgancha ko‘p. Sigmoida bilan birga logit bo‘yicha gradiyent shunchaki $\hat y-y$: to‘yinishsiz, moduli birdan oshmaydi va xatoga proporsional. BCE logistik regressiya vaznlari bo‘yicha qavariq, uning minimumi esa halol ehtimolliklarda erishiladi.</p></div>
+
+    <h2 id="intuition">Intuitsiya: kutilmaganlik uchun jarima</h2>
+    <p>Modelni har kuni yomg‘ir ehtimolligini aytadigan sinoptik deb tasavvur qiling. U «90%» desa va yomg‘ir yog‘sa — u deyarli ajablanmaydi, jarima kichik. «10%» desa-yu, yomg‘ir yog‘sa — u qattiq xato qildi <i>va bunga ishongan edi</i>; jarima katta bo‘lishi kerak. Agar u umuman prognozdan bosh tortib, doim «50%» desa, har kungi jarimasi bir xil — $\ln2\approx0{,}693$.</p>
+    <p>BCE aynan shunday tuzilgan: yo‘qotish haqiqatda sodir bo‘lgan narsa ehtimolligining $-\ln$ iga teng. $y=1$ to‘g‘ri javob uchun bu $-\ln\hat y$ (qizil egri chiziq), $y=0$ uchun — $-\ln(1-\hat y)$ (ko‘k). Nuqtani torting.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-curves" data-config="{&quot;y&quot;: 1, &quot;p&quot;: 0.9}"></div><figcaption><b>1-rasm.</b> BCE’ning ikki tarmog‘i va faol tarmoqqa urinma. Standart holatda $y=1$, $\hat y=0{,}9$: yo‘qotish $0{,}105$, qiyalik $-1{,}111$. Nuqtani $\hat y=0{,}1$ ga suring: yo‘qotish $2{,}303$, qiyalik esa allaqachon $-10$. To‘g‘ri javobni $y=0$ ga almashtiring — egri chiziqlar rollarini almashtiradi.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>Ishonchli xato $\hat y=0{,}1$ ishonchli to‘g‘ri javob $\hat y=0{,}9$ dan 22 marta qimmat ($2{,}303$ ga qarshi $0{,}105$). Yo‘qotishning shifti yo‘q: $\hat y\to0$ da devor cheksizlikka ketadi. Logarifmning yana bir xossasi: to‘g‘ri javob ehtimolligining har bir <i>ikki marta</i> kamayishi yo‘qotishga bir xil son — $\ln2\approx0{,}693$ qo‘shadi.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <p>Bitta qo‘shiluvchini — bitta obyektdagi yo‘qotishni olib, har bir detaliga qaraymiz.</p>
+    <div class="eqd">$$\ell(y,\hat y)=-\Bigl[\underbrace{y\log\hat y}_{y=1\text{ da ishlaydi}}+\underbrace{(1-y)\log(1-\hat y)}_{y=0\text{ da ishlaydi}}\Bigr]$$</div>
+    <dl class="symbols"><dt>$y\in\{0,1\}$</dt><dd>to‘g‘ri javob (belgi). U <b>kalit</b> vazifasini bajaradi: $y=1$ da ikkinchi qo‘shiluvchi 0 ga ko‘paytiriladi, $y=0$ da — birinchisi;</dd><dt>$\hat y\in(0;\,1)$</dt><dd>1-sinfning bashorat qilingan ehtimolligi, odatda $\hat y=\sigma(z)$, bu yerda $z$ — logit (modelning xom chiqishi);</dd><dt>$1-\hat y$</dt><dd>0-sinfning bashorat qilingan ehtimolligi — ikki ehtimollik yig‘indisi 1 ga teng;</dd><dt>$\log$</dt><dd>natural logarifm ($\ln$): yo‘qotish «nat»larda o‘lchanadi; $\log_2$ bilan bitlar chiqardi;</dd><dt>$-$</dt><dd>minus kerak, chunki ehtimollik logarifmi manfiy: $\log\hat y\le0$, yo‘qotish esa $\ge0$ bo‘lishi kerak;</dd><dt>$\frac1n\sum_{i=1}^{n}$</dt><dd>obyektlar bo‘yicha o‘rtacha — yo‘qotish kattaligi batch o‘lchamiga bog‘liq bo‘lmasligi uchun.</dd></dl>
+    <p>Kalit ixcham yozuv beradi: $p_t$ — model to‘g‘ri sinfga bergan ehtimollik bo‘lsin ($y=1$ da $p_t=\hat y$, $y=0$ da $p_t=1-\hat y$). Unda</p>
+    <div class="eqd">$$\ell=-\log p_t\qquad\text{va }z\text{ logit orqali:}\qquad \ell=\log\bigl(1+e^{z}\bigr)-y\,z=\operatorname{softplus}(z)-y\,z$$</div>
+    <p>Ikkinchi shakl — «logitlar bo‘yicha BCE» — gradiyentni keltirib chiqarish va barqaror kod uchun kerak bo‘ladi. Agar belgilar $s=\pm1$ ko‘rinishida yozilsa, xuddi shu yo‘qotish $\log(1+e^{-s z})$ logistik yo‘qotishga aylanadi, bu yerda $s z$ — <b>chegara masofasi</b> (margin): musbat margin to‘g‘ri javobni bildiradi.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$\hat y$</th><th class=num>$-\ln\hat y$ ($y=1$ da)</th><th class=num>$-\ln(1-\hat y)$ ($y=0$ da)</th><th class=num>$y=1$ da $\partial\ell/\partial\hat y$</th></tr></thead><tbody><tr><td class=num>0,001</td><td class=num>6,908</td><td class=num>0,001</td><td class=num>−1000</td></tr><tr><td class=num>0,01</td><td class=num>4,605</td><td class=num>0,010</td><td class=num>−100</td></tr><tr><td class=num>0,1</td><td class=num>2,303</td><td class=num>0,105</td><td class=num>−10</td></tr><tr><td class=num>0,3</td><td class=num>1,204</td><td class=num>0,357</td><td class=num>−3,333</td></tr><tr><td class=num>0,5</td><td class=num>0,693</td><td class=num>0,693</td><td class=num>−2</td></tr><tr><td class=num>0,7</td><td class=num>0,357</td><td class=num>1,204</td><td class=num>−1,429</td></tr><tr><td class=num>0,9</td><td class=num>0,105</td><td class=num>2,303</td><td class=num>−1,111</td></tr><tr><td class=num>0,99</td><td class=num>0,010</td><td class=num>4,605</td><td class=num>−1,010</td></tr><tr><td class=num>0,999</td><td class=num>0,001</td><td class=num>6,908</td><td class=num>−1,001</td></tr></tbody></table></div>
+    <p>Jadval nosimmetriyani ko‘rsatadi: to‘g‘ri tomonda yo‘qotish tezda nolga yopishadi, noto‘g‘ri tomonda logarifm kabi o‘sadi, $-1/\hat y$ qiyalik esa $\hat y=0{,}001$ da $-1000$ ga yetadi.</p>
+    <h3>To‘rt obyektdagi misol</h3>
+    <p>Belgilar $y=(1;\,0;\,1;\,1)$, bashoratlar $\hat y=(0{,}9;\,0{,}2;\,0{,}6;\,0{,}95)$. To‘g‘ri javoblar ehtimolliklari: $0{,}9$; $0{,}8$; $0{,}6$; $0{,}95$. Yo‘qotishlar: $0{,}105$; $0{,}223$; $0{,}511$; $0{,}051$. O‘rtachasi — $\mathrm{BCE}\approx0{,}223$. Eng ko‘p «aybdor» — uchinchi obyekt: model to‘g‘ri javobga atigi $0{,}6$ bergan.</p>
+
+    <h2 id="likelihood">U qayerdan keladi: maksimal o‘xshashlik</h2>
+    <p>BCE «ko‘z bilan» o‘ylab topilmagan — u keltirib chiqariladi. Model shunday desin: «obyekt $\hat y$ ehtimollik bilan 1-sinfga tegishli». Bu <b>Bernulli taqsimoti</b>, uning formulasini bitta satrda yozish qulay — yana belgi kalit rolida, lekin endi daraja ko‘rsatkichida:</p>
+    <div class="eqd">$$P(y\mid x)=\hat y^{\,y}\,(1-\hat y)^{1-y}=\begin{cases}\hat y, &amp; y=1\\ 1-\hat y, &amp; y=0\end{cases}$$</div>
+    <p>Agar obyektlar mustaqil bo‘lsa, o‘quv tanlanmasining barcha belgilarini ko‘rish ehtimolligi — <b>o‘xshashlik</b> (likelihood) — ko‘paytmaga teng. Maksimal o‘xshashlik usuli model parametrlarini shu ko‘paytma imkon qadar katta bo‘ladigan qilib tanlaydi:</p>
+    <div class="eqd">$$\mathcal L=\prod_{i=1}^{n}\hat y_i^{\,y_i}(1-\hat y_i)^{1-y_i}\;\xrightarrow{\;-\frac1n\log\;}\;-\frac1n\sum_{i=1}^{n}\Bigl[y_i\log\hat y_i+(1-y_i)\log(1-\hat y_i)\Bigr]=\mathrm{BCE}$$</div>
+    <p>Logarifm ko‘paytmani yig‘indiga aylantiradi va maksimum nuqtasini siljitmaydi (u qat’iy o‘suvchi), minus maksimumni minimumga, $\tfrac1n$ esa o‘rtachaga aylantiradi. Demak, <b>BCE’ni minimallashtirish — Bernulli modeli o‘xshashligini maksimallashtirishning aynan o‘zi</b>.</p>
+    <p>Yuqoridagi misolda: $\mathcal L=0{,}9\cdot0{,}8\cdot0{,}6\cdot0{,}95=0{,}4104$, $-\ln0{,}4104\approx0{,}891$ — aynan to‘rt yo‘qotish yig‘indisi, 4 ga bo‘linganda esa xuddi shu $\mathrm{BCE}\approx0{,}223$.</p>
+    <div class="callout note"><b>BCE o‘rta geometrik sifatida</b><p>Formuladan kelib chiqadi: $e^{-\mathrm{BCE}}=\mathcal L^{1/n}$ — model to‘g‘ri javoblarga bergan ehtimolliklarning o‘rta geometrigi. Misolda $e^{-0{,}223}\approx0{,}800$: «model o‘rtacha to‘g‘ri javobga 80% qo‘yadi». Bu BCE qiymatini mutaxassis bo‘lmagan odamga tushuntirishning qulay usuli.</p></div>
+    <details class="deep"><summary>Nega ko‘paytmaning o‘zi emas, logarifm</summary><div class="deep-body">
+      <p>Birinchidan, 1 dan kichik million ehtimollik ko‘paytmasi kompyuterda nolga aylanadi (underflow), logarifmlar yig‘indisi esa oddiy son. Ikkinchidan, yig‘indining hosilasi — hosilalar yig‘indisi: batch bo‘yicha gradiyent obyektlar hissalaridan yig‘iladi. Uchinchidan, logarifm mustaqillikni (ehtimolliklarni ko‘paytirishni) yo‘qotishlarni qo‘shishga aylantiradigan yagona (ko‘paytuvchi aniqligida) funksiya — u axborot ta’rifida turishining sababi ham shu.</p>
+    </div></details>
+
+    <h2 id="information">Axborot nazariyasi nigohi: kutilmaganlik, entropiya, KL</h2>
+    <p>Xuddi shu natija boshqa tomondan ham olinadi. Klod Shennon $p$ ehtimollikli hodisaning <b>kutilmaganligi</b> (xususiy axboroti) deb $I(p)=-\log p$ kattalikni atagan. Muqarrar hodisa ($p=1$) ajablantirmaydi ($I=0$); kamyob hodisa qattiq ajablantiradi; mustaqil hodisalarning kutilmaganliklari qo‘shiladi. Bitlarda ($\log_2$) $\tfrac18$ ehtimollikli hodisa 3 bit olib yuradi; natlarda ($\ln$) bir bit $\ln2\approx0{,}693$ ga teng.</p>
+    <p>Haqiqiy dunyo «1» ehtimolligi $y$ bo‘lgan tanga kabi tuzilgan bo‘lsin, model esa $\hat y$ ehtimollikka ishonsin. Unda:</p>
+    <div class="eqd">$$\underbrace{H(y)=-y\log y-(1-y)\log(1-y)}_{\text{entropiya: haqiqatni bilgandagi o‘rtacha kutilmaganlik}}$$</div>
+    <div class="eqd">$$\underbrace{H(y,\hat y)=-y\log\hat y-(1-y)\log(1-\hat y)}_{\text{kross-entropiya: }\hat y\text{ ga ishonilgandagi o‘rtacha kutilmaganlik}}$$</div>
+    <p>Kross-entropiya — bu aynan BCE (nomi shundan), formula esa «yumshoq» $y\in[0;\,1]$ belgilar uchun ham ishlaydi. Ikki kattalik ayirmasi — <b>Kulbak — Leybler divergensiyasi</b> (KL):</p>
+    <div class="eqd">$$H(y,\hat y)=H(y)+\mathrm{KL}(y\,\|\,\hat y),\qquad \mathrm{KL}(y\,\|\,\hat y)=y\log\frac{y}{\hat y}+(1-y)\log\frac{1-y}{1-\hat y}\;\ge\;0$$</div>
+    <p>$H(y)$ entropiya modelga bog‘liq emas, shuning uchun BCE’ni minimallashtirish — KL’ni, ya’ni model ishonchidan haqiqatgacha bo‘lgan «masofa»ni minimallashtirish demak. KL faqat $\hat y=y$ da nolga teng. Qattiq $y\in\{0,1\}$ belgilar uchun entropiya nolga teng va BCE KL bilan <i>ustma-ust tushadi</i>.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-mix" data-config="{&quot;y&quot;: 0.8, &quot;p&quot;: 0.3}"></div><figcaption><b>2-rasm.</b> Yumshoq $y$ belgi uchun kross-entropiya — ikki vaznli tarmoq (qizil va ko‘k) yig‘indisi. Uning minimumi aynan $\hat y=y$ da yotadi va $H(y)$ entropiyaga teng (feruza chiziq); undan yuqoridagi hamma narsa — KL (to‘q sariq ustun). $y=0{,}8$ va $\hat y=0{,}3$ da: $H=0{,}500$, $\mathrm{KL}=0{,}534$, $\mathrm{CE}=1{,}035$. $y$ ni 0 yoki 1 ga suring — entropiya yo‘qoladi va butun yo‘qotish KL bo‘lib qoladi.</figcaption></figure>
+    <div class="callout intuition"><b>Kod uzunligi</b><p>«Muhandislik» ma’nosi ham bor. Optimal kod $p$ ehtimollikli hodisaga taxminan $-\log_2p$ bit sarflaydi. Agar hodisalarni haqiqiy $y$ ga emas, $\hat y$ ga ishonib kodlasak, xabarning o‘rtacha uzunligi kross-entropiyaga teng, idealga nisbatan ortiqcha sarf esa aynan KL. Modelni BCE bilan o‘qitib, biz uni belgilarni imkon qadar tejamkor «siqish»ga o‘rgatamiz.</p></div>
+    <details class="deep"><summary>Isbot: KL ≥ 0 (Gibbs tengsizligi)</summary><div class="deep-body">
+      <p>$\ln t\le t-1$ dan foydalanamiz (botiq logarifmga $t=1$ nuqtadagi urinma grafikdan yuqorida yotadi):</p>
+      <div class="eqd">$$-\mathrm{KL}=y\ln\frac{\hat y}{y}+(1-y)\ln\frac{1-\hat y}{1-y}\le y\Bigl(\frac{\hat y}{y}-1\Bigr)+(1-y)\Bigl(\frac{1-\hat y}{1-y}-1\Bigr)=\hat y-y+(1-\hat y)-(1-y)=0$$</div>
+      <p>$\ln t\le t-1$ da tenglik faqat $t=1$ da, shuning uchun $\mathrm{KL}=0$ faqat $\hat y=y$ da (vazni nol bo‘lgan, $y=0$ yoki $1-y=0$ qo‘shiluvchilar shunchaki tushib qoladi).</p>
+    </div></details>
+
+    <h2 id="properties">Xossalar</h2>
+    <ul class="flist"><li><b>Manfiy emaslik.</b> $\ell\ge0$; qattiq belgilar uchun $\ell=0$ faqat $\hat y\to y$ limitda. Chiqishda sigmoida bo‘lsa, $\hat y$ hech qachon aynan 0 yoki 1 bo‘lmaydi, shuning uchun nolga erishilmaydi.</li><li><b>Yuqoridan chegaralanmaganlik.</b> $y=1$, $\hat y\to0$ da yo‘qotish $\to+\infty$. Lekin logitlarda o‘sish faqat <i>chiziqli</i>: $z\ll0$ da $\operatorname{softplus}(-z)\approx-z$, va $-10$ logitli ishonchli xato cheksizlik emas, taxminan 10 turadi.</li><li><b>Logit bo‘yicha chegaralangan gradiyent.</b> $|\partial\ell/\partial z|=|\hat y-y|&lt;1$: model qanchalik qattiq xato qilmasin, har bir obyekt uni 1 dan oshmaydigan kuch bilan tortadi.</li><li><b>$\hat y$ bo‘yicha qavariqlik:</b> $\dfrac{\partial^2\ell}{\partial\hat y^2}=\dfrac{y}{\hat y^2}+\dfrac{1-y}{(1-\hat y)^2}&gt;0$. <b>Logit bo‘yicha qavariqlik:</b> $\dfrac{\partial^2\ell}{\partial z^2}=\hat y(1-\hat y)&gt;0$. Bundan logistik regressiya vaznlari bo‘yicha qavariqlik kelib chiqadi (pastga qarang).</li><li><b>Sinflar simmetriyasi:</b> $\ell(z,y)=\ell(-z,1-y)$ — sinflar nomini va logit ishorasini almashtirsak, hech narsa o‘zgarmaydi.</li><li><b>Qat’iy xos baholash qoidasi</b> (strictly proper scoring rule): agar haqiqat $p$ ehtimollikli tanga bo‘lsa, o‘rtacha yo‘qotish $H(p)+\mathrm{KL}(p\,\|\,q)$ faqat $q=p$ prognozda minimal. BCE halollikni rag‘batlantiradi (kalibrlash bo‘limi).</li><li><b>Sanoq nuqtasi.</b> Doim musbatlar ulushi $\pi$ ni bashorat qiladigan konstanta-model $\mathrm{BCE}=H(\pi)$ oladi. Muvozanatli sinflar uchun bu $\ln2\approx0{,}693$, $\pi=0{,}1$ uchun — $0{,}325$. Bu chegaradan yomonroq model hech narsa o‘rganmagan.</li></ul>
+    <details class="deep"><summary>Logistik regressiya vaznlari bo‘yicha qavariqlik: gessian</summary><div class="deep-body">
+      <p>$z_i=w^\top x_i$ bo‘lsin ($b$ siljish birlik belgi orqali $w$ ga kiritilgan). O‘rtacha BCE gradiyenti va gessiani:</p>
+      <div class="eqd">$$\nabla_w\mathrm{BCE}=\frac1n\sum_{i=1}^{n}(\hat y_i-y_i)\,x_i,\qquad \nabla_w^2\mathrm{BCE}=\frac1n\sum_{i=1}^{n}\hat y_i(1-\hat y_i)\,x_ix_i^\top=\frac1n X^\top S X$$</div>
+      <p>bu yerda $S=\operatorname{diag}\bigl(\hat y_i(1-\hat y_i)\bigr)$. Istalgan $v$ vektor uchun: $v^\top\nabla^2 v=\frac1n\sum\hat y_i(1-\hat y_i)(v^\top x_i)^2\ge0$ — gessian nomanfiy aniqlangan, funksiya qavariq. Demak, logistik regressiyada yomon lokal minimumlar yo‘q: gradiyenti nol bo‘lgan nuqtani topgan har qanday tushish global minimumni topgan bo‘ladi. $y$ belgilar gessianga umuman kirmaydi. Klassik realizatsiyalardagi Nyuton usuli (IRLS) aynan shu gessianda ishlaydi.</p>
+    </div></details>
+
+    <h2 id="derivative">Hosila: nega σ′ qisqaradi</h2>
+    <p>Bu sahifaning markaziy formulasi. Avval $\hat y$ ehtimollik bo‘yicha hosila, so‘ng $z$ logit bo‘yicha, bu yerda $\hat y=\sigma(z)$.</p>
+    <div class="eqd">$$\frac{\partial\ell}{\partial\hat y}=-\frac{y}{\hat y}+\frac{1-y}{1-\hat y}=\frac{\hat y-y}{\hat y\,(1-\hat y)}$$</div>
+    <p>Bu hosila noqulay: $\hat y\to0$ yoki $\hat y\to1$ da maxraj nolga intiladi va gradiyent portlaydi (yuqoridagi jadvalda $\hat y=0{,}001$ da $-1000$). Lekin model $\hat y$ ni bevosita chiqarmaydi — u logit chiqaradi, ehtimollik esa sigmoida orqali olinadi. Zanjir qoidasi:</p>
+    <div class="eqd">$$\frac{\partial\ell}{\partial z}=\frac{\partial\ell}{\partial\hat y}\cdot\frac{\partial\hat y}{\partial z}=\frac{\hat y-y}{\hat y\,(1-\hat y)}\cdot\underbrace{\hat y\,(1-\hat y)}_{\sigma'(z)}=\hat y-y$$</div>
+    <p>Birinchi kasr maxraji — aynan sigmoida hosilasi $\sigma'(z)=\sigma(z)\bigl(1-\sigma(z)\bigr)$ (keltirib chiqarilishi <a href='../sigmoid/'>sigmoida</a> sahifasida). Ular qisqaradi va «bashorat minus haqiqat» qoladi.</p>
+    <details class="deep"><summary>Softplus orqali qadamma-qadam keltirib chiqarish</summary><div class="deep-body">
+      <p>Yo‘qotishni logit orqali qayta yozamiz. $\log\sigma(z)=-\log(1+e^{-z})=-\operatorname{softplus}(-z)$ va $\log(1-\sigma(z))=\log\sigma(-z)=-\operatorname{softplus}(z)$ bo‘lgani uchun:</p>
+      <div class="eqd">$$\ell=y\operatorname{softplus}(-z)+(1-y)\operatorname{softplus}(z)=\operatorname{softplus}(z)-y\,z$$</div>
+      <p>Bu yerda $\operatorname{softplus}(-z)=\log(1+e^{-z})=\log\bigl(e^{-z}(e^{z}+1)\bigr)=\operatorname{softplus}(z)-z$ ayniyatidan foydalanildi. Softplus hosilasi — sigmoida: $\frac{d}{dz}\log(1+e^{z})=\frac{e^{z}}{1+e^{z}}=\sigma(z)$. Demak,</p>
+      <div class="eqd">$$\frac{\partial\ell}{\partial z}=\sigma(z)-y,\qquad \frac{\partial^2\ell}{\partial z^2}=\sigma(z)\bigl(1-\sigma(z)\bigr)$$</div>
+      <p>Ikkinchi hosila istalgan $z$ da musbat — yo‘qotish logit bo‘yicha qat’iy qavariq.</p>
+    </div></details>
+    <details class="deep"><summary>Nega bu tasodif emas: kanonik bog‘lanish</summary><div class="deep-body">
+      <p>Bernulli taqsimoti eksponensial oilaga tegishli: $\log P(y)=y\,z-A(z)$, bu yerda $z=\log\frac{\hat y}{1-\hat y}$ — tabiiy parametr (logit), $A(z)=\log(1+e^{z})=\operatorname{softplus}(z)$ esa normallovchi konstanta logarifmi. Har qanday bunday oilada $A'(z)$ o‘rtachaga teng, bu yerda $\sigma(z)$. Shuning uchun $A(z)-yz$ manfiy log-o‘xshashlik doim «o‘rtacha − kuzatuv» gradiyentiga ega.</p>
+      <p>Sigmoida — umumlashgan chiziqli modellarda Bernulli uchun <b>kanonik bog‘lanish funksiyasi</b> (aniqrog‘i, unga teskari). Aynan shu manzara softmax + kross-entropiya (gradiyent $s-y$) va gauss shovqini uchun «ayniy chiqish + MSE» (gradiyent $\hat y-y$) juftliklarida ham. Shuning uchun «bashorat − haqiqat» formulasi butun mashinaviy o‘qitishda takrorlanadi.</p>
+    </div></details>
+    <p>Logistik regressiya vaznlari $\hat y_i=\sigma(w^\top x_i+b)$ uchun bu o‘qitishda ishlatiladigan qisqa formulalarni beradi:</p>
+    <div class="eqd">$$\frac{\partial\,\mathrm{BCE}}{\partial w}=\frac1n X^\top(\hat y-y),\qquad \frac{\partial\,\mathrm{BCE}}{\partial b}=\frac1n\sum_{i=1}^{n}(\hat y_i-y_i)$$</div>
+    <figure class="viz"><div class="fv" data-viz="bce-logit" data-config="{&quot;y&quot;: 1, &quot;z&quot;: -2, &quot;eps&quot;: 0}"></div><figcaption><b>3-rasm.</b> Yuqorida — logit funksiyasi sifatida BCE, pastda — uning birinchi (to‘q sariq) va ikkinchi (feruza) hosilalari. Urinma qiyaligi $\hat y-y$ ga teng. $y=1$, $z=-2$ da: $\hat y=0{,}1192$, yo‘qotish $2{,}1269$, gradiyent $-0{,}8808$ — yuqoriga kuchli turtki. Punktirlar — asimptotalar: chapda yo‘qotish $-1$ qiyalikli to‘g‘ri chiziq kabi o‘sadi, o‘ngda nolga yopishadi. $\varepsilon$ suriluvchisi belgilarni silliqlash bo‘limida kerak bo‘ladi.</figcaption></figure>
+    <div class="callout key"><b>Xato signali</b><p>$\hat y-y$ gradiyent $(-1;\,1)$ oraliqda yotadi, ehtimollikdagi xatoga chiziqli bog‘liq va $\sigma'(z)$ ko‘paytuvchisini o‘z ichiga olmaydi. Ishonch bilan xato qilayotgan model deyarli maksimal turtki oladi; allaqachon haq bo‘lgan model — deyarli nol. Chiziqli regressiyadagi MSE gradiyenti ham aynan shunday ko‘rinadi.</p></div>
+
+    <h2 id="vs-mse">Nega MSE emas: to‘yinish va qavariq emaslik</h2>
+    <p>Nega klassifikatorni regressiyadagidek $(\hat y-y)^2$ kvadratik xato bilan o‘qitmaslik kerak? $\hat y=\sigma(z)$ bo‘lganda logit bo‘yicha gradiyentni hisoblaymiz:</p>
+    <div class="eqd">$$\frac{\partial}{\partial z}\bigl(\sigma(z)-y\bigr)^2=2\bigl(\sigma(z)-y\bigr)\,\underbrace{\sigma(z)\bigl(1-\sigma(z)\bigr)}_{\sigma'(z)\;\to\;0\text{ chekkalarda}}$$</div>
+    <p>Bu yerda $\sigma'(z)$ ko‘paytuvchisi endi hech narsa bilan qisqarmaydi. Agar model ishonch bilan xato qilsa ($y=1$, $z\ll0$), $\sigma'(z)\approx0$ va gradiyent deyarli nol: model o‘zining eng qo‘pol xatosini «eshitmaydi». $z=-4$ da BCE gradiyenti $-0{,}982$, MSE’niki esa $-0{,}0347$ — 28 marta kichik; $z=-6$ da — allaqachon 203 marta. MSE gradiyentining eng katta moduli, $-0{,}296$, $z=-\ln2\approx-0{,}693$ da erishiladi — ya’ni MSE <i>ozgina</i> xato qilayotgan modelni eng kuchli turtadi.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-vs-mse" data-config="{&quot;z&quot;: -4}"></div><figcaption><b>4-rasm.</b> Yuqorida — $y=1$ uchun sigmoida orqali BCE va MSE, pastda — ularning logit bo‘yicha hosilalari. Nuqtani chapga, ishonchli xato zonasiga torting: BCE’ning to‘q sariq gradiyenti $-1$ yonida turadi, MSE’ning binafsha gradiyenti so‘nadi. Binafsha bo‘yalgan soha — MSE botiq bo‘lgan $z&lt;-\ln2$ sohasi.</figcaption></figure>
+    <p>Ikkinchi muammo — <b>qavariq emaslik</b>. $y=1$ uchun MSE’ning logit bo‘yicha ikkinchi hosilasi $-2\sigma(1-\sigma)^2(1-3\sigma)$ ga teng va $\sigma&lt;\tfrac13$ da, ya’ni $z&lt;-\ln2$ da manfiy. U yerda yo‘qotish botiq va deyarli tekis: ko‘p obyektlar bo‘yicha bunday qo‘shiluvchilar yig‘indisida platolar va egar sohalar paydo bo‘ladi (5-rasm). Uchinchi muammo — chegaralanganlik: MSE 1 dan oshmaydi va «juda noto‘g‘ri» deyarli «umidsiz noto‘g‘ri» bilan bir xil turadi.</p>
+    <details class="deep"><summary>MSE ikkinchi hosilasini keltirib chiqarish</summary><div class="deep-body">
+      <p>$y=1$ da: $L=(1-\sigma)^2$, $L'=-2(1-\sigma)\sigma'=-2\sigma(1-\sigma)^2$. $\sigma'=\sigma(1-\sigma)$ ni eslab, ko‘paytmani differensiallaymiz:</p>
+      <div class="eqd">$$L''=-2\Bigl[\sigma'(1-\sigma)^2-2\sigma(1-\sigma)\sigma'\Bigr]=-2\sigma'(1-\sigma)(1-3\sigma)=-2\sigma(1-\sigma)^2(1-3\sigma)$$</div>
+      <p>Ishorani $1-3\sigma$ ko‘paytuvchi belgilaydi: $\sigma&lt;\tfrac13$ da (ya’ni $z&lt;-\ln2$) $L''&lt;0$. $L'$ minimumi o‘sha nuqtada: $L'(-\ln2)=-2\cdot\tfrac13\cdot\tfrac49=-\tfrac{8}{27}\approx-0{,}296$.</p>
+    </div></details>
+    <div class="callout note"><b>Ehtimolliklar bo‘yicha MSE qayerda o‘rinli</b><p><b>Metrika</b> sifatida — marhamat: $(\hat y-y)^2$ o‘rtacha kvadratini Brayer bahosi (Brier score) deyishadi, u ham xos baholash qoidasi. Muammo kvadratning o‘zida emas, sigmoida orqali o‘qitishda: gradiyent $\sigma'$ orqali o‘tadi va so‘nadi. Ehtimoliy sabab ham bor: MSE — gauss shovqini o‘xshashligi, 0/1 belgilar esa gauss emas.</p></div>
+
+    <h2 id="landscape">3D’da yo‘qotish landshafti</h2>
+    <p>Yo‘qotishga butunlay, parametrlar funksiyasi sifatida qaraymiz. Bitta belgili logistik regressiya $\hat y=\sigma(wx+b)$ va 24 nuqtani (har sinfdan 12 tadan) olamiz. O‘rtacha yo‘qotish — ikki o‘zgaruvchili $L(w,b)$ funksiya, uni sirt sifatida chizish mumkin.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-surface" data-config="{&quot;loss&quot;: &quot;bce&quot;, &quot;w&quot;: -5, &quot;b&quot;: 4, &quot;lr&quot;: 1}"></div><figcaption><b>5-rasm.</b> Chapda — $(w;\,b)$ tekisligi ustidagi yo‘qotish sirti (uni aylantiring), o‘ngda — sath chiziqlari bilan yuqoridan ko‘rinish, pastda — ma’lumotlar va joriy $\sigma(wx+b)$ egri chizig‘i. Start $(-5;\,4)$ — sinflarni ishonch bilan adashtiradigan model. «Boshlash» $\eta=1$ qadamli gradiyent tushishini ishga tushiradi; almashtirgich BCE’ni MSE’ga o‘zgartiradi.</figcaption></figure>
+    <p>Rasmda nima ko‘rinadi:</p>
+    <ul class="flist"><li><b>BCE — qavariq kosa</b>, yagona minimumi $(1{,}441;\,0{,}149)$ da, u yerda $L=0{,}451$. Minimumdan uzoqda devorlari parabola emas, deyarli tekis <i>qiya tekisliklar</i>: yo‘qotish chiziqli o‘sadi, gradiyent chegaralangan.</li><li><b>MSE — platolar va burmalar.</b> Uning minimumi $(1{,}374;\,0{,}320)$, $L=0{,}150$, tor vodiyda yotadi, chekkalarda esa sirt deyarli gorizontal.</li><li><b>Tushish tezligi.</b> Startda BCE gradiyenti normasi $0{,}969$, MSE’niki — $0{,}0174$, 56 marta kichik. BCE minimumiga $0{,}01$ dan yaqinroq atigi 15 qadamda keladi va 63-qadamda to‘xtaydi (gradiyent normasi $&lt;10^{-4}$). MSE o‘z minimumiga $0{,}01$ gacha faqat 600-qadamda yetadi, 1150-qadamda to‘xtaydi; 100- va 400-qadamlar orasida u yo‘qotish deyarli o‘zgarmaydigan plato bo‘ylab sudraladi ($0{,}500\to0{,}495$).</li><li><b>Turli minimumlar.</b> Ikki yo‘qotish optimumlari ustma-ust tushmaydi: bular «eng yaxshi» modelning turli ta’riflari. BCE halol ehtimolliklarni, MSE esa ehtimolliklarning 0 va 1 dan og‘ishlari kvadratlarining eng kichigini qidiradi.</li></ul>
+    <div class="callout intuition"><b>Kosa emas, konus</b><p>Minimumdan uzoqda o‘rtacha BCE $|w|\cdot\overline{|x|}$ kabi — konus kabi o‘zini tutadi. Shuning uchun o‘zgarmas qadamli gradiyent tushishi chiziqli regressiyadagi MSE parabolasidagidek tik qiyaliklarda «tezlashmaydi», balki chegaralangan tezlik bilan yuradi — bu $|\hat y-y|&lt;1$ ning yana bir natijasi.</p></div>
+
+    <h2 id="training">O‘qitishda BCE</h2>
+    <p>Endi ikki o‘lchovli holat: ikki sinfning 60 nuqtasi, $\hat y=\sigma(w_1x_1+w_2x_2+b)$ model, nol vaznlardan $\eta=1$ qadamli to‘liq gradiyent tushishi:</p>
+    <div class="eqd">$$w\leftarrow w-\eta\,\frac1n X^\top\bigl(\sigma(Xw+b)-y\bigr),\qquad b\leftarrow b-\eta\,\frac1n\sum_{i=1}^{n}\bigl(\sigma(w^\top x_i+b)-y_i\bigr)$$</div>
+    <figure class="viz"><div class="fv" data-viz="bce-train" data-config="{&quot;data&quot;: &quot;over&quot;, &quot;lr&quot;: 1}"></div><figcaption><b>6-rasm.</b> Chapda — 1-sinf ehtimolligi va $\hat y=0{,}5$ chegara; nuqta o‘lchami uning o‘z yo‘qotishiga proporsional. O‘ngda — qadamlar bo‘yicha o‘rtacha BCE. Startda barcha $\hat y=0{,}5$: yo‘qotish $\ln2=0{,}693$, aniqlik 50%. 10 qadamdan keyin yo‘qotish $0{,}456$, so‘ng $78{,}3\%$ aniqlik va $\|w\|=1{,}47$ bilan $0{,}453$ da qotib qoladi. Ma’lumotlarni «ajraladigan» ga almashtiring.</figcaption></figure>
+    <p>Nuqtalar o‘lchamiga e’tibor bering: eng yiriklari chegaraning «begona» tomonidagi nuqtalar bo‘lib qoladi. Ularning $|\hat y-y|$ gradiyenti 1 ga yaqin, ishonchli va to‘g‘ri klassifikatsiya qilinganlarniki esa nolga. BCE modelning «e’tibori»ni nimaga sarflashni o‘zi hal qiladi: asosan xatolarga va chegara yonidagi nuqtalarga.</p>
+    <h3>Chiziqli ajraladigan ma’lumotlar: vaznlar cheksizlikka ketadi</h3>
+    <p>Agar sinflar to‘g‘ri chiziq bilan ajralsa, BCE’ni shunchaki $\|w\|$ ni oshirib, istalgancha kichik qilish mumkin: chegara joyida qoladi, sigmoida esa tobora tiklashadi. Minimum yo‘q — faqat 0 infimum bor. Rasmda bu hisoblagichda ko‘rinadi: 100-qadamda yo‘qotish $0{,}0205$ va $\|w\|=3{,}94$, 200-qadamda — $0{,}0133$ va $4{,}77$, 400-qadamda — $0{,}0082$ va $5{,}76$. Norma qadamlar soni logarifmi kabi o‘sadi va to‘xtamaydi.</p>
+    <details class="deep"><summary>Vaznlar yo‘nalishi qayerga yaqinlashadi</summary><div class="deep-body">
+      <p>Ajraladigan ma’lumotlarda BCE gradiyentini eng kichik marginli nuqtalar belgilaydi: nuqta hissasi $e^{-\text{margin}}$ kabi so‘nadi. Shuning uchun gradiyent tushishining $w/\|w\|$ yo‘nalishi <b>maksimal margin</b> yo‘nalishiga — qattiq SVM’niki bilan bir xil yo‘nalishga yaqinlashadi (Soudry va boshq., 2018), norma esa $\log t$ kabi o‘sadi. Bu gradiyent tushishining «yashirin regulyarizatsiyasi». Amalda vaznlarning cheksiz o‘sishi $L_2$-regulyarizatsiya, erta to‘xtatish yoki belgilarni silliqlash bilan to‘xtatiladi.</p>
+    </div></details>
+
+    <h2 id="stability">Hisoblash barqarorligi: BCEWithLogits</h2>
+    <p>$-[y\log\hat y+(1-y)\log(1-\hat y)]$ formulasi qog‘ozda benuqson, lekin kompyuterda buziladi. Agar avval $\hat y=\sigma(z)$ ni, keyin logarifmni hisoblasak, uchta muammo paydo bo‘ladi:</p>
+    <ol class="flist"><li><b>log(0).</b> float32’da $\sigma(z)$ qiymati $z&gt;16{,}64$ dayoq aynan 1 gacha yaxlitlanadi: unda $1-\hat y=0$, yo‘qotish $\infty$, gradiyent esa NaN. float64’da xuddi shu $z&gt;36{,}74$ dan boshlanadi.</li><li><b>Undan oldin aniqlik yo‘qolishi.</b> Ikki yaqin sonning $1-\sigma(z)$ ayirmasi qiymatli raqamlarini yo‘qotadi (halokatli qisqarish): $z=16$ da sodda float32 $16$ o‘rniga $15{,}942$ beradi va grafik zinapoyaga aylanadi.</li><li><b>Kesish (clipping) — davo emas, yamoq.</b> Agar $\hat y$ ni $\varepsilon=10^{-7}$ bilan $[\varepsilon;\,1-\varepsilon]$ kesmaga cheklasak (Keras shunday qiladi), yo‘qotish $-\ln10^{-7}\approx16{,}118$ shiftiga, float32’da esa hatto $15{,}942$ ga tiraladi, chunki $1-10^{-7}$ soni $1-2^{-23}$ gacha yaxlitlanadi. Eng yomoni, shiftdan keyin kesish gradiyenti nolga teng: ishonch bilan xato qilayotgan misollar modelni o‘rgatishdan to‘xtaydi. PyTorch <code>BCELoss</code> ham shunga o‘xshash ish qiladi — logarifmni $-100$ da kesadi.</li></ol>
+    <p>Davo — $\hat y$ ni hech qachon alohida hisoblamaslik, yo‘qotishni to‘g‘ridan-to‘g‘ri logit bo‘yicha, softplus va log-sum-exp usuli orqali hisoblash:</p>
+    <div class="eqd">$$\ell(z,y)=\operatorname{softplus}(z)-y\,z=\max(z,0)-y\,z+\log\bigl(1+e^{-|z|}\bigr)$$</div>
+    <details class="deep"><summary>Bu shakl qayerdan keladi</summary><div class="deep-body">
+      <p>Biz allaqachon $\ell=\operatorname{softplus}(z)-yz$ ni oldik. $\operatorname{softplus}(z)=\log(e^{0}+e^{z})$ ni to‘lib ketishsiz hisoblash qoldi. Log-sum-exp usuli: eng katta eksponentani qavsdan chiqaramiz, $m=\max(0,z)$:</p>
+      <div class="eqd">$$\log\bigl(e^{0}+e^{z}\bigr)=m+\log\bigl(e^{-m}+e^{z-m}\bigr)=\max(z,0)+\log\bigl(1+e^{-|z|}\bigr)$$</div>
+      <p>Ko‘rsatkichlardan biri 0 ga, ikkinchisi $-|z|\le0$ ga teng, shuning uchun eksponenta hech qachon to‘lib ketmaydi, <code>log1p</code> funksiyasi esa kichik $u$ uchun $\log(1+u)$ ni aniq hisoblaydi. $|z|\to\infty$ da oxirgi qo‘shiluvchi silliq ravishda 0 ga ketadi va yo‘qotish aynan chiziqli bo‘ladi.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="bce-stability" data-config="{&quot;y&quot;: 0, &quot;z&quot;: 20, &quot;prec&quot;: &quot;32&quot;}"></div><figcaption><b>7-rasm.</b> 0-sinf obyektidagi yo‘qotish logit funksiyasi sifatida, uch usulda hisoblangan. Qora chiziq — barqaror formula, binafsha punktir — sodda formula, feruza — kesish bilan. float32’da $z=20$ da: aniq $20{,}000$, sodda $\infty$, kesish bilan $15{,}942$. Aniqlikni float64’ga almashtiring (sodda formula $z\approx36{,}74$ gacha yashaydi) va to‘g‘ri javobni $y=1$ ga: u yerda sodda $-\log\sigma(z)$ $z\approx-88{,}7$ gacha turadi, kesish esa baribir $16{,}118$ ga tiraladi.</figcaption></figure>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def sigmoid(z):
+    # σ(z) = (1 + tanh(z/2)) / 2 — istalgan z da to‘lib ketishsiz
+    return 0.5 * (1.0 + np.tanh(0.5 * np.asarray(z, dtype=float)))
+
+def bce_with_logits(z, y, pos_weight=1.0):
+    &quot;&quot;&quot;Logitlar bo‘yicha barqaror BCE: y·softplus(−z) + (1 − y)·softplus(z).&quot;&quot;&quot;
+    z, y = np.asarray(z, dtype=float), np.asarray(y, dtype=float)
+    sp_pos = np.logaddexp(0.0, z)      # softplus(z)  = −log(1 − σ(z))
+    sp_neg = sp_pos - z                # softplus(−z) = −log σ(z)
+    return np.mean(pos_weight * y * sp_neg + (1 - y) * sp_pos)
+
+def bce_grad(z, y):
+    &quot;&quot;&quot;O‘rtacha BCE’ning logitlar bo‘yicha gradiyenti: (σ(z) − y) / n.&quot;&quot;&quot;
+    return (sigmoid(z) - y) / len(z)
+
+z = np.array([3.0, -2.0, 0.5, 20.0])
+y = np.array([1.0, 0.0, 1.0, 0.0])
+print(bce_with_logits(z, y))         # 5.1624 — deyarli hammasini oxirgi misol berdi
+print(bce_grad(z, y))                # ≈ [-0.0119  0.0298 -0.0944  0.25]
+print(bce_with_logits(z, y, 10.0))   # 6.3384 — musbat misollar 10 marta og‘irroq
+
+# float32’da sodda usul: σ(20) 1 gacha yaxlitlanadi va log(1 − 1) = −inf
+p = 1 / (1 + np.exp(-np.float32(20.0)))
+print(-np.log(1 - p))                # inf (va RuntimeWarning)</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+z = torch.tensor([3.0, -2.0, 0.5, 20.0], requires_grad=True)   # logitlar
+y = torch.tensor([1.0, 0.0, 1.0, 0.0])
+
+loss = nn.BCEWithLogitsLoss()(z, y)    # σ va log bitta barqaror formula ichida
+loss.backward()
+print(loss.item())                     # 5.1624
+print(z.grad)                          # (σ(z) − y) / 4 ≈ [-0.0119, 0.0298, -0.0944, 0.2500]
+
+# Yomon: avval sigmoid, keyin BCELoss. float32’da σ(20) 1 ga teng,
+# BCELoss log’ni −100 da kesadi va oxirgi misol 20 o‘rniga 100 turadi
+p = torch.sigmoid(z.detach())
+print(nn.BCELoss()(p, y).item())       # 25.1624
+
+# Sinflar nomutanosibligi: musbat misoldagi xato 10 marta qimmat
+loss_w = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([10.0]))
+
+# Belgilarni silliqlash: BCEWithLogitsLoss’da bunday parametr yo‘q — o‘zimiz silliqlaymiz
+eps = 0.1
+y_smooth = y * (1 - eps) + eps / 2     # 1 → 0.95, 0 → 0.05</code></pre>
+    <div class="callout key"><b>Qoida</b><p>Model <b>logitlarni</b> qaytaradi, sigmoidani esa yo‘qotishning o‘zi qo‘llaydi: PyTorch’da <code>BCEWithLogitsLoss</code>, Keras’da <code>from_logits=True</code>, JAX’da <code>optax.sigmoid_binary_cross_entropy</code>. Chiqishga sigmoidani faqat ehtimollikning o‘zi kerak bo‘lganda — hisobot yoki chegara uchun qo‘llang.</p></div>
+
+    <h2 id="weights">Sinflar nomutanosibligi: vaznlar va pos_weight</h2>
+    <p>Real masalalarda musbat misollar ko‘pincha kam: tranzaksiyalarning 1% i firibgarlik, ko‘rsatishlarning 0,1% i bosish. Oddiy BCE ehtimolliklarni halol o‘rganadi, lekin kamyob sinf ehtimolligi deyarli hamma joyda kichik va $0{,}5$ chegarada model deyarli hech kimni topmaydi. Ko‘p qo‘llanadigan vosita — musbat sinf vazni $w_+$ (PyTorch’da — <code>pos_weight</code>):</p>
+    <div class="eqd">$$\ell_{w}=-\Bigl[w_+\,y\log\hat y+(1-y)\log(1-\hat y)\Bigr],\qquad \frac{\partial\ell_w}{\partial z}=\begin{cases}w_+(\hat y-1), &amp; y=1\\ \hat y, &amp; y=0\end{cases}$$</div>
+    <p>$w_+$ vazni har bir musbat misolni $w_+$ marta takrorlashga teng kuchli. To‘g‘ri berilgan model uchun optimal imkoniyatlar $w_+$ ga ko‘payadi, ya’ni logit $\ln w_+$ ga siljiydi. Musbatlar ulushi $\pi$ bo‘lgan konstanta-model quyidagini tanlaydi</p>
+    <div class="eqd">$$\hat y^{*}=\frac{w_+\pi}{w_+\pi+1-\pi},\qquad w_+=\frac{1-\pi}{\pi}=\frac{n_{\text{neg}}}{n_{\text{pos}}}\;\Longrightarrow\;\hat y^{*}=\tfrac12$$</div>
+    <p>Shuning uchun ommabop $w_+=n_{\text{neg}}/n_{\text{pos}}$ tanlovi sinflarni «tenglashtiradi»: konstanta $0{,}5$ bo‘ladi.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-imbalance" data-config="{&quot;pw&quot;: 1}"></div><figcaption><b>8-rasm.</b> 0-sinfning 150 obyekti ($x\sim N(0,\,1)$) va 1-sinfning 15 tasi ($x\sim N(2,\,1)$), logistik regressiya Nyuton usuli bilan o‘qitilgan. Qora egri — o‘qitilgan model, feruza punktir — nazariy $\sigma(\text{logit}+\ln w_+)$, to‘q sariq chiziq — $\hat y=0{,}5$ chegara. $w_+=1$ da: chegara $x^*=2{,}21$, 15 musbatdan 6 tasi topilgan, aniqlik (precision) $6/10$, o‘rtacha $\hat y=0{,}091$. $w_+=10=150/15$ da: chegara $1{,}24$, 15 tadan 13 tasi topilgan, aniqlik $13/33$, o‘rtacha $\hat y=0{,}244$.</figcaption></figure>
+    <p>Rasmdan uchta xulosa:</p>
+    <ul class="flist"><li><b>Vaznlarsiz o‘rtacha bashorat sinf ulushiga teng</b>: $0{,}091=15/165$. Bu tasodif emas: siljishli logistik regressiyada optimumda $\partial\mathrm{BCE}/\partial b=\frac1n\sum(\hat y_i-y_i)=0$, ya’ni $\sum\hat y_i=\sum y_i$.</li><li><b>Vazn chegarani siljitadi, modelni «aqlliroq» qilmaydi.</b> $w_+=10$ da $b$ ning siljishi $1{,}91$ — $\ln10\approx2{,}30$ ga yaqin (chekli tanlanmada $w$ ham o‘zgaradi). To‘liqlik oshadi, aniqlik kamayadi: bu chegara bilan ham yurish mumkin bo‘lgan o‘sha murosa egri chizig‘i.</li><li><b>Vaznlar kalibrlashni buzadi.</b> O‘rtacha $\hat y=0{,}244$ endi $0{,}091$ ulushga teng emas. Haqiqiy ehtimolliklar kerak bo‘lsa, vaznlarsiz o‘qiting va chegarani tanlang (xuddi shu qaror uchun u $1/(1+w_+)$ ga teng) yoki imkoniyatlarni qayta hisoblang: $\text{imkoniyat}=\text{imkoniyat}_w/w_+$.</li></ul>
+    <details class="deep"><summary>Optimal konstantani keltirib chiqarish</summary><div class="deep-body">
+      <p>Musbatlar ulushi $\pi$ bo‘lganda $q$ konstantaning o‘rtacha vaznli yo‘qotishi: $f(q)=-w_+\pi\ln q-(1-\pi)\ln(1-q)$. Hosilani nolga tenglaymiz:</p>
+      <div class="eqd">$$f'(q)=-\frac{w_+\pi}{q}+\frac{1-\pi}{1-q}=0\;\Longrightarrow\;q=\frac{w_+\pi}{w_+\pi+1-\pi},\qquad \frac{q}{1-q}=w_+\cdot\frac{\pi}{1-\pi}$$</div>
+      <p>Imkoniyatlar aynan $w_+$ ga ko‘paydi, logit $\ln w_+$ ga siljidi. $w_+=1$ da $q=\pi$ ni olamiz — «o‘rtacha bashorat ulushga teng» qonunining o‘zi.</p>
+    </div></details>
+    <div class="callout note"><b>Faqat vaznlar emas</b><p>Agar kamyob sinf yana «qiyin» ham bo‘lsa, <a href='../focal/'>Focal Loss</a> yordam beradi: $(1-p_t)^\gamma$ ko‘paytuvchisi oson misollarni pasaytiradi. $\gamma=0$ da u BCE bilan ustma-ust tushadi. Muqobillar — qayta tanlash (resampling) va validatsiyada kerakli metrika bo‘yicha chegarani tanlash.</p></div>
+
+    <h2 id="smoothing">Belgilarni silliqlash</h2>
+    <p>Qattiq belgilarda optimal logit cheksiz: musbat misoldagi yo‘qotish nol bo‘lishi uchun $z\to+\infty$ kerak. Gradiyent tushishi halollik bilan o‘sha yoqqa boradi. Bitta musbat misolda $z=0$ dan $\eta=1$ qadam bilan logit 10, 100 va 1000 qadamdan keyin $2{,}26$; $4{,}59$; $6{,}91$ ga teng — taxminan $\ln t$ kabi o‘sadi va to‘xtamaydi. Model o‘ziga haddan tashqari ishonishni o‘rganadi.</p>
+    <p><b>Belgilarni silliqlash</b> (label smoothing) qattiq belgilarni yumshoqlari bilan almashtiradi:</p>
+    <div class="eqd">$$y_s=y\,(1-\varepsilon)+\frac{\varepsilon}{2}\qquad(1\to1-\tfrac{\varepsilon}{2},\;\;0\to\tfrac{\varepsilon}{2}),\qquad z^{*}=\ln\frac{y_s}{1-y_s}$$</div>
+    <p>Endi $\sigma(z)-y_s$ gradiyent chekli $z^*$ nuqtada nolga aylanadi, u yerda $\sigma(z^*)=y_s$, minimal yo‘qotish esa 0 emas, $H(y_s)$ entropiyaga teng (2-rasm). $\varepsilon=0{,}1$ da: $y_s=0{,}95$, $z^*=\ln19\approx2{,}944$, xuddi shu tushish $1{,}97$; $2{,}936$; $2{,}944$ beradi — logit to‘xtaydi. 3-rasmga qayting va $\varepsilon$ suriluvchisini suring: egri chiziqda minimum paydo bo‘ladi, to‘q sariq gradiyent esa nolni kesib o‘tadi.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$\varepsilon$</th><th class=num>$y_s$</th><th class=num>$z^*=\ln\frac{y_s}{1-y_s}$</th><th class=num>$\min\ell=H(y_s)$</th></tr></thead><tbody><tr><td class=num>0</td><td class=num>1</td><td class=num>+∞</td><td class=num>0</td></tr><tr><td class=num>0,05</td><td class=num>0,975</td><td class=num>3,664</td><td class=num>0,117</td></tr><tr><td class=num>0,1</td><td class=num>0,95</td><td class=num>2,944</td><td class=num>0,199</td></tr><tr><td class=num>0,2</td><td class=num>0,9</td><td class=num>2,197</td><td class=num>0,325</td></tr></tbody></table></div>
+    <p>Silliqlash ishonch regulyarizatori kabi ishlaydi: vaznlar cheksizlikka ketmaydi, ehtimolliklar 0 va 1 ga yopishmaydi, kalibrlash esa ko‘pincha yaxshilanadi. Buning narxi — model hech qachon $1-\varepsilon/2$ dan ko‘p bashorat qilmaydi, sinflar o‘xshashligi haqidagi «yashirin bilim» qisman yo‘qoladi (Myuller, Kornblit, Hinton, 2019). Keras’da bu <code>BinaryCrossentropy</code> ning <code>label_smoothing</code> parametri, PyTorch’da BCE uchun belgilar qo‘lda silliqlanadi (yuqoridagi kodga qarang).</p>
+
+    <h2 id="calibration">Kalibrlash: BCE halollikni rag‘batlantiradi</h2>
+    <p>Agar model ehtimolliklariga so‘zma-so‘z ishonish mumkin bo‘lsa, u <b>kalibrlangan</b>: u taxminan $0{,}8$ bergan barcha obyektlar orasida 1-sinf taxminan 80% hollarda uchraydi. Buni <b>ishonchlilik diagrammasi</b> (reliability diagram) bilan tekshirishadi: bashoratlar savatlarga bo‘linadi va har birida o‘rtacha bashorat birlar ulushi bilan solishtiriladi. Umumiy son — kutilgan kalibrlash xatosi:</p>
+    <div class="eqd">$$\mathrm{ECE}=\sum_{b=1}^{B}\frac{n_b}{n}\,\bigl|\,\overline{\hat y}_b-\overline{y}_b\,\bigr|$$</div>
+    <p>Nega BCE kalibrlashga o‘rgatadi? Agar bir xil belgili obyektlarda 1-sinf $p$ chastota bilan uchrasa, $q$ prognozning o‘rtacha yo‘qotishi $H(p)+\mathrm{KL}(p\,\|\,q)$ ga teng va u <i>faqat</i> $q=p$ da minimal. Har qanday bo‘rttirish — ishonch tomonga ham, ehtiyotkorlik tomonga ham — qimmatroq turadi. Aniqlik (accuracy) buni qila olmaydi: model $0{,}51$ dedimi yoki $0{,}99$ — unga farqi yo‘q.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-calibration" data-config="{&quot;k&quot;: 2}"></div><figcaption><b>9-rasm.</b> 4000 obyekt: haqiqiy logit $t\sim N(0,\,2^2)$, belgi $y\sim\text{Bernulli}(\sigma(t))$, model $\sigma(k\,t)$ ni bashorat qiladi. $k&gt;1$ da u o‘ziga haddan tashqari ishongan, $k&lt;1$ da — haddan tashqari ehtiyotkor. $k=2$ da: $\mathrm{BCE}=0{,}533$, $\mathrm{ECE}=0{,}092$; yuqori savatda model o‘rtacha $0{,}974$ va’da qiladi, u yerdagi birlar ulushi esa $0{,}891$. Tanlanmadagi BCE minimumi — $k^*\approx1{,}008$ da (cheksiz tanlanma bo‘yicha o‘rtacha — aynan 1). Tugma $k=1{,}01$ ni qo‘yadi: $\mathrm{BCE}=0{,}458$, $\mathrm{ECE}=0{,}011$.</figcaption></figure>
+    <p><b>Harorat bo‘yicha masshtablash</b> (temperature scaling, Guo va boshq., 2017) aynan shunga asoslangan: o‘qitilgan tarmoqda $\hat y=\sigma(z/T)$ dagi bitta $T$ parametr validatsiya tanlanmasida BCE’ni minimallashtirib tanlanadi. Bu yerda $k=1/T$. Bashoratlar tartibi va aniqlik o‘zgarmaydi — faqat ehtimolliklarning halolligi o‘zgaradi.</p>
+    <div class="callout warn"><b>Nega tarmoqlar o‘ziga haddan tashqari ishonadi</b><p>O‘quv tanlanmasida BCE’ni minimallashtirib, katta tarmoq uni deyarli mukammal yodlab olishi mumkin — lokal jihatdan bu «ajraladigan ma’lumotlar» holatining o‘zi: logitlar o‘sadi, ehtimolliklar 0 va 1 ga yopishadi, yangi ma’lumotlarda esa model xuddi shunday ishonch bilan xato qiladi. Bundan «BCE + regulyarizatsiya (weight decay, belgilarni silliqlash, erta to‘xtatish)» juftligi va ajratilgan tanlanmada kalibrlash kelib chiqadi.</p></div>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b>Ikki marta sigmoida.</b> Model <code>sigmoid</code> ni allaqachon qo‘llagan, yo‘qotish — <code>BCEWithLogitsLoss</code> — uni yana qo‘llaydi. Unda $\sigma(\sigma(z))\in(0{,}5;\,0{,}731)$: model 0-sinfni yarmidan ko‘p ehtimollik bilan umuman bashorat qila olmaydi va undagi yo‘qotish $\ln2\approx0{,}693$ dan pastga tushmaydi.</li><li><b><code>BCEWithLogitsLoss</code> o‘rniga sigmoida + <code>BCELoss</code>.</b> Birinchi ishonchli misolgacha ishlaydi, keyin $\log0$, $-100$ da kesish va nol gradiyent (barqarorlik bo‘limi).</li><li><b>$\{0,1\}$ o‘rniga $\pm1$ belgilar.</b> $y=-1$ bilan BCE formulasi $\log\hat y-2\log(1-\hat y)$ ni beradi, u $\hat y\to0$ da $-\infty$ ga ketadi: yo‘qotish manfiy bo‘ladi va o‘qitish uzoqlashadi. $\pm1$ belgilar uchun o‘z shakli bor: $\log(1+e^{-s z})$.</li><li><b>O‘zaro istisno qiluvchi sinflar uchun BCE.</b> Agar $K&gt;2$ sinfdan aynan bittasi to‘g‘ri bo‘lsa, <a href='../softmax/'>softmax</a> va <a href='../cross-entropy/'>kategorial kross-entropiya</a> kerak. BCE bilan bir nechta sigmoida — bu sinflar mustaqil bo‘lgan multi-label.</li><li><b>BCE’ni sanoq nuqtasisiz solishtirish.</b> «Yo‘qotish 0,05» ajoyib eshitiladi, lekin musbatlar ulushi 1% bo‘lganda konstanta $H(0{,}01)\approx0{,}056$ beradi — model deyarli hech narsa o‘rganmagan. $H(\pi)$ bilan solishtiring.</li><li><b>Sinf vaznlari va «ehtimolliklar».</b> <code>pos_weight</code> dan keyin sigmoida chiqishi endi ehtimollik emas (8-rasm). Xatolar narxi bor qarorlar uchun chegarani tanlang; halol ehtimolliklar uchun — qayta hisoblang yoki kalibrlang.</li><li><b>O‘rtacha o‘rniga <code>reduction='sum'</code>.</b> Yig‘indi batch o‘lchami bilan o‘sadi, u bilan birga haqiqiy o‘qitish qadami ham. Batch o‘lchamini o‘zgartirsangiz — optimal o‘qitish tezligi (learning rate) o‘zgaradi.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘lanishlar</h2>
+    <ul class="flist"><li><a href='../sigmoid/'>Sigmoida</a>: logitni $\hat y$ ga aylantiradi; uning $\sigma(1-\sigma)$ hosilasi BCE gradiyentida qisqaradi.</li><li><a href='../cross-entropy/'>Kategorial kross-entropiya</a>: $K$ sinfga umumlashma; $K=2$ da softmax + CE $z_1-z_2$ logitlar ayirmasidan sigmoida + BCE bilan ustma-ust tushadi.</li><li><a href='../softmax/'>Softmax</a>: ikki sinf uchun $\operatorname{softmax}(z_1,z_2)_1=\sigma(z_1-z_2)$.</li><li><a href='../focal/'>Focal Loss</a>: $-(1-p_t)^\gamma\log p_t$ — oson misollarni pasaytiradigan BCE; $\gamma=0$ da BCE bilan bir xil.</li><li><a href='../mse/'>MSE</a>: gauss shovqini uchun to‘g‘ri yo‘qotish; sigmoida bilan to‘yinish va qavariq emaslik beradi (4- va 5-rasmlar).</li><li><a href='../sgd/'>SGD</a> va <a href='../adam/'>Adam</a>: $\frac1nX^\top(\hat y-y)$ gradiyentdan foydalanadigan optimizatorlar.</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) BCE — to‘g‘ri javob ehtimolligining $-\log$ i; $y$ belgi $-\log\hat y$ va $-\log(1-\hat y)$ orasida kalit vazifasini bajaradi. 2) U Bernulli modelining maksimal o‘xshashligidan kelib chiqadi va kross-entropiyaga teng: $H(y)+\mathrm{KL}(y\,\|\,\hat y)$. 3) Sigmoida bilan juftlikda $\partial\ell/\partial z=\hat y-y$: $\sigma'$ ko‘paytuvchisi qisqaradi, gradiyent chegaralangan va ishonchli xatoda so‘nmaydi — MSE’dan farqli. 4) BCE logit bo‘yicha va logistik regressiya vaznlari bo‘yicha qavariq; minimumdan uzoqda chiziqli o‘sadi. 5) Uni logitlar bo‘yicha hisoblang: $\max(z,0)-yz+\log(1+e^{-|z|})$. 6) <code>pos_weight</code> logitni taxminan $\ln w_+$ ga siljitadi, silliqlash optimumni chekli qiladi, BCE minimumi esa kalibrlangan ehtimolliklarda erishiladi.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. To‘g‘ri javob $y=1$, model $\hat y=0{,}25$ chiqardi. Yo‘qotish nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0{,}25$</button><button type="button" data-ok="1">$\ln4\approx1{,}386$</button><button type="button" data-ok="0">$0{,}75^2\approx0{,}563$</button><button type="button" data-ok="0">$\ln0{,}75\approx-0{,}288$</button></div><div class="explain" hidden>$-\ln0{,}25=\ln4\approx1{,}386$. $y=1$ da faqat $-\ln\hat y$ tarmog‘i ishlaydi.</div></fieldset><fieldset class="q"><legend>2. Logit $z=1{,}2$, to‘g‘ri javob $y=0$. BCE’ning $z$ bo‘yicha hosilasi nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$-0{,}769$</button><button type="button" data-ok="0">$0{,}178$</button><button type="button" data-ok="1">$0{,}769$</button><button type="button" data-ok="0">$1{,}2$</button></div><div class="explain" hidden>$\partial\ell/\partial z=\sigma(z)-y=\sigma(1{,}2)-0\approx0{,}769$: model 1-sinfga haddan tashqari ishongan, logit pastga turtiladi.</div></fieldset><fieldset class="q"><legend>3. Nega model ishonch bilan xato qilganda sigmoida + MSE yomon o‘rganadi?</legend><div class="opts"><button type="button" data-ok="0">MSE differensiallanmaydi</button><button type="button" data-ok="1">Gradiyentda $\sigma'(z)\approx0$ ko‘paytuvchisi qoladi</button><button type="button" data-ok="0">MSE juda katta gradiyent beradi</button><button type="button" data-ok="0">MSE ehtimolliklar bilan ishlamaydi</button></div><div class="explain" hidden>$\partial(\sigma-y)^2/\partial z=2(\sigma-y)\sigma'(z)$, $|z|\gg1$ da esa $\sigma'(z)\to0$. BCE’da bu ko‘paytuvchi qisqaradi va gradiyent $\hat y-y$ ga teng.</div></fieldset><fieldset class="q"><legend>4. Tanlanmada 10% musbat. Eng yaxshi konstanta-model qanday yo‘qotish beradi?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$\ln2\approx0{,}693$</button><button type="button" data-ok="1">$H(0{,}1)\approx0{,}325$</button><button type="button" data-ok="0">$-\ln0{,}1\approx2{,}303$</button></div><div class="explain" hidden>Eng yaxshi konstanta — $\hat y=0{,}1$, uning yo‘qotishi — entropiya $-0{,}1\ln0{,}1-0{,}9\ln0{,}9\approx0{,}325$. Bu shu ma’lumotlardagi istalgan model uchun sanoq nuqtasi.</div></fieldset><fieldset class="q"><legend>5. Belgilarni silliqlash $\varepsilon=0{,}2$, belgi $y=1$. O‘qitish qaysi logitga yaqinlashadi?</legend><div class="opts"><button type="button" data-ok="0">$+\infty$</button><button type="button" data-ok="1">$\ln9\approx2{,}197$</button><button type="button" data-ok="0">$\ln4\approx1{,}386$</button><button type="button" data-ok="0">$0$</button></div><div class="explain" hidden>$y_s=1-0{,}2/2=0{,}9$, $\sigma(z)-0{,}9$ gradiyent esa $z^*=\ln\frac{0{,}9}{0{,}1}=\ln9\approx2{,}197$ da nolga teng.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../huber/"><span class="kicker">← Oldingi formula</span><span class="big">Huber</span><span class="kicker">MSE va MAE gibridi</span></a>
+<a class="next" href="../cross-entropy/"><span class="kicker">Keyingi formula →</span><span class="big">Categorical CE</span><span class="kicker">kategorial kross-entropiya</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

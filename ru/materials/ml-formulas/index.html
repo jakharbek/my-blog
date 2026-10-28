@@ -46,17 +46,17 @@
 <section class="art-head wrap-xs">
   <span class="kicker">Материалы · Машинное обучение</span>
   <h1>Шпаргалка формул нейросетей</h1>
-  <p class="dek">Функции активации, функции потерь и оптимизатор Adam в одном месте. У каждой формулы — смысл, производная, пример с числами, код на NumPy и главное, что стоит запомнить.</p>
+  <p class="dek">Функции активации, функции потерь и оптимизаторы в одном месте. У каждой формулы — смысл, производная, пример с числами, код на NumPy, главное, что стоит запомнить, и отдельная страница с подробным разбором и интерактивными 2D- и 3D-рисунками.</p>
   <div class="author">
     <img src="../../../assets/img/javharbek.png" alt="" width="44" height="44">
     <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time></span></span>
   </div>
-  <div class="mat-stats"><span><b>13</b> формул разобрано</span><span><b>5</b> активаций</span><span><b>7</b> функций потерь</span><span><b>1</b> оптимизатор</span></div>
+  <div class="mat-stats"><span><b>18</b> формул с подробным разбором</span><span><b>7</b> активаций</span><span><b>9</b> функций потерь</span><span><b>2</b> оптимизатора</span></div>
 </section>
 
 <div class="wrap-s">
   <div class="mat-tools">
-    <div class="chips" role="group" aria-label="Фильтр по группе"><button type="button" class="chip" data-group="all" aria-pressed="true"><span>Все</span></button><button type="button" class="chip" data-group="act" aria-pressed="false"><span>Функции активации</span><small>5</small></button><button type="button" class="chip" data-group="reg" aria-pressed="false"><span>Потери — регрессия</span><small>5</small></button><button type="button" class="chip" data-group="cls" aria-pressed="false"><span>Потери — классификация</span><small>2</small></button><button type="button" class="chip" data-group="opt" aria-pressed="false"><span>Оптимизатор</span><small>1</small></button><button type="button" class="chip" data-group="next" aria-pressed="false"><span>Что разбираю дальше</span><small>6</small></button></div>
+    <div class="chips" role="group" aria-label="Фильтр по группе"><button type="button" class="chip" data-group="all" aria-pressed="true"><span>Все</span></button><button type="button" class="chip" data-group="act" aria-pressed="false"><span>Функции активации</span><small>5</small></button><button type="button" class="chip" data-group="reg" aria-pressed="false"><span>Потери — регрессия</span><small>5</small></button><button type="button" class="chip" data-group="cls" aria-pressed="false"><span>Потери — классификация</span><small>2</small></button><button type="button" class="chip" data-group="opt" aria-pressed="false"><span>Оптимизатор</span><small>1</small></button><button type="button" class="chip" data-group="next" aria-pressed="false"><span>Следующий уровень</span><small>6</small></button></div>
     <div class="mat-btns"><button type="button" class="b2" data-expand="1">Раскрыть всё</button><button type="button" class="b2" data-expand="0">Свернуть всё</button></div>
   </div>
 
@@ -66,6 +66,7 @@
       <article class="fcard" id="sigmoid">
         <div class="fc-top"><h3><span>Sigmoid</span><small>логистическая функция</small></h3><span class="fc-tag mono">(0; 1)</span></div>
         <div class="fc-formula">$$\sigma(x)=\frac{1}{1+e^{-x}}$$</div>
+        <a class="ul fc-full" href="sigmoid/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -85,6 +86,7 @@ def sigmoid_grad(x):
       <article class="fcard" id="tanh">
         <div class="fc-top"><h3><span>Tanh</span><small>гиперболический тангенс</small></h3><span class="fc-tag mono">(−1; 1)</span></div>
         <div class="fc-formula">$$\tanh(x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}$$</div>
+        <a class="ul fc-full" href="tanh/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -101,6 +103,7 @@ def sigmoid_grad(x):
       <article class="fcard" id="relu">
         <div class="fc-top"><h3><span>ReLU</span><small>rectified linear unit</small></h3><span class="fc-tag mono">max(0, x)</span></div>
         <div class="fc-formula">$$\operatorname{ReLU}(x)=\max(0,\,x)$$</div>
+        <a class="ul fc-full" href="relu/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -119,6 +122,7 @@ def relu_grad(x):
       <article class="fcard" id="leaky-relu">
         <div class="fc-top"><h3><span>Leaky ReLU</span><small>«протекающий» ReLU</small></h3><span class="fc-tag mono">α ≈ 0.01</span></div>
         <div class="fc-formula">$$\operatorname{LReLU}(x)=\max(\alpha x,\,x)=\begin{cases}x, &amp; x&gt;0\\ \alpha x, &amp; x\le 0\end{cases}$$</div>
+        <a class="ul fc-full" href="leaky-relu/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -134,6 +138,7 @@ def relu_grad(x):
       <article class="fcard" id="softmax">
         <div class="fc-top"><h3><span>Softmax</span><small>«мягкий максимум»</small></h3><span class="fc-tag mono">Σ = 1</span></div>
         <div class="fc-formula">$$\operatorname{softmax}(x)_i=s_i=\frac{e^{x_i}}{\sum_{j} e^{x_j}}$$</div>
+        <a class="ul fc-full" href="softmax/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -156,6 +161,7 @@ def relu_grad(x):
       <article class="fcard" id="mae">
         <div class="fc-top"><h3><span>MAE</span><small>mean absolute error</small></h3><span class="fc-tag mono">|·|</span></div>
         <div class="fc-formula">$$\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}\bigl|y_i-\hat{y}_i\bigr|$$</div>
+        <a class="ul fc-full" href="mae/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -170,6 +176,7 @@ def relu_grad(x):
       <article class="fcard" id="mse">
         <div class="fc-top"><h3><span>MSE</span><small>mean squared error</small></h3><span class="fc-tag mono">(·)²</span></div>
         <div class="fc-formula">$$\mathrm{MSE}=\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2$$</div>
+        <a class="ul fc-full" href="mse/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -184,6 +191,7 @@ def relu_grad(x):
       <article class="fcard" id="rmse">
         <div class="fc-top"><h3><span>RMSE</span><small>root mean squared error</small></h3><span class="fc-tag mono">√MSE</span></div>
         <div class="fc-formula">$$\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2}$$</div>
+        <a class="ul fc-full" href="rmse/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -197,6 +205,7 @@ def relu_grad(x):
       <article class="fcard" id="mape">
         <div class="fc-top"><h3><span>MAPE</span><small>mean absolute percentage error</small></h3><span class="fc-tag mono">%</span></div>
         <div class="fc-formula">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\left|\frac{y_i-\hat{y}_i}{y_i}\right|$$</div>
+        <a class="ul fc-full" href="mape/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -210,6 +219,7 @@ def relu_grad(x):
       <article class="fcard" id="huber">
         <div class="fc-top"><h3><span>Huber</span><small>гибрид MSE и MAE</small></h3><span class="fc-tag mono">порог δ</span></div>
         <div class="fc-formula">$$L_\delta(r)=\begin{cases}\tfrac{1}{2}r^2, &amp; |r|\le\delta\\[1mm] \delta\bigl(|r|-\tfrac{1}{2}\delta\bigr), &amp; |r|&gt;\delta\end{cases}\qquad r=y-\hat{y}$$</div>
+        <a class="ul fc-full" href="huber/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -232,6 +242,7 @@ def relu_grad(x):
       <article class="fcard" id="bce">
         <div class="fc-top"><h3><span>BCE</span><small>бинарная кросс-энтропия</small></h3><span class="fc-tag mono">+ sigmoid</span></div>
         <div class="fc-formula">$$\mathrm{BCE}=-\frac{1}{n}\sum_{i=1}^{n}\Bigl[y_i\log\hat{y}_i+(1-y_i)\log\bigl(1-\hat{y}_i\bigr)\Bigr]$$</div>
+        <a class="ul fc-full" href="bce/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -248,6 +259,7 @@ bce = -np.mean(y * np.log(p)
       <article class="fcard" id="cross-entropy">
         <div class="fc-top"><h3><span>Categorical CE</span><small>категориальная кросс-энтропия</small></h3><span class="fc-tag mono">+ softmax</span></div>
         <div class="fc-formula">$$\mathrm{CE}=-\sum_{k=1}^{K} y_k\log\hat{y}_k$$</div>
+        <a class="ul fc-full" href="cross-entropy/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -269,6 +281,7 @@ bce = -np.mean(y * np.log(p)
       <article class="fcard" id="adam">
         <div class="fc-top"><h3><span>Adam</span><small>adaptive moment estimation</small></h3><span class="fc-tag mono">momentum + adaptive</span></div>
         <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,\frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$$</div>
+        <a class="ul fc-full" href="adam/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -276,7 +289,7 @@ bce = -np.mean(y * np.log(p)
           <div class="fc-row"><span class="lab">Шаг 2 · второй момент (масштаб)</span><div class="fx">$$v_t=\beta_2 v_{t-1}+(1-\beta_2)\,g_t^2$$</div></div>
           <div class="fc-row"><span class="lab">Шаг 3 · поправка смещения</span><div class="fx">$$\hat{m}_t=\frac{m_t}{1-\beta_1^{\,t}}\qquad \hat{v}_t=\frac{v_t}{1-\beta_2^{\,t}}$$</div></div>
           <div class="fc-row"><span class="lab">Гиперпараметры по умолчанию</span><p>$\eta=0{,}001$ (темп обучения, learning rate), $\beta_1=0{,}9$, $\beta_2=0{,}999$, $\epsilon=10^{-8}$. Все операции — поэлементные: у каждого веса свои $m$ и $v$.</p></div>
-          <div class="fc-row"><span class="lab">Пример</span><p>Первый шаг, $g_1=0{,}5$, $m_0=v_0=0$: $m_1=0{,}05$, $v_1=0{,}00025$. Без поправки шаг был бы занижен; с поправкой $\hat{m}_1=0{,}5$, $\hat{v}_1=0{,}25$, и $\hat{m}_1/\sqrt{\hat{v}_1}=1$. Вес сдвигается ровно на $\eta$ — каким бы ни был масштаб градиента.</p></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Первый шаг, $g_1=0{,}5$, $m_0=v_0=0$: $m_1=0{,}05$, $v_1=0{,}00025$. Без поправки шаг был бы в $3{,}16$ раза больше: $0{,}05/\sqrt{0{,}00025}\approx3{,}16$, потому что $v$ занижен сильнее, чем $m$; с поправкой $\hat{m}_1=0{,}5$, $\hat{v}_1=0{,}25$, и $\hat{m}_1/\sqrt{\hat{v}_1}=1$. Вес сдвигается ровно на $\eta$ — каким бы ни был масштаб градиента.</p></div>
           <div class="fc-row"><span class="lab">В коде</span><pre><code>m = b1 * m + (1 - b1) * g
 v = b2 * v + (1 - b2) * g ** 2
 m_hat = m / (1 - b1 ** t)
@@ -288,12 +301,13 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
       </article>
     </div>
   </section>
-  <section class="fgroup upcoming" id="next" data-group="next">
-    <div class="fg-head"><span class="glyph math" aria-hidden="true">→</span><h2>Что разбираю дальше</h2><p>Короткие карточки по приоритету. Подробный разбор появится здесь, когда дойду до них.</p></div>
+  <section class="fgroup" id="next" data-group="next">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">→</span><h2>Следующий уровень</h2><p>Активации современных трансформеров, предшественники Adam, метрическое обучение и несбалансированные классы — в порядке изучения.</p></div>
     <div class="fgrid">
       <article class="fcard" id="silu">
         <div class="fc-top"><h3><span>SiLU / Swish</span><small>активация Qwen и LLaMA</small></h3><span class="fc-tag mono">приоритет 1</span></div>
         <div class="fc-formula">$$\operatorname{SiLU}(x)=x\cdot\sigma(x)$$</div>
+        <a class="ul fc-full" href="silu/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -305,6 +319,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
       <article class="fcard" id="gelu">
         <div class="fc-top"><h3><span>GELU</span><small>BERT, GPT</small></h3><span class="fc-tag mono">приоритет 1</span></div>
         <div class="fc-formula">$$\operatorname{GELU}(x)=x\cdot\Phi(x)$$</div>
+        <a class="ul fc-full" href="gelu/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -316,6 +331,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
       <article class="fcard" id="sgd">
         <div class="fc-top"><h3><span>SGD → Momentum → RMSProp</span><small>основа под Adam</small></h3><span class="fc-tag mono">приоритет 2</span></div>
         <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,g_t$$</div>
+        <a class="ul fc-full" href="sgd/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -328,6 +344,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
       <article class="fcard" id="triplet">
         <div class="fc-top"><h3><span>Triplet Loss</span><small>повторная идентификация (Re-ID)</small></h3><span class="fc-tag mono">приоритет 2</span></div>
         <div class="fc-formula">$$L=\max\bigl(0,\;d(a,p)-d(a,n)+m\bigr)$$</div>
+        <a class="ul fc-full" href="triplet/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
@@ -339,6 +356,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
       <article class="fcard" id="focal">
         <div class="fc-top"><h3><span>Focal Loss</span><small>несбалансированные классы</small></h3><span class="fc-tag mono">приоритет 3</span></div>
         <div class="fc-formula">$$\mathrm{FL}=-(1-p_t)^{\gamma}\log p_t$$</div>
+        <a class="ul fc-full" href="focal/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">

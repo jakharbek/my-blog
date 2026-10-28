@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MAPE: the mean absolute percentage error — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="MAPE in depth: formula, asymmetry, behaviour near zero, derivative, the optimal constant as a weighted median, a 3D error surface, training with 1/y weights, comparison with sMAPE, WAPE and MASE, a business example, code.">
+  <meta property="og:title" content="MAPE: the mean absolute percentage error — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="MAPE in depth: formula, asymmetry, behaviour near zero, derivative, the optimal constant as a weighted median, a 3D error surface, training with 1/y weights, comparison with sMAPE, WAPE and MASE, a business example, code.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/mape/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/mape/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/mape/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/mape/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/mape.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/mape/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/mape/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/mape/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Losses — regression</span>
+  <h1>MAPE: the mean absolute percentage error</h1>
+  <p class="dek">A metric any manager understands: “on average we are off by 12%”. Behind the simplicity there are traps: dividing by the actual explodes near zero, under- and over-forecasts are punished differently, and a model trained on MAPE systematically forecasts too low. We take it apart bone by bone — with the derivative, a 3D error surface, training and a business example.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why it is needed</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: the error as a share of the actual</a>
+      <a href="#anatomy"><span class="n">3</span>The formula bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties and asymmetry</a>
+      <a href="#derivative"><span class="n">5</span>The derivative and the best constant</a>
+      <a href="#surface"><span class="n">6</span>A map of the error: APE over the (y, ŷ) plane</a>
+      <a href="#training"><span class="n">7</span>Training on MAPE: 1/y weights and under-forecasting</a>
+      <a href="#alternatives"><span class="n">8</span>MAPE, sMAPE, WAPE and MASE</a>
+      <a href="#business"><span class="n">9</span>A business example: a store’s assortment</a>
+      <a href="#code"><span class="n">10</span>In code</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#links"><span class="n">12</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\left|\frac{y_i-\hat{y}_i}{y_i}\right|$$</div>
+
+    <h2 id="why">Why it is needed</h2>
+    <p>The sales team asks: “how accurate is the forecast?”. The answer “MAE is 37 units” says little: for bread that is excellent, for cars a disaster. The answer “on average we are off by 12%” needs no explanation and reads the same for bread and for cars. That is why MAPE (mean absolute percentage error) is one of the most popular metrics in demand forecasting, finance and energy.</p>
+    <p>Where it shows up:</p>
+    <ul class="flist"><li><b>demand and sales forecasting</b> — retail, logistics, purchase planning; it is often the main KPI of a forecasting team;</li><li><b>finance and economics</b> — the accuracy of revenue, price and macro forecasts;</li><li><b>energy</b> — grid load forecasting, where the percentage error translates directly into the cost of reserves;</li><li><b>comparing series of different scales</b> — MAPE is dimensionless, so accuracy can be averaged over thousands of products;</li><li><b>forecasting competitions</b> — the M competitions used its symmetric variant, sMAPE.</li></ul>
+    <div class="callout key"><b>The gist in a minute</b><p>MAPE is the mean absolute error measured as a share of the actual. It does not depend on scale, but it is undefined at $y_i=0$ and explodes near zero. For a positive actual an under-forecast costs at most $100\%$, an over-forecast can cost any amount. MAPE is MAE with weights $1/|y_i|$, so the best constant under MAPE is a weighted median shifted downwards, and a model trained on MAPE forecasts too low.</p></div>
+
+    <h2 id="intuition">Intuition: the error as a share of the actual</h2>
+    <p>Missing by 1 unit when 3 were sold means being off by a third. Missing by the same unit when 100 were sold is almost a bull’s-eye. MAPE measures each error relative to its own actual and averages the resulting percentages.</p>
+    <p>Drag the blue points — the forecasts. On the right, the percentage error of each object (APE, absolute percentage error) and their mean — MAPE.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-explorer" data-config="{}"></div><figcaption><b>Figure 1.</b> The running example: $y=(3,\,5,\,8)$, $\hat y=(2.5,\,5,\,10)$. The errors $0.5$ and $2$ become $16.7\%$ and $25\%$; the mean is $\mathrm{MAPE}\approx13.9\%$. Lower the first forecast to 2 — a miss of one unit will cost $33.3\%$; the same miss on the third object (forecast 7) would cost only $12.5\%$.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>The absolute error of the third object is four times that of the first ($2$ versus $0.5$), but the percentage error is only $1.5$ times larger ($25\%$ versus $16.7\%$): a large actual “forgives” large errors. MAPE is indifferent to scale and very sensitive to small actuals.</p></div>
+
+    <h2 id="anatomy">The formula bone by bone</h2>
+    <p>Let us take the formula apart from the inside out.</p>
+    <div class="eqd">$$e_i=y_i-\hat y_i\;\xrightarrow{\;|\cdot|\;}\;|e_i|\;\xrightarrow{\;:\,|y_i|\;}\;\mathrm{APE}_i=\frac{|e_i|}{|y_i|}\;\xrightarrow{\;\frac1n\sum\;}\;\text{share}\;\xrightarrow{\;\times100\%\;}\;\mathrm{MAPE}$$</div>
+    <dl class="symbols"><dt>$y_i$</dt><dd>the actual; must be non-zero;</dd><dt>$\hat y_i$</dt><dd>the model’s forecast;</dd><dt>$|y_i-\hat y_i|$</dt><dd>the absolute error, as in <a href="../mae/">MAE</a>;</dd><dt>$\frac{|y_i-\hat y_i|}{|y_i|}$</dt><dd>the relative error APE — the share of the actual by which we missed; independent of the units;</dd><dt>$\frac{100\%}{n}\sum_{i=1}^n$</dt><dd>the mean over the objects, converted to per cent.</dd></dl>
+    <p>The running example step by step:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$i$</th><th class=num>$y_i$</th><th class=num>$\hat y_i$</th><th class=num>$|y_i-\hat y_i|$</th><th class=num>$\mathrm{APE}_i$</th></tr></thead><tbody><tr><td>1</td><td class=num>3</td><td class=num>2.5</td><td class=num>0.5</td><td class=num>16.7%</td></tr><tr><td>2</td><td class=num>5</td><td class=num>5</td><td class=num>0</td><td class=num>0%</td></tr><tr><td>3</td><td class=num>8</td><td class=num>10</td><td class=num>2</td><td class=num>25.0%</td></tr><tr><td>mean</td><td class=num></td><td class=num></td><td class=num>0.833</td><td class=num>13.9%</td></tr></tbody></table></div>
+    <div class="eqd">$$\mathrm{MAPE}=\frac{100\%}{3}\Bigl(\frac{0.5}{3}+\frac{0}{5}+\frac{2}{8}\Bigr)=\frac{100\%}{3}\,(0.1667+0+0.25)\approx13.9\%$$</div>
+    <p>Two equivalent forms reveal how the metric works:</p>
+    <div class="eqd">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\underbrace{\frac{1}{|y_i|}}_{w_i}\,|y_i-\hat y_i|=\frac{100\%}{n}\sum_{i=1}^{n}\Bigl|1-\frac{\hat y_i}{y_i}\Bigr|$$</div>
+    <p>The first: MAPE is a <b>weighted MAE</b> with weights $w_i=1/|y_i|$; objects with a small actual get a huge weight. The second: for positive actuals APE depends only on the ratio $q_i=\hat y_i/y_i$, $\mathrm{APE}_i=|1-q_i|$. That is why MAPE does not change when all actuals and forecasts are multiplied by the same number.</p>
+    <div class="callout note"><b>Per cent or fraction</b><p>Libraries often return MAPE as a fraction, without multiplying by 100: <code>sklearn.metrics.mean_absolute_percentage_error</code> gives $0.139$ on the running example, not $13.9$. Check what exactly you are comparing.</p></div>
+
+    <h2 id="properties">Properties and asymmetry</h2>
+    <ul class="flist"><li><b>Dimensionless</b>: $\mathrm{MAPE}(c\,y,\,c\,\hat y)=\mathrm{MAPE}(y,\hat y)$ for any $c\ne0$. Dollars or thousands of dollars — it does not matter.</li><li><b>Not shift-invariant</b>: add 1000 to the actuals and the forecasts — the absolute errors are the same, but MAPE drops many times over. So MAPE is meaningless for temperature in °C and other scales with an arbitrary zero.</li><li><b>Undefined at $y_i=0$</b> and unbounded as $y_i\to0$: a forecast of 1 for an actual of $0.01$ is an error of $9900\%$.</li><li><b>A zero forecast costs exactly $100\%$</b>: with $\hat y_i=0$ every $\mathrm{APE}_i=1$. The “always zero” model has $\mathrm{MAPE}=100\%$ on any non-zero data.</li><li><b>Asymmetry</b>: for a positive actual and a non-negative forecast an under-forecast gives $\mathrm{APE}\le100\%$, while an over-forecast is unbounded.</li><li><b>Convexity</b>: MAPE is a sum of absolute values of linear functions of the forecasts, so it is convex in the forecasts (and in the parameters of a linear model); it is zero only for a perfect forecast.</li></ul>
+    <h3>Symmetric in units, not in ratios</h3>
+    <p>If you count a miss in units, MAPE is symmetric: forecasts $y-d$ and $y+d$ cost the same, $d/y$. But in business misses are often measured in ratios: “over by half again”, “half of what we sold”. Here MAPE is asymmetric: forecasting half ($\hat y=y/2$) costs $50\%$, forecasting double ($\hat y=2y$) costs $100\%$. Of two forecasts that are off by the same factor, MAPE always prefers the lower one.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-asymmetry" data-config="{&quot;yhat&quot;: 150}"></div><figcaption><b>Figure 2.</b> The error of one object with actual $y=100$ as a function of the forecast. The orange APE is a “tick” with a kink at $\hat y=y$: on the left it hits the $100\%$ ceiling, on the right it grows without bound. A forecast of 150 ($1.5$ times the actual) costs $50\%$, while $100^2/150\approx66.7$ ($1.5$ times less) costs only $33.3\%$. The violet sMAPE is bounded by $200\%$ and, for the same absolute error, is harsher on under-forecasts: $40\%$ at $\hat y=150$ and $66.7\%$ at $\hat y=50$. Bottom: the derivatives; for APE it is a step of $\pm1\%$ per unit of forecast.</figcaption></figure>
+    <details class="deep"><summary>Why sMAPE is not that symmetric</summary><div class="deep-body">
+      <p>sMAPE divides the error by the mean of the actual and the forecast: $\mathrm{sAPE}=2|y-\hat y|/(|y|+|\hat y|)$. In ratios it is symmetric: for $\hat y=k\,y$ and for $\hat y=y/k$ (with $k&gt;0$, $y&gt;0$) we get the same value:</p>
+      <div class="eqd">$$\frac{2|k-1|\,y}{y+k\,y}=\frac{2|k-1|}{k+1},\qquad\frac{2|1/k-1|\,y}{y+y/k}=\frac{2|1-k|}{k+1}$$</div>
+      <p>In units it is not: for $\hat y=y\pm d$ the denominators $2y-d$ and $2y+d$ differ, and the under-forecast is penalised more. None of these metrics is symmetric both “in ratios” and “in units”; the log error $|\ln(\hat y/y)|$ is exactly symmetric in ratios.</p>
+    </div></details>
+
+    <h2 id="derivative">The derivative and the best constant</h2>
+    <p>For a single object APE is the absolute value of a linear function of the forecast, so its derivative is a step:</p>
+    <div class="eqd">$$\frac{\partial\,\mathrm{APE}_i}{\partial\hat y_i}=\frac{\operatorname{sign}(\hat y_i-y_i)}{|y_i|},\qquad\hat y_i\ne y_i$$</div>
+    <details class="deep"><summary>Derivation and the gradient in the parameters</summary><div class="deep-body">
+      <p>For $\hat y_i&gt;y_i$ we have $\mathrm{APE}_i=(\hat y_i-y_i)/|y_i|$, a line with slope $1/|y_i|$; for $\hat y_i&lt;y_i$, the line $(y_i-\hat y_i)/|y_i|$ with slope $-1/|y_i|$. At $\hat y_i=y_i$ there is no derivative (a kink); a subgradient is any number in $[-1/|y_i|,\,1/|y_i|]$, and libraries usually take 0. For model parameters, by the chain rule:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MAPE}}{\partial\theta}=\frac{100\%}{n}\sum_{i=1}^{n}\frac{\operatorname{sign}(\hat y_i-y_i)}{|y_i|}\cdot\frac{\partial\hat y_i}{\partial\theta}$$</div>
+    </div></details>
+    <p>The size of the derivative does not depend on the size of the error — as in <a href="../mae/">MAE</a> — but it is multiplied by $1/|y_i|$: an object with actual 1 pulls the model 100 times harder than an object with actual 100. In the running example $\partial\,\mathrm{MAPE}/\partial\hat y=\tfrac{100\%}{3}\,\bigl(-\tfrac13,\;0,\;\tfrac18\bigr)\approx(-11.1\%,\;0,\;4.2\%)$ per unit of forecast: the first object, with a four times smaller error, pulls $2.7$ times harder than the third.</p>
+    <h3>The best constant is a weighted median shifted downwards</h3>
+    <p>Which single forecast $c$ for all objects minimises MAPE? The function $\mathrm{MAPE}(c)=\frac{100\%}{n}\sum_i|y_i-c|/y_i$ is piecewise linear and convex; between neighbouring data points its slope is $\frac{100\%}{n}\bigl(\sum_{y_i&lt;c}\tfrac1{y_i}-\sum_{y_i&gt;c}\tfrac1{y_i}\bigr)$. The minimum is where the slope changes sign — where the total weight $1/y$ on the left balances the weight on the right. This is the <b>weighted median</b> with weights $1/y_i$:</p>
+    <div class="eqd">$$c^*=\operatorname*{arg\,min}_c\sum_{i=1}^{n}\frac{|y_i-c|}{y_i}=\text{the weighted median of } y_i \text{ with weights } \frac{1}{y_i}$$</div>
+    <p>The weights decrease as $y$ grows, so the weighted median is not larger than the ordinary one: MAPE systematically pulls the forecast down. For lognormal demand this can be computed exactly: if $\ln y\sim N(\mu,\sigma^2)$, then $c^*=e^{\mu-\sigma^2}$ — the median $e^{\mu}$ multiplied by $e^{-\sigma^2}$.</p>
+    <details class="deep"><summary>Where the factor e^(−σ²) comes from</summary><div class="deep-body">
+      <p>The weighted median is the median of the distribution with density proportional to $f(y)/y$. For the lognormal density $f$, writing $t=\ln y$:</p>
+      <div class="eqd">$$\frac{f(y)}{y}\propto\frac{1}{y^2}\,e^{-\frac{(t-\mu)^2}{2\sigma^2}}=\frac{1}{y}\,e^{-\frac{(t-\mu)^2+2\sigma^2 t}{2\sigma^2}}\propto\frac{1}{y}\,e^{-\frac{(t-(\mu-\sigma^2))^2}{2\sigma^2}}$$</div>
+      <p>This is again a lognormal density, but with parameter $\mu-\sigma^2$; its median is $e^{\mu-\sigma^2}$. For comparison, the mean of the original distribution, $e^{\mu+\sigma^2/2}$, is above the median. With $\sigma=0.6$ the MAPE optimum is $1-e^{-0.36}\approx30\%$ below the median.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="mape-optimal" data-config="{&quot;sigma&quot;: 0.6, &quot;c&quot;: 100}"></div><figcaption><b>Figure 3.</b> 60 values of lognormal demand with a median of about 100 (fixed generator seed). The black curve is the MAPE of the constant forecast $c$; below is its slope, a step function. With $\sigma=0.6$ the minimum $42.5\%$ is reached at $c^*\approx71.0$, while the median is $101.0$ and the mean is $119.1$: the MAPE-optimal forecast is $29.7\%$ below the median (theory $e^{-0.36}-1\approx-30.2\%$). A forecast equal to the median costs $51.5\%$, one equal to the mean $63.0\%$, and a zero forecast exactly $100\%$.</figcaption></figure>
+    <div class="callout warn"><b>Training on MAPE leads to under-forecasting</b><p>A model trained to minimise MAPE inherits this bias: its forecasts are systematically below the actuals. In retail that means empty shelves, and the lost sales never show up in any metric: you sell exactly what was in stock.</p></div>
+
+    <h2 id="surface">A map of the error: APE over the (y, ŷ) plane</h2>
+    <p>Look at the error of one object as a function of two variables — the actual $y$ and the forecast $\hat y$. The level lines of APE are <b>rays from the origin</b>: the condition $|y-\hat y|/y=a$ is equivalent to $\hat y=(1\pm a)\,y$. The level lines of the absolute error, in contrast, are parallel lines $\hat y=y\pm e$. The rays converge at zero, so near $y=0$ any fixed absolute error crosses all levels of APE — hence the “explosion”.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-surface" data-config="{&quot;p&quot;: [2, 3]}"></div><figcaption><b>Figure 4.</b> Left: the surface $\mathrm{APE}(y,\hat y)$, clipped at $200\%$ (rotatable): a valley of zero error along the diagonal $\hat y=y$ (orange line) and a wall as $y\to0$. Right: the top view; black rays are APE levels, the red dashed lines are absolute-error levels 1 and 2. The points $P=(2,\,3)$ and $Q=(8,\,9)$ miss by the same one unit, but $\mathrm{APE}(P)=50\%$ while $\mathrm{APE}(Q)=12.5\%$.</figcaption></figure>
+    <p>For $n$ objects MAPE is the mean of such functions. In the forecast space $(\hat y_1,\dots,\hat y_n)$ its level sets are polytopes (diamonds in 2D) centred at $y$ with semi-axes proportional to $y_i$: along axes with small $y_i$ you cannot move far without a big penalty.</p>
+
+    <h2 id="training">Training on MAPE: 1/y weights and under-forecasting</h2>
+    <p>Since MAPE is MAE with weights $1/|y_i|$, a model can be trained on MAPE by any algorithm that minimises a weighted MAE: pass <code>sample_weight=1/|y|</code>. LightGBM has a ready-made <code>objective="mape"</code>, and in PyTorch the loss is one line (see the code section).</p>
+    <p>Let us train the simplest model $\hat y=w\,x$ on 40 objects with $y=10\,x\cdot e^{0.35\,\varepsilon}$, $\varepsilon\sim N(0,1)$: the true slope is 10, and the noise is multiplicative — its size grows with $y$, as with real sales.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-training" data-config="{}"></div><figcaption><b>Figure 5.</b> Left: the data (dot size is proportional to the weight $1/y$) and two models; right: MAPE as a function of the slope $w$. Press “Play”: subgradient descent on MAPE with step $8/\sqrt{t+1}$ from $w=4$ converges to $w^*\approx9.10$ with $\mathrm{MAPE}\approx20.28\%$. Least squares gives $w\approx10.74$ and $\mathrm{MAPE}\approx22.99\%$, but its total forecast is almost unbiased ($-0.6\%$), while the MAPE model’s total forecast is about $16\%$ below the total actual.</figcaption></figure>
+    <p>Why: points with small $y$ get a large weight and pull the line down. In terms of the ratios $q_i=y_i/x_i$ we have $\mathrm{MAPE}(w)=\frac{100\%}{n}\sum_i|q_i-w|/q_i$, so the optimum is the weighted median of $q_i$ with weights $1/q_i$. With lognormal noise this is the median times $e^{-\sigma^2}=e^{-0.1225}\approx0.885$, i.e. about $8.85$ instead of 10.</p>
+    <div class="callout key"><b>How to avoid the bias</b><p>1) Train on MAE or MSE of $\ln y$ and use MAPE only for reporting. 2) If the KPI really is MAPE but under-forecasts are costly (stock-outs), correct the forecasts with a multiplier tuned on validation data, or choose a metric that reflects the real costs (WAPE, the quantile loss). 3) Do not train on MAPE if the data contain zeros or near-zeros.</p></div>
+
+    <h2 id="alternatives">MAPE, sMAPE, WAPE and MASE</h2>
+    <p>Because of these problems MAPE has several popular relatives ($e_i=y_i-\hat y_i$):</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Metric</th><th>Formula</th><th>Zeros in $y$</th><th>Feature</th></tr></thead><tbody><tr><td>MAPE</td><td>$\frac{100\%}{n}\sum\frac{|e_i|}{|y_i|}$</td><td>undefined</td><td>a share of the actual; asymmetric in ratios; explodes near zero</td></tr><tr><td>sMAPE</td><td>$\frac{100\%}{n}\sum\frac{2|e_i|}{|y_i|+|\hat y_i|}$</td><td>allowed if $\hat y_i\ne0$</td><td>bounded by $200\%$; in units, harsher on under-forecasts</td></tr><tr><td>WAPE</td><td>$100\%\cdot\frac{\sum|e_i|}{\sum|y_i|}$</td><td>allowed (a non-zero sum is needed)</td><td>MAE divided by the mean actual; large objects weigh more</td></tr><tr><td>MASE</td><td>$\frac{\frac1n\sum|e_i|}{\frac{1}{T-1}\sum_t|y_t-y_{t-1}|}$</td><td>allowed (the series is not constant)</td><td>MAE relative to the naive “same as last period” forecast; $&lt;1$ — better than naive</td></tr></tbody></table></div>
+    <p>In the running example $\mathrm{MAPE}\approx13.9\%$, $\mathrm{sMAPE}\approx13.5\%$, $\mathrm{WAPE}=2.5/16\approx15.6\%$, and MASE with the scale $\tfrac12\bigl(|5-3|+|8-5|\bigr)=2.5$ equals $0.833/2.5\approx0.33$.</p>
+    <p>WAPE (also called the MAD/Mean ratio) is MAE divided by the mean actual: objects with large sales weigh more, and the total is not ruined by a single product with near-zero demand. MASE (Hyndman and Koehler, 2006) compares the model’s MAE with the MAE of the naive forecast and works even for series with zeros. On the same data WAPE and MASE differ only by a constant factor, so they share the same optimum.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-metrics" data-config="{&quot;k&quot;: 1}"></div><figcaption><b>Figure 6.</b> 52 weeks of demand (dots) and the forecast $k\cdot$base (blue line). Right: the metrics as functions of the multiplier $k$; dots mark the minima. MAPE is minimal at $k\approx0.89$, i.e. for a forecast 11% too low; sMAPE at $k\approx1.007$; WAPE (and MASE) at $k\approx1.012$. Turn on the demand dip — one week with $y=3$: MAPE at $k=1$ jumps from $24.5\%$ to $68.8\%$ and its minimum moves to $k\approx0.78$; WAPE only changes from $23.5\%$ to $25.4\%$.</figcaption></figure>
+
+    <h2 id="business">A business example: a store’s assortment</h2>
+    <p>A chain forecasts weekly sales of six products. Five of them sell in tens and hundreds of units and are forecast with errors from $7.5\%$ to $16.7\%$. The sixth, F, is a slow mover: the forecast was 10 units and 4 were sold.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-portfolio" data-config="{&quot;f&quot;: 4}"></div><figcaption><b>Figure 7.</b> Left: actual and forecast (log scale); right: the APE of each product. Product F, which accounts for $0.15\%$ of sales, has $\mathrm{APE}=150\%$ and $72\%$ of the sum of all APEs: $\mathrm{MAPE}=34.8\%$, whereas without it MAPE is $11.7\%$. WAPE, which counts the error in units, is $9.4\%$: 256 units of error over 2714 sold. Move the sales of F: with a single unit sold MAPE almost reaches $160\%$.</figcaption></figure>
+    <p>What to do in practice:</p>
+    <ul class="flist"><li><b>report WAPE</b> (or MAPE weighted by revenue) when the overall accuracy in units or money matters;</li><li><b>compute MAPE by groups</b> — fast and slow movers separately — or exclude items with sales below a threshold, stating the threshold explicitly;</li><li><b>for slow movers</b> use MASE or dedicated metrics for intermittent demand;</li><li><b>track the sign of the error separately</b>: the bias of the total forecast is a KPI of its own, and MAPE does not show it.</li></ul>
+    <div class="callout history"><b>Why MAPE is so popular</b><p>MAPE is understandable without statistical training, so it long ago became the standard of industry reports. The criticism is old too: the bias towards low forecasts and the problem of small actuals were pointed out back in the 1980s–1990s (for example, Armstrong and Collopy, 1992), and Hyndman and Koehler (2006) proposed MASE as a scale-free alternative without these shortcomings.</p></div>
+
+    <h2 id="code">In code</h2>
+    <p>In NumPy MAPE is one line; below we also compute sMAPE and WAPE and check the formulas on the running example.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+
+ape  = np.abs((y - y_hat) / y)      # [0.1667 0.     0.25  ]
+mape = 100 * ape.mean()             # 13.89
+
+# The same as a weighted MAE with weights 1/|y|
+w = 1 / np.abs(y)
+print(100 * np.mean(w * np.abs(y - y_hat)))   # 13.89
+
+def smape(y, f):
+    return 100 * np.mean(2 * np.abs(f - y) / (np.abs(y) + np.abs(f)))
+
+def wape(y, f):
+    return 100 * np.sum(np.abs(y - f)) / np.sum(np.abs(y))
+
+print(smape(y, y_hat), wape(y, y_hat))        # ≈13.468 15.625</code></pre>
+    <p>scikit-learn returns a fraction and divides by the machine epsilon instead of zero. Median regression with weights $1/y$ is a way to train “on MAPE”:</p>
+    <pre class="code"><span class="lang">python</span><code>from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.linear_model import LinearRegression, QuantileRegressor
+
+print(mean_absolute_percentage_error(y, y_hat))            # 0.1389 — a fraction, not a percentage!
+print(mean_absolute_percentage_error([0.0, 5.0], [1.0, 5.0]))  # 2.25e+15: division by eps instead of zero
+
+# Training “on MAPE”: median (MAE) regression with weights 1/y
+rng = np.random.default_rng(0)
+x = rng.uniform(1, 10, 400)
+t = 10 * x * np.exp(0.35 * rng.standard_normal(400))
+X = x[:, None]
+ols = LinearRegression(fit_intercept=False).fit(X, t)
+fit = QuantileRegressor(quantile=0.5, alpha=0, fit_intercept=False).fit(X, t, sample_weight=1 / t)
+print(ols.coef_, fit.coef_)   # ≈[10.58] [8.85] — the MAPE model under-forecasts the total by 16%</code></pre>
+    <p>MAPE as a loss in PyTorch:</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+
+def mape_loss(pred, target, eps=1e-8):
+    &quot;&quot;&quot;MAPE as a loss (a fraction). eps prevents division by 0 but not huge weights near zero.&quot;&quot;&quot;
+    return torch.mean(torch.abs(target - pred) / target.abs().clamp_min(eps))
+
+y     = torch.tensor([3.0, 5.0, 8.0])
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+loss = mape_loss(y_hat, y)
+loss.backward()
+print(loss.item(), y_hat.grad)   # 0.1389  tensor([-0.1111, -0.0000,  0.0417])</code></pre>
+    <div class="callout key"><b>Rule of thumb</b><p>Before computing MAPE, look at the minimum of $|y|$ in the data. If there are zeros or values that are tiny compared with typical ones, report WAPE or MASE and do not use MAPE as a loss.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>MAPE on data with zeros.</b> Division by zero gives infinity or NaN, and “protecting” it with $\varepsilon$ gives astronomical numbers: scikit-learn returns $2.25\cdot10^{15}$. Filter zeros explicitly and say so, or use WAPE and MASE.</li><li><b>MAPE for scales with an arbitrary zero</b> — temperatures in °C, indices, dates. An error of 1° at 2° and at 30° is the same, but MAPE differs 15 times.</li><li><b>Training on MAPE without accounting for the bias.</b> The model systematically under-forecasts, which in retail turns into stock-outs.</li><li><b>Comparing MAPE across data sets with different shares of small values.</b> The same model will show 12% on fast movers and 60% on slow movers — the data are to blame, not the quality.</li><li><b>Mixing up fractions and per cent</b>: scikit-learn returns $0.139$, not $13.9$.</li><li><b>“Lower MAPE means a more accurate plan”.</b> MAPE does not see the sign of the errors: a forecast with lower MAPE can under-forecast total demand by 16%, as in Figure 5.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href="../mae/">MAE</a>: MAPE is MAE with weights $1/|y_i|$; the size of the gradient also does not depend on the size of the error, but it is scaled by $1/|y_i|$.</li><li><a href="../mse/">MSE</a> and <a href="../rmse/">RMSE</a>: absolute squared errors; their relative cousin is RMSLE, the RMSE on a log scale.</li><li><a href="../huber/">Huber</a>: smooths the kink at zero; the same idea can be applied to the relative error.</li><li><a href="../sgd/">SGD</a>: training on MAPE is subgradient descent whose step must shrink (in Figure 5, as $1/\sqrt t$).</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $\mathrm{MAPE}=\frac{100\%}{n}\sum|y_i-\hat y_i|/|y_i|$ is the mean error as a percentage of the actual; scale-free and clear to business. 2) Undefined at $y=0$ and explodes near zero; a zero forecast costs exactly $100\%$. 3) Asymmetric in ratios: half the actual costs $50\%$, double costs $100\%$. 4) MAPE is MAE with weights $1/|y|$: the derivative is $\operatorname{sign}(\hat y-y)/|y|$, the best constant is a weighted median below the ordinary one, and training on MAPE leads to under-forecasting. 5) For assortment reports WAPE and MASE are usually more reliable.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. The actual is 200 and the forecast is 150. What is APE?</legend><div class="opts"><button type="button" data-ok="1">$25\%$</button><button type="button" data-ok="0">$33.3\%$</button><button type="button" data-ok="0">$50\%$</button><button type="button" data-ok="0">$12.5\%$</button></div><div class="explain" hidden>Divide by the actual: $50/200=25\%$. Dividing by the forecast by mistake would give $33.3\%$.</div></fieldset><fieldset class="q"><legend>2. The actual is 100. Which forecast gives the larger APE: 50 or 200?</legend><div class="opts"><button type="button" data-ok="0">50</button><button type="button" data-ok="1">200</button><button type="button" data-ok="0">The same</button><button type="button" data-ok="0">It depends on $n$</button></div><div class="explain" hidden>$|100-50|/100=50\%$ and $|100-200|/100=100\%$. Both are off by a factor of two, but the over-forecast costs twice as much.</div></fieldset><fieldset class="q"><legend>3. A model always forecasts 0 while sales are positive. What is its MAPE?</legend><div class="opts"><button type="button" data-ok="0">$0\%$</button><button type="button" data-ok="0">$50\%$</button><button type="button" data-ok="1">$100\%$</button><button type="button" data-ok="0">Infinity</button></div><div class="explain" hidden>Every $\mathrm{APE}_i=|y_i-0|/|y_i|=1$, so $\mathrm{MAPE}=100\%$ for any data.</div></fieldset><fieldset class="q"><legend>4. The actuals are 1, 10 and 100. Which constant forecast minimises MAPE?</legend><div class="opts"><button type="button" data-ok="1">1</button><button type="button" data-ok="0">10</button><button type="button" data-ok="0">37</button><button type="button" data-ok="0">100</button></div><div class="explain" hidden>The weights $1/y_i$ are $1$, $0.1$ and $0.01$; the first weight exceeds the sum of the others, so the weighted median is 1: $\mathrm{MAPE}=(0+0.9+0.99)/3=63\%$, while at $c=10$ it is $330\%$.</div></fieldset><fieldset class="q"><legend>5. Why is WAPE more robust than MAPE on an assortment with slow movers?</legend><div class="opts"><button type="button" data-ok="0">WAPE ignores the errors of slow movers</button><button type="button" data-ok="1">WAPE divides the total error by the total actual, so small actuals do not get huge weights</button><button type="button" data-ok="0">WAPE is always smaller than MAPE</button><button type="button" data-ok="0">WAPE squares the errors</button></div><div class="explain" hidden>In WAPE each object enters with its absolute error in units, and the division happens once — by the sum of the actuals. A slow mover’s error of 6 units stays an error of 6 units.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../rmse/"><span class="kicker">← Previous formula</span><span class="big">RMSE</span><span class="kicker">root mean squared error</span></a>
+<a class="next" href="../huber/"><span class="kicker">Next formula →</span><span class="big">Huber</span><span class="kicker">a hybrid of MSE and MAE</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

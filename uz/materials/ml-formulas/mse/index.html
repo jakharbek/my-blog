@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MSE: o‘rtacha kvadratik xato — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="MSE batafsil: formula, xossalar, optimal o‘zgarmas sifatida o‘rtacha, hosila, 3D’dagi yo‘qotish kosasi va eng kichik kvadratlar usuli, gradiyent tushish va shartlanganlik soni, siljish va tarqoqlik, Gauss o‘xshashligi, chetga chiquvchi qiymatlar, NumPy, PyTorch va scikit-learn’da kod.">
+  <meta property="og:title" content="MSE: o‘rtacha kvadratik xato — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="MSE batafsil: formula, xossalar, optimal o‘zgarmas sifatida o‘rtacha, hosila, 3D’dagi yo‘qotish kosasi va eng kichik kvadratlar usuli, gradiyent tushish va shartlanganlik soni, siljish va tarqoqlik, Gauss o‘xshashligi, chetga chiquvchi qiymatlar, NumPy, PyTorch va scikit-learn’da kod.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/mse/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/mse/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/mse/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/mse/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/mse.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/mse/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/mse/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/mse/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Yo‘qotishlar — regressiya</span>
+  <h1>MSE: o‘rtacha kvadratik xato</h1>
+  <p class="dek">Regressiyaning asosiy yo‘qotish funksiyasi va eng kichik kvadratlar usulining poydevori. MSE’ni mayda detallarigacha tahlil qilamiz: xatolar ustidagi tom ma’nodagi kvadratlar, nega uni o‘rtacha minimallashtiradi, 2e hosila va model parametrlari ustidagi kosa, gradiyent tushishning kritik qadami, siljish va tarqoqlikka yoyilma, normal shovqin bilan bog‘liqlik va chetga chiquvchi qiymatlarga sezgirlik.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 35 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: kvadratlar yuzi</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#properties"><span class="n">4</span>Xossalar va eng yaxshi o‘zgarmas</a>
+      <a href="#derivative"><span class="n">5</span>Hosila: xatoga proporsional kuch</a>
+      <a href="#space"><span class="n">6</span>Parametrlar ustidagi kosa: EKK va gradiyent tushish</a>
+      <a href="#biasvar"><span class="n">7</span>Siljish va tarqoqlik</a>
+      <a href="#probability"><span class="n">8</span>Ehtimoliy ma’no: normal shovqin</a>
+      <a href="#outliers"><span class="n">9</span>Chetga chiquvchi qiymatlar: cheklanmagan ta’sir</a>
+      <a href="#code"><span class="n">10</span>Kodda</a>
+      <a href="#mistakes"><span class="n">11</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">12</span>Boshqa formulalar bilan bog‘liqlik</a>
+      <a href="#summary"><span class="n">13</span>Xulosa</a>
+      <a href="#quiz"><span class="n">14</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{MSE}=\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>Agar model son bashorat qilsa, deyarli aniq uni MSE (mean squared error) — <b>xatoning o‘rtacha kvadratini</b> kamaytirib o‘qitishgan. Bu regressiya uchun «standart» yo‘qotish: chiziqli modellar uchun uning aniq yechimi, neyron tarmoqlar uchun silliq gradiyenti va aniq statistik ma’nosi bor. XIX asr boshida Lejandr va Gauss ma’lumotlar tahlilini boshlagan eng kichik kvadratlar usuli — aynan MSE’ni minimallashtirishdir.</p>
+    <p>U qayerda uchraydi:</p>
+    <ul class="flist"><li><b>chiziqli regressiya</b> — bitta formulali yechimga ega eng kichik kvadratlar usuli (EKK, ordinary least squares);</li><li><b>regressiya uchun neyron tarmoqlar</b> — PyTorch’da <code>MSELoss</code>, Keras’da <code>"mse"</code>; kirishni tiklaydigan avtoenkoderlar;</li><li><b>diffuziya modellari</b> — tarmoq qo‘shilgan shovqinni bashorat qilishni o‘rganadi va yo‘qotish — haqiqiy va bashorat qilingan shovqin orasidagi MSE;</li><li><b>mustahkamlab o‘qitish</b> — qiymat funksiyasi TD-xato kvadratida o‘qitiladi;</li><li><b>gradiyent busting</b> — <code>loss="squared_error"</code>: MSE antigradiyenti qoldiqqa teng, shuning uchun har bir daraxt qoldiqlarga moslashtiriladi;</li><li><b>signal va tasvirlarga ishlov berish</b> — PSNR MSE orqali hisoblanadi, Kalman filtri xato kvadratining kutilmasini minimallashtiradi.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>MSE — xatolar kvadratlarining o‘rtachasi: $\frac1n\sum(y_i-\hat y_i)^2$. Kvadrat yo‘qotishni yagona tubli silliq kosaga aylantiradi, uning gradiyenti $-\frac2n(y_i-\hat y_i)$ xatoga proporsional, eng yaxshi o‘zgarmas esa — <b>o‘rtacha</b>. Teskari tomoni — kvadrat katta adashishlarni bo‘rttiradi: 10 ga teng bitta xato 1 ga teng yuzta xato bilan teng vaznga ega, shuning uchun MSE chetga chiquvchi qiymatlarga sezgir va kvadrat birliklarda o‘lchanadi.</p></div>
+
+    <h2 id="intuition">Intuitsiya: kvadratlar yuzi</h2>
+    <p>Bu yerda «kvadrat» so‘zini tom ma’noda tushunish mumkin. Har bir xato ustiga tomoni $|e_i|$ bo‘lgan kvadrat chizamiz. Uning yuzi — $e_i^2$, MSE esa — <b>kvadratlarning o‘rtacha yuzi</b>. Kesmalar uzunligi o‘rtachalanadigan MAE bilan solishtiring: yuz tomonning kvadrati kabi o‘sadi, shuning uchun katta xatolar nomutanosib ko‘p joy egallaydi.</p>
+    <p>Quyida qo‘llanmaning umumiy misoli: $y=(3;\,5;\,8)$, $\hat y=(2{,}5;\,5;\,10)$. Ko‘k bashoratlarni torting. Pastki grafikda xatolar $e^2$ parabolasi ustida turadi; MSE — bu nuqtalarning o‘rtacha balandligi.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-squares" data-config="{&quot;yhat&quot;: [2.5, 5, 10]}"></div><figcaption><b>1-rasm.</b> Umumiy misol xatolarining kvadratlari. Yuzlar $0{,}25$, $0$ va $4$, yig‘indi $4{,}25$, $\mathrm{MSE}=4{,}25/3\approx1{,}417$. Uchinchi kvadrat — butun yuzning $94\%$ i. Uchinchi bashoratni $8$ ga qo‘ying — MSE $0{,}25/3\approx0{,}083$ gacha tushadi.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>$2$ xato $0{,}5$ xatodan 4 marta katta, uning kvadrati esa 16 marta katta. Shuning uchun MSE’da o‘qitilgan model katta adashishlardan «qo‘rqadi» va bitta kattasini yo‘qotish uchun bir nechta mayda xatolarga bajonidil rozi bo‘ladi. Bu ham afzallik (katta xatolar odatda qimmatroq), ham zaiflik (ma’lumotlardagi chetga chiquvchi qiymat ham «katta xato» bo‘lib ko‘rinadi).</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <p>MAE’dagi o‘sha to‘rtta amal, faqat modul o‘rniga — kvadrat.</p>
+    <div class="eqd">$$\underbrace{y_i-\hat y_i}_{\text{xato }e_i}\;\longrightarrow\;\underbrace{e_i^2}_{\text{yuz}}\;\longrightarrow\;\underbrace{\sum_{i=1}^{n}e_i^2}_{\text{SSE}}\;\longrightarrow\;\underbrace{\frac1n\sum_{i=1}^{n}e_i^2}_{\text{MSE}}$$</div>
+    <dl class="symbols"><dt>$y_i$</dt><dd>$i$-obyekt uchun haqiqiy qiymat;</dd><dt>$\hat y_i$</dt><dd>model bashorati;</dd><dt>$e_i=y_i-\hat y_i$</dt><dd>xato (qoldiq); kvadratga oshirilgandan keyin uning ishorasi yo‘qoladi;</dd><dt>$e_i^2$</dt><dd>kvadrat: manfiy emas, silliq va xato qancha katta bo‘lsa, shuncha tez o‘sadi;</dd><dt>$\sum e_i^2$</dt><dd>qoldiqlar kvadratlari yig‘indisi — SSE (sum of squared errors) yoki RSS (residual sum of squares);</dd><dt>$\frac1n$</dt><dd>o‘rtachalash: MSE tanlanma hajmiga bog‘liq emas.</dd></dl>
+    <p>Nega modul emas, kvadrat? Uchta sabab bor. <b>Silliqlik</b>: $e^2$ ning $2e$ hosilasi hamma joyda, jumladan nolda ham bor. <b>Algebra</b>: kvadratlar yig‘indisi — kvadratik forma, uning minimumi chiziqli sistemani (normal tenglamalarni) yechib topiladi. <b>Geometriya</b>: $\sum e_i^2$ — Yevklid masofasining kvadrati, eng yaxshi bashorat esa Pifagor teoremasidagidek ortogonal proyeksiya.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$i$</th><th class=num>$y_i$</th><th class=num>$\hat y_i$</th><th class=num>$e_i$</th><th class=num>$e_i^2$</th><th class=num>yig‘indidagi ulush</th></tr></thead><tbody><tr><td class=num>1</td><td class=num>3</td><td class=num>2,5</td><td class=num>0,5</td><td class=num>0,25</td><td class=num>5,9%</td></tr><tr><td class=num>2</td><td class=num>5</td><td class=num>5</td><td class=num>0</td><td class=num>0</td><td class=num>0%</td></tr><tr><td class=num>3</td><td class=num>8</td><td class=num>10</td><td class=num>−2</td><td class=num>4</td><td class=num>94,1%</td></tr><tr><td class=num><b>Yig‘indi</b></td><td class=num></td><td class=num></td><td class=num></td><td class=num><b>4,25</b></td><td class=num>100%</td></tr><tr><td class=num><b>O‘rtacha (MSE)</b></td><td class=num></td><td class=num></td><td class=num></td><td class=num><b>1,417</b></td><td class=num></td></tr></tbody></table></div>
+    <p>Vektor ko‘rinishida MSE — xatolar vektori Yevklid normasining $n$ ga bo‘lingan kvadrati:</p>
+    <div class="eqd">$$\mathrm{MSE}(y,\hat y)=\frac{1}{n}\,\bigl\|y-\hat y\bigr\|_2^2,\qquad \mathrm{RMSE}=\sqrt{\mathrm{MSE}}$$</div>
+    <p>Ikkinchi nomi shundan — <b>L2-yo‘qotish</b>. MSE birliklari — $y$ birliklarining kvadrati: so‘m², daqiqa². Dastlabki birliklarga qaytish uchun ildiz olinadi va <a href="../rmse/">RMSE</a> hosil bo‘ladi; misolda $\sqrt{1{,}417}\approx1{,}190$.</p>
+
+    <h2 id="properties">Xossalar va eng yaxshi o‘zgarmas</h2>
+    <ul class="flist"><li><b>Manfiy emaslik</b>: $\mathrm{MSE}\ge0$, tenglik — faqat aniq bashoratlarda.</li><li><b>Kvadratik masshtab</b>: $y$ va $\hat y$ ni $k$ ga ko‘paytirsak, MSE $k^2$ ga ko‘payadi. So‘mni ming so‘mga o‘tkazish MSE’ni million marta kamaytiradi.</li><li><b>Silliqlik va qavariqlik</b>: MSE — bashoratlarning kvadratik funksiyasi; chiziqli model uchun — parametrlarning kvadratik funksiyasi. Belgilar chiziqli erkli bo‘lsa, u qat’iy qavariq va minimum yagona.</li><li><b>Xatolar yoyilmasi</b>: $\mathrm{MSE}=\bar e^{\,2}+\operatorname{Var}(e)$ — o‘rtacha siljish kvadrati plyus xatolar tarqoqligi. Misolda $\bar e=-0{,}5$: $1{,}417=0{,}25+1{,}167$.</li><li><b>MAE bilan solishtirish</b>: $\mathrm{MSE}\ge\mathrm{MAE}^2$ (kvadratlar o‘rtachasi o‘rtachaning kvadratidan kam emas). Misolda: $1{,}417\ge0{,}833^2\approx0{,}694$.</li></ul>
+    <h3>Eng yaxshi o‘zgarmas — o‘rtacha</h3>
+    <p>Agar model bitta $c$ son bilan javob bersa, $c$ ning funksiyasi sifatida MSE — parabola. $\bar y$ o‘rtachani qo‘shib va ayirib qavslarni ochamiz:</p>
+    <div class="eqd">$$\mathrm{MSE}(c)=\frac1n\sum_{i=1}^{n}(y_i-c)^2=\underbrace{\frac1n\sum_{i=1}^{n}(y_i-\bar y)^2}_{\operatorname{Var}(y)}+\;(c-\bar y)^2$$</div>
+    <p>Birinchi qo‘shiluvchi $c$ ga bog‘liq emas, ikkinchisi manfiy emas va faqat $c=\bar y$ da nolga aylanadi. Demak, MSE minimumi yagona va <b>o‘rtachada</b> erishiladi, uning qiymati esa — ma’lumotlar dispersiyasi. $2(c-\bar y)$ hosila — o‘rtachagacha bo‘lgan masofaga proporsional to‘g‘ri chiziq.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-mean" data-config="{&quot;c&quot;: 12}"></div><figcaption><b>2-rasm.</b> $(2;\,3;\,5;\,9;\,16)$ tanlanma uchun $\mathrm{MSE}(c)$ va uning hosilasi. O‘rtacha $\bar y=7$, minimum $\operatorname{Var}=26$. $c=12$ da: $\mathrm{MSE}=26+(12-7)^2=51$, hosila $2\cdot5=10$. Mediana $5$ esa $30$ beradi — MSE uchun u o‘rtachadan yomonroq. Chetga chiquvchi qiymatni yoqing ($16\to40$): o‘rtacha $11{,}8$ ga ketadi, dispersiya $204{,}56$ gacha o‘sadi, mediana esa $5$ bo‘lib qoladi.</figcaption></figure>
+    <details class="deep"><summary>MSE(c) = Var + (c − ȳ)² yoyilmasining isboti</summary><div class="deep-body">
+      <p>$y_i-c=(y_i-\bar y)+(\bar y-c)$ deb yozamiz va kvadratga oshiramiz:</p>
+      <div class="eqd">$$\sum_{i=1}^{n}(y_i-c)^2=\sum_{i=1}^{n}(y_i-\bar y)^2+2(\bar y-c)\sum_{i=1}^{n}(y_i-\bar y)+n(\bar y-c)^2$$</div>
+      <p>O‘rtadagi qo‘shiluvchi nolga teng, chunki o‘rtachadan chetlanishlar yig‘indisi nol: $\sum(y_i-\bar y)=n\bar y-n\bar y=0$. $n$ ga bo‘lib yoyilmani olamiz. Xuddi shu algebra $\mathrm{MSE}=\bar e^{\,2}+\operatorname{Var}(e)$ formulasini va ehtimoliy shaklda siljish va tarqoqlikka yoyilmani beradi.</p>
+    </div></details>
+    <div class="callout note"><b>MAE bilan solishtiring</b><p>MAE uchun eng yaxshi o‘zgarmas — mediana va u chetga chiquvchi qiymatni sezmaydi. MSE uchun — o‘rtacha, uni chetga chiquvchi qiymat o‘zi bilan sudraydi: $\Delta$ ga surilgan bitta nuqta $\Delta$ qancha bo‘lmasin, o‘rtachani $\Delta/n$ ga suradi. <a href="../mae/">MAE sahifasida</a> — mediana uchun xuddi shu tajriba.</p></div>
+
+    <h2 id="derivative">Hosila: xatoga proporsional kuch</h2>
+    <p>Kvadratning hosilasi — $2e$. Bashorat haqiqatdan qancha uzoq bo‘lsa, gradiyent uni shuncha kuchli orqaga tortadi, minimumning o‘zida esa kuch silliq yo‘qoladi. Aynan shu MSE’ni gradiyent tushish uchun shunchalik qulay qiladi.</p>
+    <details class="deep"><summary>Keltirib chiqarish: MSE’ning bashoratlar va parametrlar bo‘yicha hosilasi</summary><div class="deep-body">
+      <p>Bitta obyekt uchun $\ell=(y_i-\hat y_i)^2$. Zanjir qoidasi bo‘yicha, $\partial e_i/\partial\hat y_i=-1$ bilan:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MSE}}{\partial\hat y_i}=\frac1n\cdot2e_i\cdot(-1)=-\frac{2}{n}\bigl(y_i-\hat y_i\bigr)$$</div>
+      <p>$\hat y_i=wx_i+b$ chiziqli model uchun:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MSE}}{\partial w}=-\frac2n\sum_{i=1}^{n}e_i\,x_i,\qquad \frac{\partial\,\mathrm{MSE}}{\partial b}=-\frac2n\sum_{i=1}^{n}e_i$$</div>
+      <p>Matritsa shaklida, $\hat y=X\theta$: $\nabla_\theta\,\mathrm{MSE}=\frac2nX^\top(X\theta-y)$, $\frac2nX^\top X$ gessian esa $\theta$ ga bog‘liq emas — kosaning egriligi hamma joyda bir xil.</p>
+      <p>Har bir bashorat bo‘yicha ikkinchi hosila o‘zgarmas: $\partial^2\mathrm{MSE}/\partial\hat y_i^2=2/n$. Shuning uchun MSE’dagi gradiyent bustingda Nyuton qadami shunchaki bargdagi o‘rtacha qoldiqqa teng va har bir yangi daraxt $y_i-F(x_i)$ qoldiqlarda o‘qitiladi.</p>
+    </div></details>
+    <div class="eqd">$$\frac{\partial\,\mathrm{MSE}}{\partial\hat y_i}=-\frac{2}{n}\bigl(y_i-\hat y_i\bigr)$$</div>
+    <p>Bitta xato uchun gradiyent tushishni ko‘raylik. $\hat y\leftarrow\hat y-\eta\,\partial e^2/\partial\hat y=\hat y+2\eta e$ qadami xatoni $e\leftarrow(1-2\eta)\,e$ ga aylantiradi. Har bir qadam xatoni bir xil songa ko‘paytiradi — geometrik progressiya hosil bo‘ladi.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-derivative" data-config="{&quot;e&quot;: 2.5, &quot;eta&quot;: 0.3}"></div><figcaption><b>3-rasm.</b> Chapda — $e^2$ parabola, boshlang‘ich nuqtadagi urinma va tushish qadamlari; o‘ngda — $2e$ hosila: ko‘k kesmalar uzunligi, ya’ni gradiyentlar xato bilan birga kamayadi. $e_0=2{,}5$ va $\eta=0{,}3$ da ko‘paytuvchi $1-2\eta=0{,}4$: xatolar $1$, $0{,}4$, $0{,}16$. Qadamni o‘zgartiring: $\eta&lt;0{,}5$ da xato monoton kamayadi, $\eta=0{,}5$ da bir qadamda yo‘qoladi, $0{,}5&lt;\eta&lt;1$ da — tebranib, $\eta=1$ da abadiy tebranadi, $\eta&gt;1$ da o‘sadi.</figcaption></figure>
+    <div class="callout intuition"><b>MAE bilan solishtiring</b><p>$|e|$ da $\pm1$ hosila xato kattaligiga bog‘liq emas, shuning uchun o‘zgarmas $\eta$ li qadamlar qisqarmaydi va tushish minimum yonida titraydi (<a href="../mae/">MAE</a> ga qarang). $e^2$ da «tormoz» ichiga o‘rnatilgan: gradiyent tub yonida o‘z-o‘zidan kamayadi va aniq yaqinlashish uchun o‘zgarmas qadam yetarli.</p></div>
+
+    <h2 id="space">Parametrlar ustidagi kosa: EKK va gradiyent tushish</h2>
+    <p>$\hat y=wx+b$ to‘g‘ri chiziqni va beshta nuqtani olamiz: $x=(1;\,2;\,3;\,4;\,5)$, $y=(1{,}3;\,2;\,3{,}1;\,4{,}5;\,7)$. $(w;\,b)$ funksiyasi sifatida MSE — kvadratik forma, uning grafigi — yagona tubli <b>elliptik kosa</b> (paraboloid).</p>
+    <h3>Aniq yechim: normal tenglamalar</h3>
+    <p>Gradiyentni nolga tenglab, chiziqli sistema — normal tenglamalar — va eng kichik kvadratlar usuli yechimini olamiz:</p>
+    <div class="eqd">$$X^\top X\,\theta=X^\top y\quad\Longrightarrow\quad\theta^*=(X^\top X)^{-1}X^\top y;\qquad w^*=\frac{\operatorname{Cov}(x,y)}{\operatorname{Var}(x)},\quad b^*=\bar y-w^*\bar x$$</div>
+    <p>Bizning nuqtalar uchun $w^*=1{,}39$, $b^*=-0{,}59$, $\mathrm{MSE}^*=0{,}2294$. Amalda teskari matritsa hisoblanmaydi: QR yoki SVD yoyilmasi (<code>np.linalg.lstsq</code>), katta ma’lumotlarda esa gradiyent tushish ishlatiladi.</p>
+    <h3>Gradiyent tushish va kosa shakli</h3>
+    <p>Tushish tezligini kosa shakli — $H=\frac2nX^\top X$ gessianning xos sonlari belgilaydi. Tik yo‘nalish ($\lambda_{\max}$) bo‘ylab juda katta qadam tub ustidan oshirib yuboradi, yotiq yo‘nalish ($\lambda_{\min}$) bo‘ylab tushish sudraladi. Bizning ma’lumotlar uchun $\lambda_{\max}=23{,}66$, $\lambda_{\min}=0{,}338$, ularning nisbati — shartlanganlik soni — taxminan $70$: kosa tor jarlikka cho‘zilgan va $\eta_{\text{krit}}=2/\lambda_{\max}\approx0{,}0845$ dan katta qadam uzoqlashishga olib keladi.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-bowl" data-config="{&quot;eta&quot;: 0.05}"></div><figcaption><b>4-rasm.</b> Chapda — $\mathrm{MSE}(w,b)$ kosasi (uni aylantirish mumkin), o‘ngda — yuqoridan ko‘rinish va minimumdan ortiqcha logarifmik shkalada. Start — $y=3$ to‘g‘ri chiziq, $\eta=0{,}05$. 150 qadamda tushish jarlik bo‘ylab faqat $1{,}5\cdot10^{-2}$ ortiqchagacha yetadi; $\eta=0{,}09$ da u sochilib ketadi. Markazlashgan $x-\bar x$ belgiga o‘ting: gessian diagonal bo‘ladi ($\lambda=4$ va $2$), shartlanganlik soni $2$ gacha tushadi, joiz qadam $0{,}5$ gacha o‘sadi va o‘sha $\eta=0{,}05$ da ortiqcha 61-qadamdayoq $10^{-6}$ dan kichik, $\eta=0{,}2$ da esa 13-qadamda.</figcaption></figure>
+    <details class="deep"><summary>Nega yaqinlashish sharti — η < 2/λ_max</summary><div class="deep-body">
+      <p>Kvadratik funksiya uchun gradiyent chiziqli: $\nabla\mathrm{MSE}(\theta)=H(\theta-\theta^*)$. Tushish qadami beradi</p>
+      <div class="eqd">$$\theta_{t+1}-\theta^*=(I-\eta H)(\theta_t-\theta^*)\quad\Longrightarrow\quad\theta_t-\theta^*=(I-\eta H)^t(\theta_0-\theta^*)$$</div>
+      <p>$H$ ning xos vektorlari bazisida har bir koordinata har qadamda $1-\eta\lambda_k$ ga ko‘payadi. Barcha $k$ uchun $|1-\eta\lambda_k|&lt;1$ bo‘lsa, ya’ni $0&lt;\eta&lt;2/\lambda_{\max}$ da tushish yaqinlashadi. $1/\lambda_{\max}&lt;\eta&lt;2/\lambda_{\max}$ da ko‘paytuvchi manfiy — jarlik bo‘ylab zigzag shundan. Eng sekin $\lambda_{\min}$ yo‘nalishi yaqinlashadi: hatto eng yaxshi o‘zgarmas $\eta=2/(\lambda_{\max}+\lambda_{\min})$ qadamda ham xato har qadamda $(\kappa-1)/(\kappa+1)$ marta kamayadi, bu yerda $\kappa=\lambda_{\max}/\lambda_{\min}$. $\kappa=70$ da bu $0{,}97$ — yuzlab qadamlar; $\kappa=2$ da — $1/3$.</p>
+    </div></details>
+    <div class="callout key"><b>Amaliy xulosa</b><p>Belgilarni standartlashtiring (o‘rtachani ayiring, standart chetlanishga bo‘ling) — bu kosani yumaloqlaydi va kattaroq qadam olishga imkon beradi. Moslashuvchan optimizatorlar (<a href="../adam/">Adam</a>, RMSProp) har bir koordinata bo‘yicha shunga o‘xshash masshtablashni avtomatik bajaradi.</p></div>
+
+    <h2 id="biasvar">Siljish va tarqoqlik</h2>
+    <p>Yangi ma’lumotlardagi MSE uch qismdan iborat va bu, ehtimol, qayta o‘qitish haqidagi eng muhim formula. $y=f(x)+\varepsilon$ bo‘lsin, shovqinning o‘rtachasi $0$ va dispersiyasi $\sigma^2$, $\hat f$ model esa tasodifiy tanlanmada o‘qitilgan. U holda $x$ nuqtadagi kutilgan xato:</p>
+    <div class="eqd">$$\mathbb E\bigl[(y-\hat f(x))^2\bigr]=\underbrace{\bigl(f(x)-\mathbb E\hat f(x)\bigr)^2}_{\text{siljish}^2}+\underbrace{\mathbb E\bigl[(\hat f(x)-\mathbb E\hat f(x))^2\bigr]}_{\text{tarqoqlik}}+\underbrace{\sigma^2}_{\text{shovqin}}$$</div>
+    <dl class="symbols"><dt>$\mathbb E\hat f(x)$</dt><dd>barcha mumkin bo‘lgan o‘qitish tanlanmalari bo‘yicha o‘rtacha bashorat;</dd><dt>$\text{siljish}^2$</dt><dd>o‘rtacha model haqiqatdan qanchalik adashadi — juda oddiy model uchun to‘lov;</dd><dt>$\text{tarqoqlik}$</dt><dd>model tanlanmadan tanlanmaga qanchalik o‘zgaradi — juda moslashuvchan model uchun to‘lov;</dd><dt>$\sigma^2$</dt><dd>yo‘qotib bo‘lmaydigan shovqin: uni hech qanday model olib tashlamaydi.</dd></dl>
+    <figure class="viz"><div class="fv" data-viz="mse-biasvar" data-config="{&quot;d&quot;: 3}"></div><figcaption><b>5-rasm.</b> Haqiqat $f(x)=\sin\pi x$, $\sigma=0{,}3$ shovqinli 15 nuqta, 200 ta turli o‘qitish tanlanmasi, $d$ darajali polinomlar. To‘g‘ri chiziq ($d=1$) siljigan: $0{,}204+0{,}012+0{,}09=0{,}306$. $d=3$ da kutilgan xato minimal: $0{,}005+0{,}025+0{,}09=0{,}120$. $d=10$ da siljish deyarli o‘zgarmaydi ($0{,}005$), lekin tarqoqlik $0{,}777$ gacha sakraydi va test MSE — $0{,}872$, garchi o‘qitishdagi MSE atigi $0{,}022$ bo‘lsa ham — shovqinning o‘zidan, $\sigma^2=0{,}09$ dan kichik: model shovqinni yodlab oladi.</figcaption></figure>
+    <details class="deep"><summary>Yoyilmani keltirib chiqarish</summary><div class="deep-body">
+      <p>$\bar f=\mathbb E\hat f(x)$ deb belgilaymiz. Yangi nuqtadagi $\varepsilon$ shovqin o‘qitish tanlanmasiga bog‘liq emas, shuning uchun</p>
+      <div class="eqd">$$\mathbb E(y-\hat f)^2=\mathbb E(f+\varepsilon-\hat f)^2=\sigma^2+\mathbb E(f-\hat f)^2$$</div>
+      <p>So‘ng o‘zgarmas haqidagi bo‘limdagi usulni takrorlaymiz: $f-\hat f=(f-\bar f)+(\bar f-\hat f)$, va kesishgan qo‘shiluvchi yo‘qoladi, chunki $\mathbb E(\bar f-\hat f)=0$:</p>
+      <div class="eqd">$$\mathbb E(f-\hat f)^2=(f-\bar f)^2+\mathbb E(\hat f-\bar f)^2$$</div>
+      <p>Rasmda xuddi shu kattaliklar $x\in[-1;\,1]$ tekis to‘r bo‘yicha o‘rtachalangan. Toq $\sin\pi x$ funksiya uchun juft darajalar deyarli hech narsa qo‘shmaydi: $d=1$ va $d=2$ da siljish bir xil.</p>
+    </div></details>
+    <div class="callout note"><b>Siljigan baho yaxshiroq bo‘lishi mumkin</b><p>Faqat siljishni emas, yig‘indini minimallashtirish kerak. Regulyarizatsiya (ridge regressiya, erta to‘xtatish, modellarni o‘rtachalash) tarqoqlikni ko‘proq kamaytirish uchun ataylab siljish kiritadi va ko‘pincha test MSE’ni pasaytiradi.</p></div>
+
+    <h2 id="probability">Ehtimoliy ma’no: normal shovqin</h2>
+    <p>Nega aynan kvadrat? Eng chuqur javobni Gauss bergan. $y_i=\hat y_i+\varepsilon_i$ bo‘lsin, bu yerda $\varepsilon_i$ shovqin erkli va normal taqsimlangan, $N(0,\sigma^2)$. Bitta kuzatuv zichligi — bashorat atrofidagi qo‘ng‘iroq, tanlanma o‘xshashligi esa — ma’lumot nuqtalaridagi qo‘ng‘iroqlar balandliklarining ko‘paytmasi. O‘xshashlikning manfiy logarifmi:</p>
+    <div class="eqd">$$-\ln L=\frac n2\ln(2\pi\sigma^2)+\frac{1}{2\sigma^2}\sum_{i=1}^{n}\bigl(y_i-\hat y_i\bigr)^2=\frac n2\ln(2\pi\sigma^2)+\frac{n}{2\sigma^2}\,\mathrm{MSE}$$</div>
+    <p>Istalgan belgilangan $\sigma$ da bu MSE’ning o‘suvchi chiziqli funksiyasi. Demak, <b>MSE’ni minimallashtirish — normal shovqindagi maksimal o‘xshashlik usuli</b>. $\sigma$ bo‘yicha minimum yana bir bog‘liqlikni beradi: $\hat\sigma^2=\mathrm{MSE}$.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-gauss" data-config="{&quot;w&quot;: 1, &quot;b&quot;: 0.5, &quot;s&quot;: 0.6}"></div><figcaption><b>6-rasm.</b> Chapda — to‘g‘ri chiziq va uning atrofidagi $N(\hat y_i,\sigma^2)$ normal qo‘ng‘iroqlar; to‘q sariq kesmalar — ma’lumot nuqtalaridagi qo‘ng‘iroqlar balandligi, ya’ni har bir nuqtaning o‘xshashlikka hissasi. O‘ngda — joriy $\sigma$ da MSE funksiyasi sifatida $-\ln L$: bu to‘g‘ri chiziq. $w=1$, $b=0{,}5$, $\sigma=0{,}6$ uchun: $\mathrm{MSE}=0{,}540$, $-\ln L=5{,}791$; $\mathrm{MSE}=0{,}229$ bo‘lgan EKK chizig‘i (qizil nuqta) $-\ln L=3{,}634$ beradi. Joriy chiziq uchun eng yaxshi $\sigma$ — $\sqrt{0{,}54}\approx0{,}735$.</figcaption></figure>
+    <p>Xuddi shu faktning yana bir ifodasi: barcha $g(x)$ funksiyalar orasida $\mathbb E(y-g(x))^2$ kutilgan xato kvadrati $g(x)=\mathbb E[y\mid x]$ da minimal. MSE’da o‘qitilgan model <b>shartli o‘rtachani</b> baholaydi. Agar shovqin nosimmetrik yoki og‘ir dumli bo‘lsa, shartli o‘rtacha «tipik» natijani yomon tasvirlashi mumkin — u holda medianaga (<a href="../mae/">MAE</a>) yoki kvantillarga qarashadi.</p>
+
+    <h2 id="outliers">Chetga chiquvchi qiymatlar: cheklanmagan ta’sir</h2>
+    <p>Kvadratning teskari tomoni — anomal nuqtalarga sezgirlik. Obyektdan keladigan gradiyent uning xatosiga proporsional, shuning uchun uzoqdagi chetga chiquvchi nuqta qancha uzoq bo‘lsa, modelni shuncha kuchli tortadi. Robast statistikada EKK’ning <b>ta’sir funksiyasi cheklanmagan</b> va sinish nuqtasi nol deyiladi: to‘g‘ri chiziqni istalgancha uzoqqa olib ketish uchun bitta nuqta yetarli.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-outlier" data-config="{&quot;y&quot;: 0}"></div><figcaption><b>7-rasm.</b> $y=1+0{,}5x$ atrofidagi o‘nta nuqta va $x=9$ dagi chetga chiquvchi nuqta. U $y=0$ da bo‘lganda MSE chizig‘ining qiyaligi $0{,}291$ gacha tushadi, chetga chiquvchi nuqtaning o‘zi esa kvadratlar yig‘indisining $74\%$ ini beradi. O‘ngda — chetga chiquvchi nuqta balandligi funksiyasi sifatida qiyalik: MSE’da bu to‘g‘ri chiziq (balandlikning har bir birligi qiyalikni $0{,}0375$ ga o‘zgartiradi, $y=-5$ da $0{,}104$ dan $y=13$ da $0{,}779$ gacha), MAE’da qiyalik $0{,}438$ va $0{,}514$ orasida qoladi.</figcaption></figure>
+    <p>MSE kerak bo‘lsa, chetga chiquvchi qiymatlar bilan nima qilish kerak:</p>
+    <ul class="flist"><li>yo‘qotishni <a href="../huber/">Xyuber</a> bilan almashtirish: kichik xatolar uchun kvadrat va kattalar uchun modul — MSE silliqligi va MAE’ning cheklangan ta’siri;</li><li>maqsadli o‘zgaruvchini o‘zgartirish (narxlar va daromadlar uchun $\log y$) — lekin u holda model $y$ ning emas, logarifmning o‘rtachasini baholaydi;</li><li>chetga chiquvchilarni qoldiqlar bo‘yicha topish va tekshirish: juda katta $e_i^2$ li nuqtalar darhol ko‘rinadi;</li><li>ma’lumotlar qism-to‘plamlarida o‘qitiladigan robast moslashtirish algoritmlaridan (RANSAC, Theil–Sen) foydalanish.</li></ul>
+
+    <h2 id="code">Kodda</h2>
+    <p>NumPy’da MSE va uning gradiyenti, EKK’ning aniq yechimi va eng yaxshi o‘zgarmas o‘rtacha ekanini tekshirish:</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+
+def mse(y, y_hat):
+    return np.mean((y - y_hat) ** 2)
+
+def mse_grad(y, y_hat):
+    # bashoratlar bo‘yicha gradiyent: 2(ŷ − y) / n
+    return 2 * (y_hat - y) / y.size
+
+print(mse(y, y_hat))        # 1.4166666666666667
+print(mse_grad(y, y_hat))   # [-0.33333333  0.          1.33333333]
+
+# EKK to‘g‘ri chizig‘i: normal tenglamalarning aniq yechimi
+x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+t = np.array([1.3, 2.0, 3.1, 4.5, 7.0])
+A = np.column_stack([x, np.ones_like(x)])
+w, b = np.linalg.lstsq(A, t, rcond=None)[0]
+print(round(w, 4), round(b, 4), round(mse(t, A @ [w, b]), 4))   # 1.39 -0.59 0.2294
+
+# MSE bo‘yicha eng yaxshi o‘zgarmas — o‘rtacha; MSE(c) = Var + (c − ȳ)²
+data = np.array([2.0, 3.0, 5.0, 9.0, 16.0])
+print(data.mean(), mse(data, data.mean()), mse(data, 12.0))   # 7.0 26.0 51.0</code></pre>
+    <p>PyTorch’da — <code>MSELoss</code>. Bashoratlar bo‘yicha gradiyent — $2(\hat y-y)/n$; 4-rasmdagi xom belgi bo‘yicha $0{,}05$ qadamli tushish o‘sha EKK yechimiga keladi, lekin minglab qadamlarda:</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+y     = torch.tensor([3.0, 5.0, 8.0])
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+
+loss = nn.MSELoss()(y_hat, y)    # ((y_hat - y) ** 2).mean() bilan bir xil
+loss.backward()
+print(loss.item())               # 1.4166666269302368
+print(y_hat.grad)                # tensor([-0.3333,  0.0000,  1.3333])
+
+# to‘g‘ri chiziq uchun gradiyent tushish: η &gt; 2/λ_max ≈ 0.0845 da u uzoqlashadi
+x = torch.tensor([1.0, 2.0, 3.0, 4.0, 5.0])
+t = torch.tensor([1.3, 2.0, 3.1, 4.5, 7.0])
+w = torch.zeros(1, requires_grad=True)
+b = torch.zeros(1, requires_grad=True)
+opt = torch.optim.SGD([w, b], lr=0.05)
+for step in range(2000):
+    opt.zero_grad()
+    nn.functional.mse_loss(w * x + b, t).backward()
+    opt.step()
+print(round(w.item(), 2), round(b.item(), 2))   # 1.39 -0.59</code></pre>
+    <p>scikit-learn’da MSE — regressiya uchun standart metrika, <code>LinearRegression</code> uni aniq minimallashtiradi, busting esa undan standart yo‘qotish sifatida foydalanadi:</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+from sklearn.metrics import mean_squared_error, root_mean_squared_error
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+print(mean_squared_error([3, 5, 8], [2.5, 5, 10]))        # 1.4166666666666667
+print(root_mean_squared_error([3, 5, 8], [2.5, 5, 10]))   # 1.1902380714238083
+
+X = np.array([[1.0], [2.0], [3.0], [4.0], [5.0]])
+y = np.array([1.3, 2.0, 3.1, 4.5, 7.0])
+lr = LinearRegression().fit(X, y)                    # MSE’ni aniq minimallashtiradi
+print(lr.coef_.round(4), round(lr.intercept_, 4))    # [1.39] -0.59
+
+# MSE’dagi busting: har bir daraxt y − F(x) qoldiqlarga moslashtiriladi
+gbr = HistGradientBoostingRegressor(loss=&quot;squared_error&quot;)</code></pre>
+    <div class="callout key"><b>Qoida</b><p>MSE’da o‘qiting, hisobotlarda esa <a href="../mae/">MAE</a> yonida <a href="../rmse/">RMSE</a>’ni ($y$ bilan bir xil birliklarda) ko‘rsating. Ular orasidagi katta farq — xatolarda og‘ir dum yoki chetga chiquvchilar borligi haqida signal.</p></div>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b>MSE’ni «o‘rtacha xato» deb o‘qish</b>. Misoldagi MSE $=1{,}417$ — kvadrat birliklarda; o‘rtacha xato $\sqrt{1{,}417}\approx1{,}19$ (RMSE) yoki $0{,}833$ (MAE) tartibida.</li><li><b>Chetga chiquvchilari bor ma’lumotlarda MSE</b>. Bir nechta anomaliya modelni o‘zi bilan sudrab ketadi (7-rasm). Ma’lumotlarni tozalang, <a href="../huber/">Xyuber</a> yoki MAE’ni oling.</li><li><b>Masshtablanmagan belgilar</b>. Cho‘zilgan kosa — sekin tushish va kichik joiz qadam (4-rasm). Belgilarni standartlashtiring.</li><li><b>Juda katta qadam</b>. $\eta&gt;2/\lambda_{\max}$ da yo‘qotish eksponensial o‘sadi va tezda <code>inf</code> va <code>nan</code> ga aylanadi.</li><li><b>Sigmoida ustidan klassifikatsiya uchun MSE</b>. Model ishonch bilan adashganda ($y=1$ da $p\approx0$) $2(p-y)\,p(1-p)$ gradiyent so‘nadi. Ehtimolliklar uchun <a href="../bce/">BCE</a> yoki <a href="../cross-entropy/">kross-entropiya</a>dan foydalaning.</li><li><b>Modelni o‘qitishdagi MSE bo‘yicha baholash</b>. O‘qitish ma’lumotlaridagi past MSE shovqinni yodlashni anglatishi mumkin (5-rasm, $d=10$). Validatsiyaga qarang.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘liqlik</h2>
+    <ul class="flist"><li><a href="../mae/">MAE</a>: kvadrat o‘rniga modul — o‘rtacha o‘rniga mediana, chetga chiquvchilarga bardoshlilik, lekin nolda sinish.</li><li><a href="../rmse/">RMSE</a>: $\sqrt{\mathrm{MSE}}$ — o‘sha optimal model, lekin xato $y$ birliklarida.</li><li><a href="../huber/">Huber</a>: nol yonida MSE va dumlarda MAE.</li><li><a href="../bce/">BCE</a>: ehtimolliklar uchun MSE analogi — u ham maksimal o‘xshashlik usuli, lekin Bernulli taqsimoti uchun.</li><li><a href="../sgd/">SGD</a> va <a href="../adam/">Adam</a>: MSE’da qadam va masalaning shartlanganligi yaqinlashishni qanday belgilashi yaxshi ko‘rinadi.</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) $\mathrm{MSE}=\frac1n\sum(y_i-\hat y_i)^2$ — xatolar ustidagi kvadratlarning o‘rtacha yuzi; misolda $1{,}417$ va $94\%$ ini bitta xato beradi. 2) Eng yaxshi o‘zgarmas — o‘rtacha va $\mathrm{MSE}(c)=\operatorname{Var}+(c-\bar y)^2$. 3) $-\frac2n(y_i-\hat y_i)$ gradiyent xatoga proporsional va minimum yonida o‘z-o‘zidan so‘nadi. 4) Chiziqli model uchun MSE — $(X^\top X)^{-1}X^\top y$ aniq yechimli kosa; gradiyent tushish $\eta&lt;2/\lambda_{\max}$ da yaqinlashadi, tezlikni shartlanganlik soni belgilaydi. 5) Test MSE = siljish² + tarqoqlik + shovqin. 6) MSE — normal shovqindagi o‘xshashlik; model shartli o‘rtachani baholaydi. 7) Bahosi — chetga chiquvchilarning cheklanmagan ta’siri.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. $y=(1;\,4;\,6)$, $\hat y=(2;\,4;\,3)$. MSE nimaga teng?</legend><div class="opts"><button type="button" data-ok="1">$3{,}333$</button><button type="button" data-ok="0">$1{,}333$</button><button type="button" data-ok="0">$1{,}826$</button><button type="button" data-ok="0">$10$</button></div><div class="explain" hidden>Xatolar $(-1;\,0;\,3)$, kvadratlar $(1;\,0;\,9)$, $\mathrm{MSE}=10/3\approx3{,}333$. $1{,}333$ — bu MAE, $1{,}826$ — RMSE, $10$ — $n$ ga bo‘linmagan kvadratlar yig‘indisi.</div></fieldset><fieldset class="q"><legend>2. $(1;\,2;\,3;\,10;\,50)$ tanlanma uchun qaysi o‘zgarmas MSE’ni minimallashtiradi?</legend><div class="opts"><button type="button" data-ok="0">$3$</button><button type="button" data-ok="1">$13{,}2$</button><button type="button" data-ok="0">$10$</button><button type="button" data-ok="0">$50$</button></div><div class="explain" hidden>MSE minimumi o‘rtachada: $(1+2+3+10+50)/5=13{,}2$. Mediana $3$ MAE’ni minimallashtiradi.</div></fieldset><fieldset class="q"><legend>3. $\partial\,\mathrm{MSE}/\partial\hat y_i$ nimaga teng?</legend><div class="opts"><button type="button" data-ok="1">$-\frac2n(y_i-\hat y_i)$</button><button type="button" data-ok="0">$-\frac1n\operatorname{sign}(y_i-\hat y_i)$</button><button type="button" data-ok="0">$(y_i-\hat y_i)^2$</button><button type="button" data-ok="0">$\frac2n$</button></div><div class="explain" hidden>$\frac{\partial}{\partial\hat y_i}\frac1n(y_i-\hat y_i)^2=\frac1n\cdot2(y_i-\hat y_i)\cdot(-1)$. Ishorali variant — MAE hosilasi, $\frac2n$ — ikkinchi hosila.</div></fieldset><fieldset class="q"><legend>4. MSE gessianining xos sonlari $4$ va $2$. Qanday eng katta o‘zgarmas qadamda gradiyent tushish hali yaqinlashadi?</legend><div class="opts"><button type="button" data-ok="0">$\eta&lt;0{,}25$</button><button type="button" data-ok="1">$\eta&lt;0{,}5$</button><button type="button" data-ok="0">$\eta&lt;1$</button><button type="button" data-ok="0">$\eta&lt;2$</button></div><div class="explain" hidden>Barcha xos sonlar uchun $|1-\eta\lambda|&lt;1$ sharti $\eta&lt;2/\lambda_{\max}=2/4=0{,}5$ ni beradi. Bu aynan 4-rasmdagi markazlashgan holat.</div></fieldset><fieldset class="q"><legend>5. Agar shovqin … taqsimlangan bo‘lsa, MSE’ni minimallashtirish maksimal o‘xshashlik usuli bilan mos keladi</legend><div class="opts"><button type="button" data-ok="0">Laplas bo‘yicha</button><button type="button" data-ok="1">normal</button><button type="button" data-ok="0">tekis</button><button type="button" data-ok="0">Puasson bo‘yicha</button></div><div class="explain" hidden>Normal shovqinda $-\ln L=\frac n2\ln(2\pi\sigma^2)+\frac{n}{2\sigma^2}\mathrm{MSE}$ — MSE’ning o‘suvchi funksiyasi. Laplas shovqini MAE’ga mos keladi.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../mae/"><span class="kicker">← Oldingi formula</span><span class="big">MAE</span><span class="kicker">mean absolute error</span></a>
+<a class="next" href="../rmse/"><span class="kicker">Keyingi formula →</span><span class="big">RMSE</span><span class="kicker">root mean squared error</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

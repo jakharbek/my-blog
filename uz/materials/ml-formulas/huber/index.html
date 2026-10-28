@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Huber yo‘qotish funksiyasi: MSE va MAE orasidagi ko‘prik — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Huber yo‘qotishi batafsil: formula mayda detallarigacha, silliq tutashuv, chegaralangan ψ(r) gradiyent, L(r, δ) 3D-sirti, markaz bahosi, δ = 1,345σ tanlovi, IRLS, chetga chiquvchilar bilan gradiyent tushish, psevdo-Huber, log-cosh, Smooth L1, NumPy va PyTorch kodi.">
+  <meta property="og:title" content="Huber yo‘qotish funksiyasi: MSE va MAE orasidagi ko‘prik — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Huber yo‘qotishi batafsil: formula mayda detallarigacha, silliq tutashuv, chegaralangan ψ(r) gradiyent, L(r, δ) 3D-sirti, markaz bahosi, δ = 1,345σ tanlovi, IRLS, chetga chiquvchilar bilan gradiyent tushish, psevdo-Huber, log-cosh, Smooth L1, NumPy va PyTorch kodi.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/huber/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/huber/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/huber/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/huber/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/huber.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/huber/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/huber/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/huber/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Yo‘qotishlar — regressiya</span>
+  <h1>Huber yo‘qotish funksiyasi: MSE va MAE orasidagi ko‘prik</h1>
+  <p class="dek">O‘rtada parabola, chetlarda to‘g‘ri chiziqlar. Tutashuvda nega qiymatlar ham, qiyaliklar ham mos kelishini, δ chegara chetga chiquvchilar gradiyentini qanday kesishini, Huber bahosi nega o‘rtacha va medianadan yaxshiroq ekanini, sehrli 1,345σ qayerdan kelishini va bu yo‘qotish bugun qayerda ishlashini — robast regressiyadan Fast R-CNN va DQN’gacha — tahlil qilamiz.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 35 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: to‘g‘ri dumli parabola</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#properties"><span class="n">4</span>Xossalar</a>
+      <a href="#derivative"><span class="n">5</span>Hosila: kesilgan qoldiq</a>
+      <a href="#surface"><span class="n">6</span>L(r, δ) sirti 3D’da</a>
+      <a href="#statistics"><span class="n">7</span>Huber bahosi va δ tanlovi</a>
+      <a href="#training"><span class="n">8</span>O‘qitishda Huber</a>
+      <a href="#variants"><span class="n">9</span>Silliq qarindoshlar: psevdo-Huber, log-cosh, Smooth L1</a>
+      <a href="#code"><span class="n">10</span>Kodda</a>
+      <a href="#mistakes"><span class="n">11</span>Keng tarqalgan xatolar</a>
+      <a href="#links"><span class="n">12</span>Boshqa formulalar bilan bog‘liqlik</a>
+      <a href="#summary"><span class="n">13</span>Xulosa</a>
+      <a href="#quiz"><span class="n">14</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$L_\delta(r)=\begin{cases}\tfrac12 r^2, &amp; |r|\le\delta\\[1mm] \delta\bigl(|r|-\tfrac12\delta\bigr), &amp; |r|&gt;\delta\end{cases}$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>Regressiya o‘z xatolaridan $r=y-\hat y$ o‘rganadi. Ikki klassik yo‘qotish «xatoni qanday jazolash» savoliga turlicha javob beradi. <a href="../mse/">MSE</a> kvadrat bilan jazolaydi: u silliq, gradiyenti xatoga proporsional va minimum yaqinida ravon so‘nadi, lekin xatosi 10 bo‘lgan bitta chetga chiquvchi qiymat 1 o‘lchamli yuzta xatoga teng keladi. <a href="../mae/">MAE</a> modul bilan jazolaydi: chetga chiquvchilar unga deyarli ta’sir qilmaydi, ammo nolda sinish bor va gradiyent doim bir xil kattalikda — modelga kichik xatolarni «sayqallash» qiyin.</p>
+    <p>Piter Huber 1964 yilda ikkalasining eng yaxshisini olishni taklif qildi: <b>kichik xatolar uchun parabola, katta xatolar uchun to‘g‘ri chiziq</b>, $\delta$ chegarada almashinadi. Bu g‘oya bugun qayerda ishlaydi:</p>
+    <ul class="flist"><li><b>robast regressiya</b> — scikit-learn’dagi <code>HuberRegressor</code>, statistikadagi M-baholar;</li><li><b>obyektlarni aniqlash</b> — Fast R-CNN va uning avlodlarida ramka koordinatalari regressiyasi uchun Smooth L1; bu ko‘paytuvchi aniqligida Huber;</li><li><b>mustahkamlab o‘qitish</b> — DQN’da vaqtli farq xatosi $[-1;\,1]$ gacha kesiladi, bu $\delta=1$ dagi Huber yo‘qotishiga teng kuchli;</li><li><b>gradiyentli busting</b> — scikit-learn’da <code>loss='huber'</code>, LightGBM’da <code>objective='huber'</code>, XGBoost’da psevdo-Huber;</li><li><b>anomaliyali har qanday ma’lumot</b> — ko‘chmas mulk narxlari, datchik ko‘rsatkichlari, xatoli belgilash.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>$L_\delta(r)$ $|r|\le\delta$ da $\tfrac12r^2$ ga, undan tashqarida $\delta(|r|-\tfrac12\delta)$ ga teng. $|r|=\delta$ nuqtada qiymatlar ($\tfrac12\delta^2$) ham, qiyaliklar ($\delta$) ham mos tushadi. $\psi(r)=\operatorname{clip}(r,-\delta,\delta)$ hosila chegaralangan: chetga chiquvchi qiymat modelni $\delta$ dan kuchliroq tortmaydi. Kichik $\delta$ — MAE’ga yaqinroq, katta $\delta$ — MSE’ga.</p></div>
+
+    <h2 id="intuition">Intuitsiya: to‘g‘ri dumli parabola</h2>
+    <p>Bashoratni javobga tortadigan prujinani tasavvur qiling. Xato kichik ekan, prujina oddiy: qancha cho‘zilsa, shuncha kuchli tortadi — bu $\tfrac12r^2$ parabola. Lekin prujinada saqlagich bor: $\delta$ cho‘zilishdan keyin kuch o‘sishdan to‘xtaydi va $\delta$ ga teng bo‘lib qoladi. Bunday prujinaning energiyasi shundan keyin faqat chiziqli o‘sadi — bular to‘g‘ri dumlar.</p>
+    <p>Nuqtani grafik bo‘ylab torting va $\delta$ ni o‘zgartiring. Firuza $|r|\le\delta$ yo‘lak ichida ko‘k egri chiziq kulrang parabolada, tashqarida esa $\delta(|r|-\delta/2)$ shtrixli to‘g‘ri chiziqda yotadi. To‘q sariq urinma tutashuvdan sinishsiz o‘tadi.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-explorer" data-config="{&quot;delta&quot;: 1, &quot;r&quot;: 2}"></div><figcaption><b>1-rasm.</b> $L_\delta(r)$ Huber yo‘qotishi va uning hosilalari. Pastda: to‘q sariq $\psi(r)=L'_\delta(r)$ yo‘lak ichida qiya, tashqarida gorizontal; binafsha $L''_\delta$ — zinapoya: ichkarida 1, tashqarida 0. $\delta=1$ va $r=2$ da: $\tfrac12r^2=2$ o‘rniga $L=1{,}5$, qiyalik esa 2 emas, 1.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>$|r|=\delta$ tutashuvda egri chiziq paraboladan to‘g‘ri chiziqqa ravon o‘tadi: $\delta(|r|-\delta/2)$ to‘g‘ri chiziq $r=\pm\delta$ nuqtada parabolaga <i>urinma</i>. Sakrash faqat ikkinchi hosilada bor: egrilik 1 dan 0 ga tushadi.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <div class="eqd">$$L_\delta(r)=\begin{cases}\tfrac12 r^2, &amp; |r|\le\delta,\\[1mm] \delta\bigl(|r|-\tfrac12\delta\bigr), &amp; |r|&gt;\delta,\end{cases}\qquad r=y-\hat y$$</div>
+    <dl class="symbols"><dt>$r=y-\hat y$</dt><dd>qoldiq (residual): $y$ javob $\hat y$ bashoratdan qanchalik yuqori; yo‘qotish faqat $|r|$ ga bog‘liq, ishora ahamiyatsiz;</dd><dt>$\delta&gt;0$</dt><dd>chegara: $\delta$ dan kichik xatolar «oddiy shovqin», kattalari shubhali hisoblanadi; $y$ birliklarida o‘lchanadi;</dd><dt>$\tfrac12 r^2$</dt><dd>kvadratik tarmoq — MSE’dagi kabi xato kvadratining aynan yarmi; $\tfrac12$ ko‘paytuvchi hosilani $r$ ga teng qiladi;</dd><dt>$\delta|r|$</dt><dd>chiziqli tarmoq — MAE’dagi kabi $\delta$ vaznli xato moduli;</dd><dt>$-\tfrac12\delta^2$</dt><dd>tarmoqlarni tikadigan pastga siljish: usiz $\delta|r|$ to‘g‘ri chiziq $|r|=\delta$ da $\delta^2$ berardi, parabola esa $\tfrac12\delta^2$ beradi.</dd></dl>
+    <p>Tikishni tekshiramiz. $|r|=\delta$ da kvadratik tarmoq $\tfrac12\delta^2$, chiziqlisi $\delta(\delta-\tfrac12\delta)=\tfrac12\delta^2$ beradi: qiymatlar teng. Hosilalar: parabolada $r=\delta$, to‘g‘ri chiziqda $\delta\operatorname{sign}r=\delta$ — qiyaliklar ham teng. $-\tfrac12\delta^2$ o‘zgarmas aynan to‘g‘ri chiziq parabolaga urinma bo‘lishi uchun tanlangan.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$r$</th><th class=num>$\tfrac12r^2$</th><th class=num>$|r|$</th><th class=num>$L_1(r)$</th><th class=num>$\psi_1(r)$</th></tr></thead><tbody><tr><td class=num>0</td><td class=num>0</td><td class=num>0</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>0,5</td><td class=num>0,125</td><td class=num>0,5</td><td class=num>0,125</td><td class=num>0,5</td></tr><tr><td class=num>1</td><td class=num>0,5</td><td class=num>1</td><td class=num>0,5</td><td class=num>1</td></tr><tr><td class=num>2</td><td class=num>2</td><td class=num>2</td><td class=num>1,5</td><td class=num>1</td></tr><tr><td class=num>3</td><td class=num>4,5</td><td class=num>3</td><td class=num>2,5</td><td class=num>1</td></tr><tr><td class=num>5</td><td class=num>12,5</td><td class=num>5</td><td class=num>4,5</td><td class=num>1</td></tr><tr><td class=num>10</td><td class=num>50</td><td class=num>10</td><td class=num>9,5</td><td class=num>1</td></tr></tbody></table></div>
+    <p>$\delta=1$ uchun jadval asosiy narsani ko‘rsatadi: 10 xatoda kvadrat 50 beradi, Huber esa — 9,5; hosila (oxirgi ustun) esa hech qachon 1 dan oshmaydi.</p>
+    <h3>Umumiy misol</h3>
+    <p>Qo‘llanmadagi misolni olamiz: $y=(3;\,5;\,8)$, $\hat y=(2{,}5;\,5;\,10)$, xatolar $r=(0{,}5;\,0;\,-2)$. $\delta=1$ da birinchi xato parabolaga tushadi: $\tfrac12\cdot0{,}5^2=0{,}125$; ikkinchisi — nol; uchinchisi, $|r|=2&gt;1$, — to‘g‘ri chiziqqa: $1\cdot(2-0{,}5)=1{,}5$. O‘rtacha $(0{,}125+0+1{,}5)/3\approx0{,}542$.</p>
+    <p>Gradiyentlar qiziqroq. MSE yarmida ular xatolarning o‘ziga teng: $(0{,}5;\,0;\,-2)$ — chetga chiquvchi birinchi nuqtadan to‘rt marta kuchliroq tortadi. Huber’da $\psi=(0{,}5;\,0;\,-1)$ — faqat ikki marta: katta xato qolganlarini bosib keta olmaydi.</p>
+    <h3>Masshtab: barcha δ uchun bitta egri chiziq</h3>
+    <p>Agar xatoni chegara birliklarida o‘lchasak, barcha Huber yo‘qotishlari bitta egri chiziqdir:</p>
+    <div class="eqd">$$L_\delta(r)=\delta^2\,L_1\!\left(\frac{r}{\delta}\right)$$</div>
+    <p>Shuning uchun $\delta$ ni «umuman» tanlab bo‘lmaydi: u $y$ birliklariga bog‘liq. 1 so‘mlik va 1 million so‘mlik xato — turli narsalar. Odatda $\delta$ shovqinning tipik tarqoqligi $\sigma$ ulushlarida beriladi ($\delta$ tanlovi bo‘limiga qarang).</p>
+
+    <h2 id="properties">Xossalar</h2>
+    <ul class="flist"><li><b>Manfiy emas va juft</b>: $L_\delta(r)\ge0$, $L_\delta(-r)=L_\delta(r)$, $0$ minimum faqat $r=0$ da.</li><li><b>Qavariq</b>: parabola va uning urinmasi «chuqurliksiz» yopishtirilgan; demak, Huber yo‘qotishli chiziqli regressiyada soxta lokal minimumlar yo‘q.</li><li><b>$C^1$ silliqlik, lekin $C^2$ emas</b>: birinchi hosila uzluksiz, ikkinchisi $|r|=\delta$ da 1 dan 0 ga sakraydi.</li><li><b>Parabola va to‘g‘ri chiziq orasida qisilgan</b>: $\delta|r|-\tfrac12\delta^2\le L_\delta(r)\le\tfrac12r^2$; egri chiziq ulardan biri bilan mos kelmagan joyda farq $\tfrac12(|r|-\delta)^2$ ga teng.</li><li><b>Chegaralangan hosila</b>: $|L'_\delta(r)|\le\delta$ — robastlik uchun asosiy xossa.</li><li><b>Limitlar</b>: $\delta\to\infty$ da $L_\delta(r)\to\tfrac12r^2$ (MSE), $\delta\to0$ da $L_\delta(r)/\delta\to|r|$ (MAE).</li></ul>
+    <details class="deep"><summary>Nega egri chiziq qisilgan va limitlar qayerdan</summary><div class="deep-body">
+      <p>$|r|&gt;\delta$ da: $\tfrac12r^2-\bigl(\delta|r|-\tfrac12\delta^2\bigr)=\tfrac12(|r|-\delta)^2\ge0$, ya’ni to‘g‘ri chiziq paraboladan pastda yotadi. $|r|\le\delta$ da xuddi shu ifoda parabola to‘g‘ri chiziqdan yuqorida ekanini ko‘rsatadi. Demak, $L_\delta$ doim ular orasida va har biri bilan o‘z qismida mos keladi.</p>
+      <p>Limitlar: agar $\delta\ge|r|$ bo‘lsa, $L_\delta(r)=\tfrac12r^2$ aynan — yetarlicha katta chegara kifoya. Agar $\delta&lt;|r|$ bo‘lsa, $\delta\to0$ da $L_\delta(r)/\delta=|r|-\tfrac12\delta\to|r|$.</p>
+    </div></details>
+    <details class="deep"><summary>Huber «yumshatilgan modul» sifatida (Moro qobig‘i)</summary><div class="deep-body">
+      <p>Nafis ekvivalent yozuv bor: agar xatoning $z$ qismini modul narxida «hisobdan chiqarish» mumkin bo‘lsa, Huber yo‘qotishi eng yaxshi murosadir:</p>
+      <div class="eqd">$$L_\delta(r)=\min_{z\in\mathbb R}\Bigl(\tfrac12(r-z)^2+\delta|z|\Bigr)$$</div>
+      <p>Minimumga $z^*=\operatorname{sign}(r)\max(|r|-\delta,\,0)$ yumshoq chegarada erishiladi. Agar $|r|\le\delta$ bo‘lsa, $z^*=0$ va $\tfrac12r^2$ qoladi. Aks holda $z^*=r-\delta\operatorname{sign}r$, va $\tfrac12\delta^2+\delta(|r|-\delta)=\delta|r|-\tfrac12\delta^2$ hosil bo‘ladi. Qavariq tahlilda bu $\delta|\cdot|$ funksiyaning Moro qobig‘i deyiladi: u silliq bo‘lmagan modulni cheksizlikdagi xulqi o‘sha bo‘lgan silliq funksiyaga aylantiradi.</p>
+      <p>Modelli talqin: $y=\hat y+\text{shovqin}+z$, bu yerda $z$ — kamdan-kam «anomaliya». Huber yo‘qotishi xatoning qaysi qismini anomaliya, qaysi qismini gauss shovqini bilan tushuntirishni o‘zi hal qiladi.</p>
+    </div></details>
+
+    <h2 id="derivative">Hosila: kesilgan qoldiq</h2>
+    <p>Statistikada qoldiq bo‘yicha hosila $\psi$ bilan belgilanadi va ta’sir funksiyasi (influence function) deyiladi: u bitta nuqta bahoni qanday kuch bilan tortishini ko‘rsatadi.</p>
+    <div class="eqd">$$\psi_\delta(r)=L'_\delta(r)=\begin{cases}r, &amp; |r|\le\delta,\\ \delta\operatorname{sign}r, &amp; |r|&gt;\delta\end{cases}=\operatorname{clip}(r,\,-\delta,\,\delta)$$</div>
+    <details class="deep"><summary>Qadam-baqadam keltirib chiqarish</summary><div class="deep-body">
+      <p>Yo‘lak ichida $(\tfrac12r^2)'=r$. Tashqarida $|r|$ ning hosilasi $\operatorname{sign}r$, shuning uchun $\bigl(\delta|r|-\tfrac12\delta^2\bigr)'=\delta\operatorname{sign}r$. $r=\pm\delta$ nuqtalarda chap va o‘ng hosilalar mos keladi ($\pm\delta$), demak, hosila mavjud va uzluksiz.</p>
+      <p>Bashorat bo‘yicha — zanjir qoidasi: $\dfrac{\partial L_\delta}{\partial\hat y}=\psi_\delta(r)\cdot\dfrac{\partial r}{\partial\hat y}=-\psi_\delta(y-\hat y)$.</p>
+      <p>Ikkinchi hosila: $|r|&lt;\delta$ da $L''_\delta(r)=1$, $|r|&gt;\delta$ da $0$; $\pm\delta$ nuqtalarda u yo‘q — chap va o‘ng hosilalar mos kelmaydi.</p>
+    </div></details>
+    <div class="eqd">$$\frac{\partial L_\delta}{\partial\hat y}=-\operatorname{clip}\bigl(y-\hat y,\,-\delta,\,\delta\bigr)$$</div>
+    <p>Uch yo‘qotishni taqqoslang. MSE’da ($\tfrac12r^2$) $\psi=r$ tortish chegarasiz o‘sadi. MAE’da tortish o‘zgarmas. Huber’da u nuqta «o‘zimizniki» ekan o‘sadi va nuqta shubhali bo‘lganda $\delta$ darajasida to‘xtaydi. Ikkinchi foydali rasm — nuqtaning <b>vazni</b> $w(r)=\psi(r)/r$: nuqta oddiy eng kichik kvadratlar usuliga (EKKU) nisbatan «ovoz»ning qancha ulushini oladi.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-influence" data-config="{&quot;delta&quot;: 1, &quot;r&quot;: 4}"></div><figcaption><b>2-rasm.</b> Chapda — $\psi(r)$ tortish, o‘ngda — $w(r)=\psi(r)/r$ vazn. $\delta=1$ da $r=4$ xatoli nuqta MSE’da 4 kuch bilan, Huber’da 1 kuch bilan tortadi, ya’ni $0{,}25$ vazn oladi. $|r|\le\delta$ yo‘lak ichida vazn 1 ga teng: Huber oddiy nuqtalarga tegmaydi.</figcaption></figure>
+    <div class="callout note"><b>Nega ψ yo‘qotishning o‘zidan muhimroq</b><p>Model optimumi yo‘qotish qiymati bilan emas, $\sum_i\psi(r_i)\,\partial\hat y_i/\partial\theta=0$ tenglama bilan aniqlanadi. Shuning uchun robastlik — $\psi$ ning xossasi: chegaralangan $\psi$ hech bir yolg‘iz chetga chiquvchi yechimni istalgancha uzoqqa sura olmasligini bildiradi. MSE’da $\psi$ chegaralanmagan va bitta chetga chiquvchi o‘rtachani istalgan joyga suradi.</p></div>
+
+    <h2 id="surface">L(r, δ) sirti 3D’da</h2>
+    <p>Yo‘qotishni ikki o‘zgaruvchi — $r$ xato va $\delta$ chegara funksiyasi sifatida ko‘raylik. Bu butun egri chiziqlar oilasini birdaniga va chegara shaklni qanday o‘zgartirishini ko‘rishga yordam beradi.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-surface" data-config="{&quot;delta&quot;: 1}"></div><figcaption><b>3-rasm.</b> Chapda — $L_\delta(r)$ sirti (uni aylantirish mumkin), to‘q sariq chiziqlar — $|r|=\delta$ tutashuv, ko‘k — tanlangan $\delta$ dagi kesim. O‘ngda — sath chiziqlari bilan yuqoridan ko‘rinish. $|r|\le\delta$ «pona» ichida chiziqlar vertikal, tashqarida egiladi. Psevdo-Huber’ga o‘tkazing: tutashuv yo‘qoladi, sirt hamma joyda silliq.</figcaption></figure>
+    <p>Ikki narsa darhol ko‘rinadi. Birinchidan, tutashuv ostida, $|r|\le\delta$ da, sirt $\delta$ ga bog‘liq emas: u yerda doim $\tfrac12r^2$, va $L=c$ sath chiziqlari — $r=\pm\sqrt{2c}$ vertikal to‘g‘ri chiziqlar. Ikkinchidan, tashqarida $L=c$ sath chizig‘i — $|r|=c/\delta+\delta/2$: chegara qancha kichik bo‘lsa, o‘sha yo‘qotishni yig‘ish uchun shuncha uzoqqa borish kerak.</p>
+    <div class="callout note"><b>Ko‘p o‘lchovli holat</b><p>Javob vektor bo‘lganda (masalan, aniqlashda ramkaning to‘rtta koordinatasi), Huber yo‘qotishi odatda har bir koordinata bo‘yicha hisoblanib qo‘shiladi: $\sum_jL_\delta(r_j)$. Bunday yig‘indining $(r_1,r_2)$ tekislikdagi sath chiziqlari — burchaklari yumaloqlangan kvadratlar, gradiyent esa har bir koordinata bo‘yicha alohida kesiladi. Bu butun xato vektorining uzunligi kesiladigan $L_\delta(\|r\|)$ bilan bir xil emas.</p></div>
+
+    <h2 id="statistics">Huber bahosi va δ tanlovi</h2>
+    <p>Huber o‘z funksiyasini statistikaning eng oddiy masalasi — $x_1,\dots,x_n$ tanlanma markazini baholash uchun o‘ylab topgan. $\sum(x_i-\mu)^2$ ni minimallashtirsak, o‘rtacha; $\sum|x_i-\mu|$ ni — mediana chiqadi. Huber bahosi $\hat\mu$ $\sum L_\delta(x_i-\mu)$ ni minimallashtiradi, ya’ni quyidagi tenglamani yechadi</p>
+    <div class="eqd">$$\sum_{i=1}^{n}\psi_\delta(x_i-\hat\mu)=0$$</div>
+    <p>$|x_i-\hat\mu|\le\delta$ zona ichidagi nuqtalar o‘rtachadagi kabi qatnashadi, uzoqdagilari esa medianadagi kabi faqat ishorasi bilan, $\delta$ kuch bilan.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-location" data-config="{&quot;delta&quot;: 1}"></div><figcaption><b>4-rasm.</b> 5 atrofidagi 13 qiymat va ikkita chetga chiquvchi (qizil; o‘ngdagisini tortish mumkin). Ustun balandligi — nuqtaning bahodagi vazni. $\delta=1$ da: o‘rtacha $6{,}079$, mediana $5{,}557$, Huber bahosi $5{,}369$ — haqiqiy markaz 5 ga hammadan yaqin. O‘ngda — $\hat\mu(\delta)$ yo‘li: $\delta\to0$ da baho medianaga intiladi, $\delta\ge7{,}42$ da esa o‘rtacha bilan mos tushadi.</figcaption></figure>
+    <p>O‘ng grafikka e’tibor bering: $\hat\mu(\delta)$ yo‘li mediana va o‘rtacha orasida yotishi <b>shart emas</b> — $\delta=1$ da baho ikkalasidan ham past. Limit qiymatlar aniq: $\delta\to0$ da mediana chiqadi, $\delta$ o‘rtachadan eng uzoq nuqtagacha masofadan oshishi bilan (bu yerda $13{,}5-6{,}079\approx7{,}42$) barcha nuqtalar kvadratik zonada va $\hat\mu$ o‘rtachaga teng.</p>
+    <h3>Robastlik narxi: 1,345σ qoidasi</h3>
+    <p>Agar ma’lumotlar haqiqatan normal va chetga chiquvchilarsiz bo‘lsa, eng yaxshi baho — o‘rtacha. Huber qanchalik yomonroq? Buni <b>asimptotik samaradorlik</b> o‘lchaydi: o‘rtacha dispersiyasining baho dispersiyasiga nisbati. $k$ chegarali ($\sigma$ birliklarida) $\psi$ uchun standart normal $X$ da:</p>
+    <div class="eqd">$$\operatorname{Var}\hat\mu\approx\frac{\sigma^2}{n}\cdot\frac{\mathbb E\,\psi_k(X)^2}{\bigl(\mathbb E\,\psi'_k(X)\bigr)^2},\qquad \mathbb E\,\psi'_k=2\Phi(k)-1,\quad \mathbb E\,\psi_k^2=2\Phi(k)-1-2k\varphi(k)+2k^2\bigl(1-\Phi(k)\bigr)$$</div>
+    <p>«Samaradorlik $=95\%$» ni yechsak, $k\approx1{,}345$ chiqadi. Klassik $\delta=1{,}345\,\sigma$ tanlovi shundan: chetga chiquvchilardan himoya evaziga toza ma’lumotlarda atigi 5% yo‘qotish. Medianing samaradorligi $2/\pi\approx64\%$.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-efficiency" data-config="{&quot;k&quot;: 1.345, &quot;eps&quot;: 0.05}"></div><figcaption><b>5-rasm.</b> $(1-\varepsilon)N(0,1)+\varepsilon N(0,10^2)$ aralashma uchun markaz bahosi dispersiyasi ($\sigma^2/n$ birliklarida). $k=1{,}345$ da toza ma’lumotlardagi samaradorlik — $95{,}0\%$. $\varepsilon=0{,}05$ da o‘rtacha dispersiyasi $5{,}95$, mediananiki $1{,}722$, $k=1{,}345$ li Huber’niki $1{,}229$; bu aralashma uchun eng yaxshi chegara $k\approx1{,}48$ (bo‘sh doiracha).</figcaption></figure>
+    <div class="callout history"><b>Huber minimaksi</b><p>1964 yilgi maqolada Huber ko‘proq narsani isbotladi: agar qanday chetga chiquvchilar uchrashi noma’lum bo‘lib, faqat ularning $\varepsilon$ ulushi ma’lum bo‘lsa, $\psi_k$ li baho <i>eng yomon holdagi</i> dispersiyani minimallashtiradi. Chegara ulush bilan $2\varphi(k)/k-2\Phi(-k)=\varepsilon/(1-\varepsilon)$ tenglama orqali bog‘langan: $\varepsilon=0{,}05$ uchun bu $k\approx1{,}40$, $\varepsilon=0{,}01$ uchun $k\approx1{,}95$.</p></div>
+    <div class="callout warn"><b>σ ni ham robast baholash kerak</b><p>Agar $\sigma$ oddiy standart chetlanish bilan hisoblansa, $\delta=1{,}345\sigma$ qoidasi foydasiz: chetga chiquvchilar uni shishiradi. Median absolyut chetlanishdan foydalaning: $\hat\sigma=\operatorname{MAD}/0{,}6745\approx1{,}4826\cdot\operatorname{median}|r_i-\operatorname{median}(r)|$. <code>HuberRegressor</code>’da masshtab koeffitsiyentlar bilan birga baholanadi, standart <code>epsilon=1.35</code> esa aynan $k$.</p></div>
+
+    <h2 id="training">O‘qitishda Huber</h2>
+    <p>To‘g‘ri chiziqni gradiyent tushish bilan ikki usulda — MSE yarmida va Huber yo‘qotishida — bir xil ma’lumotlarda o‘qitamiz: $\sigma=0{,}5$ shovqinli $y=1+0{,}5x$ atrofidagi 30 nuqta va pastki o‘ngda uchta chetga chiquvchi. Chegara $\delta=0{,}7\approx1{,}345\cdot0{,}5$.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-regression" data-config="{&quot;delta&quot;: 0.7}"></div><figcaption><b>6-rasm.</b> «Boshlash»ni bosing. Ikkala model $y=0$ to‘g‘ri chiziqdan boshlaydi va bir xil qadamlar qiladi ($\eta=0{,}15$). MSE tezda $0{,}363$ qiyalikka yaqinlashadi — chetga chiquvchilar to‘g‘ri chiziqni ag‘daradi. Huber avvaliga sekinroq yuradi (barcha xatolar katta va har biri $\delta$ dan kuchli tortmaydi), lekin haqiqiy $0{,}5$ ga qarshi $0{,}511$ qiyalikka keladi. Chetdagi chetga chiquvchini torting — o‘qitish paytida yoki undan oldin.</figcaption></figure>
+    <p>Tushish qadami mexanizmni ko‘rsatadi: har bir nuqta parametrlarni $\psi(r_i)$ ga proporsional tortadi. To‘g‘ri chiziq barcha nuqtalardan uzoq ekan, Huber’da barcha tortishlar $\pm\delta$ ga teng — u MAE kabi o‘zgarmas tezlikda harakatlanadi. To‘g‘ri chiziq nuqtalarning asosiy qismiga yaqinlashganda ularning xatolari kvadratik zonaga tushadi va tushish oddiy EKKU’ga aylanadi — endi $\delta$ «arqonida» qolgan chetga chiquvchilarsiz.</p>
+    <div class="eqd">$$\theta\leftarrow\theta+\eta\,\frac1n\sum_{i=1}^{n}\psi_\delta\bigl(y_i-\hat y_i\bigr)\,\frac{\partial\hat y_i}{\partial\theta}$$</div>
+    <details class="deep"><summary>IRLS: Huber vaznli EKKU sifatida</summary><div class="deep-body">
+      <p>$\hat y_i=x_i^\top\beta$ chiziqli model uchun $\sum_i\psi(r_i)x_i=0$ optimallik shartini $w_i=\psi(r_i)/r_i=\min(1,\delta/|r_i|)$ vaznlar bilan $\sum_iw_ir_ix_i=0$ ko‘rinishida qayta yozish mumkin. Vaznlar muzlatilsa, bu vaznli EKKU’ning oshkor yechiladigan normal tenglamalari:</p>
+      <div class="eqd">$$\beta^{(t+1)}=\bigl(X^\top W^{(t)}X\bigr)^{-1}X^\top W^{(t)}y,\qquad W^{(t)}=\operatorname{diag}\bigl(w_i(\beta^{(t)})\bigr)$$</div>
+      <p>«Qoldiqlarni hisoblash → vaznlarni yangilash → EKKU’ni yechish» iteratsiyalari (iteratively reweighted least squares) o‘nga yaqin qadamda Huber bahosiga yaqinlashadi. Vaznlar 2-rasmning o‘ng qismidagilarning o‘zi.</p>
+    </div></details>
+    <h3>Huber o‘qitish ichida yana qayerda ishlaydi</h3>
+    <ul class="flist"><li><b>Gradiyentli busting.</b> Har bir yangi daraxt yo‘qotishning antigradiyentini o‘rganadi. Huber uchun bu $\psi(r_i)$ — <i>kesilgan</i> qoldiqlar, shuning uchun bitta anomal qiymat daraxtni chetga chiquvchiga barg sarflashga majburlamaydi. scikit-learn’da $\delta$ chegara har iteratsiyada $|r_i|$ ning $\alpha$-kvantili sifatida olinadi (standart $\alpha=0{,}9$).</li><li><b>DQN.</b> DeepMind maqolasida (2015) vaqtli farq xatosi $[-1;\,1]$ gacha kesilgan. Kesilgan gradiyent — aynan $\psi_1$, ya’ni $\delta=1$ dagi Huber yo‘qotishida o‘qitish: kamdan-kam ulkan mukofotlar tarmoqni buzmaydi.</li><li><b>Fast R-CNN.</b> Ramka koordinatalari regressiyasi uchun Girshik (2015) Smooth L1 ni oldi: u «chetga chiquvchilarga L2 dan kamroq sezgir» va gradiyent portlashidan qochish uchun o‘qitish tezligini sinchiklab sozlashni talab qilmaydi.</li></ul>
+
+    <h2 id="variants">Silliq qarindoshlar: psevdo-Huber, log-cosh, Smooth L1</h2>
+    <p>Ikkinchi hosiladagi sakrash gradiyent tushishga xalaqit bermaydi, lekin ikkinchi tartibli usullarga xalaqit beradi. XGBoost va LightGBM Nyuton qadamini qiladi: barg $-\sum g_i/\sum h_i$ qiymat oladi, bu yerda $h_i$ — ikkinchi hosilalar. Huber’ning haqiqiy ikkinchi hosilasi barcha chetga chiquvchilar uchun nolga teng, va bargga faqat ular tushsa, maxraj nolga aylanadi. Shuning uchun realizatsiyalar uni yo o‘zgarmas bilan almashtiradi (LightGBM <code>objective='huber'</code> da shunday qiladi), yoki silliq variantni oladi.</p>
+    <div class="eqd">$$\text{psevdo-Huber: }\;\delta^2\Bigl(\sqrt{1+(r/\delta)^2}-1\Bigr),\qquad \text{log-cosh: }\;\delta^2\ln\cosh\frac{r}{\delta},\qquad \text{Smooth L1: }\;\frac{L_\beta(r)}{\beta}$$</div>
+    <figure class="viz"><div class="fv" data-viz="huber-variants" data-config="{&quot;variant&quot;: &quot;pseudo&quot;, &quot;delta&quot;: 1, &quot;r&quot;: 3}"></div><figcaption><b>7-rasm.</b> Bir xil $\delta$ da Huber va uning qarindoshlari. Psevdo-Huber va log-cosh ham nol atrofida $\tfrac12r^2$ kabi, dumlarda $\delta|r|$ kabi o‘zini tutadi, lekin o‘tish ravon, ikkinchi hosila (pastdagi belgi) esa uzluksiz. $\delta=1$, $r=3$ da: Huber $2{,}5$, psevdo-Huber $2{,}162$, log-cosh $2{,}309$.</figcaption></figure>
+    <ul class="flist"><li><b>Psevdo-Huber</b> (kompyuter ko‘rishida $\delta$ ko‘paytuvchi aniqligida — Sharbonye yo‘qotishi $\sqrt{r^2+\delta^2}-\delta$): $r/\sqrt{1+(r/\delta)^2}$ hosila $\pm\delta$ ga sekin intiladi; $(1+(r/\delta)^2)^{-3/2}$ ikkinchi hosila hamma joyda musbat. XGBoost’da — <code>huber_slope</code> ($=\delta$) parametrli <code>objective='reg:pseudohubererror'</code>.</li><li><b>log-cosh</b>: $\delta\tanh(r/\delta)$ hosila — silliq «kesish»; dumlarda $\delta^2\ln\cosh(r/\delta)\approx\delta|r|-\delta^2\ln2$.</li><li><b>Smooth L1</b> — $\beta$ ga bo‘lingan Huber: $|r|&lt;\beta$ da $\tfrac{0{,}5r^2}{\beta}$ va undan tashqarida $|r|-\tfrac12\beta$. $\beta\to0$ da u $|r|$ ga intiladi (Huber esa nolga). PyTorch’da: <code>HuberLoss(delta=δ) = δ · SmoothL1Loss(beta=δ)</code>.</li></ul>
+
+    <h2 id="code">Kodda</h2>
+    <p>Formulaning o‘zi — <code>np.where</code> bilan bitta qator. Gradiyent — <code>np.clip</code>. Quyida — realizatsiya, umumiy misolda tekshirish va IRLS orqali Huber regressiyasi.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def huber(r, delta=1.0):
+    &quot;&quot;&quot;r = y − ŷ qoldiqlar uchun Huber yo‘qotishi (elementma-element).&quot;&quot;&quot;
+    a = np.abs(r)
+    return np.where(a &lt;= delta, 0.5 * r**2, delta * (a - 0.5 * delta))
+
+def huber_grad(r, delta=1.0):
+    &quot;&quot;&quot;ψ(r) = dL/dr — [−δ, δ] gacha kesilgan qoldiq. ŷ bo‘yicha — minus ishora bilan.&quot;&quot;&quot;
+    return np.clip(r, -delta, delta)
+
+def pseudo_huber(r, delta=1.0):
+    return delta**2 * (np.sqrt(1.0 + (r / delta)**2) - 1.0)
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+r = y - y_hat               # [ 0.5  0.  -2. ]
+print(huber(r))             # [0.125 0.    1.5  ]
+print(huber(r).mean())      # 0.5416666666666666
+print(huber_grad(r))        # [ 0.5  0.  -1. ]</code></pre>
+    <pre class="code"><span class="lang">python</span><code>def huber_regression(X, y, delta=1.345, iters=50):
+    &quot;&quot;&quot;IRLS usulidagi Huber regressiyasi: w_i = min(1, δ·s/|r_i|) vaznli EKKU.&quot;&quot;&quot;
+    X1 = np.column_stack([np.ones(len(X)), X])
+    beta = np.linalg.lstsq(X1, y, rcond=None)[0]           # boshlanish — oddiy EKKU
+    for _ in range(iters):
+        r = y - X1 @ beta
+        s = np.median(np.abs(r - np.median(r))) / 0.6745   # robast masshtab (MAD)
+        w = np.minimum(1.0, delta * s / np.maximum(np.abs(r), 1e-12))
+        sw = np.sqrt(w)
+        beta = np.linalg.lstsq(X1 * sw[:, None], y * sw, rcond=None)[0]
+    return beta
+
+rng = np.random.default_rng(0)
+x = np.linspace(0, 10, 30)
+y = 1 + 0.5 * x + rng.normal(0, 0.5, 30)
+y[-3:] -= 6                                                # uchta chetga chiquvchi
+X1 = np.column_stack([np.ones(30), x])
+print(np.linalg.lstsq(X1, y, rcond=None)[0].round(3))      # [1.931 0.182] — EKKU
+print(huber_regression(x, y).round(3))                     # [1.134 0.442] — Huber</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+y = torch.tensor([3.0, 5.0, 8.0])
+
+loss = nn.HuberLoss(delta=1.0)(y_hat, y)   # o‘rtacha: 0.5417
+loss.backward()
+print(y_hat.grad)       # tensor([-0.1667,  0.0000,  0.3333]) = ψ(ŷ − y) / n
+
+# Fast R-CNN’dagi Smooth L1 — β ga bo‘lingan Huber (β = δ):
+huber2 = nn.HuberLoss(delta=2.0)(y_hat, y)        # 0.7083
+sl1_2 = nn.SmoothL1Loss(beta=2.0)(y_hat, y)       # 0.3542 = 0.7083 / 2</code></pre>
+    <div class="callout key"><b>Tayyor realizatsiyalar</b><p>PyTorch: <code>nn.HuberLoss(delta)</code>, <code>nn.SmoothL1Loss(beta)</code>. Keras: <code>keras.losses.Huber(delta)</code>. scikit-learn: <code>HuberRegressor(epsilon=1.35)</code>, <code>GradientBoostingRegressor</code> (<code>loss='huber'</code>, <code>alpha=0.9</code>). LightGBM: <code>objective='huber'</code> (chegara — <code>alpha</code> parametri). XGBoost: <code>objective='reg:pseudohubererror'</code>.</p></div>
+
+    <h2 id="mistakes">Keng tarqalgan xatolar</h2>
+    <ol class="flist"><li><b>Masshtabni hisobga olmagan δ.</b> Dollardagi narxlar va milliondagi narxlar uchun $\delta=1$ — butunlay turli yo‘qotishlar. Maqsadli o‘zgaruvchini normallang yoki $\delta$ ni robast tarqoqlik birliklarida bering.</li><li><b>Huber va Smooth L1 ni chalkashtirish.</b> Ular $1/\beta$ ko‘paytuvchiga farq qiladi: bir xil chegarada Smooth L1 $\beta$ marta kichik yo‘qotish va gradiyent beradi. Birini boshqasiga almashtirganda o‘qitish tezligini qayta sozlang.</li><li><b>$1{,}345\sigma$ qoidasi uchun σ ni oddiy std bilan baholash</b> — chetga chiquvchilar std ni shishiradi, chegara juda katta bo‘lib qoladi va himoya yo‘qoladi. MAD dan foydalaning.</li><li><b>Huber belgilardagi chetga chiquvchilardan qutqaradi deb kutish.</b> U katta $r$ qoldiqning ta’sirini cheklaydi, lekin ekstremal $x$ li nuqta (yuqori richag, leverage) baribir to‘g‘ri chiziqni burib yuborishi mumkin. Buning uchun boshqa usullar kerak (masalan, $x$ bo‘yicha vaznlar).</li><li><b>Nyuton usulli bustingda Huber</b> tekshiruvsiz: chetga chiquvchilarning nol ikkinchi hosilalari barg qadamlarini beqaror qiladi. Psevdo-Huber’dan yoki buni hisobga oladigan realizatsiyadan foydalaning.</li><li><b>Turli δ dagi yo‘qotish qiymatlarini taqqoslash.</b> Boshqa shartlar teng bo‘lsa, $L_\delta$ qiymati $\delta$ bilan o‘sadi; modellarni yo‘qotishning o‘zi bilan emas, tashqi metrika (validatsiyadagi MAE, RMSE) bilan taqqoslang.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘liqlik</h2>
+    <ul class="flist"><li><a href="../mse/">MSE</a>: $\delta\ge\max|r_i|$ da Huber yo‘qotishi xato kvadratining yarmiga, baho esa EKKU’ga teng.</li><li><a href="../mae/">MAE</a>: $\delta\to0$ da $L_\delta/\delta\to|r|$; markaz bahosi medianaga intiladi.</li><li><a href="../rmse/">RMSE</a>: chetga chiquvchilar eng oson buzadigan metrika; Huber barqaror o‘qitish va toza ma’lumotlarda RMSE bo‘yicha hisobot berish imkonini beradi.</li><li><a href="../relu/">ReLU</a> va kesish: $\psi_\delta(r)=\operatorname{clip}(r,-\delta,\delta)$ — ReLU6 va gradient clipping’dagi «chegaragacha chiziqli» g‘oyaning o‘zi.</li><li><a href="../focal/">Focal Loss</a> — qarama-qarshi falsafa: Huber eng katta xatolarni <i>susaytiradi</i> (ularni chetga chiquvchi deb hisoblab), focal loss esa qiyin misollar vaznini oson misollarga nisbatan <i>oshiradi</i>.</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) $L_\delta(r)$ — $|r|\le\delta$ da $\tfrac12r^2$ parabola va undan tashqarida unga urinma $\delta(|r|-\tfrac12\delta)$ to‘g‘ri chiziq; funksiya qavariq va $C^1$, lekin $C^2$ emas. 2) $\psi=\operatorname{clip}(r,-\delta,\delta)$ hosila chegaralangan — chetga chiquvchi $\delta$ dan kuchli tortmaydi; nuqta vazni $\min(1,\delta/|r|)$. 3) $\delta\to\infty$ — MSE va o‘rtacha, $\delta\to0$ — MAE va mediana. 4) $\delta=1{,}345\sigma$ (σ MAD bo‘yicha) normal ma’lumotlarda 95% samaradorlik beradi. 5) Silliq versiyalar — psevdo-Huber va log-cosh — ikkinchi tartibli usullarga kerak; Smooth L1 — β ga bo‘lingan o‘sha Huber.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. $L_1(3)$ — $\delta=1$ li Huber yo‘qotishi 3 xatoda nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$4{,}5$</button><button type="button" data-ok="0">$3$</button><button type="button" data-ok="1">$2{,}5$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>$|r|=3&gt;\delta$, chiziqli tarmoq: $1\cdot(3-0{,}5)=2{,}5$. Kvadrat yarmi $4{,}5$ berardi.</div></fieldset><fieldset class="q"><legend>2. $|\partial L_\delta/\partial\hat y|$ eng katta qanday qiymat qabul qilishi mumkin?</legend><div class="opts"><button type="button" data-ok="0">Chegaralanmagan</button><button type="button" data-ok="1">$\delta$</button><button type="button" data-ok="0">$\tfrac12\delta^2$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>Hosila — $\operatorname{clip}(r,-\delta,\delta)$ kesilgan qoldiq, moduli $\delta$ dan oshmaydi.</div></fieldset><fieldset class="q"><legend>3. $|r|=\delta$ nuqtada nima bo‘ladi?</legend><div class="opts"><button type="button" data-ok="0">Qiymat uziladi</button><button type="button" data-ok="0">Sinish: birinchi hosila sakraydi</button><button type="button" data-ok="1">Qiymat va birinchi hosila uzluksiz, ikkinchisi sakraydi</button><button type="button" data-ok="0">Hech narsa, funksiya cheksiz silliq</button></div><div class="explain" hidden>Tarmoqlar $\tfrac12\delta^2$ qiymat va $\delta$ qiyalik bo‘yicha tikilgan; ikkinchi hosila 1 dan 0 ga o‘tadi. Shuning uchun Huber — $C^1$, lekin $C^2$ emas.</div></fieldset><fieldset class="q"><legend>4. $\delta\to0$ da va juda katta $\delta$ da Huber markaz bahosi nimaga intiladi?</legend><div class="opts"><button type="button" data-ok="0">O‘rtacha va medianaga</button><button type="button" data-ok="1">Mediana va o‘rtachaga</button><button type="button" data-ok="0">Moda va o‘rtachaga</button><button type="button" data-ok="0">Nol va cheksizlikka</button></div><div class="explain" hidden>Kichik chegara har bir nuqtadan faqat ishorani qoldiradi — mediana chiqadi; katta chegara barcha nuqtalarni «o‘zimizniki» qiladi — o‘rtacha chiqadi.</div></fieldset><fieldset class="q"><legend>5. Nega chegara ko‘pincha $1{,}345\sigma$ ga teng olinadi?</legend><div class="opts"><button type="button" data-ok="0">Shunda baho siljimagan bo‘ladi</button><button type="button" data-ok="1">Bu robastlikni saqlagan holda normal ma’lumotlarda 95% samaradorlik</button><button type="button" data-ok="0">Shunda aynan 5% nuqta tashlab yuboriladi</button><button type="button" data-ok="0">Bu qoldiqlar modulining 0,9 kvantili</button></div><div class="explain" hidden>$k=1{,}345$ da toza normal tanlanmada Huber bahosi dispersiyasi o‘rtacha dispersiyasidan atigi $1/0{,}95$ marta katta; bunda chetga chiquvchilar ta’siri cheklangan. Hech qanday nuqta tashlanmaydi — uzoqdagilari shunchaki kichikroq vazn oladi.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../mape/"><span class="kicker">← Oldingi formula</span><span class="big">MAPE</span><span class="kicker">mean absolute percentage error</span></a>
+<a class="next" href="../bce/"><span class="kicker">Keyingi formula →</span><span class="big">BCE</span><span class="kicker">binar kross-entropiya</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

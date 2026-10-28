@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Функция потерь Хьюбера: мост между MSE и MAE — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="Потеря Хьюбера подробно: формула по косточкам, гладкость стыка, ограниченный градиент ψ(r), 3D-поверхность L(r, δ), оценка центра, выбор δ = 1,345σ, IRLS, градиентный спуск с выбросами, псевдо-Хьюбер, log-cosh, Smooth L1, код NumPy и PyTorch.">
+  <meta property="og:title" content="Функция потерь Хьюбера: мост между MSE и MAE — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="Потеря Хьюбера подробно: формула по косточкам, гладкость стыка, ограниченный градиент ψ(r), 3D-поверхность L(r, δ), оценка центра, выбор δ = 1,345σ, IRLS, градиентный спуск с выбросами, псевдо-Хьюбер, log-cosh, Smooth L1, код NumPy и PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/huber/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/huber/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/huber/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/huber/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/huber.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/huber/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/huber/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/huber/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Потери — регрессия</span>
+  <h1>Функция потерь Хьюбера: мост между MSE и MAE</h1>
+  <p class="dek">Парабола в середине и прямые по краям. Разбираем, почему у стыка совпадают и значения, и наклоны, как порог δ обрезает градиент выбросов, чем оценка Хьюбера лучше среднего и медианы, откуда берётся магическое 1,345σ и где эта потеря работает сегодня — от робастной регрессии до Fast R-CNN и DQN.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем она нужна</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: парабола с прямыми хвостами</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#properties"><span class="n">4</span>Свойства</a>
+      <a href="#derivative"><span class="n">5</span>Производная: обрезанный остаток</a>
+      <a href="#surface"><span class="n">6</span>Поверхность L(r, δ) в 3D</a>
+      <a href="#statistics"><span class="n">7</span>Оценка Хьюбера и выбор δ</a>
+      <a href="#training"><span class="n">8</span>Хьюбер в обучении</a>
+      <a href="#variants"><span class="n">9</span>Гладкие родственники: псевдо-Хьюбер, log-cosh, Smooth L1</a>
+      <a href="#code"><span class="n">10</span>В коде</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$L_\delta(r)=\begin{cases}\tfrac12 r^2, &amp; |r|\le\delta\\[1mm] \delta\bigl(|r|-\tfrac12\delta\bigr), &amp; |r|&gt;\delta\end{cases}$$</div>
+
+    <h2 id="why">Зачем она нужна</h2>
+    <p>Регрессия учится на ошибках $r=y-\hat y$. Две классические потери отвечают на вопрос «как штрафовать ошибку» по-разному. <a href="../mse/">MSE</a> штрафует квадратом: она гладкая, её градиент пропорционален ошибке и плавно затухает у минимума, но один выброс с ошибкой 10 весит как сто ошибок размером 1. <a href="../mae/">MAE</a> штрафует модулем: выбросы ей почти безразличны, зато в нуле у неё излом, а градиент всегда одного размера — модели трудно «доводить» мелкие ошибки.</p>
+    <p>Питер Хьюбер в 1964 году предложил взять лучшее от обеих: <b>парабола для малых ошибок и прямая для больших</b>, с переключением на пороге $\delta$. Где эта идея работает сегодня:</p>
+    <ul class="flist"><li><b>робастная регрессия</b> — <code>HuberRegressor</code> в scikit-learn, M-оценки в статистике;</li><li><b>детекция объектов</b> — Smooth L1 в Fast R-CNN и его потомках для регрессии координат рамок; это Хьюбер с точностью до множителя;</li><li><b>обучение с подкреплением</b> — в DQN ошибку временной разности обрезают до $[-1;\,1]$, что равносильно потере Хьюбера с $\delta=1$;</li><li><b>градиентный бустинг</b> — <code>loss='huber'</code> в scikit-learn, <code>objective='huber'</code> в LightGBM, псевдо-Хьюбер в XGBoost;</li><li><b>любые данные с аномалиями</b> — цены недвижимости, показания датчиков, разметка с опечатками.</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>$L_\delta(r)$ равна $\tfrac12r^2$ при $|r|\le\delta$ и $\delta(|r|-\tfrac12\delta)$ дальше. В точке $|r|=\delta$ совпадают и значения ($\tfrac12\delta^2$), и наклоны ($\delta$). Производная $\psi(r)=\operatorname{clip}(r,-\delta,\delta)$ ограничена: выброс тянет модель не сильнее, чем на $\delta$. Малое $\delta$ — ближе к MAE, большое — к MSE.</p></div>
+
+    <h2 id="intuition">Интуиция: парабола с прямыми хвостами</h2>
+    <p>Представьте пружину, которая тянет прогноз к ответу. Пока ошибка мала, пружина обычная: чем дальше растянута, тем сильнее тянет — это парабола $\tfrac12r^2$. Но у пружины есть предохранитель: после растяжения $\delta$ сила перестаёт расти и остаётся равной $\delta$. Энергия такой пружины дальше растёт уже линейно — это прямые хвосты.</p>
+    <p>Потяните точку по графику и подвигайте $\delta$. Синяя кривая лежит на серой параболе внутри бирюзовой полосы $|r|\le\delta$ и на пунктирной прямой $\delta(|r|-\delta/2)$ снаружи. Оранжевая касательная проходит стык без излома.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-explorer" data-config="{&quot;delta&quot;: 1, &quot;r&quot;: 2}"></div><figcaption><b>Рисунок 1.</b> Потеря Хьюбера $L_\delta(r)$ и её производные. Внизу: оранжевая $\psi(r)=L'_\delta(r)$ — наклонная внутри полосы и горизонтальная снаружи; фиолетовая $L''_\delta$ — ступенька: 1 внутри, 0 снаружи. При $\delta=1$ и $r=2$: $L=1{,}5$ вместо $\tfrac12r^2=2$, а наклон равен 1, а не 2.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>На стыке $|r|=\delta$ кривая переходит с параболы на прямую плавно: прямая $\delta(|r|-\delta/2)$ — это <i>касательная</i> к параболе в точке $r=\pm\delta$. Излом есть только у второй производной: кривизна прыгает с 1 до 0.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <div class="eqd">$$L_\delta(r)=\begin{cases}\tfrac12 r^2, &amp; |r|\le\delta,\\[1mm] \delta\bigl(|r|-\tfrac12\delta\bigr), &amp; |r|&gt;\delta,\end{cases}\qquad r=y-\hat y$$</div>
+    <dl class="symbols"><dt>$r=y-\hat y$</dt><dd>остаток (residual): насколько ответ $y$ выше прогноза $\hat y$; потеря зависит только от $|r|$, знак не важен;</dd><dt>$\delta&gt;0$</dt><dd>порог: ошибки меньше $\delta$ считаются «обычным шумом», больше — подозрительными; измеряется в единицах $y$;</dd><dt>$\tfrac12 r^2$</dt><dd>квадратичная ветвь — ровно половина квадрата ошибки, как в MSE; множитель $\tfrac12$ делает производную равной $r$;</dd><dt>$\delta|r|$</dt><dd>линейная ветвь — модуль ошибки с весом $\delta$, как в MAE;</dd><dt>$-\tfrac12\delta^2$</dt><dd>сдвиг вниз, который сшивает ветви: без него прямая $\delta|r|$ при $|r|=\delta$ давала бы $\delta^2$, а парабола — $\tfrac12\delta^2$.</dd></dl>
+    <p>Проверим сшивку. При $|r|=\delta$ квадратичная ветвь даёт $\tfrac12\delta^2$, линейная — $\delta(\delta-\tfrac12\delta)=\tfrac12\delta^2$: значения равны. Производные: $r=\delta$ у параболы и $\delta\operatorname{sign}r=\delta$ у прямой — равны и наклоны. Константу $-\tfrac12\delta^2$ выбрали именно так, чтобы прямая стала касательной к параболе.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$r$</th><th class=num>$\tfrac12r^2$</th><th class=num>$|r|$</th><th class=num>$L_1(r)$</th><th class=num>$\psi_1(r)$</th></tr></thead><tbody><tr><td class=num>0</td><td class=num>0</td><td class=num>0</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>0,5</td><td class=num>0,125</td><td class=num>0,5</td><td class=num>0,125</td><td class=num>0,5</td></tr><tr><td class=num>1</td><td class=num>0,5</td><td class=num>1</td><td class=num>0,5</td><td class=num>1</td></tr><tr><td class=num>2</td><td class=num>2</td><td class=num>2</td><td class=num>1,5</td><td class=num>1</td></tr><tr><td class=num>3</td><td class=num>4,5</td><td class=num>3</td><td class=num>2,5</td><td class=num>1</td></tr><tr><td class=num>5</td><td class=num>12,5</td><td class=num>5</td><td class=num>4,5</td><td class=num>1</td></tr><tr><td class=num>10</td><td class=num>50</td><td class=num>10</td><td class=num>9,5</td><td class=num>1</td></tr></tbody></table></div>
+    <p>Таблица для $\delta=1$ показывает главное: при ошибке 10 квадрат даёт 50, а Хьюбер — 9,5; при этом производная (последний столбец) никогда не превышает 1.</p>
+    <h3>Сквозной пример</h3>
+    <p>Возьмём пример из шпаргалки: $y=(3;\,5;\,8)$, $\hat y=(2{,}5;\,5;\,10)$, ошибки $r=(0{,}5;\,0;\,-2)$. При $\delta=1$ первая ошибка попадает в параболу: $\tfrac12\cdot0{,}5^2=0{,}125$; вторая — ноль; третья, $|r|=2&gt;1$, — в прямую: $1\cdot(2-0{,}5)=1{,}5$. Среднее $(0{,}125+0+1{,}5)/3\approx0{,}542$.</p>
+    <p>Интереснее градиенты. В половине MSE они равны самим ошибкам: $(0{,}5;\,0;\,-2)$ — выброс тянет вчетверо сильнее первой точки. У Хьюбера $\psi=(0{,}5;\,0;\,-1)$ — только вдвое: большой промах не может перекричать остальных.</p>
+    <h3>Масштаб: одна кривая на все δ</h3>
+    <p>Если измерять ошибку в единицах порога, все потери Хьюбера — одна и та же кривая:</p>
+    <div class="eqd">$$L_\delta(r)=\delta^2\,L_1\!\left(\frac{r}{\delta}\right)$$</div>
+    <p>Поэтому $\delta$ нельзя выбрать «вообще»: он зависит от единиц $y$. Ошибка в 1 рубль и в 1 миллион рублей — разные вещи. Обычно $\delta$ задают в долях типичного разброса шума $\sigma$ (раздел про выбор $\delta$).</p>
+
+    <h2 id="properties">Свойства</h2>
+    <ul class="flist"><li><b>Неотрицательна и чётна</b>: $L_\delta(r)\ge0$, $L_\delta(-r)=L_\delta(r)$, минимум $0$ только при $r=0$.</li><li><b>Выпукла</b>: парабола и касательная к ней склеены без «впадины»; значит, у линейной регрессии с потерей Хьюбера нет ложных локальных минимумов.</li><li><b>Гладкость $C^1$, но не $C^2$</b>: первая производная непрерывна, вторая прыгает с 1 на 0 при $|r|=\delta$.</li><li><b>Зажата между параболой и прямой</b>: $\delta|r|-\tfrac12\delta^2\le L_\delta(r)\le\tfrac12r^2$; разность с каждой из них равна $\tfrac12(|r|-\delta)^2$ там, где кривая с ней не совпадает.</li><li><b>Ограниченная производная</b>: $|L'_\delta(r)|\le\delta$ — главное свойство для робастности.</li><li><b>Пределы</b>: при $\delta\to\infty$ $L_\delta(r)\to\tfrac12r^2$ (MSE), при $\delta\to0$ $L_\delta(r)/\delta\to|r|$ (MAE).</li></ul>
+    <details class="deep"><summary>Почему кривая зажата и откуда пределы</summary><div class="deep-body">
+      <p>При $|r|&gt;\delta$: $\tfrac12r^2-\bigl(\delta|r|-\tfrac12\delta^2\bigr)=\tfrac12(|r|-\delta)^2\ge0$, то есть прямая лежит под параболой. При $|r|\le\delta$ то же выражение показывает, что парабола лежит над прямой. Значит, $L_\delta$ всегда между ними и совпадает с каждой на своём участке.</p>
+      <p>Пределы: если $\delta\ge|r|$, то $L_\delta(r)=\tfrac12r^2$ ровно — достаточно большого порога. Если $\delta&lt;|r|$, то $L_\delta(r)/\delta=|r|-\tfrac12\delta\to|r|$ при $\delta\to0$.</p>
+    </div></details>
+    <details class="deep"><summary>Хьюбер как «смягчённый модуль» (огибающая Моро)</summary><div class="deep-body">
+      <p>Есть изящная эквивалентная запись: потеря Хьюбера — это лучший компромисс, если часть ошибки $z$ разрешено «списать» по цене модуля:</p>
+      <div class="eqd">$$L_\delta(r)=\min_{z\in\mathbb R}\Bigl(\tfrac12(r-z)^2+\delta|z|\Bigr)$$</div>
+      <p>Минимум достигается при мягком пороге $z^*=\operatorname{sign}(r)\max(|r|-\delta,\,0)$. Если $|r|\le\delta$, то $z^*=0$ и остаётся $\tfrac12r^2$. Иначе $z^*=r-\delta\operatorname{sign}r$, и получаем $\tfrac12\delta^2+\delta(|r|-\delta)=\delta|r|-\tfrac12\delta^2$. В выпуклом анализе это называют огибающей Моро функции $\delta|\cdot|$: так из негладкого модуля получают гладкую функцию с тем же поведением на бесконечности.</p>
+      <p>Модельная интерпретация: $y=\hat y+\text{шум}+z$, где $z$ — редкая «аномалия». Потеря Хьюбера сама решает, какую часть ошибки объяснить аномалией, а какую — гауссовым шумом.</p>
+    </div></details>
+
+    <h2 id="derivative">Производная: обрезанный остаток</h2>
+    <p>Производная по остатку в статистике обозначается $\psi$ и называется функцией влияния (influence function): она показывает, с какой силой одна точка тянет оценку.</p>
+    <div class="eqd">$$\psi_\delta(r)=L'_\delta(r)=\begin{cases}r, &amp; |r|\le\delta,\\ \delta\operatorname{sign}r, &amp; |r|&gt;\delta\end{cases}=\operatorname{clip}(r,\,-\delta,\,\delta)$$</div>
+    <details class="deep"><summary>Вывод по шагам</summary><div class="deep-body">
+      <p>Внутри полосы $(\tfrac12r^2)'=r$. Снаружи $|r|$ дифференцируем как $\operatorname{sign}r$, поэтому $\bigl(\delta|r|-\tfrac12\delta^2\bigr)'=\delta\operatorname{sign}r$. В точках $r=\pm\delta$ левая и правая производные совпадают ($\pm\delta$), значит, производная существует и непрерывна.</p>
+      <p>По прогнозу — цепное правило: $\dfrac{\partial L_\delta}{\partial\hat y}=\psi_\delta(r)\cdot\dfrac{\partial r}{\partial\hat y}=-\psi_\delta(y-\hat y)$.</p>
+      <p>Вторая производная: $L''_\delta(r)=1$ при $|r|&lt;\delta$ и $0$ при $|r|&gt;\delta$; в точках $\pm\delta$ её нет — левая и правая не совпадают.</p>
+    </div></details>
+    <div class="eqd">$$\frac{\partial L_\delta}{\partial\hat y}=-\operatorname{clip}\bigl(y-\hat y,\,-\delta,\,\delta\bigr)$$</div>
+    <p>Сравните три потери. У MSE ($\tfrac12r^2$) тяга $\psi=r$ растёт без предела. У MAE тяга постоянна. У Хьюбера она растёт, пока точка «своя», и замирает на уровне $\delta$, когда точка подозрительна. Вторая полезная картинка — <b>вес</b> точки $w(r)=\psi(r)/r$: какую долю «голоса» точка получает по сравнению с обычным методом наименьших квадратов (МНК).</p>
+    <figure class="viz"><div class="fv" data-viz="huber-influence" data-config="{&quot;delta&quot;: 1, &quot;r&quot;: 4}"></div><figcaption><b>Рисунок 2.</b> Слева — тяга $\psi(r)$, справа — вес $w(r)=\psi(r)/r$. Точка с ошибкой $r=4$ при $\delta=1$ тянет в MSE с силой 4, у Хьюбера — с силой 1, то есть получает вес $0{,}25$. Внутри полосы $|r|\le\delta$ вес равен 1: обычные точки Хьюбер не трогает.</figcaption></figure>
+    <div class="callout note"><b>Почему ψ важнее самой потери</b><p>Оптимум модели определяется уравнением $\sum_i\psi(r_i)\,\partial\hat y_i/\partial\theta=0$, а не значением потери. Поэтому робастность — это свойство $\psi$: ограниченная $\psi$ значит, что никакой одиночный выброс не может сдвинуть решение сколь угодно далеко. У MSE $\psi$ не ограничена, и один выброс сдвигает среднее куда угодно.</p></div>
+
+    <h2 id="surface">Поверхность L(r, δ) в 3D</h2>
+    <p>Посмотрим на потерю как на функцию двух переменных — ошибки $r$ и порога $\delta$. Это помогает увидеть сразу всё семейство кривых и то, как порог меняет форму.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-surface" data-config="{&quot;delta&quot;: 1}"></div><figcaption><b>Рисунок 3.</b> Слева — поверхность $L_\delta(r)$ (её можно вращать), оранжевые линии — стык $|r|=\delta$, синяя — срез при выбранном $\delta$. Справа — вид сверху с линиями уровня. Внутри «клина» $|r|\le\delta$ линии вертикальны, снаружи изгибаются. Переключите на псевдо-Хьюбера: стыка больше нет, поверхность гладкая всюду.</figcaption></figure>
+    <p>Две вещи видны сразу. Во-первых, под стыком, где $|r|\le\delta$, поверхность не зависит от $\delta$: там всегда $\tfrac12r^2$, и линии уровня $L=c$ — вертикальные прямые $r=\pm\sqrt{2c}$. Во-вторых, снаружи линия уровня $L=c$ — это $|r|=c/\delta+\delta/2$: чем меньше порог, тем дальше нужно уйти, чтобы набрать ту же потерю.</p>
+    <div class="callout note"><b>Многомерный случай</b><p>Когда ответ — вектор (например, четыре координаты рамки в детекции), потерю Хьюбера обычно считают по каждой координате и складывают: $\sum_jL_\delta(r_j)$. Линии уровня такой суммы на плоскости $(r_1,r_2)$ — квадраты со скруглёнными углами, а градиент обрезается по каждой координате отдельно. Это не то же самое, что $L_\delta(\|r\|)$, где обрезается длина всего вектора ошибки.</p></div>
+
+    <h2 id="statistics">Оценка Хьюбера и выбор δ</h2>
+    <p>Хьюбер придумал свою функцию для простейшей задачи статистики — оценки центра выборки $x_1,\dots,x_n$. Если минимизировать $\sum(x_i-\mu)^2$, получится среднее; если $\sum|x_i-\mu|$ — медиана. Оценка Хьюбера $\hat\mu$ минимизирует $\sum L_\delta(x_i-\mu)$, то есть решает уравнение</p>
+    <div class="eqd">$$\sum_{i=1}^{n}\psi_\delta(x_i-\hat\mu)=0$$</div>
+    <p>Точки внутри зоны $|x_i-\hat\mu|\le\delta$ участвуют как в среднем, а дальние — только знаком, с силой $\delta$, как в медиане.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-location" data-config="{&quot;delta&quot;: 1}"></div><figcaption><b>Рисунок 4.</b> 13 значений вокруг 5 и два выброса (красные; правый можно тянуть). Высота столбика — вес точки в оценке. При $\delta=1$: среднее $6{,}079$, медиана $5{,}557$, оценка Хьюбера $5{,}369$ — ближе всех к истинному центру 5. Справа — путь $\hat\mu(\delta)$: при $\delta\to0$ оценка стремится к медиане, а при $\delta\ge7{,}42$ совпадает со средним.</figcaption></figure>
+    <p>Обратите внимание на правый график: путь $\hat\mu(\delta)$ <b>не обязан</b> лежать между медианой и средним — при $\delta=1$ оценка ниже обоих. Предельные значения точные: при $\delta\to0$ получается медиана, а как только $\delta$ превышает расстояние от среднего до самой дальней точки (здесь $13{,}5-6{,}079\approx7{,}42$), все точки в квадратичной зоне и $\hat\mu$ равна среднему.</p>
+    <h3>Сколько стоит робастность: правило 1,345σ</h3>
+    <p>Если данные на самом деле нормальные, без выбросов, лучшая оценка — среднее. Насколько Хьюбер хуже? Это измеряют <b>асимптотической эффективностью</b>: отношением дисперсии среднего к дисперсии оценки. Для $\psi$ с порогом $k$ (в единицах $\sigma$) при стандартной нормальной $X$:</p>
+    <div class="eqd">$$\operatorname{Var}\hat\mu\approx\frac{\sigma^2}{n}\cdot\frac{\mathbb E\,\psi_k(X)^2}{\bigl(\mathbb E\,\psi'_k(X)\bigr)^2},\qquad \mathbb E\,\psi'_k=2\Phi(k)-1,\quad \mathbb E\,\psi_k^2=2\Phi(k)-1-2k\varphi(k)+2k^2\bigl(1-\Phi(k)\bigr)$$</div>
+    <p>Решая «эффективность $=95\%$», получаем $k\approx1{,}345$. Отсюда классический выбор $\delta=1{,}345\,\sigma$: всего 5% потерь на чистых данных в обмен на защиту от выбросов. У медианы эффективность $2/\pi\approx64\%$.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-efficiency" data-config="{&quot;k&quot;: 1.345, &quot;eps&quot;: 0.05}"></div><figcaption><b>Рисунок 5.</b> Дисперсия оценки центра (в единицах $\sigma^2/n$) для смеси $(1-\varepsilon)N(0,1)+\varepsilon N(0,10^2)$. При $k=1{,}345$ эффективность на чистых данных — $95{,}0\%$. При $\varepsilon=0{,}05$ дисперсия среднего $5{,}95$, медианы $1{,}722$, Хьюбера с $k=1{,}345$ — $1{,}229$; лучший порог для этой смеси $k\approx1{,}48$ (полый кружок).</figcaption></figure>
+    <div class="callout history"><b>Минимакс Хьюбера</b><p>В статье 1964 года Хьюбер доказал больше: если неизвестно, какие именно выбросы встретятся, а известна лишь их доля $\varepsilon$, то оценка с $\psi_k$ минимизирует <i>наихудшую</i> дисперсию. Порог связан с долей уравнением $2\varphi(k)/k-2\Phi(-k)=\varepsilon/(1-\varepsilon)$: для $\varepsilon=0{,}05$ это $k\approx1{,}40$, для $\varepsilon=0{,}01$ — $k\approx1{,}95$.</p></div>
+    <div class="callout warn"><b>σ тоже нужно оценить робастно</b><p>Правило $\delta=1{,}345\sigma$ бесполезно, если $\sigma$ посчитать обычным стандартным отклонением: выбросы раздуют его. Используют медианное абсолютное отклонение: $\hat\sigma=\operatorname{MAD}/0{,}6745\approx1{,}4826\cdot\operatorname{median}|r_i-\operatorname{median}(r)|$. В <code>HuberRegressor</code> масштаб оценивается совместно с коэффициентами, а <code>epsilon=1.35</code> по умолчанию — это и есть $k$.</p></div>
+
+    <h2 id="training">Хьюбер в обучении</h2>
+    <p>Обучим прямую градиентным спуском двумя способами — на половине MSE и на потере Хьюбера — по одним и тем же данным: 30 точек вокруг $y=1+0{,}5x$ с шумом $\sigma=0{,}5$ и три выброса внизу справа. Порог $\delta=0{,}7\approx1{,}345\cdot0{,}5$.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-regression" data-config="{&quot;delta&quot;: 0.7}"></div><figcaption><b>Рисунок 6.</b> Нажмите «Пуск». Обе модели стартуют с прямой $y=0$ и делают одинаковые шаги ($\eta=0{,}15$). MSE быстро сходится к наклону $0{,}363$ — выбросы опрокидывают прямую. Хьюбер сначала идёт медленнее (все ошибки большие, и каждая тянет не сильнее $\delta$), но приходит к наклону $0{,}511$ при истинном $0{,}5$. Перетащите крайний выброс — во время обучения или до него.</figcaption></figure>
+    <p>Шаг спуска показывает механизм: каждая точка тянет параметры пропорционально $\psi(r_i)$. Пока прямая далеко от всех точек, у Хьюбера все тяги равны $\pm\delta$ — он движется как MAE, с постоянной скоростью. Когда прямая подходит к основной массе точек, их ошибки попадают в квадратичную зону и спуск становится обычным МНК — уже без выбросов, которые так и остались «на привязи» $\delta$.</p>
+    <div class="eqd">$$\theta\leftarrow\theta+\eta\,\frac1n\sum_{i=1}^{n}\psi_\delta\bigl(y_i-\hat y_i\bigr)\,\frac{\partial\hat y_i}{\partial\theta}$$</div>
+    <details class="deep"><summary>IRLS: Хьюбер как МНК с весами</summary><div class="deep-body">
+      <p>Для линейной модели $\hat y_i=x_i^\top\beta$ условие оптимума $\sum_i\psi(r_i)x_i=0$ можно переписать как $\sum_iw_ir_ix_i=0$ с весами $w_i=\psi(r_i)/r_i=\min(1,\delta/|r_i|)$. Если веса заморозить, это нормальные уравнения взвешенного МНК, решаемые явно:</p>
+      <div class="eqd">$$\beta^{(t+1)}=\bigl(X^\top W^{(t)}X\bigr)^{-1}X^\top W^{(t)}y,\qquad W^{(t)}=\operatorname{diag}\bigl(w_i(\beta^{(t)})\bigr)$$</div>
+      <p>Итерации «посчитать остатки → обновить веса → решить МНК» (iteratively reweighted least squares) сходятся к оценке Хьюбера за десяток шагов. Веса здесь те же, что на рисунке 2 справа.</p>
+    </div></details>
+    <h3>Где ещё Хьюбер работает внутри обучения</h3>
+    <ul class="flist"><li><b>Градиентный бустинг.</b> Каждое новое дерево учится на антиградиенте потери. Для Хьюбера это $\psi(r_i)$ — <i>обрезанные</i> остатки, поэтому одно аномальное значение не заставляет дерево тратить лист на выброс. В scikit-learn порог $\delta$ на каждой итерации берут как $\alpha$-квантиль $|r_i|$ (по умолчанию $\alpha=0{,}9$).</li><li><b>DQN.</b> В статье DeepMind (2015) ошибку временной разности обрезали до $[-1;\,1]$. Обрезанный градиент — это ровно $\psi_1$, то есть обучение на потере Хьюбера с $\delta=1$: редкие огромные награды не разрушают сеть.</li><li><b>Fast R-CNN.</b> Для регрессии координат рамки Гиршик (2015) взял Smooth L1: она «менее чувствительна к выбросам, чем L2» и не требует аккуратной настройки темпа обучения, чтобы избежать взрыва градиентов.</li></ul>
+
+    <h2 id="variants">Гладкие родственники: псевдо-Хьюбер, log-cosh, Smooth L1</h2>
+    <p>Скачок второй производной не мешает градиентному спуску, но мешает методам второго порядка. XGBoost и LightGBM делают шаг Ньютона: лист получает значение $-\sum g_i/\sum h_i$, где $h_i$ — вторые производные. Истинная вторая производная Хьюбера для всех выбросов равна нулю, и если в лист попали только они, знаменатель обнуляется. Поэтому реализации либо подменяют её константой (так поступает LightGBM в <code>objective='huber'</code>), либо берут гладкий вариант.</p>
+    <div class="eqd">$$\text{псевдо-Хьюбер: }\;\delta^2\Bigl(\sqrt{1+(r/\delta)^2}-1\Bigr),\qquad \text{log-cosh: }\;\delta^2\ln\cosh\frac{r}{\delta},\qquad \text{Smooth L1: }\;\frac{L_\beta(r)}{\beta}$$</div>
+    <figure class="viz"><div class="fv" data-viz="huber-variants" data-config="{&quot;variant&quot;: &quot;pseudo&quot;, &quot;delta&quot;: 1, &quot;r&quot;: 3}"></div><figcaption><b>Рисунок 7.</b> Хьюбер и его родственники при одинаковом $\delta$. Псевдо-Хьюбер и log-cosh тоже ведут себя как $\tfrac12r^2$ у нуля и как $\delta|r|$ на хвостах, но переход плавный, а вторая производная (галочка внизу) непрерывна. При $\delta=1$, $r=3$: Хьюбер $2{,}5$, псевдо-Хьюбер $2{,}162$, log-cosh $2{,}309$.</figcaption></figure>
+    <ul class="flist"><li><b>Псевдо-Хьюбер</b> (в компьютерном зрении с точностью до множителя $\delta$ — потеря Шарбоннье $\sqrt{r^2+\delta^2}-\delta$): производная $r/\sqrt{1+(r/\delta)^2}$ стремится к $\pm\delta$ медленно; вторая производная $(1+(r/\delta)^2)^{-3/2}$ всюду положительна. В XGBoost — <code>objective='reg:pseudohubererror'</code> с параметром <code>huber_slope</code> ($=\delta$).</li><li><b>log-cosh</b>: производная $\delta\tanh(r/\delta)$ — гладкое «обрезание»; на хвостах $\delta^2\ln\cosh(r/\delta)\approx\delta|r|-\delta^2\ln2$.</li><li><b>Smooth L1</b>: это Хьюбер, делённый на $\beta$: $\tfrac{0{,}5r^2}{\beta}$ при $|r|&lt;\beta$ и $|r|-\tfrac12\beta$ дальше. При $\beta\to0$ она стремится к $|r|$ (а Хьюбер — к нулю). В PyTorch: <code>HuberLoss(delta=δ) = δ · SmoothL1Loss(beta=δ)</code>.</li></ul>
+
+    <h2 id="code">В коде</h2>
+    <p>Сама формула — одна строка с <code>np.where</code>. Градиент — <code>np.clip</code>. Ниже — реализация, проверка на сквозном примере и регрессия Хьюбера через IRLS.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def huber(r, delta=1.0):
+    &quot;&quot;&quot;Потеря Хьюбера для остатков r = y − ŷ (поэлементно).&quot;&quot;&quot;
+    a = np.abs(r)
+    return np.where(a &lt;= delta, 0.5 * r**2, delta * (a - 0.5 * delta))
+
+def huber_grad(r, delta=1.0):
+    &quot;&quot;&quot;ψ(r) = dL/dr — остаток, обрезанный до [−δ, δ]. По ŷ — со знаком минус.&quot;&quot;&quot;
+    return np.clip(r, -delta, delta)
+
+def pseudo_huber(r, delta=1.0):
+    return delta**2 * (np.sqrt(1.0 + (r / delta)**2) - 1.0)
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+r = y - y_hat               # [ 0.5  0.  -2. ]
+print(huber(r))             # [0.125 0.    1.5  ]
+print(huber(r).mean())      # 0.5416666666666666
+print(huber_grad(r))        # [ 0.5  0.  -1. ]</code></pre>
+    <pre class="code"><span class="lang">python</span><code>def huber_regression(X, y, delta=1.345, iters=50):
+    &quot;&quot;&quot;Регрессия Хьюбера методом IRLS: МНК с весами w_i = min(1, δ·s/|r_i|).&quot;&quot;&quot;
+    X1 = np.column_stack([np.ones(len(X)), X])
+    beta = np.linalg.lstsq(X1, y, rcond=None)[0]           # старт — обычный МНК
+    for _ in range(iters):
+        r = y - X1 @ beta
+        s = np.median(np.abs(r - np.median(r))) / 0.6745   # робастный масштаб (MAD)
+        w = np.minimum(1.0, delta * s / np.maximum(np.abs(r), 1e-12))
+        sw = np.sqrt(w)
+        beta = np.linalg.lstsq(X1 * sw[:, None], y * sw, rcond=None)[0]
+    return beta
+
+rng = np.random.default_rng(0)
+x = np.linspace(0, 10, 30)
+y = 1 + 0.5 * x + rng.normal(0, 0.5, 30)
+y[-3:] -= 6                                                # три выброса
+X1 = np.column_stack([np.ones(30), x])
+print(np.linalg.lstsq(X1, y, rcond=None)[0].round(3))      # [1.931 0.182] — МНК
+print(huber_regression(x, y).round(3))                     # [1.134 0.442] — Хьюбер</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+y = torch.tensor([3.0, 5.0, 8.0])
+
+loss = nn.HuberLoss(delta=1.0)(y_hat, y)   # среднее: 0.5417
+loss.backward()
+print(y_hat.grad)       # tensor([-0.1667,  0.0000,  0.3333]) = ψ(ŷ − y) / n
+
+# Smooth L1 из Fast R-CNN — это Хьюбер, делённый на β (β = δ):
+huber2 = nn.HuberLoss(delta=2.0)(y_hat, y)        # 0.7083
+sl1_2 = nn.SmoothL1Loss(beta=2.0)(y_hat, y)       # 0.3542 = 0.7083 / 2</code></pre>
+    <div class="callout key"><b>Готовые реализации</b><p>PyTorch: <code>nn.HuberLoss(delta)</code>, <code>nn.SmoothL1Loss(beta)</code>. Keras: <code>keras.losses.Huber(delta)</code>. scikit-learn: <code>HuberRegressor(epsilon=1.35)</code>, <code>GradientBoostingRegressor</code> (<code>loss='huber'</code>, <code>alpha=0.9</code>). LightGBM: <code>objective='huber'</code> (порог — параметр <code>alpha</code>). XGBoost: <code>objective='reg:pseudohubererror'</code>.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>δ без учёта масштаба.</b> $\delta=1$ для цен в долларах и для цен в миллионах — совершенно разные потери. Нормируйте целевую переменную или задавайте $\delta$ в единицах робастного разброса.</li><li><b>Путаница Huber и Smooth L1.</b> Они отличаются множителем $1/\beta$: при одинаковом пороге Smooth L1 даёт в $\beta$ раз меньшую потерю и градиент. Меняя одну на другую, пересчитайте темп обучения.</li><li><b>Оценка σ обычным std</b> для правила $1{,}345\sigma$ — выбросы раздувают std, порог получается слишком большим, и защита исчезает. Берите MAD.</li><li><b>Ожидание, что Хьюбер спасёт от выбросов в признаках.</b> Он ограничивает влияние большого остатка $r$, но точка с экстремальным $x$ (высокий рычаг, leverage) всё равно может развернуть прямую. Для этого нужны другие методы (например, веса по $x$).</li><li><b>Хьюбер в бустинге с методом Ньютона</b> без проверки: нулевые вторые производные выбросов делают шаги листьев нестабильными. Используйте псевдо-Хьюбера или реализацию, которая это учитывает.</li><li><b>Сравнение значений потерь при разных δ.</b> Значение $L_\delta$ растёт с $\delta$ при прочих равных; сравнивайте модели по внешней метрике (MAE, RMSE на валидации), а не по самой потере.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href="../mse/">MSE</a>: при $\delta\ge\max|r_i|$ потеря Хьюбера равна половине квадрата ошибки, а оценка — МНК.</li><li><a href="../mae/">MAE</a>: при $\delta\to0$ $L_\delta/\delta\to|r|$; оценка центра стремится к медиане.</li><li><a href="../rmse/">RMSE</a>: метрика, которую чаще всего портят выбросы; Хьюбер позволяет обучаться устойчиво, а отчитываться по RMSE на чистых данных.</li><li><a href="../relu/">ReLU</a> и обрезание: $\psi_\delta(r)=\operatorname{clip}(r,-\delta,\delta)$ — та же идея «линейно до порога», что и в ReLU6 и gradient clipping.</li><li><a href="../focal/">Focal Loss</a> — противоположная философия: Хьюбер <i>ослабляет</i> самые большие ошибки (считая их выбросами), а focal loss <i>усиливает</i> вес трудных примеров относительно лёгких.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $L_\delta(r)$ — парабола $\tfrac12r^2$ при $|r|\le\delta$ и касательная к ней прямая $\delta(|r|-\tfrac12\delta)$ дальше; функция выпукла и принадлежит $C^1$, но не $C^2$. 2) Производная $\psi=\operatorname{clip}(r,-\delta,\delta)$ ограничена — выброс не тянет сильнее $\delta$; вес точки $\min(1,\delta/|r|)$. 3) $\delta\to\infty$ — MSE и среднее, $\delta\to0$ — MAE и медиана. 4) $\delta=1{,}345\sigma$ (σ по MAD) даёт 95% эффективности на нормальных данных. 5) Гладкие версии — псевдо-Хьюбер и log-cosh — нужны методам второго порядка; Smooth L1 — тот же Хьюбер, делённый на β.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Чему равна $L_1(3)$ — потеря Хьюбера с $\delta=1$ при ошибке 3?</legend><div class="opts"><button type="button" data-ok="0">$4{,}5$</button><button type="button" data-ok="0">$3$</button><button type="button" data-ok="1">$2{,}5$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>$|r|=3&gt;\delta$, линейная ветвь: $1\cdot(3-0{,}5)=2{,}5$. Половина квадрата дала бы $4{,}5$.</div></fieldset><fieldset class="q"><legend>2. Какое наибольшее значение может принять $|\partial L_\delta/\partial\hat y|$?</legend><div class="opts"><button type="button" data-ok="0">Не ограничено</button><button type="button" data-ok="1">$\delta$</button><button type="button" data-ok="0">$\tfrac12\delta^2$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>Производная — обрезанный остаток $\operatorname{clip}(r,-\delta,\delta)$, по модулю не больше $\delta$.</div></fieldset><fieldset class="q"><legend>3. Что происходит в точке $|r|=\delta$?</legend><div class="opts"><button type="button" data-ok="0">Разрыв значения</button><button type="button" data-ok="0">Излом: прыгает первая производная</button><button type="button" data-ok="1">Значение и первая производная непрерывны, прыгает вторая</button><button type="button" data-ok="0">Ничего, функция бесконечно гладкая</button></div><div class="explain" hidden>Ветви сшиты по значению $\tfrac12\delta^2$ и по наклону $\delta$; вторая производная переходит с 1 на 0. Поэтому Хьюбер — $C^1$, но не $C^2$.</div></fieldset><fieldset class="q"><legend>4. К чему стремится оценка центра Хьюбера при $\delta\to0$ и при очень большом $\delta$?</legend><div class="opts"><button type="button" data-ok="0">К среднему и к медиане</button><button type="button" data-ok="1">К медиане и к среднему</button><button type="button" data-ok="0">К моде и к среднему</button><button type="button" data-ok="0">К нулю и к бесконечности</button></div><div class="explain" hidden>Малый порог оставляет от каждой точки только знак — получается медиана; большой порог делает все точки «своими» — получается среднее.</div></fieldset><fieldset class="q"><legend>5. Почему порог часто берут равным $1{,}345\sigma$?</legend><div class="opts"><button type="button" data-ok="0">Так оценка становится несмещённой</button><button type="button" data-ok="1">Это 95% эффективности на нормальных данных при сохранении робастности</button><button type="button" data-ok="0">Так выбрасывается ровно 5% точек</button><button type="button" data-ok="0">Это квантиль 0,9 модуля остатков</button></div><div class="explain" hidden>При $k=1{,}345$ дисперсия оценки Хьюбера на чистой нормальной выборке всего в $1/0{,}95$ раза больше дисперсии среднего; при этом влияние выбросов ограничено. Никакие точки не выбрасываются — дальние просто получают меньший вес.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../mape/"><span class="kicker">← Предыдущая формула</span><span class="big">MAPE</span><span class="kicker">mean absolute percentage error</span></a>
+<a class="next" href="../bce/"><span class="kicker">Следующая формула →</span><span class="big">BCE</span><span class="kicker">бинарная кросс-энтропия</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>GELU: ehtimollikka ko‘paytirilgan kirish — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="GELU batafsil: x·Φ(x) formulasi, stoxastik ma’nosi, minimum, birinchi va ikkinchi hosilalar, tanh yaqinlashishi, 3D’da x·Φ(x/s) oilasi, tarmoqni o‘qitish, NumPy va PyTorch kodi.">
+  <meta property="og:title" content="GELU: ehtimollikka ko‘paytirilgan kirish — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="GELU batafsil: x·Φ(x) formulasi, stoxastik ma’nosi, minimum, birinchi va ikkinchi hosilalar, tanh yaqinlashishi, 3D’da x·Φ(x/s) oilasi, tarmoqni o‘qitish, NumPy va PyTorch kodi.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/gelu/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/gelu/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/gelu/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/gelu/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/gelu.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/gelu/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/gelu/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/gelu/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Keyingi bosqich</span>
+  <h1>GELU: ehtimollikka ko‘paytirilgan kirish</h1>
+  <p class="dek">BERT, GPT va ViT aktivatsiyasi. Nega bu shunchaki «silliqlangan ReLU» emasligini mayda detallarigacha ko‘rib chiqamiz: normal taqsimot funksiyasi Φ qayerdan keladi, GELU tasodifiy niqobni o‘rtachalashdan qanday hosil bo‘ladi, uning minimumi qayerda, Φ(x) + xφ(x) hosila qanday ko‘rinadi va tanh hamda sigmoida orqali yaqinlashishlar qanchalik aniq.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 35 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: ehtimollikka ko‘paytirilgan kirish</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#origin"><span class="n">4</span>U qayerdan kelgan: o‘rtacha shovqinli niqob</a>
+      <a href="#properties"><span class="n">5</span>Xossalar va shakl</a>
+      <a href="#derivative"><span class="n">6</span>Hosila: Φ(x) + x·φ(x)</a>
+      <a href="#approx"><span class="n">7</span>Tez yaqinlashishlar: tanh va sigmoida</a>
+      <a href="#space"><span class="n">8</span>3D’da x·Φ(x/s) oilasi: ReLU’dan to‘g‘ri chiziqqacha</a>
+      <a href="#training"><span class="n">9</span>O‘qitishda va transformerda GELU</a>
+      <a href="#code"><span class="n">10</span>Kodda: aniq, tez va barqaror</a>
+      <a href="#mistakes"><span class="n">11</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">12</span>Boshqa formulalar bilan bog‘lanish</a>
+      <a href="#summary"><span class="n">13</span>Xulosa</a>
+      <a href="#quiz"><span class="n">14</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{GELU}(x)=x\cdot\Phi(x)=\frac{x}{2}\Bigl(1+\operatorname{erf}\frac{x}{\sqrt2}\Bigr)$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>Aktivatsiya funksiyasi — har bir chiziqli qatlamdan keyin turadigan nochiziqlilik. Usiz istalgancha qatlam bitta matritsaga ko‘paytirishga aylanib qoladi. Uzoq vaqt standart <a href="../relu/">ReLU</a> edi: $\max(0,x)$ — musbatni o‘tkazish, manfiyni nolga aylantirish. GELU (Gaussian Error Linear Unit, Xendriks va Gimpel, 2016) xuddi shu vazifani yumshoqroq hal qiladi: kirish shunchaki o‘tkazilmaydi yoki kesilmaydi, balki uni o‘tkazish kerakligi <b>ehtimolligiga ko‘paytiriladi</b>.</p>
+    <p>U qayerda uchraydi:</p>
+    <ul class="flist"><li><b>BERT, RoBERTa, GPT, GPT-2, GPT-3</b> — transformerning har bir to‘g‘ri tarqalish (feed-forward, FFN) blokida: $\operatorname{FFN}(h)=W_2\,\operatorname{GELU}(W_1h+b_1)+b_2$;</li><li><b>Vision Transformer (ViT)</b> va undan keyingi ko‘plab kompyuter ko‘rishi modellarida;</li><li><b>GeGLU</b> — ventilli variant $\operatorname{GELU}(xW)\odot(xV)$, masalan Gemma’da; uning qarindoshi — <a href="../silu/">SiLU</a>’li SwiGLU — LLaMA va Qwen’da;</li><li><b>silliqlik muhim bo‘lgan har joyda</b>: GELU’ning barcha tartibdagi hosilalari bor, nolda sinish yo‘q va ReLU’dagidek gradiyenti nol bo‘lgan «o‘lik» zona yo‘q.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>$\operatorname{GELU}(x)=x\,\Phi(x)$, bunda $\Phi$ — standart normal taqsimot funksiyasi. Katta musbat $x$ deyarli to‘liq o‘tadi, katta manfiylari deyarli nolga aylanadi, nol atrofida esa silliq o‘tish ishlaydi. Funksiyaning $x\approx-0{,}752$ nuqtada $\approx-0{,}170$ minimumi bor, $\Phi(x)+x\varphi(x)$ hosila $-0{,}129$ dan $1{,}129$ gacha oraliqda yotadi, amalda esa uni ko‘pincha xatosi $4{,}7\cdot10^{-4}$ dan oshmaydigan tanh yaqinlashishi orqali hisoblashadi.</p></div>
+
+    <h2 id="intuition">Intuitsiya: ehtimollikka ko‘paytirilgan kirish</h2>
+    <p>$x$ signalning qancha ulushini o‘tkazishni hal qiladigan ventilni tasavvur qiling. ReLU’da ventil qattiq: $x&gt;0$ da to‘liq ochiq, $x&lt;0$ da yopiq. GELU’da ventil $\Phi(x)$ ga ochiq — 0 dan 1 gacha bo‘lgan, $x$ bilan birga silliq o‘sadigan ulushga. Katta musbat signal deyarli to‘liq o‘tadi, katta manfiysi deyarli so‘nadi, nol atrofida esa signalning yarmi o‘tadi: $\Phi(0)=0{,}5$.</p>
+    <p>Nuqtani torting. Kulrang polosa — butun $x$ kirish, ko‘k polosa — uning o‘tgan qismi: uzunligi $x\cdot\Phi(x)$ ga teng. Moviy-yashil punktir — $\Phi(x)$ ulushning o‘zi.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-explorer" data-config="{&quot;x&quot;: 1}"></div><figcaption><b>1-rasm.</b> GELU, $\Phi(x)$ ulush va hosila. $x=1$ da $\Phi(1)\approx0{,}841$ ulush o‘tadi, shuning uchun $\operatorname{GELU}(1)\approx0{,}841$; $x=-1$ da faqat $0{,}159$ o‘tadi va chiqish $-0{,}159$ ga teng. Doiracha funksiya minimumini belgilaydi.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>Manfiy $x$ uchun chiqish nolga teng emas: u manfiy va kichik. $x$ noldan kamayganda chiqish avval kamayadi (kirish moduli ulush kamayishidan tezroq o‘sadi), taxminan $x=-0{,}75$ dan boshlab esa yana nolga ko‘tariladi: $\Phi(x)$ ulush $|x|$ o‘sishidan tezroq so‘nadi. Shundan sayoz «chuqurcha» paydo bo‘ladi — GELU va ReLU shakllari orasidagi asosiy farq.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <p>GELU’ning butun murakkabligi $\Phi$ ichida yashiringan. Uni qismlarga ajratamiz.</p>
+    <div class="eqd">$$\operatorname{GELU}(x)=x\cdot\Phi(x),\qquad \Phi(x)=\int_{-\infty}^{x}\varphi(t)\,dt,\qquad \varphi(t)=\frac{1}{\sqrt{2\pi}}\,e^{-t^{2}/2}$$</div>
+    <dl class="symbols"><dt>$\varphi(t)$</dt><dd>standart normal taqsimot $N(0,1)$ zichligi — nolda $1/\sqrt{2\pi}\approx0{,}399$ maksimumli Gauss qo‘ng‘irog‘i;</dd><dt>$\Phi(x)$</dt><dd>taqsimot funksiyasi: qo‘ng‘iroq ostidagi $x$ nuqtadan chapdagi yuza, ya’ni $\varepsilon\sim N(0,1)$ uchun $P(\varepsilon\le x)$ ehtimollik; 0 dan 1 gacha o‘sadi, $\Phi(0)=\tfrac12$;</dd><dt>$x\cdot\Phi(x)$</dt><dd>shu ehtimollikka ko‘paytirilgan kirish.</dd></dl>
+    <p>Gaussiana integrali elementar funksiyalar orqali ifodalanmaydi, shuning uchun uning maxsus nomi bor — xatolar funksiyasi (error function), «Gaussian <i>Error</i> Linear Unit» nomi shundan:</p>
+    <div class="eqd">$$\operatorname{erf}(z)=\frac{2}{\sqrt\pi}\int_0^{z}e^{-t^2}\,dt,\qquad \Phi(x)=\frac12\Bigl(1+\operatorname{erf}\frac{x}{\sqrt2}\Bigr)\quad\Longrightarrow\quad\operatorname{GELU}(x)=\frac{x}{2}\Bigl(1+\operatorname{erf}\frac{x}{\sqrt2}\Bigr)$$</div>
+    <p>$1/\sqrt2$ ko‘paytuvchi zichligi $e^{-t^2/2}$ bo‘lgan standart normal miqdorni erf aniqlangan $e^{-t^2}$ yadroga o‘tkazadi. erf’ning o‘zi toq, $-1$ dan $1$ gacha o‘zgaradi, shuning uchun $\tfrac12(1+\operatorname{erf})$ 0 dan 1 gacha o‘zgaradi.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\Phi(x)$</th><th class=num>$\operatorname{GELU}(x)$</th><th class=num>$\operatorname{GELU}'(x)$</th><th class=num>$\operatorname{ReLU}(x)$</th></tr></thead><tbody><tr><td class=num>−3</td><td class=num>0,0013</td><td class=num>−0,0040</td><td class=num>−0,0119</td><td class=num>0</td></tr><tr><td class=num>−2</td><td class=num>0,0228</td><td class=num>−0,0455</td><td class=num>−0,0852</td><td class=num>0</td></tr><tr><td class=num>−1</td><td class=num>0,1587</td><td class=num>−0,1587</td><td class=num>−0,0833</td><td class=num>0</td></tr><tr><td class=num>−0,5</td><td class=num>0,3085</td><td class=num>−0,1543</td><td class=num>0,1325</td><td class=num>0</td></tr><tr><td class=num>0</td><td class=num>0,5000</td><td class=num>0,0000</td><td class=num>0,5000</td><td class=num>0</td></tr><tr><td class=num>0,5</td><td class=num>0,6915</td><td class=num>0,3457</td><td class=num>0,8675</td><td class=num>0,5</td></tr><tr><td class=num>1</td><td class=num>0,8413</td><td class=num>0,8413</td><td class=num>1,0833</td><td class=num>1</td></tr><tr><td class=num>2</td><td class=num>0,9772</td><td class=num>1,9545</td><td class=num>1,0852</td><td class=num>2</td></tr><tr><td class=num>3</td><td class=num>0,9987</td><td class=num>2,9960</td><td class=num>1,0119</td><td class=num>3</td></tr></tbody></table></div>
+    <p>Jadval uch narsani ko‘rsatadi. O‘ngda GELU ReLU’ga tez yetib oladi: $x=3$ da farq atigi $0{,}004$. Chapda chiqish manfiy, lekin kichik: jadvaldagi eng chuqur qiymat — $x=-1$ da $-0{,}159$. Nolda hosila $0{,}5$ ga teng, $x\ge1$ da esa birdan katta — funksiya $y=x$ to‘g‘ri chiziqqa yetib olish uchun undan biroz tezroq o‘sadi.</p>
+
+    <h2 id="origin">U qayerdan kelgan: o‘rtacha shovqinli niqob</h2>
+    <p>GELU mualliflari ikki g‘oyani birlashtirdi. <b>ReLU</b> kirishni deterministik niqobga ko‘paytiradi: $x\cdot\mathbb 1[x&gt;0]$. <b>Dropout</b> kirishni undan bog‘liq bo‘lmagan tasodifiy niqobga ko‘paytiradi. Agar niqob tasodifiy bo‘lsa-yu, lekin kirishga <i>bog‘liq</i> bo‘lsa-chi: $x$ qancha katta bo‘lsa, uni o‘tkazish ehtimoli shuncha yuqori?</p>
+    <div class="eqd">$$m\sim\operatorname{Bernoulli}\bigl(\Phi(x)\bigr),\qquad \mathbb E\,[\,x\cdot m\,]=x\cdot P(m=1)=x\,\Phi(x)=\operatorname{GELU}(x)$$</div>
+    <p>Bunday niqobni olish oson: $\varepsilon\sim N(0,1)$ shovqin oling va $\varepsilon\le x$ bo‘lsa, $m=1$ deb oling. U holda taqsimot funksiyasi ta’rifiga ko‘ra $P(m=1)=\Phi(x)$. Nega normal qonun? Normallashtirishlardan (BatchNorm, LayerNorm) keyin neyron kirishlari taxminan $N(0,1)$ kabi taqsimlangan, $\Phi(x)$ esa tabiiy savolga javob beradi: odatiy kirishlarning qancha ulushi berilgan $x$ dan kichik.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-mask" data-config="{&quot;x&quot;: 0.5, &quot;seed&quot;: 3}"></div><figcaption><b>2-rasm.</b> Chapda to‘q sariq nuqtalar — $-3$ dan $3$ gacha 25 nuqtada $n$ ta tasodifiy niqob bo‘yicha $x\cdot m$ o‘rtachasi, o‘ngda — $\varepsilon$ shovqin va niqob ochiq bo‘ladigan $\Phi(x_0)$ ulush. «Boshlash»ni bosing: $n=20$ da GELU’dan eng katta chetlanish $0{,}146$, $n=2000$ da esa $0{,}0125$; o‘rtacha xatosi $1/\sqrt n$ kabi kamayadi. $x_0=0{,}5$ nuqtada ochiq niqoblar ulushi $\Phi(0{,}5)\approx0{,}691$ ga yaqinlashadi.</figcaption></figure>
+    <div class="callout note"><b>GELU’ning o‘zi tasodifiy emas</b><p>Shovqinli niqob faqat shaklni tushuntiradi. Tarmoqda deterministik o‘rtacha $x\Phi(x)$ turadi: o‘qitishda ham, xulosa chiqarishda ham tasodif yo‘q (shovqin kerak bo‘lsa, alohida dropout qo‘shiladi).</p></div>
+
+    <h2 id="properties">Xossalar va shakl</h2>
+    <ul class="flist"><li><b>Qiymatlar sohasi</b> — $[-0{,}170;\,+\infty)$: pastdan chegaralangan, yuqoridan yo‘q.</li><li><b>Silliqlik</b>: GELU cheksiz differensiallanuvchi; $\operatorname{GELU}(0)=0$, $\operatorname{GELU}'(0)=\tfrac12$.</li><li><b>Monoton emaslik</b>: funksiya $(-\infty;\,-0{,}752)$ da kamayadi, o‘ngda o‘sadi; minimum $\approx-0{,}170$.</li><li><b>Asimptotalar</b>: $x\to+\infty$ da $\operatorname{GELU}(x)-x\to0$, $x\to-\infty$ da $\operatorname{GELU}(x)\to0$, chap dum esa gaussiana kabi so‘nadi: $x\Phi(x)\approx-\varphi(x)$, allaqachon $\operatorname{GELU}(-4)\approx-1{,}3\cdot10^{-4}$.</li><li><b>Ayniyat</b>: $\operatorname{GELU}(x)-\operatorname{GELU}(-x)=x$, chunki $\Phi(x)+\Phi(-x)=1$.</li><li><b>Qavariqlik</b>: faqat $[-\sqrt2;\,\sqrt2]$ kesmada; undan tashqarida funksiya botiq (ikkinchi hosila ishorasi — keyingi bo‘limda).</li></ul>
+    <h3>GELU = ReLU minus juft «chuqurcha»</h3>
+    <p>Ayniyatdan qulay yozuv kelib chiqadi. $x&gt;0$ uchun: $x\Phi(x)=x-x\Phi(-x)$; $x&lt;0$ uchun: $x\Phi(x)=-|x|\Phi(-|x|)$. Ikkala holda ham</p>
+    <div class="eqd">$$\operatorname{GELU}(x)=\operatorname{ReLU}(x)-|x|\,\Phi(-|x|)$$</div>
+    <p>$|x|\Phi(-|x|)$ tuzatma juft: noldan chapda ham, o‘ngda ham bir xil, $|x|=0{,}752$ da $0{,}170$ maksimumga erishadi va tez so‘nadi. <a href="../silu/">SiLU</a> $x\,\sigma(x)$ ham shu xossaga ega, faqat uning «chuqurchasi» kengroq va chuqurroq: $|x|=1{,}278$ da $0{,}278$.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-family" data-config="{&quot;x&quot;: -1}"></div><figcaption><b>3-rasm.</b> Yuqorida — GELU, SiLU va ReLU, pastda — $\operatorname{ReLU}-f$ ayirmalar. Kursorni istalgan grafik ustiga olib boring. $x=-1$ da: $\operatorname{GELU}=-0{,}159$, $\operatorname{SiLU}=-0{,}269$. Pastki grafikdagi nuqtalar — ReLU’dan eng katta farqlar: GELU’da $0{,}170$, SiLU’da $0{,}278$; bular ularning minimumlari chuqurligi hamdir.</figcaption></figure>
+    <div class="callout note"><b>Sigmoida bilan bog‘lanish</b><p>Normal va logistik qonunlarning taqsimot funksiyalari juda o‘xshash: $\Phi(x)\approx\sigma(1{,}702\,x)$, xato $0{,}0095$ dan oshmaydi. Shuning uchun GELU $x\,\sigma(1{,}702x)$ bilan deyarli ustma-ust tushadi — bu cho‘zilgan sigmoidali SiLU. $\sigma$ ning o‘zi haqida — <a href="../sigmoid/">sigmoida</a> sahifasida.</p></div>
+
+    <h2 id="derivative">Hosila: Φ(x) + x·φ(x)</h2>
+    <p>Hosila xatoni teskari tarqatishda kerak. Uni keltirib chiqaramiz va funksiya minimumini topamiz.</p>
+    <details class="deep"><summary>Birinchi va ikkinchi hosilani keltirib chiqarish</summary><div class="deep-body">
+      <p>Asosiy fakt: taqsimot funksiyasining hosilasi — zichlik, $\Phi'(x)=\varphi(x)$ (yuqori chegarasi o‘zgaruvchi bo‘lgan integral uchun analizning asosiy teoremasi). Ko‘paytma hosilasi qoidasiga ko‘ra:</p>
+      <div class="eqd">$$\operatorname{GELU}'(x)=(x)'\cdot\Phi(x)+x\cdot\Phi'(x)=\Phi(x)+x\,\varphi(x)$$</div>
+      <p>Gaussiana uchun $\varphi'(x)=-x\,\varphi(x)$. Yana bir marta differensiallaymiz:</p>
+      <div class="eqd">$$\operatorname{GELU}''(x)=\varphi(x)+\varphi(x)+x\cdot\bigl(-x\,\varphi(x)\bigr)=\varphi(x)\,\bigl(2-x^{2}\bigr)$$</div>
+      <p>$\operatorname{GELU}''$ ishorasi $2-x^2$ ishorasi bilan bir xil: funksiya $(-\sqrt2;\,\sqrt2)$ da qavariq va undan tashqarida botiq, $\operatorname{GELU}'$ hosilaning ekstremumlari esa $x=\pm\sqrt2$ nuqtalarda.</p>
+    </div></details>
+    <div class="eqd">$$\operatorname{GELU}'(x)=\underbrace{\Phi(x)}_{\text{ulush}}+\underbrace{x\,\varphi(x)}_{\text{ulush o‘zgarishi}}$$</div>
+    <p>Hosila ikki qo‘shiluvchidan iborat. Birinchisi — $\Phi(x)$ ulushning o‘zi: ventil $x$ ga bog‘liq bo‘lmaganida hosila shunday bo‘lardi. Ikkinchisi — $x$ o‘sganda ventil ochilishidan keladigan tuzatma; u noldan o‘ngda musbat, chapda manfiy. Hosilasi 0/1 zinapoya bo‘lgan ReLU bilan solishtiring.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-derivative" data-config="{&quot;x&quot;: -0.75}"></div><figcaption><b>4-rasm.</b> GELU hosilasi (to‘q sariq) va uning ikki qo‘shiluvchisi. Eng katta qiymat $\Phi(\sqrt2)+\sqrt2\,\varphi(\sqrt2)\approx1{,}129$, eng kichigi $x=-\sqrt2$ da $\approx-0{,}129$ — bu sonlar yig‘indisi 1 ga teng, chunki $\operatorname{GELU}'(x)+\operatorname{GELU}'(-x)=1$. Hosila $x\approx-0{,}752$ da nolga aylanadi; boshlang‘ich $x=-0{,}75$ nuqtada u allaqachon deyarli nol. Ikkinchi hosilani yoqing: uning nollari $\pm\sqrt2$ da.</figcaption></figure>
+    <h3>Minimum qayerda</h3>
+    <p>Minimum $\operatorname{GELU}'(x)=0$ bo‘lgan joyda, ya’ni $\Phi(x)=-x\,\varphi(x)$. Bu tenglama elementar funksiyalarda yechilmaydi; $x_0=-1$ dan boshlangan Nyuton usuli $x_{k+1}=x_k-\operatorname{GELU}'(x_k)/\operatorname{GELU}''(x_k)$ $-0{,}6557$, $-0{,}7448$, $-0{,}75175$, $-0{,}751792$ ni beradi — har bir iteratsiya to‘g‘ri raqamlar sonini taxminan ikki barobar oshiradi.</p>
+    <div class="eqd">$$x^{*}\approx-0{,}7518,\qquad \operatorname{GELU}(x^{*})=x^{*}\Phi(x^{*})=-(x^{*})^{2}\varphi(x^{*})\approx-0{,}1700$$</div>
+    <p>Ikkinchi tenglik $\Phi(x^*)=-x^*\varphi(x^*)$ minimum shartidan kelib chiqadi. Minimumda $\Phi(x^*)\approx0{,}226$ ulush o‘tadi.</p>
+    <div class="callout intuition"><b>Chapdagi manfiy gradiyent</b><p>$x&lt;-0{,}752$ da hosila manfiy: kirish oshirilsa, chiqish <i>kamayadi</i>. ReLU bu zonada aynan nol beradi, GELU esa kichik, lekin noldan farqli signal beradi ($-0{,}129$ dan kichik emas). U gaussiana kabi so‘nadi: $\operatorname{GELU}'(-3)\approx-0{,}012$, $\operatorname{GELU}'(-4)\approx-0{,}0005$.</p></div>
+
+    <h2 id="approx">Tez yaqinlashishlar: tanh va sigmoida</h2>
+    <p>2016 yilda erf funksiyasi freymvorklarda sekin ishlardi yoki umuman yo‘q edi, shuning uchun mualliflar ikki yaqinlashishni taklif qildi. Birinchisi tanh’dan foydalanadi:</p>
+    <div class="eqd">$$\operatorname{GELU}(x)\approx\frac{x}{2}\Bigl(1+\tanh\Bigl[\sqrt{2/\pi}\,\bigl(x+0{,}044715\,x^{3}\bigr)\Bigr]\Bigr)$$</div>
+    <p>BERT va GPT-2 ning asl kodida aynan shu formula yozilgan (Hugging Face kutubxonasida u <code>gelu_new</code>, PyTorch’da — <code>approximate="tanh"</code> deb ataladi). Eng katta xato — $|x|\approx2{,}70$ da $4{,}7\cdot10^{-4}$. Ikkinchi yaqinlashish sigmoida orqali:</p>
+    <div class="eqd">$$\operatorname{GELU}(x)\approx x\,\sigma(1{,}702\,x)$$</div>
+    <p>U qo‘polroq: $|x|\approx2{,}27$ da xato $0{,}020$ gacha yetadi. Ikkala xato ham juft funksiyalar, chunki uchala formula ham $f(x)-f(-x)=x$ ayniyatini qanoatlantiradi.</p>
+    <details class="deep"><summary>√(2/π) va 0,044715 qayerdan keladi</summary><div class="deep-body">
+      <p>$\operatorname{erf}(z)$ ni $\tanh(u)$ funksiya bilan yaqinlashtirish kerak. Ikkalasini nol atrofida yoyamiz: $\operatorname{erf}(z)=\frac{2}{\sqrt\pi}\bigl(z-\frac{z^3}{3}+\dots\bigr)$ va $\tanh u=u-\frac{u^3}{3}+\dots$. $u=\frac{2}{\sqrt\pi}(z+cz^3)$ ni olamiz va koeffitsiyentlarni tenglashtiramiz.</p>
+      <div class="eqd">$$z^{1}:\ \ \frac{2}{\sqrt\pi}=\frac{2}{\sqrt\pi};\qquad z^{3}:\ \ \frac{2c}{\sqrt\pi}-\frac{8}{3\pi\sqrt\pi}=-\frac{2}{3\sqrt\pi}\ \Longrightarrow\ c=\frac{4}{3\pi}-\frac13$$</div>
+      <p>$z=x/\sqrt2$ ni qo‘yib, $c'=c/2=\frac{2}{3\pi}-\frac16\approx0{,}0455$ bilan $\sqrt{2/\pi}\,(x+c'x^3)$ ni olamiz. Qatorlarning mos kelishi faqat nol atrofida aniqlik beradi, shuning uchun mualliflar koeffitsiyentni butun o‘q bo‘yicha sonli tanladi: $0{,}044715$. Teylor qiymati $0{,}0455$ bilan maksimal xato $7{,}5\cdot10^{-4}$, $0{,}044715$ bilan — $4{,}7\cdot10^{-4}$, kub hadsiz ($c'=0$) esa — $0{,}034$.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="gelu-approx" data-config="{&quot;c&quot;: 0.044715, &quot;x&quot;: 1}"></div><figcaption><b>5-rasm.</b> Yuqorida — aniq GELU va ikki yaqinlashish, pastda — logarifmik shkaladagi xato moduli (botiqlar — xato ishorasini o‘zgartiradigan nuqtalar). $c$ koeffitsiyentni suring: $c=0{,}044715$ da maksimal xato $4{,}7\cdot10^{-4}$, $c=0$ da — $0{,}034$. $x=1$ da: aniq qiymat $0{,}8413$, tanh yaqinlashishi $0{,}8412$, sigmoidali $0{,}8458$.</figcaption></figure>
+    <div class="callout warn"><b>Bular turli funksiyalar</b><p>tanh yaqinlashishi bilan o‘qitilgan model xulosa chiqarishda ham aynan undan foydalanishi kerak. Farq har bir neyronda $4{,}7\cdot10^{-4}$ dan oshmaydi, lekin yuzlab qatlam va minglab neyronlarda vaznlarni konvertatsiya qilishda logitlarning sezilarli farqini beradi va bitma-bit testlarni buzadi.</p></div>
+
+    <h2 id="space">3D’da x·Φ(x/s) oilasi: ReLU’dan to‘g‘ri chiziqqacha</h2>
+    <p>Niqobdagi shovqin birlik bo‘lishi shart emas. Agar $\varepsilon\sim N(0,s^2)$ bo‘lsa, $P(\varepsilon\le x)=\Phi(x/s)$ bo‘ladi va $s$ «harorat»li butun funksiyalar oilasi hosil bo‘ladi:</p>
+    <div class="eqd">$$f(x,s)=x\,\Phi\Bigl(\frac{x}{s}\Bigr)=s\cdot\operatorname{GELU}\Bigl(\frac{x}{s}\Bigr)$$</div>
+    <ul class="flist"><li>$s\to0$: shovqin yo‘q, $\Phi(x/s)$ zinapoyaga aylanadi va $f\to\operatorname{ReLU}(x)$;</li><li>$s=1$: oddiy GELU;</li><li>$s\to\infty$: shovqin kirishni bosib ketadi, $\Phi(x/s)\to\tfrac12$ va $f\to x/2$ — to‘g‘ri chiziq, nochiziqlilik yo‘qoladi.</li></ul>
+    <p>Ikkinchi tenglik oilaning barcha a’zolari o‘xshash ekanini ko‘rsatadi: minimum $x=-0{,}752\,s$ nuqtada va $-0{,}170\,s$ ga teng. Sirtda bu «jarlik» tubi bo‘ylab o‘tgan to‘g‘ri moviy-yashil chiziq.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-surface" data-config="{&quot;s&quot;: 1}"></div><figcaption><b>6-rasm.</b> $f(x,s)=x\,\Phi(x/s)$ sirti (uni aylantirish mumkin) va joriy $s$ dagi kesim. To‘q sariq chiziq — kesim, moviy-yashil — minimumlar chizig‘i. $s=1$ da $x=-0{,}752$ dagi minimum $-0{,}170$ ga teng. Hosilaga o‘ting: kichik $s$ da u ReLU zinapoyasiga aylanadi, katta $s$ da $\tfrac12$ ga yaqinlashadi.</figcaption></figure>
+    <p>Tarmoqda GELU vektorga elementma-element qo‘llaniladi: $h=\operatorname{GELU}(W_1x+b_1)$. Har bir koordinata — $w_j^\top x+b_j=0$ giperteksislik bo‘ylab o‘z «burmasi», lekin ReLU’dan farqli ravishda burma silliq va sinishdan oldin kichik manfiy botiqqa ega.</p>
+
+    <h2 id="training">O‘qitishda va transformerda GELU</h2>
+    <p>Bitta yashirin qatlamli tarmoq javobni $w_{2j}\,f(w_{1j}x+b_{1j})$ «g‘ishtlar» yig‘indisi sifatida quradi. ReLU’da har bir g‘isht — bitta sinishli siniq chiziq, yig‘indi ham siniq chiziq. GELU’da g‘ishtlar silliq, shuning uchun silliq bog‘lanishni ularning kamroq soni bilan tasvirlash mumkin.</p>
+    <figure class="viz"><div class="fv" data-viz="gelu-train" data-config="{&quot;h&quot;: 4}"></div><figcaption><b>7-rasm.</b> Bir xil boshlang‘ich qiymatli 4 neyronli o‘sha tarmoq, $\sin1{,}5x+0{,}3x$ shovqinli egri chiziqning 40 nuqtasida $0{,}03$ qadamli Adam bilan o‘qitiladi. O‘ngda — logarifmik shkaladagi o‘rtacha kvadratik xato (MSE). 2000 qadamda GELU’li tarmoq MSE’ni $7{,}06$ dan $0{,}0042$ gacha tushiradi — bu ma’lumotlardagi shovqin darajasi ($0{,}0051$), ReLU’li tarmoq esa $0{,}0083$ da qotib qoladi: to‘rtta sinish yetmaydi. «Neyronlar» tugmalari alohida g‘ishtlarni ko‘rsatadi.</figcaption></figure>
+    <p>O‘qitish o‘sha hosiladan foydalanadi: neyronga kelgan gradiyent $\operatorname{GELU}'(z)=\Phi(z)+z\varphi(z)$ ga ko‘paytiriladi. ReLU’dan farqli ravishda manfiy $z$ li neyron signal olishda davom etadi, shuning uchun GELU’li tarmoqlar «o‘lik» neyronlardan kamroq aziyat chekadi.</p>
+    <h3>Transformerning to‘g‘ri tarqalish bloki</h3>
+    <p>BERT va GPT’da har bir diqqat (attention) qatlamidan keyin har bir tokenni alohida qayta ishlaydigan ikki qatlamli perseptron turadi:</p>
+    <div class="eqd">$$\operatorname{FFN}(h)=W_2\,\operatorname{GELU}(W_1h+b_1)+b_2,\qquad W_1\in\mathbb R^{4d\times d},\ \ W_2\in\mathbb R^{d\times4d}$$</div>
+    <p>BERT-base’da $d=768$, ya’ni 12 qatlamning har birida har bir tokenga $4d=3072$ ta GELU hisoblash to‘g‘ri keladi. FFN oldida LayerNorm turadi, shuning uchun o‘qitish boshida $W_1h+b_1$ kirishlar birlik tartibida — GELU’da ham «chuqurcha», ham silliq o‘tish bo‘lgan aynan o‘sha soha. Shuning uchun aktivatsiyaning o‘z tezligi muhim va aniq erf o‘rniga ko‘pincha tanh yaqinlashishi olinadi.</p>
+    <div class="callout history"><b>GELU qanday standartga aylandi</b><p>Xendriks va Gimpel GELU’ni 2016 yilda taklif qildi va ko‘rish, nutq hamda matn vazifalarida u ReLU va ELU’dan yomon emasligini ko‘rsatdi. Unga keng shuhrat GPT (2018) va BERT (2018), keyin GPT-2, GPT-3 va Vision Transformer (2020) olib keldi. 2020 yilda Shazir GeGLU va SwiGLU ventilli variantlari yanada yaxshi ekanini ko‘rsatdi va yangi LLM’lar ko‘pincha ulardan foydalanadi.</p></div>
+
+    <h2 id="code">Kodda: aniq, tez va barqaror</h2>
+    <p>NumPy’da erf funksiyasi yo‘q, shuning uchun uni SciPy’dan olishadi. Katta manfiy $x$ da aniqlikni yo‘qotmaslik uchun taqsimot funksiyasini qo‘shimcha xatolar funksiyasi orqali hisoblash qulay: $\Phi(x)=\tfrac12\operatorname{erfc}(-x/\sqrt2)$. $\tfrac12(1+\operatorname{erf})$ formulasi $x=-10$ da deyarli teng sonlarni ayiradi va aynan 0 beradi, holbuki haqiqiy qiymat $\operatorname{GELU}(-10)\approx-7{,}6\cdot10^{-23}$; aktivatsiyaning o‘zi uchun bu muhim emas, lekin o‘sha $\Phi$ boshqa formulalarda ham tez-tez kerak bo‘ladi.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+from scipy.special import erfc        # NumPy’ning o‘zida erf funksiyasi yo‘q
+
+SQRT2 = np.sqrt(2.0)
+
+def gelu(x):
+    &quot;&quot;&quot;Aniq GELU: x·Φ(x), bunda Φ(x) = ½·erfc(−x/√2) — yaqin sonlarni ayirmasdan.&quot;&quot;&quot;
+    x = np.asarray(x, dtype=float)
+    return x * 0.5 * erfc(-x / SQRT2)
+
+def gelu_grad(x):
+    &quot;&quot;&quot;Hosila: Φ(x) + x·φ(x).&quot;&quot;&quot;
+    x = np.asarray(x, dtype=float)
+    cdf = 0.5 * erfc(-x / SQRT2)
+    pdf = np.exp(-0.5 * x * x) / np.sqrt(2.0 * np.pi)
+    return cdf + x * pdf
+
+def gelu_tanh(x):
+    # BERT va GPT-2 ning asl kodidagi yaqinlashish
+    return 0.5 * x * (1.0 + np.tanh(np.sqrt(2.0 / np.pi) * (x + 0.044715 * x**3)))
+
+x = np.array([-3.0, -1.0, 0.0, 1.0, 3.0])
+print(gelu(x))        # ≈ [-0.00405 -0.15866  0.  0.84134  2.99595]
+print(gelu_grad(x))   # ≈ [-0.01195 -0.08332  0.5 1.08332  1.01195]
+print(np.abs(gelu_tanh(x) - gelu(x)).max())   # ≈ 4.1e-04 (x = ±3 nuqtalarda)</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+x = torch.tensor([-1.0, 0.0, 1.0], requires_grad=True)
+y = F.gelu(x)                          # −0.1587, 0.0000, 0.8413
+y.sum().backward()
+print(x.grad)                          # −0.0833, 0.5000, 1.0833 = Φ(x) + x·φ(x)
+print(F.gelu(x, approximate=&quot;tanh&quot;))   # −0.1588, 0.0000, 0.8412
+
+# Transformerning FFN bloki (BERT va GPT’dagi kabi): d → 4d → d
+class FeedForward(nn.Module):
+    def __init__(self, d_model=768, mult=4, p_drop=0.1):
+        super().__init__()
+        self.fc1 = nn.Linear(d_model, mult * d_model)
+        self.act = nn.GELU()           # GPT-2 vaznlari uchun: nn.GELU(approximate=&quot;tanh&quot;)
+        self.fc2 = nn.Linear(mult * d_model, d_model)
+        self.drop = nn.Dropout(p_drop)
+
+    def forward(self, h):
+        return self.drop(self.fc2(self.act(self.fc1(h))))</code></pre>
+    <div class="callout key"><b>Qoida</b><p>GELU variantini vaznlar o‘qitilgandagidek tanlang: <code>nn.GELU()</code> — aniq, <code>nn.GELU(approximate="tanh")</code> — taqribiy. Yangi model uchun sifatda deyarli farq yo‘q; tanh varianti eski uskunada tezroq bo‘lishi mumkin.</p></div>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b>GELU chiqishini ReLU’dagidek manfiy emas deb hisoblash.</b> U $-0{,}170$ gacha tushishi mumkin; keyin logarifm, ildiz yoki bo‘lish kelsa, buni hisobga olish kerak.</li><li><b>O‘qitish va xulosa chiqarish orasida yoki modelni konvertatsiya qilishda (ONNX, TensorRT, boshqa freymvork) aniq GELU va tanh yaqinlashishini aralashtirish.</b> Xato kichik, lekin qatlamlar bo‘yicha to‘planadi.</li><li><b>$x\,\sigma(1{,}702x)$ ni GELU bilan adashtirish.</b> Bu xatosi $0{,}02$ gacha bo‘lgan tez yaqinlashish, aslida $\beta=1{,}702$ parametrli <a href="../silu/">SiLU</a>.</li><li><b>GELU gradiyent so‘nishidan to‘liq xalos qiladi deb o‘ylash.</b> $x\to-\infty$ da hosila gaussiana kabi so‘nadi: allaqachon $\operatorname{GELU}'(-4)\approx-0{,}0005$. Kirishlarni normallashtirish baribir kerak.</li><li><b>$\Phi$ ni $\sqrt2$ ga bo‘lishni unutib, $\tfrac12(1+\operatorname{erf}(x))$ deb yozish.</b> Bu $N(0,\tfrac12)$ taqsimot funksiyasi bo‘ladi, ya’ni $x\Phi(\sqrt2x)$ — boshqa egri chiziq.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘lanish</h2>
+    <ul class="flist"><li><a href="../relu/">ReLU</a>: $s\to0$ da $x\,\Phi(x/s)$ ning limiti va GELU’ning «skeleti»: $\operatorname{GELU}=\operatorname{ReLU}-|x|\Phi(-|x|)$.</li><li><a href="../silu/">SiLU / Swish</a>: «kirish × yumshoq ventil» sxemasi, faqat $\Phi$ o‘rnida sigmoida; $x\,\sigma(1{,}702x)\approx\operatorname{GELU}(x)$.</li><li><a href="../sigmoid/">Sigmoida</a>: $\sigma(1{,}702x)$ $\Phi(x)$ ni $0{,}0095$ dan oshmaydigan xato bilan yaqinlashtiradi — logit va probit modellari bog‘lanishi.</li><li><a href="../tanh/">tanh</a>: GELU’ning eng mashhur yaqinlashishi asosi.</li><li><a href="../leaky-relu/">Leaky ReLU</a>: $x&lt;0$ da signalni o‘tkazishning boshqa usuli — silliq «chuqurcha» o‘rniga doimiy kichik qiyalik.</li><li><a href="../adam/">Adam</a> va <a href="../mse/">MSE</a>: 7-rasmdagi simulyatsiyaning optimizatori va yo‘qotishi.</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) $\operatorname{GELU}(x)=x\,\Phi(x)$: $\varepsilon\sim N(0,1)$ uchun $P(\varepsilon\le x)$ ehtimollikka ko‘paytirilgan kirish; bu kirishga bog‘liq tasodifiy niqobning o‘rtachasi. 2) $\operatorname{GELU}=\operatorname{ReLU}-|x|\Phi(-|x|)$: $x=-0{,}752$ da $-0{,}170$ minimumli silliq ReLU. 3) $\operatorname{GELU}'=\Phi+x\varphi\in(-0{,}129;\,1{,}129)$, $\operatorname{GELU}''=\varphi\,(2-x^2)$. 4) $0{,}044715$ koeffitsiyentli tanh yaqinlashishi ko‘pi bilan $4{,}7\cdot10^{-4}$ ga xato qiladi, lekin bu boshqa funksiya. 5) $x\,\Phi(x/s)$ ReLU ($s\to0$) va $x/2$ ($s\to\infty$) ni bog‘laydi. 6) BERT, GPT va ViT’ning FFN bloklarida turadi.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. $\operatorname{GELU}(-1)$ taxminan nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$-1$</button><button type="button" data-ok="1">$-0{,}159$</button><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$0{,}841$</button></div><div class="explain" hidden>$\operatorname{GELU}(-1)=-1\cdot\Phi(-1)=-0{,}159$: manfiy kirishning faqat 15,9% i o‘tadi.</div></fieldset><fieldset class="q"><legend>2. GELU’ning noldagi hosilasi nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$0{,}25$</button><button type="button" data-ok="1">$0{,}5$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>$\operatorname{GELU}'(0)=\Phi(0)+0\cdot\varphi(0)=\tfrac12$.</div></fieldset><fieldset class="q"><legend>3. GELU minimumi qayerda?</legend><div class="opts"><button type="button" data-ok="0">Nolda, qiymati 0</button><button type="button" data-ok="1">$x\approx-0{,}75$ da, qiymati $\approx-0{,}17$</button><button type="button" data-ok="0">$x=-1$ da, qiymati $-0{,}159$</button><button type="button" data-ok="0">Minimum yo‘q</button></div><div class="explain" hidden>Minimum $\Phi(x)+x\varphi(x)=0$ bo‘lgan joyda: $x^*\approx-0{,}752$, $\operatorname{GELU}(x^*)\approx-0{,}170$. $x=-1$ nuqta chaproqda, kamayuvchi tarmoqda yotadi.</div></fieldset><fieldset class="q"><legend>4. GELU formulasida $\Phi(x)$ nimani anglatadi?</legend><div class="opts"><button type="button" data-ok="0">$x$ nuqtadagi normal zichlik</button><button type="button" data-ok="1">$\varepsilon\sim N(0,1)$ ning $x$ dan katta bo‘lmaslik ehtimolligi — kirish o‘tkaziladigan ulush</button><button type="button" data-ok="0">$x$ ning sigmoidasi</button><button type="button" data-ok="0">Kirishlar dispersiyasi</button></div><div class="explain" hidden>$\Phi$ — taqsimot funksiyasi: $\Phi(x)=P(\varepsilon\le x)$. GELU — $m=\mathbb 1[\varepsilon\le x]$ niqob uchun $x\cdot m$ ning o‘rtachasi.</div></fieldset><fieldset class="q"><legend>5. $\operatorname{GELU}(3)-\operatorname{GELU}(-3)$ nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$2{,}996$</button><button type="button" data-ok="1">$3$</button><button type="button" data-ok="0">$6$</button></div><div class="explain" hidden>$x\Phi(x)-(-x)\Phi(-x)=x\bigl(\Phi(x)+\Phi(-x)\bigr)=x$, shuning uchun ayirma aynan 3 ga teng.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../silu/"><span class="kicker">← Oldingi formula</span><span class="big">SiLU / Swish</span><span class="kicker">Qwen va LLaMA aktivatsiyasi</span></a>
+<a class="next" href="../sgd/"><span class="kicker">Keyingi formula →</span><span class="big">SGD → Momentum → RMSProp</span><span class="kicker">Adam uchun poydevor</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

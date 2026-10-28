@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Triplet Loss: o‘ziniki begonadan yaqinroq — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Triplet Loss batafsil: formula va oraliq, oson, yarim qiyin va qiyin uchliklar, gradiyentlar va 3D yo‘qotish sirti, batch-hard va batch-all, embeddinglarni o‘qitish, normallashtirish, FaceNet va Re-ID, NumPy va PyTorch kodi.">
+  <meta property="og:title" content="Triplet Loss: o‘ziniki begonadan yaqinroq — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Triplet Loss batafsil: formula va oraliq, oson, yarim qiyin va qiyin uchliklar, gradiyentlar va 3D yo‘qotish sirti, batch-hard va batch-all, embeddinglarni o‘qitish, normallashtirish, FaceNet va Re-ID, NumPy va PyTorch kodi.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/triplet/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/triplet.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/triplet/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/triplet/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/triplet/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Keyingi bosqich</span>
+  <h1>Triplet Loss: o‘ziniki begonadan yaqinroq</h1>
+  <p class="dek">Sinflarni emas, masofalarni o‘rgatadigan yo‘qotish funksiyasi: langar «o‘ziniki»ga «begona»dan kamida m oraliqqa yaqinroq bo‘lishi kerak. Formulani, uchliklarning uch rejimini, gradiyentlarni, batch-hard maynigni, sferada normallashtirishni va FaceNet hamda odamlarni qayta identifikatsiya qilish (Re-ID) shu matematikaga qanday tayanishini mayda detallarigacha ko‘rib chiqamiz.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 35 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: o‘ziniki begonadan yaqinroq</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#regimes"><span class="n">4</span>Uch rejim: oson, yarim qiyin, qiyin</a>
+      <a href="#gradients"><span class="n">5</span>Gradiyentlar: har bir nuqta qayerga tortiladi</a>
+      <a href="#mining"><span class="n">6</span>Mayning: qaysi uchliklarni olish kerak</a>
+      <a href="#training"><span class="n">7</span>O‘qitishda bu qanday ishlaydi</a>
+      <a href="#sphere"><span class="n">8</span>Sferada normallashtirish va oraliqni tanlash</a>
+      <a href="#code"><span class="n">9</span>Kodda: batch ichida mayning va barqarorlik</a>
+      <a href="#mistakes"><span class="n">10</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">11</span>Boshqa formulalar bilan bog‘lanish</a>
+      <a href="#summary"><span class="n">12</span>Xulosa</a>
+      <a href="#quiz"><span class="n">13</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$L(a,p,n)=\max\bigl(0,\;d(a,p)-d(a,n)+m\bigr)$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>Oddiy klassifikator sinflarning qat’iy ro‘yxatini biladi. Lekin yuzni tanish tizimi o‘quv to‘plamida bo‘lmagan odamlarni ham tanishi, qayta identifikatsiya (re-identification, Re-ID) tizimi esa o‘sha odamni boshqa kamera yozuvida, boshqa rakursda va boshqa yorug‘likda topishi kerak. Har bir yangi odam uchun tarmoqni qayta o‘qitib bo‘lmaydi.</p>
+    <p>Yechim — sinflarni emas, <b>metrikani</b> o‘rgatish (metric learning). $f$ tarmoq tasvirni $f(x)\in\mathbb R^d$ embedding vektoriga shunday aylantiradiki, bir odamning suratlari yonma-yon, turli odamlarniki esa uzoqda bo‘ladi. Shunda «bu kim?» savoli masofa bo‘yicha eng yaqin qo‘shnilarni qidirishga keltiriladi, yangi odam esa bazaga bitta embedding bilan qo‘shiladi.</p>
+    <p>Triplet Loss bu talabni to‘g‘ridan-to‘g‘ri qo‘yadi. Uchlik olamiz: <b>langar</b> $a$ (anchor), <b>o‘ziniki</b> $p$ (positive, o‘sha odam) va <b>begona</b> $n$ (negative, boshqa odam). O‘ziniki begonadan kamida $m$ oraliqqa (margin) yaqinroq bo‘lishini talab qilamiz.</p>
+    <ul class="flist"><li><b>yuzni tanish</b> — FaceNet (Google, 2015): 128 o‘lchovli embeddinglar, $0{,}2$ oraliq, LFW to‘plamida $99{,}63\%$ aniqlik;</li><li><b>odamlarni kameralar orasida qayta identifikatsiya qilish</b> — batch-hard triplet loss (Xermans va boshq., 2017) va torchreid kutubxonasi, unda u OSNet’ni o‘qitishda kross-entropiyani to‘ldiradi;</li><li><b>o‘xshash tasvirlar, tovarlar, ovozlarni qidirish</b> va umuman savol «bu namunaga nima yaqinroq?» bo‘lgan har qanday ma’no bo‘yicha qidiruv.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>$L=\max\bigl(0,\,d(a,p)-d(a,n)+m\bigr)$. Agar begona o‘zinikidan $m$ dan ko‘proq uzoq bo‘lsa, yo‘qotish nolga teng va uchlik hech narsa o‘rgatmaydi. Aks holda gradiyent o‘zinikini langarga tortadi va begonani itaradi. Tasodifiy uchliklarning deyarli hammasi oson, shuning uchun asosiy mahorat — qiyinlarini tanlash (mayning), masalan batch ichidagi eng uzoq o‘ziniki va eng yaqin begonani (batch-hard).</p></div>
+
+    <h2 id="intuition">Intuitsiya: o‘ziniki begonadan yaqinroq</h2>
+    <p>Embeddinglarni tekislikda chizamiz. $a$ langar atrofida o‘ziniki $p$ orqali aylana o‘tkazamiz — uning radiusi $d(a,p)$. Ikkinchisini oraliq qadar kengroq qo‘shamiz: radiusi $d(a,p)+m$. Formula talabi oddiy: <b>begona tashqi aylanadan tashqarida yotishi kerak</b>. To‘q sariq halqaga yoki ichkariga tushsa — yo‘qotish musbat.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-play" data-config="{&quot;a&quot;: [-0.5, 0], &quot;p&quot;: [0.4, 0], &quot;n&quot;: [0.1, 0.8], &quot;m&quot;: 0.2}"></div><figcaption><b>1-rasm.</b> Langar, o‘ziniki va begonani torting. To‘q sariq strelkalar — gradiyent tushish har bir nuqtani siljitadigan yo‘nalishlar. Boshlang‘ich holatda $d(a,p)=0{,}9$, $d(a,n)=1{,}0$, $m=0{,}2$: begona halqa ichida, $L=0{,}9-1{,}0+0{,}2=0{,}1$. Uni halqadan tashqariga chiqaring — strelkalar yo‘qoladi.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>O‘ziniki va begonadagi strelkalar doim langarga boruvchi chiziqlar bo‘ylab yo‘nalgan, oddiy (kvadratsiz) metrikada esa ularning uzunliklari bir xil va 1 ga teng: buzilish kattaligi emas, uning faktining o‘zi muhim. Masofalar kvadratlarini yoqing — strelkalar uzunligi masofalarga proporsional bo‘lib qoladi.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <p>Yo‘qotishni to‘liq yozamiz — tarmoq, masofalar va uchliklar bo‘yicha o‘rtachalash bilan:</p>
+    <div class="eqd">$$\mathcal L=\frac{1}{|T|}\sum_{(a,p,n)\in T}\max\Bigl(0,\;\bigl\|f(x_a)-f(x_p)\bigr\|-\bigl\|f(x_a)-f(x_n)\bigr\|+m\Bigr)$$</div>
+    <dl class="symbols"><dt>$f(x)$</dt><dd>embedding: $x$ tasvir uchun tarmoq chiqishi, $\mathbb R^d$ dagi vektor (FaceNet’da $d=128$), ko‘pincha birlik uzunlikka normallashtirilgan;</dd><dt>$d(a,p)$</dt><dd>o‘zinikigacha masofa, $\|f(x_a)-f(x_p)\|$; uni kamaytirmoqchimiz;</dd><dt>$d(a,n)$</dt><dd>begonagacha masofa, $\|f(x_a)-f(x_n)\|$; uni oshirmoqchimiz;</dd><dt>$m&gt;0$</dt><dd>oraliq: begona o‘zinikidan shunchaki emas, $m$ zaxira bilan uzoqroq bo‘lishi kerak;</dd><dt>$\max(0,\cdot)$</dt><dd>sharnir (hinge): bajarilgan talab jarimalanmaydi va gradiyent bermaydi;</dd><dt>$T$</dt><dd>o‘rtachalanadigan uchliklar to‘plami — odatda batch ichidagi uchliklar (mayning bo‘limiga qarang).</dd></dl>
+    <p>Bitta o‘zgaruvchi — masofalar ayirmasi $\Delta=d(a,p)-d(a,n)$ ni kiritish qulay. U holda $L=\max(0,\Delta+m)$: bu $m$ ga surilgan <a href="../relu/">ReLU</a>. Manfiy $\Delta$ o‘ziniki allaqachon yaqinroq ekanini bildiradi; lekin $\Delta&gt;-m$ ekan, zaxira yetmaydi.</p>
+    <p>$m=0{,}2$ dagi misollar: $d(a,p)=0{,}4$, $d(a,n)=1{,}1$ $\Delta=-0{,}7$ va $L=\max(0;\,-0{,}5)=0$ beradi — uchlik allaqachon ajratilgan. $d(a,p)=0{,}9$, $d(a,n)=1{,}0$ $\Delta=-0{,}1$ va $L=0{,}1$ beradi: o‘ziniki yaqinroq, lekin oraliq kam.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-hinge" data-config="{&quot;m&quot;: 0.2, &quot;delta&quot;: -0.1}"></div><figcaption><b>2-rasm.</b> $\Delta$ funksiyasi sifatidagi yo‘qotish (yuqorida) va uning hosilasi (pastda). Hosila — zinapoya: bajarilgan uchliklar uchun 0, buzilganlari uchun 1, oraliq qiymatlarsiz. Punktir — Xermans va boshqalar ishidagi «yumshoq oraliq» (soft margin) $\ln(1+e^{\Delta})$: u hech qachon nolga aylanmaydi, hosilasi esa <a href="../sigmoid/">sigmoida</a> $\sigma(\Delta)$. $\Delta=-0{,}1$ da: hinge $0{,}1$, yumshoq variant $0{,}644$ beradi.</figcaption></figure>
+    <div class="callout note"><b>Oraliq — nisbiy</b><p>Triplet Loss o‘zinikilar qandaydir qat’iy chegaradan yaqinroq bo‘lishini talab qilmaydi — faqat begonalardan yaqinroq bo‘lishini. Shuning uchun turli odamlarning klasterlari turli o‘lchamda bo‘lishi mumkin. «Bu o‘sha odam» javobi uchun chegara keyin, validatsiyada tanlanadi.</p></div>
+
+    <h2 id="regimes">Uch rejim: oson, yarim qiyin, qiyin</h2>
+    <p>Har bir uchlik $d(a,p)$ va $d(a,n)$ ga qarab uch rejimdan biriga tushadi:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Rejim</th><th>Shart</th><th>$L$</th><th>Gradiyent</th></tr></thead><tbody><tr><td>oson (easy)</td><td>$d(a,n)\ge d(a,p)+m$</td><td>$0$</td><td>yo‘q</td></tr><tr><td>yarim qiyin (semi-hard)</td><td>$d(a,p)&lt;d(a,n)&lt;d(a,p)+m$</td><td>$0$ dan $m$ gacha</td><td>bor</td></tr><tr><td>qiyin (hard)</td><td>$d(a,n)\le d(a,p)$</td><td>$m$ dan kam emas</td><td>bor</td></tr></tbody></table></div>
+    <p>$(d(a,p),\,d(a,n))$ tekisligida rejimlar chegaralari — ikkita parallel to‘g‘ri chiziq: $d(a,n)=d(a,p)$ va $d(a,n)=d(a,p)+m$. Yo‘qotish — ulardan yuqoridagisidan tepada nol bilan kesilgan qiya tekislik.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-regimes" data-config="{&quot;m&quot;: 0.2, &quot;pt&quot;: [0.9, 1.0]}"></div><figcaption><b>3-rasm.</b> $(d(a,p),\,d(a,n))$ tekisligidagi yo‘qotish: qizil rang qancha to‘q bo‘lsa, u shuncha katta. Nuqtalar — 5-rasmdagi batchning barcha 576 uchligi (4 kishi, har biri 4 suratdan). $m=0{,}2$ da ulardan 510 tasi oson, 31 tasi yarim qiyin va 35 tasi qiyin: 576 tadan faqat 66 uchlik gradiyent beradi. Oraliqni oshiring — yarim qiyinlar polosasi kengayadi.</figcaption></figure>
+    <div class="callout warn"><b>Nega tasodifiy uchliklar foydasiz</b><p>Tarmoq ozgina o‘rgangan zahoti tasodifiy uchliklarning aksariyati oson bo‘lib qoladi: ularning yo‘qotishi va gradiyenti nolga teng. Ular bo‘yicha o‘rtachalash foydali signalni suyultiradi va o‘qitish deyarli to‘xtaydi. Mayning shundan kelib chiqadi — qiyin va yarim qiyin uchliklarni maqsadli tanlash.</p></div>
+
+    <h2 id="gradients">Gradiyentlar: har bir nuqta qayerga tortiladi</h2>
+    <p>Faol uchlik ($L&gt;0$) uchun yo‘qotish $d(a,p)-d(a,n)+m$ ga teng va hammasi masofa gradiyentiga keltiriladi. Evklid normasi uchun $\nabla_u\|u-v\|=\frac{u-v}{\|u-v\|}$ — $v$ dan $u$ ga yo‘nalgan birlik vektor.</p>
+    <details class="deep"><summary>Uch nuqta bo‘yicha gradiyentlarni keltirib chiqarish</summary><div class="deep-body">
+      <p>Embeddinglarni $a,p,n$ va $d_{ap}=\|a-p\|$, $d_{an}=\|a-n\|$ deb belgilaymiz. $d_{ap}=\sqrt{(a-p)^\top(a-p)}$ ni zanjir qoidasi bo‘yicha differensiallaymiz:</p>
+      <div class="eqd">$$\nabla_a d_{ap}=\frac{1}{2d_{ap}}\cdot2(a-p)=\frac{a-p}{d_{ap}},\qquad \nabla_p d_{ap}=\frac{p-a}{d_{ap}}$$</div>
+      <p>$d_{an}$ uchun ham xuddi shunday. $L=d_{ap}-d_{an}+m$ ga qo‘yamiz:</p>
+      <div class="eqd">$$\nabla_p L=\frac{p-a}{d_{ap}},\qquad \nabla_n L=-\frac{n-a}{d_{an}},\qquad \nabla_a L=\frac{a-p}{d_{ap}}-\frac{a-n}{d_{an}}$$</div>
+      <p>Uch gradiyent yig‘indisi nolga teng: uchala nuqtani bir xil vektorga surish masofalarni o‘zgartirmaydi, demak, yo‘qotish ham o‘zgarmaydi. Masofalar kvadratlari uchun $L=d_{ap}^2-d_{an}^2+m$ dan $\nabla_pL=2(p-a)$, $\nabla_nL=-2(n-a)$ va $\nabla_aL=2(n-p)$ ni olamiz — langarning gradiyenti umuman uning holatiga bog‘liq emas.</p>
+    </div></details>
+    <p>Gradiyent tushish qadami gradiyentga qarshi yo‘naladi: o‘ziniki $p$ <b>langarga qarab</b>, begona $n$ <b>langardan uzoqqa</b> siljiydi, langar esa o‘zinikiga qarab va begonadan uzoqlashadi. Oddiy metrikada bu siljishlar uzunligi istalgan masofada 1 ga teng; kvadratli metrikada — masofalarga proporsional.</p>
+    <p>Buni 3D sirtda ko‘rish mumkin. Langarni koordinata boshida, o‘zinikini esa $0{,}6$ masofada mahkamlaymiz; yo‘qotish begonaning $n=(x,y)$ holatiga qanday bog‘liq? To‘ntarilgan konus hosil bo‘ladi: markazda $L=0{,}6+m$, radiusi $0{,}6+m$ bo‘lgan doira chetida — nol. Konus qiyaligi hamma joyda bir xil, $|\nabla L|=1$.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-surface" data-config="{&quot;m&quot;: 0.4, &quot;who&quot;: &quot;neg&quot;}"></div><figcaption><b>4-rasm.</b> Langar mahkamlanganda begona (yoki o‘ziniki) holatining funksiyasi sifatidagi yo‘qotish; sirtni aylantirish mumkin. O‘ngda — langardan chiqqan nur bo‘ylab kesim: yo‘qotishning o‘zi va gradiyent normasi. $m=0{,}4$ va oddiy masofada konus balandligi $1{,}0$ va radiusi $1{,}0$. $d^2$ ga o‘ting: sirt balandligi $0{,}76$ va radiusi $0{,}872$ bo‘lgan paraboloidga aylanadi, langarning o‘zida esa gradiyent nolga aylanadi. O‘ziniki uchun (begona $1{,}2$ masofada) — voronka: yo‘qotish radiusi $0{,}8$ bo‘lgan aylanadan tashqarida o‘sadi.</figcaption></figure>
+    <div class="callout warn"><b>Masofa kvadrati va qiyin begonalar</b><p>Masofalar kvadratlarida itarish kuchi $2\,d(a,n)$ begona langarga qancha yaqin bo‘lsa, shuncha zaif — ya’ni aynan eng xavfli xatolar uchun. Oddiy metrikada u doimiy. Shuning uchun Re-ID’da (Xermans va boshq., 2017) oddiy Evklid masofasi tavsiya etiladi; FaceNet kvadratlardan foydalanadi, lekin normallashtirilgan vektorlarda va yarim qiyin uchliklar bilan.</p></div>
+
+    <h2 id="mining">Mayning: qaysi uchliklarni olish kerak</h2>
+    <p>$N$ ta tasvir to‘plamida $N^3$ tartibidagi uchlik bor — hammasini sanab chiqib bo‘lmaydi, ularning deyarli barchasi oson ham. Uchliklar batch ichida <b>onlayn</b> tanlanadi. Batch $P\times K$ sxemasida quriladi: $P$ kishi, har biridan $K$ surat. Bunday batch ichida</p>
+    <div class="eqd">$$|T|=\underbrace{PK}_{\text{langarlar}}\cdot\underbrace{(K-1)}_{\text{o‘zinikilar}}\cdot\underbrace{(P-1)K}_{\text{begonalar}}$$</div>
+    <p>$P=4$, $K=4$ da bu 576 uchlik, $P=18$, $K=4$ da (Xermans va boshqalarning Market-1501 to‘plami uchun batchi) — allaqachon 14 688. Asosiy strategiyalar:</p>
+    <ul class="flist"><li><b>batch-all</b> — batchning barcha uchliklarini olamiz va osonlari signalni suyultirmasligi uchun yo‘qotishni faqat faollari ($L&gt;0$) bo‘yicha o‘rtachalaymiz;</li><li><b>batch-hard</b> — har bir langar uchun bitta uchlik: <i>eng uzoq o‘ziniki</i> va <i>eng yaqin begona</i>; $PK$ ta eng informativ uchlik;</li><li><b>semi-hard</b> (FaceNet) — $(a,p)$ juftligi uchun o‘zinikidan uzoqroq, lekin oraliq ichidagi begona olinadi; shunda boshida o‘qitish yumshoqroq bo‘ladi.</li></ul>
+    <div class="eqd">$$\mathcal L_{\text{BH}}=\frac{1}{PK}\sum_{a}\max\Bigl(0,\;\max_{p:\,y_p=y_a}d(a,p)-\min_{n:\,y_n\ne y_a}d(a,n)+m\Bigr)$$</div>
+    <figure class="viz"><div class="fv" data-viz="triplet-mining" data-config="{&quot;anchor&quot;: 1, &quot;m&quot;: 0.2, &quot;strategy&quot;: &quot;hard&quot;}"></div><figcaption><b>5-rasm.</b> Embedding fazosidagi $P=4$, $K=4$ batch. Langar va strategiyani tanlang. batch-hard rejimida qalin chiziqlar eng uzoq o‘ziniki va eng yaqin begonaga olib boradi, punktir aylana — $d_{\max}(a,p)+m$ radius. $m=0{,}2$ da batch-hard $L=0{,}353$, batch-all esa 576 tadan 66 faol uchlik bo‘yicha $0{,}306$ beradi. Birinchi langarning 36 uchligidan 34 tasi oson va 2 tasi yarim qiyin.</figcaption></figure>
+    <div class="callout warn"><b>Eng qiyinlarining xavfi</b><p>Eng qiyin uchliklar ko‘pincha belgilashdagi xatolar yoki deyarli farqlanmaydigan suratlar bo‘lib chiqadi. O‘qitish boshida, embeddinglar tasodifiy bo‘lganda, ularning ortidan quvish modelni «yopishtirib» qo‘yishi mumkin: barcha $f(x)$ bitta nuqtaga tortiladi, u yerda istalgan uchlik uchun $L=m$. Boshida yarim qiyin uchliklar, embeddinglarni normallashtirish, yumshoq oraliq va kross-entropiya bilan birlashtirish yordam beradi.</p></div>
+
+    <h2 id="training">O‘qitishda bu qanday ishlaydi</h2>
+    <p>Hammasini birlashtiramiz. Har bir suratning ikki belgisi bo‘lsin: $x_1$ — bir odamning o‘zida kuchli o‘zgaradigan xalaqit (rakurs, yoritilish), $x_2$ esa — xalaqit ozgina egib yuborgan shaxs belgisi. Kirish fazosida bir odamning ikki surati turli odamlarning suratlaridan uzoqroq bo‘lishi mumkin: uchliklarning faqat $62{,}7\%$ i to‘g‘ri tartiblangan.</p>
+    <p>Kichik $f:\mathbb R^2\to\mathbb R^2$ tarmoq (12 ta tanh neyron) $m=0{,}5$ dagi batch-hard triplet loss va <a href="../adam/">Adam</a> optimizatori bilan o‘qitiladi. Unga qaysi odam qayerda bo‘lishi kerakligi aytilmaydi — faqat o‘zinikilar begonalardan yaqinroq bo‘lishi kerakligi.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-train" data-config="{&quot;m&quot;: 0.5}"></div><figcaption><b>6-rasm.</b> Chapda — har biri 12 suratli 4 kishining kirishlari, o‘ngda — ularning embeddinglari, pastda — yo‘qotish. «Boshlash»ni bosing. Boshida $L=1{,}266$, barcha 48 langar faol, uchliklarning $64{,}9\%$ i to‘g‘ri tartiblangan. 60-qadamga kelib $100\%$ i tartiblangan, lekin 42 langarga hali oraliq yetmaydi; 300-qadamga kelib 4 tasi faol qoladi, 600-qadamda yo‘qotish nolga teng. Tarmoq polosalarni «to‘g‘riladi»: $x_1$ xalaqit endi masofalarga ta’sir qilmaydi.</figcaption></figure>
+    <p>Re-ID ham xuddi shunday ishlaydi: so‘rov (query) — bir kameradagi odam surati, galereya (gallery) — qolgan barcha kameralardagi suratlar. Galereya embeddinglari so‘rovgacha bo‘lgan masofa bo‘yicha saralanadi va birinchi to‘g‘ri javob nechanchi o‘rinda ekaniga qaraladi. Metrikalar — Rank-1 (to‘g‘ri javob birinchi o‘rinda) va mAP (barcha to‘g‘rilar bo‘yicha o‘rtacha aniqlik).</p>
+    <div class="callout history"><b>Bu qayerdan boshlangan</b><p>O‘zinikilar va begonalar orasidagi oraliq g‘oyasi — katta oraliqli eng yaqin qo‘shnilar usulidan (LMNN, Vaynberger va Sol, 2005). Oraliqli o‘ziniki va begona juftliklarini kontrastiv yo‘qotish kiritgan (Xadsell, Chopra va LeKun, 2006). Shroff, Kalenichenko va Filbin uchliklarni FaceNet asosiga aylantirdi (2015), Xermans, Bayer va Leybe esa «In Defense of the Triplet Loss for Person Re-Identification» (2017) ishida batch-hard mayning bilan uchliklar Re-ID’da ham yaxshi ishlashini ko‘rsatdi.</p></div>
+
+    <h2 id="sphere">Sferada normallashtirish va oraliqni tanlash</h2>
+    <p>Cheklovlarsiz tarmoq fazoni shunchaki cho‘zib, barcha masofalarni oshirishi mumkin: oddiy metrikada masshtab qat’iy bo‘lmasa, $m$ oraliq ma’nosini yo‘qotadi. Shuning uchun embeddinglar ko‘pincha normallashtiriladi: $\hat f=f/\|f\|$, barcha nuqtalar birlik sferada yotadi. Birlik vektorlar uchun</p>
+    <div class="eqd">$$\|u-v\|^{2}=\|u\|^2+\|v\|^2-2\,u^\top v=2-2\cos\theta$$</div>
+    <p>bunda $\theta$ — vektorlar orasidagi burchak. Masofa kvadrati 0 dan (ustma-ust) 4 gacha (qarama-qarshi) o‘zgaradi va FaceNet’dagi $m=0{,}2$ oraliq butun diapazonning $5\%$ i. $d^2(a,n)\ge d^2(a,p)+m$ talabi burchaklarga qo‘yilgan talabga aylanadi: $\cos\theta_{an}\le\cos\theta_{ap}-m/2$.</p>
+    <figure class="viz"><div class="fv" data-viz="triplet-sphere" data-config="{&quot;a&quot;: 0, &quot;p&quot;: 40, &quot;n&quot;: -45, &quot;m&quot;: 0.2}"></div><figcaption><b>7-rasm.</b> Birlik aylanadagi normallashtirilgan embeddinglar (nuqtalarni aylana bo‘ylab torting) va burchak funksiyasi sifatidagi masofa kvadrati. To‘q sariq yoy — begona oraliqni buzadigan zona. $\theta_{ap}=40^\circ$ va $m=0{,}2$ da begona langardan kamida $48{,}2^\circ$ uzoqda bo‘lishi kerak; boshlang‘ich holatda u $45^\circ$ da: $d^2(a,p)=0{,}468$, $d^2(a,n)=0{,}586$, $L=0{,}082$.</figcaption></figure>
+    <div class="callout note"><b>Oraliqni qanday tanlash kerak</b><p>Oraliq masofa birliklarida o‘lchanadi, shuning uchun normallashtirishga va masofa kvadratmi yoki yo‘qligiga bog‘liq. Normallashtirilgan embeddinglar uchun odatiy qiymatlar $0{,}2$ (FaceNet, $d^2$) va $0{,}3$ (torchreid, $d$). Juda kichik oraliq deyarli ajratishni talab qilmaydi, juda kattasiga esa erishib bo‘lmasligi mumkin va u barcha uchliklarni faol ushlab turadi.</p></div>
+
+    <h2 id="code">Kodda: batch ichida mayning va barqarorlik</h2>
+    <p>Samaradorlik kaliti — batchdagi barcha juft masofalar matritsasi, undan mayning sikllarsiz, niqoblar bilan olinadi. Sonli nozik jihat: $\|u-v\|$ $u=v$ da differensiallanmaydi (ildizning noldagi hosilasi cheksiz), $\|u\|^2-2u^\top v+\|v\|^2$ formulasi esa yaxlitlash tufayli juda kichik manfiy son berishi mumkin. Shuning uchun ildiz ostiga $\max(\cdot,\varepsilon)$ qo‘yiladi, <code>nn.TripletMarginLoss</code> esa vektorlar ayirmasiga $\varepsilon=10^{-6}$ qo‘shadi.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def pairwise_dist(E, eps=1e-12):
+    &quot;&quot;&quot;E (n × d) satrlari orasidagi Evklid masofalari matritsasi.&quot;&quot;&quot;
+    sq = (E * E).sum(1)
+    d2 = sq[:, None] - 2.0 * E @ E.T + sq[None, :]
+    return np.sqrt(np.maximum(d2, eps))     # max: −1e-16 va noldan ildizdan himoya
+
+def batch_hard_triplet(E, labels, margin=0.3):
+    D = pairwise_dist(E)
+    same = labels[:, None] == labels[None, :]
+    hardest_pos = np.where(same, D, 0.0).max(1)       # eng uzoq o‘ziniki
+    hardest_neg = np.where(same, np.inf, D).min(1)    # eng yaqin begona
+    return np.maximum(hardest_pos - hardest_neg + margin, 0.0).mean()
+
+E = np.array([[0.0, 0.0], [0.9, 0.0], [0.6, 0.8]])   # langar, o‘ziniki, begona
+labels = np.array([0, 0, 1])
+print(batch_hard_triplet(E, labels, margin=0.2))      # ≈ 0.1152 = (0.1 + 0.2456 + 0) / 3</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+# 1) Uchliklar oldindan yig‘ilgan: tayyor yo‘qotish
+loss_fn = nn.TripletMarginLoss(margin=0.2, p=2)
+a = torch.tensor([[0.0, 0.0]], requires_grad=True)
+p = torch.tensor([[0.9, 0.0]], requires_grad=True)
+n = torch.tensor([[0.6, 0.8]], requires_grad=True)
+loss = loss_fn(a, p, n)            # max(0, 0.9 − 1.0 + 0.2) ≈ 0.1
+loss.backward()
+print(p.grad, n.grad)              # ≈ [1, 0] va [−0.6, −0.8]: birlik vektorlar
+
+# 2) P × K batch ichida mayning (batch-hard)
+def batch_hard(emb, labels, margin=0.3, normalize=True):
+    if normalize:
+        emb = F.normalize(emb, dim=1)          # birlik sferadagi nuqtalar
+    D = torch.cdist(emb, emb)                  # n × n Evklid masofalari
+    same = labels[:, None] == labels[None, :]
+    pos = (D * same).max(1).values             # eng uzoq o‘ziniki
+    neg = D.masked_fill(same, float(&quot;inf&quot;)).min(1).values   # eng yaqin begona
+    return F.relu(pos - neg + margin).mean()</code></pre>
+    <div class="callout key"><b>Amaliyot</b><p>$P\times K$ batch (masalan, $P=16$, $K=4$) albatta kerak: batchda bir odamning bir nechta surati bo‘lmasa, o‘zinikilar bo‘lmaydi. Triplet loss odatda shaxslar bo‘yicha kross-entropiya bilan birlashtiriladi — shunda o‘qitish tezroq va barqarorroq.</p></div>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b>$P\times K$ o‘rniga tasodifiy batchlar.</b> Tasodifiy batchda ko‘p langarlarning birorta ham o‘zinikisi yo‘q va uchliklar yig‘ilmaydi.</li><li><b>Faqat tasodifiy uchliklarda o‘qitish.</b> Ularning deyarli hammasi oson, gradiyent nol va model yomon bo‘lsa ham yo‘qotish kichik qiymatda «qotib qoladi».</li><li><b>Birinchi qadamdan eng qiyin uchliklar</b> normallashtirish va qizdirishsiz — barcha embeddinglarning bitta nuqtaga yopishib qolish xavfi.</li><li><b>Masshtabni hisobga olmagan oraliq.</b> Normallashtirishsiz tarmoq fazoni cho‘zadi; sferada $m$ ni masofa maksimumiga ($d$ uchun 2, $d^2$ uchun 4) solishtirish kerak.</li><li><b>Noldan ildiz.</b> Matritsa diagonalidagi nuqtaning o‘zigacha masofasi, agar $\varepsilon$ qo‘shilmasa yoki diagonal niqoblanmasa, gradiyentda NaN beradi.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘lanish</h2>
+    <p>Eng yaqin qarindoshi — <b>kontrastiv yo‘qotish</b> (contrastive loss): u nisbiy taqqoslash bilan emas, juftliklar va mutlaq chegaralar bilan ishlaydi. $y=1$ (o‘zinikilar) va $y=0$ (begonalar) belgili juftlik uchun:</p>
+    <div class="eqd">$$L_{\text{contr}}=y\,d^{2}+(1-y)\,\max(0,\;m-d)^{2}$$</div>
+    <ul class="flist"><li><a href="../relu/">ReLU</a>: $\max(0,\Delta+m)$ sharnir — masofalarning surilgan ayirmasidan olingan ReLU; uning hosilasi — zinapoya.</li><li><a href="../sigmoid/">Sigmoida</a>: $\ln(1+e^\Delta)$ yumshoq oraliq hosilasi $\sigma(\Delta)$ ga teng.</li><li><a href="../softmax/">Softmax</a> va <a href="../cross-entropy/">kross-entropiya</a>: N-pair loss va InfoNCE uchlikni o‘xshashliklar bo‘yicha softmax orqali bitta o‘ziniki va ko‘plab begonalarga umumlashtiradi; ArcFace oraliqni softmax ichidagi burchakka ko‘chiradi.</li><li><a href="../mse/">MSE</a>: Evklid masofasi kvadrati — ayirmalar kvadratlarining o‘sha yig‘indisi.</li><li><a href="../focal/">Focal Loss</a>: «qiyinlardan o‘rganish» g‘oyasining o‘zi, faqat uchliklarni tanlash orqali emas, misol vazni orqali.</li><li><a href="../adam/">Adam</a>: 6-rasmdagi simulyatsiya optimizatori.</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) $L=\max(0,\,d(a,p)-d(a,n)+m)$: o‘ziniki begonadan $m$ zaxira bilan yaqinroq bo‘lishi kerak; bu $\Delta+m$ dan olingan ReLU. 2) Rejimlar: oson ($L=0$, gradiyent yo‘q), yarim qiyin ($0&lt;L&lt;m$), qiyin ($L\ge m$). 3) Gradiyentlar — langarga boruvchi chiziqlar bo‘ylab birlik vektorlar ($d^2$ uchun masofalarga proporsional), yig‘indisi nolga teng. 4) Uchliklar $P\times K$ batch ichida tanlanadi: batch-all, batch-hard, semi-hard. 5) Sferada normallashtirish $d^2=2-2\cos\theta$ va ma’noli oraliq beradi. 6) FaceNet va Re-ID shunga tayanadi: embedding va eng yaqin qo‘shnilarni qidirish.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. $m=0{,}2$, $d(a,p)=0{,}9$, $d(a,n)=1{,}0$. Yo‘qotish nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="1">$0{,}1$</button><button type="button" data-ok="0">$0{,}2$</button><button type="button" data-ok="0">$0{,}3$</button></div><div class="explain" hidden>$\max(0;\,0{,}9-1{,}0+0{,}2)=0{,}1$: o‘ziniki yaqinroq, lekin $0{,}1$ zaxira $0{,}2$ oraliqdan kichik.</div></fieldset><fieldset class="q"><legend>2. $m=0{,}2$ da $d(a,p)=0{,}5$, $d(a,n)=0{,}4$ bo‘lgan uchlik —…</legend><div class="opts"><button type="button" data-ok="0">oson</button><button type="button" data-ok="0">yarim qiyin</button><button type="button" data-ok="1">qiyin</button><button type="button" data-ok="0">mumkin emas</button></div><div class="explain" hidden>Begona o‘zinikidan yaqinroq: $d(a,n)\le d(a,p)$, bu qiyin uchlik; $L=0{,}3\ge m$.</div></fieldset><fieldset class="q"><legend>3. Faol uchlikdagi begona $n$ uchun gradiyent tushish qadami qayerga yo‘nalgan (oddiy metrika)?</legend><div class="opts"><button type="button" data-ok="0">Langarga, uzunligi $d(a,n)$</button><button type="button" data-ok="1">Langardan, birlik uzunlikda</button><button type="button" data-ok="0">O‘ziniki $p$ ga</button><button type="button" data-ok="0">Qadam yo‘q</button></div><div class="explain" hidden>$\nabla_nL=-(n-a)/d(a,n)$, qadam gradiyentga qarshi: $+(n-a)/d(a,n)$ — langardan yo‘nalgan birlik vektor.</div></fieldset><fieldset class="q"><legend>4. batch-hard har bir langar uchun nimani tanlaydi?</legend><div class="opts"><button type="button" data-ok="0">Tasodifiy o‘ziniki va tasodifiy begonani</button><button type="button" data-ok="0">Eng yaqin o‘ziniki va eng uzoq begonani</button><button type="button" data-ok="1">Eng uzoq o‘ziniki va eng yaqin begonani</button><button type="button" data-ok="0">$L&gt;0$ bo‘lgan barcha uchliklarni</button></div><div class="explain" hidden>Langar uchun eng yomon holat: $\max d(a,p)$ va $\min d(a,n)$ — eng informativ uchlik.</div></fieldset><fieldset class="q"><legend>5. $90^\circ$ burchak ostidagi birlik vektorlar uchun masofa kvadrati…</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$1$</button><button type="button" data-ok="1">$2$</button><button type="button" data-ok="0">$4$</button></div><div class="explain" hidden>$d^2=2-2\cos90^\circ=2$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../sgd/"><span class="kicker">← Oldingi formula</span><span class="big">SGD → Momentum → RMSProp</span><span class="kicker">Adam uchun poydevor</span></a>
+<a class="next" href="../focal/"><span class="kicker">Keyingi formula →</span><span class="big">Focal Loss</span><span class="kicker">muvozanatsiz sinflar</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

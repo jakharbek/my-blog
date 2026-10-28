@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Focal Loss: the loss that looks at the hard examples — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="Focal loss in depth: p_t and the modulating factor, the family of curves in γ, the gradient with respect to the logit, the 3D surface FL(p_t, γ), class imbalance, α-balancing and calibration, training logistic regression, NumPy and PyTorch code, RetinaNet.">
+  <meta property="og:title" content="Focal Loss: the loss that looks at the hard examples — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="Focal loss in depth: p_t and the modulating factor, the family of curves in γ, the gradient with respect to the logit, the 3D surface FL(p_t, γ), class imbalance, α-balancing and calibration, training logistic regression, NumPy and PyTorch code, RetinaNet.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/focal/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/focal/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/focal/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/focal/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/focal.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/focal/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/focal/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/focal/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · The next level</span>
+  <h1>Focal Loss: the loss that looks at the hard examples</h1>
+  <p class="dek">Cross-entropy with a single factor (1 − p_t)^γ. We take apart how it damps easy examples by orders of magnitude, why the gradient stops being monotonic, where RetinaNet’s γ = 2 and α = 0.25 come from, what happens to the loss at a 1 : 1000 imbalance, and why a model trained with focal loss outputs uncalibrated probabilities.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: a volume knob for every example</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties</a>
+      <a href="#derivative"><span class="n">5</span>The derivative: the gradient with respect to the logit</a>
+      <a href="#surface"><span class="n">6</span>The surface FL(p_t, γ) in 3D</a>
+      <a href="#imbalance"><span class="n">7</span>Imbalance: where the loss comes from</a>
+      <a href="#alpha"><span class="n">8</span>α-balancing and calibration</a>
+      <a href="#training"><span class="n">9</span>Focal loss in training</a>
+      <a href="#code"><span class="n">10</span>In code</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#links"><span class="n">12</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{FL}(p_t)=-\alpha_t\,(1-p_t)^{\gamma}\,\log p_t$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p>An object detector such as RetinaNet checks about a hundred thousand “anchors” per image — boxes, each of which may contain an object. There are only a handful of objects in a frame; everything else is background. Most background anchors are trivial: sky, a wall, asphalt. The model quickly learns to call them background with confidence, but <a href="../cross-entropy/">cross-entropy</a> still charges a small loss for each one. A hundred thousand small losses add up to a large one — and that sum drowns out the signal from the few hard examples the whole thing was for.</p>
+    <p>Lin, Goyal, Girshick, He and Dollár (2017) proposed not to discard easy examples and not to resample the data, but to <b>change the loss itself</b>: multiply cross-entropy by $(1-p_t)^\gamma$. For a confidently recognised example the factor is almost zero, for a hard one almost one. Where it is used:</p>
+    <ul class="flist"><li><b>one-stage detectors</b> — RetinaNet, and after it FCOS, ATSS and other dense detectors;</li><li><b>segmentation</b> — especially medical, where the region of interest covers a fraction of a percent of the pixels (often paired with Dice);</li><li><b>tabular problems with a rare class</b> — fraud, churn, anomalies; in boosting, focal loss is set as a custom objective;</li><li><b>classification with “noisy” confidence</b> — focal loss is sometimes used to keep a network from becoming overconfident.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>$p_t$ is the probability the model gave to the correct class. $\mathrm{FL}=-(1-p_t)^\gamma\log p_t$: with $\gamma=0$ it is ordinary cross-entropy; with $\gamma=2$ an example with $p_t=0.9$ weighs 100 times less, while one with $p_t=0.3$ only about 2 times less. The factor $\alpha_t$ additionally sets class weights. The price: the model no longer outputs calibrated probabilities.</p></div>
+
+    <h2 id="intuition">Intuition: a volume knob for every example</h2>
+    <p>Picture a class where a teacher answers students’ questions. A thousand students ask questions they already know the answer to, and twenty ask really hard ones. If every question gets the same time, none is left for the hard ones. Focal loss is a volume knob: the more confidently the model already answers an example, the quieter its voice in the total.</p>
+    <p>Drag the point and change $\gamma$. The grey dashed curve is cross-entropy, $-\ln p_t$. The blue one is focal loss: in the right half, where examples are already classified correctly, it hugs zero much earlier.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-curves" data-config="{&quot;gamma&quot;: 2, &quot;pt&quot;: 0.9}"></div><figcaption><b>Figure 1.</b> The family $\mathrm{FL}(p_t)$ for $\gamma=0,\,0.5,\,1,\,2,\,5$ (as in Figure 1 of the RetinaNet paper). With $\gamma=2$ and $p_t=0.9$: $\mathrm{CE}=0.105$, the factor $(1-p_t)^2=0.01$, $\mathrm{FL}=0.00105$ — 100 times smaller. On the left, where $p_t$ is small, the curves almost coincide.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>Focal loss barely touches hard examples and strongly damps easy ones. As $p_t\to0$ the factor $(1-p_t)^\gamma\to1$ and $\mathrm{FL}\approx\mathrm{CE}$. As $p_t\to1$ the loss decays like $(1-p_t)^{\gamma+1}$ rather than $1-p_t$ for CE.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <div class="eqd">$$\mathrm{FL}(p_t)=-\,\alpha_t\,(1-p_t)^{\gamma}\,\log p_t,\qquad p_t=\begin{cases}p, &amp; y=1,\\ 1-p, &amp; y=0\end{cases}$$</div>
+    <dl class="symbols"><dt>$p=\sigma(z)$</dt><dd>the probability of class 1 that the model obtained from the logit $z$ (via the <a href="../sigmoid/">sigmoid</a>; in the multi-class case via <a href="../softmax/">softmax</a>);</dd><dt>$p_t$</dt><dd>the probability of the <i>correct</i> class: how right the model is on this example; $p_t&gt;0.5$ means it is classified correctly;</dd><dt>$-\log p_t$</dt><dd>ordinary cross-entropy: zero at $p_t=1$, infinity as $p_t\to0$;</dd><dt>$(1-p_t)^\gamma$</dt><dd>the modulating factor: “how wrong the model still is”, raised to the power $\gamma$;</dd><dt>$\gamma\ge0$</dt><dd>the focusing parameter: $\gamma=0$ is CE, and the larger it is, the more easy examples are damped; RetinaNet uses $\gamma=2$;</dd><dt>$\alpha_t$</dt><dd>the class weight: $\alpha$ for positives and $1-\alpha$ for negatives; RetinaNet uses $\alpha=0.25$.</dd></dl>
+    <p>Writing it through $p_t$ is the key trick: instead of the two branches of binary cross-entropy $-y\log p-(1-y)\log(1-p)$ there is one, $-\log p_t$. In terms of the logit it is handy to set $z_t=z$ for $y=1$ and $z_t=-z$ for $y=0$; then $p_t=\sigma(z_t)$.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$p_t$</th><th class=num>$\mathrm{CE}$</th><th class=num>$(1-p_t)^2$</th><th class=num>$\mathrm{FL}_{\gamma=2}$</th><th class=num>$\mathrm{CE}/\mathrm{FL}$</th></tr></thead><tbody><tr><td class=num>0.1</td><td class=num>2.303</td><td class=num>0.81</td><td class=num>1.865</td><td class=num>1.23</td></tr><tr><td class=num>0.3</td><td class=num>1.204</td><td class=num>0.49</td><td class=num>0.590</td><td class=num>2.04</td></tr><tr><td class=num>0.5</td><td class=num>0.693</td><td class=num>0.25</td><td class=num>0.173</td><td class=num>4</td></tr><tr><td class=num>0.7</td><td class=num>0.357</td><td class=num>0.09</td><td class=num>0.0321</td><td class=num>11.1</td></tr><tr><td class=num>0.9</td><td class=num>0.105</td><td class=num>0.01</td><td class=num>0.00105</td><td class=num>100</td></tr><tr><td class=num>0.99</td><td class=num>0.0101</td><td class=num>0.0001</td><td class=num>$1.0\cdot10^{-6}$</td><td class=num>10,000</td></tr></tbody></table></div>
+    <p>The last column says how many times focal loss is smaller than cross-entropy; it is exactly $1/(1-p_t)^\gamma$. The example from the cheat sheet: with $\gamma=2$ the easy example $p_t=0.9$ gives $0.00105$ versus $0.105$ (100 times less), the hard one $p_t=0.3$ gives $0.590$ versus $1.204$ (about half).</p>
+    <p>On an ordinary scale the values $0.001$ and $0.000001$ are indistinguishable, so it helps to look at the losses on a logarithmic scale, where the factor turns into a vertical shift.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-weight" data-config="{&quot;gamma&quot;: 2, &quot;pt&quot;: 0.9}"></div><figcaption><b>Figure 2.</b> Left: the modulating factor $(1-p_t)^\gamma$ (the pale curves are $\gamma=0.5,\,1,\,2,\,5$). Right: CE and FL on a log scale; the arrow is the gap between them, the log of the factor. With $\gamma=2$ the gap is 100 times at $p_t=0.9$ and 10,000 times at $p_t=0.99$.</figcaption></figure>
+
+    <h2 id="properties">Properties</h2>
+    <ul class="flist"><li><b>Generalises cross-entropy</b>: $\gamma=0$, $\alpha_t=1$ give $\mathrm{CE}=-\log p_t$.</li><li><b>Never exceeds CE</b>: $0\le\mathrm{FL}\le\mathrm{CE}$, since $0\le(1-p_t)^\gamma\le1$ for $\gamma\ge0$.</li><li><b>Decreasing in $p_t$</b>: both factors $(1-p_t)^\gamma$ and $-\log p_t$ are non-negative and decreasing, so the more confident the correct answer, the smaller the loss.</li><li><b>Behaviour at the edge</b>: as $p_t\to1$, $\mathrm{FL}\approx(1-p_t)^{\gamma+1}$, because $-\log p_t\approx1-p_t$.</li><li><b>Not convex in the logit</b> for $\gamma&gt;0$: for very hard examples (with $\gamma=2$, for $p_t&lt;0.058$, $z_t&lt;-2.79$) the second derivative with respect to $z_t$ is negative. Cross-entropy is convex in the logit everywhere.</li><li><b>Not a strictly proper scoring rule</b>: the minimum of the expected FL is not attained at the true probability. Hence probabilities learned with FL need calibration (see the section on $\alpha$).</li></ul>
+    <div class="callout note"><b>Compared with other ways to fight imbalance</b><p>Class weighting ($\alpha$) changes the weight of a whole <i>class</i>, equally for easy and hard examples. Resampling and hard negative mining throw part of the examples away by a hard rule. Focal loss changes the weight of <i>every example</i> smoothly, according to how well the model already handles it — and needs no sampling.</p></div>
+
+    <h2 id="derivative">The derivative: the gradient with respect to the logit</h2>
+    <p>The model learns through the gradient with respect to the logit $z$, so that gradient shows whom training “hears”. For cross-entropy it is simple: $\partial\,\mathrm{CE}/\partial z_t=-(1-p_t)$ — the bigger the error, the stronger the gradient, monotonically. Focal loss adds a second term.</p>
+    <details class="deep"><summary>Step-by-step derivation</summary><div class="deep-body">
+      <p>Step 1. The derivative with respect to $p_t$ — the product rule for $-(1-p_t)^\gamma\log p_t$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{FL}}{\partial p_t}=\gamma(1-p_t)^{\gamma-1}\log p_t-\frac{(1-p_t)^{\gamma}}{p_t}$$</div>
+      <p>Step 2. The derivative of the sigmoid: $\partial p_t/\partial z_t=p_t(1-p_t)$ (see the <a href="../sigmoid/">sigmoid</a>).</p>
+      <p>Step 3. The chain rule, then factor out $(1-p_t)^\gamma$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{FL}}{\partial z_t}=\gamma p_t(1-p_t)^{\gamma}\log p_t-(1-p_t)^{\gamma+1}=(1-p_t)^{\gamma}\bigl(\gamma p_t\log p_t+p_t-1\bigr)$$</div>
+      <p>Step 4. For the original logit $z$: $z_t=\pm z$, so $\partial\,\mathrm{FL}/\partial z=\pm\,\partial\,\mathrm{FL}/\partial z_t$ (plus for $y=1$, minus for $y=0$), and $\alpha_t$ simply multiplies the result. Check: at $\gamma=0$ we get $p_t-1$, the gradient of cross-entropy.</p>
+    </div></details>
+    <div class="eqd">$$\left|\frac{\partial\,\mathrm{FL}}{\partial z_t}\right|=(1-p_t)^{\gamma}\Bigl[(1-p_t)+\gamma\,p_t\,|\log p_t|\Bigr]$$</div>
+    <p>Inside the brackets is the CE gradient, $1-p_t$, plus a non-negative extra term $\gamma p_t|\log p_t|$. Outside is the same factor $(1-p_t)^\gamma$. For easy examples the factor wins, while for very hard ones the extra term can make the gradient even <b>larger</b> than for CE.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-grad" data-config="{&quot;gamma&quot;: 2}"></div><figcaption><b>Figure 3.</b> The strength of the gradient with respect to the logit of the correct class. The grey dashed line is CE, $1-p_t$. The orange curve is FL: with $\gamma=2$ the maximum $1.129$ is reached at $p_t=0.058$; for $p_t&lt;0.298$ the FL gradient is stronger than CE’s, and at $p_t=0.9$ it is only $0.029$ of the CE gradient (35 times smaller).</figcaption></figure>
+    <div class="callout warn"><b>The gradient is no longer monotonic</b><p>With CE, the worse an example, the harder it pulls. With FL and $\gamma&gt;0$ the strongest gradient belongs to examples with $p_t$ around a few per cent, and further towards $p_t\to0$ it drops back to 1. For $\gamma=1$ the border where FL pulls harder than CE is exactly $p_t=1/e\approx0.368$. If the data contain wrong labels, they land precisely in this zone — and focal loss will diligently “learn” them.</p></div>
+
+    <h2 id="surface">The surface FL(p_t, γ) in 3D</h2>
+    <p>Let us gather the whole family of curves into one surface over the $(p_t,\gamma)$ plane. The slice at $\gamma=0$ is cross-entropy; moving along $\gamma$, the surface “sinks”, and the larger $p_t$, the faster.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-surface" data-config="{&quot;gamma&quot;: 2, &quot;pt&quot;: 0.5}"></div><figcaption><b>Figure 4.</b> Left: $\mathrm{FL}(p_t,\gamma)$ (rotate it with the mouse); the blue line is the slice at the chosen $\gamma$, the teal one at the chosen $p_t$. Right: the same teal curve on a log scale — a straight line with slope $\ln(1-p_t)$. At $p_t=0.5$ and $\gamma=2$: $\mathrm{FL}=0.173$, slope $\ln0.5=-0.693$.</figcaption></figure>
+    <p>Why a straight line: $\log\mathrm{FL}=\log\mathrm{CE}+\gamma\log(1-p_t)$. The loss decays exponentially in $\gamma$, at the rate $|\ln(1-p_t)|$: $0.69$ per unit of $\gamma$ for $p_t=0.5$, $2.30$ for $p_t=0.9$, $4.61$ for $p_t=0.99$. The parameter $\gamma$ spreads easy and hard examples apart on a scale of orders of magnitude.</p>
+
+    <h2 id="imbalance">Imbalance: where the loss comes from</h2>
+    <p>Let us model a one-stage detector. There are 1000 negatives per positive. The negatives are mostly easy: the logit of the correct class is $z_t\sim N(4,\,1)$, so a typical $p_t=\sigma(4)\approx0.98$. The positives are hard: $z_t\sim N(0,\,1)$, a typical $p_t=0.5$. Let us compute what share of the total loss comes from each group.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-imbalance" data-config="{&quot;gamma&quot;: 2, &quot;ratio&quot;: 1000}"></div><figcaption><b>Figure 5.</b> Left: the share of the total loss in $p_t$ bins of width $0.05$ (grey — CE, blue — FL). Right: the make-up of the total. Easy negatives ($p_t\ge0.9$) are $96.3\%$ of the examples. Under CE they produce $78.1\%$ of the loss, and the positives only $2.7\%$. Under FL with $\gamma=2$ the easy ones produce $9.0\%$, and the positives $58.0\%$.</figcaption></figure>
+    <p>This is exactly the “focusing”. Gradient descent minimises the sum, and under CE that sum consists almost entirely of examples that are already solved. Focal loss redistributes the “attention budget”: the losses of easy examples are damped tens and hundreds of times, and the sum becomes dominated by hard negatives and positives — the ones on which the model can actually improve.</p>
+    <div class="callout history"><b>RetinaNet</b><p>Before 2017 one-stage detectors were noticeably less accurate than two-stage ones (Faster R-CNN). Two-stage detectors coped with imbalance thanks to the proposal stage and sampling positives and negatives at a 1 : 3 ratio. Lin and co-authors showed that the main reason for the gap was the imbalance itself, and a simple change of the loss (RetinaNet = ResNet + FPN + focal loss) let a one-stage detector overtake two-stage ones. The paper received the Best Student Paper award at ICCV 2017.</p></div>
+
+    <h2 id="alpha">α-balancing and calibration</h2>
+    <p>The factor $\alpha_t$ is ordinary class weighting. Intuition suggests giving the rare class more weight: $\alpha&gt;0.5$. Yet in RetinaNet the best value turned out to be $\alpha=0.25$ — positives weigh <i>less</i> than negatives. The reason is that $\gamma$ has already done the job: easy negatives are damped, and now the balance tilts towards the positives. $\alpha$ and $\gamma$ have to be tuned together; the authors recommend $\gamma=2$, $\alpha=0.25$, noting that the result is robust for $\gamma$ in $[0.5,\,5]$.</p>
+    <p>There is also a subtlety that people forget. Take the simplest “model” — a single number $p$, the same for every example. If the share of positives is $\pi$, cross-entropy is minimised exactly at $p=\pi$: CE is a proper scoring rule, it teaches honest probabilities. With focal loss this is no longer true.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-prior" data-config="{&quot;pi&quot;: 0.01, &quot;gamma&quot;: 2, &quot;alpha&quot;: 0.25}"></div><figcaption><b>Figure 6.</b> The mean loss of a constant prediction $p$, divided by its own minimum. The share of positives is $\pi=0.01$. CE is minimal at $p=0.01$. FL with $\gamma=2$, $\alpha=0.25$ is minimal at $p=0.108$ (logit $-2.107$), i.e. the model overestimates the frequency of positives 11 times. Without $\alpha$ ($\alpha=0.5$) the minimum would be at $p=0.154$.</figcaption></figure>
+    <p>The conclusion: the factor $(1-p_t)^\gamma$ pulls predictions towards the middle — it “dislikes” confidence, because confidence stops being rewarded. So the output of a model trained with focal loss cannot be read as a probability: for thresholds and ranking that is fine, but if you need probabilities, calibrate them on validation data (Platt scaling, isotonic regression, temperature scaling).</p>
+    <div class="callout key"><b>Initialisation for a rare class</b><p>At the start of training the network outputs $p\approx0.5$ for every anchor, and the losses of 100,000 negatives blow up the first steps. That is why the bias of the last layer is initialised so that $p=\pi$: $b=-\ln\frac{1-\pi}{\pi}$; for $\pi=0.01$ this is $b\approx-4.595$. In addition, the sum of FL over all anchors is divided by the number of <i>positive</i> anchors, not by the number of all of them.</p></div>
+
+    <h2 id="training">Focal loss in training</h2>
+    <p>Let us train logistic regression on two-dimensional data with a 1 : 20 imbalance (400 negatives, 20 positives) in two ways — with CE and with FL — from the same start (the bias initialised to the share of positives, as in RetinaNet) and with the same step. The size of each dot is proportional to its gradient $|\partial L/\partial z|$: this shows which examples training “hears”.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-train" data-config="{&quot;gamma&quot;: 2}"></div><figcaption><b>Figure 7.</b> Left — CE, right — FL with $\gamma=2$; the solid line is the boundary $p=0.5$, the dashed ones are $p=0.1$ and $p=0.9$. Press “Play”. At the start easy examples ($p_t&gt;0.9$) account for $50.0\%$ of the total CE gradient and only $0.6\%$ for FL; after 400 steps, $12.8\%$ and $0.7\%$. Both models find 13 positives of 20, with 3 and 4 false alarms respectively.</figcaption></figure>
+    <p>What the figure shows. With CE large dots are scattered over the whole cloud of negatives: each of the 400 easy examples adds its own small portion of gradient. With FL only the dots near the boundary and the positives stay large — the rest almost vanish. The boundary itself comes out similar for the two models: for a linear model on such data the optimal direction is almost the same. The difference lies elsewhere: FL reaches its boundary in a few dozen steps and stops moving it, while CE keeps growing the weights, making easy examples even more confident. In a deep network with millions of parameters this difference is decisive: gradient spent on “obvious” background is network capacity not spent on hard cases.</p>
+    <div class="eqd">$$w\leftarrow w-\eta\,\frac1n\sum_{i=1}^{n}\frac{\partial\,\mathrm{FL}_i}{\partial z_i}\,x_i,\qquad \frac{\partial\,\mathrm{FL}_i}{\partial z_i}=\pm(1-p_{t,i})^{\gamma}\bigl(\gamma p_{t,i}\log p_{t,i}+p_{t,i}-1\bigr)$$</div>
+    <div class="callout warn"><b>An honest caveat</b><p>Focal loss is not a magic cure for imbalance. If the model is simple and the classes are well separated, it gives almost the same boundary as CE, only with less confident probabilities. The gain appears where easy examples outnumber hard ones by orders of magnitude and really take the gradient away: dense detection, segmentation, large tables with a rare class.</p></div>
+
+    <h2 id="code">In code</h2>
+    <p>Compute focal loss from logits, not from probabilities: $\log p_t=\log\sigma(z_t)=-\operatorname{softplus}(-z_t)$ — no $\log0$ and no overflow. Below is a NumPy version with the gradient and a check on the cheat-sheet example.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def log_sigmoid(z):
+    return -np.logaddexp(0.0, -z)          # log σ(z) without overflow
+
+def focal_loss(z, y, gamma=2.0, alpha=None):
+    &quot;&quot;&quot;Binary focal loss from logits z and labels y ∈ {0, 1}, element-wise.&quot;&quot;&quot;
+    zt = np.where(y == 1, z, -z)           # logit of the correct class: p_t = σ(z_t)
+    log_pt = log_sigmoid(zt)
+    pt = np.exp(log_pt)
+    at = 1.0 if alpha is None else np.where(y == 1, alpha, 1 - alpha)
+    return -at * (1 - pt) ** gamma * log_pt
+
+def focal_grad(z, y, gamma=2.0, alpha=None):
+    &quot;&quot;&quot;dFL/dz = ±α_t (1 − p_t)^γ (γ p_t log p_t + p_t − 1).&quot;&quot;&quot;
+    zt = np.where(y == 1, z, -z)
+    log_pt = log_sigmoid(zt)
+    pt = np.exp(log_pt)
+    at = 1.0 if alpha is None else np.where(y == 1, alpha, 1 - alpha)
+    g = at * (1 - pt) ** gamma * (gamma * pt * log_pt + pt - 1)
+    return np.where(y == 1, g, -g)
+
+z = np.array([np.log(9.0), np.log(3 / 7), -np.log(9.0)])  # p_t = 0.9, 0.3, 0.9
+y = np.array([1, 1, 0])
+print(focal_loss(z, y, gamma=0.0).round(4))   # [0.1054 1.204  0.1054]  — this is CE
+print(focal_loss(z, y).round(5))              # [0.00105 0.58995 0.00105]
+print(focal_grad(z, y, gamma=0.0).round(4))   # [-0.1 -0.7  0.1]
+print(focal_grad(z, y).round(4))              # [-0.0029 -0.697   0.0029]</code></pre>
+    <p>In PyTorch the binary version ships with torchvision; the multi-class one is easy to write with <code>log_softmax</code>. The last line initialises the bias for a rare class.</p>
+    <pre class="code"><span class="lang">python</span><code>import math
+import torch
+import torch.nn as nn
+from torchvision.ops import sigmoid_focal_loss
+
+# Binary (per anchor and class): α = 0.25, γ = 2, as in RetinaNet
+logits = torch.tensor([math.log(9.0), math.log(3 / 7)])
+targets = torch.tensor([1.0, 1.0])
+loss = sigmoid_focal_loss(logits, targets, alpha=0.25, gamma=2.0, reduction=&quot;none&quot;)
+# ≈ [0.00026, 0.14749] = 0.25 · [0.00105, 0.58995]
+
+# Multi-class version via log_softmax
+def focal_loss_multiclass(logits, target, gamma=2.0):
+    logp = torch.log_softmax(logits, dim=-1)
+    logp_t = logp.gather(-1, target[:, None]).squeeze(-1)
+    return (-(1 - logp_t.exp()) ** gamma * logp_t).mean()
+
+# Initialise the last layer’s bias for a rare class (π = 0.01)
+cls_head = nn.Conv2d(256, 9 * 80, kernel_size=3, padding=1)   # A = 9 anchors × K = 80 classes
+nn.init.constant_(cls_head.bias, -math.log((1 - 0.01) / 0.01))   # ≈ −4.595</code></pre>
+    <div class="callout note"><b>Checking the gradient</b><p>The numerical derivative $\bigl(\mathrm{FL}(z+\varepsilon)-\mathrm{FL}(z-\varepsilon)\bigr)/2\varepsilon$ with $\varepsilon=10^{-6}$ matches <code>focal_grad</code> to four digits: $-0.0029$, $-0.697$, $0.0029$. At $p_t=0.3$ the FL and CE gradients are almost equal ($0.697$ versus $0.7$): this is close to the crossing point $p_t\approx0.298$ in Figure 3.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>$\alpha$ “by frequency” together with $\gamma$.</b> Setting $\alpha=0.99$ for a class with a 1% share at $\gamma=2$ compensates twice. Start from $\gamma=2$, $\alpha=0.25$ and tune them together.</li><li><b>No initialisation for the rare class.</b> With a zero bias the first iterations drown in background losses; in the RetinaNet paper, training with plain CE without the $\pi=0.01$ initialisation diverged.</li><li><b>Normalising by the number of all examples.</b> Averaging over 100,000 anchors makes the loss tiny and dependent on image size; in detection it is divided by the number of positives.</li><li><b>Focal loss on probabilities with a <code>clamp</code>.</b> $\log(\max(p,\varepsilon))$ zeroes the gradient for the hardest examples. Compute from logits.</li><li><b>Reading the output as a probability.</b> FL shifts predictions towards the middle (Figure 6); for risk estimates and pricing, probabilities have to be calibrated.</li><li><b>A large $\gamma$ with noisy labels.</b> Wrong labels look like very hard examples, and FL increases their relative weight. If you suspect noise, lower $\gamma$ or clean the labels.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href="../bce/">BCE</a> and <a href="../cross-entropy/">cross-entropy</a>: FL with $\gamma=0$, $\alpha_t=1$ coincides with them.</li><li><a href="../sigmoid/">The sigmoid</a>: $p_t=\sigma(z_t)$, and its derivative $p_t(1-p_t)$ enters the FL gradient.</li><li><a href="../softmax/">Softmax</a>: in the multi-class case $p_t$ is the softmax component of the correct class.</li><li><a href="../huber/">Huber</a> is the opposite philosophy: Huber <i>weakens</i> the contribution of the largest errors, treating them as outliers, while FL weakens the <i>smallest</i> ones so that the large ones stand out.</li><li><a href="../triplet/">Triplet loss</a> solves a related problem in metric learning: easy triplets with zero loss give no gradient, and training focuses on the hard ones (hard negative mining).</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $\mathrm{FL}=-\alpha_t(1-p_t)^\gamma\log p_t$ is cross-entropy multiplied by the “degree of error” $(1-p_t)^\gamma$; $\gamma=0$ gives CE. 2) Easy examples are damped like $(1-p_t)^{\gamma+1}$: with $\gamma=2$ an example with $p_t=0.9$ weighs 100 times less. 3) The gradient with respect to the logit, $(1-p_t)^\gamma(\gamma p_t\log p_t+p_t-1)$, is not monotonic: with $\gamma=2$ its maximum is at $p_t\approx0.06$. 4) At a 1 : 1000 imbalance FL moves most of the loss from easy negatives to positives and hard negatives. 5) RetinaNet practice: $\gamma=2$, $\alpha=0.25$, the initialisation $b=-\ln\frac{1-\pi}{\pi}$, normalisation by the number of positives; the output probabilities need calibration.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. The model gave the correct class a probability $p_t=0.8$. What is the modulating factor at $\gamma=2$?</legend><div class="opts"><button type="button" data-ok="0">$0.64$</button><button type="button" data-ok="0">$0.2$</button><button type="button" data-ok="1">$0.04$</button><button type="button" data-ok="0">$0.8$</button></div><div class="explain" hidden>$(1-p_t)^\gamma=0.2^2=0.04$: the loss of this example is 25 times smaller than in CE.</div></fieldset><fieldset class="q"><legend>2. What does focal loss become with $\gamma=0$ and $\alpha_t=1$?</legend><div class="opts"><button type="button" data-ok="0">MSE</button><button type="button" data-ok="1">Cross-entropy</button><button type="button" data-ok="0">Hinge loss</button><button type="button" data-ok="0">Zero</button></div><div class="explain" hidden>The factor $(1-p_t)^0=1$, leaving $-\log p_t$ — cross-entropy.</div></fieldset><fieldset class="q"><legend>3. How does the FL gradient with respect to the logit behave at $\gamma=2$ as a function of $p_t$?</legend><div class="opts"><button type="button" data-ok="0">It decreases monotonically, like CE’s</button><button type="button" data-ok="0">It grows with $p_t$</button><button type="button" data-ok="1">It first grows, peaks around $p_t\approx0.06$, then falls fast</button><button type="button" data-ok="0">It is constant</button></div><div class="explain" hidden>$|\partial\mathrm{FL}/\partial z_t|=(1-p_t)^\gamma[(1-p_t)+\gamma p_t|\log p_t|]$: it equals 1 as $p_t\to0$, grows to $1.129$ at $p_t\approx0.058$ and then decreases.</div></fieldset><fieldset class="q"><legend>4. Why does RetinaNet use $\alpha=0.25$ rather than, say, $0.99$ for the rare object class?</legend><div class="opts"><button type="button" data-ok="0">It is a typo in the paper</button><button type="button" data-ok="1">$\gamma$ has already damped the easy negatives, and a strong extra tilt towards positives would be too much</button><button type="button" data-ok="0">$\alpha$ does not affect training</button><button type="button" data-ok="0">Objects are not actually rare</button></div><div class="explain" hidden>After the modulating factor most of the loss already comes from positives and hard negatives; $\alpha$ and $\gamma$ are tuned together, and $\alpha=0.25$ turned out best.</div></fieldset><fieldset class="q"><legend>5. A model is trained with focal loss, $\gamma=2$. What is true about its output probabilities?</legend><div class="opts"><button type="button" data-ok="0">They are perfectly calibrated</button><button type="button" data-ok="1">They are pulled towards the middle and need calibration</button><button type="button" data-ok="0">They are always 0 or 1</button><button type="button" data-ok="0">They coincide with a CE model’s</button></div><div class="explain" hidden>FL is not a proper scoring rule: even for a constant prediction the minimum is not at $p=\pi$ (Figure 6: $0.108$ instead of $0.01$).</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../triplet/"><span class="kicker">← Previous formula</span><span class="big">Triplet Loss</span><span class="kicker">re-identification (Re-ID)</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

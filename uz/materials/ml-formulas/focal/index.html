@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Focal Loss: qiyin misollarga qaraydigan yo‘qotish — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Focal loss batafsil: p_t va modulyatsiyalovchi ko‘paytuvchi, γ bo‘yicha egri chiziqlar oilasi, logit bo‘yicha gradiyent, FL(p_t, γ) 3D-sirti, sinflar muvozanatsizligi, α-muvozanatlash va kalibrlash, logistik regressiyani o‘qitish, NumPy va PyTorch kodi, RetinaNet.">
+  <meta property="og:title" content="Focal Loss: qiyin misollarga qaraydigan yo‘qotish — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Focal loss batafsil: p_t va modulyatsiyalovchi ko‘paytuvchi, γ bo‘yicha egri chiziqlar oilasi, logit bo‘yicha gradiyent, FL(p_t, γ) 3D-sirti, sinflar muvozanatsizligi, α-muvozanatlash va kalibrlash, logistik regressiyani o‘qitish, NumPy va PyTorch kodi, RetinaNet.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/focal/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/focal/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/focal/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/focal/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/focal.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/focal/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/focal/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/focal/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Keyingi bosqich</span>
+  <h1>Focal Loss: qiyin misollarga qaraydigan yo‘qotish</h1>
+  <p class="dek">Bitta (1 − p_t)^γ ko‘paytuvchili kross-entropiya. U oson misollarni yuzlab marta qanday so‘ndirishini, nega gradiyent monoton bo‘lmay qolishini, RetinaNet’dagi γ = 2 va α = 0,25 qayerdan kelishini, 1 : 1000 muvozanatsizlikda yo‘qotish bilan nima bo‘lishini va focal loss’da o‘qitilgan model nega kalibrlanmagan ehtimolliklar berishini mayda detallarigacha tahlil qilamiz.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 35 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: har bir misol uchun ovoz balandligi</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#properties"><span class="n">4</span>Xossalar</a>
+      <a href="#derivative"><span class="n">5</span>Hosila: logit bo‘yicha gradiyent</a>
+      <a href="#surface"><span class="n">6</span>FL(p_t, γ) sirti 3D’da</a>
+      <a href="#imbalance"><span class="n">7</span>Muvozanatsizlik: yo‘qotish qayerdan keladi</a>
+      <a href="#alpha"><span class="n">8</span>α-muvozanatlash va kalibrlash</a>
+      <a href="#training"><span class="n">9</span>O‘qitishda focal loss</a>
+      <a href="#code"><span class="n">10</span>Kodda</a>
+      <a href="#mistakes"><span class="n">11</span>Keng tarqalgan xatolar</a>
+      <a href="#links"><span class="n">12</span>Boshqa formulalar bilan bog‘liqlik</a>
+      <a href="#summary"><span class="n">13</span>Xulosa</a>
+      <a href="#quiz"><span class="n">14</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{FL}(p_t)=-\alpha_t\,(1-p_t)^{\gamma}\,\log p_t$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>RetinaNet kabi obyekt detektori bitta rasmda yuz mingga yaqin «anchor»ni — har birida obyekt bo‘lishi mumkin bo‘lgan to‘rtburchaklarni tekshiradi. Kadrda obyektlar bir nechta, qolgan hammasi — fon. Ko‘pchilik fon anchorlari arzimas: osmon, devor, asfalt. Model ularni ishonch bilan fon deb atashni tez o‘rganadi, lekin <a href="../cross-entropy/">kross-entropiya</a> baribir har biri uchun kichik yo‘qotish hisoblaydi. Yuz ming kichik yo‘qotish kattasiga qo‘shiladi — va bu yig‘indi hamma narsa aynan ular uchun qilingan bir nechta qiyin misollar signalini bosib ketadi.</p>
+    <p>Lin, Goyal, Girshik, Xe va Dollar (2017) oson misollarni tashlab yubormaslikni va ma’lumotlarni qayta tanlamaslikni, balki <b>yo‘qotishning o‘zini o‘zgartirishni</b> taklif qildi: kross-entropiyani $(1-p_t)^\gamma$ ga ko‘paytirish. Ishonch bilan tanilgan misol uchun ko‘paytuvchi deyarli nol, qiyini uchun deyarli bir. U qayerda qo‘llaniladi:</p>
+    <ul class="flist"><li><b>bir bosqichli detektorlar</b> — RetinaNet, undan keyin FCOS, ATSS va boshqa zich detektorlar;</li><li><b>segmentatsiya</b> — ayniqsa tibbiy, bu yerda qiziqish sohasi piksellarning foiz ulushlarini egallaydi (ko‘pincha Dice bilan juftlikda);</li><li><b>kamyob sinfli jadval masalalari</b> — firibgarlik, mijozlar ketishi, anomaliyalar; bustingda focal loss foydalanuvchi maqsad funksiyasi sifatida beriladi;</li><li><b>«shovqinli» ishonchli klassifikatsiya</b> — focal loss ba’zan tarmoq haddan tashqari ishonchli bo‘lib ketmasligi uchun qo‘llaniladi.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>$p_t$ — model to‘g‘ri sinfga bergan ehtimollik. $\mathrm{FL}=-(1-p_t)^\gamma\log p_t$: $\gamma=0$ da bu oddiy kross-entropiya, $\gamma=2$ da $p_t=0{,}9$ li misol 100 marta yengil, $p_t=0{,}3$ lisi esa atigi 2 marta yengil. $\alpha_t$ ko‘paytuvchi qo‘shimcha ravishda sinflar vaznini beradi. Narxi — model kalibrlangan ehtimolliklar berishni to‘xtatadi.</p></div>
+
+    <h2 id="intuition">Intuitsiya: har bir misol uchun ovoz balandligi</h2>
+    <p>O‘qituvchi o‘quvchilar savollariga javob beradigan sinfni tasavvur qiling. Ming o‘quvchi javobini o‘zi biladigan savollarni beradi, yigirmatasi esa haqiqatan qiyinlarini. Agar har bir savolga bir xil vaqt ajratilsa, qiyinlariga vaqt qolmaydi. Focal loss — ovoz balandligi regulyatori: model misolga qanchalik ishonch bilan javob bersa, uning umumiy yig‘indidagi ovozi shunchalik past.</p>
+    <p>Nuqtani torting va $\gamma$ ni o‘zgartiring. Kulrang shtrixli egri chiziq — kross-entropiya $-\ln p_t$. Ko‘k — focal loss: misollar allaqachon to‘g‘ri klassifikatsiya qilingan o‘ng yarmida u nolga ancha erta yopishadi.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-curves" data-config="{&quot;gamma&quot;: 2, &quot;pt&quot;: 0.9}"></div><figcaption><b>1-rasm.</b> $\gamma=0;\,0{,}5;\,1;\,2;\,5$ uchun $\mathrm{FL}(p_t)$ oilasi (RetinaNet maqolasining 1-rasmidagi kabi). $\gamma=2$ va $p_t=0{,}9$ da: $\mathrm{CE}=0{,}105$, $(1-p_t)^2=0{,}01$ ko‘paytuvchi, $\mathrm{FL}=0{,}00105$ — 100 marta kichik. Chapda, $p_t$ kichik joyda, egri chiziqlar deyarli mos tushadi.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>Focal loss qiyin misollarga deyarli tegmaydi va oson misollarni juda kuchli so‘ndiradi. $p_t\to0$ da $(1-p_t)^\gamma\to1$ va $\mathrm{FL}\approx\mathrm{CE}$. $p_t\to1$ da yo‘qotish CE’dagidek $1-p_t$ kabi emas, $(1-p_t)^{\gamma+1}$ kabi kamayadi.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <div class="eqd">$$\mathrm{FL}(p_t)=-\,\alpha_t\,(1-p_t)^{\gamma}\,\log p_t,\qquad p_t=\begin{cases}p, &amp; y=1,\\ 1-p, &amp; y=0\end{cases}$$</div>
+    <dl class="symbols"><dt>$p=\sigma(z)$</dt><dd>model $z$ logitdan olgan 1-sinf ehtimolligi (<a href="../sigmoid/">sigmoida</a> orqali; ko‘p sinfli holatda — <a href="../softmax/">softmax</a> orqali);</dd><dt>$p_t$</dt><dd><i>to‘g‘ri</i> sinf ehtimolligi: model bu misolda qanchalik haq; $p_t&gt;0{,}5$ — misol to‘g‘ri klassifikatsiya qilingan;</dd><dt>$-\log p_t$</dt><dd>oddiy kross-entropiya: $p_t=1$ da nol, $p_t\to0$ da cheksizlik;</dd><dt>$(1-p_t)^\gamma$</dt><dd>modulyatsiyalovchi ko‘paytuvchi (modulating factor): «model hali qanchalik adashyapti» $\gamma$ darajasida;</dd><dt>$\gamma\ge0$</dt><dd>fokuslash parametri (focusing parameter): $\gamma=0$ — CE, qancha katta bo‘lsa, oson misollar shuncha kuchli so‘ndiriladi; RetinaNet’da $\gamma=2$;</dd><dt>$\alpha_t$</dt><dd>sinf vazni: pozitivlar uchun $\alpha$, negativlar uchun $1-\alpha$; RetinaNet’da $\alpha=0{,}25$.</dd></dl>
+    <p>$p_t$ orqali yozish — asosiy usul: binar kross-entropiyaning $-y\log p-(1-y)\log(1-p)$ ikki tarmog‘i o‘rniga bitta, $-\log p_t$ hosil bo‘ladi. Logit tilida $y=1$ da $z_t=z$ va $y=0$ da $z_t=-z$ deb kiritish qulay; shunda $p_t=\sigma(z_t)$.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$p_t$</th><th class=num>$\mathrm{CE}$</th><th class=num>$(1-p_t)^2$</th><th class=num>$\mathrm{FL}_{\gamma=2}$</th><th class=num>$\mathrm{CE}/\mathrm{FL}$</th></tr></thead><tbody><tr><td class=num>0,1</td><td class=num>2,303</td><td class=num>0,81</td><td class=num>1,865</td><td class=num>1,23</td></tr><tr><td class=num>0,3</td><td class=num>1,204</td><td class=num>0,49</td><td class=num>0,590</td><td class=num>2,04</td></tr><tr><td class=num>0,5</td><td class=num>0,693</td><td class=num>0,25</td><td class=num>0,173</td><td class=num>4</td></tr><tr><td class=num>0,7</td><td class=num>0,357</td><td class=num>0,09</td><td class=num>0,0321</td><td class=num>11,1</td></tr><tr><td class=num>0,9</td><td class=num>0,105</td><td class=num>0,01</td><td class=num>0,00105</td><td class=num>100</td></tr><tr><td class=num>0,99</td><td class=num>0,0101</td><td class=num>0,0001</td><td class=num>$1{,}0\cdot10^{-6}$</td><td class=num>10 000</td></tr></tbody></table></div>
+    <p>Oxirgi ustun — focal loss kross-entropiyadan necha marta kichik; bu aynan $1/(1-p_t)^\gamma$. Qo‘llanmadagi misol: $\gamma=2$ da $p_t=0{,}9$ li oson misol $0{,}105$ ga qarshi $0{,}00105$ beradi (100 marta kam), $p_t=0{,}3$ li qiyini — $1{,}204$ ga qarshi $0{,}590$ (taxminan ikki marta).</p>
+    <p>Oddiy shkalada $0{,}001$ va $0{,}000001$ qiymatlarini farqlab bo‘lmaydi, shuning uchun yo‘qotishlarni logarifmik shkalada ko‘rish foydali: u yerda ko‘paytuvchi vertikal siljishga aylanadi.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-weight" data-config="{&quot;gamma&quot;: 2, &quot;pt&quot;: 0.9}"></div><figcaption><b>2-rasm.</b> Chapda — $(1-p_t)^\gamma$ modulyatsiyalovchi ko‘paytuvchi (och egri chiziqlar — $\gamma=0{,}5;\,1;\,2;\,5$). O‘ngda — logarifmik shkaladagi CE va FL; strelka — ular orasidagi farq, ko‘paytuvchi logarifmi. $\gamma=2$ da: $p_t=0{,}9$ da farq 100 marta, $p_t=0{,}99$ da — 10 000 marta.</figcaption></figure>
+
+    <h2 id="properties">Xossalar</h2>
+    <ul class="flist"><li><b>Kross-entropiyani umumlashtiradi</b>: $\gamma=0$, $\alpha_t=1$ da $\mathrm{CE}=-\log p_t$ chiqadi.</li><li><b>CE dan katta emas</b>: $0\le\mathrm{FL}\le\mathrm{CE}$, chunki $\gamma\ge0$ da $0\le(1-p_t)^\gamma\le1$.</li><li><b>$p_t$ bo‘yicha kamayadi</b>: $(1-p_t)^\gamma$ va $-\log p_t$ ko‘paytuvchilarining ikkalasi manfiy emas va kamayuvchi, shuning uchun to‘g‘ri javob qancha ishonchli bo‘lsa, yo‘qotish shuncha kichik.</li><li><b>Chekkadagi xulq</b>: $p_t\to1$ da $\mathrm{FL}\approx(1-p_t)^{\gamma+1}$, chunki $-\log p_t\approx1-p_t$.</li><li><b>Logit bo‘yicha qavariq emas</b> $\gamma&gt;0$ da: juda qiyin misollar uchun ($\gamma=2$ da — $p_t&lt;0{,}058$, $z_t&lt;-2{,}79$ uchun) $z_t$ bo‘yicha ikkinchi hosila manfiy. Kross-entropiya logit bo‘yicha hamma joyda qavariq.</li><li><b>Qat’iy xos baholash qoidasi emas</b> (proper scoring rule): kutilgan FL minimumiga haqiqiy ehtimollikda erishilmaydi. Shuning uchun FL da o‘rganilgan ehtimolliklarni kalibrlash kerak ($\alpha$ bo‘limiga qarang).</li></ul>
+    <div class="callout note"><b>Muvozanatsizlikka qarshi boshqa usullar bilan taqqoslash</b><p>Sinflarni vaznlash ($\alpha$) butun <i>sinf</i> vaznini oson va qiyin misollar uchun bir xil o‘zgartiradi. Qayta tanlash va hard negative mining misollarning bir qismini qat’iy qoida bo‘yicha tashlab yuboradi. Focal loss <i>har bir misol</i> vaznini model u bilan qanchalik uddalayotganiga qarab ravon o‘zgartiradi — va tanlashni talab qilmaydi.</p></div>
+
+    <h2 id="derivative">Hosila: logit bo‘yicha gradiyent</h2>
+    <p>Model $z$ logit bo‘yicha gradiyent orqali o‘rganadi, shuning uchun aynan u o‘qitish kimni «eshitishini» ko‘rsatadi. Kross-entropiya uchun u oddiy: $\partial\,\mathrm{CE}/\partial z_t=-(1-p_t)$ — xato qancha katta bo‘lsa, gradiyent shuncha kuchli, monoton. Focal loss’da ikkinchi had paydo bo‘ladi.</p>
+    <details class="deep"><summary>Qadam-baqadam keltirib chiqarish</summary><div class="deep-body">
+      <p>1-qadam. $p_t$ bo‘yicha hosila — $-(1-p_t)^\gamma\log p_t$ uchun ko‘paytma qoidasi:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{FL}}{\partial p_t}=\gamma(1-p_t)^{\gamma-1}\log p_t-\frac{(1-p_t)^{\gamma}}{p_t}$$</div>
+      <p>2-qadam. Sigmoida hosilasi: $\partial p_t/\partial z_t=p_t(1-p_t)$ (<a href="../sigmoid/">sigmoida</a>ga qarang).</p>
+      <p>3-qadam. Zanjir qoidasi va umumiy $(1-p_t)^\gamma$ ko‘paytuvchini qavsdan chiqarish:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{FL}}{\partial z_t}=\gamma p_t(1-p_t)^{\gamma}\log p_t-(1-p_t)^{\gamma+1}=(1-p_t)^{\gamma}\bigl(\gamma p_t\log p_t+p_t-1\bigr)$$</div>
+      <p>4-qadam. Dastlabki $z$ logit uchun: $z_t=\pm z$, shuning uchun $\partial\,\mathrm{FL}/\partial z=\pm\,\partial\,\mathrm{FL}/\partial z_t$ ($y=1$ da plyus, $y=0$ da minus), $\alpha_t$ esa natijani shunchaki ko‘paytiradi. Tekshiruv: $\gamma=0$ da $p_t-1$, ya’ni kross-entropiya gradiyenti chiqadi.</p>
+    </div></details>
+    <div class="eqd">$$\left|\frac{\partial\,\mathrm{FL}}{\partial z_t}\right|=(1-p_t)^{\gamma}\Bigl[(1-p_t)+\gamma\,p_t\,|\log p_t|\Bigr]$$</div>
+    <p>Kvadrat qavs ichida — CE gradiyenti $1-p_t$ va manfiy bo‘lmagan $\gamma p_t|\log p_t|$ qo‘shimcha. Tashqarida — o‘sha $(1-p_t)^\gamma$ ko‘paytuvchi. Oson misollar uchun ko‘paytuvchi g‘olib chiqadi, juda qiyinlari uchun esa qo‘shimcha gradiyentni CE’dagidan hatto <b>kattaroq</b> qilishi mumkin.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-grad" data-config="{&quot;gamma&quot;: 2}"></div><figcaption><b>3-rasm.</b> To‘g‘ri sinf logiti bo‘yicha gradiyent kuchi. Kulrang shtrix — CE, $1-p_t$. To‘q sariq — FL: $\gamma=2$ da $1{,}129$ maksimumga $p_t=0{,}058$ da erishiladi, $p_t&lt;0{,}298$ da FL gradiyenti CE’nikidan kuchli, $p_t=0{,}9$ da esa u CE gradiyentining atigi $0{,}029$ qismini tashkil qiladi (35 marta kichik).</figcaption></figure>
+    <div class="callout warn"><b>Gradiyent endi monoton emas</b><p>CE’da misol qancha yomon bo‘lsa, shuncha kuchli tortadi. $\gamma&gt;0$ li FL’da eng kuchli gradiyent $p_t$ bir necha foiz atrofidagi misollarda, $p_t\to0$ tomon esa u yana 1 gacha tushadi. $\gamma=1$ uchun FL CE’dan kuchliroq tortadigan chegara aynan $p_t=1/e\approx0{,}368$. Agar ma’lumotlarda xato belgilar bo‘lsa, ular aynan shu zonaga tushadi — focal loss ularni zo‘r berib «o‘rganadi».</p></div>
+
+    <h2 id="surface">FL(p_t, γ) sirti 3D’da</h2>
+    <p>Butun egri chiziqlar oilasini $(p_t,\gamma)$ tekisligi ustidagi bitta sirtga yig‘amiz. $\gamma=0$ dagi kesim — kross-entropiya; $\gamma$ bo‘yicha harakatlanganda sirt «cho‘kadi», $p_t$ qancha katta bo‘lsa, shuncha tez.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-surface" data-config="{&quot;gamma&quot;: 2, &quot;pt&quot;: 0.5}"></div><figcaption><b>4-rasm.</b> Chapda — $\mathrm{FL}(p_t,\gamma)$ (sichqoncha bilan aylantiring), ko‘k chiziq — tanlangan $\gamma$ dagi kesim, firuza — tanlangan $p_t$ dagi kesim. O‘ngda — o‘sha firuza egri chiziq logarifmik shkalada: bu $\ln(1-p_t)$ qiyalikli to‘g‘ri chiziq. $p_t=0{,}5$ va $\gamma=2$ da: $\mathrm{FL}=0{,}173$, qiyalik $\ln0{,}5=-0{,}693$.</figcaption></figure>
+    <p>Nega to‘g‘ri chiziq: $\log\mathrm{FL}=\log\mathrm{CE}+\gamma\log(1-p_t)$. $\gamma$ bo‘yicha yo‘qotish eksponensial so‘nadi, so‘nish tezligi — $|\ln(1-p_t)|$: $p_t=0{,}5$ uchun $\gamma$ birligiga $0{,}69$, $p_t=0{,}9$ uchun — $2{,}30$, $p_t=0{,}99$ uchun — $4{,}61$. $\gamma$ parametri oson va qiyin misollarni tartiblar shkalasi bo‘yicha bir-biridan uzoqlashtiradi.</p>
+
+    <h2 id="imbalance">Muvozanatsizlik: yo‘qotish qayerdan keladi</h2>
+    <p>Bir bosqichli detektor holatini modellashtiramiz. Har bir pozitivga 1000 ta negativ to‘g‘ri keladi. Negativlar asosan oson: to‘g‘ri sinf logiti $z_t\sim N(4,\,1)$, ya’ni tipik $p_t=\sigma(4)\approx0{,}98$. Pozitivlar qiyin: $z_t\sim N(0,\,1)$, tipik $p_t=0{,}5$. Umumiy yo‘qotishning qancha ulushi har bir guruhga to‘g‘ri kelishini hisoblaymiz.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-imbalance" data-config="{&quot;gamma&quot;: 2, &quot;ratio&quot;: 1000}"></div><figcaption><b>5-rasm.</b> Chapda — $0{,}05$ kenglikdagi $p_t$ savatlari bo‘yicha umumiy yo‘qotish ulushi (kulranglar — CE, ko‘klar — FL). O‘ngda — yig‘indi tarkibi. Oson negativlar ($p_t\ge0{,}9$) — misollarning $96{,}3\%$ i. CE’da ular yo‘qotishning $78{,}1\%$ ini beradi, pozitivlar esa atigi $2{,}7\%$ ini. $\gamma=2$ li FL’da osonlar $9{,}0\%$, pozitivlar esa $58{,}0\%$ beradi.</figcaption></figure>
+    <p>Aynan shu «fokuslash». Gradiyent tushish yig‘indini minimallashtiradi, CE’da esa bu yig‘indi deyarli butunlay allaqachon yechilgan misollardan iborat. Focal loss «e’tibor byudjeti»ni qayta taqsimlaydi: oson misollar yo‘qotishlari o‘nlab va yuzlab marta so‘ndiriladi, yig‘indida esa qiyin negativlar va pozitivlar — model haqiqatan yaxshilanishi mumkin bo‘lganlar — ustunlik qila boshlaydi.</p>
+    <div class="callout history"><b>RetinaNet</b><p>2017 yilgacha bir bosqichli detektorlar aniqlikda ikki bosqichlilardan (Faster R-CNN) sezilarli ortda qolardi. Ikki bosqichlilar muvozanatsizlikni takliflar bosqichi va pozitiv hamda negativlarni 1 : 3 nisbatda tanlash hisobiga yengardi. Lin va hammualliflar ortda qolishning asosiy sababi aynan muvozanatsizlik ekanini ko‘rsatdi, va yo‘qotishni oddiygina almashtirish (RetinaNet = ResNet + FPN + focal loss) bir bosqichli detektorga ikki bosqichlilardan o‘zib ketish imkonini berdi. Ish ICCV 2017 da eng yaxshi talabalik maqolasi mukofotini oldi.</p></div>
+
+    <h2 id="alpha">α-muvozanatlash va kalibrlash</h2>
+    <p>$\alpha_t$ ko‘paytuvchi — oddiy sinflarni vaznlash. Intuitsiya kamyob sinfga kattaroq vazn berishni taklif qiladi: $\alpha&gt;0{,}5$. Lekin RetinaNet’da eng yaxshisi $\alpha=0{,}25$ bo‘lib chiqdi — pozitivlar negativlardan <i>yengilroq</i>. Sababi — $\gamma$ ishni allaqachon qilib bo‘lgan: oson negativlar so‘ndirilgan va endi ustunlik ko‘proq pozitivlarda. $\alpha$ va $\gamma$ ni birga tanlash kerak; mualliflar $\gamma=2$, $\alpha=0{,}25$ ni tavsiya qiladi va natija $[0{,}5;\,5]$ oraliqdagi $\gamma$ ga barqaror ekanini ta’kidlaydi.</p>
+    <p>Unutiladigan nozik jihat ham bor. Eng oddiy «model»ni olamiz — barcha misollar uchun bir xil bitta $p$ son. Agar pozitivlar ulushi $\pi$ bo‘lsa, kross-entropiya aynan $p=\pi$ da minimal: CE — xos baholash qoidasi, u halol ehtimolliklarga o‘rgatadi. Focal loss bilan bu endi unday emas.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-prior" data-config="{&quot;pi&quot;: 0.01, &quot;gamma&quot;: 2, &quot;alpha&quot;: 0.25}"></div><figcaption><b>6-rasm.</b> O‘zgarmas $p$ bashoratning o‘z minimumiga bo‘lingan o‘rtacha yo‘qotishi. Pozitivlar ulushi $\pi=0{,}01$. CE $p=0{,}01$ da minimal. $\gamma=2$, $\alpha=0{,}25$ li FL — $p=0{,}108$ da (logit $-2{,}107$), ya’ni model pozitivlar chastotasini 11 marta oshirib baholaydi. $\alpha$ siz ($\alpha=0{,}5$) minimum $p=0{,}154$ da bo‘lardi.</figcaption></figure>
+    <p>Xulosa: $(1-p_t)^\gamma$ ko‘paytuvchi bashoratlarni o‘rtaga tortadi — u ishonchni «yoqtirmaydi», chunki ishonch uchun to‘lov to‘xtaydi. Shuning uchun focal loss’da o‘qitilgan model chiqishini ehtimollik deb o‘qib bo‘lmaydi: chegaralar va tartiblash uchun bu normal, ehtimolliklar kerak bo‘lsa — ularni validatsiyada kalibrlang (Platt scaling, izotonik regressiya, harorat bilan shkalalash).</p>
+    <div class="callout key"><b>Kamyob sinf uchun boshlang‘ich qiymat</b><p>O‘qitish boshida tarmoq barcha anchorlar uchun $p\approx0{,}5$ beradi, va 100 000 negativ yo‘qotishlari birinchi qadamlarni portlatib yuboradi. Shuning uchun oxirgi qatlam siljishi $p=\pi$ bo‘ladigan qilib boshlanadi: $b=-\ln\frac{1-\pi}{\pi}$; $\pi=0{,}01$ uchun bu $b\approx-4{,}595$. Bundan tashqari, barcha anchorlar bo‘yicha FL yig‘indisi barcha anchorlar soniga emas, <i>pozitiv</i> anchorlar soniga bo‘linadi.</p></div>
+
+    <h2 id="training">O‘qitishda focal loss</h2>
+    <p>Logistik regressiyani 1 : 20 muvozanatsizlikdagi (400 negativ, 20 pozitiv) ikki o‘lchovli ma’lumotlarda ikki usulda — CE va FL bilan — bir xil boshlanish (siljish RetinaNet’dagidek pozitivlar ulushiga moslab boshlangan) va bir xil qadam bilan o‘qitamiz. Har bir nuqta o‘lchami uning $|\partial L/\partial z|$ gradiyentiga proporsional: shunda o‘qitish qaysi misollarni «eshitishi» ko‘rinadi.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-train" data-config="{&quot;gamma&quot;: 2}"></div><figcaption><b>7-rasm.</b> Chapda — CE, o‘ngda — $\gamma=2$ li FL; yaxlit chiziq — $p=0{,}5$ chegara, shtrixlar — $p=0{,}1$ va $p=0{,}9$. «Boshlash»ni bosing. Boshida oson misollarga ($p_t&gt;0{,}9$) CE umumiy gradiyentining $50{,}0\%$ i, FL’da esa atigi $0{,}6\%$ i to‘g‘ri keladi; 400 qadamdan keyin — $12{,}8\%$ va $0{,}7\%$. Ikkala model ham 20 tadan 13 ta pozitivni mos ravishda 3 va 4 ta soxta signal bilan topadi.</figcaption></figure>
+    <p>Rasmda nima ko‘rinadi. CE’da yirik nuqtalar butun negativlar buluti bo‘ylab sochilgan: 400 ta oson misolning har biri gradiyentning o‘z kichik ulushini qo‘shadi. FL’da faqat chegaradagi nuqtalar va pozitivlar yirik qoladi — qolganlari deyarli yo‘qoladi. Chegaraning o‘zi ikki modelda o‘xshash chiqadi: bunday ma’lumotlardagi chiziqli model uchun optimal yo‘nalish deyarli bir xil. Farq boshqa joyda: FL o‘z chegarasiga bir necha o‘n qadamda yetib boradi va uni boshqa siljitmaydi, CE esa vaznlarni oshirishda davom etib, oson misollarni yanada ishonchliroq qiladi. Millionlab parametrli chuqur tarmoqda bu farq hal qiluvchi: «baribir tushunarli» fonga sarflangan gradiyent — qiyin holatlarga sarflanmagan tarmoq sig‘imi.</p>
+    <div class="eqd">$$w\leftarrow w-\eta\,\frac1n\sum_{i=1}^{n}\frac{\partial\,\mathrm{FL}_i}{\partial z_i}\,x_i,\qquad \frac{\partial\,\mathrm{FL}_i}{\partial z_i}=\pm(1-p_{t,i})^{\gamma}\bigl(\gamma p_{t,i}\log p_{t,i}+p_{t,i}-1\bigr)$$</div>
+    <div class="callout warn"><b>Halol izoh</b><p>Focal loss muvozanatsizlikka qarshi sehrli vosita emas. Agar model oddiy, sinflar esa yaxshi ajraladigan bo‘lsa, u CE bilan deyarli bir xil chegarani, faqat kamroq ishonchli ehtimolliklar bilan beradi. Yutuq oson misollar qiyinlaridan tartiblarga ko‘p bo‘lgan va gradiyentni haqiqatan tortib oladigan joyda paydo bo‘ladi: zich aniqlash, segmentatsiya, kamyob sinfli katta jadvallar.</p></div>
+
+    <h2 id="code">Kodda</h2>
+    <p>Focal loss’ni ehtimolliklar bo‘yicha emas, logitlar bo‘yicha hisoblang: $\log p_t=\log\sigma(z_t)=-\operatorname{softplus}(-z_t)$ — $\log0$ va to‘lib ketishsiz. Quyida — gradiyentli va qo‘llanmadagi misolda tekshiriladigan NumPy versiyasi.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def log_sigmoid(z):
+    return -np.logaddexp(0.0, -z)          # to‘lib ketishsiz log σ(z)
+
+def focal_loss(z, y, gamma=2.0, alpha=None):
+    &quot;&quot;&quot;z logitlar va y ∈ {0, 1} belgilar bo‘yicha binar focal loss, elementma-element.&quot;&quot;&quot;
+    zt = np.where(y == 1, z, -z)           # to‘g‘ri sinf logiti: p_t = σ(z_t)
+    log_pt = log_sigmoid(zt)
+    pt = np.exp(log_pt)
+    at = 1.0 if alpha is None else np.where(y == 1, alpha, 1 - alpha)
+    return -at * (1 - pt) ** gamma * log_pt
+
+def focal_grad(z, y, gamma=2.0, alpha=None):
+    &quot;&quot;&quot;dFL/dz = ±α_t (1 − p_t)^γ (γ p_t log p_t + p_t − 1).&quot;&quot;&quot;
+    zt = np.where(y == 1, z, -z)
+    log_pt = log_sigmoid(zt)
+    pt = np.exp(log_pt)
+    at = 1.0 if alpha is None else np.where(y == 1, alpha, 1 - alpha)
+    g = at * (1 - pt) ** gamma * (gamma * pt * log_pt + pt - 1)
+    return np.where(y == 1, g, -g)
+
+z = np.array([np.log(9.0), np.log(3 / 7), -np.log(9.0)])  # p_t = 0.9, 0.3, 0.9
+y = np.array([1, 1, 0])
+print(focal_loss(z, y, gamma=0.0).round(4))   # [0.1054 1.204  0.1054]  — bu CE
+print(focal_loss(z, y).round(5))              # [0.00105 0.58995 0.00105]
+print(focal_grad(z, y, gamma=0.0).round(4))   # [-0.1 -0.7  0.1]
+print(focal_grad(z, y).round(4))              # [-0.0029 -0.697   0.0029]</code></pre>
+    <p>PyTorch’da binar versiya torchvision’da bor; ko‘p sinflisini <code>log_softmax</code> orqali yozish oson. Oxirgi qator — siljishni kamyob sinfga moslab boshlash.</p>
+    <pre class="code"><span class="lang">python</span><code>import math
+import torch
+import torch.nn as nn
+from torchvision.ops import sigmoid_focal_loss
+
+# Binar (har bir anchor va sinf bo‘yicha): α = 0.25, γ = 2 — RetinaNet’dagidek
+logits = torch.tensor([math.log(9.0), math.log(3 / 7)])
+targets = torch.tensor([1.0, 1.0])
+loss = sigmoid_focal_loss(logits, targets, alpha=0.25, gamma=2.0, reduction=&quot;none&quot;)
+# ≈ [0.00026, 0.14749] = 0.25 · [0.00105, 0.58995]
+
+# log_softmax orqali ko‘p sinfli versiya
+def focal_loss_multiclass(logits, target, gamma=2.0):
+    logp = torch.log_softmax(logits, dim=-1)
+    logp_t = logp.gather(-1, target[:, None]).squeeze(-1)
+    return (-(1 - logp_t.exp()) ** gamma * logp_t).mean()
+
+# Oxirgi qatlam siljishini kamyob sinfga moslab boshlash (π = 0.01)
+cls_head = nn.Conv2d(256, 9 * 80, kernel_size=3, padding=1)   # A = 9 anchor × K = 80 sinf
+nn.init.constant_(cls_head.bias, -math.log((1 - 0.01) / 0.01))   # ≈ −4.595</code></pre>
+    <div class="callout note"><b>Gradiyentni tekshirish</b><p>$\varepsilon=10^{-6}$ dagi $\bigl(\mathrm{FL}(z+\varepsilon)-\mathrm{FL}(z-\varepsilon)\bigr)/2\varepsilon$ sonli hosila <code>focal_grad</code> bilan to‘rt xonagacha mos keladi: $-0{,}0029$, $-0{,}697$, $0{,}0029$. $p_t=0{,}3$ da FL va CE gradiyentlari deyarli teng ($0{,}7$ ga qarshi $0{,}697$): bu 3-rasmdagi $p_t\approx0{,}298$ kesishish nuqtasiga yaqin.</p></div>
+
+    <h2 id="mistakes">Keng tarqalgan xatolar</h2>
+    <ol class="flist"><li><b>$\gamma$ bilan birga «chastota bo‘yicha» $\alpha$.</b> $\gamma=2$ da ulushi 1% bo‘lgan sinf uchun $\alpha=0{,}99$ qo‘yish — ikki karra kompensatsiya. $\gamma=2$, $\alpha=0{,}25$ dan boshlang va ularni birga tanlang.</li><li><b>Kamyob sinf uchun boshlang‘ich qiymat yo‘q.</b> Siljish 0 bo‘lganda birinchi iteratsiyalar fon yo‘qotishlariga cho‘kadi; RetinaNet maqolasida oddiy CE bilan $\pi=0{,}01$ boshlang‘ich qiymatsiz o‘qitish uzoqlashib ketgan.</li><li><b>Barcha misollar soniga normallash.</b> 100 000 anchor bo‘yicha o‘rtacha yo‘qotishni juda kichik va rasm o‘lchamiga bog‘liq qiladi; aniqlashda pozitivlar soniga bo‘linadi.</li><li><b><code>clamp</code> bilan ehtimolliklar bo‘yicha focal loss.</b> $\log(\max(p,\varepsilon))$ eng qiyin misollar uchun gradiyentni nolga aylantiradi. Logitlar bo‘yicha hisoblang.</li><li><b>Chiqishni ehtimollik deb o‘qish.</b> FL bashoratlarni o‘rtaga suradi (6-rasm); xavflarni baholash va narxlash uchun ehtimolliklarni kalibrlash kerak.</li><li><b>Shovqinli belgilarda katta $\gamma$.</b> Xato belgilar juda qiyin misollarga o‘xshaydi, FL esa ularning nisbiy vaznini oshiradi. Shovqin gumoni bo‘lsa, $\gamma$ ni kamaytiring yoki belgilashni tozalang.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘liqlik</h2>
+    <ul class="flist"><li><a href="../bce/">BCE</a> va <a href="../cross-entropy/">kross-entropiya</a>: $\gamma=0$, $\alpha_t=1$ li FL ular bilan mos keladi.</li><li><a href="../sigmoid/">Sigmoida</a>: $p_t=\sigma(z_t)$, uning $p_t(1-p_t)$ hosilasi esa FL gradiyentiga kiradi.</li><li><a href="../softmax/">Softmax</a>: ko‘p sinfli holatda $p_t$ — to‘g‘ri sinf uchun softmax komponentasi.</li><li><a href="../huber/">Huber</a> — qarama-qarshi falsafa: Huber eng katta xatolarni chetga chiquvchi deb hisoblab ularning hissasini <i>susaytiradi</i>, FL esa kattalari ko‘zga tashlanishi uchun eng <i>kichiklarini</i> susaytiradi.</li><li><a href="../triplet/">Triplet loss</a> metrikani o‘qitishda qarindosh masalani yechadi: nol yo‘qotishli oson uchliklar gradiyent bermaydi va o‘qitish qiyinlariga qaratiladi (hard negative mining).</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) $\mathrm{FL}=-\alpha_t(1-p_t)^\gamma\log p_t$ — «xato darajasi» $(1-p_t)^\gamma$ ga ko‘paytirilgan kross-entropiya; $\gamma=0$ — CE. 2) Oson misollar $(1-p_t)^{\gamma+1}$ kabi so‘ndiriladi: $\gamma=2$ da $p_t=0{,}9$ li misol 100 marta yengil. 3) Logit bo‘yicha $(1-p_t)^\gamma(\gamma p_t\log p_t+p_t-1)$ gradiyent monoton emas: $\gamma=2$ da maksimum $p_t\approx0{,}06$ da. 4) 1 : 1000 muvozanatsizlikda FL yo‘qotishning asosiy qismini oson negativlardan pozitivlar va qiyin negativlarga ko‘chiradi. 5) RetinaNet amaliyoti: $\gamma=2$, $\alpha=0{,}25$, $b=-\ln\frac{1-\pi}{\pi}$ boshlang‘ich qiymat, pozitivlar soniga normallash; chiqishdagi ehtimolliklarni kalibrlash kerak.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. Model to‘g‘ri sinfga $p_t=0{,}8$ ehtimollik berdi. $\gamma=2$ da modulyatsiyalovchi ko‘paytuvchi nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0{,}64$</button><button type="button" data-ok="0">$0{,}2$</button><button type="button" data-ok="1">$0{,}04$</button><button type="button" data-ok="0">$0{,}8$</button></div><div class="explain" hidden>$(1-p_t)^\gamma=0{,}2^2=0{,}04$: bu misol yo‘qotishi CE’dagidan 25 marta kichik.</div></fieldset><fieldset class="q"><legend>2. $\gamma=0$ va $\alpha_t=1$ da focal loss’dan nima chiqadi?</legend><div class="opts"><button type="button" data-ok="0">MSE</button><button type="button" data-ok="1">Kross-entropiya</button><button type="button" data-ok="0">Hinge loss</button><button type="button" data-ok="0">Nol</button></div><div class="explain" hidden>$(1-p_t)^0=1$ ko‘paytuvchi, $-\log p_t$ qoladi — kross-entropiya.</div></fieldset><fieldset class="q"><legend>3. $\gamma=2$ da logit bo‘yicha FL gradiyenti $p_t$ ga qarab o‘zini qanday tutadi?</legend><div class="opts"><button type="button" data-ok="0">CE’dagidek monoton kamayadi</button><button type="button" data-ok="0">$p_t$ bilan o‘sadi</button><button type="button" data-ok="1">Avval o‘sadi, $p_t\approx0{,}06$ atrofida maksimumga yetadi, keyin tez tushadi</button><button type="button" data-ok="0">O‘zgarmas</button></div><div class="explain" hidden>$|\partial\mathrm{FL}/\partial z_t|=(1-p_t)^\gamma[(1-p_t)+\gamma p_t|\log p_t|]$: $p_t\to0$ da u 1 ga teng, $p_t\approx0{,}058$ da $1{,}129$ gacha o‘sadi, keyin kamayadi.</div></fieldset><fieldset class="q"><legend>4. Nega RetinaNet’da kamyob obyektlar sinfi uchun, aytaylik, $0{,}99$ emas, $\alpha=0{,}25$?</legend><div class="opts"><button type="button" data-ok="0">Bu maqoladagi xato</button><button type="button" data-ok="1">$\gamma$ oson negativlarni allaqachon so‘ndirgan, pozitivlarga kuchli qo‘shimcha og‘ish ortiqcha bo‘lardi</button><button type="button" data-ok="0">$\alpha$ o‘qitishga ta’sir qilmaydi</button><button type="button" data-ok="0">Obyektlar aslida kamyob emas</button></div><div class="explain" hidden>Modulyatsiyalovchi ko‘paytuvchidan keyin yo‘qotishning asosiy qismi baribir pozitivlar va qiyin negativlardan keladi; $\alpha$ va $\gamma$ birga tanlanadi, eng yaxshisi $\alpha=0{,}25$ bo‘lib chiqdi.</div></fieldset><fieldset class="q"><legend>5. Model $\gamma=2$ li focal loss’da o‘qitilgan. Uning chiqish ehtimolliklari haqida nima to‘g‘ri?</legend><div class="opts"><button type="button" data-ok="0">Ular ideal kalibrlangan</button><button type="button" data-ok="1">Ular o‘rtaga surilgan va kalibrlashni talab qiladi</button><button type="button" data-ok="0">Ular doim 0 yoki 1</button><button type="button" data-ok="0">Ular CE-model bilan mos tushadi</button></div><div class="explain" hidden>FL xos baholash qoidasi emas: hatto o‘zgarmas bashorat uchun ham minimum $p=\pi$ da emas (6-rasm: $0{,}01$ o‘rniga $0{,}108$).</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../triplet/"><span class="kicker">← Oldingi formula</span><span class="big">Triplet Loss</span><span class="kicker">qayta identifikatsiya (Re-ID)</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

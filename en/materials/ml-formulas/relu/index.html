@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ReLU: the rectified linear unit — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="ReLU in depth: the formula and its forms, sums of hinges, the subgradient at zero, softplus, a network’s linear regions in 3D, learning a broken line, dying neurons, He initialization, NumPy and PyTorch code.">
+  <meta property="og:title" content="ReLU: the rectified linear unit — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="ReLU in depth: the formula and its forms, sums of hinges, the subgradient at zero, softplus, a network’s linear regions in 3D, learning a broken line, dying neurons, He initialization, NumPy and PyTorch code.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/relu/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/relu/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/relu/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/relu/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/relu.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/relu/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/relu/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/relu/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Activation functions</span>
+  <h1>ReLU: the rectified linear unit</h1>
+  <p class="dek">The simplest nonlinearity and the workhorse of deep learning. We take it apart bone by bone: why a single kink is enough to build any broken line, what the derivative at the kink is, how a ReLU network cuts space into linear pieces, why neurons “die”, and where the 2 in He initialization comes from.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: a rectifier</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties</a>
+      <a href="#derivative"><span class="n">5</span>The derivative, the subgradient and smooth relatives</a>
+      <a href="#space"><span class="n">6</span>A ReLU network in space: linear regions</a>
+      <a href="#training"><span class="n">7</span>ReLU in training: the network draws a broken line</a>
+      <a href="#dying"><span class="n">8</span>The dying ReLU</a>
+      <a href="#init"><span class="n">9</span>He initialization: where the 2 comes from</a>
+      <a href="#code"><span class="n">10</span>In code</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#links"><span class="n">12</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{ReLU}(x)=\max(0,\,x)$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p>Without a nonlinearity a neural network is useless: a composition of linear layers is again a linear function, however many layers you stack. We need a function that “breaks” linearity while being cheap to compute and gentle on the gradient. ReLU (rectified linear unit) does the minimum possible: it passes positive values unchanged and replaces negative ones with zero.</p>
+    <p>Where it appears:</p>
+    <ul class="flist"><li><b>convolutional networks</b> — AlexNet, VGG, ResNet: a ReLU after every convolution;</li><li><b>fully connected networks and tabular models</b> — the default choice for hidden layers;</li><li><b>the original Transformer</b> (2017) — the FFN block: $\max(0,\,xW_1+b_1)W_2+b_2$; modern LLMs moved to its smooth relatives <a href='../gelu/'>GELU</a> and <a href='../silu/'>SiLU</a>;</li><li><b>mobile networks</b> — ReLU6 $=\min(\max(0,x),\,6)$ in MobileNet suits low-precision arithmetic;</li><li><b>inside other formulas</b> — $\max(0,\cdot)$ is also the SVM hinge loss, the <a href='../triplet/'>triplet loss</a> and the positive part of a number $x^+$.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>$\operatorname{ReLU}(x)=\max(0,x)$: zero on the left, the line $y=x$ on the right. The derivative is a step: 0 for $x&lt;0$ and 1 for $x&gt;0$; at zero there is no derivative, and libraries take 0. On the right the gradient passes without attenuation — that is why deep ReLU networks train fast. The price is “dead” neurons whose input is always negative.</p></div>
+
+    <h2 id="intuition">Intuition: a rectifier</h2>
+    <p>The name comes from electronics: a rectifier diode lets current flow one way and blocks it the other way. A ReLU neuron is a detector: while a feature is below the threshold it stays silent; once the threshold is crossed, it responds in proportion to how far.</p>
+    <p>Drag the point. To the right of zero the tangent coincides with the function itself (slope 1); to the left it lies on the axis (slope 0). At zero there is no single tangent: every line with a slope between 0 and 1 touches the graph from below — these are <b>supporting lines</b>.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-explorer" data-config="{&quot;x&quot;: 1.5}"></div><figcaption><b>Figure 1.</b> ReLU, the tangent and the derivative (below). At $x=1.5$: $\operatorname{ReLU}=1.5$, $\operatorname{ReLU}'=1$. Move the point to zero: the derivative is undefined, and the set of slopes of the supporting lines is the interval $[0,\,1]$ (the subdifferential); PyTorch and TensorFlow take 0 from it.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>ReLU does not saturate on the right: at $x=100$ the derivative is the same 1 as at $x=0.1$. For the <a href='../sigmoid/'>sigmoid</a> and <a href='../tanh/'>tanh</a> the derivative is already below $0.01$ at $|x|=5$. On the left, however, ReLU is fully “saturated”: the derivative is exactly 0.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <p>It pays to recognise the same function in different forms — each one highlights its own property:</p>
+    <div class="eqd">$$\operatorname{ReLU}(x)=\max(0,x)=\begin{cases}x, &amp; x&gt;0\\0, &amp; x\le0\end{cases}=\frac{x+|x|}{2}=x\cdot\mathbb 1[x&gt;0]$$</div>
+    <dl class="symbols"><dt>$\max(0,x)$</dt><dd>a comparison with zero — one operation, no exponentials or divisions;</dd><dt>$\frac{x+|x|}{2}$</dt><dd>for $x&gt;0$ the terms are equal and give $x$; for $x&lt;0$ they cancel out;</dd><dt>$x\cdot\mathbb 1[x&gt;0]$</dt><dd>a <b>gate</b>: the input is multiplied by 0 or 1 depending on its sign. For each example a ReLU network is a linear network with some neurons switched off.</dd></dl>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\operatorname{ReLU}(x)$</th><th class=num>$\operatorname{ReLU}'(x)$</th></tr></thead><tbody><tr><td class=num>−3</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>−1</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>−0.5</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>0</td><td class=num>0</td><td class=num>[0, 1]</td></tr><tr><td class=num>0.5</td><td class=num>0.5</td><td class=num>1</td></tr><tr><td class=num>1</td><td class=num>1</td><td class=num>1</td></tr><tr><td class=num>2.5</td><td class=num>2.5</td><td class=num>1</td></tr></tbody></table></div>
+    <h3>Kinks make any broken line</h3>
+    <p>A neuron $v\cdot\operatorname{ReLU}(x-c)$ is a “hinge”: zero up to the point $c$, then a line with slope $v$. Adding hinges with different $c$ gives a broken line: at each point $c_k$ the slope changes by exactly $v_k$. For example, $\operatorname{ReLU}(x+1)-2\operatorname{ReLU}(x)+\operatorname{ReLU}(x-1)$ is a “hat” of height 1.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-hinges" data-config="{&quot;v1&quot;: 1, &quot;v2&quot;: -2, &quot;v3&quot;: 1}"></div><figcaption><b>Figure 2.</b> A sum of three hinges with kinks at $-1$, $0$, $1$. With weights $(1,\,-2,\,1)$ we get a hat: the slopes of the pieces are $0,\ 1,\ -1,\ 0$ and the height is $f(0)=1$. Below is the derivative: a step function that jumps by exactly $v_k$ at the point $c_k$.</figcaption></figure>
+    <p>This is the main secret of ReLU networks: any continuous piecewise linear function on the line with $m$ kinks is a linear function plus $m$ hinges, i.e. a network with one hidden layer of $m$ neurons (plus the linear part, which two neurons can also express: $x=\operatorname{ReLU}(x)-\operatorname{ReLU}(-x)$). And broken lines approximate any continuous function on an interval as closely as we like.</p>
+
+    <h2 id="properties">Properties</h2>
+    <ul class="flist"><li><b>Range</b>: $[0,\,+\infty)$ — unbounded above, unlike the sigmoid and tanh.</li><li><b>Piecewise linearity</b>: two linear pieces, one kink at zero.</li><li><b>Continuity and the Lipschitz property</b> with constant 1: $|\operatorname{ReLU}(a)-\operatorname{ReLU}(b)|\le|a-b|$.</li><li><b>Convexity</b>: the graph lies on or below every chord — the maximum of two linear functions is always convex.</li><li><b>Positive homogeneity</b>: $\operatorname{ReLU}(\alpha x)=\alpha\operatorname{ReLU}(x)$ for $\alpha\ge0$. Scale can be moved between layers: multiplying a layer’s weights by $\alpha&gt;0$ and the next layer’s by $1/\alpha$ gives the same network.</li><li><b>Idempotence</b>: $\operatorname{ReLU}(\operatorname{ReLU}(x))=\operatorname{ReLU}(x)$.</li><li><b>Decomposing a number</b>: $x=\operatorname{ReLU}(x)-\operatorname{ReLU}(-x)$ and $|x|=\operatorname{ReLU}(x)+\operatorname{ReLU}(-x)$.</li><li><b>Sparsity</b>: if the neurons’ inputs are symmetric about zero, about half of the outputs are exact zeros.</li></ul>
+    <details class="deep"><summary>Proofs: convexity and homogeneity</summary><div class="deep-body">
+      <p>Convexity. For $t\in[0,1]$ and any $a,b$: $\max(0,\,ta+(1-t)b)\le\max\bigl(0,\,t\max(0,a)+(1-t)\max(0,b)\bigr)=t\max(0,a)+(1-t)\max(0,b)$, because $a\le\max(0,a)$, $b\le\max(0,b)$, and the right-hand side is non-negative.</p>
+      <p>Homogeneity. For $\alpha&gt;0$ the sign of $\alpha x$ equals the sign of $x$, so $\max(0,\alpha x)=\alpha\max(0,x)$; for $\alpha=0$ both sides are 0. For $\alpha&lt;0$ the equality fails: $\operatorname{ReLU}(-x)\ne-\operatorname{ReLU}(x)$ — the function is not odd.</p>
+    </div></details>
+
+    <h2 id="derivative">The derivative, the subgradient and smooth relatives</h2>
+    <div class="eqd">$$\operatorname{ReLU}'(x)=\begin{cases}1, &amp; x&gt;0\\0, &amp; x&lt;0\end{cases},\qquad \partial\operatorname{ReLU}(0)=[0,\,1]$$</div>
+    <details class="deep"><summary>Why there is no derivative at zero</summary><div class="deep-body">
+      <p>The derivative is the limit of the difference quotient. To the right and to the left of zero it differs:</p>
+      <div class="eqd">$$\lim_{h\to0^+}\frac{\operatorname{ReLU}(h)-0}{h}=\lim_{h\to0^+}\frac{h}{h}=1,\qquad \lim_{h\to0^-}\frac{\operatorname{ReLU}(h)-0}{h}=\lim_{h\to0^-}\frac{0}{h}=0$$</div>
+      <p>The one-sided derivatives differ, so there is no ordinary derivative. Convex functions have a substitute — the <b>subgradient</b>: a number $g$ such that $f(y)\ge f(x)+g(y-x)$ for all $y$, i.e. the line with slope $g$ lies below the graph. At zero every $g\in[0,1]$ qualifies: this set is called the subdifferential $\partial\operatorname{ReLU}(0)$.</p>
+    </div></details>
+    <p>Why this does not hurt training: for continuous data a neuron’s input is exactly zero with probability 0, and at the rare exact zeros any value in $[0,1]$ will do — convergence of subgradient methods allows it. By convention libraries take 0.</p>
+    <p>The second derivative is zero everywhere except at zero (in the sense of distributions, $\operatorname{ReLU}''=\delta(x)$). Hence inside each linear region a ReLU network is an affine function of its input, and its gradient with respect to the input is piecewise constant.</p>
+    <h3>Softplus: a smoothed ReLU</h3>
+    <p>If the kink gets in the way (for example, when second-order optimization or a physical model needs a smooth function), it can be rounded off:</p>
+    <div class="eqd">$$\operatorname{softplus}_\beta(x)=\frac1\beta\ln\bigl(1+e^{\beta x}\bigr),\qquad \operatorname{softplus}_\beta'(x)=\sigma(\beta x)$$</div>
+    <p>The difference $\operatorname{softplus}_\beta(x)-\operatorname{ReLU}(x)=\frac1\beta\ln\bigl(1+e^{-\beta|x|}\bigr)$ is largest at zero, where it equals $\frac{\ln2}{\beta}$; as $\beta\to\infty$ softplus tends to ReLU, and its derivative, the <a href='../sigmoid/'>sigmoid</a>, tends to the step. At zero it always equals $\sigma(0)=0.5$ — the middle of the subdifferential $[0,1]$.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-smooth" data-config="{&quot;beta&quot;: 1}"></div><figcaption><b>Figure 3.</b> Top: ReLU and $\operatorname{softplus}_\beta$; bottom: their derivatives. At $\beta=1$ the largest gap is $\ln2\approx0.693$, at $\beta=4$ it is $0.173$, at $\beta=32$ — $0.022$. The derivative of softplus at zero is always $0.5$.</figcaption></figure>
+
+    <h2 id="space">A ReLU network in space: linear regions</h2>
+    <p>A first-layer neuron with two inputs is off on one side of the line $w^\top x+b=0$ and linear on the other. Each such line is a fold line. $H$ neurons cut the plane into regions, and within each region the set of active neurons (the <b>activation pattern</b>) is constant, so the network is an ordinary affine function there. The output surface is a polyhedron glued together from flat facets.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-surface" data-config="{&quot;arch&quot;: &quot;n4&quot;, &quot;seed&quot;: 3}"></div><figcaption><b>Figure 4.</b> Left: the network output $f(x_1,x_2)=\sum_k v_k\operatorname{ReLU}(w_k^\top x+b_k)$ in 3D — flat facets and fold edges. Right: the view from above; colour is the index of the linear region, dashed lines are the neurons’ lines, thin lines are levels of $f$ (they bend at the boundaries). With 4 neurons the window shows 10 regions out of a possible 11 ($1+H+\tfrac{H(H-1)}{2}$); with 8 neurons, 25 out of 37. Two layers of 4 neurons already give 30 regions: the second layer’s boundaries bend at the first layer’s.</figcaption></figure>
+    <p>$H$ lines in general position divide the plane into at most $1+H+\binom H2$ parts — the number of regions of one layer grows polynomially. Depth works differently: each next layer “folds” the already cut space, and the number of regions can grow exponentially with the number of layers (Montúfar et al., 2014). This is one explanation of why deep networks are more expressive than wide ones with the same number of neurons.</p>
+    <div class="callout note"><b>Universal approximation</b><p>A network with one hidden ReLU layer and enough neurons approximates any continuous function on a closed bounded set to any accuracy (Leshno et al., 1993: any continuous activation that is not a polynomial will do). For ReLU this is visible literally: broken lines are made of hinges, polyhedral surfaces of folds.</p></div>
+
+    <h2 id="training">ReLU in training: the network draws a broken line</h2>
+    <p>Let us train one hidden layer $\hat y(x)=\sum_{k=1}^{H}v_k\operatorname{ReLU}(w_kx+b_k)+c$ on points of a sine wave. Each neuron is a hinge with its kink at $x=-b_k/w_k$; gradient descent moves the kinks to where the curve bends and tunes the slopes.</p>
+    <div class="eqd">$$\frac{\partial\hat y}{\partial b_k}=v_k\,\mathbb 1[w_kx+b_k&gt;0],\qquad \frac{\partial\hat y}{\partial w_k}=v_k\,x\,\mathbb 1[w_kx+b_k&gt;0]$$</div>
+    <p>The gradient with respect to a neuron’s parameters comes only from the points where the neuron is on. If there are no such points at all, the neuron stops learning — that is what “dying” means.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-fit" data-config="{&quot;h&quot;: 6}"></div><figcaption><b>Figure 5.</b> 40 points of $y=\sin(1.6x)$ with noise ($\sigma=0.08$), full-batch gradients and <a href='../adam/'>Adam</a> with step $0.02$. Teal lines are the hinges, the dots at the bottom are their kinks, red dashes are dead neurons. With 6 neurons the MSE drops from $3.102$ to $0.267$ by step 100, $0.012$ by step 300 and $0.0090$ by step 1500; on the way one neuron dies. With 3 neurons the broken line is too coarse — $0.265$; with 12 the result is $0.0101$, but 4 of the 12 are already dead.</figcaption></figure>
+    <div class="callout note"><b>What the figure shows</b><p>A ReLU network cannot draw anything smooth — only broken lines. The kinks gather where the sine bends most, and there are none on nearly straight stretches. Extra neurons do not necessarily help: some of them die or duplicate their neighbours.</p></div>
+
+    <h2 id="dying">The dying ReLU</h2>
+    <p>A neuron is “dead” if $w^\top x+b\le0$ on all training examples. Then its output is always 0, the gradients with respect to $w$ and $b$ are always 0 (see the formula above), and no optimizer step will revive it: when training on the same data it stays switched off for good.</p>
+    <p>How it happens: one large gradient step sharply decreases the bias $b$ or turns $w$ so that the neuron’s hyperplane moves outside the cloud of data. The larger the learning rate, the more often this happens.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-dead" data-config="{&quot;lr&quot;: 0.3}"></div><figcaption><b>Figure 6.</b> A network of 64 ReLU neurons on 128 points $y=\sin(3x_1)+x_2$, $x\in[-1,1]^2$, mini-batches of 16, plain SGD, 600 steps, the same He initialization. Right: the neurons — blue ones are alive (brightness is the share of points where the neuron is on), red ones are dead. With $\eta=0.3$, $91\%$ of the neurons die within the first 5 steps and $97\%$ by the end; the MSE gets stuck at $0.137$. With $\eta=0.2$ a quarter is dead ($27\%$), MSE $0.004$; with $\eta=0.1$ and $0.03$ none die (MSE $0.005$ and $0.041$ — the small step is simply slower).</figcaption></figure>
+    <p>How to treat it:</p>
+    <ul class="flist"><li><b>a moderate learning rate</b>, warm-up and gradient clipping;</li><li><b>adaptive optimizers</b> (<a href='../adam/'>Adam</a>) and normalization (BatchNorm, LayerNorm): they keep the neurons’ inputs near zero;</li><li><b>activations with a non-zero slope on the left</b> — <a href='../leaky-relu/'>Leaky ReLU</a>, PReLU, ELU, <a href='../gelu/'>GELU</a>, <a href='../silu/'>SiLU</a>: the gradient on the left is not zero, so the neuron can come back;</li><li><b>careful initialization</b>: zero biases (sometimes slightly positive), He weights. Strongly negative biases kill neurons before training even starts.</li></ul>
+
+    <h2 id="init">He initialization: where the 2 comes from</h2>
+    <p>Let $z=\sum_{j=1}^{n}w_jh_j$ with independent weights, $\mathbb Ew_j=0$, $\operatorname{Var}w_j=c/n$. Then $\operatorname{Var}z=c\cdot q$, where $q=\mathbb E[h^2]$ is the mean square of the inputs. If $z$ is symmetric about zero, ReLU zeroes out exactly half of its distribution, and</p>
+    <div class="eqd">$$q_{l}=\mathbb E\bigl[\operatorname{ReLU}(z)^2\bigr]=\frac12\operatorname{Var}z=\frac c2\,q_{l-1}\qquad\Longrightarrow\qquad q_L=q_0\Bigl(\frac c2\Bigr)^{L}$$</div>
+    <p>With $c=1$ (as for tanh) the signal halves at every layer; with $c=3$ it grows by half. Only $c=2$ preserves the scale: this is <b>He initialization</b> (He et al., 2015), $\operatorname{Var}w=2/n_\text{in}$. The backward pass behaves the same way, so the gradients neither vanish nor explode either.</p>
+    <figure class="viz"><div class="fv" data-viz="relu-depth" data-config="{&quot;c&quot;: 2}"></div><figcaption><b>Figure 7.</b> The mean square of the activations $q_l$ at each of the 30 layers of a random network of width 100 (log scale); the orange dashed line is the theory $q_0(c/2)^l$. With $c=2$ the ratio $q_{30}/q_0=2.66$; with $c=1$ it is $2.47\cdot10^{-9}$ (theory $9.3\cdot10^{-10}$); with $c=3$, $5.1\cdot10^5$ (theory $1.9\cdot10^5$). The factor $\approx2.66$ is the same in all three cases: the weights are the same and ReLU is positively homogeneous, so $c$ merely multiplies the whole signal by $(c/2)^{L/2}$; the deviation from theory is a random finite-width fluctuation. $51\%$ of the last layer’s neurons are active.</figcaption></figure>
+    <div class="callout history"><b>A bit of history</b><p>The rectifier idea is old: Fukushima used it as early as 1969. ReLU entered deep learning in 2010–2011 (Nair and Hinton; Glorot, Bordes and Bengio), and in AlexNet (2012) a ReLU network reached 25% training error on CIFAR-10 six times faster than one with tanh. In 2015 He et al. derived the $2/n$ initialization and trained networks of the ReLU family tens of layers deep.</p></div>
+
+    <h2 id="code">In code</h2>
+    <p>ReLU never overflows and never loses precision: a comparison with zero is exact in any arithmetic. Attention belongs elsewhere: the convention at zero, dead neurons and initialization.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def relu(x):
+    return np.maximum(0.0, x)
+
+def relu_grad(x):
+    # subgradient: take 0 at the point 0, like PyTorch and TensorFlow
+    return (x &gt; 0).astype(float)
+
+x = np.array([-3.0, 0.0, 2.5])
+print(relu(x), relu_grad(x))     # [0.  0.  2.5] [0. 0. 1.]
+
+# “Dead” neurons: not a single positive input on the whole dataset
+rng = np.random.default_rng(0)
+X = rng.normal(size=(1000, 20))
+W = rng.normal(size=(20, 64)) * np.sqrt(2 / 20)   # He initialization
+for b0 in (0.0, -5.0):
+    Z = X @ W + b0
+    dead = np.mean((Z &gt; 0).sum(axis=0) == 0)
+    print(b0, f&quot;{dead:.0%}&quot;)     # 0.0 0%  and  -5.0 66%</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+x = torch.tensor([-1.0, 0.0, 2.0], requires_grad=True)
+torch.relu(x).sum().backward()
+print(x.grad)                    # tensor([0., 0., 1.]) — 0 at zero
+
+# He initialization: Var w = 2 / fan_in
+layer = nn.Linear(512, 512)
+nn.init.kaiming_normal_(layer.weight, mode=&quot;fan_in&quot;, nonlinearity=&quot;relu&quot;)
+nn.init.zeros_(layer.bias)
+
+# The FFN block of the original Transformer: Linear → ReLU → Linear
+ffn = nn.Sequential(nn.Linear(512, 2048), nn.ReLU(), nn.Linear(2048, 512))
+# nn.ReLU(inplace=True) saves memory but overwrites the input if it is still needed</code></pre>
+    <div class="callout key"><b>The rule</b><p>ReLU plus He initialization (<code>kaiming_normal_</code> with <code>nonlinearity='relu'</code>), zero biases and a reasonable learning rate. Check from time to time the share of neurons that never fired on a batch: if it grows, lower the learning rate or switch to Leaky ReLU / GELU.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>ReLU at the output of a regression whose target can be negative.</b> The network physically cannot output $y&lt;0$. A regression output needs a linear layer; ReLU at the output fits only quantities that are non-negative by nature (and even then softplus is better).</li><li><b>Initialization meant for tanh.</b> With $\operatorname{Var}w=1/n$ the signal in a deep ReLU network decays as $2^{-L}$: after 30 layers by a factor of $2^{30}\approx10^9$ (Figure 7). Use He initialization.</li><li><b>Too large a learning rate.</b> It kills neurons en masse, and they cannot be restored (Figure 6). The symptom: the loss is frozen and the share of zero activations is close to 100%.</li><li><b>“The derivative of ReLU at zero is 1/2” or “it is undefined, so it is a bug”.</b> Mathematically, at zero there is the subdifferential $[0,1]$, and any value from it is admissible; libraries take 0. It does not affect training.</li><li><b><code>inplace=True</code> where the input is needed later.</b> The operation overwrites its input; if that input is used in a residual connection or by another operation’s backward pass, PyTorch raises an error or the result is wrong.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href='../leaky-relu/'>Leaky ReLU</a>: $\max(\alpha x,x)$ — a non-zero slope $\alpha$ on the left cures dying.</li><li><a href='../gelu/'>GELU</a> and <a href='../silu/'>SiLU</a>: $x\Phi(x)$ and $x\sigma(x)$ — smooth “gates” instead of the hard $x\cdot\mathbb 1[x&gt;0]$; far from zero they behave like ReLU.</li><li><a href='../sigmoid/'>Sigmoid</a>: the derivative of softplus is $\sigma(\beta x)$; ReLU displaced the sigmoid from hidden layers because of saturation.</li><li><a href='../tanh/'>tanh</a>: saturates on both sides; tanh gets Xavier initialization, ReLU gets He.</li><li><a href='../huber/'>Huber</a> and <a href='../triplet/'>Triplet loss</a>: the cut-off $\max(0,\cdot)$ appears in loss functions too.</li><li><a href='../adam/'>Adam</a> and <a href='../sgd/'>SGD</a>: the optimizer and the learning rate decide how many neurons die.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $\operatorname{ReLU}(x)=\max(0,x)=\frac{x+|x|}2$ is a gate: the input is multiplied by $\mathbb 1[x&gt;0]$. 2) The derivative is a 0/1 step; at zero the subdifferential is $[0,1]$, in practice 0; no saturation on the right. 3) A sum of hinges $v_k\operatorname{ReLU}(x-c_k)$ is any broken line; on the plane a ReLU network is a polyhedron of linear regions, and depth multiplies their number. 4) Softplus is a smooth ReLU whose derivative is the sigmoid. 5) A large learning rate kills neurons for good. 6) He initialization $\operatorname{Var}w=2/n_\text{in}$ compensates for ReLU zeroing half of the signal.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. What is $\operatorname{ReLU}(x)-\operatorname{ReLU}(-x)$?</legend><div class="opts"><button type="button" data-ok="0">$|x|$</button><button type="button" data-ok="1">$x$</button><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$2\operatorname{ReLU}(x)$</button></div><div class="explain" hidden>For $x&gt;0$ we get $x-0=x$; for $x&lt;0$, $0-(-x)=x$. The sum $\operatorname{ReLU}(x)+\operatorname{ReLU}(-x)$ equals $|x|$.</div></fieldset><fieldset class="q"><legend>2. What does PyTorch return as the gradient of ReLU at $x=0$?</legend><div class="opts"><button type="button" data-ok="0">$1$</button><button type="button" data-ok="0">$0.5$</button><button type="button" data-ok="1">$0$</button><button type="button" data-ok="0">nan</button></div><div class="explain" hidden>Mathematically, at zero there is the subdifferential $[0,1]$; by convention PyTorch and TensorFlow take 0.</div></fieldset><fieldset class="q"><legend>3. A network with one hidden layer of 5 ReLU neurons and one input $x$. What can its graph be?</legend><div class="opts"><button type="button" data-ok="0">Any smooth curve</button><button type="button" data-ok="1">A broken line with at most 5 kinks</button><button type="button" data-ok="0">Only a straight line</button><button type="button" data-ok="0">A step function</button></div><div class="explain" hidden>Each neuron is a hinge with one kink at $x=-b_k/w_k$; a sum of hinges is a continuous broken line with at most 5 kinks.</div></fieldset><fieldset class="q"><legend>4. Why can a ReLU neuron “die” for good?</legend><div class="opts"><button type="button" data-ok="0">Its weight becomes infinite</button><button type="button" data-ok="1">If its input is negative on all examples, the gradients with respect to its weights and bias are zero</button><button type="button" data-ok="0">Because the exponential overflows</button><button type="button" data-ok="0">Because the derivative of ReLU is at most 0.25</button></div><div class="explain" hidden>The gradient with respect to the neuron’s parameters contains the factor $\mathbb 1[w^\top x+b&gt;0]$. If it is zero on all data, the optimizer will not move the neuron.</div></fieldset><fieldset class="q"><legend>5. What weight variance does He initialization suggest for a layer with $n_\text{in}$ inputs?</legend><div class="opts"><button type="button" data-ok="0">$1/n_\text{in}$</button><button type="button" data-ok="1">$2/n_\text{in}$</button><button type="button" data-ok="0">$2/(n_\text{in}+n_\text{out})$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>ReLU zeroes half of a symmetric distribution: $\mathbb E[\operatorname{ReLU}(z)^2]=\tfrac12\operatorname{Var}z$. To keep the mean square constant from layer to layer we need $\operatorname{Var}w=2/n_\text{in}$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../tanh/"><span class="kicker">← Previous formula</span><span class="big">Tanh</span><span class="kicker">hyperbolic tangent</span></a>
+<a class="next" href="../leaky-relu/"><span class="kicker">Next formula →</span><span class="big">Leaky ReLU</span><span class="kicker">“leaky” ReLU</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>
