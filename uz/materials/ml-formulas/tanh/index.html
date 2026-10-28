@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tanh: giperbolik tangens — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Tanh batafsil: eksponentalar orqali formula, sinh va cosh, sigmoida bilan bog‘lanish, hosila, Teylor qatori, markazlashganlik va SGD, 3D’da tanh tarmog‘i, aktivatsiyalar taqsimoti, RNN va LSTM, barqaror kod.">
+  <meta property="og:title" content="Tanh: giperbolik tangens — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Tanh batafsil: eksponentalar orqali formula, sinh va cosh, sigmoida bilan bog‘lanish, hosila, Teylor qatori, markazlashganlik va SGD, 3D’da tanh tarmog‘i, aktivatsiyalar taqsimoti, RNN va LSTM, barqaror kod.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/tanh/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/tanh/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/tanh/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/tanh/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/tanh.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/tanh/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/tanh/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/tanh/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Aktivatsiya funksiyalari</span>
+  <h1>Tanh: giperbolik tangens</h1>
+  <p class="dek">Nol atrofida markazlashgan S-shaklli funksiya. Uni mayda detallarigacha tahlil qilamiz: qaysi eksponentalardan yig‘ilgan, nega u «cho‘zilgan sigmoida», 1 − tanh² hosila qayerdan keladi, neyronga nega markazlashgan chiqishlar kerak va tanh chuqur hamda rekurrent tarmoqlarda gradiyentga nima qiladi.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 35 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: nolga qo‘yilgan sigmoida</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#properties"><span class="n">4</span>Xossalar va shakl</a>
+      <a href="#derivative"><span class="n">5</span>Hosila: tanh′ = 1 − tanh²</a>
+      <a href="#centered"><span class="n">6</span>Markazlashganlik: nega tanh sigmoidadan yaxshiroq o‘qitiladi</a>
+      <a href="#space"><span class="n">7</span>Tekislikda tanh: burmalar, qirralar va tepaliklar</a>
+      <a href="#training"><span class="n">8</span>O‘qitishda tanh: qatlamlar bo‘yicha aktivatsiyalar va egri chiziqni moslash</a>
+      <a href="#rnn"><span class="n">9</span>Rekurrent tarmoqlarda va LSTM’da tanh</a>
+      <a href="#code"><span class="n">10</span>Kodda: barqaror va kutilmagan holatlarsiz</a>
+      <a href="#mistakes"><span class="n">11</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">12</span>Boshqa formulalar bilan bog‘lanish</a>
+      <a href="#summary"><span class="n">13</span>Xulosalar</a>
+      <a href="#quiz"><span class="n">14</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\tanh(x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>Sigmoida sonni 0 dan 1 gacha bo‘lgan ulushga aylantiradi. Lekin tarmoq ichida ko‘pincha ulush emas, <i>ishorali signal</i> kerak bo‘ladi: «odatdagidan ko‘p» yoki «odatdagidan kam», «kuchaytirish» yoki «susaytirish». Giperbolik tangens (hyperbolic tangent) — xuddi shu silliq S-egri chiziq, lekin chiqishi $(-1;\,1)$ oraliqda va markazi nolda.</p>
+    <p>U qayerda uchraydi:</p>
+    <ul class="flist"><li><b>rekurrent tarmoqlar</b> — oddiy RNN’da $h_t=\tanh(Wh_{t-1}+Ux_t+b)$; LSTM va GRU’da tanh xotira uchun nomzodni hosil qiladi va yacheyka chiqishini chegaralaydi;</li><li><b>klassik tarmoqlarning yashirin qatlamlari</b> — ReLU davrigacha tanh standart edi va hozir ham kichik tarmoqlarda hamda silliqlik muhim bo‘lgan fizik modellarda (PINN) yaxshi ishlaydi;</li><li><b>generator chiqishi</b> — agar rasmlar $[-1;\,1]$ ga normallashtirilgan bo‘lsa, GAN generatorining oxirgi qatlami (masalan, DCGAN) tanh ishlatadi;</li><li><b>harakatlar va logitlarni chegaralash</b> — mustahkamlab o‘qitishda (SAC) harakat tanh orqali $(-1;\,1)$ ga siqiladi, Gemma 2 esa logitlarni «yumshoq kesadi»: $c\cdot\tanh(z/c)$;</li><li><b>boshqa aktivatsiyalar ichida</b> — <a href='../gelu/'>GELU</a> ning mashhur yaqinlashuvi tanh orqali yozilgan.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>$\tanh$ butun son o‘qini $(-1;\,1)$ ga siqadi, koordinatalar boshidan o‘tadi va toq: $\tanh(-x)=-\tanh x$. Bu cho‘zilgan sigmoida: $\tanh x=2\sigma(2x)-1$. Uning hosilasi $1-\tanh^2x$ 1 dan oshmaydi — sigmoida maksimumidan 4 marta katta, — lekin chekkalarda tanh ham xuddi shunday to‘yinadi va gradiyent so‘nadi.</p></div>
+
+    <h2 id="intuition">Intuitsiya: nolga qo‘yilgan sigmoida</h2>
+    <p>Ishorali ovoz regulyatorini tasavvur qiling: nol — sukunat, o‘ngga — balandroq, chapga — qarama-qarshi fazada balandroq. Nol atrofida burayotganingizda chiqish kirishga itoatkorlik bilan ergashadi: $\tanh x\approx x$. Uzoqlashgan sari burash qiyinlashadi: chiqish $\pm1$ ga tiralib, boshqa o‘smaydi. Bu <b>to‘yinish</b> (saturation).</p>
+    <p>Nuqtani torting. To‘q sariq chiziq — urinma, uning qiyaligi hosilaga teng. Kulrang punktir — sigmoida: xuddi shu shakl, lekin yuqoriga surilgan, ikki marta past va to‘rt marta yotiqroq.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-explorer" data-config="{&quot;x&quot;: 1}"></div><figcaption><b>Rasm 1.</b> tanh, uning urinmasi va hosilasi (pastda). Ko‘k nuqtani torting yoki u fokusda bo‘lganda strelkalarni bosing. Hosila maksimumi $x=0$ da $1$ ga teng, sigmoidada esa $0{,}25$. $x=1$ da: $\tanh 1=0{,}7616$, $\tanh' 1=0{,}4200$.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>$x=2$ da tanh allaqachon $0{,}964$, hosila esa bor-yo‘g‘i $0{,}071$ — markazdagidan 14 marta kichik. $|x|&gt;2{,}99$ da hosila $0{,}01$ dan pastga tushadi: kirish o‘sishda davom etadi, chiqish esa deyarli joyida turadi.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <p>Formulada ikkita eksponenta bor: o‘suvchi $e^{x}$ va kamayuvchi $e^{-x}$. Surat — ularning ayirmasi, maxraj — yig‘indisi. Bu ifodalarning yarmilari o‘z nomlariga ega — giperbolik sinus va kosinus:</p>
+    <div class="eqd">$$\begin{aligned}\sinh x&amp;=\frac{e^{x}-e^{-x}}{2}\\[4pt]\cosh x&amp;=\frac{e^{x}+e^{-x}}{2}\\[4pt]\tanh x&amp;=\frac{\sinh x}{\cosh x}\end{aligned}$$</div>
+    <dl class="symbols"><dt>$e^{x}-e^{-x}$</dt><dd>ayirma toq: $x\to-x$ almashtirishda ishorasini o‘zgartiradi; $x&gt;0$ da musbat;</dd><dt>$e^{x}+e^{-x}$</dt><dd>yig‘indi doim musbat va 2 dan kichik emas — maxraj hech qachon nolga aylanmaydi;</dd><dt>$|\sinh x|&lt;\cosh x$</dt><dd>ayirma moduli doim yig‘indidan kichik, shuning uchun $|\tanh x|&lt;1$;</dd><dt>$x\to\pm\infty$</dt><dd>eksponentalardan biri e’tiborsiz darajada kichik bo‘lib qoladi va kasr $\pm1$ ga intiladi.</dd></dl>
+    <p>Surat va maxrajni $e^{x}$ ga yoki $e^{-x}$ ga ko‘paytirib, hisoblash uchun qulay shakllarni olamiz, oxirgi shakl esa tanh ni sigmoida bilan bog‘laydi:</p>
+    <div class="eqd">$$\begin{aligned}\tanh x&amp;=\frac{e^{2x}-1}{e^{2x}+1}=\frac{1-e^{-2x}}{1+e^{-2x}}\\[4pt]&amp;=2\sigma(2x)-1\end{aligned}$$</div>
+    <figure class="viz"><div class="fv" data-viz="tanh-construction" data-config="{&quot;x&quot;: 1, &quot;t&quot;: 3}"></div><figcaption><b>Rasm 2.</b> Chapda: $\sinh$ va $\cosh$ — eksponentalarning yarim ayirmasi va yarim yig‘indisi; tanh — ularning nisbati. $x_0=1$ da: $\sinh 1=1{,}175$, $\cosh 1=1{,}543$, nisbat $0{,}7616=\tanh 1$. O‘ngda: «Boshlash»ni bosing — sigmoida uch qadamda tanh ga aylanadi: gorizontal bo‘yicha 2 marta siqamiz, vertikal bo‘yicha 2 marta cho‘zamiz, 1 ga pastga tushiramiz.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\tanh x$</th><th class=num>$\tanh' x$</th><th class=num>$\sigma(x)$</th></tr></thead><tbody><tr><td class=num>−3</td><td class=num>−0,9951</td><td class=num>0,0099</td><td class=num>0,0474</td></tr><tr><td class=num>−2</td><td class=num>−0,9640</td><td class=num>0,0707</td><td class=num>0,1192</td></tr><tr><td class=num>−1</td><td class=num>−0,7616</td><td class=num>0,4200</td><td class=num>0,2689</td></tr><tr><td class=num>−0,5</td><td class=num>−0,4621</td><td class=num>0,7864</td><td class=num>0,3775</td></tr><tr><td class=num>0</td><td class=num>0,0000</td><td class=num>1,0000</td><td class=num>0,5000</td></tr><tr><td class=num>0,5</td><td class=num>0,4621</td><td class=num>0,7864</td><td class=num>0,6225</td></tr><tr><td class=num>1</td><td class=num>0,7616</td><td class=num>0,4200</td><td class=num>0,7311</td></tr><tr><td class=num>2</td><td class=num>0,9640</td><td class=num>0,0707</td><td class=num>0,8808</td></tr><tr><td class=num>3</td><td class=num>0,9951</td><td class=num>0,0099</td><td class=num>0,9526</td></tr></tbody></table></div>
+    <p>Jadval toqlikni ko‘rsatadi: $\tanh(-x)=-\tanh x$, hosila esa juft funksiya. Taqqoslash uchun yonida sigmoida: uning qiymatlari noldan emas, $0{,}5$ ga nisbatan simmetrik.</p>
+
+    <h2 id="properties">Xossalar va shakl</h2>
+    <ul class="flist"><li><b>Aniqlanish sohasi</b> — barcha haqiqiy sonlar; <b>qiymatlar sohasi</b> — ochiq oraliq $(-1;\,1)$: $\pm1$ qiymatlariga erishilmaydi.</li><li><b>Toqlik</b>: $\tanh(-x)=-\tanh x$, grafik koordinatalar boshiga nisbatan simmetrik, $\tanh 0=0$.</li><li><b>Monotonlik</b>: qat’iy o‘sadi, chunki istalgan $x$ da $\tanh' x=1-\tanh^2x&gt;0$.</li><li><b>Asimptotalar</b>: $\lim_{x\to\pm\infty}\tanh x=\pm1$.</li><li><b>Burilish nuqtasi</b> — yagona, $x=0$: $x&lt;0$ da funksiya pastga qavariq, $x&gt;0$ da — yuqoriga.</li><li><b>1 konstantali Lipshits sharti</b>: $|\tanh a-\tanh b|\le|a-b|$; xususan, $|\tanh x|\le|x|$, tenglik faqat $x=0$ da.</li><li><b>Nol atrofida deyarli ayniyat</b>: $\tanh x=x-\tfrac{x^3}{3}+\dots$ — kichik vaznlarda tanh tarmog‘i deyarli chiziqli ishlaydi.</li></ul>
+    <details class="deep"><summary>Nega tanh x = 2σ(2x) − 1</summary><div class="deep-body">
+      <p>Sigmoida ta’rifi $\sigma(u)=1/(1+e^{-u})$ ga $u=2x$ ni qo‘yamiz:</p>
+      <div class="eqd">$$2\sigma(2x)-1=\frac{2}{1+e^{-2x}}-\frac{1+e^{-2x}}{1+e^{-2x}}=\frac{1-e^{-2x}}{1+e^{-2x}}=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}=\tanh x$$</div>
+      <p>Oxiridan oldingi qadamda surat va maxraj $e^{x}$ ga ko‘paytirilgan. Teskarisi: $\sigma(x)=\tfrac12\bigl(1+\tanh\tfrac x2\bigr)$. Demak, yashirin tanh li tarmoqni xuddi shunday ifoda kuchiga ega yashirin sigmoidali tarmoqqa qayta yozish mumkin — faqat vazn masshtablari va siljishlar o‘zgaradi. Farq o‘qitish qanday borishida (markazlashganlik bo‘limiga qarang).</p>
+    </div></details>
+    <details class="deep"><summary>Teskari funksiya va qo‘shish formulasi</summary><div class="deep-body">
+      <p>$y=\tanh x$ ni $x$ ga nisbatan yechamiz: $y=\frac{e^{2x}-1}{e^{2x}+1}$ dan $e^{2x}=\frac{1+y}{1-y}$, bundan</p>
+      <div class="eqd">$$\operatorname{artanh}y=\frac12\ln\frac{1+y}{1-y},\qquad -1&lt;y&lt;1$$</div>
+      <p>Masalan, $\operatorname{artanh}0{,}5\approx0{,}549$. Yana bir foydali ayniyat — qo‘shish formulasi:</p>
+      <div class="eqd">$$\tanh(a+b)=\frac{\tanh a+\tanh b}{1+\tanh a\,\tanh b}$$</div>
+      <p>Bu aynan tezliklarni relyativistik qo‘shish (yorug‘lik tezligi ulushlarida): $0{,}5c$ va $0{,}5c$ $c$ emas, $\frac{0{,}5+0{,}5}{1+0{,}25}c=0{,}8c$ beradi. «tanh olamida» $(-1;\,1)$ dagi ikki sonning yig‘indisi hech qachon undan chiqmaydi.</p>
+    </div></details>
+    <h3>Yumshoq cheklagich: c · tanh(x / c)</h3>
+    <p>$c\tanh(x/c)$ funksiyasi nol atrofida kirishni deyarli o‘zgartirmaydi ($\approx x$), katta qiymatlarni esa silliq ravishda $\pm c$ ga bosadi. Qattiq kesish $\operatorname{clip}(x,-c,c)$ dan farqli, unda sinishlar yo‘q va hosila hech qayerda sakrab nolga tushmaydi. Gemma 2 da diqqat logitlari ($c=50$) va yakuniy logitlar ($c=30$) shunday cheklanadi, toki ular o‘qitish davomida haddan tashqari o‘sib ketmasin.</p>
+
+    <h2 id="derivative">Hosila: tanh′ = 1 − tanh²</h2>
+    <p>Sahifaning asosiy formulasi. Uni uch usulda keltirib chiqaramiz — har biri boshqa joyda asqotadi.</p>
+    <details class="deep"><summary>1-usul. Bo‘linma hosilasi</summary><div class="deep-body">
+      <p>$u=e^{x}-e^{-x}$, $v=e^{x}+e^{-x}$ bo‘lsin. U holda $u'=v$ va $v'=u$, va kasrni differensiallash qoidasiga ko‘ra:</p>
+      <div class="eqd">$$\tanh' x=\frac{u'v-uv'}{v^{2}}=\frac{v^{2}-u^{2}}{v^{2}}=1-\Bigl(\frac{u}{v}\Bigr)^{2}=1-\tanh^{2}x$$</div>
+    </div></details>
+    <details class="deep"><summary>2-usul. Asosiy giperbolik ayniyat orqali</summary><div class="deep-body">
+      <p>Giperbolik funksiyalar uchun $\cosh^2x-\sinh^2x=1$ (eksponentalarni qo‘yib tekshiring), $\sinh' x=\cosh x$ va $\cosh' x=\sinh x$. U holda</p>
+      <div class="eqd">$$\tanh' x=\frac{\cosh x\cdot\cosh x-\sinh x\cdot\sinh x}{\cosh^{2}x}=\frac{1}{\cosh^{2}x}=\operatorname{sech}^{2}x$$</div>
+      <p>Ayniyatni $\cosh^2x$ ga bo‘lib, $1-\tanh^2x=\operatorname{sech}^2x$ ni olamiz — boshqacha yozilgan o‘sha formula. $\operatorname{sech}^2$ shakli katta $|x|$ da kodda foydali.</p>
+    </div></details>
+    <details class="deep"><summary>3-usul. Sigmoida orqali</summary><div class="deep-body">
+      <p>$\tanh x=2\sigma(2x)-1$ dan zanjir qoidasiga ko‘ra:</p>
+      <div class="eqd">$$\tanh' x=2\cdot\sigma'(2x)\cdot2=4\sigma(2x)\bigl(1-\sigma(2x)\bigr)$$</div>
+      <p>Bundan darhol ko‘rinadiki, hosila maksimumi sigmoidadagidek $\tfrac14$ emas, $4\cdot\tfrac14=1$: chiqishning ikki baravar katta oralig‘i va kirishning ikki baravar siqilgan shkalasi 4 ko‘paytuvchini beradi.</p>
+    </div></details>
+    <div class="eqd">$$\tanh' x=1-\tanh^{2}x$$</div>
+    <p>Amalda: to‘g‘ri o‘tishda tarmoq $t=\tanh z$ ni allaqachon hisoblagan. Teskari o‘tishda hosila bitta ko‘paytirish $1-t^2$ ga tushadi — yangi eksponentalarsiz. Shuning uchun freymvorklar teskari o‘tish uchun tanh ning kirishini emas, chiqishini saqlaydi.</p>
+    <h3>Ikkinchi hosila va eng keskin egilishlar</h3>
+    <p>Yana bir marta differensiallaymiz: $\tanh'' x=-2\tanh x\,(1-\tanh^2x)$. U faqat $x=0$ da (burilish nuqtasi) nolga teng, ekstremumlariga esa $\tanh^2x=\tfrac13$ da, ya’ni $x=\pm\operatorname{artanh}\tfrac{1}{\sqrt3}\approx\pm0{,}658$ da erishadi; u yerdagi qiymatlar $\mp\tfrac{4}{3\sqrt3}\approx\mp0{,}770$. $[-0{,}66;\,0{,}66]$ kesmada tanh hali deyarli to‘g‘ri chiziq, undan keyin qiyaligi tez kamayadi.</p>
+    <h3>Nol atrofida Teylor qatori</h3>
+    <div class="eqd">$$\tanh x=x-\frac{x^{3}}{3}+\frac{2x^{5}}{15}-\frac{17x^{7}}{315}+\frac{62x^{9}}{2835}-\dots,\qquad |x|&lt;\frac{\pi}{2}$$</div>
+    <p>Qator faqat $|x|&lt;\pi/2\approx1{,}571$ da yaqinlashadi: $\cosh x$ maxraj kompleks nuqtalar $x=\pm i\pi/2$ da nolga aylanadi va yaqinlashish radiusi eng yaqinigacha bo‘lgan masofaga teng. Bu sigmoidanikidan ($\pi$) ikki marta kichik — axir tanh gorizontal bo‘yicha 2 marta siqilgan.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-taylor" data-config="{&quot;order&quot;: 3, &quot;x&quot;: 1}"></div><figcaption><b>Rasm 3.</b> 1–9 tartibli Teylor ko‘phadlari va $|x|&lt;\pi/2$ yaqinlashish polosasi. $x=1$ da 3-tartibli yaqinlashish $0{,}7616$ o‘rniga $0{,}6667$, 9-tartibli esa $0{,}7679$ beradi. Polosadan tashqarida, $x=2$ da ko‘phadlar uzoqlashadi: 3-tartib $-0{,}667$, 9-tartib esa allaqachon $7{,}889$ beradi.</figcaption></figure>
+
+    <h2 id="centered">Markazlashganlik: nega tanh sigmoidadan yaxshiroq o‘qitiladi</h2>
+    <p>Keyingi qatlam neyronini ko‘raylik: $z=\sum_i w_ia_i+b$, bu yerda $a_i$ — oldingi qatlam chiqishlari. Yo‘qotishning vazn bo‘yicha gradiyenti</p>
+    <div class="eqd">$$\frac{\partial L}{\partial w_i}=\delta\cdot a_i,\qquad \delta=\frac{\partial L}{\partial z}$$</div>
+    <p>Agar barcha $a_i&gt;0$ bo‘lsa (sigmoida chiqishlari), bitta misolda <b>gradiyentning barcha komponentalari bir xil ishorali</b> — $\delta$ ishorasida. SGD qadami neyronning barcha vaznlarini yoki yuqoriga, yoki pastga suradi. Optimumga yetish uchun ba’zi vaznlarni oshirib, boshqalarini kamaytirish kerak bo‘lsa, faqat zigzag bo‘ylab yurish qoladi.</p>
+    <p>Ikkinchi qarash — yo‘qotish sirtining shakli orqali. MSE li chiziqli qatlam uchun Gesse matritsasi $\mathbb E[aa^\top]=\operatorname{Cov}(a)+\mu\mu^\top$, bu yerda $\mu$ — kirishlar o‘rtachasi. Nolga teng bo‘lmagan o‘rtacha $\mu$ bo‘ylab bitta katta xos qiymat qo‘shadi va «vodiy» cho‘ziladi. Quyidagi $\sigma(z)$ kirishlar uchun xos qiymatlar $0{,}034$ va $0{,}530$ (shartlanganlik soni 15,5), $\tanh(z)$ uchun — $0{,}340$ va $0{,}415$ (1,22).</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-zigzag" data-config="{&quot;steps&quot;: 50}"></div><figcaption><b>Rasm 4.</b> Chiziqli neyronning ikki vazni $w=(w_1;\,w_2)$ ni 100 ta misolda o‘qitamiz; kirishlar bir xil tasodifiy $z$ lardan chapda $\sigma(z)$, o‘ngda $\tanh(z)$. Qadami $0{,}5$ bo‘lgan SGD $(-1;\,1)$ dan $w^*=(1;\,-1)$ ga yo‘l oladi. Chapda har bir qadam «o‘ngga-yuqoriga» yoki «chapga-pastga» yo‘nalgan (firuza kvadrantlar) va yo‘l vodiyni arralaydi; o‘ngda deyarli to‘g‘ri boradi. 50 qadamdan keyin optimumgacha masofa $1{,}252$ va $0{,}000$; $0{,}1$ aniqlikka 194 va 21 qadamda erishiladi.</figcaption></figure>
+    <div class="callout key"><b>Xulosa</b><p>Markazlashgan aktivatsiyalar keyingi qatlamning yo‘qotish sirtini «yumaloqroq» qiladi va gradiyent tushish minimumga to‘g‘riroq boradi. Bu tanh yashirin qatlamlarda sigmoidadan tezroq o‘qitilishining sabablaridan biri (LeKun va boshq., «Efficient BackProp», 1998). Kirishlarni normallashtirish va BatchNorm ham shu g‘oyaga asoslangan.</p></div>
+
+    <h2 id="space">Tekislikda tanh: burmalar, qirralar va tepaliklar</h2>
+    <p>Ikki kirishli neyron $\tanh(w_1x_1+w_2x_2+b)$ ni hisoblaydi. Tekislikda bu <b>burma</b>: sirt $w^\top x+b=0$ to‘g‘ri chiziq bo‘ylab $-1$ dan $+1$ ga o‘tadi va u bo‘ylab o‘zgarmaydi. Ikki qarama-qarshi burmaning yig‘indisi <b>qirra</b> beradi, to‘rt burma va chiqishdagi yana bitta tanh esa faqat kvadrat ichida $-1$ dan farq qiladigan <b>tepalik</b> beradi.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-surface" data-config="{&quot;mode&quot;: &quot;four&quot;, &quot;k&quot;: 2}"></div><figcaption><b>Rasm 5.</b> tanh dan iborat kichik tarmoq. «1 neyron» — $\tanh(k(0{,}8x_1+0{,}6x_2))$; «2 neyron» — $\tanh(k(x_1+1))-\tanh(k(x_1-1))-1$; «4 + chiqish» — $x_1$ va $x_2$ bo‘yicha to‘rtta shunday burmaning yig‘indisi $s$, so‘ng $\tanh(2(s-3))$. $k=2$ da tepalik cho‘qqisida $f(0;\,0)=0{,}937$, uzoqda esa $f=-1{,}000$. Punktir — har bir yashirin neyron kirishi nolga teng bo‘lgan to‘g‘ri chiziqlar.</figcaption></figure>
+    <p><b>Universal approksimatsiya teoremasi</b> (Sibenko, 1989; Xornik, 1991) shunday ishlaydi: yetarlicha ko‘p tanh neyronli bitta yashirin qatlamli tarmoq chegaralangan yopiq to‘plamdagi istalgan uzluksiz funksiyani istalgan aniqlikda yaqinlashtiradi. Tepaliklar burmalardan yig‘iladi, tepaliklardan esa istalgan relyefni yig‘ish mumkin. Teorema bunday vaznlar <i>mavjudligini</i> aytadi, lekin qancha neyron kerakligini va o‘qitish ularni topishini aytmaydi.</p>
+
+    <h2 id="training">O‘qitishda tanh: qatlamlar bo‘yicha aktivatsiyalar va egri chiziqni moslash</h2>
+    <h3>Chuqur tarmoqda signal bilan nima sodir bo‘ladi</h3>
+    <p>Har bir qatlam vaznlari $g^2/n$ dispersiya bilan tasodifiy tanlangan bo‘lsin, bu yerda $n$ — neyron kirishlari soni. Agar $g$ kichik bo‘lsa, signal qatlamdan qatlamga so‘nadi va tanh deyarli chiziqli funksiya kabi ishlaydi. Agar $g$ katta bo‘lsa, neyron kirishlari katta va tanh to‘yinishga ketadi: chiqishlar $\pm1$ ga yopishadi, hosilalar deyarli nol.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-layers" data-config="{&quot;act&quot;: &quot;tanh&quot;, &quot;g&quot;: 1}"></div><figcaption><b>Rasm 6.</b> Har biri 100 neyronli 10 qatlamdan iborat tasodifiy tarmoq, kirishlar $N(0,1)$; har bir qatlamda 2000 ta aktivatsiya gistogrammasi (20 misol × 100 neyron), to‘q sariq nuqta — o‘rtacha. $g=1$ da tanh: oxirgi qatlam o‘rtachasi $0{,}013$, tarqoqlik esa asta-sekin $0{,}225$ gacha qisqaradi; $g=0{,}5$ da signal so‘nadi: tarqoqlik $0{,}001$ gacha tushadi, $g=3$ da neyronlarning qariyb yarmi to‘yingan ($|a|&gt;0{,}95$ bo‘lgan qiymatlar $48\%$). $g=5/3$ da tarqoqlik $0{,}65$ atrofida saqlanadi, $10\%$ to‘yingan. Sigmoidada har bir qatlamda o‘rtacha $0{,}5$ atrofida (oxirgisida $0{,}516$) — chiqishlar markazlashmagan.</figcaption></figure>
+    <p>Shuning uchun tanh uchun $g=5/3$ kuchaytirishli Ksavye — Gloro initsializatsiyasi ($\operatorname{Var}w=\frac{2}{n_\text{in}+n_\text{out}}$) tavsiya etiladi (PyTorch’da — <code>calculate_gain('tanh')</code>): ko‘paytuvchi tanh signalni siqishini qoplaydi.</p>
+    <h3>tanh tarmog‘i egri chiziqni moslaydi</h3>
+    <p>$H$ neyronli yashirin qatlam va chiziqli chiqish: $\hat y(x)=\sum_{k=1}^{H}v_k\tanh(w_kx+b_k)+c$. Har bir qo‘shiluvchi — chetlari silliq «zina»; o‘qitish zinalarni suradi, cho‘zadi va masshtablaydi, toki ularning yig‘indisi ma’lumotlarga tushsin.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-fit" data-config="{&quot;h&quot;: 5}"></div><figcaption><b>Rasm 7.</b> Shovqinli ($\sigma=0{,}08$) $y=0{,}8\sin(2{,}2x)+0{,}3x$ ning 40 nuqtasi, to‘liq gradiyent va $0{,}05$ qadamli <a href='../adam/'>Adam</a>. Firuza egri chiziqlar — alohida neyronlar hissasi, ko‘k — ularning yig‘indisi. 5 neyron bilan MSE $1{,}059$ dan $0{,}038$ platogacha tushadi (400-qadam), so‘ng neyronlardan biri «o‘z rolini topadi» va 800-qadamga kelib xato $0{,}0041$. 3 neyron bilan tarmoq $0{,}106$ da tiqilib qoladi, 8 neyron bilan 400-qadamdayoq $0{,}0039$ ga yetadi.</figcaption></figure>
+    <div class="callout note"><b>Plato — bu to‘yinish</b><p>Yo‘qotish egri chizig‘idagi uzun platolar ko‘pincha neyronlarning bir qismi tanh ning yassi chekkalarida ishlayotganini bildiradi: ularning hosilasi kichik va gradiyent parametrlarini deyarli siljitmaydi. Kirishlarni normallashtirish, ehtiyotkor initsializatsiya va Adam kabi adaptiv optimizatorlar yordam beradi.</p></div>
+
+    <h2 id="rnn">Rekurrent tarmoqlarda va LSTM’da tanh</h2>
+    <p>Oddiy rekurrent tarmoq holatni har qadamda bir xil formula bilan yangilaydi: $h_t=\tanh(Wh_{t-1}+Ux_t+b)$. Bu yerda tanh saqlagich vazifasini bajaradi: matn qanchalik uzun bo‘lmasin, holat $(-1;\,1)$ da qoladi va «portlamaydi». Lekin chegaralanganlik uchun gradiyent bilan to‘lashga to‘g‘ri keladi:</p>
+    <div class="eqd">$$\frac{\partial h_T}{\partial h_t}=\prod_{s=t+1}^{T}\operatorname{diag}\bigl(1-h_s^{2}\bigr)\,W$$</div>
+    <p>Har bir ko‘paytuvchida $1-h_s^2\le1$ bor. Vaznlar kichik bo‘lsa, ko‘paytma eksponensial so‘nadi. Vaznlar katta bo‘lsa, holatlar $\pm1$ ga bosiladi, $1-h_s^2\to0$ — va gradiyent yana so‘nadi. U faqat shu ikki rejim orasidagi tor oynada omon qoladi.</p>
+    <figure class="viz"><div class="fv" data-viz="tanh-rnn" data-config="{&quot;w&quot;: 1}"></div><figcaption><b>Rasm 8.</b> Skalyar RNN $h_t=\tanh(wh_{t-1}+x_t)$, 30 qadam, kirishlar $x_t\sim N(0;\,0{,}2^2)$ (kulrang ustunlar). Pastda — logarifmik shkalada $|\partial h_{30}/\partial h_t|$. $w=1$ da birinchi qadamdan oxirgisigacha gradiyent $3{,}1\cdot10^{-4}$ gacha kamayadi; $w=0{,}5$ da — $5{,}7\cdot10^{-11}$ gacha; $w=1{,}2$ da — $1{,}3\cdot10^{-3}$; holat to‘yingan $w=2$ va $w=3$ da esa — $7{,}2\cdot10^{-18}$ va $1{,}6\cdot10^{-38}$ gacha.</figcaption></figure>
+    <p>LSTM bu muammoni alohida «magistral» — tanh orqali emas, qo‘shish orqali yangilanadigan yacheyka holati $c_t$ bilan hal qiladi:</p>
+    <div class="eqd">$$\begin{aligned}g_t&amp;=\tanh\bigl(W_g[h_{t-1},x_t]+b_g\bigr)\\c_t&amp;=f_t\odot c_{t-1}+i_t\odot g_t\\h_t&amp;=o_t\odot\tanh(c_t)\end{aligned}$$</div>
+    <p>Bu yerda $f_t,i_t,o_t\in(0;\,1)$ — <a href='../sigmoid/'>sigmoidalar</a>dagi ventillar, tanh esa ikki vazifani bajaradi: nomzod $g_t\in(-1;\,1)$ xotirani ham oshira, ham kamaytira oladi (sigmoida faqat qo‘sha olardi), $\tanh(c_t)$ esa chiqishni chegaralaydi. $c_{t-1}\to c_t$ zanjiri bo‘ylab gradiyent $\tanh'$ ko‘paytuvchisiz $f_t$ ga ko‘payadi, shuning uchun $f_t\approx1$ da u uzoq qadamlargacha yetib boradi.</p>
+    <div class="callout history"><b>Biroz tarix</b><p>Yan LeKun 1998 yilda masshtablangan tangens $1{,}7159\tanh(2x/3)$ ni tavsiya qilgan: u $f(\pm1)=\pm1$ va chiqishning deyarli birlik dispersiyasini beradi. LSTM (Xoxrayter va Shmidxuber, 1997) tanh ni yigirma yil davomida rekurrent tarmoqlar standartiga aylantirdi. O‘ramli tarmoqlarda uni <a href='../relu/'>ReLU</a> siqib chiqardi: AlexNet’da (2012) ReLU li tarmoq CIFAR-10 o‘quv to‘plamida 25% xatoga tanh li tarmoqdan 6 marta tezroq yetdi.</p></div>
+
+    <h2 id="code">Kodda: barqaror va kutilmagan holatlarsiz</h2>
+    <p>Eksponentalar orqali sodda formula $x=1000$ da $e^{1000}=\infty$ ni hisoblaydi va natijada $\infty/\infty=\text{nan}$ chiqadi. O‘rnatilgan <code>np.tanh</code> va <code>torch.tanh</code> barqaror: $x\gtrsim19$ da ular float64 da aynan $1{,}0$ qaytaradi. Lekin unda $1-\tanh^2 x$ aynan 0 beradi, holbuki $x=20$ da haqiqiy qiymat taxminan $1{,}7\cdot10^{-17}$. Agar uzoq chekkalarda hosila kerak bo‘lsa, uni $\operatorname{sech}^2$ orqali barqaror shaklda hisoblang.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def tanh_grad_from_output(t):
+    &quot;&quot;&quot;Hisoblangan chiqish t = tanh(x) orqali hosila: bitta ko‘paytirish.&quot;&quot;&quot;
+    return 1.0 - t * t
+
+def tanh_grad(x):
+    &quot;&quot;&quot;sech²x = 4e^(−2|x|) / (1 + e^(−2|x|))²:
+    to‘lib ketishsiz va aniqlik yo‘qotmasdan.&quot;&quot;&quot;
+    e = np.exp(-2.0 * np.abs(x))
+    return 4.0 * e / (1.0 + e) ** 2
+
+def naive_tanh(x):
+    return (np.exp(x) - np.exp(-x)) / (np.exp(x) + np.exp(-x))
+
+print(naive_tanh(1000.0))       # nan: inf / inf (va to‘lib ketish haqida ogohlantirish)
+print(np.tanh(1000.0))          # 1.0 — o‘rnatilgan funksiya barqaror
+print(1 - np.tanh(20.0) ** 2)   # 0.0: float64 da tanh(20) 1 gacha yaxlitlanadi
+print(tanh_grad(20.0))          # 1.699e-17 — to‘g‘ri qiymat</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+x = torch.tensor([-2.0, 0.0, 2.0], requires_grad=True)
+y = torch.tanh(x)               # tensor([-0.9640,  0.0000,  0.9640])
+y.sum().backward()
+print(x.grad)                   # tensor([0.0707, 1.0000, 0.0707]) = 1 − tanh²
+
+# tanh uchun initsializatsiya: kuchaytirish 5/3
+layer = nn.Linear(256, 256)
+nn.init.xavier_uniform_(layer.weight, gain=nn.init.calculate_gain(&quot;tanh&quot;))
+
+# tanh li rekurrent tarmoq va portlashga qarshi gradiyentni kesish
+rnn = nn.RNN(input_size=32, hidden_size=64, nonlinearity=&quot;tanh&quot;, batch_first=True)
+out, h = rnn(torch.randn(8, 100, 32))   # uzunligi 100 bo‘lgan 8 ta ketma-ketlik
+out.pow(2).mean().backward()
+nn.utils.clip_grad_norm_(rnn.parameters(), max_norm=1.0)</code></pre>
+    <div class="callout key"><b>Qoida</b><p>O‘rnatilgan tanh va avtomatik differensiallashdan foydalaning; teskari o‘tishda — saqlangan chiqishdan $1-t^2$ formulasi. tanh tarmoqlari uchun — $5/3$ kuchaytirishli Ksavye initsializatsiyasi, RNN uchun — gradiyent normasini kesish.</p></div>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b>Ehtimollik uchun chiqishda sigmoida o‘rniga tanh.</b> tanh chiqishi $(-1;\,1)$ da yotadi va ehtimollik emas. Binar klassifikatsiyaga <a href='../sigmoid/'>sigmoida</a> va <a href='../bce/'>BCE</a> kerak; maqsadlar $[-1;\,1]$ ga normallashtirilgan bo‘lsa, chiqishdagi tanh o‘rinli.</li><li><b>Chiqish o‘rniga kirish bo‘yicha hosila.</b> $1-t^2$ formulasi <i>chiqish</i> $t=\tanh x$ ga qo‘llaniladi. Ko‘p uchraydigan xato — kirishdan $1-x^2$: $x=2$ da u $0{,}071$ o‘rniga $-3$ beradi.</li><li><b>Normallashtirilmagan kirishlar va katta vaznlar.</b> Agar belgilar yuzlab tartibda yoki vaznlar juda katta bo‘lsa, tanh birinchi qadamlardanoq to‘yingan va deyarli o‘rganmaydi. Ma’lumotlarni standartlashtiring va tanh uchun mo‘ljallangan initsializatsiyani oling.</li><li><b>«tanh so‘nish muammosini hal qiladi».</b> U sigmoidadan yaxshiroq (hosila 1 gacha va markazlashganlik), lekin u ham to‘yinadi. Chuqur tarmoqlar uchun — ReLU oilasi, normallashtirish va qoldiq bog‘lanishlar; ketma-ketliklar uchun — LSTM/GRU.</li><li><b>exp orqali o‘zi yozilgan tanh.</b> Katta $|x|$ da nan beradi. <code>np.tanh</code>, <code>torch.tanh</code> dan foydalaning.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘lanish</h2>
+    <ul class="flist"><li><a href='../sigmoid/'>Sigmoida</a>: $\tanh x=2\sigma(2x)-1$ va $\sigma(x)=\tfrac12(1+\tanh\tfrac x2)$; hosilalar $\tanh' x=4\sigma'(2x)$ kabi bog‘langan.</li><li><a href='../relu/'>ReLU</a>: $x&gt;0$ da to‘yinmaydi va tanh ni chuqur o‘ramli tarmoqlardan siqib chiqardi.</li><li><a href='../gelu/'>GELU</a>: mashhur yaqinlashuv $0{,}5x\bigl(1+\tanh\bigl(\sqrt{2/\pi}\,(x+0{,}044715x^3)\bigr)\bigr)$.</li><li><a href='../silu/'>SiLU</a>: $x\sigma(x)=\tfrac x2\bigl(1+\tanh\tfrac x2\bigr)$ — «yumshoq ventil» rolidagi o‘sha S-egri chiziq.</li><li><a href='../mse/'>MSE</a>: maqsadlar $[-1;\,1]$ da bo‘lganda tanh chiqishi uchun tabiiy juftlik.</li><li><a href='../adam/'>Adam</a>: 7-rasmdagi optimizator, to‘yinish keltirib chiqargan platolardan yaxshi o‘tadi.</li></ul>
+
+    <h2 id="summary">Xulosalar</h2>
+    <div class="callout key"><p>1) $\tanh x=\frac{e^x-e^{-x}}{e^x+e^{-x}}=\frac{\sinh x}{\cosh x}=2\sigma(2x)-1$ $\mathbb R$ ni $(-1;\,1)$ ga akslantiradi, toq va noldan o‘tadi. 2) $\tanh'=1-\tanh^2\le1$, maksimum nolda, chekkalarda — to‘yinish. 3) Teylor qatori $x-\frac{x^3}{3}+\dots$ $|x|&lt;\pi/2$ da yaqinlashadi. 4) Markazlashgan chiqishlar keyingi qatlamni sigmoidaga qaraganda tezroq o‘qitadi. 5) tanh burmalarining yig‘indisi istalgan uzluksiz funksiyani yaqinlashtiradi; initsializatsiya — $5/3$ kuchaytirishli Ksavye. 6) RNN’da tanh holatni chegaralangan saqlaydi, lekin vaqt bo‘yicha gradiyent so‘nadi — LSTM shundan.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. Ma’lumki, $\tanh 0{,}5\approx0{,}462$. $\tanh(-0{,}5)$ nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0{,}538$</button><button type="button" data-ok="1">$-0{,}462$</button><button type="button" data-ok="0">$0{,}462$</button><button type="button" data-ok="0">$-0{,}538$</button></div><div class="explain" hidden>tanh toq: $\tanh(-x)=-\tanh x=-0{,}462$. $0{,}538=1-0{,}462$ javobi — tangensning emas, sigmoidaning simmetriyasi.</div></fieldset><fieldset class="q"><legend>2. Neyron $t=\tanh z=0{,}8$ chiqardi. $\tanh' z$ hosila nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0{,}2$</button><button type="button" data-ok="1">$0{,}36$</button><button type="button" data-ok="0">$0{,}64$</button><button type="button" data-ok="0">$0{,}16$</button></div><div class="explain" hidden>$\tanh' z=1-t^2=1-0{,}64=0{,}36$. Eksponentani qayta hisoblash shart emas.</div></fieldset><fieldset class="q"><legend>3. Qaysi ayniyat to‘g‘ri?</legend><div class="opts"><button type="button" data-ok="0">$\tanh x=\sigma(2x)-1$</button><button type="button" data-ok="0">$\tanh x=2\sigma(x)-1$</button><button type="button" data-ok="1">$\tanh x=2\sigma(2x)-1$</button><button type="button" data-ok="0">$\tanh x=\sigma(x)/2$</button></div><div class="explain" hidden>Sigmoida gorizontal bo‘yicha 2 marta siqiladi, vertikal bo‘yicha 2 marta cho‘ziladi va 1 ga pastga tushiriladi: $2\sigma(2x)-1$.</div></fieldset><fieldset class="q"><legend>4. Nega yashirin qatlamlarda tanh odatda sigmoidadan tezroq o‘qitiladi?</legend><div class="opts"><button type="button" data-ok="0">U tezroq hisoblanadi</button><button type="button" data-ok="1">Uning chiqishlari markazlashgan va hosilasi 0,25 gacha emas, 1 gacha</button><button type="button" data-ok="0">U to‘yinmaydi</button><button type="button" data-ok="0">Uning nolda hosilasi yo‘q</button></div><div class="explain" hidden>Markazlashganlik keyingi qatlam yo‘qotish sirtini «yumaloqroq» qiladi, hosila maksimumining to‘rt marta kattaligi esa gradiyentni kamroq susaytiradi. tanh ham xuddi sigmoida kabi to‘yinadi.</div></fieldset><fieldset class="q"><legend>5. tanh li RNN’da rekurrent vazn juda katta qilindi. Ko‘p qadamlar orqali gradiyent bilan nima bo‘ladi?</legend><div class="opts"><button type="button" data-ok="0">Portlaydi: ko‘paytuvchilar $|w|&gt;1$</button><button type="button" data-ok="1">So‘nadi: holatlar to‘yinadi va $1-h^2\to0$</button><button type="button" data-ok="0">1 ga teng bo‘lib qoladi</button><button type="button" data-ok="0">Manfiy bo‘lib qoladi</button></div><div class="explain" hidden>Har bir ko‘paytuvchi $w(1-h_s^2)$ ga teng. Katta $w$ da holat $\pm1$ ga bosiladi va $1-h_s^2$ juda kichik bo‘ladi — 8-rasmda $w=3$ da gradiyent $1{,}6\cdot10^{-38}$ gacha tushadi.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../sigmoid/"><span class="kicker">← Oldingi formula</span><span class="big">Sigmoid</span><span class="kicker">logistik funksiya</span></a>
+<a class="next" href="../relu/"><span class="kicker">Keyingi formula →</span><span class="big">ReLU</span><span class="kicker">rectified linear unit</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

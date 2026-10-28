@@ -598,16 +598,14 @@
       const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
       let back = corners[0], bd = -Infinity;
       corners.forEach((c) => { const d = this.proj(c[0], c[1], 0)[2]; if (d > bd) { bd = d; back = c; } });
+      // the z axis stands on the leftmost corner of the silhouette, labels to its left
+      let zc = corners[0], zx = Infinity;
+      corners.forEach((c) => { const x = this.proj(c[0], c[1], 0)[0]; if (x < zx) { zx = x; zc = c; } });
       ctx.strokeStyle = faint;
-      gl([back[0], back[1], zf], [back[0], back[1], o.zScale]);
+      gl([zc[0], zc[1], zf], [zc[0], zc[1], o.zScale]);
       // z ticks on the back edge
-      ctx.fillStyle = faint;
       const zt = FV.ticks(this.zr[0], this.zr[1], 4);
-      zt.values.forEach((v) => {
-        const p = this.proj(back[0], back[1], this.norm(o.x[0], o.y[0], v)[2]);
-        ctx.strokeStyle = grid; gl([back[0], back[1], this.norm(0, 0, v)[2]], [back[0] * 0.94, back[1] * 0.94, this.norm(0, 0, v)[2]]);
-        ctx.textAlign = "right"; ctx.fillText(tickLabel(v, zt.d), p[0] - 6, p[1] + 4);
-      });
+      zt.values.forEach((v) => { ctx.strokeStyle = faint; gl([zc[0], zc[1], this.norm(0, 0, v)[2]], [zc[0] * 1.05, zc[1] * 1.05, this.norm(0, 0, v)[2]]); });
       // scene items, sorted far to near
       const items = [];
       const nz = this.Z.map((row, j) => row.map((v, i) => this.norm(o.x[0] + ((o.x[1] - o.x[0]) * i) / n, o.y[0] + ((o.y[1] - o.y[0]) * j) / n, Number.isFinite(v) ? v : this.zr[0])));
@@ -659,12 +657,21 @@
           if (it.label) { ctx.fillStyle = ink; ctx.textAlign = "left"; ctx.fillText(it.label, it.A[0] + 8, it.A[1] - 8); }
         }
       });
+      // z tick labels on top of everything, with a halo so the surface cannot hide them
+      ctx.textAlign = "right"; ctx.lineJoin = "round";
+      zt.values.forEach((v) => {
+        const p = this.proj(zc[0] * 1.05, zc[1] * 1.05, this.norm(o.x[0], o.y[0], v)[2]);
+        ctx.lineWidth = 3; ctx.strokeStyle = bg; ctx.strokeText(tickLabel(v, zt.d), p[0] - 6, p[1] + 4);
+        ctx.fillStyle = faint; ctx.fillText(tickLabel(v, zt.d), p[0] - 6, p[1] + 4);
+      });
       // axis names and end ticks along the two front floor edges
       ctx.fillStyle = faint; ctx.textAlign = "center";
       const lab = o.labels || {};
-      const edge = (a, b, v0, v1, name) => {
-        const p = this.proj(a[0], a[1], zf), q = this.proj(b[0], b[1], zf);
-        const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+      const edge = (a, b, v0, v1, name, shiftA, shiftB) => {
+        const p0 = this.proj(a[0], a[1], zf), q0 = this.proj(b[0], b[1], zf);
+        const len = Math.hypot(q0[0] - p0[0], q0[1] - p0[1]) || 1, ex = (q0[0] - p0[0]) / len, ey = (q0[1] - p0[1]) / len;
+        const p = shiftA ? [p0[0] + ex * 22, p0[1] + ey * 22] : p0, q = shiftB ? [q0[0] - ex * 22, q0[1] - ey * 22] : q0;
+        const mx = (p0[0] + q0[0]) / 2, my = (p0[1] + q0[1]) / 2;
         const cx = this.W / 2, cy = this.cy, dx = mx - cx, dy = my - cy, dl = Math.hypot(dx, dy) || 1;
         ctx.fillStyle = faint;
         ctx.fillText(FV.num(v0), p[0] + (dx / dl) * 14, p[1] + (dy / dl) * 14 + 4);
@@ -675,8 +682,8 @@
       const yEdge = this.proj(0, -1, zf)[2] < this.proj(0, 1, zf)[2] ? -1 : 1;
       const xEdge = this.proj(-1, 0, zf)[2] < this.proj(1, 0, zf)[2] ? -1 : 1;
       edge([-1, yEdge], [1, yEdge], o.x[0], o.x[1], lab.x);
-      edge([xEdge, -1], [xEdge, 1], o.y[0], o.y[1], lab.y);
-      if (lab.z) { const p = this.proj(back[0], back[1], o.zScale); ctx.fillStyle = ink; ctx.textAlign = "center"; ctx.fillText(lab.z, p[0], p[1] - 10); }
+      edge([xEdge, -1], [xEdge, 1], o.y[0], o.y[1], lab.y, yEdge === -1, yEdge === 1);
+      if (lab.z) { const p = this.proj(zc[0], zc[1], o.zScale); ctx.fillStyle = ink; ctx.textAlign = "center"; ctx.fillText(lab.z, p[0], p[1] - 10); }
     }
   }
   FV.Surface = Surface;

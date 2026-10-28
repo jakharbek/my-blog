@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BCE: binary cross-entropy — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="Binary cross-entropy in depth: Bernoulli likelihood, entropy and KL, derivation of the gradient σ(z) − y, comparison with MSE, the 3D loss landscape, stable BCEWithLogits, pos_weight, label smoothing and calibration.">
+  <meta property="og:title" content="BCE: binary cross-entropy — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="Binary cross-entropy in depth: Bernoulli likelihood, entropy and KL, derivation of the gradient σ(z) − y, comparison with MSE, the 3D loss landscape, stable BCEWithLogits, pos_weight, label smoothing and calibration.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/bce/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/bce/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/bce/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/bce/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/bce.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/bce/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/bce/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/bce/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Losses — classification</span>
+  <h1>BCE: binary cross-entropy</h1>
+  <p class="dek">The main loss function of binary classification. We take it apart bone by bone: where it comes from (likelihood and information theory), why together with the sigmoid its gradient is simply “prediction − truth”, why it beats MSE, what its landscape looks like in 3D, how to compute it without log(0), and how it relates to class weights, label smoothing and calibration.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 50 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: a penalty for surprise</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#likelihood"><span class="n">4</span>Where it comes from: maximum likelihood</a>
+      <a href="#information"><span class="n">5</span>The information-theory view: surprise, entropy, KL</a>
+      <a href="#properties"><span class="n">6</span>Properties</a>
+      <a href="#derivative"><span class="n">7</span>The derivative: why σ′ cancels</a>
+      <a href="#vs-mse"><span class="n">8</span>Why not MSE: saturation and non-convexity</a>
+      <a href="#landscape"><span class="n">9</span>The loss landscape in 3D</a>
+      <a href="#training"><span class="n">10</span>BCE in training</a>
+      <a href="#stability"><span class="n">11</span>Numerical stability: BCEWithLogits</a>
+      <a href="#weights"><span class="n">12</span>Class imbalance: weights and pos_weight</a>
+      <a href="#smoothing"><span class="n">13</span>Label smoothing</a>
+      <a href="#calibration"><span class="n">14</span>Calibration: BCE rewards honesty</a>
+      <a href="#mistakes"><span class="n">15</span>Common mistakes</a>
+      <a href="#links"><span class="n">16</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">17</span>Summary</a>
+      <a href="#quiz"><span class="n">18</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{BCE}=-\frac{1}{n}\sum_{i=1}^{n}\Bigl[y_i\log\hat{y}_i+(1-y_i)\log\bigl(1-\hat{y}_i\bigr)\Bigr]$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p>A binary classifier outputs a number $\hat y\in(0,\,1)$ — its probability that an object belongs to class 1: the email is spam, the transaction is fraud, the scan shows a tumour. To learn, the model needs a <b>loss function</b>: a single number that grows as the prediction gets worse and can be differentiated. Binary cross-entropy (BCE; in statistics, log loss or negative log-likelihood) is the standard choice for this task.</p>
+    <p>Where it is used:</p>
+    <ul class="flist"><li><b>logistic regression and the output of any binary classifier</b> — the pair <a href='../sigmoid/'>sigmoid</a> + BCE;</li><li><b>multi-label classification</b> — every label (photo tags, toxicity categories) gets its own sigmoid and its own BCE, the labels are independent;</li><li><b>gradient boosting</b> — <code>binary:logistic</code> in XGBoost, <code>binary</code> in LightGBM, <code>Logloss</code> in CatBoost are the same BCE on the raw score of the trees;</li><li><b>the GAN discriminator</b> is trained with BCE: “real” is 1, “generated” is 0;</li><li><b>reward models in RLHF and DPO</b> — the loss $-\log\sigma(r_{\text{better}}-r_{\text{worse}})$ is BCE with label 1 on the difference of scores (the Bradley–Terry model);</li><li><b>a metric</b> — log loss in competitions and reports: it checks not only whether the model guessed right but also how honest its probabilities are.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>BCE is $-\log$ of the probability the model gave to the <i>correct</i> answer. A confident right answer costs almost 0, a “50/50” answer costs $\ln2\approx0.693$, a confident mistake costs arbitrarily much. Together with the sigmoid, the gradient with respect to the logit is simply $\hat y-y$: no saturation, bounded by one in magnitude and proportional to the error. BCE is convex in the weights of logistic regression, and its minimum is reached at honest probabilities.</p></div>
+
+    <h2 id="intuition">Intuition: a penalty for surprise</h2>
+    <p>Think of the model as a weather forecaster who names the probability of rain every day. If they said “90%” and it rained, they are hardly surprised — a small penalty. If they said “10%” and it rained, they were wrong <i>and sure of it</i>; the penalty should be large. And if they refuse to commit and always say “50%”, the penalty is the same every day — $\ln2\approx0.693$.</p>
+    <p>BCE is built exactly like that: the loss is $-\ln$ of the probability of what actually happened. For the correct answer $y=1$ it is $-\ln\hat y$ (the red curve), for $y=0$ it is $-\ln(1-\hat y)$ (the blue one). Drag the point.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-curves" data-config="{&quot;y&quot;: 1, &quot;p&quot;: 0.9}"></div><figcaption><b>Figure 1.</b> The two branches of BCE and the tangent to the active branch. By default $y=1$, $\hat y=0.9$: the loss is $0.105$, the slope $-1.111$. Move the point to $\hat y=0.1$: the loss is $2.303$ and the slope is already $-10$. Switch the correct answer to $y=0$ and the curves swap roles.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>The confident mistake $\hat y=0.1$ costs 22 times more than the confident right answer $\hat y=0.9$ ($2.303$ versus $0.105$). And the loss has no ceiling: as $\hat y\to0$ the wall goes to infinity. One more property of the logarithm: every <i>halving</i> of the probability of the correct answer adds the same amount, $\ln2\approx0.693$, to the loss.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <p>Take one term — the loss on a single object — and look at every part.</p>
+    <div class="eqd">$$\ell(y,\hat y)=-\Bigl[\underbrace{y\log\hat y}_{\text{active when }y=1}+\underbrace{(1-y)\log(1-\hat y)}_{\text{active when }y=0}\Bigr]$$</div>
+    <dl class="symbols"><dt>$y\in\{0,1\}$</dt><dd>the correct answer (label). It acts as a <b>switch</b>: for $y=1$ the second term is multiplied by 0, for $y=0$ the first one;</dd><dt>$\hat y\in(0,\,1)$</dt><dd>the predicted probability of class 1, usually $\hat y=\sigma(z)$, where $z$ is the logit (the raw output of the model);</dd><dt>$1-\hat y$</dt><dd>the predicted probability of class 0 — the two probabilities add up to 1;</dd><dt>$\log$</dt><dd>the natural logarithm ($\ln$): the loss is measured in nats; with $\log_2$ it would be in bits;</dd><dt>$-$</dt><dd>the minus is needed because the logarithm of a probability is negative: $\log\hat y\le0$, while a loss must be $\ge0$;</dd><dt>$\frac1n\sum_{i=1}^{n}$</dt><dd>averaging over objects, so that the loss does not depend on the batch size.</dd></dl>
+    <p>The switch gives a compact form: let $p_t$ be the probability the model gave to the correct class ($p_t=\hat y$ for $y=1$ and $p_t=1-\hat y$ for $y=0$). Then</p>
+    <div class="eqd">$$\ell=-\log p_t\qquad\text{and in terms of the logit }z:\qquad \ell=\log\bigl(1+e^{z}\bigr)-y\,z=\operatorname{softplus}(z)-y\,z$$</div>
+    <p>The second form, “BCE on logits”, will be needed to derive the gradient and to write stable code. If the labels are written as $s=\pm1$, the same loss becomes the logistic loss $\log(1+e^{-s z})$, where $s z$ is the <b>margin</b>: a positive margin means a correct answer.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$\hat y$</th><th class=num>$-\ln\hat y$ (for $y=1$)</th><th class=num>$-\ln(1-\hat y)$ (for $y=0$)</th><th class=num>$\partial\ell/\partial\hat y$ for $y=1$</th></tr></thead><tbody><tr><td class=num>0.001</td><td class=num>6.908</td><td class=num>0.001</td><td class=num>−1000</td></tr><tr><td class=num>0.01</td><td class=num>4.605</td><td class=num>0.010</td><td class=num>−100</td></tr><tr><td class=num>0.1</td><td class=num>2.303</td><td class=num>0.105</td><td class=num>−10</td></tr><tr><td class=num>0.3</td><td class=num>1.204</td><td class=num>0.357</td><td class=num>−3.333</td></tr><tr><td class=num>0.5</td><td class=num>0.693</td><td class=num>0.693</td><td class=num>−2</td></tr><tr><td class=num>0.7</td><td class=num>0.357</td><td class=num>1.204</td><td class=num>−1.429</td></tr><tr><td class=num>0.9</td><td class=num>0.105</td><td class=num>2.303</td><td class=num>−1.111</td></tr><tr><td class=num>0.99</td><td class=num>0.010</td><td class=num>4.605</td><td class=num>−1.010</td></tr><tr><td class=num>0.999</td><td class=num>0.001</td><td class=num>6.908</td><td class=num>−1.001</td></tr></tbody></table></div>
+    <p>The table shows the asymmetry: on the right side the loss quickly settles towards zero, on the wrong side it grows like a logarithm, and the slope $-1/\hat y$ reaches $-1000$ at $\hat y=0.001$.</p>
+    <h3>An example with four objects</h3>
+    <p>Labels $y=(1,\,0,\,1,\,1)$, predictions $\hat y=(0.9,\,0.2,\,0.6,\,0.95)$. The probabilities of the correct answers: $0.9$, $0.8$, $0.6$, $0.95$. The losses: $0.105$, $0.223$, $0.511$, $0.051$. The mean is $\mathrm{BCE}\approx0.223$. The third object is the main “culprit”: the model gave the correct answer only $0.6$.</p>
+
+    <h2 id="likelihood">Where it comes from: maximum likelihood</h2>
+    <p>BCE is not made up by eye — it is derived. Suppose the model says: “the object belongs to class 1 with probability $\hat y$”. That is a <b>Bernoulli distribution</b>, and its formula fits on one line — again with the label as a switch, but now in the exponent:</p>
+    <div class="eqd">$$P(y\mid x)=\hat y^{\,y}\,(1-\hat y)^{1-y}=\begin{cases}\hat y, &amp; y=1\\ 1-\hat y, &amp; y=0\end{cases}$$</div>
+    <p>If the objects are independent, the probability of seeing all the labels of the training set — the <b>likelihood</b> — is a product. Maximum likelihood chooses the model parameters that make this product as large as possible:</p>
+    <div class="eqd">$$\mathcal L=\prod_{i=1}^{n}\hat y_i^{\,y_i}(1-\hat y_i)^{1-y_i}\;\xrightarrow{\;-\frac1n\log\;}\;-\frac1n\sum_{i=1}^{n}\Bigl[y_i\log\hat y_i+(1-y_i)\log(1-\hat y_i)\Bigr]=\mathrm{BCE}$$</div>
+    <p>The logarithm turns the product into a sum and does not move the maximum (it is strictly increasing), the minus turns the maximum into a minimum, and $\tfrac1n$ turns the sum into a mean. So <b>minimizing BCE is the same as maximizing the likelihood of a Bernoulli model</b>.</p>
+    <p>In the example above: $\mathcal L=0.9\cdot0.8\cdot0.6\cdot0.95=0.4104$, and $-\ln0.4104\approx0.891$ is exactly the sum of the four losses; divided by 4 it is the same $\mathrm{BCE}\approx0.223$.</p>
+    <div class="callout note"><b>BCE as a geometric mean</b><p>It follows that $e^{-\mathrm{BCE}}=\mathcal L^{1/n}$ is the geometric mean of the probabilities the model gave to the correct answers. In the example $e^{-0.223}\approx0.800$: “on average the model puts 80% on the right answer”. A handy way to explain a BCE value to a non-specialist.</p></div>
+    <details class="deep"><summary>Why the logarithm and not the product itself</summary><div class="deep-body">
+      <p>First, the product of a million probabilities below 1 becomes zero in a computer (underflow), while the sum of logarithms is an ordinary number. Second, the derivative of a sum is the sum of derivatives: the gradient over a batch adds up the contributions of the objects. Third, the logarithm is the only function (up to a factor) that turns independence (multiplying probabilities) into adding losses — the same reason it appears in the definition of information.</p>
+    </div></details>
+
+    <h2 id="information">The information-theory view: surprise, entropy, KL</h2>
+    <p>The same result comes from another direction. Claude Shannon called $I(p)=-\log p$ the <b>surprise</b> (self-information) of an event with probability $p$. A certain event ($p=1$) is no surprise ($I=0$); a rare one is a big surprise; the surprises of independent events add up. In bits ($\log_2$) an event with probability $\tfrac18$ carries 3 bits; in nats ($\ln$) one bit equals $\ln2\approx0.693$.</p>
+    <p>Let the real world be a coin with probability $y$ of “1”, while the model believes in the probability $\hat y$. Then:</p>
+    <div class="eqd">$$\underbrace{H(y)=-y\log y-(1-y)\log(1-y)}_{\text{entropy: mean surprise when you know the truth}}$$</div>
+    <div class="eqd">$$\underbrace{H(y,\hat y)=-y\log\hat y-(1-y)\log(1-\hat y)}_{\text{cross-entropy: mean surprise when you believe }\hat y}$$</div>
+    <p>The cross-entropy is exactly BCE (hence the name), and the formula also works for “soft” labels $y\in[0,\,1]$. The difference between the two is the <b>Kullback–Leibler divergence</b> (KL):</p>
+    <div class="eqd">$$H(y,\hat y)=H(y)+\mathrm{KL}(y\,\|\,\hat y),\qquad \mathrm{KL}(y\,\|\,\hat y)=y\log\frac{y}{\hat y}+(1-y)\log\frac{1-y}{1-\hat y}\;\ge\;0$$</div>
+    <p>The entropy $H(y)$ does not depend on the model, so minimizing BCE means minimizing KL, the “distance” from the model’s beliefs to the truth. KL is zero only when $\hat y=y$. For hard labels $y\in\{0,1\}$ the entropy is zero, and BCE <i>equals</i> KL.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-mix" data-config="{&quot;y&quot;: 0.8, &quot;p&quot;: 0.3}"></div><figcaption><b>Figure 2.</b> The cross-entropy for a soft label $y$ is the sum of two weighted branches (red and blue). Its minimum lies exactly at $\hat y=y$ and equals the entropy $H(y)$ (the teal line); everything above it is KL (the orange bar). At $y=0.8$ and $\hat y=0.3$: $H=0.500$, $\mathrm{KL}=0.534$, $\mathrm{CE}=1.035$. Move $y$ towards 0 or 1: the entropy vanishes and the whole loss becomes KL.</figcaption></figure>
+    <div class="callout intuition"><b>Code length</b><p>There is an engineering meaning too. An optimal code spends about $-\log_2p$ bits on an event with probability $p$. If we encode events believing in $\hat y$ instead of the true $y$, the mean message length equals the cross-entropy, and the overhead compared with the ideal is exactly KL. Training a model with BCE teaches it to “compress” the labels as economically as possible.</p></div>
+    <details class="deep"><summary>Proof: KL ≥ 0 (Gibbs’ inequality)</summary><div class="deep-body">
+      <p>Use $\ln t\le t-1$ (the tangent to the concave logarithm at $t=1$ lies above the graph):</p>
+      <div class="eqd">$$-\mathrm{KL}=y\ln\frac{\hat y}{y}+(1-y)\ln\frac{1-\hat y}{1-y}\le y\Bigl(\frac{\hat y}{y}-1\Bigr)+(1-y)\Bigl(\frac{1-\hat y}{1-y}-1\Bigr)=\hat y-y+(1-\hat y)-(1-y)=0$$</div>
+      <p>Equality in $\ln t\le t-1$ holds only at $t=1$, so $\mathrm{KL}=0$ only when $\hat y=y$ (terms with a zero weight, $y=0$ or $1-y=0$, simply drop out).</p>
+    </div></details>
+
+    <h2 id="properties">Properties</h2>
+    <ul class="flist"><li><b>Non-negativity.</b> $\ell\ge0$; for hard labels $\ell=0$ only in the limit $\hat y\to y$. With a sigmoid at the output $\hat y$ is never exactly 0 or 1, so zero is never reached.</li><li><b>Unbounded above.</b> For $y=1$, $\hat y\to0$ the loss tends to $+\infty$. But in logits the growth is only <i>linear</i>: $\operatorname{softplus}(-z)\approx-z$ for $z\ll0$, so a confident mistake with logit $-10$ costs about 10, not infinity.</li><li><b>Bounded gradient in the logit.</b> $|\partial\ell/\partial z|=|\hat y-y|&lt;1$: each object pulls the model with a force of at most 1, however wrong the model is.</li><li><b>Convex in $\hat y$:</b> $\dfrac{\partial^2\ell}{\partial\hat y^2}=\dfrac{y}{\hat y^2}+\dfrac{1-y}{(1-\hat y)^2}&gt;0$. <b>Convex in the logit:</b> $\dfrac{\partial^2\ell}{\partial z^2}=\hat y(1-\hat y)&gt;0$. Hence convexity in the weights of logistic regression (see below).</li><li><b>Class symmetry:</b> $\ell(z,y)=\ell(-z,1-y)$ — renaming the classes and flipping the sign of the logit changes nothing.</li><li><b>A strictly proper scoring rule:</b> if the truth is a coin with probability $p$, the mean loss $H(p)+\mathrm{KL}(p\,\|\,q)$ is minimal only for the forecast $q=p$. BCE rewards honesty (see the section on calibration).</li><li><b>A baseline.</b> A constant model that always predicts the share of positives $\pi$ gets $\mathrm{BCE}=H(\pi)$. For balanced classes this is $\ln2\approx0.693$, for $\pi=0.1$ it is $0.325$. A model worse than this threshold has learned nothing.</li></ul>
+    <details class="deep"><summary>Convexity in the weights of logistic regression: the Hessian</summary><div class="deep-body">
+      <p>Let $z_i=w^\top x_i$ (the bias $b$ is included in $w$ through a constant feature). The gradient and the Hessian of the mean BCE:</p>
+      <div class="eqd">$$\nabla_w\mathrm{BCE}=\frac1n\sum_{i=1}^{n}(\hat y_i-y_i)\,x_i,\qquad \nabla_w^2\mathrm{BCE}=\frac1n\sum_{i=1}^{n}\hat y_i(1-\hat y_i)\,x_ix_i^\top=\frac1n X^\top S X$$</div>
+      <p>where $S=\operatorname{diag}\bigl(\hat y_i(1-\hat y_i)\bigr)$. For any vector $v$: $v^\top\nabla^2 v=\frac1n\sum\hat y_i(1-\hat y_i)(v^\top x_i)^2\ge0$ — the Hessian is positive semi-definite and the function is convex. So logistic regression has no bad local minima: any descent that finds a point with zero gradient has found the global minimum. The labels $y$ do not enter the Hessian at all. Newton’s method (IRLS) in classical implementations runs on this Hessian.</p>
+    </div></details>
+
+    <h2 id="derivative">The derivative: why σ′ cancels</h2>
+    <p>This is the central formula of the page. First the derivative with respect to the probability $\hat y$, then with respect to the logit $z$, where $\hat y=\sigma(z)$.</p>
+    <div class="eqd">$$\frac{\partial\ell}{\partial\hat y}=-\frac{y}{\hat y}+\frac{1-y}{1-\hat y}=\frac{\hat y-y}{\hat y\,(1-\hat y)}$$</div>
+    <p>This derivative is awkward: as $\hat y\to0$ or $\hat y\to1$ the denominator tends to zero and the gradient explodes (the table above shows $-1000$ at $\hat y=0.001$). But the model does not output $\hat y$ directly — it outputs a logit, and the probability comes from a sigmoid. The chain rule:</p>
+    <div class="eqd">$$\frac{\partial\ell}{\partial z}=\frac{\partial\ell}{\partial\hat y}\cdot\frac{\partial\hat y}{\partial z}=\frac{\hat y-y}{\hat y\,(1-\hat y)}\cdot\underbrace{\hat y\,(1-\hat y)}_{\sigma'(z)}=\hat y-y$$</div>
+    <p>The denominator of the first fraction is exactly the derivative of the sigmoid, $\sigma'(z)=\sigma(z)\bigl(1-\sigma(z)\bigr)$ (derived on the <a href='../sigmoid/'>sigmoid</a> page). They cancel, and what remains is “prediction minus truth”.</p>
+    <details class="deep"><summary>Step-by-step derivation via softplus</summary><div class="deep-body">
+      <p>Rewrite the loss through the logit. Since $\log\sigma(z)=-\log(1+e^{-z})=-\operatorname{softplus}(-z)$ and $\log(1-\sigma(z))=\log\sigma(-z)=-\operatorname{softplus}(z)$:</p>
+      <div class="eqd">$$\ell=y\operatorname{softplus}(-z)+(1-y)\operatorname{softplus}(z)=\operatorname{softplus}(z)-y\,z$$</div>
+      <p>Here we used the identity $\operatorname{softplus}(-z)=\log(1+e^{-z})=\log\bigl(e^{-z}(e^{z}+1)\bigr)=\operatorname{softplus}(z)-z$. The derivative of softplus is the sigmoid: $\frac{d}{dz}\log(1+e^{z})=\frac{e^{z}}{1+e^{z}}=\sigma(z)$. Hence</p>
+      <div class="eqd">$$\frac{\partial\ell}{\partial z}=\sigma(z)-y,\qquad \frac{\partial^2\ell}{\partial z^2}=\sigma(z)\bigl(1-\sigma(z)\bigr)$$</div>
+      <p>The second derivative is positive for every $z$ — the loss is strictly convex in the logit.</p>
+    </div></details>
+    <details class="deep"><summary>Why this is no coincidence: the canonical link</summary><div class="deep-body">
+      <p>The Bernoulli distribution belongs to the exponential family: $\log P(y)=y\,z-A(z)$, where $z=\log\frac{\hat y}{1-\hat y}$ is the natural parameter (the logit) and $A(z)=\log(1+e^{z})=\operatorname{softplus}(z)$ is the log-partition function. For any such family $A'(z)$ equals the mean, here $\sigma(z)$. That is why the negative log-likelihood $A(z)-yz$ always has the gradient “mean − observation”.</p>
+      <p>The sigmoid is the (inverse of the) <b>canonical link function</b> of the Bernoulli distribution in generalized linear models. Exactly the same picture holds for softmax + cross-entropy (gradient $s-y$) and for “identity output + MSE” with Gaussian noise (gradient $\hat y-y$). That is why “prediction − truth” keeps recurring throughout machine learning.</p>
+    </div></details>
+    <p>For the weights of logistic regression, $\hat y_i=\sigma(w^\top x_i+b)$, this gives the short formulas used in training:</p>
+    <div class="eqd">$$\frac{\partial\,\mathrm{BCE}}{\partial w}=\frac1n X^\top(\hat y-y),\qquad \frac{\partial\,\mathrm{BCE}}{\partial b}=\frac1n\sum_{i=1}^{n}(\hat y_i-y_i)$$</div>
+    <figure class="viz"><div class="fv" data-viz="bce-logit" data-config="{&quot;y&quot;: 1, &quot;z&quot;: -2, &quot;eps&quot;: 0}"></div><figcaption><b>Figure 3.</b> Top: BCE as a function of the logit; bottom: its first (orange) and second (teal) derivatives. The slope of the tangent equals $\hat y-y$. For $y=1$, $z=-2$: $\hat y=0.1192$, the loss is $2.1269$, the gradient $-0.8808$ — a strong push upwards. The dashed lines are the asymptotes: on the left the loss grows like a line with slope $-1$, on the right it settles towards zero. The $\varepsilon$ slider will be needed in the section on label smoothing.</figcaption></figure>
+    <div class="callout key"><b>The error signal</b><p>The gradient $\hat y-y$ lies in $(-1,\,1)$, depends linearly on the error in probability and contains no factor $\sigma'(z)$. A model that is confidently wrong gets almost the maximum push; a model that is already right gets almost none. The gradient of MSE in linear regression looks exactly the same.</p></div>
+
+    <h2 id="vs-mse">Why not MSE: saturation and non-convexity</h2>
+    <p>Why not train a classifier with the squared error $(\hat y-y)^2$, as in regression? Let us compute the gradient with respect to the logit when $\hat y=\sigma(z)$:</p>
+    <div class="eqd">$$\frac{\partial}{\partial z}\bigl(\sigma(z)-y\bigr)^2=2\bigl(\sigma(z)-y\bigr)\,\underbrace{\sigma(z)\bigl(1-\sigma(z)\bigr)}_{\sigma'(z)\;\to\;0\text{ at the tails}}$$</div>
+    <p>Here the factor $\sigma'(z)$ no longer cancels with anything. If the model is confidently wrong ($y=1$, $z\ll0$), then $\sigma'(z)\approx0$ and the gradient is almost zero: the model “does not hear” its worst mistake. At $z=-4$ the BCE gradient is $-0.982$, the MSE gradient $-0.0347$, 28 times smaller; at $z=-6$ it is already 203 times smaller. The largest MSE gradient in magnitude, $-0.296$, is reached at $z=-\ln2\approx-0.693$ — MSE pushes hardest on a model that is only <i>slightly</i> wrong.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-vs-mse" data-config="{&quot;z&quot;: -4}"></div><figcaption><b>Figure 4.</b> Top: BCE and MSE through a sigmoid for $y=1$; bottom: their derivatives with respect to the logit. Drag the point to the left, into the zone of confident mistakes: the orange BCE gradient stays near $-1$, the violet MSE gradient fades away. The violet shading is the region $z&lt;-\ln2$ where MSE is concave.</figcaption></figure>
+    <p>The second problem is <b>non-convexity</b>. For $y=1$ the second derivative of MSE in the logit is $-2\sigma(1-\sigma)^2(1-3\sigma)$, negative for $\sigma&lt;\tfrac13$, i.e. for $z&lt;-\ln2$. The loss there is concave and almost flat: summing such terms over many objects produces plateaus and saddle-like regions (Figure 5). The third problem is boundedness: MSE never exceeds 1, so “very wrong” costs almost as much as “hopelessly wrong”.</p>
+    <details class="deep"><summary>Deriving the second derivative of MSE</summary><div class="deep-body">
+      <p>For $y=1$: $L=(1-\sigma)^2$, $L'=-2(1-\sigma)\sigma'=-2\sigma(1-\sigma)^2$. Differentiate the product, remembering $\sigma'=\sigma(1-\sigma)$:</p>
+      <div class="eqd">$$L''=-2\Bigl[\sigma'(1-\sigma)^2-2\sigma(1-\sigma)\sigma'\Bigr]=-2\sigma'(1-\sigma)(1-3\sigma)=-2\sigma(1-\sigma)^2(1-3\sigma)$$</div>
+      <p>The sign is set by the factor $1-3\sigma$: for $\sigma&lt;\tfrac13$ (i.e. $z&lt;-\ln2$) $L''&lt;0$. The minimum of $L'$ is at the same point: $L'(-\ln2)=-2\cdot\tfrac13\cdot\tfrac49=-\tfrac{8}{27}\approx-0.296$.</p>
+    </div></details>
+    <div class="callout note"><b>Where MSE on probabilities is fine</b><p>As a <b>metric</b>, by all means: the mean square $(\hat y-y)^2$ is called the Brier score, and it is also a proper scoring rule. The trouble is not the square itself but training through a sigmoid: the gradient passes through $\sigma'$ and fades. There is a probabilistic reason as well: MSE is the likelihood of Gaussian noise, and 0/1 labels are not Gaussian.</p></div>
+
+    <h2 id="landscape">The loss landscape in 3D</h2>
+    <p>Let us look at the loss as a whole, as a function of the parameters. Take logistic regression with one feature, $\hat y=\sigma(wx+b)$, and 24 points (12 of each class). The mean loss is a function of two variables $L(w,b)$, so it can be drawn as a surface.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-surface" data-config="{&quot;loss&quot;: &quot;bce&quot;, &quot;w&quot;: -5, &quot;b&quot;: 4, &quot;lr&quot;: 1}"></div><figcaption><b>Figure 5.</b> Left: the loss surface over the $(w,\,b)$ plane (rotate it); right: the view from above with level lines; below: the data and the current curve $\sigma(wx+b)$. The start $(-5,\,4)$ is a model that confidently swaps the classes. “Play” runs gradient descent with step $\eta=1$; the switch replaces BCE with MSE.</figcaption></figure>
+    <p>What the figure shows:</p>
+    <ul class="flist"><li><b>BCE is a convex bowl</b> with a single minimum at $(1.441,\,0.149)$, where $L=0.451$. Far from the minimum its walls are almost flat <i>inclined planes</i>, not a parabola: the loss grows linearly and the gradient is bounded.</li><li><b>MSE has plateaus and folds.</b> Its minimum $(1.374,\,0.320)$, $L=0.150$, lies in a narrow valley, and at the edges the surface is almost horizontal.</li><li><b>Speed of descent.</b> At the start the gradient norm is $0.969$ for BCE and $0.0174$ for MSE, 56 times smaller. BCE gets within $0.01$ of its minimum after only 15 steps and stops (gradient norm $&lt;10^{-4}$) at step 63. MSE gets within $0.01$ of its minimum only by step 600 and stops at step 1150; between steps 100 and 400 it crawls across a plateau where the loss barely changes ($0.500\to0.495$).</li><li><b>Different minima.</b> The optima of the two losses do not coincide: they are different definitions of the “best” model. BCE looks for honest probabilities, MSE for the least squares of the deviations of probabilities from 0 and 1.</li></ul>
+    <div class="callout intuition"><b>A cone, not a bowl</b><p>Far from the minimum the mean BCE behaves like $|w|\cdot\overline{|x|}$ — like a cone. That is why gradient descent with a constant step does not “speed up” on steep slopes, as it would on the MSE parabola of linear regression, but moves with bounded speed — another consequence of $|\hat y-y|&lt;1$.</p></div>
+
+    <h2 id="training">BCE in training</h2>
+    <p>Now the two-dimensional case: 60 points of two classes, the model $\hat y=\sigma(w_1x_1+w_2x_2+b)$, full-batch gradient descent with step $\eta=1$ from zero weights:</p>
+    <div class="eqd">$$w\leftarrow w-\eta\,\frac1n X^\top\bigl(\sigma(Xw+b)-y\bigr),\qquad b\leftarrow b-\eta\,\frac1n\sum_{i=1}^{n}\bigl(\sigma(w^\top x_i+b)-y_i\bigr)$$</div>
+    <figure class="viz"><div class="fv" data-viz="bce-train" data-config="{&quot;data&quot;: &quot;over&quot;, &quot;lr&quot;: 1}"></div><figcaption><b>Figure 6.</b> Left: the probability of class 1 and the boundary $\hat y=0.5$; the size of a point is proportional to its own loss. Right: the mean BCE over the steps. At the start all $\hat y=0.5$: the loss is $\ln2=0.693$, the accuracy 50%. After 10 steps the loss is $0.456$, and then it settles at $0.453$ with accuracy $78.3\%$ and $\|w\|=1.47$. Switch the data to “separable”.</figcaption></figure>
+    <p>Look at the sizes of the points: the largest ones are those on the “wrong” side of the boundary. Their gradient $|\hat y-y|$ is close to 1, while for confidently and correctly classified points it is close to zero. BCE itself decides where to spend the model’s “attention”: mostly on mistakes and on points near the boundary.</p>
+    <h3>Linearly separable data: the weights run off to infinity</h3>
+    <p>If a line separates the classes, BCE can be made arbitrarily small just by increasing $\|w\|$: the boundary stays in place while the sigmoid gets steeper and steeper. There is no minimum — only an infimum of 0. The counter in the figure shows it: at step 100 the loss is $0.0205$ and $\|w\|=3.94$, at step 200 — $0.0133$ and $4.77$, at step 400 — $0.0082$ and $5.76$. The norm grows roughly like the logarithm of the number of steps and never stops.</p>
+    <details class="deep"><summary>Where the direction of the weights converges</summary><div class="deep-body">
+      <p>On separable data the BCE gradient is governed by the points with the smallest margin: the contribution of a point decays like $e^{-\text{margin}}$. That is why the direction $w/\|w\|$ of gradient descent converges to the <b>maximum-margin</b> direction, the same as that of the hard-margin SVM (Soudry et al., 2018), while the norm grows like $\log t$. This is the “implicit regularization” of gradient descent. In practice the endless growth of the weights is stopped with $L_2$ regularization, early stopping or label smoothing.</p>
+    </div></details>
+
+    <h2 id="stability">Numerical stability: BCEWithLogits</h2>
+    <p>The formula $-[y\log\hat y+(1-y)\log(1-\hat y)]$ is flawless on paper but breaks in a computer. If you first compute $\hat y=\sigma(z)$ and then the logarithm, three problems arise:</p>
+    <ol class="flist"><li><b>log(0).</b> In float32 the value $\sigma(z)$ rounds to exactly 1 already for $z&gt;16.64$: then $1-\hat y=0$, the loss is $\infty$ and the gradient is NaN. In float64 the same starts at $z&gt;36.74$.</li><li><b>Loss of precision before that.</b> The difference $1-\sigma(z)$ of two close numbers loses significant digits (catastrophic cancellation): at $z=16$ naive float32 gives $15.942$ instead of $16$, and the plot turns into steps.</li><li><b>Clipping is a patch, not a cure.</b> If $\hat y$ is clipped to $[\varepsilon,\,1-\varepsilon]$ with $\varepsilon=10^{-7}$ (as Keras does), the loss hits a ceiling of $-\ln10^{-7}\approx16.118$, and in float32 even $15.942$, because $1-10^{-7}$ rounds to $1-2^{-23}$. Worse, beyond the ceiling the gradient of the clip is zero: confidently wrong examples stop teaching the model. PyTorch <code>BCELoss</code> does something similar — it clamps the logarithm at $-100$.</li></ol>
+    <p>The cure is never to compute $\hat y$ separately but to compute the loss directly from the logit, through softplus and the log-sum-exp trick:</p>
+    <div class="eqd">$$\ell(z,y)=\operatorname{softplus}(z)-y\,z=\max(z,0)-y\,z+\log\bigl(1+e^{-|z|}\bigr)$$</div>
+    <details class="deep"><summary>Where this form comes from</summary><div class="deep-body">
+      <p>We have already obtained $\ell=\operatorname{softplus}(z)-yz$. It remains to compute $\operatorname{softplus}(z)=\log(e^{0}+e^{z})$ without overflow. The log-sum-exp trick: factor out the largest exponential, $m=\max(0,z)$:</p>
+      <div class="eqd">$$\log\bigl(e^{0}+e^{z}\bigr)=m+\log\bigl(e^{-m}+e^{z-m}\bigr)=\max(z,0)+\log\bigl(1+e^{-|z|}\bigr)$$</div>
+      <p>One exponent is 0 and the other is $-|z|\le0$, so the exponential never overflows, and <code>log1p</code> computes $\log(1+u)$ accurately for small $u$. As $|z|\to\infty$ the last term smoothly vanishes and the loss becomes exactly linear.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="bce-stability" data-config="{&quot;y&quot;: 0, &quot;z&quot;: 20, &quot;prec&quot;: &quot;32&quot;}"></div><figcaption><b>Figure 7.</b> The loss on an object of class 0 as a function of the logit, computed in three ways. The black line is the stable formula, the violet dashes the naive one, the teal line the clipped one. At $z=20$ in float32: exact $20.000$, naive $\infty$, clipped $15.942$. Switch the precision to float64 (the naive formula survives up to $z\approx36.74$) and the correct answer to $y=1$: there the naive $-\log\sigma(z)$ holds until $z\approx-88.7$, while clipping still hits $16.118$.</figcaption></figure>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def sigmoid(z):
+    # σ(z) = (1 + tanh(z/2)) / 2 — no overflow for any z
+    return 0.5 * (1.0 + np.tanh(0.5 * np.asarray(z, dtype=float)))
+
+def bce_with_logits(z, y, pos_weight=1.0):
+    &quot;&quot;&quot;Stable BCE on logits: y·softplus(−z) + (1 − y)·softplus(z).&quot;&quot;&quot;
+    z, y = np.asarray(z, dtype=float), np.asarray(y, dtype=float)
+    sp_pos = np.logaddexp(0.0, z)      # softplus(z)  = −log(1 − σ(z))
+    sp_neg = sp_pos - z                # softplus(−z) = −log σ(z)
+    return np.mean(pos_weight * y * sp_neg + (1 - y) * sp_pos)
+
+def bce_grad(z, y):
+    &quot;&quot;&quot;Gradient of the mean BCE with respect to the logits: (σ(z) − y) / n.&quot;&quot;&quot;
+    return (sigmoid(z) - y) / len(z)
+
+z = np.array([3.0, -2.0, 0.5, 20.0])
+y = np.array([1.0, 0.0, 1.0, 0.0])
+print(bce_with_logits(z, y))         # 5.1624 — almost all of it comes from the last example
+print(bce_grad(z, y))                # ≈ [-0.0119  0.0298 -0.0944  0.25]
+print(bce_with_logits(z, y, 10.0))   # 6.3384 — positive examples weigh 10 times more
+
+# Naive in float32: σ(20) rounds to 1, and log(1 − 1) = −inf
+p = 1 / (1 + np.exp(-np.float32(20.0)))
+print(-np.log(1 - p))                # inf (and a RuntimeWarning)</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+z = torch.tensor([3.0, -2.0, 0.5, 20.0], requires_grad=True)   # logits
+y = torch.tensor([1.0, 0.0, 1.0, 0.0])
+
+loss = nn.BCEWithLogitsLoss()(z, y)    # σ and log inside one stable formula
+loss.backward()
+print(loss.item())                     # 5.1624
+print(z.grad)                          # (σ(z) − y) / 4 ≈ [-0.0119, 0.0298, -0.0944, 0.2500]
+
+# Bad: sigmoid first, then BCELoss. σ(20) in float32 equals 1,
+# BCELoss clamps log at −100, and the last example costs 100 instead of 20
+p = torch.sigmoid(z.detach())
+print(nn.BCELoss()(p, y).item())       # 25.1624
+
+# Class imbalance: a mistake on a positive example costs 10 times more
+loss_w = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([10.0]))
+
+# Label smoothing: BCEWithLogitsLoss has no such argument, so we smooth by hand
+eps = 0.1
+y_smooth = y * (1 - eps) + eps / 2     # 1 → 0.95, 0 → 0.05</code></pre>
+    <div class="callout key"><b>The rule</b><p>The model returns <b>logits</b>, and the loss applies the sigmoid itself: <code>BCEWithLogitsLoss</code> in PyTorch, <code>from_logits=True</code> in Keras, <code>optax.sigmoid_binary_cross_entropy</code> in JAX. Apply the sigmoid to the output only when you need the probability itself — for a report or a threshold.</p></div>
+
+    <h2 id="weights">Class imbalance: weights and pos_weight</h2>
+    <p>In real tasks positive examples are often rare: 1% of transactions are fraud, 0.1% of impressions are clicks. Plain BCE honestly learns probabilities, but the probability of the rare class is small almost everywhere, and with a $0.5$ threshold the model finds hardly anyone. A common remedy is a weight $w_+$ for the positive class (<code>pos_weight</code> in PyTorch):</p>
+    <div class="eqd">$$\ell_{w}=-\Bigl[w_+\,y\log\hat y+(1-y)\log(1-\hat y)\Bigr],\qquad \frac{\partial\ell_w}{\partial z}=\begin{cases}w_+(\hat y-1), &amp; y=1\\ \hat y, &amp; y=0\end{cases}$$</div>
+    <p>The weight $w_+$ is equivalent to repeating every positive example $w_+$ times. For a well-specified model the optimal odds are multiplied by $w_+$, i.e. the logit shifts by $\ln w_+$. A constant model for a share of positives $\pi$ chooses</p>
+    <div class="eqd">$$\hat y^{*}=\frac{w_+\pi}{w_+\pi+1-\pi},\qquad w_+=\frac{1-\pi}{\pi}=\frac{n_{\text{neg}}}{n_{\text{pos}}}\;\Longrightarrow\;\hat y^{*}=\tfrac12$$</div>
+    <p>That is why the popular choice $w_+=n_{\text{neg}}/n_{\text{pos}}$ “balances” the classes: the constant becomes $0.5$.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-imbalance" data-config="{&quot;pw&quot;: 1}"></div><figcaption><b>Figure 8.</b> 150 objects of class 0 ($x\sim N(0,\,1)$) and 15 of class 1 ($x\sim N(2,\,1)$); logistic regression is trained with Newton’s method. The black curve is the trained model, the teal dashes the theoretical $\sigma(\text{logit}+\ln w_+)$, the orange line the threshold $\hat y=0.5$. With $w_+=1$: threshold $x^*=2.21$, 6 of 15 positives found, precision $6/10$, mean $\hat y=0.091$. With $w_+=10=150/15$: threshold $1.24$, 13 of 15 found, precision $13/33$, mean $\hat y=0.244$.</figcaption></figure>
+    <p>Three conclusions from the figure:</p>
+    <ul class="flist"><li><b>Without weights the mean prediction equals the class share</b>: $0.091=15/165$. This is no coincidence: for logistic regression with a bias, at the optimum $\partial\mathrm{BCE}/\partial b=\frac1n\sum(\hat y_i-y_i)=0$, i.e. $\sum\hat y_i=\sum y_i$.</li><li><b>The weight moves the threshold; it does not make the model smarter.</b> With $w_+=10$ the bias $b$ shifts by $1.91$ — close to $\ln10\approx2.30$ (on a finite sample $w$ changes too). Recall goes up, precision goes down: this is the same trade-off curve you can also move along with the threshold.</li><li><b>Weights spoil calibration.</b> The mean $\hat y=0.244$ no longer equals the share $0.091$. If you need real probabilities, train without weights and choose the threshold (it is $1/(1+w_+)$ for the same decision), or convert the odds back: $\text{odds}=\text{odds}_w/w_+$.</li></ul>
+    <details class="deep"><summary>Deriving the optimal constant</summary><div class="deep-body">
+      <p>The mean weighted loss of a constant $q$ with a share of positives $\pi$: $f(q)=-w_+\pi\ln q-(1-\pi)\ln(1-q)$. Set the derivative to zero:</p>
+      <div class="eqd">$$f'(q)=-\frac{w_+\pi}{q}+\frac{1-\pi}{1-q}=0\;\Longrightarrow\;q=\frac{w_+\pi}{w_+\pi+1-\pi},\qquad \frac{q}{1-q}=w_+\cdot\frac{\pi}{1-\pi}$$</div>
+      <p>The odds are multiplied by exactly $w_+$, and the logit shifts by $\ln w_+$. With $w_+=1$ we get $q=\pi$ — the very law “the mean prediction equals the share”.</p>
+    </div></details>
+    <div class="callout note"><b>Not only weights</b><p>If the rare class is also “hard”, <a href='../focal/'>Focal Loss</a> helps: the factor $(1-p_t)^\gamma$ damps easy examples. With $\gamma=0$ it coincides with BCE. Alternatives are resampling and tuning the threshold for the metric you need on validation data.</p></div>
+
+    <h2 id="smoothing">Label smoothing</h2>
+    <p>With hard labels the optimal logit is infinite: for the loss on a positive example to become zero, we need $z\to+\infty$. Gradient descent faithfully goes there. On a single positive example with step $\eta=1$ from $z=0$ the logit after 10, 100 and 1000 steps is $2.26$, $4.59$, $6.91$ — it grows roughly like $\ln t$ and never stops. The model learns to be overconfident.</p>
+    <p><b>Label smoothing</b> replaces hard labels with soft ones:</p>
+    <div class="eqd">$$y_s=y\,(1-\varepsilon)+\frac{\varepsilon}{2}\qquad(1\to1-\tfrac{\varepsilon}{2},\;\;0\to\tfrac{\varepsilon}{2}),\qquad z^{*}=\ln\frac{y_s}{1-y_s}$$</div>
+    <p>Now the gradient $\sigma(z)-y_s$ vanishes at a finite point $z^*$ where $\sigma(z^*)=y_s$, and the minimal loss is not 0 but the entropy $H(y_s)$ (Figure 2). With $\varepsilon=0.1$: $y_s=0.95$, $z^*=\ln19\approx2.944$, and the same descent gives $1.97$, $2.936$, $2.944$ — the logit stops. Go back to Figure 3 and move the $\varepsilon$ slider: the curve acquires a minimum and the orange gradient crosses zero.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$\varepsilon$</th><th class=num>$y_s$</th><th class=num>$z^*=\ln\frac{y_s}{1-y_s}$</th><th class=num>$\min\ell=H(y_s)$</th></tr></thead><tbody><tr><td class=num>0</td><td class=num>1</td><td class=num>+∞</td><td class=num>0</td></tr><tr><td class=num>0.05</td><td class=num>0.975</td><td class=num>3.664</td><td class=num>0.117</td></tr><tr><td class=num>0.1</td><td class=num>0.95</td><td class=num>2.944</td><td class=num>0.199</td></tr><tr><td class=num>0.2</td><td class=num>0.9</td><td class=num>2.197</td><td class=num>0.325</td></tr></tbody></table></div>
+    <p>Smoothing acts as a regularizer of confidence: the weights do not run off to infinity, the probabilities do not stick to 0 and 1, and calibration often improves. The price is that the model will never predict more than $1-\varepsilon/2$, and part of the “dark knowledge” about class similarity is lost (Müller, Kornblith, Hinton, 2019). In Keras it is the <code>label_smoothing</code> argument of <code>BinaryCrossentropy</code>; in PyTorch the labels for BCE are smoothed by hand (see the code above).</p>
+
+    <h2 id="calibration">Calibration: BCE rewards honesty</h2>
+    <p>A model is <b>calibrated</b> if its probabilities can be taken literally: among all objects it gave about $0.8$, class 1 occurs in about 80% of cases. This is checked with a <b>reliability diagram</b>: the predictions are split into bins, and in each bin the mean prediction is compared with the share of ones. The summary number is the expected calibration error:</p>
+    <div class="eqd">$$\mathrm{ECE}=\sum_{b=1}^{B}\frac{n_b}{n}\,\bigl|\,\overline{\hat y}_b-\overline{y}_b\,\bigr|$$</div>
+    <p>Why does BCE teach calibration? If among objects with identical features class 1 occurs with frequency $p$, the mean loss of a forecast $q$ is $H(p)+\mathrm{KL}(p\,\|\,q)$, and it is minimal <i>only</i> at $q=p$. Any embellishment — towards confidence or towards caution — costs more. Accuracy cannot do this: it does not care whether the model said $0.51$ or $0.99$.</p>
+    <figure class="viz"><div class="fv" data-viz="bce-calibration" data-config="{&quot;k&quot;: 2}"></div><figcaption><b>Figure 9.</b> 4000 objects: true logit $t\sim N(0,\,2^2)$, label $y\sim\text{Bernoulli}(\sigma(t))$, the model predicts $\sigma(k\,t)$. For $k&gt;1$ it is overconfident, for $k&lt;1$ too cautious. At $k=2$: $\mathrm{BCE}=0.533$, $\mathrm{ECE}=0.092$; in the top bin the model promises $0.974$ on average, while the share of ones there is $0.891$. The minimum of BCE on the sample is at $k^*\approx1.008$ (on average over an infinite sample, exactly 1). The button sets $k=1.01$: $\mathrm{BCE}=0.458$, $\mathrm{ECE}=0.011$.</figcaption></figure>
+    <p>This is the basis of <b>temperature scaling</b> (Guo et al., 2017): for a trained network one parameter $T$ in $\hat y=\sigma(z/T)$ is fitted by minimizing BCE on a validation set. Here $k=1/T$. The order of predictions and the accuracy stay the same — only the honesty of the probabilities changes.</p>
+    <div class="callout warn"><b>Why networks become overconfident</b><p>Minimizing BCE on the training set, a large network can memorize it almost perfectly — locally the same situation as “separable data”: the logits grow, the probabilities stick to 0 and 1, and on new data the model is wrong just as confidently. Hence the pairing “BCE + regularization (weight decay, label smoothing, early stopping)” and calibration on a held-out set.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>A double sigmoid.</b> The model has already applied <code>sigmoid</code>, and the loss, <code>BCEWithLogitsLoss</code>, applies it again. Then $\sigma(\sigma(z))\in(0.5,\,0.731)$: the model simply cannot predict class 0 with a probability above one half, and the loss on such objects never drops below $\ln2\approx0.693$.</li><li><b>Sigmoid + <code>BCELoss</code> instead of <code>BCEWithLogitsLoss</code>.</b> It works until the first confident example, then come $\log0$, clamping at $-100$ and a zero gradient (see the section on stability).</li><li><b>Labels $\pm1$ instead of $\{0,1\}$.</b> With $y=-1$ the BCE formula gives $\log\hat y-2\log(1-\hat y)$, which goes to $-\infty$ as $\hat y\to0$: the loss becomes negative and training diverges. Labels $\pm1$ have their own form, $\log(1+e^{-s z})$.</li><li><b>BCE for mutually exclusive classes.</b> If exactly one of $K&gt;2$ classes is correct, you need <a href='../softmax/'>softmax</a> and <a href='../cross-entropy/'>categorical cross-entropy</a>. Several sigmoids with BCE mean multi-label, where the classes are independent.</li><li><b>Comparing BCE without a baseline.</b> “A loss of 0.05” sounds great, but with 1% positives the constant gives $H(0.01)\approx0.056$ — the model has learned almost nothing. Compare with $H(\pi)$.</li><li><b>Class weights and “probabilities”.</b> After <code>pos_weight</code> the sigmoid output is no longer a probability (Figure 8). For decisions with error costs, tune the threshold; for honest probabilities, convert or calibrate.</li><li><b><code>reduction='sum'</code> instead of the mean.</b> The sum grows with the batch size, and so does the effective step size. Change the batch size and the optimal learning rate changes too.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href='../sigmoid/'>Sigmoid</a>: turns the logit into $\hat y$; its derivative $\sigma(1-\sigma)$ cancels in the BCE gradient.</li><li><a href='../cross-entropy/'>Categorical cross-entropy</a>: the generalization to $K$ classes; for $K=2$ softmax + CE coincides with sigmoid + BCE of the logit difference $z_1-z_2$.</li><li><a href='../softmax/'>Softmax</a>: for two classes $\operatorname{softmax}(z_1,z_2)_1=\sigma(z_1-z_2)$.</li><li><a href='../focal/'>Focal Loss</a>: $-(1-p_t)^\gamma\log p_t$ — BCE that damps easy examples; with $\gamma=0$ it equals BCE.</li><li><a href='../mse/'>MSE</a>: the right loss for Gaussian noise; with a sigmoid it brings saturation and non-convexity (Figures 4 and 5).</li><li><a href='../sgd/'>SGD</a> and <a href='../adam/'>Adam</a>: optimizers that use the gradient $\frac1nX^\top(\hat y-y)$.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) BCE is $-\log$ of the probability of the correct answer; the label $y$ acts as a switch between $-\log\hat y$ and $-\log(1-\hat y)$. 2) It follows from the maximum likelihood of a Bernoulli model and equals the cross-entropy: $H(y)+\mathrm{KL}(y\,\|\,\hat y)$. 3) Paired with the sigmoid, $\partial\ell/\partial z=\hat y-y$: the factor $\sigma'$ cancels, and the gradient is bounded and does not fade on a confident mistake — unlike MSE. 4) BCE is convex in the logit and in the weights of logistic regression; far from the minimum it grows linearly. 5) Compute it from logits: $\max(z,0)-yz+\log(1+e^{-|z|})$. 6) <code>pos_weight</code> shifts the logit by roughly $\ln w_+$, smoothing makes the optimum finite, and the minimum of BCE is reached at calibrated probabilities.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. The correct answer is $y=1$, the model output $\hat y=0.25$. What is the loss?</legend><div class="opts"><button type="button" data-ok="0">$0.25$</button><button type="button" data-ok="1">$\ln4\approx1.386$</button><button type="button" data-ok="0">$0.75^2\approx0.563$</button><button type="button" data-ok="0">$\ln0.75\approx-0.288$</button></div><div class="explain" hidden>$-\ln0.25=\ln4\approx1.386$. For $y=1$ only the branch $-\ln\hat y$ is active.</div></fieldset><fieldset class="q"><legend>2. The logit is $z=1.2$ and the correct answer is $y=0$. What is the derivative of BCE with respect to $z$?</legend><div class="opts"><button type="button" data-ok="0">$-0.769$</button><button type="button" data-ok="0">$0.178$</button><button type="button" data-ok="1">$0.769$</button><button type="button" data-ok="0">$1.2$</button></div><div class="explain" hidden>$\partial\ell/\partial z=\sigma(z)-y=\sigma(1.2)-0\approx0.769$: the model is too sure of class 1, so the logit is pushed down.</div></fieldset><fieldset class="q"><legend>3. Why does sigmoid + MSE learn poorly when the model is confidently wrong?</legend><div class="opts"><button type="button" data-ok="0">MSE is not differentiable</button><button type="button" data-ok="1">The factor $\sigma'(z)\approx0$ remains in the gradient</button><button type="button" data-ok="0">MSE gives too large a gradient</button><button type="button" data-ok="0">MSE does not work with probabilities</button></div><div class="explain" hidden>$\partial(\sigma-y)^2/\partial z=2(\sigma-y)\sigma'(z)$, and for $|z|\gg1$ $\sigma'(z)\to0$. In BCE this factor cancels and the gradient is $\hat y-y$.</div></fieldset><fieldset class="q"><legend>4. 10% of the sample is positive. What loss does the best constant model get?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$\ln2\approx0.693$</button><button type="button" data-ok="1">$H(0.1)\approx0.325$</button><button type="button" data-ok="0">$-\ln0.1\approx2.303$</button></div><div class="explain" hidden>The best constant is $\hat y=0.1$, and its loss is the entropy $-0.1\ln0.1-0.9\ln0.9\approx0.325$. This is the baseline for any model on this data.</div></fieldset><fieldset class="q"><legend>5. Label smoothing $\varepsilon=0.2$, label $y=1$. Which logit does training converge to?</legend><div class="opts"><button type="button" data-ok="0">$+\infty$</button><button type="button" data-ok="1">$\ln9\approx2.197$</button><button type="button" data-ok="0">$\ln4\approx1.386$</button><button type="button" data-ok="0">$0$</button></div><div class="explain" hidden>$y_s=1-0.2/2=0.9$, and the gradient $\sigma(z)-0.9$ is zero at $z^*=\ln\frac{0.9}{0.1}=\ln9\approx2.197$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../huber/"><span class="kicker">← Previous formula</span><span class="big">Huber</span><span class="kicker">a hybrid of MSE and MAE</span></a>
+<a class="next" href="../cross-entropy/"><span class="kicker">Next formula →</span><span class="big">Categorical CE</span><span class="kicker">categorical cross-entropy</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>
