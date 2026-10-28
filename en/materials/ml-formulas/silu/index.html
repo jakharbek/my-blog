@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SiLU / Swish: an input that gates itself — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="SiLU (Swish) in depth: the self-gate x·σ(x), the minimum via the Lambert W function, the derivative and its overshoot above 1, Swish-β, comparison with ReLU and GELU, the probabilistic meaning, SwiGLU in 3D, training, code in NumPy and PyTorch.">
+  <meta property="og:title" content="SiLU / Swish: an input that gates itself — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="SiLU (Swish) in depth: the self-gate x·σ(x), the minimum via the Lambert W function, the derivative and its overshoot above 1, Swish-β, comparison with ReLU and GELU, the probabilistic meaning, SwiGLU in 3D, training, code in NumPy and PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/silu/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/silu/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/silu/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/silu/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/silu.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/silu/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/silu/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/silu/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · The next level</span>
+  <h1>SiLU / Swish: an input that gates itself</h1>
+  <p class="dek">The activation of modern language models: the input is multiplied by the sigmoid of itself. We take it apart bone by bone: why it has a minimum of −0.278 and a derivative above one, how it relates to ReLU and GELU, where the Swish-β family comes from, and how SiLU works inside the SwiGLU block of LLaMA and Qwen.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: the input decides how much of itself to let through</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties</a>
+      <a href="#derivative"><span class="n">5</span>The derivative: above one and below zero</a>
+      <a href="#compare"><span class="n">6</span>Smoothness and relatives: ReLU and GELU</a>
+      <a href="#swiglu"><span class="n">7</span>SwiGLU: SiLU in large language models</a>
+      <a href="#training"><span class="n">8</span>SiLU in training</a>
+      <a href="#code"><span class="n">9</span>In code</a>
+      <a href="#mistakes"><span class="n">10</span>Common mistakes</a>
+      <a href="#links"><span class="n">11</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">12</span>Summary</a>
+      <a href="#quiz"><span class="n">13</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{SiLU}(x)=x\cdot\sigma(x)=\frac{x}{1+e^{-x}}$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p><a href="../relu/">ReLU</a> has two drawbacks: it has a kink at zero, and on the left it throws away the whole signal together with the gradient. SiLU (Sigmoid Linear Unit) works differently: the input $x$ is multiplied by the <a href="../sigmoid/">sigmoid</a> of itself. A large positive input passes almost in full, a large negative one is almost completely suppressed, and near zero the input passes “partially” — smoothly, without kinks.</p>
+    <p>The same function with a parameter, $x\,\sigma(\beta x)$, is called Swish. With $\beta=1$ it is exactly SiLU; PyTorch and other libraries call it just that: <code>nn.SiLU</code>.</p>
+    <p>Where it appears:</p>
+    <ul class="flist"><li><b>large language models</b> — LLaMA, Qwen, Mistral and PaLM use SiLU inside the SwiGLU block (section 7); in model configs it is the line <code>hidden_act = "silu"</code>;</li><li><b>computer vision</b> — EfficientNet (2019) is built on Swish, and the YOLO family of detectors uses SiLU starting with YOLOv5;</li><li><b>mobile networks</b> — MobileNetV3 uses the “hard” Swish, a cheap piecewise-polynomial approximation $x\cdot\operatorname{ReLU6}(x+3)/6$;</li><li><b>reinforcement learning</b> — Elfwing, Uchibe and Doya (2017) used it to approximate value functions under the name SiLU.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>$\operatorname{SiLU}(x)=x\,\sigma(x)$. Far to the right it is almost $x$, far to the left almost 0, like ReLU, but smooth. It is non-monotonic: the minimum is $\approx-0.278$ at $x\approx-1.278$. The derivative $\sigma(x)\bigl(1+x(1-\sigma(x))\bigr)$ equals $0.5$ at zero and exceeds 1 for $x&gt;1.278$ (maximum $\approx1.100$). In LLMs SiLU acts as the gate in SwiGLU: $\operatorname{SiLU}(W_1x)\odot W_3x$.</p></div>
+
+    <h2 id="intuition">Intuition: the input decides how much of itself to let through</h2>
+    <p>Picture a tap whose handle is turned by the flow itself. The sigmoid $\sigma(x)$ is how far the tap is open, from 0 to 1. If the input is large and positive, the tap is almost fully open ($\sigma\approx1$) and the output almost equals the input. If the input is strongly negative, the tap is almost closed and the output is close to zero. This mechanism is called <b>self-gating</b>: the input is both the signal and the decision about how much of the signal to pass.</p>
+    <p>Drag the blue point. The teal curve is the gate $\sigma(x)$, the blue one is the product $x\cdot\sigma(x)$. Look at the area around $x=-1$: the gate is already partly closed, but not fully, while the input is negative — and the output dips below zero.</p>
+    <figure class="viz"><div class="fv" data-viz="silu-explorer" data-config="{&quot;x&quot;: -1}"></div><figcaption><b>Figure 1.</b> SiLU as the product of the signal and the gate. At $x=-1$ the gate is open by $\sigma(-1)=0.2689$, and the output is $-1\cdot0.2689=-0.2689$. The circle marks the minimum $(-1.278,\,-0.278)$. The grey dashed line is ReLU, the dotted line is $y=x$.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>On the right the blue curve hugs the line $y=x$, on the left it hugs zero: in those areas SiLU hardly differs from ReLU. The whole difference sits in the band of roughly $-5&lt;x&lt;5$, where the gate is partly open. That is where ReLU makes a sharp kink, while SiLU makes a smooth bend with a small “dip” on the left.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <p>Let us build SiLU from two familiar parts and look at it in several forms.</p>
+    <div class="eqd">$$\operatorname{SiLU}(x)=\underbrace{x}_{\text{signal}}\cdot\underbrace{\sigma(x)}_{\text{gate}}=\frac{x}{1+e^{-x}}$$</div>
+    <dl class="symbols"><dt>$x$</dt><dd>the neuron’s input (pre-activation); it is also the signal to be let through;</dd><dt>$\sigma(x)=\frac{1}{1+e^{-x}}$</dt><dd>the <a href="../sigmoid/">sigmoid</a>, a number in $(0,\,1)$ — the share of the signal that will pass;</dd><dt>$x\cdot\sigma(x)$</dt><dd>the result: with $\sigma\approx1$ the output is $\approx x$, with $\sigma\approx0$ it is $\approx0$.</dd></dl>
+    <p>Through the hyperbolic tangent ($\sigma(x)=\tfrac12(1+\tanh\tfrac x2)$) we get a form that explains a lot:</p>
+    <div class="eqd">$$\operatorname{SiLU}(x)=\frac{x}{2}\Bigl(1+\tanh\frac{x}{2}\Bigr)=\underbrace{\frac{x}{2}}_{\text{odd part}}+\underbrace{\frac{x}{2}\tanh\frac{x}{2}}_{\text{even part}}$$</div>
+    <p>Compare with ReLU: $\operatorname{ReLU}(x)=\frac{x}{2}+\frac{|x|}{2}$. Their odd parts are identical, and the even part of SiLU, $\frac x2\tanh\frac x2$, is a <b>smoothed absolute value</b> $\frac{|x|}{2}$: for large $|x|$ the tangent is $\pm1$ and they coincide, while near zero the corner is replaced by the parabola $\approx\frac{x^2}{4}$.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\sigma(x)$</th><th class=num>$\operatorname{SiLU}(x)$</th><th class=num>$\operatorname{SiLU}'(x)$</th></tr></thead><tbody><tr><td class=num>−5</td><td class=num>0.0067</td><td class=num>−0.0335</td><td class=num>−0.0265</td></tr><tr><td class=num>−3</td><td class=num>0.0474</td><td class=num>−0.1423</td><td class=num>−0.0881</td></tr><tr><td class=num>−1.2785</td><td class=num>0.2178</td><td class=num>−0.2785</td><td class=num>0.0000</td></tr><tr><td class=num>−1</td><td class=num>0.2689</td><td class=num>−0.2689</td><td class=num>0.0723</td></tr><tr><td class=num>0</td><td class=num>0.5000</td><td class=num>0.0000</td><td class=num>0.5000</td></tr><tr><td class=num>1</td><td class=num>0.7311</td><td class=num>0.7311</td><td class=num>0.9277</td></tr><tr><td class=num>2</td><td class=num>0.8808</td><td class=num>1.7616</td><td class=num>1.0908</td></tr><tr><td class=num>3</td><td class=num>0.9526</td><td class=num>2.8577</td><td class=num>1.0881</td></tr><tr><td class=num>5</td><td class=num>0.9933</td><td class=num>4.9665</td><td class=num>1.0265</td></tr></tbody></table></div>
+    <p>The table shows three features: negative values on the left (the deepest is $-0.2785$), a derivative of $0.5$ at zero, and a derivative above 1 at $x=2$ and $x=3$.</p>
+
+    <h2 id="properties">Properties</h2>
+    <ul class="flist"><li><b>Smoothness</b>: SiLU is infinitely differentiable — there is not a single kink.</li><li><b>Asymptotes</b>: $\operatorname{SiLU}(x)-x\to0$ as $x\to+\infty$ and $\operatorname{SiLU}(x)\to0$ as $x\to-\infty$, exponentially fast in both cases.</li><li><b>Non-monotonicity</b>: the function decreases on $(-\infty,\,x^*)$ and increases on $(x^*,\,+\infty)$, where $x^*\approx-1.2785$.</li><li><b>Bounded below</b>: the range is $[-0.2785,\,+\infty)$. It is unbounded above.</li><li><b>Link with ReLU</b>: $\operatorname{ReLU}(x)-\operatorname{SiLU}(x)=|x|\,\sigma(-|x|)$ — an even function between 0 and $0.2785$. SiLU always lies below ReLU, but never more than $0.2785$ below.</li><li><b>Antisymmetry of the difference</b>: $\operatorname{SiLU}(x)-\operatorname{SiLU}(-x)=x$, because $\sigma(x)+\sigma(-x)=1$.</li><li><b>Convexity</b>: the function is convex on $(-2.3994,\,2.3994)$ and concave outside it; these are the inflection points.</li></ul>
+    <h3>The minimum: where and why −0.278</h3>
+    <p>The minimum is where the derivative is zero. The result is neatly written through the Lambert W function — the solution of $We^{W}=c$:</p>
+    <div class="eqd">$$x^*=-1-W\!\left(e^{-1}\right)\approx-1.2785,\qquad \operatorname{SiLU}(x^*)=x^*+1=-W\!\left(e^{-1}\right)\approx-0.2785$$</div>
+    <details class="deep"><summary>Derivation through the Lambert W function</summary><div class="deep-body">
+      <p>The derivative (section 5) is $\sigma(x)\bigl(1+x(1-\sigma(x))\bigr)$. The sigmoid is positive, so only the bracket can vanish: $1+x(1-\sigma)=0$, i.e. $1-\sigma(x)=-1/x$.</p>
+      <p>This immediately gives the value of the minimum: $\sigma(x^*)=1+1/x^*$, and $\operatorname{SiLU}(x^*)=x^*\sigma(x^*)=x^*+1$.</p>
+      <p>Now find $x^*$. Since $1-\sigma(x)=\sigma(-x)=\frac{1}{1+e^{x}}$, the equation becomes $1+e^{x}=-x$. Put $u=-x-1$; then $x=-u-1$ and</p>
+      <div class="eqd">$$1+e^{-u-1}=u+1\;\Longleftrightarrow\;e^{-u}e^{-1}=u\;\Longleftrightarrow\;u\,e^{u}=e^{-1}\;\Longleftrightarrow\;u=W(e^{-1})\approx0.2785$$</div>
+      <p>Hence $x^*=-1-W(e^{-1})\approx-1.2785$ and $\operatorname{SiLU}(x^*)=x^*+1=-W(e^{-1})\approx-0.2785$. A pretty coincidence: the depth of the dip and its distance from the point $x=-1$ are the same number.</p>
+    </div></details>
+    <h3>The Swish-β family</h3>
+    <p>Adding a steepness $\beta$ to the gate gives the Swish family:</p>
+    <div class="eqd">$$\operatorname{Swish}_\beta(x)=x\,\sigma(\beta x),\qquad \lim_{\beta\to\infty}\operatorname{Swish}_\beta(x)=\operatorname{ReLU}(x),\qquad \operatorname{Swish}_0(x)=\frac{x}{2}$$</div>
+    <p>With $\beta=0$ the gate is always half open, and the function is linear. As $\beta\to\infty$ the sigmoid turns into a step, and we get ReLU. Swish-β is a bridge between a linear function and ReLU, and SiLU is the point $\beta=1$ on that bridge. The substitution $u=\beta x$ shows that all members of the family are one and the same graph at a different scale: $\operatorname{Swish}_\beta(x)=\frac{1}{\beta}\operatorname{SiLU}(\beta x)$.</p>
+    <figure class="viz"><div class="fv" data-viz="silu-beta" data-config="{&quot;beta&quot;: 1}"></div><figcaption><b>Figure 2.</b> $x\,\sigma(\beta x)$ and its derivative. At $\beta=1$ the minimum is $(-1.278,\,-0.278)$, the slope at zero is $0.5$, and the maximum of the derivative is $1.0998$. Move $\beta$: the minimum shifts to $(-1.278/\beta,\,-0.278/\beta)$, while the slope at zero and the maximum of the derivative stay the same. At $\beta=1.702$ the function nearly coincides with GELU.</figcaption></figure>
+    <p>Ramachandran, Zoph and Le (2017) found $x\,\sigma(\beta x)$ by an automated search among thousands of candidate formulas and called it Swish; a learnable $\beta$ added almost nothing, and in practice $\beta=1$ stuck.</p>
+
+    <h2 id="derivative">The derivative: above one and below zero</h2>
+    <p>By the product rule the derivative of SiLU is made of two parts: the gate and how fast the gate opens.</p>
+    <div class="eqd">$$\operatorname{SiLU}'(x)=\underbrace{\sigma(x)}_{\text{gate}}+\underbrace{x\,\sigma'(x)}_{\text{gate opening}}=\sigma(x)\bigl(1+x\,(1-\sigma(x))\bigr)$$</div>
+    <details class="deep"><summary>Step-by-step derivation</summary><div class="deep-body">
+      <p>The product rule: $(x\cdot\sigma(x))'=1\cdot\sigma(x)+x\cdot\sigma'(x)$.</p>
+      <p>The derivative of the sigmoid is known: $\sigma'(x)=\sigma(x)(1-\sigma(x))$ (derived on the <a href="../sigmoid/">sigmoid</a> page). Substitute and factor out $\sigma(x)$:</p>
+      <div class="eqd">$$\operatorname{SiLU}'(x)=\sigma(x)+x\,\sigma(x)\bigl(1-\sigma(x)\bigr)=\sigma(x)\bigl(1+x(1-\sigma(x))\bigr)$$</div>
+      <p>One more useful form uses the value of the function itself, $f=\operatorname{SiLU}(x)$: expanding the brackets gives $\sigma+x\sigma-x\sigma^2=f+\sigma(1-f)$. Implementations use it: the backward pass needs only the already computed $f$ and $\sigma$.</p>
+    </div></details>
+    <div class="eqd">$$\operatorname{SiLU}'(x)=\operatorname{SiLU}(x)+\sigma(x)\bigl(1-\operatorname{SiLU}(x)\bigr)$$</div>
+    <p>Properties of the derivative:</p>
+    <ul class="flist"><li>$\operatorname{SiLU}'(0)=\sigma(0)=\tfrac12$ — at zero the slope is exactly one half;</li><li>$\operatorname{SiLU}'(x)+\operatorname{SiLU}'(-x)=1$ — the derivative of the identity $\operatorname{SiLU}(x)-\operatorname{SiLU}(-x)=x$;</li><li>the derivative is <b>negative</b> for $x&lt;-1.2785$ (left of the minimum), with the smallest value $\approx-0.0998$ at $x\approx-2.3994$;</li><li>the derivative is <b>above 1</b> for $x&gt;1.2785$ — by the symmetry of the previous item — with a maximum of $\approx1.0998$ at $x\approx2.3994$; then it tends to 1 from above.</li></ul>
+    <p>The points $\pm2.3994$ are the roots of $x\tanh\frac{x}{2}=2$: that is where the second derivative vanishes</p>
+    <div class="eqd">$$\operatorname{SiLU}''(x)=\sigma(x)\bigl(1-\sigma(x)\bigr)\Bigl(2-x\tanh\frac{x}{2}\Bigr),\qquad \operatorname{SiLU}''(0)=\frac12$$</div>
+    <figure class="viz"><div class="fv" data-viz="silu-derivative" data-config="{&quot;x&quot;: 2.3994}"></div><figcaption><b>Figure 3.</b> The derivative of SiLU (orange) is the sum of the gate $\sigma(x)$ and the term $x\sigma'(x)$. At $x=2.399$ the gate gives $0.9168$, the second term $0.1831$, together $1.0998$; this is the maximum, and the second derivative (lower plot) is zero here. On the left the derivative drops to $-0.0998$.</figcaption></figure>
+    <div class="callout note"><b>Why a derivative above 1 is fine</b><p>A slope above 1 means that for $x&gt;1.28$ SiLU is “catching up” with the line $y=x$, from which it fell behind near zero. For $x&gt;0$ the output of SiLU never exceeds the input ($\sigma&lt;1$), so nothing explodes: the slope is only slightly above 1 and quickly returns to 1.</p></div>
+
+    <h2 id="compare">Smoothness and relatives: ReLU and GELU</h2>
+    <p>Three functions on one plot: ReLU, SiLU and <a href="../gelu/">GELU</a> $=x\,\Phi(x)$, where $\Phi$ is the cumulative distribution function of the standard normal. Look not only at the functions but also at the first and second derivatives: that is where the difference in smoothness shows.</p>
+    <figure class="viz"><div class="fv" data-viz="silu-compare" data-config="{&quot;view&quot;: &quot;f&quot;, &quot;x&quot;: -1}"></div><figcaption><b>Figure 4.</b> ReLU, SiLU and GELU: the functions, the first and the second derivatives. At $x=-1$: SiLU $=-0.269$, GELU $=-0.159$; the first derivatives are $0.072$ and $-0.083$ (GELU is still decreasing there, its minimum is $-0.170$ at $x\approx-0.752$); the second derivatives are $0.302$ and $0.242$. The second derivative of ReLU is a delta function at zero: all the curvature is gathered at one point.</figcaption></figure>
+    <ul class="flist"><li><b>ReLU</b>: the first derivative is a step, the second a delta function. For the optimizer the loss surface is made of flat pieces with sharp edges.</li><li><b>SiLU and GELU</b>: the derivatives are continuous, the second derivatives are smooth “humps” peaking at zero ($0.5$ for SiLU, $2\varphi(0)\approx0.798$ for GELU). The loss landscape becomes smooth, and the gradient changes gradually.</li><li><b>GELU ≈ Swish with $\beta=1.702$</b>: $x\,\Phi(x)\approx x\,\sigma(1.702x)$ with a largest error of about $0.02$. GELU is a slightly “steeper” SiLU: its dip is shallower ($-0.170$ versus $-0.278$), and its maximum derivative is higher ($1.129$ versus $1.100$).</li></ul>
+    <h3>The probabilistic meaning: a random gate</h3>
+    <p>SiLU and GELU share an explanation. Let a neuron pass the input in full if the input is larger than a random noise $\varepsilon$, and block it completely otherwise: $y=x\cdot[\varepsilon\le x]$. Then the mean output is</p>
+    <div class="eqd">$$\mathbb E[y]=x\cdot P(\varepsilon\le x)=x\cdot F_\varepsilon(x)=\begin{cases}x\,\sigma(x)=\operatorname{SiLU}(x), &amp; \varepsilon\sim\text{Logistic}(0,1),\\ x\,\Phi(x)=\operatorname{GELU}(x), &amp; \varepsilon\sim N(0,1).\end{cases}$$</div>
+    <p>The sigmoid is the distribution function of the logistic law, $\Phi$ that of the normal one. So SiLU is an “averaged ReLU with a random threshold”: instead of cutting exactly at zero, the neuron cuts at a random point near zero, and on average the result is a smooth curve.</p>
+    <figure class="viz"><div class="fv" data-viz="silu-noise" data-config="{&quot;noise&quot;: &quot;logistic&quot;}"></div><figcaption><b>Figure 5.</b> Press “Play”. For 33 values of $x$ a logistic noise $\varepsilon$ is drawn, and the output is either $x$ or 0 (grey dots on the dashed lines). The orange dots are the mean outputs; after 2000 draws per point they deviate from the SiLU curve by at most $0.031$. Switch the noise to normal: the means gather on the GELU curve (deviation $0.015$).</figcaption></figure>
+
+    <h2 id="swiglu">SwiGLU: SiLU in large language models</h2>
+    <p>In a transformer the attention block is followed by a fully connected block (feed-forward network, FFN). The classic version is $W_2\,\operatorname{ReLU}(W_1x)$ (or GELU instead of ReLU). Shazeer (2020) proposed replacing it with a <b>gated</b> block (gated linear unit), where one branch decides how much of the other to let through:</p>
+    <div class="eqd">$$\operatorname{FFN}_{\text{SwiGLU}}(x)=W_2\bigl(\operatorname{SiLU}(W_1x)\odot W_3x\bigr)$$</div>
+    <dl class="symbols"><dt>$x\in\mathbb R^{d}$</dt><dd>the token vector of dimension $d$ (for LLaMA-7B $d=4096$);</dd><dt>$W_1x$</dt><dd>the gate branch: through SiLU it decides which components to pass and how much;</dd><dt>$W_3x$</dt><dd>the value branch: linear, with no activation — what gets passed;</dd><dt>$\odot$</dt><dd>the element-wise product of two vectors of dimension $h$ (the hidden size);</dd><dt>$W_2$</dt><dd>the projection back to dimension $d$.</dd></dl>
+    <p>For a single component this is a function of two numbers: $g(a,b)=\operatorname{SiLU}(a)\cdot b$, where $a$ is a component of the gate branch and $b$ of the value branch. It is worth seeing in 3D.</p>
+    <figure class="viz"><div class="fv" data-viz="silu-swiglu" data-config="{&quot;gate&quot;: &quot;silu&quot;, &quot;a&quot;: 1.5, &quot;b&quot;: 2}"></div><figcaption><b>Figure 6.</b> The surface $\operatorname{SiLU}(a)\cdot b$ (you can rotate it) and the view from above. For $a&lt;0$ the gate is almost closed, and the surface is almost flat for any $b$; for $a&gt;0$ it becomes the “saddle” $\approx a\cdot b$. At the point $(1.5,\,2)$: the gate $\operatorname{SiLU}(1.5)=1.226$, the output $2.453$, $\partial/\partial a=\operatorname{SiLU}'(1.5)\cdot b=2.083$, $\partial/\partial b=1.226$. Switch the gate to ReLU, GELU, the sigmoid, or remove it altogether.</figcaption></figure>
+    <p>The gradients here are simple and instructive: $\frac{\partial g}{\partial b}=\operatorname{SiLU}(a)$ — the value branch learns in proportion to how far the gate is open; $\frac{\partial g}{\partial a}=\operatorname{SiLU}'(a)\cdot b$ — the gate learns only if there is something to pass through it.</p>
+    <h3>Why the hidden size is 8/3·d</h3>
+    <p>SwiGLU has three matrices instead of two. To keep the parameter count of an ordinary FFN with $h=4d$ ($2\cdot d\cdot4d=8d^2$), the hidden size is reduced to $h=\frac{2}{3}\cdot4d=\frac83 d$: then $3\cdot d\cdot\frac83d=8d^2$. For LLaMA-7B $\frac83\cdot4096\approx10923$ is rounded up to a multiple of 256: $h=11008$. That gives $3\cdot4096\cdot11008=135{,}266{,}304$ parameters per block versus $134{,}217{,}728$ for an FFN with $h=4d$ — only $0.8\%$ more.</p>
+    <div class="callout history"><b>Where it came from</b><p>Gated linear units (GLU, $\sigma(W_1x)\odot W_3x$) were proposed by Dauphin et al. (2017) for convolutional language models. Shazeer (2020) compared variants with different gates — ReGLU, GEGLU, SwiGLU — and all of them beat the ordinary FFN. SwiGLU was chosen for PaLM (2022), then for LLaMA (2023), and since then it has been the standard of open LLMs: Qwen, Mistral and many others.</p></div>
+
+    <h2 id="training">SiLU in training</h2>
+    <p>How does a smooth activation help in practice? A network of ReLU neurons assembles a function from line segments, a network of SiLUs from smooth “bends”. If the target dependence is smooth, SiLU neurons find it easier to reproduce. Besides, SiLU has no exact zero gradient: for a negative input the derivative is small but not zero, and the neuron does not “die”.</p>
+    <p>The experiment: a $1\to6\to1$ network approximates the curve $y=\sin1.5x+0.3x$ from 40 points. Both networks start from the same weights and differ only in the activation; training is Adam with step $0.03$ for 2000 steps.</p>
+    <figure class="viz"><div class="fv" data-viz="silu-train" data-config="{&quot;seed&quot;: 1}"></div><figcaption><b>Figure 7.</b> Press “Play”. The blue curve is the network with SiLU, the black dashes the one with ReLU. With initialization #1, after 2000 steps the SiLU error is $0.00139$ and the ReLU error $0.00406$, almost three times larger. Turn on “Show the neurons”: in ReLU every neuron is a “corner”, in SiLU a smooth bend. The rare spikes in the error curve are the usual oscillations of Adam with a constant step.</figcaption></figure>
+    <p>To avoid conclusions from a single run, we repeated the experiment for eight different initializations. SiLU was more accurate in all eight, by a factor of $1.4$ to $5.2$. But this is a property of a smooth target: on a piecewise-linear dependence ReLU may do no worse. So the choice of activation is an empirical question, and in large models it is settled by experiment.</p>
+    <div class="callout warn"><b>The price of smoothness</b><p>SiLU is more expensive than ReLU: it needs an exponential (or tanh), and the backward pass has to keep the input. On a GPU this is usually invisible next to the matrix multiplications, but on mobile devices people use the “hard” Swish $x\cdot\operatorname{ReLU6}(x+3)/6$ — a piecewise-polynomial approximation without exponentials.</p></div>
+
+    <h2 id="code">In code</h2>
+    <p>The naive form <code>x / (1 + np.exp(-x))</code> at $x=-1000$ computes $e^{1000}$ and emits an overflow warning (the result is still $-0$). It is cleaner to compute the sigmoid through $\tanh$: $\sigma(x)=\tfrac12(1+\tanh\tfrac x2)$ — the tangent never overflows.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def sigmoid(x):
+    # σ(x) = (1 + tanh(x/2)) / 2 — no overflow for any x
+    return 0.5 * (1.0 + np.tanh(0.5 * x))
+
+def silu(x):
+    return x * sigmoid(x)
+
+def silu_grad(x):
+    s = sigmoid(x)
+    return s * (1.0 + x * (1.0 - s))      # = SiLU(x) + σ(x)·(1 − SiLU(x))
+
+def swish(x, beta=1.0):
+    return x * sigmoid(beta * x)
+
+x = np.array([-1000.0, -1.0, 0.0, 1.0, 2.3994])
+print(silu(x))        # [-0.     -0.2689  0.      0.7311  2.1997]
+print(silu_grad(x))   # [-0.      0.0723  0.5     0.9277  1.0998]</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+z = torch.tensor([-2.0, 0.0, 2.0], requires_grad=True)
+y = F.silu(z)                    # tensor([-0.2384, 0.0000, 1.7616])
+y.sum().backward()
+print(z.grad)                    # tensor([-0.0908, 0.5000, 1.0908])
+
+class SwiGLU(nn.Module):
+    &quot;&quot;&quot;The FFN block of LLaMA and Qwen: W2 · (SiLU(W1 x) ⊙ W3 x).&quot;&quot;&quot;
+    def __init__(self, d, hidden):
+        super().__init__()
+        self.w1 = nn.Linear(d, hidden, bias=False)   # gate branch
+        self.w3 = nn.Linear(d, hidden, bias=False)   # value branch
+        self.w2 = nn.Linear(hidden, d, bias=False)   # back to size d
+    def forward(self, x):
+        return self.w2(F.silu(self.w1(x)) * self.w3(x))
+
+ffn = SwiGLU(4096, 11008)                          # the sizes of LLaMA-7B
+print(sum(p.numel() for p in ffn.parameters()))   # 135266304</code></pre>
+    <div class="callout key"><b>Names in libraries</b><p>PyTorch: <code>nn.SiLU</code>, <code>F.silu</code>. TensorFlow/Keras: <code>tf.nn.silu</code>, <code>activation="swish"</code> (the same function with $\beta=1$). In Hugging Face configs: <code>hidden_act="silu"</code>. The built-in <code>nn.init.calculate_gain</code> does not know SiLU: people usually take the default initialization or the one for ReLU.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>“SiLU is non-negative, like ReLU.”</b> No: for $x&lt;0$ it is negative, with a minimum of $-0.278$. If something that needs a non-negative input follows (a logarithm or a square root, say), this matters.</li><li><b>“SiLU is monotonic.”</b> No: to the left of $x\approx-1.278$ it decreases, and its derivative is negative there. It has no inverse on the whole line.</li><li><b>Confusing SiLU and GELU.</b> They are different functions: $x\sigma(x)$ and $x\Phi(x)$. You cannot swap one for the other in a pretrained model — the weights are tuned to a specific activation.</li><li><b>An activation on both branches of SwiGLU.</b> SiLU sits only on the gate branch $W_1x$; the value branch $W_3x$ is linear. An extra activation changes the model.</li><li><b>A hidden size of $4d$ in SwiGLU.</b> With three matrices this gives $1.5$ times more parameters than an ordinary FFN. For a fair comparison take $h\approx\frac83d$.</li><li><b>The naive formula with <code>exp(-x)</code></b> in hand-written kernels: overflow for large negative $x$ and loss of precision in half precision. Use <code>F.silu</code> or the tanh form.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href="../sigmoid/">Sigmoid</a>: the gate of SiLU; the derivative $\sigma'=\sigma(1-\sigma)$ enters $\operatorname{SiLU}'$.</li><li><a href="../relu/">ReLU</a>: the limit of $x\sigma(\beta x)$ as $\beta\to\infty$; $\operatorname{ReLU}-\operatorname{SiLU}=|x|\sigma(-|x|)\le0.2785$.</li><li><a href="../gelu/">GELU</a>: $x\Phi(x)\approx x\sigma(1.702x)$ — the same self-gate with normal noise instead of logistic.</li><li><a href="../leaky-relu/">Leaky ReLU</a>: another way not to zero the negative part — the line $\alpha x$ instead of a smooth dip.</li><li><a href="../tanh/">tanh</a>: $\operatorname{SiLU}(x)=\frac x2\bigl(1+\tanh\frac x2\bigr)$.</li><li><a href="../softmax/">Softmax</a> and <a href="../adam/">Adam</a>: SwiGLU’s neighbours in a transformer — the attention mechanism and the optimizer such models are trained with.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $\operatorname{SiLU}(x)=x\,\sigma(x)=\frac x2\bigl(1+\tanh\frac x2\bigr)$ is a self-gate: the input decides what share of itself to pass. 2) Smooth, non-monotonic, with a minimum of $-W(e^{-1})\approx-0.278$ at $\approx-1.278$; always below ReLU by at most $0.278$. 3) $\operatorname{SiLU}'=\sigma(1+x(1-\sigma))$: $0.5$ at zero, above 1 for $x&gt;1.278$, maximum $\approx1.100$. 4) Swish-β links the linear function ($\beta=0$) and ReLU ($\beta\to\infty$); GELU $\approx$ Swish-1.702. 5) Probabilistically, it is ReLU with a random logistic threshold, averaged. 6) In LLMs it is the gate of SwiGLU: $W_2(\operatorname{SiLU}(W_1x)\odot W_3x)$ with a hidden size of $\approx\frac83d$.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. What is $\operatorname{SiLU}(-1)$ approximately?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="1">$-0.269$</button><button type="button" data-ok="0">$0.269$</button><button type="button" data-ok="0">$-1$</button></div><div class="explain" hidden>$\operatorname{SiLU}(-1)=-1\cdot\sigma(-1)=-0.2689$: the gate is about a quarter open.</div></fieldset><fieldset class="q"><legend>2. What is the smallest value SiLU takes?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="1">$\approx-0.278$</button><button type="button" data-ok="0">$-1$</button><button type="button" data-ok="0">It is unbounded below</button></div><div class="explain" hidden>The minimum is at $x^*\approx-1.278$, with the value $x^*+1=-W(e^{-1})\approx-0.278$.</div></fieldset><fieldset class="q"><legend>3. What is the derivative of SiLU at zero?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$0.25$</button><button type="button" data-ok="1">$0.5$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>$\operatorname{SiLU}'(0)=\sigma(0)\bigl(1+0\bigr)=\tfrac12$.</div></fieldset><fieldset class="q"><legend>4. In the SwiGLU block $W_2\bigl(\operatorname{SiLU}(W_1x)\odot W_3x\bigr)$, how many weight matrices are there and what activation is on the $W_3x$ branch?</legend><div class="opts"><button type="button" data-ok="0">2 matrices, SiLU</button><button type="button" data-ok="1">3 matrices, none (a linear branch)</button><button type="button" data-ok="0">3 matrices, the sigmoid</button><button type="button" data-ok="0">4 matrices, ReLU</button></div><div class="explain" hidden>The matrices are $W_1$, $W_2$, $W_3$; the value branch $W_3x$ is linear, and SiLU sits only on the gate branch.</div></fieldset><fieldset class="q"><legend>5. What does $x\,\sigma(\beta x)$ become at $\beta=0$?</legend><div class="opts"><button type="button" data-ok="0">ReLU</button><button type="button" data-ok="1">$x/2$</button><button type="button" data-ok="0">0</button><button type="button" data-ok="0">SiLU</button></div><div class="explain" hidden>$\sigma(0)=\tfrac12$, so $x\,\sigma(0)=x/2$. As $\beta\to\infty$, on the contrary, we get ReLU.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../adam/"><span class="kicker">← Previous formula</span><span class="big">Adam</span><span class="kicker">adaptive moment estimation</span></a>
+<a class="next" href="../gelu/"><span class="kicker">Next formula →</span><span class="big">GELU</span><span class="kicker">BERT, GPT</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

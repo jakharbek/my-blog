@@ -484,3 +484,4 @@ dl.symbols dd { margin: 0; }
 .article code { overflow-wrap: anywhere; }
 .article p a, .article li a, .article dd a, .callout a, figure.viz figcaption a, .quiz .explain a { text-decoration: underline; text-decoration-color: var(--curve); text-decoration-thickness: 1px; text-underline-offset: .22em; transition: text-decoration-color .2s; }
 .article p a:hover, .article li a:hover, .article dd a:hover, .callout a:hover, figure.viz figcaption a:hover, .quiz .explain a:hover { text-decoration-color: currentColor; }
+.article table.data .katex { white-space: nowrap; }

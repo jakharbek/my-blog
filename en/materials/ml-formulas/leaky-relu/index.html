@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Leaky ReLU: the “leaky” ReLU — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="Leaky ReLU in depth: the formula in three forms, the derivative and subgradient, the dying ReLU and neuron revival, a piecewise-linear network in 3D, He initialization for α, PReLU, RReLU, ELU and SELU, code in NumPy and PyTorch.">
+  <meta property="og:title" content="Leaky ReLU: the “leaky” ReLU — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="Leaky ReLU in depth: the formula in three forms, the derivative and subgradient, the dying ReLU and neuron revival, a piecewise-linear network in 3D, He initialization for α, PReLU, RReLU, ELU and SELU, code in NumPy and PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/leaky-relu/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/leaky-relu/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/leaky-relu/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/leaky-relu/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/leaky-relu.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/leaky-relu/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/leaky-relu/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/leaky-relu/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Activation functions</span>
+  <h1>Leaky ReLU: the “leaky” ReLU</h1>
+  <p class="dek">ReLU with a tiny fix: to the left of zero the function does not zero the signal, it multiplies it by a small α. We take it apart bone by bone: why that is enough to keep neurons alive, where the He initialization with the factor 1 + α² comes from, how a network of such neurons cuts space into flat pieces, and how PReLU learns α by itself.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 30 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: a door that never closes completely</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties</a>
+      <a href="#derivative"><span class="n">5</span>The derivative: a step instead of a cliff</a>
+      <a href="#dying"><span class="n">6</span>The dying ReLU and how Leaky cures it</a>
+      <a href="#space"><span class="n">7</span>A network of Leaky ReLUs: a piecewise-linear landscape</a>
+      <a href="#depth"><span class="n">8</span>Deep networks: He initialization for Leaky ReLU</a>
+      <a href="#family"><span class="n">9</span>PReLU, RReLU and the whole family</a>
+      <a href="#code"><span class="n">10</span>In code</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#links"><span class="n">12</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\operatorname{LReLU}(x)=\max(\alpha x,\,x)=\begin{cases}x, &amp; x&gt;0\\ \alpha x, &amp; x\le 0\end{cases}$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p><a href="../relu/">ReLU</a> is the most popular activation in deep learning: $\max(0,x)$ is instant to compute, and to the right of zero the gradient does not vanish. But it has a weak spot. To the left of zero ReLU does not dampen the signal, it <b>zeroes</b> it — and the gradient with it. A neuron whose input is negative on every example outputs 0, receives a zero gradient and never learns again. This is the “dying ReLU”.</p>
+    <p>Leaky ReLU is the minimal fix: to the left of zero the graph is not horizontal but slightly tilted, $\alpha x$ with a small $\alpha$ (usually from $0.01$ to $0.3$). The signal “leaks” through the closed door — hence the name.</p>
+    <p>Where it appears:</p>
+    <ul class="flist"><li><b>GAN discriminators</b> — in DCGAN (Radford et al., 2015) every discriminator layer uses Leaky ReLU with $\alpha=0.2$;</li><li><b>YOLO detectors</b> — the Darknet network of YOLOv2 and YOLOv3 is built on Leaky ReLU with $\alpha=0.1$;</li><li><b>graph networks</b> — the attention coefficients in GAT are computed through Leaky ReLU with $\alpha=0.2$;</li><li><b>convolutional networks with PReLU</b> — the variant with a learnable $\alpha$ (He et al., 2015) helped push the ImageNet top-5 error below the human level for the first time;</li><li><b>any network where ReLU “dies”</b> — the swap is one line and costs almost nothing.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>$\operatorname{LReLU}(x)=x$ for $x&gt;0$ and $\alpha x$ for $x\le0$. The derivative is a step: $1$ on the right and $\alpha$ on the left, so the gradient never vanishes completely. The function stays piecewise linear, monotonic and almost as cheap as ReLU. With $\alpha=0$ it is ReLU, with $\alpha=1$ the identity, with a learnable $\alpha$ it is PReLU.</p></div>
+
+    <h2 id="intuition">Intuition: a door that never closes completely</h2>
+    <p>ReLU is like a door: a positive signal passes through in full, a negative one hits the closed leaf. Leaky ReLU leaves a gap — the negative signal gets through, but weakened $1/\alpha$ times. With $\alpha=0.1$ the input $-2$ becomes $-0.2$.</p>
+    <p>Drag the point along the graph. The orange “slope triangle” shows the derivative: one step of 1 along $x$ changes the value by $\alpha$ to the left of zero and by 1 to the right. Below is the derivative itself: two horizontal steps with a jump at zero. Move the $\alpha$ slider: from ReLU ($\alpha=0$) through the leaky variant to the line $y=x$ ($\alpha=1$).</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-explorer" data-config="{&quot;alpha&quot;: 0.1, &quot;x&quot;: -2}"></div><figcaption><b>Figure 1.</b> Leaky ReLU and its derivative at $\alpha=0.1$. At $x=-2$ the value is $-0.2$ and the derivative is $0.1$. The grey dashed line is ReLU, the dotted line is $y=x$. At zero the derivative is undefined: it equals $\alpha$ on the left and 1 on the right.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>On the left the graph is not flat, just very shallow: with $\alpha=0.01$ the input $-100$ gives only $-1$. All the nonlinearity of Leaky ReLU sits at one point — the kink at zero, where the slope switches from $\alpha$ to 1. The expressive power of a network of such neurons comes precisely from these kinks.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <p>It pays to be able to write the same function in three ways — each one is useful in its own place.</p>
+    <h3>1. By cases</h3>
+    <div class="eqd">$$\operatorname{LReLU}_\alpha(x)=\begin{cases}x, &amp; x&gt;0,\\ \alpha x, &amp; x\le 0.\end{cases}$$</div>
+    <dl class="symbols"><dt>$x$</dt><dd>the neuron’s input — usually the pre-activation $z=w^\top h+b$;</dd><dt>$\alpha$</dt><dd>the slope of the negative part, a hyperparameter; usually $0&lt;\alpha&lt;1$;</dd><dt>$\alpha x$</dt><dd>the “leak”: a negative input is not zeroed but shrunk $1/\alpha$ times.</dd></dl>
+    <p>At $x=0$ both branches give zero, so it does not matter which branch zero belongs to: the function is continuous.</p>
+    <h3>2. Through the maximum</h3>
+    <div class="eqd">$$\operatorname{LReLU}_\alpha(x)=\max(\alpha x,\;x)\qquad(\alpha\le 1)$$</div>
+    <p>For $x&gt;0$ and $\alpha\le1$ we have $x\ge\alpha x$, and for $x&lt;0$ the opposite, $\alpha x\ge x$. So the maximum picks the right branch by itself. But only when $\alpha\le1$: with $\alpha=2$ the term $2x$ wins on the right, and you get a different function. This form is handy in code (<code>np.maximum(alpha * x, x)</code>), but the condition is easy to forget.</p>
+    <h3>3. A linear part plus the absolute value</h3>
+    <div class="eqd">$$\operatorname{LReLU}_\alpha(x)=\frac{1+\alpha}{2}\,x+\frac{1-\alpha}{2}\,|x|$$</div>
+    <p>Check: for $x&gt;0$ we get $\frac{1+\alpha}{2}x+\frac{1-\alpha}{2}x=x$, for $x&lt;0$ — $\frac{1+\alpha}{2}x-\frac{1-\alpha}{2}x=\alpha x$. This form holds for any $\alpha$ and explains the main point: Leaky ReLU is a linear function plus “a bit of absolute value”. All the nonlinearity lives in the second term, and its share $\frac{1-\alpha}{2}$ shrinks as $\alpha$ grows. At $\alpha=1$ the nonlinearity disappears completely.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-parts" data-config="{&quot;alpha&quot;: 0.2}"></div><figcaption><b>Figure 2.</b> On the left, Leaky ReLU as the upper envelope of the two lines $y=x$ and $y=\alpha x$. Move $\alpha$ above 1: the envelope (black dashes) breaks away from the real Leaky ReLU (blue line). On the right, the split into a linear part and the absolute value; at $\alpha=0.2$ the coefficients are $0.6$ and $0.4$.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\alpha=0.01$</th><th class=num>$\alpha=0.2$</th><th class=num>$\operatorname{LReLU}'(x)$</th></tr></thead><tbody><tr><td class=num>−5</td><td class=num>−0.05</td><td class=num>−1</td><td class=num>$\alpha$</td></tr><tr><td class=num>−2</td><td class=num>−0.02</td><td class=num>−0.4</td><td class=num>$\alpha$</td></tr><tr><td class=num>−0.5</td><td class=num>−0.005</td><td class=num>−0.1</td><td class=num>$\alpha$</td></tr><tr><td class=num>0.5</td><td class=num>0.5</td><td class=num>0.5</td><td class=num>$1$</td></tr><tr><td class=num>2</td><td class=num>2</td><td class=num>2</td><td class=num>$1$</td></tr><tr><td class=num>5</td><td class=num>5</td><td class=num>5</td><td class=num>$1$</td></tr></tbody></table></div>
+    <p>To the right of zero all variants coincide with ReLU; they differ only in how much negative signal “leaks” through.</p>
+
+    <h2 id="properties">Properties</h2>
+    <ul class="flist"><li><b>Domain and range</b>: the whole real line $\mathbb R$ (for $\alpha&gt;0$). ReLU only takes values in $[0,\,+\infty)$.</li><li><b>Continuity and piecewise linearity</b>: two lines glued at zero. The function is differentiable everywhere except $x=0$.</li><li><b>Strict monotonicity</b> for $\alpha&gt;0$: a larger input gives a larger output. Hence the function is invertible: $\operatorname{LReLU}_\alpha^{-1}(y)=y$ for $y&gt;0$ and $y/\alpha$ for $y\le0$, i.e. $\operatorname{LReLU}_{1/\alpha}$. ReLU has no inverse: all negative inputs are glued into zero.</li><li><b>Positive homogeneity</b>: $\operatorname{LReLU}(cx)=c\,\operatorname{LReLU}(x)$ for $c\ge0$. The scale of the input carries over to the output — hence the simple initialization formulas.</li><li><b>Lipschitz continuity</b> with constant $\max(1,\alpha)$, i.e. 1 for $\alpha\le1$: $|\operatorname{LReLU}(a)-\operatorname{LReLU}(b)|\le|a-b|$.</li><li><b>Unboundedness</b> above and below, though downwards the function grows $1/\alpha$ times more slowly.</li><li><b>Special cases</b>: $\alpha=0$ is ReLU, $\alpha=1$ the identity, $\alpha=-1$ the absolute value $|x|$ (no longer monotonic).</li></ul>
+    <h3>Mean and spread of the output</h3>
+    <p>Let the neuron’s input be $z\sim N(0,1)$. Then</p>
+    <div class="eqd">$$\mathbb E\bigl[\operatorname{LReLU}(z)\bigr]=\frac{1-\alpha}{\sqrt{2\pi}},\qquad \mathbb E\bigl[\operatorname{LReLU}(z)^2\bigr]=\frac{1+\alpha^2}{2}$$</div>
+    <p>At $\alpha=0.01$ the mean is $0.395$ (ReLU: $0.399$), at $\alpha=0.2$ it is $0.319$. The larger $\alpha$, the closer the outputs are to zero mean, which makes the next layer slightly easier to train. The second moment $\frac{1+\alpha^2}{2}$ will be needed in the section on initialization.</p>
+    <details class="deep"><summary>Where these formulas come from</summary><div class="deep-body">
+      <p>For $z\sim N(0,1)$ we know that $\mathbb E[z\,\mathbf 1_{z&gt;0}]=\varphi(0)=1/\sqrt{2\pi}$, and by symmetry $\mathbb E[z\,\mathbf 1_{z&lt;0}]=-1/\sqrt{2\pi}$. Therefore</p>
+      <div class="eqd">$$\mathbb E[\operatorname{LReLU}(z)]=\mathbb E[z\mathbf 1_{z&gt;0}]+\alpha\,\mathbb E[z\mathbf 1_{z&lt;0}]=\frac{1}{\sqrt{2\pi}}-\frac{\alpha}{\sqrt{2\pi}}$$</div>
+      <p>Likewise $\mathbb E[z^2\mathbf 1_{z&gt;0}]=\mathbb E[z^2\mathbf 1_{z&lt;0}]=\tfrac12$, so $\mathbb E[\operatorname{LReLU}(z)^2]=\tfrac12+\tfrac{\alpha^2}{2}$. The second formula holds for any symmetric distribution with unit variance, the first only for the normal one.</p>
+    </div></details>
+
+    <h2 id="derivative">The derivative: a step instead of a cliff</h2>
+    <p>On each branch the function is linear, so the derivative is simply the slope of the branch:</p>
+    <div class="eqd">$$\operatorname{LReLU}'_\alpha(x)=\begin{cases}1, &amp; x&gt;0,\\ \alpha, &amp; x&lt;0.\end{cases}$$</div>
+    <details class="deep"><summary>Derivation from the definition</summary><div class="deep-body">
+      <p>For $x&gt;0$ and small enough $h$ the point $x+h$ is positive too, and $\frac{\operatorname{LReLU}(x+h)-\operatorname{LReLU}(x)}{h}=\frac{(x+h)-x}{h}=1$. For $x&lt;0$ we likewise get $\frac{\alpha(x+h)-\alpha x}{h}=\alpha$.</p>
+      <p>At zero the one-sided limits differ:</p>
+      <div class="eqd">$$\lim_{h\to0^+}\frac{\operatorname{LReLU}(h)-0}{h}=1,\qquad \lim_{h\to0^-}\frac{\alpha h-0}{h}=\alpha$$</div>
+      <p>For $\alpha\ne1$ they do not match, so there is no derivative at zero — it is a kink.</p>
+    </div></details>
+    <p>What to do about zero in practice? At the kink there is a <b>subgradient</b>: for $0\le\alpha\le1$ any number $g\in[\alpha,\,1]$ defines a line $y=gx$ that lies nowhere above the graph. Libraries pick one value by convention — PyTorch takes $\alpha$ at $x=0$. An input rarely lands exactly on zero, so the choice hardly matters.</p>
+    <h3>Why a step is better than a cliff</h3>
+    <p>By the chain rule the gradient with respect to the weight $w_j$ of a neuron $a=\operatorname{LReLU}(z)$, $z=\sum_j w_jx_j+b$, is</p>
+    <div class="eqd">$$\frac{\partial L}{\partial w_j}=\frac{\partial L}{\partial a}\cdot\operatorname{LReLU}'(z)\cdot x_j$$</div>
+    <p>For ReLU the middle factor is 0 when $z&lt;0$; for Leaky ReLU it is $\alpha$. On the left the gradient is $1/\alpha$ times weaker, but not zero: a neuron “stuck” in the negative zone still receives an error signal.</p>
+    <h3>The derivative with respect to α: a step towards PReLU</h3>
+    <p>If $\alpha$ becomes a learnable parameter, we need the derivative with respect to it. It is simple too:</p>
+    <div class="eqd">$$\frac{\partial\operatorname{LReLU}_\alpha(x)}{\partial\alpha}=\begin{cases}0, &amp; x&gt;0,\\ x, &amp; x\le 0\end{cases}\;=\;\min(0,\,x)$$</div>
+    <p>The slope $\alpha$ learns only from examples that land on the left branch — this is how PReLU works (section 9). The second derivative in $x$ is zero everywhere except at zero: all the curvature is concentrated in the kink, and in the sense of generalized functions $\operatorname{LReLU}''(x)=(1-\alpha)\,\delta(x)$.</p>
+
+    <h2 id="dying">The dying ReLU and how Leaky cures it</h2>
+    <p>How a neuron dies. Suppose that after an unlucky large step (too high a learning rate, an outlier in the data, a bad initialization) the neuron’s bias $b$ has become strongly negative. Then $z=w^\top x+b&lt;0$ on every example, ReLU outputs 0, the derivative $\operatorname{ReLU}'(z)=0$ — and the gradients with respect to $w$, $b$ and the output weight $v$ vanish all at once. Gradient descent will never move this neuron again: it is dead. The CS231n course notes mention that with too high a learning rate as much as 40% of a network can end up dead.</p>
+    <p>Below is the cleanest possible experiment. A single neuron $f(x)=v\cdot\operatorname{act}(wx+b)$ has to learn the “hinge” $y=1.5\max(0,\,x-1)$ from 41 points on $[-3,\,3]$. Start: $w=1$, $b=-4$, $v=1$ — the kink is at $x=4$, outside the data, so $z&lt;0$ on every example. Training is gradient descent on MSE with step $0.1$.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-revive" data-config="{&quot;alpha&quot;: 0.1}"></div><figcaption><b>Figure 3.</b> Press “Play”. The ReLU neuron (black dashes) is frozen: all its gradients are zero, and the error stays at $1.09$ forever. The Leaky ReLU neuron with $\alpha=0.1$ receives a weak gradient, its line tilts and shifts, and at step 24 the kink enters the data range. After 1500 steps the error is $0.0549$. With $\alpha=0.01$ the revival takes 135 steps, but the final error is $0.00082$.</figcaption></figure>
+    <p>Note the trade-off. A large $\alpha$ brings the neuron back to life quickly, but the left branch stays tilted: with $\alpha=0.1$ the final model has slope $\alpha v w\approx0.116$ on the left instead of zero, hence the residual error. A small $\alpha$ barely distorts the shape of the function, but revives more slowly.</p>
+    <div class="callout warn"><b>Leaky is not a guarantee</b><p>A non-zero gradient does not mean the neuron must come back: it may stay on the left branch, working as the linear function $\alpha(w^\top x+b)$. What Leaky ReLU guarantees is different — the neuron never freezes solid and keeps learning. Against the cause of death itself, use a moderate learning rate, warmup, normalization and proper initialization.</p></div>
+
+    <h2 id="space">A network of Leaky ReLUs: a piecewise-linear landscape</h2>
+    <p>In a network with two inputs every neuron $\operatorname{LReLU}(w_k^\top x+b_k)$ “folds” the plane along the line $w_k^\top x+b_k=0$: on one side of it the slope is $1/\alpha$ times smaller than on the other. The sum of neurons $f(x)=\sum_k v_k\operatorname{LReLU}(w_k^\top x+b_k)$ is a polyhedral surface: inside every region where the set of active neurons does not change it is flat, and on the kink lines it changes slope.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-surface" data-config="{&quot;alpha&quot;: 0.1}"></div><figcaption><b>Figure 4.</b> A network of six Leaky ReLU neurons. On the left, the surface $f(x_1,x_2)$ in 3D (you can rotate it); on the right, the view from above with the six kink lines. They cut the square $[-3,\,3]^2$ into 19 linear regions. Drag the orange point: at the centre, at $(0.2,\,-0.3)$, all six neurons are off, yet the gradient is not zero: $|\nabla f|=0.100$. Set $\alpha=0$: the central region becomes flat — that is 5% of the square where a ReLU network has a zero gradient with respect to the input. At $\alpha=1$ the whole network turns into a single plane.</figcaption></figure>
+    <p>The number of regions does not depend on $\alpha$ (as long as $\alpha\ne1$): only the kink lines set it. What does depend on $\alpha$ is what happens where all neurons are off. With ReLU there is a plateau with zero gradient, and examples that land on it tell the network nothing. With Leaky ReLU the plateau is tilted, and the gradient there is generally non-zero.</p>
+    <div class="callout note"><b>How many regions there can be</b><p>$n$ lines in general position cut the plane into at most $1+n+\binom n2$ pieces: for $n=6$ that is 22. In the square of the figure 19 of them are visible. In deep networks the number of linear regions can grow exponentially with depth — one explanation of their expressive power.</p></div>
+
+    <h2 id="depth">Deep networks: He initialization for Leaky ReLU</h2>
+    <p>In a deep network the signal passes through dozens of layers $z_{l+1}=W_{l+1}\operatorname{LReLU}(z_l)$. If at every layer the variance is multiplied by a number even slightly different from 1, after 50 layers this becomes an explosion or a disappearance of the signal. Let us compute that factor.</p>
+    <details class="deep"><summary>Deriving the factor</summary><div class="deep-body">
+      <p>Let the weights $W_{ij}$ be independent, $\mathbb E W_{ij}=0$, $\operatorname{Var}W_{ij}=s^2$, and the inputs $z_l$ symmetric around zero. For one output $z_{l+1,i}=\sum_{j=1}^{n}W_{ij}h_j$ with $h_j=\operatorname{LReLU}(z_{l,j})$:</p>
+      <div class="eqd">$$\operatorname{Var}z_{l+1}=n\,s^2\,\mathbb E[h^2]=n\,s^2\,\frac{1+\alpha^2}{2}\operatorname{Var}z_l$$</div>
+      <p>The last equality is the second moment from the section on properties: half of $z_l^2$ comes from the positive branch in full, half from the negative one, multiplied by $\alpha^2$. For the variance to be preserved, the factor must equal 1:</p>
+      <div class="eqd">$$s^2=\frac{2}{(1+\alpha^2)\,n_{\text{in}}}\qquad\Longleftrightarrow\qquad g=\sqrt n\,s=\sqrt{\frac{2}{1+\alpha^2}}$$</div>
+      <p>On the backward pass the gradient is multiplied by $W^\top$ and by $\operatorname{LReLU}'(z)$, and $\mathbb E[\operatorname{LReLU}'(z)^2]=\frac{1+\alpha^2}{2}$ — the same factor. So one and the same initialization preserves both the forward signal and the gradients.</p>
+    </div></details>
+    <div class="eqd">$$\operatorname{Var}z_{l+1}=\frac{g^2(1+\alpha^2)}{2}\,\operatorname{Var}z_l,\qquad g_{\text{He}}=\sqrt{\frac{2}{1+\alpha^2}}$$</div>
+    <p>With $\alpha=0$ we get the famous $g=\sqrt2$ of He (Kaiming) initialization for ReLU. For Leaky ReLU the coefficient is slightly smaller: $1.414$ at $\alpha=0.01$, $1.387$ at $\alpha=0.2$, $1.355$ at $\alpha=0.3$.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-init" data-config="{&quot;alpha&quot;: 0.3, &quot;depth&quot;: 50}"></div><figcaption><b>Figure 5.</b> The RMS of the pre-activations at every layer of a random network of width 256 (the vertical scale is logarithmic). By default $\alpha=0.3$ and the weights are initialized “as for ReLU”, $g=\sqrt2$: the variance factor is $1.09$ per layer, and by layer 50 the RMS grows to $11.6$ (theory: $11.7$). With the correct $g=\sqrt{2/(1+\alpha^2)}$ the factor is 1, and at layer 50 the RMS is $1.34$ (theory: $1.35$). With $g=1$ the factor is $0.545$, and the signal fades to $3.45\cdot10^{-7}$.</figcaption></figure>
+    <div class="callout note"><b>In PyTorch</b><p>This is exactly what <code>nn.init.kaiming_normal_(w, a=alpha, nonlinearity='leaky_relu')</code> does: the standard deviation is $\sqrt{2/((1+a^2)\,n_{\text{in}})}$. The default there is <code>a=0</code>, i.e. the initialization for plain ReLU — for Leaky ReLU the parameter <code>a</code> has to be passed explicitly.</p></div>
+
+    <h2 id="family">PReLU, RReLU and the whole family</h2>
+    <p>How to choose $\alpha$? There are three answers.</p>
+    <ul class="flist"><li><b>A fixed $\alpha$</b> — the classic Leaky ReLU (Maas, Hannun, Ng, 2013, $\alpha=0.01$). Today $0.1$–$0.3$ is common: in the comparison by Xu et al. (2015) a “very leaky” variant with $\alpha=1/5.5\approx0.18$ worked better than $0.01$.</li><li><b>A learnable $\alpha$</b> — PReLU (Parametric ReLU, He et al., 2015). $\alpha$ becomes a parameter — one per layer or one per channel — and is learned by gradient descent together with the weights. The initial value in PyTorch is $0.25$.</li><li><b>A random $\alpha$</b> — RReLU (Randomized ReLU): during training $\alpha$ is drawn for each example from the uniform distribution $U(1/8,\,1/3)$ (PyTorch’s default bounds); at inference the mean $\frac{1/8+1/3}{2}=\frac{11}{48}\approx0.229$ is used. The noise acts as regularization.</li></ul>
+    <p>For PReLU the gradient with respect to $\alpha$ is $\min(0,\,z)$ from the section on the derivative: the slope learns only from negative inputs. Let us watch gradient descent find both the weight and the slope.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-prelu" data-config="{&quot;w&quot;: 0.5, &quot;a&quot;: 1.3}"></div><figcaption><b>Figure 6.</b> The two-parameter model $\operatorname{PReLU}_\alpha(wx)$ learns from 31 points generated by the “teacher” $w^*=1.5$, $\alpha^*=0.2$ with noise. On the right, the error surface $L(w,\alpha)$ (lighter means smaller). From the start $(0.5,\,1.3)$ gradient descent with step $0.05$ arrives in 87 steps at $w=1.521$, $\alpha=0.209$ with error $0.0158$ — the minimum for these noisy data (the teacher itself has error $0.0170$). Drag the start somewhere else.</figcaption></figure>
+    <p>PReLU adds only one parameter per channel, yet in the work of He et al., together with a new initialization, it made it possible to train very deep convolutional networks and reach a top-5 error of $4.94\%$ on ImageNet — below the estimated human error of $5.1\%$. The authors note that weight decay should not be applied to $\alpha$: it pulls $\alpha$ towards zero, that is, back to ReLU.</p>
+    <h3>Smooth relatives</h3>
+    <p>The kink at zero can be smoothed. ELU replaces the left line with the exponential $\alpha(e^x-1)$, which saturates at $-\alpha$. SELU adds a scale: $\lambda\approx1.0507$ and $\alpha\approx1.6733$ are chosen so that the activations keep zero mean and unit variance by themselves. <a href="../gelu/">GELU</a> and <a href="../silu/">SiLU</a> are smooth and even non-monotonic functions used in today’s transformers.</p>
+    <figure class="viz"><div class="fv" data-viz="leaky-relu-zoo" data-config="{&quot;cmp&quot;: &quot;elu&quot;, &quot;x&quot;: -2}"></div><figcaption><b>Figure 7.</b> Leaky ReLU with $\alpha=0.1$ next to its relatives. Hover the cursor: at $x=-2$ Leaky ReLU gives $-0.2$, ELU $-0.865$, SELU $-1.520$, GELU $-0.046$, SiLU $-0.238$. Switch to the derivatives: for Leaky ReLU and SELU it is a step with a jump at zero (for SELU $\lambda\alpha\approx1.758$ on the left and $\lambda\approx1.051$ on the right), for ELU, GELU and SiLU a continuous curve.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Function</th><th>For $x\le0$</th><th>Derivative on the left</th><th>Feature</th></tr></thead><tbody><tr><td>ReLU</td><td>$0$</td><td>$0$</td><td>zero gradient, “dead” neurons</td></tr><tr><td>Leaky ReLU</td><td>$\alpha x$</td><td>$\alpha$</td><td>fixed slope, usually $0.01$–$0.3$</td></tr><tr><td>PReLU</td><td>$\alpha x$, $\alpha$ is learned</td><td>$\alpha$</td><td>+1 parameter per layer or channel</td></tr><tr><td>RReLU</td><td>$\alpha x$, $\alpha\sim U(\tfrac18,\,\tfrac13)$</td><td>$\alpha$</td><td>noise as regularization</td></tr><tr><td>ELU</td><td>$\alpha(e^{x}-1)$</td><td>$\alpha e^{x}$</td><td>smooth for $\alpha=1$, saturates at $-\alpha$</td></tr><tr><td>SELU</td><td>$\lambda\alpha(e^{x}-1)$</td><td>$\lambda\alpha e^{x}$</td><td>self-normalizing, $\lambda\approx1.0507$</td></tr></tbody></table></div>
+
+    <h2 id="code">In code</h2>
+    <p>In NumPy Leaky ReLU is one line. It is safer to write <code>np.where</code> than <code>np.maximum(alpha * x, x)</code>: the latter silently breaks for $\alpha&gt;1$.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def leaky_relu(x, alpha=0.01):
+    # where, not maximum(alpha * x, x): this form is correct for any alpha
+    return np.where(x &gt; 0, x, alpha * x)
+
+def leaky_relu_grad(x, alpha=0.01):
+    return np.where(x &gt; 0, 1.0, alpha)      # alpha at zero, as in PyTorch
+
+def he_std(n_in, alpha=0.01):
+    # He initialization for Leaky ReLU: Var w = 2 / ((1 + alpha²) · n_in)
+    return np.sqrt(2.0 / ((1.0 + alpha**2) * n_in))
+
+x = np.array([-3.0, -0.5, 0.0, 2.0])
+print(leaky_relu(x))        # [-0.03  -0.005  0.     2.   ]
+print(leaky_relu_grad(x))   # [0.01 0.01 0.01 1.  ]
+print(he_std(256, 0.2))     # 0.08667...</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+act = nn.LeakyReLU(negative_slope=0.01)   # 0.01 is the default
+x = torch.tensor([-3.0, 0.0, 2.0], requires_grad=True)
+act(x).sum().backward()
+print(x.grad)                    # tensor([0.0100, 0.0100, 1.0000]) — α at zero
+
+prelu = nn.PReLU(num_parameters=1, init=0.25)   # α is a learnable parameter
+print(prelu(torch.tensor([-2.0, 3.0])))         # tensor([-0.5000, 3.0000])
+
+lin = nn.Linear(256, 256)
+# std = √(2 / ((1 + a²) · 256)); the default a=0 means “as for ReLU”
+nn.init.kaiming_normal_(lin.weight, a=0.2, nonlinearity=&quot;leaky_relu&quot;)
+print(nn.init.calculate_gain(&quot;leaky_relu&quot;, 0.2))  # 1.3867504905630728</code></pre>
+    <div class="callout key"><b>Library defaults differ</b><p>PyTorch <code>nn.LeakyReLU</code>: <code>negative_slope=0.01</code>. TensorFlow <code>tf.nn.leaky_relu</code>: <code>alpha=0.2</code>. Keras <code>layers.LeakyReLU</code>: $0.3$. The same “Leaky ReLU” in three frameworks is three different functions. When porting a model, set $\alpha$ explicitly.</p></div>
+    <p>Numerically Leaky ReLU is safe: no exponentials, no division, no overflow. The only subtlety is <code>inplace=True</code> in PyTorch: it saves memory but overwrites the input, which other operations of the graph may still need.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>Writing <code>max(alpha * x, x)</code> with $\alpha&gt;1$.</b> The formula holds only for $\alpha\le1$; for larger $\alpha$ you get a different function. The safe form is <code>where(x &gt; 0, x, alpha * x)</code>.</li><li><b>Too large an $\alpha$.</b> As $\alpha\to1$ the share of nonlinearity $\frac{1-\alpha}{2}$ goes to zero, the function becomes almost linear, and a deep network loses expressiveness. A sensible range is from $0.01$ to $0.3$.</li><li><b>Initializing “as for ReLU” without correcting for $\alpha$.</b> The variance factor is $1+\alpha^2$ per layer: at $\alpha=0.3$ the signal grows about 8 times over 50 layers (figure 5). Pass $\alpha$ to <code>kaiming_normal_(..., a=alpha)</code>.</li><li><b>Hoping that Leaky ReLU alone will cure unstable training.</b> It removes the zero gradient, but not the cause: too high a learning rate is still dangerous.</li><li><b>Weight decay on the $\alpha$ of PReLU.</b> It pulls $\alpha$ towards zero, and PReLU turns into ReLU. Exclude $\alpha$ from the parameter group with weight decay.</li><li><b>Different defaults</b> in PyTorch ($0.01$), TensorFlow ($0.2$) and Keras ($0.3$): when a model moves between frameworks, the result silently changes.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href="../relu/">ReLU</a>: the special case $\alpha=0$; more on the dying ReLU there.</li><li><a href="../silu/">SiLU / Swish</a> and <a href="../gelu/">GELU</a>: smooth activations that also let a small negative signal through on the left, but then fade it out.</li><li><a href="../sigmoid/">Sigmoid</a> and <a href="../tanh/">tanh</a>: saturating activations; Leaky ReLU has no saturation at all, and hence no vanishing gradient caused by saturation.</li><li><a href="../mse/">MSE</a>: the loss function in the experiments of figures 3 and 6.</li><li><a href="../sgd/">SGD</a> and <a href="../adam/">Adam</a>: too large an optimizer step is the main cause of death for ReLU neurons.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $\operatorname{LReLU}_\alpha(x)=x$ for $x&gt;0$ and $\alpha x$ for $x\le0$; it equals $\max(\alpha x,x)$ for $\alpha\le1$ and $\frac{1+\alpha}{2}x+\frac{1-\alpha}{2}|x|$ for any $\alpha$. 2) The derivative is a step made of $\alpha$ and $1$: the gradient does not vanish, the neuron does not freeze. 3) The trade-off: a larger $\alpha$ revives neurons faster but brings the function closer to linear. 4) A network of Leaky ReLUs is a piecewise-linear function without flat “dead” plateaus. 5) Initialization: $\operatorname{Var}w=\frac{2}{(1+\alpha^2)\,n_{\text{in}}}$. 6) PReLU learns $\alpha$ through the gradient $\min(0,z)$.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. What is $\operatorname{LReLU}(-5)$ with $\alpha=0.2$?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="1">$-1$</button><button type="button" data-ok="0">$-5$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>The input is negative, so the branch $\alpha x=0.2\cdot(-5)=-1$ applies.</div></fieldset><fieldset class="q"><legend>2. What is the derivative of Leaky ReLU for $x&lt;0$?</legend><div class="opts"><button type="button" data-ok="0">$0$</button><button type="button" data-ok="0">$1$</button><button type="button" data-ok="1">$\alpha$</button><button type="button" data-ok="0">$\alpha x$</button></div><div class="explain" hidden>On the left the function is the line $\alpha x$, whose slope is $\alpha$. So the gradient does not vanish.</div></fieldset><fieldset class="q"><legend>3. For which $\alpha$ does $\operatorname{LReLU}_\alpha(x)=\max(\alpha x,x)$ hold?</legend><div class="opts"><button type="button" data-ok="0">For any $\alpha$</button><button type="button" data-ok="1">Only for $\alpha\le1$</button><button type="button" data-ok="0">Only for $\alpha&gt;1$</button><button type="button" data-ok="0">Only for $\alpha=0.01$</button></div><div class="explain" hidden>For $\alpha\le1$, on the right $x\ge\alpha x$ and on the left $\alpha x\ge x$. For $\alpha&gt;1$ the maximum picks $\alpha x$ on the right — a different function.</div></fieldset><fieldset class="q"><legend>4. A network with Leaky ReLU ($\alpha=0.3$) is initialized “as for ReLU”, $g=\sqrt2$. What is the variance factor per layer?</legend><div class="opts"><button type="button" data-ok="0">$1$</button><button type="button" data-ok="1">$1.09$</button><button type="button" data-ok="0">$0.545$</button><button type="button" data-ok="0">$2$</button></div><div class="explain" hidden>$g^2(1+\alpha^2)/2=2\cdot1.09/2=1.09$. Over 50 layers the RMS grows by about $1.09^{24.5}\approx8.3$ times.</div></fieldset><fieldset class="q"><legend>5. A ReLU neuron gets $z&lt;0$ on every example. What is true?</legend><div class="opts"><button type="button" data-ok="1">The gradients with respect to its parameters are zero, and gradient descent will never change it again</button><button type="button" data-ok="0">The gradient is small but not zero</button><button type="button" data-ok="0">The neuron outputs negative values</button><button type="button" data-ok="0">Lowering the learning rate is enough to revive it</button></div><div class="explain" hidden>$\operatorname{ReLU}'(z)=0$ for $z&lt;0$, so all gradients vanish — the neuron is dead. A smaller step will not help: a step multiplied by zero is still zero.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../relu/"><span class="kicker">← Previous formula</span><span class="big">ReLU</span><span class="kicker">rectified linear unit</span></a>
+<a class="next" href="../softmax/"><span class="kicker">Next formula →</span><span class="big">Softmax</span><span class="kicker">“soft maximum”</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

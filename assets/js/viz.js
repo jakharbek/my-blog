@@ -293,7 +293,8 @@
       xs.forEach(({ v, label }) => {
         const px = this.X(v);
         if (o.grid) S("line", { x1: px, x2: px, y1: this.y1, y2: this.y0, class: v === 0 && !o.xTicks ? "fv-zero" : "fv-grid" }, g);
-        const t = S("text", { x: px, y: this.y0 + 17, "text-anchor": "middle", class: "fv-tick" }, g);
+        const edge = px >= this.x1 - 1; // a label on the right edge would stick out of the figure
+        const t = S("text", { x: edge ? this.W - 2 : px, y: this.y0 + 17, "text-anchor": edge ? "end" : "middle", class: "fv-tick" }, g);
         t.textContent = label;
       });
       ys.forEach(({ v, label }) => {
