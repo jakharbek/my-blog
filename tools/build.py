@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Generate the site: three languages × (home, article, about).
+"""Generate the site: three languages × (home, article, about, materials).
 
 Run from the repository root:  python3 tools/build.py
 The output is committed, so GitHub Pages needs no build step.
-Article texts live in tools/content_sigmoid.py.
+Article texts live in tools/content_sigmoid.py, materials in tools/content_formulas.py.
 """
+import html
 import json
 from pathlib import Path
 
+import content_formulas as formulas
 from content_sigmoid import ARTICLE, TABLE_ROWS
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -43,7 +45,8 @@ SITE = {
         derive="Разобрать вывод", researchTitle="Исследования и проекты",
         aboutKicker="Об авторе", aboutMore="Подробнее обо мне",
         about1="Здравствуйте. Меня зовут Жавхарбек Абдулатипов, я заместитель директора Департамента программных технологий Xalq Banki. Занимаюсь машинным обучением, компьютерным зрением и разработкой банковских систем.",
-        news="Новость", openSite="Открыть сайт ↗",
+        news="Новость", openSite="Открыть сайт ↗", openMaterial="Открыть материал →",
+        navMaterials="Материалы", materialsDek="Шпаргалки и справочники, которые я собираю по ходу работы: формулы, производные, примеры на числах и код. Здесь они хранятся целиком и дополняются.",
     ),
     "en": dict(
         brand="Abdulatipov J.", title="Abdulatipov J. — programming, mathematics, machine learning",
@@ -62,7 +65,8 @@ SITE = {
         derive="See the derivation", researchTitle="Research and projects",
         aboutKicker="About the author", aboutMore="More about me",
         about1="Hello. My name is Javharbek Abdulatipov, and I am Deputy Director of the Software Technologies Department at Xalq Banki. I work on machine learning, computer vision and banking systems development.",
-        news="News", openSite="Open the site ↗",
+        news="News", openSite="Open the site ↗", openMaterial="Open the material →",
+        navMaterials="Materials", materialsDek="Cheat sheets and references I put together along the way: formulas, derivatives, worked numeric examples and code. They are kept here in full and keep growing.",
     ),
     "uz": dict(
         brand="Abdulatipov J.", title="Abdulatipov J. — dasturlash, matematika, mashinaviy o‘qitish",
@@ -81,7 +85,8 @@ SITE = {
         derive="Isbotini ko‘rish", researchTitle="Tadqiqotlar va loyihalar",
         aboutKicker="Muallif haqida", aboutMore="Men haqimda batafsil",
         about1="Assalomu alaykum. Mening ismim Javharbek Abdulatipov, Xalq Banki Dasturiy texnologiyalar departamenti direktori o‘rinbosariman. Mashinaviy o‘qitish, kompyuter ko‘rishi va bank tizimlarini ishlab chiqish bilan shug‘ullanaman.",
-        news="Yangilik", openSite="Saytni ochish ↗",
+        news="Yangilik", openSite="Saytni ochish ↗", openMaterial="Materialni ochish →",
+        navMaterials="Materiallar", materialsDek="Ish jarayonida yig‘ib boradigan qo‘llanma va ma’lumotnomalarim: formulalar, hosilalar, sonli misollar va kod. Ular bu yerda to‘liq saqlanadi va to‘ldirib boriladi.",
     ),
 }
 
@@ -110,6 +115,7 @@ def fmt_date(iso, lang):
 
 # Posts. Add new ones here; the list on the home page is sorted newest first.
 # A post with "url" is a news item: the row links to that page instead of an article.
+# An absolute url opens another site; a relative one opens a page of this blog (a material).
 FEATURED = "sigmoid"
 COURSE_URL = "https://jakharbek.github.io/ml_gradient_boosting/"
 POSTS = [
@@ -127,8 +133,19 @@ POSTS = [
          excerpt={"ru": "Интерактивный курс на русском: от первого дерева решений до XGBoost, LightGBM и CatBoost. Параметры меняются прямо на странице, код запускается на Python в браузере и повторяется в Jupyter.",
                   "en": "An interactive course in Russian: from the first decision tree to XGBoost, LightGBM and CatBoost. Change parameters right on the page, run the code in Python in the browser and repeat it in Jupyter.",
                   "uz": "Rus tilidagi interaktiv kurs: birinchi qaror daraxtidan XGBoost, LightGBM va CatBoost’gacha. Parametrlar sahifaning o‘zida o‘zgaradi, kod brauzerda Python’da ishlaydi va Jupyter’da takrorlanadi."}),
+    dict(slug="ml-formulas-news", topic="ml", date="2026-10-28",
+         url="materials/ml-formulas/",
+         title={"ru": "Новый материал: шпаргалка формул нейросетей",
+                "en": "New material: a cheat sheet of neural network formulas",
+                "uz": "Yangi material: neyron tarmoq formulalari qo‘llanmasi"},
+         excerpt={l: formulas.PAGE[l]["excerpt"] for l in LANGS}),
 ]
 POST = {p["slug"]: p for p in POSTS}
+
+# Materials: long-lived reference pages under <lang>/materials/<slug>/, newest first.
+MATERIALS = [
+    dict(slug="ml-formulas", topic="ml", date="2026-10-28", module=formulas),
+]
 
 # Research cards: [kicker, title, text] and an optional link as a fourth item.
 RESEARCH = {
@@ -218,7 +235,7 @@ def hreflang(path_fn):
     return "\n".join(out)
 
 
-def head(lang, title, desc, rel, page, og_type="website"):
+def head(lang, title, desc, rel, page, og_type="website", extra=""):
     return f"""<!doctype html>
 <html lang="{lang}">
 <head>
@@ -233,7 +250,7 @@ def head(lang, title, desc, rel, page, og_type="website"):
 {hreflang(lambda l: f"{rel}{l}/{page}")}
   <link rel="icon" href="{rel}assets/favicon.svg" type="image/svg+xml">
 {THEME_BOOT}{FONTS}  <link rel="stylesheet" href="{rel}assets/css/site.css">
-</head>
+{extra}</head>
 <body>
 """
 
@@ -271,6 +288,7 @@ def footer(lang, rel):
   <nav aria-label="{s['footLabel']}">
     <span>Javharbek Abdulatipov © 2026</span>
     <a href="{rel}{lang}/#posts">{s['navPosts']}</a>
+    <a href="{rel}{lang}/materials/">{s['navMaterials']}</a>
     <a href="{rel}{lang}/about/">{s['navAbout']}</a>
     {links}
   </nav>
@@ -301,16 +319,20 @@ def sigmoid_svg(aria):
 def home(lang):
     s = SITE[lang]
     rel = "../"
-    nav = [(s["navPosts"], "#posts", False), (s["navFields"], "#fields", False), (s["navResearch"], "#research", False), (s["navAbout"], "about/", False)]
+    nav = [(s["navPosts"], "#posts", False), (s["navFields"], "#fields", False), (s["navMaterials"], "materials/", False), (s["navResearch"], "#research", False), (s["navAbout"], "about/", False)]
     feat = POST[FEATURED]
     chips = [f'<button type="button" class="chip" data-topic="all" aria-pressed="true"><span>{s["all"]}</span><small>{len(POSTS)}</small></button>']
     for tid, _, _, names in TOPICS:
         chips.append(f'<button type="button" class="chip" data-topic="{tid}" aria-pressed="false"><span>{names[lang][0]}</span><small>{sum(1 for p in POSTS if p["topic"] == tid)}</small></button>')
     topic_name = {tid: names[lang][0] for tid, _, _, names in TOPICS}
+    def cta(p):
+        if "url" not in p:
+            return f"{p['mins']} {s['min']}"
+        return s["openSite"] if p["url"].startswith("http") else s["openMaterial"]
     rows = "\n".join(
         f"""      <a class="row" href="{p.get('url') or p['slug'] + '/'}" data-topic="{p['topic']}">
         <span class="l"><span class="kicker">{s['news'] + ' · ' if 'url' in p else ''}{topic_name[p['topic']]}</span><span class="rt">{p['title'][lang]}</span><span class="ex">{p['excerpt'][lang]}</span></span>
-        <span class="r"><time datetime="{p['date']}">{fmt_date(p['date'], lang)}</time><span>{s['openSite'] if 'url' in p else f"{p['mins']} {s['min']}"}</span></span>
+        <span class="r"><time datetime="{p['date']}">{fmt_date(p['date'], lang)}</time><span>{cta(p)}</span></span>
       </a>""" for p in sorted(POSTS, key=lambda p: p["date"], reverse=True))
     tiles = "\n".join(
         f"""      <button type="button" class="tile" data-topic="{tid}"><span class="glyph math{' it' if it else ''}">{glyph}</span><span class="nm"><b>{names[lang][0]}</b><span>{names[lang][1]}</span></span><span class="cnt">{sum(1 for p in POSTS if p['topic'] == tid)}</span></button>"""
@@ -425,7 +447,7 @@ def home(lang):
 def article(lang):
     s, a, p = SITE[lang], ARTICLE[lang], POST["sigmoid"]
     rel = "../../"
-    nav = [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navAbout"], f"{rel}{lang}/about/", False)]
+    nav = [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navMaterials"], f"{rel}{lang}/materials/", False), (s["navAbout"], f"{rel}{lang}/about/", False)]
     rows = "\n".join(f"        <tr><td>{x}</td><td>{y}</td><td>{g}</td></tr>" for x, y, g in TABLE_ROWS)
     summary = "\n".join(f"      <li>{li}</li>" for li in a["sum"])
     toc = "\n".join(f'      <a href="#s{i+1}">{h}</a>' for i, h in enumerate(a["toc"]))
@@ -531,7 +553,7 @@ def article(lang):
 def about(lang):
     s, a = SITE[lang], ABOUT[lang]
     rel = "../../"
-    nav = [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navAbout"], "./", True)]
+    nav = [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navMaterials"], f"{rel}{lang}/materials/", False), (s["navAbout"], "./", True)]
     stats = "\n".join(f"      <div><b>{b}</b><span>{t}</span></div>" for b, t in a["stats"])
     jobs = [
         ("2026 — " + a["now"], a["dep"], "Xalq Banki", ""),
@@ -602,6 +624,139 @@ def about(lang):
 """ + footer(lang, rel) + "</body>\n</html>\n"
 
 
+KATEX = "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist"
+
+
+def tr(v, lang):
+    """A text that differs by language is a dict; anything else is shared."""
+    return v[lang] if isinstance(v, dict) else v
+
+
+def tex(src, display=True):
+    # KaTeX renders it in the browser; without KaTeX the TeX source stays readable.
+    d = "$$" if display else "$"
+    return f"{d}{html.escape(src, quote=False)}{d}"
+
+
+def materials_nav(lang, rel, current):
+    s = SITE[lang]
+    return [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navMaterials"], f"{rel}{lang}/materials/", current), (s["navAbout"], f"{rel}{lang}/about/", False)]
+
+
+def materials_index(lang):
+    s = SITE[lang]
+    rel = "../../"
+    topic_name = {tid: names[lang][0] for tid, _, _, names in TOPICS}
+    rows = "\n".join(
+        f"""      <a class="row" href="{m['slug']}/">
+        <span class="l"><span class="kicker">{topic_name[m['topic']]}</span><span class="rt">{m['module'].PAGE[lang]['title']}</span><span class="ex">{m['module'].PAGE[lang]['excerpt']}</span></span>
+        <span class="r"><time datetime="{m['date']}">{fmt_date(m['date'], lang)}</time><span>{sum(len(g['cards']) for g in m['module'].GROUPS if not g.get('upcoming'))} {m['module'].PAGE[lang]['count']}</span></span>
+      </a>""" for m in sorted(MATERIALS, key=lambda m: m["date"], reverse=True))
+    return head(lang, f"{s['navMaterials']} — {s['brand']}", s["materialsDek"], rel, "materials/") + header(lang, rel, "materials/", materials_nav(lang, rel, True)) + f"""
+<main>
+<section class="art-head wrap-xs">
+  <span class="kicker">{s['brand']}</span>
+  <h1>{s['navMaterials']}</h1>
+  <p class="dek">{s['materialsDek']}</p>
+</section>
+
+<section class="wrap-s mat-list">
+  <div class="list">
+{rows}
+  </div>
+</section>
+</main>
+
+""" + footer(lang, rel) + "</body>\n</html>\n"
+
+
+def formula_card(c, lang):
+    f = formulas
+    rows = []
+    for kind, label, body in c["rows"]:
+        lab = f'<span class="lab">{f.LABEL[label][lang]}</span>'
+        if kind == "fx":
+            rows.append(f'<div class="fc-row">{lab}<div class="fx">{tex(body)}</div></div>')
+        elif kind == "code":
+            rows.append(f'<div class="fc-row">{lab}<pre><code>{html.escape(body)}</code></pre></div>')
+        else:
+            rows.append(f'<div class="fc-row">{lab}<p>{body[lang]}</p></div>')
+    rows.append(f'<div class="fc-key">{c["key"][lang]}</div>')
+    body = "\n          ".join(rows)
+    shown = f'<div class="fc-formula">{tex(c["tex"])}</div>' if c["tex"] else f'<p class="fc-lead">{c["lead"][lang]}</p>'
+    return f"""      <article class="fcard" id="{c['id']}">
+        <div class="fc-top"><h3><span>{tr(c['name'], lang)}</span><small>{c['alt'][lang]}</small></h3><span class="fc-tag mono">{tr(c['tag'], lang)}</span></div>
+        {shown}
+        <details>
+          <summary>{f.PAGE[lang]['more']}</summary>
+          <div class="fc-body">
+          {body}
+          </div>
+        </details>
+      </article>"""
+
+
+def material_formulas(lang):
+    s, f = SITE[lang], formulas
+    pg = f.PAGE[lang]
+    m = next(x for x in MATERIALS if x["slug"] == "ml-formulas")
+    rel = "../../../"
+    page = "materials/ml-formulas/"
+    done = [g for g in f.GROUPS if not g.get("upcoming")]
+    by_id = {g["id"]: len(g["cards"]) for g in f.GROUPS}
+    counts = [sum(len(g["cards"]) for g in done), by_id["act"], by_id["reg"] + by_id["cls"], by_id["opt"]]
+    stats = "".join(f"<span><b>{n}</b> {t}</span>" for n, t in zip(counts, pg["stats"]))
+    chips = [f'<button type="button" class="chip" data-group="all" aria-pressed="true"><span>{pg["all"]}</span></button>']
+    chips += [f'<button type="button" class="chip" data-group="{g["id"]}" aria-pressed="false"><span>{g["title"][lang]}</span><small>{len(g["cards"])}</small></button>' for g in f.GROUPS]
+    groups = []
+    for g in f.GROUPS:
+        cards = "\n".join(formula_card(c, lang) for c in g["cards"])
+        route = f'\n    <p class="fc-route">{g["route"][lang]}</p>' if "route" in g else ""
+        groups.append(f"""  <section class="fgroup{' upcoming' if g.get('upcoming') else ''}" id="{g['id']}" data-group="{g['id']}">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">{g['glyph']}</span><h2>{g['title'][lang]}</h2><p>{g['note'][lang]}</p></div>
+    <div class="fgrid">
+{cards}
+    </div>{route}
+  </section>""")
+    links = "\n".join(f"      <li>{li}</li>" for li in pg["links"])
+    extra = (f'  <link rel="stylesheet" href="{KATEX}/katex.min.css">\n'
+             f'  <script defer src="{KATEX}/katex.min.js"></script>\n'
+             f'  <script defer src="{KATEX}/contrib/auto-render.min.js"></script>\n')
+    return head(lang, f"{pg['title']} — {s['brand']}", pg["meta_desc"], rel, page, "article", extra) + header(lang, rel, page, materials_nav(lang, rel, False)) + f"""
+<main class="material">
+<section class="art-head wrap-xs">
+  <span class="kicker">{pg['kicker']}</span>
+  <h1>{pg['title']}</h1>
+  <p class="dek">{pg['dek']}</p>
+  <div class="author">
+    <img src="{rel}assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="{m['date']}">{fmt_date(m['date'], lang)}</time></span></span>
+  </div>
+  <div class="mat-stats">{stats}</div>
+</section>
+
+<div class="wrap-s">
+  <div class="mat-tools">
+    <div class="chips" role="group" aria-label="{pg['filter']}">{''.join(chips)}</div>
+    <div class="mat-btns"><button type="button" class="b2" data-expand="1">{pg['expand']}</button><button type="button" class="b2" data-expand="0">{pg['collapse']}</button></div>
+  </div>
+
+{chr(10).join(groups)}
+
+  <section class="takeaway mat-links">
+    <h2>{pg['links_h']}</h2>
+    <ul>
+{links}
+    </ul>
+  </section>
+
+  <p class="mat-back"><a class="ul" href="../">← {pg['back']}</a></p>
+</div>
+</main>
+
+""" + footer(lang, rel) + f'<script src="{rel}assets/js/materials.js" defer></script>\n</body>\n</html>\n'
+
+
 ROOT_INDEX = """<!doctype html>
 <html lang="en">
 <head>
@@ -652,13 +807,12 @@ ROOT_INDEX = """<!doctype html>
 
 def main():
     for lang in LANGS:
-        for sub in ("", "sigmoid", "about"):
+        pages = {"": home, "sigmoid": article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas}
+        for sub, render in pages.items():
             (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)
-        (ROOT / lang / "index.html").write_text(home(lang), encoding="utf-8")
-        (ROOT / lang / "sigmoid" / "index.html").write_text(article(lang), encoding="utf-8")
-        (ROOT / lang / "about" / "index.html").write_text(about(lang), encoding="utf-8")
+            (ROOT / lang / sub / "index.html").write_text(render(lang), encoding="utf-8")
     (ROOT / "index.html").write_text(ROOT_INDEX, encoding="utf-8")
-    print("built:", ", ".join(f"{l}/ {l}/sigmoid/ {l}/about/" for l in LANGS), "+ index.html")
+    print("built:", ", ".join(f"{l}/" + "{" + ", ".join(pages) + "}" for l in LANGS), "+ index.html")
 
 
 if __name__ == "__main__":

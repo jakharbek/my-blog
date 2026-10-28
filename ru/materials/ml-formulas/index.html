@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="Шпаргалка формул нейросетей: sigmoid, tanh, ReLU, softmax, MAE, MSE, Huber, кросс-энтропия, Adam — с производными, примерами и кодом.">
+  <meta property="og:title" content="Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="Шпаргалка формул нейросетей: sigmoid, tanh, ReLU, softmax, MAE, MSE, Huber, кросс-энтропия, Adam — с производными, примерами и кодом.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../ru/materials/ml-formulas/">
+  <link rel="alternate" hreflang="en" href="../../../en/materials/ml-formulas/">
+  <link rel="alternate" hreflang="uz" href="../../../uz/materials/ml-formulas/">
+  <link rel="alternate" hreflang="x-default" href="../../../en/materials/ml-formulas/">
+  <link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../ru/#posts">Все статьи</a>
+    <a href="../../../ru/materials/">Материалы</a>
+    <a href="../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../ru/materials/ml-formulas/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../en/materials/ml-formulas/" lang="en" hreflang="en">EN</a> <a href="../../../uz/materials/ml-formulas/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="material">
+<section class="art-head wrap-xs">
+  <span class="kicker">Материалы · Машинное обучение</span>
+  <h1>Шпаргалка формул нейросетей</h1>
+  <p class="dek">Функции активации, функции потерь и оптимизатор Adam в одном месте. У каждой формулы — смысл, производная, пример с числами, код на NumPy и главное, что стоит запомнить.</p>
+  <div class="author">
+    <img src="../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time></span></span>
+  </div>
+  <div class="mat-stats"><span><b>13</b> формул разобрано</span><span><b>5</b> активаций</span><span><b>7</b> функций потерь</span><span><b>1</b> оптимизатор</span></div>
+</section>
+
+<div class="wrap-s">
+  <div class="mat-tools">
+    <div class="chips" role="group" aria-label="Фильтр по группе"><button type="button" class="chip" data-group="all" aria-pressed="true"><span>Все</span></button><button type="button" class="chip" data-group="act" aria-pressed="false"><span>Функции активации</span><small>5</small></button><button type="button" class="chip" data-group="reg" aria-pressed="false"><span>Потери — регрессия</span><small>5</small></button><button type="button" class="chip" data-group="cls" aria-pressed="false"><span>Потери — классификация</span><small>2</small></button><button type="button" class="chip" data-group="opt" aria-pressed="false"><span>Оптимизатор</span><small>1</small></button><button type="button" class="chip" data-group="next" aria-pressed="false"><span>Что разбираю дальше</span><small>6</small></button></div>
+    <div class="mat-btns"><button type="button" class="b2" data-expand="1">Раскрыть всё</button><button type="button" class="b2" data-expand="0">Свернуть всё</button></div>
+  </div>
+
+  <section class="fgroup" id="act" data-group="act">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">σ</span><h2>Функции активации</h2><p>Нелинейность нейрона: без неё любая глубокая сеть сводится к одному линейному слою.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="sigmoid">
+        <div class="fc-top"><h3><span>Sigmoid</span><small>логистическая функция</small></h3><span class="fc-tag mono">(0; 1)</span></div>
+        <div class="fc-formula">$$\sigma(x)=\frac{1}{1+e^{-x}}$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Сжимает любое число в интервал $(0;\,1)$, поэтому выход читается как вероятность. Кривая S-образная, симметрична относительно точки $(0;\,0{,}5)$; асимптоты — $y=0$ и $y=1$.</p></div>
+          <div class="fc-row"><span class="lab">Производная</span><div class="fx">$$\sigma'(x)=\sigma(x)\,\bigl(1-\sigma(x)\bigr)$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>$\sigma(0)=0{,}5$, $\sigma(2)\approx0{,}881$, $\sigma(-2)\approx0{,}119$. Наклон максимален в нуле: $\sigma'(0)=0{,}25$, а уже $\sigma'(2)\approx0{,}105$.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_grad(x):
+    s = sigmoid(x)
+    return s * (1 - s)</code></pre></div>
+          <div class="fc-key"><b>Запомни:</b> производная выражается через саму функцию, поэтому при обратном распространении экспоненту заново не считают. Минус: на хвостах наклон почти ноль и градиент затухает.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="tanh">
+        <div class="fc-top"><h3><span>Tanh</span><small>гиперболический тангенс</small></h3><span class="fc-tag mono">(−1; 1)</span></div>
+        <div class="fc-formula">$$\tanh(x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Та же S-образная форма, но центрирована в нуле, а диапазон — $(-1;\,1)$. Функция нечётная: $\tanh(-x)=-\tanh(x)$.</p></div>
+          <div class="fc-row"><span class="lab">Производная</span><div class="fx">$$\tanh'(x)=1-\tanh^{2}(x)$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>$\tanh(1)\approx0{,}762$, $\tanh'(0)=1$ — в четыре раза круче сигмоиды в нуле, $\tanh'(1)\approx0{,}420$.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>def tanh_grad(x):
+    t = np.tanh(x)
+    return 1 - t ** 2</code></pre></div>
+          <div class="fc-key"><b>Связь:</b> $\tanh(x)=2\sigma(2x)-1$. Выходы центрированы в нуле, поэтому градиенты следующего слоя не смещены в одну сторону — в скрытых слоях tanh обучается лучше сигмоиды.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="relu">
+        <div class="fc-top"><h3><span>ReLU</span><small>rectified linear unit</small></h3><span class="fc-tag mono">max(0, x)</span></div>
+        <div class="fc-formula">$$\operatorname{ReLU}(x)=\max(0,\,x)$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Положительное пропускает как есть, отрицательное обнуляет. Считается дёшево, а справа от нуля градиент не затухает.</p></div>
+          <div class="fc-row"><span class="lab">Производная</span><div class="fx">$$\operatorname{ReLU}'(x)=\begin{cases}1, &amp; x&gt;0\\ 0, &amp; x&lt;0\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>$\operatorname{ReLU}(-3)=0$, $\operatorname{ReLU}(2{,}5)=2{,}5$. В точке $x=0$ производной нет; библиотеки по соглашению берут $0$.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>def relu(x):
+    return np.maximum(0, x)
+
+def relu_grad(x):
+    return (x &gt; 0).astype(float)</code></pre></div>
+          <div class="fc-key"><b>Проблема:</b> «умирающий ReLU» (dying ReLU). Если вход нейрона всегда отрицательный, он выдаёт 0, градиент тоже 0 — и нейрон больше не учится.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="leaky-relu">
+        <div class="fc-top"><h3><span>Leaky ReLU</span><small>«протекающий» ReLU</small></h3><span class="fc-tag mono">α ≈ 0.01</span></div>
+        <div class="fc-formula">$$\operatorname{LReLU}(x)=\max(\alpha x,\,x)=\begin{cases}x, &amp; x&gt;0\\ \alpha x, &amp; x\le 0\end{cases}$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Как ReLU, но отрицательная часть не обнуляется, а умножается на маленький $\alpha$ (при $0&lt;\alpha&lt;1$). Лечит «умирающий ReLU».</p></div>
+          <div class="fc-row"><span class="lab">Производная</span><div class="fx">$$\operatorname{LReLU}'(x)=\begin{cases}1, &amp; x&gt;0\\ \alpha, &amp; x&lt;0\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>При $\alpha=0{,}01$: $\operatorname{LReLU}(-3)=-0{,}03$, $\operatorname{LReLU}(2)=2$.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>def leaky_relu(x, alpha=0.01):
+    return np.where(x &gt; 0, x, alpha * x)</code></pre></div>
+          <div class="fc-key"><b>Отличие от ReLU:</b> слева градиент равен $\alpha$, а не 0. Слабый сигнал течёт всегда, и нейрон не «умирает».</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="softmax">
+        <div class="fc-top"><h3><span>Softmax</span><small>«мягкий максимум»</small></h3><span class="fc-tag mono">Σ = 1</span></div>
+        <div class="fc-formula">$$\operatorname{softmax}(x)_i=s_i=\frac{e^{x_i}}{\sum_{j} e^{x_j}}$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Превращает вектор логитов (logits — сырых выходов сети) в распределение вероятностей: все $s_i\in(0;\,1)$, сумма равна 1. Стоит в конце многоклассового классификатора.</p></div>
+          <div class="fc-row"><span class="lab">Устойчивость</span><p>На практике из всех логитов вычитают максимум: $\dfrac{e^{x_i-\max x}}{\sum_j e^{x_j-\max x}}$. Результат тот же, а переполнения экспоненты нет.</p></div>
+          <div class="fc-row"><span class="lab">Производная</span><div class="fx">$$\frac{\partial s_i}{\partial x_j}=\begin{cases}s_i(1-s_i), &amp; i=j\\ -\,s_i s_j, &amp; i\ne j\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Логиты $(2;\,1;\,0)$ дают вероятности $\approx(0{,}665;\,0{,}245;\,0{,}090)$.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>def softmax(x):
+    e = np.exp(x - x.max())
+    return e / e.sum()</code></pre></div>
+          <div class="fc-key"><b>Запомни:</b> диагональ $s_i(1-s_i)$ — ровно производная сигмоиды. Для двух классов softmax и есть сигмоида разности логитов.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup" id="reg" data-group="reg">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">ŷ</span><h2>Потери — регрессия</h2><p>Предсказываем число. Функция потерь (loss) говорит, насколько прогноз $\hat{y}$ далёк от ответа $y$.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="mae">
+        <div class="fc-top"><h3><span>MAE</span><small>mean absolute error</small></h3><span class="fc-tag mono">|·|</span></div>
+        <div class="fc-formula">$$\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}\bigl|y_i-\hat{y}_i\bigr|$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Средний модуль ошибки. Измеряется в тех же единицах, что и целевая переменная, и проще всего интерпретируется. К выбросам устойчивее, чем MSE.</p></div>
+          <div class="fc-row"><span class="lab">Производная</span><div class="fx">$$\frac{\partial\,\mathrm{MAE}}{\partial\hat{y}_i}=-\frac{1}{n}\operatorname{sign}\bigl(y_i-\hat{y}_i\bigr)$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Сквозной пример: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, ошибки $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{MAE}=(0{,}5+0+2)/3\approx0{,}833$.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>mae = np.mean(np.abs(y - y_hat))</code></pre></div>
+          <div class="fc-key"><b>Модуль</b> нужен, чтобы ошибки разного знака не гасили друг друга; $|x|=\sqrt{x^2}$. Градиент по модулю всегда одинаков — и для ошибки 0,1, и для ошибки 100.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="mse">
+        <div class="fc-top"><h3><span>MSE</span><small>mean squared error</small></h3><span class="fc-tag mono">(·)²</span></div>
+        <div class="fc-formula">$$\mathrm{MSE}=\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Средний квадрат ошибки. Квадрат сильно штрафует крупные промахи. Единицы — квадрат единиц целевой переменной.</p></div>
+          <div class="fc-row"><span class="lab">Производная</span><div class="fx">$$\frac{\partial\,\mathrm{MSE}}{\partial\hat{y}_i}=-\frac{2}{n}\bigl(y_i-\hat{y}_i\bigr)$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Сквозной пример: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, ошибки $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{MSE}=(0{,}25+0+4)/3\approx1{,}417$: одна ошибка $-2$ даёт 94% суммы.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>mse = np.mean((y - y_hat) ** 2)</code></pre></div>
+          <div class="fc-key">Градиент пропорционален ошибке: чем больше промах, тем сильнее модель тянет к нему. Поэтому MSE чувствительнее к выбросам, чем MAE, — один аномальный объект даёт огромный вклад.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="rmse">
+        <div class="fc-top"><h3><span>RMSE</span><small>root mean squared error</small></h3><span class="fc-tag mono">√MSE</span></div>
+        <div class="fc-formula">$$\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2}$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Корень из MSE возвращает ошибку в единицы целевой переменной. Наглядна, как MAE, но по-прежнему сильнее наказывает крупные ошибки.</p></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Сквозной пример: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, ошибки $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{RMSE}=\sqrt{1{,}417}\approx1{,}190$ против $\mathrm{MAE}\approx0{,}833$.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>rmse = np.sqrt(np.mean((y - y_hat) ** 2))</code></pre></div>
+          <div class="fc-key">Всегда $\mathrm{RMSE}\ge\mathrm{MAE}$, равенство — только когда все ошибки одинаковы по модулю. Чем больше разрыв, тем сильнее разброс ошибок: это индикатор выбросов.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="mape">
+        <div class="fc-top"><h3><span>MAPE</span><small>mean absolute percentage error</small></h3><span class="fc-tag mono">%</span></div>
+        <div class="fc-formula">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\left|\frac{y_i-\hat{y}_i}{y_i}\right|$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Ошибка в процентах от факта: «в среднем модель ошибается на MAPE %». Удобна, когда важна относительная, а не абсолютная ошибка.</p></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Сквозной пример: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, ошибки $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{MAPE}=\frac{100\%}{3}\bigl(\tfrac{0{,}5}{3}+0+\tfrac{2}{8}\bigr)\approx13{,}9\%$.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>mape = 100 * np.mean(np.abs((y - y_hat) / y))</code></pre></div>
+          <div class="fc-key">⚠ Не определена при $y_i=0$ и взрывается возле нуля. Асимметрична: заниженный положительный прогноз даёт не больше 100%, а завышенный — сколько угодно. Симметричный вариант — sMAPE.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="huber">
+        <div class="fc-top"><h3><span>Huber</span><small>гибрид MSE и MAE</small></h3><span class="fc-tag mono">порог δ</span></div>
+        <div class="fc-formula">$$L_\delta(r)=\begin{cases}\tfrac{1}{2}r^2, &amp; |r|\le\delta\\[1mm] \delta\bigl(|r|-\tfrac{1}{2}\delta\bigr), &amp; |r|&gt;\delta\end{cases}\qquad r=y-\hat{y}$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Возле нуля квадратична, как MSE (точная подстройка), на больших ошибках линейна, как MAE (не боится выбросов). Обе ветви и их производные сходятся в точке $|r|=\delta$.</p></div>
+          <div class="fc-row"><span class="lab">Производная</span><div class="fx">$$\frac{\partial L_\delta}{\partial\hat{y}}=\begin{cases}-r, &amp; |r|\le\delta\\ -\delta\operatorname{sign}(r), &amp; |r|&gt;\delta\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Сквозной пример: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, ошибки $y-\hat{y}=(0{,}5;\,0;\,-2)$. При $\delta=1$: потери $0{,}125$, $0$ и $1\cdot(2-0{,}5)=1{,}5$; среднее $\approx0{,}542$.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>def huber(y, y_hat, delta=1.0):
+    r = np.abs(y - y_hat)
+    return np.mean(np.where(r &lt;= delta, 0.5 * r ** 2,
+                            delta * (r - 0.5 * delta)))</code></pre></div>
+          <div class="fc-key">На выбросах градиент ограничен по модулю числом $\delta$ и не взрывается. Хорошо подходит, например, для цен недвижимости с аномалиями. $\delta\downarrow$ — ближе к MAE, $\delta\uparrow$ — ближе к MSE.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup" id="cls" data-group="cls">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">p</span><h2>Потери — классификация</h2><p>Предсказываем класс. Модель выдаёт вероятности, а потеря наказывает за малую вероятность правильного ответа. Логарифм — натуральный.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="bce">
+        <div class="fc-top"><h3><span>BCE</span><small>бинарная кросс-энтропия</small></h3><span class="fc-tag mono">+ sigmoid</span></div>
+        <div class="fc-formula">$$\mathrm{BCE}=-\frac{1}{n}\sum_{i=1}^{n}\Bigl[y_i\log\hat{y}_i+(1-y_i)\log\bigl(1-\hat{y}_i\bigr)\Bigr]$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Для двух классов. Метка $y\in\{0,1\}$ работает как переключатель: из двух слагаемых остаётся одно, $-\log$ вероятности правильного ответа.</p></div>
+          <div class="fc-row"><span class="lab">Производная по логиту</span><div class="fx">$$\hat{y}=\sigma(z):\qquad \frac{\partial\,\mathrm{BCE}_i}{\partial z_i}=\hat{y}_i-y_i$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Правильный ответ $y=1$. Модель уверена и права, $\hat{y}=0{,}9$: потеря $-\ln0{,}9\approx0{,}105$. Уверена и ошибается, $\hat{y}=0{,}1$: $-\ln0{,}1\approx2{,}303$ — в 22 раза больше.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>p = np.clip(y_hat, 1e-7, 1 - 1e-7)
+bce = -np.mean(y * np.log(p)
+               + (1 - y) * np.log(1 - p))</code></pre></div>
+          <div class="fc-key">Сильнее всего наказывает <b>уверенную ошибку</b>: при $\hat{y}\to0$ для $y=1$ потеря уходит в бесконечность. Связка sigmoid + BCE даёт чистый градиент «предсказание − правда».</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="cross-entropy">
+        <div class="fc-top"><h3><span>Categorical CE</span><small>категориальная кросс-энтропия</small></h3><span class="fc-tag mono">+ softmax</span></div>
+        <div class="fc-formula">$$\mathrm{CE}=-\sum_{k=1}^{K} y_k\log\hat{y}_k$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Смысл</span><p>Для $K$ классов; $y$ — one-hot вектор (единица на месте правильного класса). В сумме выживает одно слагаемое — $-\log$ вероятности правильного класса.</p></div>
+          <div class="fc-row"><span class="lab">Градиент связки softmax + CE</span><div class="fx">$$\hat{y}=\operatorname{softmax}(x):\qquad \frac{\partial\,\mathrm{CE}}{\partial x_k}=s_k-y_k$$</div></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Логиты $(2;\,1;\,0)$, правильный класс — первый. $s\approx(0{,}665;\,0{,}245;\,0{,}090)$, $\mathrm{CE}=-\ln0{,}665\approx0{,}408$, градиент $s-y\approx(-0{,}335;\,0{,}245;\,0{,}090)$: правильный логит тянется вверх, остальные — вниз.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>def cross_entropy(logits, k):
+    z = logits - logits.max()
+    return np.log(np.exp(z).sum()) - z[k]</code></pre></div>
+          <div class="fc-key"><b>Главная развязка:</b> вся матрица Якоби softmax вместе с логарифмом схлопывается в $s_k-y_k$. Эта связка стоит в конце любого классификатора и любой языковой модели (LLM): там классы — токены словаря.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup" id="opt" data-group="opt">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">θ</span><h2>Оптимизатор</h2><p>Как двигать веса $\theta$ по градиенту $g_t$ потерь, чтобы потери уменьшались.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="adam">
+        <div class="fc-top"><h3><span>Adam</span><small>adaptive moment estimation</small></h3><span class="fc-tag mono">momentum + adaptive</span></div>
+        <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,\frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Шаг 1 · первый момент (инерция)</span><div class="fx">$$m_t=\beta_1 m_{t-1}+(1-\beta_1)\,g_t$$</div></div>
+          <div class="fc-row"><span class="lab">Шаг 2 · второй момент (масштаб)</span><div class="fx">$$v_t=\beta_2 v_{t-1}+(1-\beta_2)\,g_t^2$$</div></div>
+          <div class="fc-row"><span class="lab">Шаг 3 · поправка смещения</span><div class="fx">$$\hat{m}_t=\frac{m_t}{1-\beta_1^{\,t}}\qquad \hat{v}_t=\frac{v_t}{1-\beta_2^{\,t}}$$</div></div>
+          <div class="fc-row"><span class="lab">Гиперпараметры по умолчанию</span><p>$\eta=0{,}001$ (темп обучения, learning rate), $\beta_1=0{,}9$, $\beta_2=0{,}999$, $\epsilon=10^{-8}$. Все операции — поэлементные: у каждого веса свои $m$ и $v$.</p></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Первый шаг, $g_1=0{,}5$, $m_0=v_0=0$: $m_1=0{,}05$, $v_1=0{,}00025$. Без поправки шаг был бы занижен; с поправкой $\hat{m}_1=0{,}5$, $\hat{v}_1=0{,}25$, и $\hat{m}_1/\sqrt{\hat{v}_1}=1$. Вес сдвигается ровно на $\eta$ — каким бы ни был масштаб градиента.</p></div>
+          <div class="fc-row"><span class="lab">В коде</span><pre><code>m = b1 * m + (1 - b1) * g
+v = b2 * v + (1 - b2) * g ** 2
+m_hat = m / (1 - b1 ** t)
+v_hat = v / (1 - b2 ** t)
+theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
+          <div class="fc-key"><b>Числитель</b> $\hat{m}_t$ — куда идти: инерция гасит шум градиента. <b>Знаменатель</b> $\sqrt{\hat{v}_t}$ — насколько большим будет шаг у каждого веса. AdamW — тот же Adam с отделённым от градиента затуханием весов (weight decay); им обучают современные LLM.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup upcoming" id="next" data-group="next">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">→</span><h2>Что разбираю дальше</h2><p>Короткие карточки по приоритету. Подробный разбор появится здесь, когда дойду до них.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="silu">
+        <div class="fc-top"><h3><span>SiLU / Swish</span><small>активация Qwen и LLaMA</small></h3><span class="fc-tag mono">приоритет 1</span></div>
+        <div class="fc-formula">$$\operatorname{SiLU}(x)=x\cdot\sigma(x)$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Пример</span><p>$\operatorname{SiLU}(1)\approx0{,}731$, $\operatorname{SiLU}(-1)\approx-0{,}269$: в отличие от ReLU, небольшие отрицательные значения проходят.</p></div>
+          <div class="fc-key">Гладкая активация: ведёт себя как ReLU вдали от нуля, но без излома. Внутри блоков SwiGLU стоит в Qwen, LLaMA и других современных LLM.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="gelu">
+        <div class="fc-top"><h3><span>GELU</span><small>BERT, GPT</small></h3><span class="fc-tag mono">приоритет 1</span></div>
+        <div class="fc-formula">$$\operatorname{GELU}(x)=x\cdot\Phi(x)$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Пример</span><p>$\operatorname{GELU}(1)\approx0{,}841$, $\operatorname{GELU}(-1)\approx-0{,}159$.</p></div>
+          <div class="fc-key">$\Phi(x)$ — функция распределения стандартного нормального закона: вход умножается на вероятность того, что он «больше шума». Стандартная активация в BERT и GPT.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="sgd">
+        <div class="fc-top"><h3><span>SGD → Momentum → RMSProp</span><small>основа под Adam</small></h3><span class="fc-tag mono">приоритет 2</span></div>
+        <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,g_t$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Momentum</span><div class="fx">$$u_t=\beta u_{t-1}+g_t,\qquad \theta_t=\theta_{t-1}-\eta\,u_t$$</div></div>
+          <div class="fc-row"><span class="lab">RMSProp</span><div class="fx">$$v_t=\beta v_{t-1}+(1-\beta)\,g_t^2,\qquad \theta_t=\theta_{t-1}-\eta\,\frac{g_t}{\sqrt{v_t}+\epsilon}$$</div></div>
+          <div class="fc-key">Предшественники Adam: Momentum добавляет инерцию, RMSProp — свой масштаб шага для каждого веса. Если разобрать их по порядку, Adam становится очевидным.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="triplet">
+        <div class="fc-top"><h3><span>Triplet Loss</span><small>повторная идентификация (Re-ID)</small></h3><span class="fc-tag mono">приоритет 2</span></div>
+        <div class="fc-formula">$$L=\max\bigl(0,\;d(a,p)-d(a,n)+m\bigr)$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Пример</span><p>Зазор $m=0{,}2$. $d(a,p)=0{,}4$, $d(a,n)=1{,}1$: $L=0$, тройка уже разделена. $d(a,p)=0{,}9$, $d(a,n)=1{,}0$: $L=0{,}1$ — «чужой» слишком близко.</p></div>
+          <div class="fc-key">Обучение метрике (metric learning): якорь $a$ должен быть ближе к «своему» $p$, чем к «чужому» $n$, хотя бы на зазор $m$. Ровно та математика, на которой держится повторная идентификация людей между камерами.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="focal">
+        <div class="fc-top"><h3><span>Focal Loss</span><small>несбалансированные классы</small></h3><span class="fc-tag mono">приоритет 3</span></div>
+        <div class="fc-formula">$$\mathrm{FL}=-(1-p_t)^{\gamma}\log p_t$$</div>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Пример</span><p>$p_t$ — вероятность правильного класса. При $\gamma=2$ лёгкий пример с $p_t=0{,}9$ весит в 100 раз меньше, чем в CE ($0{,}001$ против $0{,}105$), а трудный с $p_t=0{,}3$ — всего в 2 раза ($0{,}590$ против $1{,}204$).</p></div>
+          <div class="fc-key">Кросс-энтропия с множителем $(1-p_t)^\gamma$: гасит вклад лёгких примеров и фокусирует обучение на трудных. Применяется в детекции объектов, где фона гораздо больше, чем людей и лиц.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="backprop">
+        <div class="fc-top"><h3><span>Backprop и регуляризация</span><small>темы, а не формулы</small></h3><span class="fc-tag mono">механизмы</span></div>
+        <p class="fc-lead">Как градиент течёт назад через все слои · L1/L2 · Dropout · BatchNorm / LayerNorm</p>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="fc-body">
+          <div class="fc-key">Следующий шаг — не новая формула, а <b>сборка</b>: понять обратное распространение как процесс, в котором все формулы выше работают вместе.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+    <p class="fc-route"><b>Маршрут:</b> SiLU и GELU (закрыть активации современных трансформеров) → SGD, Momentum, RMSProp (фундамент под Adam) → Triplet Loss (Re-ID) → затем уже не формулы, а механизмы: обратное распространение ошибки и attention внутри трансформера.</p>
+  </section>
+
+  <section class="takeaway mat-links">
+    <h2>Главные связи</h2>
+    <ul>
+      <li>$\tanh(x)=2\sigma(2x)-1$: тангенс — это растянутая и сдвинутая сигмоида.</li>
+      <li>Softmax для двух классов совпадает с сигмоидой разности логитов, а диагональ его производной $s_i(1-s_i)$ — производная сигмоиды.</li>
+      <li>Sigmoid + BCE и softmax + CE дают один и тот же градиент по логитам: «предсказание − правда», $\hat{y}-y$.</li>
+      <li>Huber — мост между MSE и MAE: квадратичен возле нуля и линеен на больших ошибках.</li>
+      <li>Adam = Momentum (инерция, числитель) + RMSProp (масштаб шага, знаменатель) + поправка смещения.</li>
+    </ul>
+  </section>
+
+  <p class="mat-back"><a class="ul" href="../">← Все материалы</a></p>
+</div>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../ru/#posts">Статьи</a>
+    <a href="../../../ru/materials/">Материалы</a>
+    <a href="../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../assets/js/site.js" defer></script>
+<script src="../../../assets/js/materials.js" defer></script>
+</body>
+</html>

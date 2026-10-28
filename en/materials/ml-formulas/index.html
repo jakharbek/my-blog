@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="A cheat sheet of neural network formulas: sigmoid, tanh, ReLU, softmax, MAE, MSE, Huber, cross-entropy, Adam — with derivatives, examples and code.">
+  <meta property="og:title" content="Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="A cheat sheet of neural network formulas: sigmoid, tanh, ReLU, softmax, MAE, MSE, Huber, cross-entropy, Adam — with derivatives, examples and code.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../ru/materials/ml-formulas/">
+  <link rel="alternate" hreflang="en" href="../../../en/materials/ml-formulas/">
+  <link rel="alternate" hreflang="uz" href="../../../uz/materials/ml-formulas/">
+  <link rel="alternate" hreflang="x-default" href="../../../en/materials/ml-formulas/">
+  <link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../en/#posts">All articles</a>
+    <a href="../../../en/materials/">Materials</a>
+    <a href="../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../ru/materials/ml-formulas/" lang="ru" hreflang="ru">RU</a> <a href="../../../en/materials/ml-formulas/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../uz/materials/ml-formulas/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="material">
+<section class="art-head wrap-xs">
+  <span class="kicker">Materials · Machine Learning</span>
+  <h1>Neural network formulas: a cheat sheet</h1>
+  <p class="dek">Activation functions, loss functions and the Adam optimizer in one place. Each formula comes with its meaning, derivative, a worked numeric example, NumPy code and the one thing worth remembering.</p>
+  <div class="author">
+    <img src="../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time></span></span>
+  </div>
+  <div class="mat-stats"><span><b>13</b> formulas covered</span><span><b>5</b> activations</span><span><b>7</b> loss functions</span><span><b>1</b> optimizer</span></div>
+</section>
+
+<div class="wrap-s">
+  <div class="mat-tools">
+    <div class="chips" role="group" aria-label="Filter by group"><button type="button" class="chip" data-group="all" aria-pressed="true"><span>All</span></button><button type="button" class="chip" data-group="act" aria-pressed="false"><span>Activation functions</span><small>5</small></button><button type="button" class="chip" data-group="reg" aria-pressed="false"><span>Losses — regression</span><small>5</small></button><button type="button" class="chip" data-group="cls" aria-pressed="false"><span>Losses — classification</span><small>2</small></button><button type="button" class="chip" data-group="opt" aria-pressed="false"><span>Optimizer</span><small>1</small></button><button type="button" class="chip" data-group="next" aria-pressed="false"><span>What I am studying next</span><small>6</small></button></div>
+    <div class="mat-btns"><button type="button" class="b2" data-expand="1">Expand all</button><button type="button" class="b2" data-expand="0">Collapse all</button></div>
+  </div>
+
+  <section class="fgroup" id="act" data-group="act">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">σ</span><h2>Activation functions</h2><p>The neuron’s non-linearity: without it any deep network collapses into a single linear layer.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="sigmoid">
+        <div class="fc-top"><h3><span>Sigmoid</span><small>logistic function</small></h3><span class="fc-tag mono">(0; 1)</span></div>
+        <div class="fc-formula">$$\sigma(x)=\frac{1}{1+e^{-x}}$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>Squashes any number into the interval $(0,\,1)$, so the output reads as a probability. The curve is S-shaped and symmetric about the point $(0,\,0.5)$; its asymptotes are $y=0$ and $y=1$.</p></div>
+          <div class="fc-row"><span class="lab">Derivative</span><div class="fx">$$\sigma'(x)=\sigma(x)\,\bigl(1-\sigma(x)\bigr)$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>$\sigma(0)=0.5$, $\sigma(2)\approx0.881$, $\sigma(-2)\approx0.119$. The slope peaks at zero: $\sigma'(0)=0.25$, while $\sigma'(2)\approx0.105$.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_grad(x):
+    s = sigmoid(x)
+    return s * (1 - s)</code></pre></div>
+          <div class="fc-key"><b>Remember:</b> the derivative is expressed through the function itself, so backpropagation never recomputes the exponential. The downside: on the tails the slope is almost zero and the gradient vanishes.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="tanh">
+        <div class="fc-top"><h3><span>Tanh</span><small>hyperbolic tangent</small></h3><span class="fc-tag mono">(−1; 1)</span></div>
+        <div class="fc-formula">$$\tanh(x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>The same S shape, but centred at zero with range $(-1,\,1)$. The function is odd: $\tanh(-x)=-\tanh(x)$.</p></div>
+          <div class="fc-row"><span class="lab">Derivative</span><div class="fx">$$\tanh'(x)=1-\tanh^{2}(x)$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>$\tanh(1)\approx0.762$, $\tanh'(0)=1$ — four times steeper than the sigmoid at zero, $\tanh'(1)\approx0.420$.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>def tanh_grad(x):
+    t = np.tanh(x)
+    return 1 - t ** 2</code></pre></div>
+          <div class="fc-key"><b>Connection:</b> $\tanh(x)=2\sigma(2x)-1$. Outputs are zero-centred, so the next layer’s gradients are not all pushed one way — in hidden layers tanh trains better than the sigmoid.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="relu">
+        <div class="fc-top"><h3><span>ReLU</span><small>rectified linear unit</small></h3><span class="fc-tag mono">max(0, x)</span></div>
+        <div class="fc-formula">$$\operatorname{ReLU}(x)=\max(0,\,x)$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>Passes positive values unchanged and zeroes out negative ones. It is cheap, and to the right of zero the gradient does not vanish.</p></div>
+          <div class="fc-row"><span class="lab">Derivative</span><div class="fx">$$\operatorname{ReLU}'(x)=\begin{cases}1, &amp; x&gt;0\\ 0, &amp; x&lt;0\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>$\operatorname{ReLU}(-3)=0$, $\operatorname{ReLU}(2.5)=2.5$. At $x=0$ there is no derivative; libraries take $0$ by convention.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>def relu(x):
+    return np.maximum(0, x)
+
+def relu_grad(x):
+    return (x &gt; 0).astype(float)</code></pre></div>
+          <div class="fc-key"><b>Problem:</b> the “dying ReLU”. If a neuron’s input is always negative, it outputs 0, the gradient is 0 too — and the neuron stops learning.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="leaky-relu">
+        <div class="fc-top"><h3><span>Leaky ReLU</span><small>“leaky” ReLU</small></h3><span class="fc-tag mono">α ≈ 0.01</span></div>
+        <div class="fc-formula">$$\operatorname{LReLU}(x)=\max(\alpha x,\,x)=\begin{cases}x, &amp; x&gt;0\\ \alpha x, &amp; x\le 0\end{cases}$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>Like ReLU, but the negative part is not zeroed: it is multiplied by a small $\alpha$ (with $0&lt;\alpha&lt;1$). It cures the dying ReLU.</p></div>
+          <div class="fc-row"><span class="lab">Derivative</span><div class="fx">$$\operatorname{LReLU}'(x)=\begin{cases}1, &amp; x&gt;0\\ \alpha, &amp; x&lt;0\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>With $\alpha=0.01$: $\operatorname{LReLU}(-3)=-0.03$, $\operatorname{LReLU}(2)=2$.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>def leaky_relu(x, alpha=0.01):
+    return np.where(x &gt; 0, x, alpha * x)</code></pre></div>
+          <div class="fc-key"><b>Difference from ReLU:</b> on the left the gradient is $\alpha$, not 0. A weak signal always flows, so the neuron does not die.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="softmax">
+        <div class="fc-top"><h3><span>Softmax</span><small>“soft maximum”</small></h3><span class="fc-tag mono">Σ = 1</span></div>
+        <div class="fc-formula">$$\operatorname{softmax}(x)_i=s_i=\frac{e^{x_i}}{\sum_{j} e^{x_j}}$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>Turns a vector of logits (the network’s raw outputs) into a probability distribution: every $s_i\in(0,\,1)$ and they sum to 1. It sits at the end of a multi-class classifier.</p></div>
+          <div class="fc-row"><span class="lab">Stability</span><p>In practice the maximum is subtracted from every logit: $\dfrac{e^{x_i-\max x}}{\sum_j e^{x_j-\max x}}$. The result is the same, with no exponential overflow.</p></div>
+          <div class="fc-row"><span class="lab">Derivative</span><div class="fx">$$\frac{\partial s_i}{\partial x_j}=\begin{cases}s_i(1-s_i), &amp; i=j\\ -\,s_i s_j, &amp; i\ne j\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>Logits $(2,\,1,\,0)$ give probabilities $\approx(0.665,\,0.245,\,0.090)$.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>def softmax(x):
+    e = np.exp(x - x.max())
+    return e / e.sum()</code></pre></div>
+          <div class="fc-key"><b>Remember:</b> the diagonal $s_i(1-s_i)$ is exactly the derivative of the sigmoid. For two classes softmax is the sigmoid of the logit difference.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup" id="reg" data-group="reg">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">ŷ</span><h2>Losses — regression</h2><p>We predict a number. The loss function says how far the prediction $\hat{y}$ is from the answer $y$.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="mae">
+        <div class="fc-top"><h3><span>MAE</span><small>mean absolute error</small></h3><span class="fc-tag mono">|·|</span></div>
+        <div class="fc-formula">$$\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}\bigl|y_i-\hat{y}_i\bigr|$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>The average absolute error. It is in the same units as the target and is the easiest to interpret. It is more robust to outliers than MSE.</p></div>
+          <div class="fc-row"><span class="lab">Derivative</span><div class="fx">$$\frac{\partial\,\mathrm{MAE}}{\partial\hat{y}_i}=-\frac{1}{n}\operatorname{sign}\bigl(y_i-\hat{y}_i\bigr)$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>Running example: $y=(3,\,5,\,8)$, $\hat{y}=(2.5,\,5,\,10)$, errors $y-\hat{y}=(0.5,\,0,\,-2)$. $\mathrm{MAE}=(0.5+0+2)/3\approx0.833$.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>mae = np.mean(np.abs(y - y_hat))</code></pre></div>
+          <div class="fc-key"><b>The absolute value</b> keeps errors of opposite sign from cancelling out; $|x|=\sqrt{x^2}$. The gradient has the same size for an error of 0.1 and for an error of 100.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="mse">
+        <div class="fc-top"><h3><span>MSE</span><small>mean squared error</small></h3><span class="fc-tag mono">(·)²</span></div>
+        <div class="fc-formula">$$\mathrm{MSE}=\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>The average squared error. Squaring punishes large misses hard. Its units are the target’s units squared.</p></div>
+          <div class="fc-row"><span class="lab">Derivative</span><div class="fx">$$\frac{\partial\,\mathrm{MSE}}{\partial\hat{y}_i}=-\frac{2}{n}\bigl(y_i-\hat{y}_i\bigr)$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>Running example: $y=(3,\,5,\,8)$, $\hat{y}=(2.5,\,5,\,10)$, errors $y-\hat{y}=(0.5,\,0,\,-2)$. $\mathrm{MSE}=(0.25+0+4)/3\approx1.417$: the single error of $-2$ makes up 94% of the sum.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>mse = np.mean((y - y_hat) ** 2)</code></pre></div>
+          <div class="fc-key">The gradient is proportional to the error: the bigger the miss, the harder the model is pulled towards it. That is why MSE is more sensitive to outliers than MAE — one anomalous object contributes a huge share.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="rmse">
+        <div class="fc-top"><h3><span>RMSE</span><small>root mean squared error</small></h3><span class="fc-tag mono">√MSE</span></div>
+        <div class="fc-formula">$$\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2}$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>The square root of MSE brings the error back to the target’s units. It is as readable as MAE but still punishes large errors more.</p></div>
+          <div class="fc-row"><span class="lab">Example</span><p>Running example: $y=(3,\,5,\,8)$, $\hat{y}=(2.5,\,5,\,10)$, errors $y-\hat{y}=(0.5,\,0,\,-2)$. $\mathrm{RMSE}=\sqrt{1.417}\approx1.190$ versus $\mathrm{MAE}\approx0.833$.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>rmse = np.sqrt(np.mean((y - y_hat) ** 2))</code></pre></div>
+          <div class="fc-key">Always $\mathrm{RMSE}\ge\mathrm{MAE}$, with equality only when all errors have the same magnitude. The wider the gap, the more the errors vary: it is an outlier indicator.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="mape">
+        <div class="fc-top"><h3><span>MAPE</span><small>mean absolute percentage error</small></h3><span class="fc-tag mono">%</span></div>
+        <div class="fc-formula">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\left|\frac{y_i-\hat{y}_i}{y_i}\right|$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>The error as a percentage of the actual value: “on average the model is off by MAPE %”. Useful when the relative error matters more than the absolute one.</p></div>
+          <div class="fc-row"><span class="lab">Example</span><p>Running example: $y=(3,\,5,\,8)$, $\hat{y}=(2.5,\,5,\,10)$, errors $y-\hat{y}=(0.5,\,0,\,-2)$. $\mathrm{MAPE}=\frac{100\%}{3}\bigl(\tfrac{0.5}{3}+0+\tfrac{2}{8}\bigr)\approx13.9\%$.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>mape = 100 * np.mean(np.abs((y - y_hat) / y))</code></pre></div>
+          <div class="fc-key">⚠ Undefined at $y_i=0$ and explodes near zero. Asymmetric: an under-forecast of a positive value costs at most 100%, an over-forecast can cost any amount. The symmetric variant is sMAPE.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="huber">
+        <div class="fc-top"><h3><span>Huber</span><small>a hybrid of MSE and MAE</small></h3><span class="fc-tag mono">threshold δ</span></div>
+        <div class="fc-formula">$$L_\delta(r)=\begin{cases}\tfrac{1}{2}r^2, &amp; |r|\le\delta\\[1mm] \delta\bigl(|r|-\tfrac{1}{2}\delta\bigr), &amp; |r|&gt;\delta\end{cases}\qquad r=y-\hat{y}$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>Quadratic near zero like MSE (fine tuning), linear for large errors like MAE (not afraid of outliers). Both branches and their derivatives meet at $|r|=\delta$.</p></div>
+          <div class="fc-row"><span class="lab">Derivative</span><div class="fx">$$\frac{\partial L_\delta}{\partial\hat{y}}=\begin{cases}-r, &amp; |r|\le\delta\\ -\delta\operatorname{sign}(r), &amp; |r|&gt;\delta\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>Running example: $y=(3,\,5,\,8)$, $\hat{y}=(2.5,\,5,\,10)$, errors $y-\hat{y}=(0.5,\,0,\,-2)$. With $\delta=1$: losses $0.125$, $0$ and $1\cdot(2-0.5)=1.5$; the mean is $\approx0.542$.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>def huber(y, y_hat, delta=1.0):
+    r = np.abs(y - y_hat)
+    return np.mean(np.where(r &lt;= delta, 0.5 * r ** 2,
+                            delta * (r - 0.5 * delta)))</code></pre></div>
+          <div class="fc-key">On outliers the gradient is bounded by $\delta$ in magnitude and does not explode. A good fit, for example, for property prices with anomalies. $\delta\downarrow$ — closer to MAE, $\delta\uparrow$ — closer to MSE.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup" id="cls" data-group="cls">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">p</span><h2>Losses — classification</h2><p>We predict a class. The model outputs probabilities, and the loss punishes a low probability of the correct answer. The logarithm is natural.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="bce">
+        <div class="fc-top"><h3><span>BCE</span><small>binary cross-entropy</small></h3><span class="fc-tag mono">+ sigmoid</span></div>
+        <div class="fc-formula">$$\mathrm{BCE}=-\frac{1}{n}\sum_{i=1}^{n}\Bigl[y_i\log\hat{y}_i+(1-y_i)\log\bigl(1-\hat{y}_i\bigr)\Bigr]$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>For two classes. The label $y\in\{0,1\}$ acts as a switch: of the two terms only one survives, $-\log$ of the probability of the correct answer.</p></div>
+          <div class="fc-row"><span class="lab">Derivative with respect to the logit</span><div class="fx">$$\hat{y}=\sigma(z):\qquad \frac{\partial\,\mathrm{BCE}_i}{\partial z_i}=\hat{y}_i-y_i$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>The correct answer is $y=1$. Confident and right, $\hat{y}=0.9$: the loss is $-\ln0.9\approx0.105$. Confident and wrong, $\hat{y}=0.1$: $-\ln0.1\approx2.303$ — 22 times more.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>p = np.clip(y_hat, 1e-7, 1 - 1e-7)
+bce = -np.mean(y * np.log(p)
+               + (1 - y) * np.log(1 - p))</code></pre></div>
+          <div class="fc-key">It punishes a <b>confident mistake</b> hardest: as $\hat{y}\to0$ for $y=1$ the loss goes to infinity. Sigmoid + BCE gives the clean gradient “prediction − truth”.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="cross-entropy">
+        <div class="fc-top"><h3><span>Categorical CE</span><small>categorical cross-entropy</small></h3><span class="fc-tag mono">+ softmax</span></div>
+        <div class="fc-formula">$$\mathrm{CE}=-\sum_{k=1}^{K} y_k\log\hat{y}_k$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Meaning</span><p>For $K$ classes; $y$ is a one-hot vector (a one in the position of the correct class). Only one term survives — $-\log$ of the probability of the correct class.</p></div>
+          <div class="fc-row"><span class="lab">Gradient of softmax + CE</span><div class="fx">$$\hat{y}=\operatorname{softmax}(x):\qquad \frac{\partial\,\mathrm{CE}}{\partial x_k}=s_k-y_k$$</div></div>
+          <div class="fc-row"><span class="lab">Example</span><p>Logits $(2,\,1,\,0)$, the correct class is the first. $s\approx(0.665,\,0.245,\,0.090)$, $\mathrm{CE}=-\ln0.665\approx0.408$, gradient $s-y\approx(-0.335,\,0.245,\,0.090)$: the correct logit is pulled up and the others down.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>def cross_entropy(logits, k):
+    z = logits - logits.max()
+    return np.log(np.exp(z).sum()) - z[k]</code></pre></div>
+          <div class="fc-key"><b>The key payoff:</b> the whole softmax Jacobian together with the logarithm collapses into $s_k-y_k$. This pair sits at the end of every classifier and every language model (LLM), where the classes are vocabulary tokens.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup" id="opt" data-group="opt">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">θ</span><h2>Optimizer</h2><p>How to move the weights $\theta$ along the loss gradient $g_t$ so that the loss goes down.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="adam">
+        <div class="fc-top"><h3><span>Adam</span><small>adaptive moment estimation</small></h3><span class="fc-tag mono">momentum + adaptive</span></div>
+        <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,\frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Step 1 · first moment (momentum)</span><div class="fx">$$m_t=\beta_1 m_{t-1}+(1-\beta_1)\,g_t$$</div></div>
+          <div class="fc-row"><span class="lab">Step 2 · second moment (scale)</span><div class="fx">$$v_t=\beta_2 v_{t-1}+(1-\beta_2)\,g_t^2$$</div></div>
+          <div class="fc-row"><span class="lab">Step 3 · bias correction</span><div class="fx">$$\hat{m}_t=\frac{m_t}{1-\beta_1^{\,t}}\qquad \hat{v}_t=\frac{v_t}{1-\beta_2^{\,t}}$$</div></div>
+          <div class="fc-row"><span class="lab">Default hyperparameters</span><p>$\eta=0.001$ (learning rate), $\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=10^{-8}$. All operations are element-wise: every weight has its own $m$ and $v$.</p></div>
+          <div class="fc-row"><span class="lab">Example</span><p>First step, $g_1=0.5$, $m_0=v_0=0$: $m_1=0.05$, $v_1=0.00025$. Without correction the step would be too small; with it $\hat{m}_1=0.5$, $\hat{v}_1=0.25$, and $\hat{m}_1/\sqrt{\hat{v}_1}=1$. The weight moves by exactly $\eta$, whatever the scale of the gradient.</p></div>
+          <div class="fc-row"><span class="lab">In code</span><pre><code>m = b1 * m + (1 - b1) * g
+v = b2 * v + (1 - b2) * g ** 2
+m_hat = m / (1 - b1 ** t)
+v_hat = v / (1 - b2 ** t)
+theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
+          <div class="fc-key"><b>The numerator</b> $\hat{m}_t$ says where to go: inertia smooths out gradient noise. <b>The denominator</b> $\sqrt{\hat{v}_t}$ sets how big each weight’s step is. AdamW is the same Adam with weight decay decoupled from the gradient; modern LLMs are trained with it.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup upcoming" id="next" data-group="next">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">→</span><h2>What I am studying next</h2><p>Short cards in order of priority. A detailed breakdown will appear here once I get to them.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="silu">
+        <div class="fc-top"><h3><span>SiLU / Swish</span><small>the activation of Qwen and LLaMA</small></h3><span class="fc-tag mono">priority 1</span></div>
+        <div class="fc-formula">$$\operatorname{SiLU}(x)=x\cdot\sigma(x)$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Example</span><p>$\operatorname{SiLU}(1)\approx0.731$, $\operatorname{SiLU}(-1)\approx-0.269$: unlike ReLU, small negative values get through.</p></div>
+          <div class="fc-key">A smooth activation: behaves like ReLU away from zero, but with no kink. Inside SwiGLU blocks it is used in Qwen, LLaMA and other modern LLMs.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="gelu">
+        <div class="fc-top"><h3><span>GELU</span><small>BERT, GPT</small></h3><span class="fc-tag mono">priority 1</span></div>
+        <div class="fc-formula">$$\operatorname{GELU}(x)=x\cdot\Phi(x)$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Example</span><p>$\operatorname{GELU}(1)\approx0.841$, $\operatorname{GELU}(-1)\approx-0.159$.</p></div>
+          <div class="fc-key">$\Phi(x)$ is the cumulative distribution function of the standard normal: the input is scaled by the probability that it is “above the noise”. The standard activation in BERT and GPT.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="sgd">
+        <div class="fc-top"><h3><span>SGD → Momentum → RMSProp</span><small>the groundwork for Adam</small></h3><span class="fc-tag mono">priority 2</span></div>
+        <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,g_t$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Momentum</span><div class="fx">$$u_t=\beta u_{t-1}+g_t,\qquad \theta_t=\theta_{t-1}-\eta\,u_t$$</div></div>
+          <div class="fc-row"><span class="lab">RMSProp</span><div class="fx">$$v_t=\beta v_{t-1}+(1-\beta)\,g_t^2,\qquad \theta_t=\theta_{t-1}-\eta\,\frac{g_t}{\sqrt{v_t}+\epsilon}$$</div></div>
+          <div class="fc-key">Adam’s predecessors: Momentum adds inertia, RMSProp a per-weight step scale. Work through them in order and Adam becomes obvious.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="triplet">
+        <div class="fc-top"><h3><span>Triplet Loss</span><small>re-identification (Re-ID)</small></h3><span class="fc-tag mono">priority 2</span></div>
+        <div class="fc-formula">$$L=\max\bigl(0,\;d(a,p)-d(a,n)+m\bigr)$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Example</span><p>Margin $m=0.2$. $d(a,p)=0.4$, $d(a,n)=1.1$: $L=0$, the triplet is already separated. $d(a,p)=0.9$, $d(a,n)=1.0$: $L=0.1$ — the “other” is too close.</p></div>
+          <div class="fc-key">Metric learning: the anchor $a$ must be closer to its “own” $p$ than to the “other” $n$ by at least the margin $m$. Exactly the mathematics behind re-identifying people across cameras.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="focal">
+        <div class="fc-top"><h3><span>Focal Loss</span><small>imbalanced classes</small></h3><span class="fc-tag mono">priority 3</span></div>
+        <div class="fc-formula">$$\mathrm{FL}=-(1-p_t)^{\gamma}\log p_t$$</div>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Example</span><p>$p_t$ is the probability of the correct class. With $\gamma=2$ an easy example with $p_t=0.9$ weighs 100 times less than in CE ($0.001$ versus $0.105$), while a hard one with $p_t=0.3$ only about 2 times less ($0.590$ versus $1.204$).</p></div>
+          <div class="fc-key">Cross-entropy with a factor $(1-p_t)^\gamma$: it damps the easy examples and focuses training on the hard ones. Used in object detection, where background vastly outnumbers people and faces.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="backprop">
+        <div class="fc-top"><h3><span>Backprop and regularization</span><small>topics, not formulas</small></h3><span class="fc-tag mono">mechanisms</span></div>
+        <p class="fc-lead">How the gradient flows back through every layer · L1/L2 · Dropout · BatchNorm / LayerNorm</p>
+        <details>
+          <summary>Details</summary>
+          <div class="fc-body">
+          <div class="fc-key">The next step is not another formula but <b>assembly</b>: understanding backpropagation as the process in which all the formulas above work together.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+    <p class="fc-route"><b>Route:</b> SiLU and GELU (to close out the activations of modern transformers) → SGD, Momentum, RMSProp (the foundation under Adam) → Triplet Loss (Re-ID) → and then mechanisms rather than formulas: backpropagation and attention inside a transformer.</p>
+  </section>
+
+  <section class="takeaway mat-links">
+    <h2>Key connections</h2>
+    <ul>
+      <li>$\tanh(x)=2\sigma(2x)-1$: the hyperbolic tangent is a stretched and shifted sigmoid.</li>
+      <li>Softmax over two classes equals the sigmoid of the logit difference, and the diagonal of its derivative, $s_i(1-s_i)$, is the derivative of the sigmoid.</li>
+      <li>Sigmoid + BCE and softmax + CE give the same gradient with respect to the logits: “prediction − truth”, $\hat{y}-y$.</li>
+      <li>Huber bridges MSE and MAE: quadratic near zero and linear for large errors.</li>
+      <li>Adam = Momentum (inertia, the numerator) + RMSProp (step scale, the denominator) + bias correction.</li>
+    </ul>
+  </section>
+
+  <p class="mat-back"><a class="ul" href="../">← All materials</a></p>
+</div>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../en/#posts">Articles</a>
+    <a href="../../../en/materials/">Materials</a>
+    <a href="../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../assets/js/site.js" defer></script>
+<script src="../../../assets/js/materials.js" defer></script>
+</body>
+</html>

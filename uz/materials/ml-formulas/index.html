@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Neyron tarmoq formulalari qo‘llanmasi: sigmoid, tanh, ReLU, softmax, MAE, MSE, Huber, kross-entropiya, Adam — hosilalar, misollar va kod bilan.">
+  <meta property="og:title" content="Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Neyron tarmoq formulalari qo‘llanmasi: sigmoid, tanh, ReLU, softmax, MAE, MSE, Huber, kross-entropiya, Adam — hosilalar, misollar va kod bilan.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../ru/materials/ml-formulas/">
+  <link rel="alternate" hreflang="en" href="../../../en/materials/ml-formulas/">
+  <link rel="alternate" hreflang="uz" href="../../../uz/materials/ml-formulas/">
+  <link rel="alternate" hreflang="x-default" href="../../../en/materials/ml-formulas/">
+  <link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../uz/materials/">Materiallar</a>
+    <a href="../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../ru/materials/ml-formulas/" lang="ru" hreflang="ru">RU</a> <a href="../../../en/materials/ml-formulas/" lang="en" hreflang="en">EN</a> <a href="../../../uz/materials/ml-formulas/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="material">
+<section class="art-head wrap-xs">
+  <span class="kicker">Materiallar · Mashinaviy o‘qitish</span>
+  <h1>Neyron tarmoq formulalari: qo‘llanma</h1>
+  <p class="dek">Aktivatsiya funksiyalari, yo‘qotish funksiyalari va Adam optimizatori bir joyda. Har bir formulaning ma’nosi, hosilasi, sonli misoli, NumPy’dagi kodi va eslab qolish kerak bo‘lgan asosiy fikri bor.</p>
+  <div class="author">
+    <img src="../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time></span></span>
+  </div>
+  <div class="mat-stats"><span><b>13</b> formula tahlil qilingan</span><span><b>5</b> aktivatsiya</span><span><b>7</b> yo‘qotish funksiyasi</span><span><b>1</b> optimizator</span></div>
+</section>
+
+<div class="wrap-s">
+  <div class="mat-tools">
+    <div class="chips" role="group" aria-label="Guruh bo‘yicha saralash"><button type="button" class="chip" data-group="all" aria-pressed="true"><span>Barchasi</span></button><button type="button" class="chip" data-group="act" aria-pressed="false"><span>Aktivatsiya funksiyalari</span><small>5</small></button><button type="button" class="chip" data-group="reg" aria-pressed="false"><span>Yo‘qotishlar — regressiya</span><small>5</small></button><button type="button" class="chip" data-group="cls" aria-pressed="false"><span>Yo‘qotishlar — klassifikatsiya</span><small>2</small></button><button type="button" class="chip" data-group="opt" aria-pressed="false"><span>Optimizator</span><small>1</small></button><button type="button" class="chip" data-group="next" aria-pressed="false"><span>Keyin nimani o‘rganaman</span><small>6</small></button></div>
+    <div class="mat-btns"><button type="button" class="b2" data-expand="1">Hammasini ochish</button><button type="button" class="b2" data-expand="0">Hammasini yopish</button></div>
+  </div>
+
+  <section class="fgroup" id="act" data-group="act">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">σ</span><h2>Aktivatsiya funksiyalari</h2><p>Neyronning nochiziqliligi: usiz har qanday chuqur tarmoq bitta chiziqli qatlamga aylanib qoladi.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="sigmoid">
+        <div class="fc-top"><h3><span>Sigmoid</span><small>logistik funksiya</small></h3><span class="fc-tag mono">(0; 1)</span></div>
+        <div class="fc-formula">$$\sigma(x)=\frac{1}{1+e^{-x}}$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>Istalgan sonni $(0;\,1)$ oralig‘iga siqadi, shuning uchun natija ehtimollik sifatida o‘qiladi. Egri chiziq S-shaklida, $(0;\,0{,}5)$ nuqtaga nisbatan simmetrik; asimptotalari $y=0$ va $y=1$.</p></div>
+          <div class="fc-row"><span class="lab">Hosila</span><div class="fx">$$\sigma'(x)=\sigma(x)\,\bigl(1-\sigma(x)\bigr)$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>$\sigma(0)=0{,}5$, $\sigma(2)\approx0{,}881$, $\sigma(-2)\approx0{,}119$. Qiyalik nolda eng katta: $\sigma'(0)=0{,}25$, $\sigma'(2)\approx0{,}105$ esa allaqachon kichikroq.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_grad(x):
+    s = sigmoid(x)
+    return s * (1 - s)</code></pre></div>
+          <div class="fc-key"><b>Eslab qoling:</b> hosila funksiyaning o‘zi orqali ifodalanadi, shuning uchun teskari tarqatishda eksponenta qayta hisoblanmaydi. Kamchiligi: chekkalarda qiyalik deyarli nol va gradiyent so‘nadi.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="tanh">
+        <div class="fc-top"><h3><span>Tanh</span><small>giperbolik tangens</small></h3><span class="fc-tag mono">(−1; 1)</span></div>
+        <div class="fc-formula">$$\tanh(x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>Xuddi shu S-shakl, lekin markazi nolda va qiymatlar oralig‘i $(-1;\,1)$. Funksiya toq: $\tanh(-x)=-\tanh(x)$.</p></div>
+          <div class="fc-row"><span class="lab">Hosila</span><div class="fx">$$\tanh'(x)=1-\tanh^{2}(x)$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>$\tanh(1)\approx0{,}762$, $\tanh'(0)=1$ — nolda sigmoidadan to‘rt marta tikroq, $\tanh'(1)\approx0{,}420$.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>def tanh_grad(x):
+    t = np.tanh(x)
+    return 1 - t ** 2</code></pre></div>
+          <div class="fc-key"><b>Bog‘lanish:</b> $\tanh(x)=2\sigma(2x)-1$. Natijalar nol atrofida markazlashgan, shuning uchun keyingi qatlam gradiyentlari bir tomonga surilmaydi — yashirin qatlamlarda tanh sigmoidadan yaxshiroq o‘qitiladi.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="relu">
+        <div class="fc-top"><h3><span>ReLU</span><small>rectified linear unit</small></h3><span class="fc-tag mono">max(0, x)</span></div>
+        <div class="fc-formula">$$\operatorname{ReLU}(x)=\max(0,\,x)$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>Musbat qiymatni o‘zgarishsiz o‘tkazadi, manfiyni nolga aylantiradi. Hisoblash arzon, noldan o‘ngda gradiyent so‘nmaydi.</p></div>
+          <div class="fc-row"><span class="lab">Hosila</span><div class="fx">$$\operatorname{ReLU}'(x)=\begin{cases}1, &amp; x&gt;0\\ 0, &amp; x&lt;0\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>$\operatorname{ReLU}(-3)=0$, $\operatorname{ReLU}(2{,}5)=2{,}5$. $x=0$ nuqtada hosila yo‘q; kutubxonalar kelishuv bo‘yicha $0$ oladi.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>def relu(x):
+    return np.maximum(0, x)
+
+def relu_grad(x):
+    return (x &gt; 0).astype(float)</code></pre></div>
+          <div class="fc-key"><b>Muammo:</b> «o‘layotgan ReLU» (dying ReLU). Neyron kirishi doim manfiy bo‘lsa, u 0 chiqaradi, gradiyent ham 0 — va neyron boshqa o‘rganmaydi.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="leaky-relu">
+        <div class="fc-top"><h3><span>Leaky ReLU</span><small>«oqadigan» ReLU</small></h3><span class="fc-tag mono">α ≈ 0.01</span></div>
+        <div class="fc-formula">$$\operatorname{LReLU}(x)=\max(\alpha x,\,x)=\begin{cases}x, &amp; x&gt;0\\ \alpha x, &amp; x\le 0\end{cases}$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>ReLU kabi, lekin manfiy qism nolga aylanmaydi, kichik $\alpha$ ga ko‘paytiriladi ($0&lt;\alpha&lt;1$ da). «O‘layotgan ReLU»ni davolaydi.</p></div>
+          <div class="fc-row"><span class="lab">Hosila</span><div class="fx">$$\operatorname{LReLU}'(x)=\begin{cases}1, &amp; x&gt;0\\ \alpha, &amp; x&lt;0\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>$\alpha=0{,}01$ da: $\operatorname{LReLU}(-3)=-0{,}03$, $\operatorname{LReLU}(2)=2$.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>def leaky_relu(x, alpha=0.01):
+    return np.where(x &gt; 0, x, alpha * x)</code></pre></div>
+          <div class="fc-key"><b>ReLU’dan farqi:</b> chapda gradiyent 0 emas, $\alpha$ ga teng. Kuchsiz signal doim oqadi va neyron «o‘lmaydi».</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="softmax">
+        <div class="fc-top"><h3><span>Softmax</span><small>«yumshoq maksimum»</small></h3><span class="fc-tag mono">Σ = 1</span></div>
+        <div class="fc-formula">$$\operatorname{softmax}(x)_i=s_i=\frac{e^{x_i}}{\sum_{j} e^{x_j}}$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>Logitlar (tarmoqning xom chiqishlari) vektorini ehtimolliklar taqsimotiga aylantiradi: barcha $s_i\in(0;\,1)$, yig‘indisi 1. Ko‘p sinfli klassifikatorning oxirida turadi.</p></div>
+          <div class="fc-row"><span class="lab">Barqarorlik</span><p>Amalda barcha logitlardan maksimum ayiriladi: $\dfrac{e^{x_i-\max x}}{\sum_j e^{x_j-\max x}}$. Natija o‘sha, lekin eksponenta to‘lib ketmaydi.</p></div>
+          <div class="fc-row"><span class="lab">Hosila</span><div class="fx">$$\frac{\partial s_i}{\partial x_j}=\begin{cases}s_i(1-s_i), &amp; i=j\\ -\,s_i s_j, &amp; i\ne j\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>$(2;\,1;\,0)$ logitlar $\approx(0{,}665;\,0{,}245;\,0{,}090)$ ehtimolliklarni beradi.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>def softmax(x):
+    e = np.exp(x - x.max())
+    return e / e.sum()</code></pre></div>
+          <div class="fc-key"><b>Eslab qoling:</b> $s_i(1-s_i)$ diagonal — aynan sigmoidaning hosilasi. Ikki sinf uchun softmax logitlar ayirmasining sigmoidasidir.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup" id="reg" data-group="reg">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">ŷ</span><h2>Yo‘qotishlar — regressiya</h2><p>Sonni bashorat qilamiz. Yo‘qotish funksiyasi (loss) $\hat{y}$ bashorat $y$ javobdan qanchalik uzoqligini ko‘rsatadi.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="mae">
+        <div class="fc-top"><h3><span>MAE</span><small>mean absolute error</small></h3><span class="fc-tag mono">|·|</span></div>
+        <div class="fc-formula">$$\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}\bigl|y_i-\hat{y}_i\bigr|$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>Xatoning o‘rtacha moduli. Maqsadli o‘zgaruvchi bilan bir xil birliklarda o‘lchanadi va eng oson tushuniladi. Chetga chiquvchi qiymatlarga MSE’dan chidamliroq.</p></div>
+          <div class="fc-row"><span class="lab">Hosila</span><div class="fx">$$\frac{\partial\,\mathrm{MAE}}{\partial\hat{y}_i}=-\frac{1}{n}\operatorname{sign}\bigl(y_i-\hat{y}_i\bigr)$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>Umumiy misol: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, xatolar $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{MAE}=(0{,}5+0+2)/3\approx0{,}833$.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>mae = np.mean(np.abs(y - y_hat))</code></pre></div>
+          <div class="fc-key"><b>Modul</b> turli ishorali xatolar bir-birini yo‘qotmasligi uchun kerak; $|x|=\sqrt{x^2}$. Gradiyent kattaligi 0,1 xato uchun ham, 100 xato uchun ham bir xil.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="mse">
+        <div class="fc-top"><h3><span>MSE</span><small>mean squared error</small></h3><span class="fc-tag mono">(·)²</span></div>
+        <div class="fc-formula">$$\mathrm{MSE}=\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>Xatoning o‘rtacha kvadrati. Kvadrat katta xatolarni qattiq jazolaydi. Birliklari — maqsadli o‘zgaruvchi birliklarining kvadrati.</p></div>
+          <div class="fc-row"><span class="lab">Hosila</span><div class="fx">$$\frac{\partial\,\mathrm{MSE}}{\partial\hat{y}_i}=-\frac{2}{n}\bigl(y_i-\hat{y}_i\bigr)$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>Umumiy misol: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, xatolar $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{MSE}=(0{,}25+0+4)/3\approx1{,}417$: bitta $-2$ xato yig‘indining 94% ini beradi.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>mse = np.mean((y - y_hat) ** 2)</code></pre></div>
+          <div class="fc-key">Gradiyent xatoga proporsional: xato qancha katta bo‘lsa, model unga shuncha kuchli tortiladi. Shuning uchun MSE chetga chiquvchi qiymatlarga MAE’dan sezgirroq — bitta anomal obyekt ulkan hissa qo‘shadi.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="rmse">
+        <div class="fc-top"><h3><span>RMSE</span><small>root mean squared error</small></h3><span class="fc-tag mono">√MSE</span></div>
+        <div class="fc-formula">$$\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2}$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>MSE’dan ildiz xatoni maqsadli o‘zgaruvchi birliklariga qaytaradi. MAE kabi tushunarli, lekin katta xatolarni baribir qattiqroq jazolaydi.</p></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>Umumiy misol: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, xatolar $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{RMSE}=\sqrt{1{,}417}\approx1{,}190$, $\mathrm{MAE}\approx0{,}833$ ga qarshi.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>rmse = np.sqrt(np.mean((y - y_hat) ** 2))</code></pre></div>
+          <div class="fc-key">Doim $\mathrm{RMSE}\ge\mathrm{MAE}$, tenglik faqat barcha xatolar modul bo‘yicha bir xil bo‘lganda. Farq qancha katta bo‘lsa, xatolar tarqoqligi shuncha kuchli: bu chetga chiquvchi qiymatlar ko‘rsatkichi.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="mape">
+        <div class="fc-top"><h3><span>MAPE</span><small>mean absolute percentage error</small></h3><span class="fc-tag mono">%</span></div>
+        <div class="fc-formula">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\left|\frac{y_i-\hat{y}_i}{y_i}\right|$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>Haqiqiy qiymatga nisbatan foizdagi xato: «model o‘rtacha MAPE % ga adashadi». Mutlaq emas, nisbiy xato muhim bo‘lganda qulay.</p></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>Umumiy misol: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, xatolar $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{MAPE}=\frac{100\%}{3}\bigl(\tfrac{0{,}5}{3}+0+\tfrac{2}{8}\bigr)\approx13{,}9\%$.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>mape = 100 * np.mean(np.abs((y - y_hat) / y))</code></pre></div>
+          <div class="fc-key">⚠ $y_i=0$ da aniqlanmagan va nol atrofida portlaydi. Nosimmetrik: musbat qiymatni kam bashorat qilish ko‘pi bilan 100% beradi, ortiq bashorat esa istalgancha. Simmetrik varianti — sMAPE.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="huber">
+        <div class="fc-top"><h3><span>Huber</span><small>MSE va MAE gibridi</small></h3><span class="fc-tag mono">chegara δ</span></div>
+        <div class="fc-formula">$$L_\delta(r)=\begin{cases}\tfrac{1}{2}r^2, &amp; |r|\le\delta\\[1mm] \delta\bigl(|r|-\tfrac{1}{2}\delta\bigr), &amp; |r|&gt;\delta\end{cases}\qquad r=y-\hat{y}$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>Nol atrofida MSE kabi kvadratik (aniq sozlash), katta xatolarda MAE kabi chiziqli (chetga chiquvchi qiymatlardan qo‘rqmaydi). Ikkala tarmoq va ularning hosilalari $|r|=\delta$ nuqtada tutashadi.</p></div>
+          <div class="fc-row"><span class="lab">Hosila</span><div class="fx">$$\frac{\partial L_\delta}{\partial\hat{y}}=\begin{cases}-r, &amp; |r|\le\delta\\ -\delta\operatorname{sign}(r), &amp; |r|&gt;\delta\end{cases}$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>Umumiy misol: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, xatolar $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\delta=1$ da: yo‘qotishlar $0{,}125$, $0$ va $1\cdot(2-0{,}5)=1{,}5$; o‘rtachasi $\approx0{,}542$.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>def huber(y, y_hat, delta=1.0):
+    r = np.abs(y - y_hat)
+    return np.mean(np.where(r &lt;= delta, 0.5 * r ** 2,
+                            delta * (r - 0.5 * delta)))</code></pre></div>
+          <div class="fc-key">Chetga chiquvchi qiymatlarda gradiyent moduli $\delta$ bilan cheklangan va portlamaydi. Masalan, anomaliyali ko‘chmas mulk narxlari uchun mos. $\delta\downarrow$ — MAE’ga yaqinroq, $\delta\uparrow$ — MSE’ga yaqinroq.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup" id="cls" data-group="cls">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">p</span><h2>Yo‘qotishlar — klassifikatsiya</h2><p>Sinfni bashorat qilamiz. Model ehtimolliklar chiqaradi, yo‘qotish esa to‘g‘ri javobning past ehtimolligini jazolaydi. Logarifm — natural.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="bce">
+        <div class="fc-top"><h3><span>BCE</span><small>binar kross-entropiya</small></h3><span class="fc-tag mono">+ sigmoid</span></div>
+        <div class="fc-formula">$$\mathrm{BCE}=-\frac{1}{n}\sum_{i=1}^{n}\Bigl[y_i\log\hat{y}_i+(1-y_i)\log\bigl(1-\hat{y}_i\bigr)\Bigr]$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>Ikki sinf uchun. $y\in\{0,1\}$ belgi kalit vazifasini bajaradi: ikki qo‘shiluvchidan bittasi qoladi — to‘g‘ri javob ehtimolligining $-\log$ i.</p></div>
+          <div class="fc-row"><span class="lab">Logit bo‘yicha hosila</span><div class="fx">$$\hat{y}=\sigma(z):\qquad \frac{\partial\,\mathrm{BCE}_i}{\partial z_i}=\hat{y}_i-y_i$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>To‘g‘ri javob $y=1$. Model ishonchli va haq, $\hat{y}=0{,}9$: yo‘qotish $-\ln0{,}9\approx0{,}105$. Ishonchli, lekin xato, $\hat{y}=0{,}1$: $-\ln0{,}1\approx2{,}303$ — 22 marta ko‘p.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>p = np.clip(y_hat, 1e-7, 1 - 1e-7)
+bce = -np.mean(y * np.log(p)
+               + (1 - y) * np.log(1 - p))</code></pre></div>
+          <div class="fc-key">Eng qattiq <b>ishonchli xatoni</b> jazolaydi: $y=1$ uchun $\hat{y}\to0$ da yo‘qotish cheksizlikka intiladi. Sigmoid + BCE toza gradiyent beradi: «bashorat − haqiqat».</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="cross-entropy">
+        <div class="fc-top"><h3><span>Categorical CE</span><small>kategorial kross-entropiya</small></h3><span class="fc-tag mono">+ softmax</span></div>
+        <div class="fc-formula">$$\mathrm{CE}=-\sum_{k=1}^{K} y_k\log\hat{y}_k$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Ma’nosi</span><p>$K$ ta sinf uchun; $y$ — one-hot vektor (to‘g‘ri sinf o‘rnida bir). Yig‘indida bitta qo‘shiluvchi qoladi — to‘g‘ri sinf ehtimolligining $-\log$ i.</p></div>
+          <div class="fc-row"><span class="lab">softmax + CE gradiyenti</span><div class="fx">$$\hat{y}=\operatorname{softmax}(x):\qquad \frac{\partial\,\mathrm{CE}}{\partial x_k}=s_k-y_k$$</div></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>$(2;\,1;\,0)$ logitlar, to‘g‘ri sinf — birinchisi. $s\approx(0{,}665;\,0{,}245;\,0{,}090)$, $\mathrm{CE}=-\ln0{,}665\approx0{,}408$, gradiyent $s-y\approx(-0{,}335;\,0{,}245;\,0{,}090)$: to‘g‘ri logit yuqoriga, qolganlari pastga tortiladi.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>def cross_entropy(logits, k):
+    z = logits - logits.max()
+    return np.log(np.exp(z).sum()) - z[k]</code></pre></div>
+          <div class="fc-key"><b>Asosiy natija:</b> softmax’ning butun Yakobi matritsasi logarifm bilan birga $s_k-y_k$ ga qisqaradi. Bu juftlik har qanday klassifikator va har qanday til modeli (LLM) oxirida turadi: u yerda sinflar — lug‘at tokenlari.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup" id="opt" data-group="opt">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">θ</span><h2>Optimizator</h2><p>Yo‘qotish kamayishi uchun $\theta$ vaznlarni $g_t$ gradiyent bo‘yicha qanday siljitish kerak.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="adam">
+        <div class="fc-top"><h3><span>Adam</span><small>adaptive moment estimation</small></h3><span class="fc-tag mono">momentum + adaptive</span></div>
+        <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,\frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">1-qadam · birinchi moment (inersiya)</span><div class="fx">$$m_t=\beta_1 m_{t-1}+(1-\beta_1)\,g_t$$</div></div>
+          <div class="fc-row"><span class="lab">2-qadam · ikkinchi moment (masshtab)</span><div class="fx">$$v_t=\beta_2 v_{t-1}+(1-\beta_2)\,g_t^2$$</div></div>
+          <div class="fc-row"><span class="lab">3-qadam · siljishni tuzatish</span><div class="fx">$$\hat{m}_t=\frac{m_t}{1-\beta_1^{\,t}}\qquad \hat{v}_t=\frac{v_t}{1-\beta_2^{\,t}}$$</div></div>
+          <div class="fc-row"><span class="lab">Standart giperparametrlar</span><p>$\eta=0{,}001$ (o‘qitish tezligi, learning rate), $\beta_1=0{,}9$, $\beta_2=0{,}999$, $\epsilon=10^{-8}$. Barcha amallar elementma-element: har bir vaznning o‘z $m$ va $v$ i bor.</p></div>
+          <div class="fc-row"><span class="lab">Misol</span><p>Birinchi qadam, $g_1=0{,}5$, $m_0=v_0=0$: $m_1=0{,}05$, $v_1=0{,}00025$. Tuzatishsiz qadam kichrayib ketardi; tuzatish bilan $\hat{m}_1=0{,}5$, $\hat{v}_1=0{,}25$ va $\hat{m}_1/\sqrt{\hat{v}_1}=1$. Vazn gradiyent masshtabidan qat’i nazar aynan $\eta$ ga siljiydi.</p></div>
+          <div class="fc-row"><span class="lab">Kodda</span><pre><code>m = b1 * m + (1 - b1) * g
+v = b2 * v + (1 - b2) * g ** 2
+m_hat = m / (1 - b1 ** t)
+v_hat = v / (1 - b2 ** t)
+theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
+          <div class="fc-key"><b>Surat</b> $\hat{m}_t$ — qayerga borish: inersiya gradiyent shovqinini so‘ndiradi. <b>Maxraj</b> $\sqrt{\hat{v}_t}$ — har bir vazn qadami qanchalik katta bo‘lishi. AdamW — vaznlar so‘nishi (weight decay) gradiyentdan ajratilgan o‘sha Adam; zamonaviy LLM’lar u bilan o‘qitiladi.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="fgroup upcoming" id="next" data-group="next">
+    <div class="fg-head"><span class="glyph math" aria-hidden="true">→</span><h2>Keyin nimani o‘rganaman</h2><p>Ustuvorlik bo‘yicha qisqa kartochkalar. Ularga yetib kelganimda bu yerda batafsil tahlil paydo bo‘ladi.</p></div>
+    <div class="fgrid">
+      <article class="fcard" id="silu">
+        <div class="fc-top"><h3><span>SiLU / Swish</span><small>Qwen va LLaMA aktivatsiyasi</small></h3><span class="fc-tag mono">1-ustuvorlik</span></div>
+        <div class="fc-formula">$$\operatorname{SiLU}(x)=x\cdot\sigma(x)$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Misol</span><p>$\operatorname{SiLU}(1)\approx0{,}731$, $\operatorname{SiLU}(-1)\approx-0{,}269$: ReLU’dan farqli, kichik manfiy qiymatlar o‘tadi.</p></div>
+          <div class="fc-key">Silliq aktivatsiya: noldan uzoqda ReLU kabi ishlaydi, lekin sinishsiz. SwiGLU bloklari ichida Qwen, LLaMA va boshqa zamonaviy LLM’larda ishlatiladi.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="gelu">
+        <div class="fc-top"><h3><span>GELU</span><small>BERT, GPT</small></h3><span class="fc-tag mono">1-ustuvorlik</span></div>
+        <div class="fc-formula">$$\operatorname{GELU}(x)=x\cdot\Phi(x)$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Misol</span><p>$\operatorname{GELU}(1)\approx0{,}841$, $\operatorname{GELU}(-1)\approx-0{,}159$.</p></div>
+          <div class="fc-key">$\Phi(x)$ — standart normal taqsimot funksiyasi: kirish uning «shovqindan katta» bo‘lish ehtimolligiga ko‘paytiriladi. BERT va GPT’dagi standart aktivatsiya.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="sgd">
+        <div class="fc-top"><h3><span>SGD → Momentum → RMSProp</span><small>Adam uchun poydevor</small></h3><span class="fc-tag mono">2-ustuvorlik</span></div>
+        <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,g_t$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Momentum</span><div class="fx">$$u_t=\beta u_{t-1}+g_t,\qquad \theta_t=\theta_{t-1}-\eta\,u_t$$</div></div>
+          <div class="fc-row"><span class="lab">RMSProp</span><div class="fx">$$v_t=\beta v_{t-1}+(1-\beta)\,g_t^2,\qquad \theta_t=\theta_{t-1}-\eta\,\frac{g_t}{\sqrt{v_t}+\epsilon}$$</div></div>
+          <div class="fc-key">Adam’ning o‘tmishdoshlari: Momentum inersiya qo‘shadi, RMSProp — har bir vazn uchun o‘z qadam masshtabini. Ularni tartib bilan tahlil qilsangiz, Adam ravshan bo‘lib qoladi.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="triplet">
+        <div class="fc-top"><h3><span>Triplet Loss</span><small>qayta identifikatsiya (Re-ID)</small></h3><span class="fc-tag mono">2-ustuvorlik</span></div>
+        <div class="fc-formula">$$L=\max\bigl(0,\;d(a,p)-d(a,n)+m\bigr)$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Misol</span><p>Oraliq $m=0{,}2$. $d(a,p)=0{,}4$, $d(a,n)=1{,}1$: $L=0$, uchlik allaqachon ajratilgan. $d(a,p)=0{,}9$, $d(a,n)=1{,}0$: $L=0{,}1$ — «begona» juda yaqin.</p></div>
+          <div class="fc-key">Metrikani o‘qitish (metric learning): $a$ langar «o‘ziniki» $p$ ga «begona» $n$ dan kamida $m$ oraliqqa yaqinroq bo‘lishi kerak. Kameralar orasida odamlarni qayta identifikatsiya qilish aynan shu matematikaga tayanadi.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="focal">
+        <div class="fc-top"><h3><span>Focal Loss</span><small>muvozanatsiz sinflar</small></h3><span class="fc-tag mono">3-ustuvorlik</span></div>
+        <div class="fc-formula">$$\mathrm{FL}=-(1-p_t)^{\gamma}\log p_t$$</div>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-row"><span class="lab">Misol</span><p>$p_t$ — to‘g‘ri sinf ehtimolligi. $\gamma=2$ da $p_t=0{,}9$ bo‘lgan oson misol CE’dagidan 100 marta yengil ($0{,}001$ ga qarshi $0{,}105$), $p_t=0{,}3$ bo‘lgan qiyin misol esa atigi 2 marta ($0{,}590$ ga qarshi $1{,}204$).</p></div>
+          <div class="fc-key">$(1-p_t)^\gamma$ ko‘paytuvchili kross-entropiya: oson misollar hissasini so‘ndiradi va o‘qitishni qiyinlariga qaratadi. Fon odamlar va yuzlardan ancha ko‘p bo‘lgan obyektlarni aniqlashda qo‘llaniladi.</div>
+          </div>
+        </details>
+      </article>
+      <article class="fcard" id="backprop">
+        <div class="fc-top"><h3><span>Backprop va regulyarizatsiya</span><small>formulalar emas, mavzular</small></h3><span class="fc-tag mono">mexanizmlar</span></div>
+        <p class="fc-lead">Gradiyent barcha qatlamlar orqali qanday orqaga oqadi · L1/L2 · Dropout · BatchNorm / LayerNorm</p>
+        <details>
+          <summary>Batafsil</summary>
+          <div class="fc-body">
+          <div class="fc-key">Keyingi qadam — yangi formula emas, <b>yig‘ish</b>: teskari tarqatishni yuqoridagi barcha formulalar birga ishlaydigan jarayon sifatida tushunish.</div>
+          </div>
+        </details>
+      </article>
+    </div>
+    <p class="fc-route"><b>Yo‘nalish:</b> SiLU va GELU (zamonaviy transformerlar aktivatsiyalarini yopish) → SGD, Momentum, RMSProp (Adam uchun poydevor) → Triplet Loss (Re-ID) → keyin formulalar emas, mexanizmlar: xatoni teskari tarqatish va transformer ichidagi attention.</p>
+  </section>
+
+  <section class="takeaway mat-links">
+    <h2>Asosiy bog‘lanishlar</h2>
+    <ul>
+      <li>$\tanh(x)=2\sigma(2x)-1$: giperbolik tangens — cho‘zilgan va surilgan sigmoida.</li>
+      <li>Ikki sinf uchun softmax logitlar ayirmasining sigmoidasiga teng, uning hosilasi diagonali $s_i(1-s_i)$ esa sigmoidaning hosilasi.</li>
+      <li>Sigmoid + BCE va softmax + CE logitlar bo‘yicha bir xil gradiyent beradi: «bashorat − haqiqat», $\hat{y}-y$.</li>
+      <li>Huber — MSE va MAE orasidagi ko‘prik: nol atrofida kvadratik, katta xatolarda chiziqli.</li>
+      <li>Adam = Momentum (inersiya, surat) + RMSProp (qadam masshtabi, maxraj) + siljishni tuzatish.</li>
+    </ul>
+  </section>
+
+  <p class="mat-back"><a class="ul" href="../">← Barcha materiallar</a></p>
+</div>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../uz/#posts">Maqolalar</a>
+    <a href="../../../uz/materials/">Materiallar</a>
+    <a href="../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../assets/js/site.js" defer></script>
+<script src="../../../assets/js/materials.js" defer></script>
+</body>
+</html>
