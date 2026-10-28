@@ -152,6 +152,11 @@
   const parsed = {};
   FV.cmap = function (name, t) {
     t = FV.clamp(Number.isFinite(t) ? t : 0, 0, 1);
+    if (name === "seq" || name === "seq-orange") {
+      // sequential map that follows the theme: neutral background tone → series colour
+      const bg = hex(FV.css("v-mid") || "#e8e8e8"), c = hex(FV.css(name === "seq" ? "v-blue" : "v-orange") || "#3e6ae1");
+      return bg.map((v, i) => Math.round(v + (c[i] - v) * Math.pow(t, 0.8)));
+    }
     if (name === "diverging") {
       // blue ↔ neutral ↔ red around t = 0.5, neutral follows the theme
       const bg = hex(FV.css("v-mid") || "#e8e8e8");
@@ -181,7 +186,8 @@
     const step0 = (b - a) / Math.max(1, n);
     const mag = Math.pow(10, Math.floor(Math.log10(step0)));
     const e = step0 / mag;
-    const step = (e >= 7.5 ? 10 : e >= 3.5 ? 5 : e >= 1.5 ? 2 : 1) * mag;
+    const k = 1 - 1e-9; // tolerate rounding: a span of 1.4 in 4 parts is exactly 0.35
+    const step = (e >= 7.5 * k ? 10 : e >= 3.5 * k ? 5 : e >= 1.5 * k ? 2 : 1) * mag;
     const out = [];
     for (let v = Math.ceil(a / step - 1e-9) * step; v <= b + step * 1e-9; v += step) out.push(Math.abs(v) < step * 1e-9 ? 0 : v);
     return { values: out, d: decimals(step) };

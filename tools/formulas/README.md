@@ -84,7 +84,7 @@ META = dict(
   с вращением мышью/пальцем: `setF, setDomain, setPaths([{pts:[[x,y,z],…], c}]), setPoints([{x,y,z,c,label}]), setPlanes`.
 * Колонки: `FV.shell(el, {cols: true})` и `FV.col(w.stage)`.
 * Контролы: `FV.ui.slider, seg, check, button, player({onstep, onreset, interval}), readout`.
-* Цвета серий `c`: `ink, blue, orange, teal, red, violet, faint, guide`; карты цветов: `viridis, magma, blues, diverging`.
+* Цвета серий `c`: `ink, blue, orange, teal, red, violet, faint, guide`; карты цветов: `viridis, magma, blues, diverging` и следующие теме `seq`, `seq-orange` (для тёмной темы лучше `seq`/`diverging`).
 * Числа: `FV.fmt(v, d)` (запятая в ru/uz), `FV.num(v, sig)`; детерминированный ГПСЧ `FV.rng(seed)` (`.normal()`);
   `FV.sigmoid, FV.erf, FV.Phi, FV.phi`.
 * Подписи с формулами: `FV.rich("Вес $w$")`, `FV.tex(src)`.
