@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Adam: momentum, scale and bias correction — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="Adam in depth: the moments m and v, the derivation of bias correction, scale invariance, the step and the signal-to-noise ratio, an optimizer race in 3D, AdamW versus L2, warmup and cosine schedules, NumPy and PyTorch code.">
+  <meta property="og:title" content="Adam: momentum, scale and bias correction — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="Adam in depth: the moments m and v, the derivation of bias correction, scale invariance, the step and the signal-to-noise ratio, an optimizer race in 3D, AdamW versus L2, warmup and cosine schedules, NumPy and PyTorch code.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/adam/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/adam/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/adam/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/adam/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/adam.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/adam/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/adam/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/adam/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Optimizer</span>
+  <h1>Adam: momentum, scale and bias correction</h1>
+  <p class="dek">The default optimizer for neural networks and the basis of AdamW, which trains language models. We take apart both moments, derive bias correction, see why Adam’s step does not depend on the gradient’s scale and shrinks by itself in noise, race five optimizers over 3D surfaces and work out why AdamW beats L2 regularization.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 40 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need Adam</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: a compass and a speedometer</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#bias"><span class="n">4</span>Bias correction: where 1 − βᵗ comes from</a>
+      <a href="#properties"><span class="n">5</span>Properties of the step</a>
+      <a href="#math"><span class="n">6</span>The mathematics behind the formula</a>
+      <a href="#landscape"><span class="n">7</span>An optimizer race in 3D</a>
+      <a href="#adamw"><span class="n">8</span>AdamW: weight decay done right</a>
+      <a href="#training"><span class="n">9</span>Adam in training: warmup and schedules</a>
+      <a href="#code"><span class="n">10</span>In code: from scratch and in PyTorch</a>
+      <a href="#practice"><span class="n">11</span>Hyperparameters and practice</a>
+      <a href="#mistakes"><span class="n">12</span>Common mistakes</a>
+      <a href="#links"><span class="n">13</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">14</span>Summary</a>
+      <a href="#quiz"><span class="n">15</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\theta_t=\theta_{t-1}-\eta\,\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}$$</div>
+
+    <h2 id="why">Why we need Adam</h2>
+    <p>A neural network has millions of weights, and their gradients live on very different scales: embeddings of rare tokens get rare large kicks, the last layers get constant small ones, normalization layers yet others. Plain <a href="../sgd/">SGD</a> takes the step $\eta g$, and a single rate $\eta$ is at once too large for some weights and too small for others. On top of that, the mini-batch gradient is noisy, and the loss surface is full of elongated ravines and plateaus.</p>
+    <p>Adam (adaptive moment estimation, Kingma and Ba, 2014) tackles both problems with one formula:</p>
+    <ul class="flist"><li><b>the first moment</b> $m_t$ — an exponential average of gradients: inertia that damps noise and zigzags (like <a href="../sgd/">Momentum</a>);</li><li><b>the second moment</b> $v_t$ — an exponential average of squared gradients: the typical gradient size of each weight, by which the step is divided (like RMSProp);</li><li><b>bias correction</b> — division by $1-\beta^t$, which removes the systematic underestimate of the moments in the first steps.</li></ul>
+    <p>The result: every weight’s step is of order $\eta$ regardless of its gradient’s scale, with no manual tuning per layer. That is why Adam is the default optimizer for most tasks, and its variant AdamW trains transformers and large language models.</p>
+    <div class="callout key"><b>The essentials in a minute</b><p>$m_t$ says where to go (a smoothed gradient), $\sqrt{v_t}$ how big a step to take (the root-mean-square gradient), $1-\beta^t$ corrects for starting from zero. The step $\eta\,\hat m_t/(\sqrt{\hat v_t}+\epsilon)$ is dimensionless: multiply the gradients by 1000 and the steps do not change. With a clean signal the step is $\approx\eta$, in noise it is smaller. AdamW takes weight decay out of the gradient.</p></div>
+
+    <h2 id="intuition">Intuition: a compass and a speedometer</h2>
+    <p>Imagine driving off-road by a jittery compass. Turning the wheel at every twitch would be silly — it is wiser to follow the averaged direction. That is $m_t$. And the speed should depend on how strong the twitches usually are: on a smooth road you can drive confidently, on bumps carefully. That is $\sqrt{v_t}$: Adam’s step is the direction divided by the typical strength of the jolts.</p>
+    <p>The figure shows the gradient stream of one weight: mean $+0.5$ until step 100 and $-0.5$ after, plus noise. The orange line is the smoothed gradient $\hat m_t$, the teal lines are the corridor $\pm\sqrt{\hat v_t}$, and below is the resulting step in units of $\eta$.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-moments" data-config="{&quot;b1&quot;: 0.9, &quot;b2&quot;: 0.999, &quot;sigma&quot;: 1, &quot;t&quot;: 1}"></div><figcaption><b>Figure 1.</b> Adam’s moments on a noisy gradient ($\sigma=1$). The $t$ slider picks the step for the table below the figure. At the first step $\hat m_1/\sqrt{\hat v_1}=1$ exactly — the step is $\eta$ against $g_1$, whatever $g_1$ is; without correction the ratio would be $3.16$. After the mean changes sign, $\hat m_t$ turns negative for good from step 109, while $\sqrt{\hat v_t}$ hardly changes ($\approx1.1$): the step size is set by the signal-to-noise ratio, $0.5/\sqrt{1.25}\approx0.45$. Even at step 200 the uncorrected step (dashed) is $2.35$ times the correct one.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>Remove the noise ($\sigma=0$): the step immediately becomes exactly $\pm1$ — with a clean signal Adam takes steps of $\eta$, like a sign method. Increase the noise and the step shrinks. Lower $\beta_1$ to zero and $\hat m_t$ turns into the gradient itself, so the step jumps between $\pm1$.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <div class="eqd">$$\begin{aligned}g_t&amp;=\nabla_\theta L(\theta_{t-1})\\ m_t&amp;=\beta_1 m_{t-1}+(1-\beta_1)\,g_t\\ v_t&amp;=\beta_2 v_{t-1}+(1-\beta_2)\,g_t^2\\ \hat m_t&amp;=\frac{m_t}{1-\beta_1^{\,t}},\qquad \hat v_t=\frac{v_t}{1-\beta_2^{\,t}}\\ \theta_t&amp;=\theta_{t-1}-\eta\,\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}\end{aligned}$$</div>
+    <dl class="symbols"><dt>$g_t$</dt><dd>the mini-batch gradient at step $t$ (steps are numbered from 1);</dd><dt>$m_t$</dt><dd>the first moment: an exponential moving average (EMA) of the gradient, $m_0=0$;</dd><dt>$v_t$</dt><dd>the second moment: an EMA of the element-wise squared gradient, $v_0=0$; every weight has its own $m$ and $v$;</dd><dt>$\beta_1,\ \beta_2$</dt><dd>decay rates, $0.9$ and $0.999$ by default: memory of about $1/(1-\beta)$ steps — 10 and 1000;</dd><dt>$1-\beta^t$</dt><dd>bias correction: compensates for the moments starting at zero;</dd><dt>$\eta$</dt><dd>the learning rate, $10^{-3}$ by default; here it sets the typical step length in the units of the weights;</dd><dt>$\epsilon$</dt><dd>a small constant ($10^{-8}$) against division by zero.</dd></dl>
+    <p>Let us run three steps by hand for the gradients $0.5$, $-0.2$, $0.4$ with the standard $\beta_1=0.9$, $\beta_2=0.999$. The last column shows what the step would be without bias correction.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$t$</th><th class=num>$g_t$</th><th class=num>$m_t$</th><th class=num>$v_t$</th><th class=num>$\hat m_t$</th><th class=num>$\sqrt{\hat v_t}$</th><th class=num>step $/\eta$</th><th class=num>uncorrected</th></tr></thead><tbody><tr><td class=num>1</td><td class=num>0.5</td><td class=num>0.05</td><td class=num>0.00025</td><td class=num>0.5</td><td class=num>0.5</td><td class=num>1.000</td><td class=num>3.162</td></tr><tr><td class=num>2</td><td class=num>−0.2</td><td class=num>0.025</td><td class=num>0.00029</td><td class=num>0.1316</td><td class=num>0.3807</td><td class=num>0.346</td><td class=num>1.469</td></tr><tr><td class=num>3</td><td class=num>0.4</td><td class=num>0.0625</td><td class=num>0.00045</td><td class=num>0.2306</td><td class=num>0.3873</td><td class=num>0.596</td><td class=num>2.948</td></tr></tbody></table></div>
+    <div class="callout note"><b>The first step in detail</b><p>$g_1=0.5$: $m_1=0.1\cdot0.5=0.05$ and $v_1=0.001\cdot0.25=0.00025$ — both moments are understated, by factors of 10 and 1000. The correction restores $\hat m_1=0.5$ and $\hat v_1=0.25$, and the ratio $\hat m_1/\sqrt{\hat v_1}=1$: the weight moves by exactly $\eta$. Without correction it would be $m_1/\sqrt{v_1}=0.05/0.0158\approx3.16$ — the step is $3.16$ times too large, because $\sqrt{v_1}$ is understated more ($\sqrt{1000}\approx31.6$ times) than $m_1$ (10 times). Correcting only $m$ would make the step $31.6$ times too large; correcting only $v$ would make it 10 times too small.</p></div>
+    <p>Note the third step: the gradients changed sign, so $\hat m_3=0.23$ is noticeably smaller than the typical gradient size $\sqrt{\hat v_3}=0.39$, and Adam steps only $0.6\eta$. The more consistent the gradients, the closer the step is to $\eta$.</p>
+
+    <h2 id="bias">Bias correction: where 1 − βᵗ comes from</h2>
+    <p>The moments start at zero, and the first steps “remember” that zero. Unroll the recursion for $m_t$:</p>
+    <div class="eqd">$$m_t=(1-\beta_1)\sum_{i=1}^{t}\beta_1^{\,t-i}\,g_i$$</div>
+    <p>This is a weighted sum of gradients, but the weights add up not to 1 but to $(1-\beta_1)(1+\beta_1+\dots+\beta_1^{t-1})=1-\beta_1^t$. The missing share $\beta_1^t$ went to the initial zero. Hence the correction.</p>
+    <details class="deep"><summary>Derivation: $\hat m_t$ and $\hat v_t$ are unbiased</summary><div class="deep-body">
+      <p>Let the gradients be stationary: $\mathbb E[g_i]=\mu$, $\mathbb E[g_i^2]=s$ for all $i$. Then by linearity of expectation</p>
+      <div class="eqd">$$\mathbb E[m_t]=(1-\beta_1)\sum_{i=1}^{t}\beta_1^{\,t-i}\mu=\mu\,(1-\beta_1^{\,t}),\qquad \mathbb E[v_t]=s\,(1-\beta_2^{\,t})$$</div>
+      <p>Dividing by $1-\beta^t$ gives $\mathbb E[\hat m_t]=\mu$ and $\mathbb E[\hat v_t]=s$ — the estimates are unbiased from the very first step. If the gradients are non-stationary, a bias of the order of the change of $\mu$ over the memory window remains; Kingma and Ba note that it can be kept small because the weights of the distant past are exponentially small.</p>
+      <p>The correction matters only at the start: $\beta_1^t&lt;0.01$ already for $t\ge44$, but $\beta_2^t&lt;0.01$ only for $t\ge4603$. That is why it matters most for the second moment.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="adam-bias" data-config="{&quot;b1&quot;: 0.9, &quot;b2&quot;: 0.999}"></div><figcaption><b>Figure 2.</b> The correction factors $1/(1-\beta_1^t)$ and $1/(1-\beta_2^t)$ (both axes logarithmic) and the ratio of the uncorrected step to the corrected one for a constant gradient, $(1-\beta_1^t)/\sqrt{1-\beta_2^t}$. With the standard $\beta$ the first factors are 10 and 1000; the uncorrected step is $3.16$ times too large at the first step, most of all — $6.57$ times — at step 12, still $2.35$ times at step 200 and $1.26$ times at step 1000. With $\beta_2=0.99$ the first steps coincide ($0.1/\sqrt{0.01}=1$), but by step 13 the overshoot reaches $2.13$.</figcaption></figure>
+    <div class="callout warn"><b>Why this matters in practice</b><p>Without correction Adam’s early steps are several times longer than intended — exactly when the weights have just been initialized and the loss is at its largest. This is one of the reasons transformers without learning-rate warmup diverge in the first hundreds of steps; the correction itself removes this risk only partly, because in the first steps $\hat v_t$ is estimated from just a few gradients.</p></div>
+
+    <h2 id="properties">Properties of the step</h2>
+    <h3>Scale invariance</h3>
+    <p>Multiply all gradients of a weight by $c&gt;0$. Then $m_t$ is multiplied by $c$, $v_t$ by $c^2$, $\sqrt{v_t}$ by $c$, and the ratio $\hat m_t/\sqrt{\hat v_t}$ does not change. Adam’s step is a homogeneous function of degree zero in the gradients (as long as $\sqrt{\hat v_t}\gg\epsilon$). Each weight’s effective rate $\eta/(\sqrt{\hat v_t}+\epsilon)$ adapts by itself: large for weights with small gradients, small for weights with large ones.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-scale" data-config="{&quot;eps&quot;: 1e-08}"></div><figcaption><b>Figure 3.</b> Four parameters with the same noisy gradient $c\,(1+0.5\xi_t)$ but scales $c$ from $10^{-3}$ to $10^{3}$; the bars are the step length at step 100 (log scale). SGD’s steps differ by a factor of $10^6$, Adam’s steps are identical: $8.8\cdot10^{-4}=0.88\,\eta$, while the effective rate $\eta/(\sqrt{\hat v}+\epsilon)$ ranges from $8.8\cdot10^{-7}$ to $0.88$. Lower the overall scale $k$ to $10^{-6}$: a gradient of order $10^{-9}$ becomes smaller than $\epsilon=10^{-8}$, and its step drops 10 times — this is how $\epsilon$ switches off adaptation for very small gradients.</figcaption></figure>
+    <h3>The step and the signal-to-noise ratio</h3>
+    <p>Let a weight’s gradient be stationary with mean $\mu$ and standard deviation $\sigma$. Then $\hat m_t\approx\mu$, $\hat v_t\approx\mu^2+\sigma^2$ (the second moment is the squared mean plus the variance), and the mean step is</p>
+    <div class="eqd">$$\frac{|\Delta\theta|}{\eta}\approx\frac{|\mu|}{\sqrt{\mu^2+\sigma^2}}=\frac{\mathrm{SNR}}{\sqrt{1+\mathrm{SNR}^2}},\qquad \mathrm{SNR}=\frac{|\mu|}{\sigma}$$</div>
+    <p>With a clean signal ($\sigma\ll|\mu|$) the step is $\approx\eta$; in strong noise ($\sigma\gg|\mu|$) it is proportional to the signal-to-noise ratio. This is automatic “braking”: near the minimum the mean gradient tends to zero while the noise remains — and Adam shortens its steps by itself.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-snr" data-config="{&quot;b1&quot;: 0.9, &quot;b2&quot;: 0.999, &quot;snr&quot;: 0.3}"></div><figcaption><b>Figure 4.</b> Adam’s mean step (in units of $\eta$) against the signal-to-noise ratio $\mu/\sigma$: the solid line is the formula above, the points are a 20,000-step simulation with a spread of $\pm$ one standard deviation, the dashed line is SGD’s step, which grows in proportion to $\mu$. At $\mu/\sigma=0.3$ the formula gives $0.287$, the simulation $0.298$ with a spread of $\pm0.216$. With a weak signal the spread is close to $\sqrt{(1-\beta_1)/(1+\beta_1)}\approx0.23$: lower $\beta_1$ and the steps become more erratic.</figcaption></figure>
+    <details class="deep"><summary>How large can the step get</summary><div class="deep-body">
+      <p>Usually $|\hat m_t|\le\sqrt{\hat v_t}$ and the step does not exceed $\eta$, but this is not a theorem. If the gradient was zero and suddenly became $g$, then for large $t$ we get $m_t=(1-\beta_1)g$, $v_t=(1-\beta_2)g^2$, and the step equals $\eta(1-\beta_1)/\sqrt{1-\beta_2}\approx3.16\,\eta$ — the case discussed by Kingma and Ba. The exact upper bound follows from the Cauchy–Schwarz inequality for weighted sums:</p>
+      <div class="eqd">$$\frac{|m_t|}{\sqrt{v_t}}\le\frac{1-\beta_1}{\sqrt{(1-\beta_2)\,(1-\beta_1^2/\beta_2)}}\approx7.27$$</div>
+      <p>(for $\beta_1^2&lt;\beta_2$). It is attained when the gradient grows by a factor of $\beta_2/\beta_1\approx1.11$ per step. So Adam’s step is bounded by something of order $\eta$ for any gradients — a built-in protection against their explosion.</p>
+    </div></details>
+    <h3>Special cases</h3>
+    <ul class="flist"><li>$\beta_1=\beta_2=0$: $\hat m_t=g_t$, $\sqrt{\hat v_t}=|g_t|$, the step is $\eta\operatorname{sign}(g_t)$ — sign gradient descent (signSGD).</li><li>$\beta_1=0$: RMSProp with bias correction.</li><li>$\epsilon\gg\sqrt{\hat v_t}$: the step is $\approx(\eta/\epsilon)\,\hat m_t$ — SGD with momentum and rate $\eta/\epsilon$.</li><li>Adam is a <b>diagonal</b> preconditioner: it scales each coordinate separately and cannot rotate the axes (see Figure 6 on the <a href="../sgd/">SGD</a> page).</li></ul>
+
+    <h2 id="math">The mathematics behind the formula</h2>
+    <p>Let us collect what hides behind the four lines.</p>
+    <ul class="flist"><li><b>EMA as a weighted average.</b> $\hat m_t=\sum_i w_i g_i$ with weights $w_i=(1-\beta_1)\beta_1^{t-i}/(1-\beta_1^t)$, which are positive and sum to 1. The weight halves roughly every $\ln2/(1-\beta)$ steps: 7 for $\beta_1=0.9$ and 693 for $\beta_2=0.999$.</li><li><b>The effective window</b> $1/(1-\beta)$: $m$ averages about the last 10 gradients, $v$ about the last 1000. The direction reacts fast, the scale slowly and therefore stably.</li><li><b>The second moment is not the variance.</b> $v$ estimates $\mathbb E[g^2]=\mu^2+\sigma^2$, the “uncentred” size of the gradient. That is why with a clean signal the step is $\approx\eta$ rather than infinite.</li><li><b>The link to Newton’s method.</b> It is sometimes said that $\sqrt v$ approximates the curvature. That is only partly true: $v$ estimates the diagonal of the empirical Fisher matrix (from mini-batch gradients), which for some losses is close to the Hessian near the minimum, but Adam takes its square root. It is safer to see Adam as step normalization rather than as an approximation to Newton.</li></ul>
+    <details class="deep"><summary>Convergence: a counterexample and AMSGrad</summary><div class="deep-body">
+      <p>The original proof of Adam’s convergence for convex problems contained an error. Reddi, Kale and Kumar (2018) built a simple convex problem on which Adam converges to a worse point: a rare but large gradient is quickly “forgotten” in $v_t$, because the $\beta_2$ memory is finite, and the effective rate $\eta/\sqrt{\hat v_t}$ can grow.</p>
+      <p>Their fix, AMSGrad, uses $\hat v_t=\max(\hat v_{t-1},v_t)$ — the effective rate no longer grows, and convergence in the convex case can be proved. In practice AMSGrad is rarely noticeably better than Adam (in PyTorch it is the flag <code>amsgrad=True</code>). For non-convex problems guarantees exist for a decaying rate and a large enough $\beta_2$.</p>
+    </div></details>
+
+    <h2 id="landscape">An optimizer race in 3D</h2>
+    <p>Let us compare five methods on two surfaces. The first is a plateau with a pit: $f=1-e^{-q(x,y)}$, $q=0.2(x-1)^2+1.2(y-0.5)^2$. Far from the pit $f\approx1$ and the gradient is tiny, while the pit itself is elongated. The second is the Rosenbrock banana.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-race" data-config="{&quot;fn&quot;: &quot;plateau&quot;}"></div><figcaption><b>Figure 5.</b> On the left the surface in 3D (you can rotate it), on the right the view from above; the start can be dragged, and “Play” replays the race. At the start $(-2.4,\,-1.5)$ the gradient is of order $4\cdot10^{-3}$: SGD with $\eta=0.3$ crawls across the plateau and reaches $f&lt;0.01$ only after 246 steps, Momentum after 61, RMSProp after 44, Adam after 58, AdamW after 53. But AdamW stops not at the minimum $(1,\,0.5)$ but at $(0.979,\,0.498)$, where $f=9\cdot10^{-5}$: weight decay pulls towards zero. On Rosenbrock, within 2000 steps: Momentum takes 416 steps, Adam 717, AdamW 818, while SGD and RMSProp never reach $f&lt;0.01$.</figcaption></figure>
+    <div class="callout intuition"><b>What the race teaches</b><p>Adaptive methods win where gradients are badly scaled: on a plateau their step stays of order $\eta$, while SGD’s is proportional to the tiny gradient. But well-tuned momentum can beat them (Rosenbrock), and weight decay shifts the solution — that is not a bug but regularization. There is no universal winner.</p></div>
+
+    <h2 id="adamw">AdamW: weight decay done right</h2>
+    <p>Classic $L_2$ regularization adds $\tfrac\lambda2\|\theta\|^2$ to the loss, i.e. $\lambda\theta$ to the gradient. For SGD this is the same as multiplying the weights by $1-\eta\lambda$ at every step (weight decay). For Adam it is not: the term $\lambda\theta$ enters $m$ and $v$ and gets divided by $\sqrt{\hat v_t}$. Loshchilov and Hutter (2017) proposed to decouple decay from the gradient:</p>
+    <div class="eqd">$$\text{Adam}+L_2:\quad \begin{aligned}g_t&amp;=\nabla L(\theta_{t-1})+\lambda\,\theta_{t-1}\\ \theta_t&amp;=\theta_{t-1}-\eta\,\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}\end{aligned}$$</div>
+    <div class="eqd">$$\text{AdamW}:\quad \theta_t=\theta_{t-1}-\eta\Bigl(\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}+\lambda\,\theta_{t-1}\Bigr)$$</div>
+    <p>In AdamW the moments are computed from the loss gradient alone, and all weights decay at the same rate $\eta\lambda$ per step. In Adam with $L_2$ each weight’s decay is divided by its $\sqrt{\hat v_t}$: weights with large gradients are barely regularized, while weights with no loss gradient shrink at a constant speed of $\approx\eta$ per step, regardless of $\lambda$.</p>
+    <figure class="viz"><div class="fv" data-viz="adam-adamw" data-config="{&quot;lam&quot;: 0.1}"></div><figcaption><b>Figure 6.</b> Three weights starting at $\theta=1$; their data gradient alternates in sign, $\pm c$ (zero on average), with $c=0$, $0.1$ and $10$. Rate $\eta=0.01$, $\lambda=0.1$, 1000 steps. AdamW (violet) shrinks all three equally, to $0.37\approx e^{-\eta\lambda t}=e^{-1}$. Adam with $L_2$ (orange) wipes out the weight with no gradient (below $0.01$ already by step 213), shrinks the weight with $c=0.1$ to $0.0003$ and barely touches the weight with $c=10$, which keeps $0.889$.</figcaption></figure>
+    <div class="callout key"><b>Takeaway</b><p>In Adam, $L_2$ regularization and weight decay are different things. If you want decay, use <code>AdamW</code>; in PyTorch <code>torch.optim.Adam(weight_decay=…)</code> implements exactly $L_2$ inside the gradient. The default for <code>AdamW</code> is $\lambda=0.01$; language models are usually trained with $\lambda=0.1$ and without decay on biases and normalization weights.</p></div>
+
+    <h2 id="training">Adam in training: warmup and schedules</h2>
+    <p>Even an adaptive method needs a rate schedule. The most common scheme for transformers is a <b>linear warmup</b> from zero to $\eta_{\max}$ over the first hundreds or thousands of steps, followed by a <b>cosine decay</b> to $\eta_{\min}$:</p>
+    <div class="eqd">$$\eta_t=\eta_{\max}\,\frac{t}{T_w}\qquad(t\le T_w)$$</div>
+    <div class="eqd">$$\eta_t=\eta_{\min}+\tfrac12(\eta_{\max}-\eta_{\min})\bigl(1+\cos\pi p\bigr),\quad p=\frac{t-T_w}{T-T_w}$$</div>
+    <figure class="viz"><div class="fv" data-viz="adam-schedule" data-config="{&quot;warm&quot;: 200, &quot;minr&quot;: 0.1}"></div><figcaption><b>Figure 7.</b> Adam on a noisy quadratic problem (10 parameters with curvatures from $0.01$ to 1, gradient noise $0.05$), $\eta_{\max}=0.05$, 2000 steps. Top: the rate; bottom: the loss (log scale). With a constant $\eta$ the loss gets stuck at the noise level $5.6\cdot10^{-3}$ (mean of the last 100 steps); with a 200-step warmup and cosine down to $0.1\,\eta_{\max}$ it reaches $7.1\cdot10^{-4}$, $7.9$ times lower. Warmup only slightly delays the start here; its benefit shows in deep networks.</figcaption></figure>
+    <p>Why decay helps: from the section on properties, Adam’s step near the minimum is proportional to $\eta$ times the signal-to-noise ratio. The smaller $\eta$, the smaller the cloud in which the weights jitter around the minimum.</p>
+    <p>Why warmup is needed: in the first steps $\hat v_t$ is estimated from a few gradients and is very noisy, while the weights have just been initialized and the gradients are especially large. Liu et al. (RAdam, 2019) showed that the variance of the effective rate $\eta/\sqrt{\hat v_t}$ is large early in training and proposed to rectify it analytically; warmup solves the same problem more simply.</p>
+    <div class="callout note"><b>A typical recipe for language models</b><p>AdamW with $\beta_1=0.9$, $\beta_2=0.95$, $\lambda=0.1$, gradient clipping at norm 1, warmup over ~2000 steps and a cosine down to 10% of $\eta_{\max}$ — this is, for example, how the training of LLaMA is described. A smaller $\beta_2$ (a window of 20 steps instead of 1000) reacts faster to gradient spikes and makes training of large models more stable.</p></div>
+
+    <h2 id="code">In code: from scratch and in PyTorch</h2>
+    <p>A from-scratch implementation takes twenty lines. The <code>decoupled</code> flag switches weight decay between AdamW and $L_2$ inside the gradient.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+class Adam:
+    &quot;&quot;&quot;Adam; with weight_decay &gt; 0 and decoupled=True it is AdamW. As in torch.optim.&quot;&quot;&quot;
+    def __init__(self, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0, decoupled=True):
+        self.lr, (self.b1, self.b2), self.eps = lr, betas, eps
+        self.wd, self.decoupled = weight_decay, decoupled
+        self.m = self.v = None
+        self.t = 0
+
+    def step(self, theta, g):
+        if self.m is None:
+            self.m, self.v = np.zeros_like(theta), np.zeros_like(theta)
+        if self.wd and not self.decoupled:
+            g = g + self.wd * theta                        # L2 inside the gradient (Adam)
+        self.t += 1
+        self.m = self.b1 * self.m + (1 - self.b1) * g      # momentum
+        self.v = self.b2 * self.v + (1 - self.b2) * g * g  # scale
+        m_hat = self.m / (1 - self.b1 ** self.t)           # bias correction
+        v_hat = self.v / (1 - self.b2 ** self.t)
+        if self.wd and self.decoupled:
+            theta = theta - self.lr * self.wd * theta      # AdamW: decay applied separately
+        return theta - self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
+
+# The three steps from the table: g = 0.5, −0.2, 0.4 (lr = 1, so the step is in units of η)
+opt, th = Adam(lr=1.0), np.zeros(1)
+for g in [0.5, -0.2, 0.4]:
+    new = opt.step(th, np.array([g]))
+    print(f&quot;t={opt.t}: m̂={opt.m[0] / (1 - 0.9 ** opt.t):.4f}  step/η={th[0] - new[0]:.4f}&quot;)
+    th = new
+# t=1: m̂=0.5000  step/η=1.0000
+# t=2: m̂=0.1316  step/η=0.3456
+# t=3: m̂=0.2306  step/η=0.5955
+
+# Scale invariance: gradients ×1000 give the same steps
+rng = np.random.default_rng(0)
+a, b, x, y = Adam(lr=0.01), Adam(lr=0.01), np.zeros(1), np.zeros(1)
+for t in range(100):
+    g = rng.normal(1.0, 0.5, size=1)
+    x, y = a.step(x, g), b.step(y, 1000 * g)
+print(x, y, abs(x - y))   # [-0.95081564] [-0.95081565] [8.6e-09] — the difference comes from ε alone</code></pre>
+    <p>The output matches the table from “The formula, bone by bone”, and <code>torch.optim.Adam</code> moves the weight by exactly $\eta$ on the same first step. A typical training loop with AdamW, separate decay groups, warmup and cosine:</p>
+    <pre class="code"><span class="lang">python</span><code>import math
+import torch
+import torch.nn.functional as F
+
+decay = [p for p in model.parameters() if p.ndim &gt;= 2]     # weight matrices
+no_decay = [p for p in model.parameters() if p.ndim &lt; 2]   # biases and normalization layers
+opt = torch.optim.AdamW([{&quot;params&quot;: decay, &quot;weight_decay&quot;: 0.1},
+                         {&quot;params&quot;: no_decay, &quot;weight_decay&quot;: 0.0}],
+                        lr=3e-4, betas=(0.9, 0.95), eps=1e-8)
+
+total, warmup = 10_000, 500
+def lr_factor(step):                       # lr multiplier: warmup, then cosine down to 10%
+    if step &lt; warmup:
+        return (step + 1) / warmup
+    p = (step - warmup) / (total - warmup)
+    return 0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * p))
+sched = torch.optim.lr_scheduler.LambdaLR(opt, lr_factor)
+
+for step, (x, y) in zip(range(total), loader):
+    loss = F.mse_loss(model(x), y)
+    opt.zero_grad(set_to_none=True)
+    loss.backward()
+    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # gradient clipping
+    opt.step()
+    sched.step()                          # the schedule steps after every update</code></pre>
+    <div class="callout warn"><b>Memory</b><p>Adam stores $m$ and $v$ — two numbers per parameter. For a 7-billion-parameter model that is $2\cdot7\cdot10^9\cdot4$ bytes $=56$ GB in float32 for the optimizer state alone. Hence 8-bit optimizers, state sharding (ZeRO) and frugal variants such as Adafactor.</p></div>
+
+    <h2 id="practice">Hyperparameters and practice</h2>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Parameter</th><th>Default</th><th>Typical range and meaning</th></tr></thead><tbody><tr><td>$\eta$</td><td>$10^{-3}$</td><td>$10^{-4}$–$3\cdot10^{-3}$; transformers — about $3\cdot10^{-4}$ and lower as models grow; fine-tuning — $10^{-5}$–$5\cdot10^{-5}$</td></tr><tr><td>$\beta_1$</td><td>$0.9$</td><td>almost never changed; a direction window of 10 steps</td></tr><tr><td>$\beta_2$</td><td>$0.999$</td><td>$0.95$–$0.98$ for large transformers: reacts faster to spikes</td></tr><tr><td>$\epsilon$</td><td>$10^{-8}$</td><td>larger ($10^{-6}$ and up) in low precision or when unstable; a too large $\epsilon$ turns Adam into SGD with momentum</td></tr><tr><td>$\lambda$ (AdamW)</td><td>$0.01$</td><td>$0.01$–$0.1$; do not apply to biases and normalization layers</td></tr><tr><td>warmup</td><td>—</td><td>from hundreds to a few thousand steps, 1–5% of training</td></tr></tbody></table></div>
+    <ul class="flist"><li><b>Start with the defaults.</b> $\eta=10^{-3}$ (or $3\cdot10^{-4}$ for transformers), $\beta=(0.9,\,0.999)$, AdamW with $\lambda=0.01$. Tune $\eta$ first, then $\lambda$ and the schedule.</li><li><b>Gradient clipping</b> by norm ($1.0$) is almost free and saves you from rare outliers.</li><li><b>Save the optimizer state</b> (<code>opt.state_dict()</code>) together with the weights: when resuming with zero $m$ and $v$ the first steps will be “cold” again.</li><li><b>When SGD is better.</b> On computer-vision tasks a well-tuned SGD with momentum often generalizes better (Wilson et al., 2017). For transformers, recommender systems with embeddings and problems with sparse gradients Adam wins.</li></ul>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b><code>Adam(weight_decay=…)</code> instead of <code>AdamW</code>.</b> That is $L_2$ inside the gradient: the decay is divided by $\sqrt{\hat v_t}$ and acts unevenly (Figure 6).</li><li><b>A rate taken from SGD.</b> $\eta=0.1$ is fine for SGD with momentum, but for Adam it means a step of about $0.1$ in weight units at every step — training will almost surely diverge.</li><li><b>Decay on all parameters.</b> Biases and LayerNorm/BatchNorm weights are usually excluded from weight decay: shrinking them towards zero hurts rather than regularizes.</li><li><b>A poor $\epsilon$.</b> A too small one rounds to zero in float16; a too large one ($\gtrsim\sqrt{\hat v}$) silently switches adaptation off — the step becomes $(\eta/\epsilon)\hat m$.</li><li><b>No warmup on a transformer.</b> A large $\eta$ from the first steps, with a noisy estimate $\hat v_t$, often makes the loss explode early in training.</li><li><b>The schedule on the wrong step.</b> <code>scheduler.step()</code> once per epoch where the schedule is defined in steps (or vice versa) stretches warmup hundreds of times.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href="../sgd/">SGD, Momentum and RMSProp</a>: Adam’s numerator is EMA momentum, its denominator is $\sqrt v$ from RMSProp; that page also covers the stability condition and the condition number.</li><li><a href="../cross-entropy/">Cross-entropy</a> and <a href="../softmax/">softmax</a>: the loss AdamW minimizes in language models; its gradient with respect to the logits, $s-y$, is the $g_t$ of the last layer.</li><li><a href="../mse/">MSE</a> and <a href="../huber/">Huber</a>: the scale of the target sets the scale of the gradient — Adam is insensitive to it, SGD is not.</li><li><a href="../gelu/">GELU</a> and <a href="../silu/">SiLU</a>: the activations of transformers trained with AdamW.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) Adam keeps two exponential averages: $m_t$ of the gradient (direction, a window of ~10 steps) and $v_t$ of its square (scale, a window of ~1000 steps). 2) Both start at zero and are understated by a factor of $1-\beta^t$; the correction makes them unbiased, and without it early steps overshoot — by $3.16$ times at the first step. 3) The step $\eta\,\hat m_t/(\sqrt{\hat v_t}+\epsilon)$ does not depend on the gradient’s scale, is of order $\eta$ with a clean signal and proportional to the signal-to-noise ratio in noise. 4) AdamW decouples weight decay from the gradient — all weights decay evenly. 5) In practice: AdamW, warmup, cosine, gradient clipping; $\eta$ is the main hyperparameter.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. Adam’s first step with bias correction, $g_1=-3$. How does the weight change?</legend><div class="opts"><button type="button" data-ok="0">It decreases by $3\eta$</button><button type="button" data-ok="1">It increases by $\eta$</button><button type="button" data-ok="0">It decreases by $\eta$</button><button type="button" data-ok="0">It increases by $3\eta$</button></div><div class="explain" hidden>$\hat m_1=g_1=-3$, $\sqrt{\hat v_1}=|g_1|=3$, the step is $-\eta\cdot(-3)/3=+\eta$: the weight grows by $\eta$, whatever $|g_1|$ is.</div></fieldset><fieldset class="q"><legend>2. Roughly how many recent steps does $v_t$ “remember” at $\beta_2=0.999$?</legend><div class="opts"><button type="button" data-ok="0">10</button><button type="button" data-ok="0">100</button><button type="button" data-ok="1">1000</button><button type="button" data-ok="0">10 000</button></div><div class="explain" hidden>The effective window is $1/(1-\beta_2)=1000$ steps.</div></fieldset><fieldset class="q"><legend>3. All gradients of a model are multiplied by 100 (for example, the loss is multiplied by 100). What happens to Adam’s steps?</legend><div class="opts"><button type="button" data-ok="0">They grow 100 times</button><button type="button" data-ok="0">They grow 10 times</button><button type="button" data-ok="1">They hardly change</button><button type="button" data-ok="0">They shrink 100 times</button></div><div class="explain" hidden>$\hat m$ and $\sqrt{\hat v}$ grow 100 times, and their ratio stays the same (as long as $\epsilon$ is negligible).</div></fieldset><fieldset class="q"><legend>4. How does AdamW differ from Adam with $L_2$ regularization?</legend><div class="opts"><button type="button" data-ok="0">It does not, they are synonyms</button><button type="button" data-ok="1">Weight decay does not go through $m$ and $v$ and is not divided by $\sqrt{\hat v}$</button><button type="button" data-ok="0">AdamW does not use bias correction</button><button type="button" data-ok="0">AdamW uses the sign of the gradient</button></div><div class="explain" hidden>In AdamW the weights are multiplied by $1-\eta\lambda$ separately from the adaptive step, so the decay is the same for all weights.</div></fieldset><fieldset class="q"><legend>5. By how much is Adam’s first step too large without bias correction at $\beta_1=0.9$, $\beta_2=0.999$?</legend><div class="opts"><button type="button" data-ok="0">$0.1$ times (10 times too small)</button><button type="button" data-ok="0">It is not too large</button><button type="button" data-ok="1">$3.16$ times</button><button type="button" data-ok="0">1000 times</button></div><div class="explain" hidden>$m_1/\sqrt{v_1}=(1-\beta_1)g/(\sqrt{1-\beta_2}\,|g|)=0.1/0.0316\approx3.16$.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../cross-entropy/"><span class="kicker">← Previous formula</span><span class="big">Categorical CE</span><span class="kicker">categorical cross-entropy</span></a>
+<a class="next" href="../silu/"><span class="kicker">Next formula →</span><span class="big">SiLU / Swish</span><span class="kicker">the activation of Qwen and LLaMA</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

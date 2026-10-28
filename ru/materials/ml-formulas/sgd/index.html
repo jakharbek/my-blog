@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SGD, Momentum и RMSProp: как веса спускаются по градиенту — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="SGD, Momentum и RMSProp подробно: условие устойчивости ηL &lt; 2, число обусловленности, шум мини-батчей, инерция и её ускорение √κ, Нестеров, RMSProp, траектории в 2D и 3D, код на NumPy и PyTorch.">
+  <meta property="og:title" content="SGD, Momentum и RMSProp: как веса спускаются по градиенту — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="SGD, Momentum и RMSProp подробно: условие устойчивости ηL &lt; 2, число обусловленности, шум мини-батчей, инерция и её ускорение √κ, Нестеров, RMSProp, траектории в 2D и 3D, код на NumPy и PyTorch.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/sgd/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/sgd/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/sgd/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/sgd/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/sgd.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/sgd/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/sgd/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/sgd/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Следующий уровень</span>
+  <h1>SGD, Momentum и RMSProp: как веса спускаются по градиенту</h1>
+  <p class="dek">Три ступени, из которых собран Adam. Разбираем по косточкам стохастический градиентный спуск, инерцию тяжёлого шарика и деление шага на среднеквадратичный градиент: почему шаг ограничен условием ηL &lt; 2, откуда берётся шум мини-батчей, как инерция ускоряет спуск по оврагу и зачем каждому весу свой масштаб шага.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем это нужно</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: шаг под гору</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#noise"><span class="n">4</span>Стохастичность: мини-батчи и шум</a>
+      <a href="#momentum"><span class="n">5</span>Momentum: инерция тяжёлого шарика</a>
+      <a href="#rmsprop"><span class="n">6</span>RMSProp: свой шаг для каждого веса</a>
+      <a href="#landscape"><span class="n">7</span>Траектории в 2D и 3D</a>
+      <a href="#code"><span class="n">8</span>В коде: с нуля и в PyTorch</a>
+      <a href="#practice"><span class="n">9</span>Гиперпараметры и практика</a>
+      <a href="#mistakes"><span class="n">10</span>Частые ошибки</a>
+      <a href="#links"><span class="n">11</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">12</span>Итоги</a>
+      <a href="#quiz"><span class="n">13</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\theta_t=\theta_{t-1}-\eta\,g_t$$</div>
+
+    <h2 id="why">Зачем это нужно</h2>
+    <p>Обучение нейросети — это поиск минимума функции потерь $L(\theta)$ по миллионам и миллиардам весов $\theta$. Готовой формулы для минимума нет: потери зависят от весов слишком сложно. Остаётся идти к минимуму шагами, и единственный ориентир на каждом шаге — градиент $\nabla L$: вектор, указывающий направление самого быстрого роста потерь. Шагаем в обратную сторону.</p>
+    <p>Эта страница — о трёх ступенях одного метода:</p>
+    <ul class="flist"><li><b>SGD</b> (stochastic gradient descent, стохастический градиентный спуск) — шаг против градиента, посчитанного на маленькой случайной пачке примеров, мини-батче;</li><li><b>Momentum</b> (инерция, метод тяжёлого шарика) — шаг против накопленной суммы прошлых градиентов: инерция гасит зигзаги и разгоняет спуск вдоль пологих направлений;</li><li><b>RMSProp</b> — шаг, поделённый на среднеквадратичную величину недавних градиентов: у каждого веса свой масштаб шага.</li></ul>
+    <p>Сложите вторую и третью ступень, добавьте поправку смещения — получится <a href="../adam/">Adam</a>. А SGD с инерцией по-прежнему обучает многие свёрточные сети для изображений и нередко даёт на них лучшее обобщение, чем адаптивные методы.</p>
+    <div class="callout key"><b>Главное за минуту</b><p>$\theta_t=\theta_{t-1}-\eta g_t$. Шаг устойчив, только если $\eta L&lt;2$, где $L$ — наибольшая кривизна потерь. Вытянутая долина (большое число обусловленности $\kappa$) заставляет SGD ползти; инерция $u_t=\beta u_{t-1}+g_t$ сокращает путь примерно с $\kappa$ до $\sqrt\kappa$ шагов; RMSProp делит шаг на $\sqrt{v_t}$ и выравнивает масштабы разных весов.</p></div>
+
+    <h2 id="intuition">Интуиция: шаг под гору</h2>
+    <p>Представьте, что вы спускаетесь с холма в густом тумане. Видно только склон под ногами: куда и насколько круто он идёт вниз. Разумная стратегия — шагнуть в сторону самого крутого спуска, осмотреться и повторить. Длина шага задаётся <b>темпом обучения</b> (learning rate) $\eta$.</p>
+    <p>Короткие шаги надёжны, но медленны. Слишком длинный шаг перепрыгивает дно ямы и попадает на противоположный склон — и если там он выше, следующий шаг унесёт ещё дальше. Посмотрите, как это выглядит на простейшей потере $f(\theta)=L\theta^2/2$: её градиент $f'(\theta)=L\theta$, а кривизна (вторая производная) равна $L$.</p>
+    <figure class="viz"><div class="fv" data-viz="sgd-parabola" data-config="{&quot;eta&quot;: 0.3, &quot;L&quot;: 2, &quot;x0&quot;: 2}"></div><figcaption><b>Рисунок 1.</b> Градиентный спуск на параболе. Вверху — шаги по кривой (стартовую точку $\theta_0$ можно тянуть), внизу — расстояние до минимума $|\theta_t|$ в логарифмической шкале. При $L=2$ и $\eta=0{,}3$ каждый шаг умножает $\theta$ на $1-\eta L=0{,}4$, и из $\theta_0=2$ до $|\theta|&lt;0{,}01$ нужно 6 шагов. Увеличивайте $\eta$: при $0{,}5$ минимум достигается за один шаг, при $0{,}6$ точка прыгает через минимум, а при $\eta&gt;1$ спуск расходится.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Всё решает одно число $\eta L$. При $\eta L&lt;1$ спуск монотонный, при $1&lt;\eta L&lt;2$ точка прыгает через минимум, но приближается к нему, при $\eta L&gt;2$ улетает. Шаг $\eta=1/L$ попадает в минимум сразу — но только пока кривизна одна во всех направлениях.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <div class="eqd">$$\theta_t=\theta_{t-1}-\eta\,g_t,\qquad g_t=\frac1B\sum_{i\in B_t}\nabla_\theta\,\ell(x_i,y_i;\,\theta_{t-1})$$</div>
+    <dl class="symbols"><dt>$\theta_{t-1}$</dt><dd>текущие веса — вектор всех параметров модели;</dd><dt>$g_t$</dt><dd>стохастический градиент: среднее градиентов потерь $\ell$ по мини-батчу $B_t$ из $B$ случайных примеров;</dd><dt>$\eta$</dt><dd>темп обучения, положительное число, обычно от $10^{-4}$ до $10^{-1}$;</dd><dt>$-\eta\,g_t$</dt><dd>шаг: против градиента, длиной $\eta\|g_t\|$ — тем длиннее, чем круче склон.</dd></dl>
+    <p>Почему это работает. Разложим потери в ряд Тейлора около текущей точки: $L(\theta-\eta g)\approx L(\theta)-\eta\,\|g\|^2$. Пока шаг мал, потери уменьшаются примерно на $\eta\|g\|^2$, и это самое быстрое убывание среди шагов той же длины: скалярное произведение $\langle\nabla L,\,d\rangle$ при фиксированной длине $\|d\|$ минимально, когда $d$ направлен против градиента.</p>
+    <div class="callout note"><b>Пример на числах</b><p>$f(\theta)=\theta^2$, $\theta_0=3$, $\eta=0{,}1$. Градиент $g_1=2\cdot3=6$, шаг $-0{,}1\cdot6=-0{,}6$, новое значение $\theta_1=2{,}4$, потери падают с $9$ до $5{,}76$. Каждый следующий шаг снова умножает $\theta$ на $1-2\eta=0{,}8$.</p></div>
+    <details class="deep"><summary>Насколько большим может быть шаг: лемма о спуске</summary><div class="deep-body">
+      <p>Пусть градиент $f$ липшицев с константой $L$: $\|\nabla f(a)-\nabla f(b)\|\le L\|a-b\|$ (для дважды дифференцируемой $f$ это значит, что собственные значения гессиана по модулю не больше $L$). Тогда $f$ лежит под параболой, касающейся её в текущей точке, и для шага $\theta-\eta g$ с $g=\nabla f(\theta)$:</p>
+      <div class="eqd">$$f(\theta-\eta g)\le f(\theta)-\eta\Bigl(1-\frac{L\eta}{2}\Bigr)\|g\|^2$$</div>
+      <p>Множитель $1-L\eta/2$ положителен при $\eta&lt;2/L$ — это та самая граница устойчивости с рисунка 1. Гарантированное убывание максимально при $\eta=1/L$: тогда $f$ уменьшается хотя бы на $\|g\|^2/(2L)$.</p>
+      <p>Для квадратичной функции $f=\tfrac12\theta^\top H\theta$ шаг — линейное отображение $\theta_t=(I-\eta H)\,\theta_{t-1}$. В собственном базисе $H$ каждая координата умножается на $1-\eta\lambda_i$, и спуск сходится тогда и только тогда, когда $|1-\eta\lambda_i|&lt;1$ для всех $i$, то есть $0&lt;\eta&lt;2/\lambda_{\max}$ (при положительно определённой $H$).</p>
+    </div></details>
+    <h3>Число обусловленности: почему спуск бывает медленным</h3>
+    <p>Если кривизны по разным направлениям различаются, шаг обязан подстроиться под самую крутую: $\eta&lt;2/\lambda_{\max}$. Тогда вдоль самого пологого направления координата за шаг уменьшается лишь на долю $\eta\lambda_{\min}&lt;2/\kappa$, где $\kappa=\lambda_{\max}/\lambda_{\min}$ — <b>число обусловленности</b> (condition number). Даже при лучшем постоянном шаге $\eta=2/(\lambda_{\max}+\lambda_{\min})$ ошибка за шаг уменьшается лишь в $(\kappa-1)/(\kappa+1)$ раз:</p>
+    <div class="eqd">$$\|\theta_t-\theta^*\|\le\Bigl(\frac{\kappa-1}{\kappa+1}\Bigr)^{t}\,\|\theta_0-\theta^*\|$$</div>
+    <p>При $\kappa=100$ множитель равен $0{,}980$, и чтобы уменьшить ошибку в тысячу раз, нужно около 345 шагов. Грубое правило: SGD тратит порядка $\kappa$ шагов на каждый порядок точности.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Метод</th><th>Шаг</th><th>Что хранит</th><th>Гиперпараметры</th></tr></thead><tbody><tr><td>SGD</td><td>$\theta_t=\theta_{t-1}-\eta g_t$</td><td>ничего</td><td>$\eta$</td></tr><tr><td>Momentum</td><td>$u_t=\beta u_{t-1}+g_t$,<br>$\theta_t=\theta_{t-1}-\eta u_t$</td><td>$u$: одно число на вес</td><td>$\eta$, $\beta\approx0{,}9$</td></tr><tr><td>RMSProp</td><td>$v_t=\beta v_{t-1}+(1-\beta)g_t^2$,<br>$\theta_t=\theta_{t-1}-\eta\,\dfrac{g_t}{\sqrt{v_t}+\epsilon}$</td><td>$v$: одно число на вес</td><td>$\eta$, $\beta=0{,}9$–$0{,}99$, $\epsilon$</td></tr></tbody></table></div>
+
+    <h2 id="noise">Стохастичность: мини-батчи и шум</h2>
+    <p>Полный градиент — среднее по всем $N$ примерам обучающей выборки. При миллионах примеров один такой шаг стоил бы прохода по всем данным. SGD берёт случайный мини-батч из $B$ примеров. Его градиент — <b>несмещённая</b> оценка полного: в среднем совпадает с $\nabla L$, но каждый раз отклоняется на случайный шум.</p>
+    <div class="eqd">$$\mathbb E\,[g_t]=\nabla L(\theta),\qquad \operatorname{Cov}[g_t]=\frac{\Sigma}{B}\cdot\frac{N-B}{N-1}$$</div>
+    <dl class="symbols"><dt>$\Sigma$</dt><dd>ковариация градиентов отдельных примеров в текущей точке;</dd><dt>$\frac{N-B}{N-1}$</dt><dd>поправка за выбор без возвращения: при $B=N$ шум исчезает.</dd></dl>
+    <p>Шум падает как $1/B$, а цена шага растёт как $B$. Поэтому за одну эпоху (один проход по данным) маленькие батчи делают много неточных шагов, а большие — мало точных. На рисунке — линейная регрессия $y\approx wx+b$ на 200 точках с потерей $L=\frac1{2N}\sum(wx_i+b-y_i)^2$: это квадратичная «миска» над плоскостью весов $(w;\,b)$.</p>
+    <figure class="viz"><div class="fv" data-viz="sgd-minibatch" data-config="{&quot;B&quot;: 10, &quot;eta&quot;: 0.05}"></div><figcaption><b>Рисунок 2.</b> Слева — путь SGD по линиям уровня потерь; оранжевые точки — куда попал бы следующий шаг при 40 разных случайных батчах, стрелка — шаг по полному градиенту. Справа — превышение потерь над минимумом $L-L^*$ по эпохам. За 8 эпох с $\eta=0{,}05$ из начальных $5{,}84$: батч 1 доходит до $1{,}4\cdot10^{-3}$, батч 10 — до $0{,}044$, батч 50 — до $1{,}06$, а полный градиент (всего 8 шагов) — до $2{,}0$. Нажмите «Пуск» и сравните облака: у $B=1$ оно широкое даже у самого минимума.</figcaption></figure>
+    <div class="callout intuition"><b>Шум — не только помеха</b><p>У минимума полный градиент равен нулю, а стохастический — нет. При постоянном $\eta$ SGD не останавливается, а дрожит в облаке, размер которого растёт как $\sqrt\eta$; поэтому к концу обучения темп снижают. Зато тот же шум помогает уходить с седловых точек и из узких минимумов; есть наблюдения, что он смещает обучение к более пологим минимумам, которые лучше обобщают.</p></div>
+    <details class="deep"><summary>Правило линейного масштабирования батча</summary><div class="deep-body">
+      <p>Если увеличить батч в $k$ раз, дисперсия шума падает в $k$ раз, но шагов за эпоху становится в $k$ раз меньше. Гоял и соавторы (2017) предложили одновременно увеличивать $\eta$ в $k$ раз: так ResNet-50 обучили на ImageNet с батчем 8192 за час без потери точности. Правило работает до некоторого «критического» размера батча и требует разогрева (warmup) — плавного роста $\eta$ на первых эпохах.</p>
+    </div></details>
+
+    <h2 id="momentum">Momentum: инерция тяжёлого шарика</h2>
+    <p>Градиентный спуск — это точка без массы: в каждый момент она идёт ровно туда, куда показывает склон. Б. Т. Поляк (1964) предложил дать ей массу. Тяжёлый шарик катится, накапливая скорость, и не реагирует на каждую кочку. В формуле скорость — вектор $u$:</p>
+    <div class="eqd">$$u_t=\beta\,u_{t-1}+g_t,\qquad \theta_t=\theta_{t-1}-\eta\,u_t$$</div>
+    <dl class="symbols"><dt>$u_t$</dt><dd>накопленное направление (буфер инерции), $u_0=0$;</dd><dt>$\beta$</dt><dd>коэффициент инерции, $0\le\beta&lt;1$, обычно $0{,}9$; при $\beta=0$ — обычный SGD.</dd></dl>
+    <p>Раскроем рекурсию: $u_t=g_t+\beta g_{t-1}+\beta^2 g_{t-2}+\dots$ — взвешенная сумма всех прошлых градиентов с экспоненциально убывающими весами. Если градиенты из шага в шаг указывают в одну сторону, они складываются, и шаг растёт до $\eta/(1-\beta)$ — в 10 раз при $\beta=0{,}9$. Если знак скачет (зигзаг поперёк оврага), слагаемые гасят друг друга.</p>
+    <figure class="viz"><div class="fv" data-viz="sgd-ema" data-config="{&quot;beta&quot;: 0.9}"></div><figcaption><b>Рисунок 3.</b> Слева — вес, с которым градиент $k$-шаговой давности входит в $u_t$; яркие столбики вместе дают половину общего веса. Справа — ответ $u_t$ на постоянный градиент $g=1$: он растёт к $1/(1-\beta)=10$ и к 22-му шагу набирает $90\%$ предела. При $\beta=0{,}9$ половина веса приходится на последние 7 градиентов, при $\beta=0{,}99$ — на последние 69, а окно памяти — 100 шагов.</figcaption></figure>
+    <div class="callout note"><b>Две записи одной инерции</b><p>PyTorch пишет $u_t=\beta u_{t-1}+g_t$, как здесь. Часто встречается и экспоненциальное скользящее среднее (exponential moving average, EMA) $m_t=\beta m_{t-1}+(1-\beta)g_t$: оно отличается постоянным множителем $1-\beta$, который переходит в $\eta$. Именно EMA стоит в числителе <a href="../adam/">Adam</a>. Переключите форму на рисунке: EMA стартует с $0{,}1$ вместо 1 и лишь постепенно доходит до истинного значения — эта недооценка на первых шагах и есть причина поправки смещения в Adam.</p></div>
+    <h3>Почему инерция ускоряет: теория на квадратичной функции</h3>
+    <p>Возьмём одно направление с кривизной $L$ и обозначим $h=\eta L$. Подставим $g_t=L\theta_{t-1}$ и исключим $u$ (из второй формулы $\eta u_{t-1}=\theta_{t-2}-\theta_{t-1}$). Получится линейная рекуррентность второго порядка:</p>
+    <div class="eqd">$$\theta_t=(1+\beta-h)\,\theta_{t-1}-\beta\,\theta_{t-2}$$</div>
+    <p>Её поведение определяют корни характеристического уравнения $\lambda^2-(1+\beta-h)\lambda+\beta=0$. Скорость сходимости — наибольший модуль корня $\rho$: ошибка убывает примерно как $\rho^t$.</p>
+    <figure class="viz"><div class="fv" data-viz="sgd-momentum" data-config="{&quot;h&quot;: 0.04, &quot;beta&quot;: 0.9}"></div><figcaption><b>Рисунок 4.</b> Слева — карта скорости $\rho$ по $\eta L$ (логарифмическая шкала) и $\beta$: синее — быстрая сходимость, красное — расходимость, сплошная линия — граница $\rho=1$, штриховые — критическое затухание. Тяните синюю точку. Справа — $\theta_t$ для SGD с тем же $\eta$ и с инерцией. При $\eta L=0{,}04$ SGD нужно 170 шагов до $|\theta|&lt;10^{-3}$ ($\rho=0{,}96$), инерции $\beta=0{,}9$ — 130 шагов с колебаниями, Нестерову с той же $\beta$ — 87, а критическое затухание $\beta=(1-\sqrt{0{,}04})^2=0{,}64$ даёт 41 шаг ($\rho=0{,}8$).</figcaption></figure>
+    <details class="deep"><summary>Вывод: область устойчивости и оптимальная инерция</summary><div class="deep-body">
+      <p>Корни комплексные, когда $(1+\beta-h)^2&lt;4\beta$, то есть при $(1-\sqrt\beta)^2&lt;h&lt;(1+\sqrt\beta)^2$. Произведение корней равно $\beta$, поэтому $|\lambda_1|=|\lambda_2|=\sqrt\beta$: $\theta_t$ колеблется и затухает в $\sqrt\beta$ раз за шаг, независимо от $h$. Вне этой полосы корни вещественные, а устойчивость сохраняется при</p>
+      <div class="eqd">$$0&lt;\eta L&lt;2(1+\beta)$$</div>
+      <p>— инерция почти вдвое расширяет допустимый шаг (у SGD $\eta L&lt;2$).</p>
+      <p>Пусть кривизны заполняют отрезок $[\mu;\,L]$, $\kappa=L/\mu$. Подберём $\eta$ и $\beta$ так, чтобы оба края попали на границы комплексной полосы: $(1-\sqrt\beta)^2=\eta\mu$ и $(1+\sqrt\beta)^2=\eta L$. Тогда все направления затухают одинаково быстро:</p>
+      <div class="eqd">$$\eta=\frac{4}{(\sqrt L+\sqrt\mu)^2},\qquad \beta=\Bigl(\frac{\sqrt\kappa-1}{\sqrt\kappa+1}\Bigr)^2,\qquad \rho=\sqrt\beta=\frac{\sqrt\kappa-1}{\sqrt\kappa+1}$$</div>
+      <p>Сравните с лучшим SGD, $\rho=(\kappa-1)/(\kappa+1)$. При $\kappa=100$ это $0{,}818$ против $0{,}980$: около 35 шагов вместо 345, чтобы уменьшить ошибку в тысячу раз. Число шагов растёт как $\sqrt\kappa$, а не как $\kappa$ — в этом и состоит ускорение тяжёлого шарика.</p>
+    </div></details>
+    <h3>Нестеров: градиент там, куда несёт инерция</h3>
+    <p>Ю. Е. Нестеров (1983) предложил считать градиент не в текущей точке, а там, куда шарик всё равно унесёт инерция. В форме PyTorch (<code>nesterov=True</code>) это поправка к шагу:</p>
+    <div class="eqd">$$u_t=\beta u_{t-1}+g_t,\qquad \theta_t=\theta_{t-1}-\eta\,(g_t+\beta u_t)$$</div>
+    <p>Характеристическое уравнение становится $\lambda^2-(1+\beta)(1-h)\lambda+\beta(1-h)=0$. На пологих направлениях колебания затухают быстрее ($\rho=\sqrt{\beta(1-h)}$ вместо $\sqrt\beta$), но область устойчивости уже: $\eta L&lt;2(1+\beta)/(1+2\beta)$, при $\beta=0{,}9$ — всего $1{,}36$. Переключите рисунок 4 на «Нестеров», чтобы увидеть обе особенности.</p>
+
+    <h2 id="rmsprop">RMSProp: свой шаг для каждого веса</h2>
+    <p>У SGD и Momentum один темп $\eta$ на все веса. Но градиенты разных весов могут отличаться на порядки: эмбеддинги редких слов получают редкие крупные толчки, смещения последнего слоя — постоянные мелкие. Общий $\eta$ для одних слишком велик, для других слишком мал. RMSProp (Дж. Хинтон, лекции курса на Coursera, 2012) делит шаг каждого веса на его типичный размер градиента:</p>
+    <div class="eqd">$$v_t=\beta\,v_{t-1}+(1-\beta)\,g_t^2,\qquad\theta_t=\theta_{t-1}-\eta\,\frac{g_t}{\sqrt{v_t}+\epsilon}$$</div>
+    <dl class="symbols"><dt>$g_t^2$</dt><dd>поэлементный квадрат: у каждого веса свой $v$;</dd><dt>$v_t$</dt><dd>экспоненциальное скользящее среднее квадрата градиента — оценка $\mathbb E[g^2]$ за последние $\sim1/(1-\beta)$ шагов, $v_0=0$;</dd><dt>$\sqrt{v_t}$</dt><dd>среднеквадратичное значение (root mean square, RMS) градиента — отсюда название;</dd><dt>$\epsilon$</dt><dd>маленькая добавка ($10^{-8}$) против деления на ноль.</dd></dl>
+    <p>Деление на $\sqrt{v_t}$ делает шаг безразмерным: если умножить все градиенты веса на 1000, то и $\sqrt v$ вырастет в 1000 раз, а шаг не изменится. Типичный шаг становится порядка $\eta$ — темп теперь задаёт длину шага прямо в единицах весов.</p>
+    <figure class="viz"><div class="fv" data-viz="sgd-rmsprop" data-config="{&quot;beta&quot;: 0.9}"></div><figcaption><b>Рисунок 5.</b> Градиент одного веса, масштаб которого меняется: на шаге 100 он вырастает в 10 раз, на шаге 200 падает в 100 раз. Вверху — $|g_t|$ и $\sqrt{v_t}$, внизу — длина шага. Шаг SGD прыгает вместе с градиентом на два порядка, шаг RMSProp остаётся порядка $\eta=0{,}01$. Но у адаптации есть запаздывание: после роста шаг кратко подскакивает (при $\beta=0{,}9$ до $0{,}030$ при границе $0{,}032$), а после падения проваливается — старому большому $v$ нужно около $\ln10^4/\ln(1/0{,}9)\approx87$ шагов, чтобы забыться.</figcaption></figure>
+    <div class="callout key"><b>Встроенная граница шага</b><p>Из $v_t\ge(1-\beta)g_t^2$ следует $|g_t|/\sqrt{v_t}\le1/\sqrt{1-\beta}$. Шаг RMSProp никогда не превышает $\eta/\sqrt{1-\beta}$: $3{,}16\,\eta$ при $\beta=0{,}9$ и $10\,\eta$ при $\beta=0{,}99$. Это защита от взрыва градиента, которой у SGD нет.</p></div>
+    <details class="deep"><summary>Откуда RMSProp: AdaGrad и Rprop</summary><div class="deep-body">
+      <p>Предшественник — AdaGrad (Дучи, Хазан, Сингер, 2011): $v_t=v_{t-1}+g_t^2$, сумма вместо среднего. Для выпуклых задач с редкими признаками он хорош, но в нейросетях $v$ только растёт, и шаг $\eta/\sqrt{v_t}$ неизбежно затухает до нуля. RMSProp заменил сумму экспоненциальным средним с конечной памятью.</p>
+      <p>Другой корень — Rprop (Ридмиллер и Браун, 1993), который использует только знак градиента. RMSProp можно читать как его вариант для мини-батчей: при $\beta=0$ получается $v_t=g_t^2$ и шаг $\eta\operatorname{sign}(g_t)$.</p>
+      <p>Важно: RMSProp масштабирует оси координат, но не поворачивает их. Это <b>диагональное</b> предобусловливание. Если овраг идёт по диагонали между весами, деление на $\sqrt v$ помогает слабо — это видно на рисунке 6 при повороте на 45°.</p>
+    </div></details>
+
+    <h2 id="landscape">Траектории в 2D и 3D</h2>
+    <p>Сравним три метода на одной задаче — вытянутой квадратичной долине $f=\tfrac12(a^2+\kappa b^2)$, где $a$ и $b$ — координаты вдоль и поперёк оврага: кривизна поперёк в $\kappa$ раз больше, чем вдоль. Старт — в точке $a=-3{,}4$, $b=0{,}9$, где $f=46{,}3$.</p>
+    <figure class="viz"><div class="fv" data-viz="sgd-ravine" data-config="{&quot;kappa&quot;: 100, &quot;eta&quot;: 0.018, &quot;beta&quot;: 0.9}"></div><figcaption><b>Рисунок 6.</b> Овраг с $\kappa=100$: вид сверху и поверхность в 3D (её можно вращать). При $\eta=0{,}018$ SGD прыгает поперёк оврага ($\eta\lambda_{\max}=1{,}8$) и медленно ползёт вдоль него: за 100 шагов $f$ падает лишь до $0{,}15$. Momentum с $\beta=0{,}9$ доходит до $2{,}2\cdot10^{-4}$, RMSProp с $\eta=0{,}1$ — до $0{,}026$: он быстро спускается на дно, но дальше дрожит с шагом порядка $\eta$. Поверните овраг на 45°: SGD и Momentum разницы не заметят, а RMSProp потеряет преимущество — $0{,}30$ вместо $0{,}026$.</figcaption></figure>
+    <p>Вторая классика — функция Розенброка $f=(1-x)^2+100(y-x^2)^2$: узкий изогнутый «банан» с минимумом в $(1;\,1)$. Кривизна здесь меняется от точки к точке, и никакой постоянный шаг не идеален.</p>
+    <figure class="viz"><div class="fv" data-viz="sgd-rosenbrock" data-config="{}"></div><figcaption><b>Рисунок 7.</b> 3000 шагов из точки $(-1{,}5;\,2)$ — её можно перетаскивать. SGD с $\eta=0{,}001$ доходит лишь до $f=0{,}049$. Momentum с тем же $\eta$ и $\beta=0{,}9$ проходит банан: $f&lt;10^{-3}$ на 666-м шаге и $3\cdot10^{-12}$ к концу. RMSProp застревает около $f\approx0{,}02$: его шаг почти не уменьшается у дна. Ползунок $t$ показывает положение всех трёх в любой момент.</figcaption></figure>
+    <div class="callout warn"><b>Карта — не территория</b><p>Двумерные картинки полезны, но обманчивы: у настоящей сети миллионы измерений, большинство критических точек там — седловые, а не локальные минимумы, и поверхность потерь сама зависит от мини-батча. Используйте рисунки для интуиции о механизмах (зигзаг, инерция, масштаб), а не для выбора оптимизатора.</p></div>
+
+    <h2 id="code">В коде: с нуля и в PyTorch</h2>
+    <p>Все три метода помещаются в два маленьких класса. Обратите внимание: состояние ($u$ или $v$) — массив того же размера, что и веса, поэтому Momentum и RMSProp удваивают память под параметры, а Adam — утраивает.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+class SGD:
+    &quot;&quot;&quot;SGD с инерцией (momentum) и вариантом Нестерова — как в torch.optim.SGD.&quot;&quot;&quot;
+    def __init__(self, lr=0.01, momentum=0.0, nesterov=False):
+        self.lr, self.beta, self.nesterov, self.u = lr, momentum, nesterov, None
+
+    def step(self, theta, g):
+        if self.beta == 0:
+            return theta - self.lr * g
+        self.u = g.copy() if self.u is None else self.beta * self.u + g
+        d = g + self.beta * self.u if self.nesterov else self.u
+        return theta - self.lr * d
+
+class RMSProp:
+    &quot;&quot;&quot;RMSProp: свой масштаб шага для каждого веса.&quot;&quot;&quot;
+    def __init__(self, lr=0.01, beta=0.99, eps=1e-8):
+        self.lr, self.beta, self.eps, self.v = lr, beta, eps, None
+
+    def step(self, theta, g):
+        if self.v is None:
+            self.v = np.zeros_like(theta)
+        self.v = self.beta * self.v + (1 - self.beta) * g * g
+        return theta - self.lr * g / (np.sqrt(self.v) + self.eps)
+
+# Вытянутая долина f = (a² + 100·b²)/2, как на рисунке 6
+H = np.diag([1.0, 100.0])
+f = lambda th: 0.5 * th @ H @ th
+grad = lambda th: H @ th
+
+for name, opt in [(&quot;SGD&quot;, SGD(lr=0.018)),
+                  (&quot;Momentum&quot;, SGD(lr=0.018, momentum=0.9)),
+                  (&quot;Nesterov&quot;, SGD(lr=0.018, momentum=0.9, nesterov=True)),
+                  (&quot;RMSProp&quot;, RMSProp(lr=0.1, beta=0.9))]:
+    th = np.array([-3.4, 0.9])
+    for t in range(100):
+        th = opt.step(th, grad(th))
+    print(f&quot;{name:9s} f = {f(th):.2e}&quot;)
+# SGD       f = 1.53e-01
+# Momentum  f = 2.23e-04
+# Nesterov  f = 3.14e+57   ← расходится: ηλ_max = 1.8 &gt; 2(1+β)/(1+2β) ≈ 1.36
+# RMSProp   f = 2.60e-02</code></pre>
+    <p>Числа в комментариях совпадают с рисунком 6, а <code>torch.optim.SGD</code> и <code>torch.optim.RMSprop</code> на той же задаче дают те же значения. Нестеров с тем же $\eta$ расходится — ровно по условию устойчивости из раздела про инерцию.</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn.functional as F
+
+model = torch.nn.Linear(10, 1)
+
+# SGD с инерцией и затуханием весов — классика для свёрточных сетей
+opt = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9,
+                      nesterov=True, weight_decay=1e-4)
+# RMSProp: коэффициент сглаживания в PyTorch называется alpha (по умолчанию 0.99)
+# opt = torch.optim.RMSprop(model.parameters(), lr=1e-3, alpha=0.99, eps=1e-8)
+
+for x, y in loader:                  # мини-батчи из DataLoader
+    opt.zero_grad()                  # градиенты накапливаются — обнуляем
+    loss = F.mse_loss(model(x), y)
+    loss.backward()                  # g_t в param.grad
+    opt.step()                       # θ ← θ − η·(…)</code></pre>
+    <div class="callout note"><b>Две формы инерции в библиотеках</b><p>PyTorch хранит сумму сырых градиентов и умножает её на текущий $\eta$: $\theta\leftarrow\theta-\eta_t u_t$. Keras и классическая статья Сутскевера и др. (2013) хранят уже умноженную на темп скорость: $v_t=\beta v_{t-1}-\eta_t g_t$, $\theta\leftarrow\theta+v_t$. При постоянном $\eta$ формы эквивалентны, при расписании — нет: в PyTorch новый $\eta$ сразу применяется ко всему накопленному буферу.</p></div>
+
+    <h2 id="practice">Гиперпараметры и практика</h2>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Параметр</th><th>Типичные значения</th><th>Как выбирать</th></tr></thead><tbody><tr><td>$\eta$ (SGD с инерцией)</td><td>$0{,}01$–$0{,}1$</td><td>наибольший, при котором потери ещё стабильно падают; ResNet: $0{,}1$ при батче 256</td></tr><tr><td>$\beta$ (momentum)</td><td>$0{,}9$, реже $0{,}95$–$0{,}99$</td><td>больше $\beta$ — длиннее память и сильнее разгон, но выше риск раскачки</td></tr><tr><td>$\beta$ RMSProp (alpha)</td><td>$0{,}9$–$0{,}99$</td><td>окно усреднения $1/(1-\beta)$: от 10 до 100 шагов</td></tr><tr><td>$\eta$ (RMSProp)</td><td>$10^{-4}$–$10^{-3}$</td><td>шаг порядка $\eta$ в единицах весов</td></tr><tr><td>$B$ (батч)</td><td>32–512</td><td>при росте $B$ в $k$ раз — $\eta$ в $k$ раз, с разогревом</td></tr><tr><td>weight decay</td><td>$10^{-4}$–$5\cdot10^{-4}$</td><td>затухание весов; для SGD совпадает с $L_2$-регуляризацией</td></tr></tbody></table></div>
+    <ul class="flist"><li><b>Расписание темпа.</b> Ступенчатое (умножение на $0{,}1$ на 30-й, 60-й и 90-й эпохах — классика ResNet), косинусное или «один цикл». Постоянный $\eta$ оставляет шумовое облако у минимума.</li><li><b>Разогрев (warmup).</b> Первые сотни–тысячи шагов $\eta$ растёт линейно от малого значения — особенно важно при большом батче.</li><li><b>Обрезка градиента</b> (gradient clipping) по норме защищает от редких огромных градиентов в RNN и трансформерах.</li><li><b>Поиск темпа</b> (LR range test, Л. Смит): короткая прогонка с экспоненциально растущим $\eta$; берут значение заметно меньше того, где потери начинают расти.</li><li><b>Нормализация</b> входов, батч-нормализация и разумная инициализация уменьшают число обусловленности и позволяют брать больший $\eta$.</li></ul>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>Забытый <code>zero_grad()</code>.</b> В PyTorch градиенты накапливаются в <code>.grad</code>; без обнуления $g_t$ превращается в сумму всех прошлых градиентов — это не инерция, а ошибка.</li><li><b>Слишком большой темп</b>: потери растут или становятся NaN. По рисунку 1 нужно $\eta&lt;2/\lambda_{\max}$; первым делом уменьшите $\eta$ в 3–10 раз.</li><li><b>Перенос $\eta$ между оптимизаторами.</b> С инерцией $\beta=0{,}9$ установившийся шаг в 10 раз больше, чем у SGD с тем же $\eta$. У RMSProp и Adam $\eta$ вообще в других единицах: $10^{-3}$ для них нормально, для SGD обычно мало.</li><li><b>Смена батча без смены темпа.</b> Увеличили $B$ в 8 раз и оставили $\eta$ — сеть учится медленнее за эпоху; уменьшили $B$ — шум может раскачать обучение.</li><li><b>$\epsilon=10^{-8}$ в низкой точности.</b> В float16 это число округляется до нуля, и при $v\approx0$ шаг RMSProp взрывается; в смешанной точности $v$ держат в float32 или берут $\epsilon$ больше.</li><li><b>Постоянный темп до конца обучения.</b> Без снижения $\eta$ SGD дрожит у минимума, и последние эпохи почти ничего не дают.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href="../adam/">Adam</a>: числитель — EMA-инерция, знаменатель — $\sqrt{v}$ из RMSProp, плюс поправка смещения.</li><li><a href="../mse/">MSE</a>: её градиент $\frac2n\sum_i(\hat y_i-y_i)\,x_i$ — тот самый $g_t$ в линейной регрессии на рисунке 2 (там потеря — половина MSE).</li><li><a href="../bce/">BCE</a> и <a href="../cross-entropy/">кросс-энтропия</a>: градиент по логитам $\hat y-y$ — простейший сигнал для спуска.</li><li><a href="../sigmoid/">Сигмоида</a>: насыщение даёт крошечные градиенты — SGD на них почти стоит, а RMSProp растягивает шаг.</li><li><a href="../huber/">Huber</a>: ограничивает градиент выбросов — родственник обрезки градиента.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) SGD: $\theta_t=\theta_{t-1}-\eta g_t$, где $g_t$ — несмещённая оценка градиента по мини-батчу; дисперсия шума падает как $1/B$. 2) Устойчивость: $\eta&lt;2/\lambda_{\max}$; скорость задаёт число обусловленности $\kappa$ — порядка $\kappa$ шагов на порядок точности. 3) Momentum $u_t=\beta u_{t-1}+g_t$ — экспоненциальная память о градиентах с окном $1/(1-\beta)$; на квадратичных задачах сокращает путь до порядка $\sqrt\kappa$ шагов и расширяет устойчивость до $\eta L&lt;2(1+\beta)$. 4) RMSProp делит шаг на $\sqrt{v_t}$: шаг безразмерный, порядка $\eta$, но адаптация только диагональная. 5) EMA-инерция + RMSProp + поправка смещения = Adam.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. $f(\theta)=5\theta^2$. При каких постоянных $\eta$ градиентный спуск сходится?</legend><div class="opts"><button type="button" data-ok="0">$\eta&lt;0{,}1$</button><button type="button" data-ok="1">$\eta&lt;0{,}2$</button><button type="button" data-ok="0">$\eta&lt;0{,}4$</button><button type="button" data-ok="0">$\eta&lt;2$</button></div><div class="explain" hidden>Кривизна $f''=10$, условие $\eta L&lt;2$ даёт $\eta&lt;0{,}2$. При $\eta=0{,}1$ минимум достигается за один шаг.</div></fieldset><fieldset class="q"><legend>2. Каково окно памяти инерции при $\beta=0{,}95$?</legend><div class="opts"><button type="button" data-ok="0">5 шагов</button><button type="button" data-ok="1">20 шагов</button><button type="button" data-ok="0">95 шагов</button><button type="button" data-ok="0">$0{,}05$ шага</button></div><div class="explain" hidden>$1/(1-\beta)=1/0{,}05=20$.</div></fieldset><fieldset class="q"><legend>3. Батч увеличили с 32 до 128 (данных намного больше, чем $B$). Что станет с дисперсией стохастического градиента?</legend><div class="opts"><button type="button" data-ok="0">Вырастет в 4 раза</button><button type="button" data-ok="0">Упадёт в 2 раза</button><button type="button" data-ok="1">Упадёт в 4 раза</button><button type="button" data-ok="0">Не изменится</button></div><div class="explain" hidden>$\operatorname{Cov}[g]\approx\Sigma/B$: батч вырос в 4 раза — дисперсия упала в 4 раза (а стандартное отклонение — в 2).</div></fieldset><fieldset class="q"><legend>4. Все градиенты одного веса умножили на 100. Как изменится шаг RMSProp, когда $v$ установится (без учёта $\epsilon$)?</legend><div class="opts"><button type="button" data-ok="0">Вырастет в 100 раз</button><button type="button" data-ok="0">Вырастет в 10 раз</button><button type="button" data-ok="1">Не изменится</button><button type="button" data-ok="0">Уменьшится в 100 раз</button></div><div class="explain" hidden>$\sqrt v$ тоже вырастет в 100 раз, и отношение $g/\sqrt v$ останется прежним.</div></fieldset><fieldset class="q"><legend>5. Почему инерция ускоряет спуск по вытянутому оврагу?</legend><div class="opts"><button type="button" data-ok="1">Вдоль оврага градиенты согласованы и складываются, а поперёк знак чередуется и они гасят друг друга</button><button type="button" data-ok="0">Она уменьшает кривизну функции</button><button type="button" data-ok="0">Она вычисляет вторые производные</button><button type="button" data-ok="0">Она делит шаг на $\sqrt v$</button></div><div class="explain" hidden>$u_t$ — сумма прошлых градиентов с весами $\beta^k$: согласованные компоненты растут до $1/(1-\beta)$, чередующиеся — сокращаются.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../gelu/"><span class="kicker">← Предыдущая формула</span><span class="big">GELU</span><span class="kicker">BERT, GPT</span></a>
+<a class="next" href="../triplet/"><span class="kicker">Следующая формула →</span><span class="big">Triplet Loss</span><span class="kicker">повторная идентификация (Re-ID)</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>
