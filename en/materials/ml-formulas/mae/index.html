@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MAE: the mean absolute error — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="MAE in depth: formula, properties, the median as the optimal constant, the subgradient, the loss surface in 3D, robustness to outliers, subgradient descent, the quantile loss, code in NumPy, PyTorch and scikit-learn.">
+  <meta property="og:title" content="MAE: the mean absolute error — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="MAE in depth: formula, properties, the median as the optimal constant, the subgradient, the loss surface in 3D, robustness to outliers, subgradient descent, the quantile loss, code in NumPy, PyTorch and scikit-learn.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/mae/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/mae/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/mae/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/mae/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/mae.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/mae/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/mae/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/mae/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Losses — regression</span>
+  <h1>MAE: the mean absolute error</h1>
+  <p class="dek">The most readable regression metric: how far off the model is on average. We take MAE apart bone by bone: why the median minimizes it, what a subgradient is and why descent with a constant step jitters near the optimum, what its polyhedral loss surface looks like, and why it shrugs off outliers.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 32 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: the average length of a miss</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties and the best constant</a>
+      <a href="#derivative"><span class="n">5</span>The derivative: the sign of the error and the subgradient</a>
+      <a href="#robust"><span class="n">6</span>Robustness to outliers</a>
+      <a href="#space"><span class="n">7</span>MAE in parameter space: a polyhedron</a>
+      <a href="#training"><span class="n">8</span>MAE in training: subgradient descent</a>
+      <a href="#quantile"><span class="n">9</span>Generalization: quantiles and the probabilistic meaning</a>
+      <a href="#code"><span class="n">10</span>In code</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#links"><span class="n">12</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}\bigl|y_i-\hat{y}_i\bigr|$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p>A model predicts a flat’s price, a delivery time, demand for a product. The client’s first question is: “How far off is it?” The answer “4 minutes on average” or “120 thousand” is exactly MAE, the <b>mean absolute error</b>. Anyone understands it without a background in statistics, because it is measured in the same units as the quantity itself.</p>
+    <p>Where it appears:</p>
+    <ul class="flist"><li><b>a regression quality metric</b> — forecasting demand, travel time, prices, server load; reports put it next to <a href="../rmse/">RMSE</a>;</li><li><b>a loss function</b> — <code>L1Loss</code> in PyTorch; it is chosen when the data contain outliers or when the target is the median rather than the mean;</li><li><b>computer vision</b> — L1 over pixels in pix2pix and in super-resolution (EDSR), L1 over box coordinates in the DETR detector;</li><li><b>gradient boosting</b> — <code>loss="absolute_error"</code> in scikit-learn, <code>objective="l1"</code> in LightGBM: leaf values are medians of the residuals;</li><li><b>robust statistics</b> — least absolute deviations (LAD) regression, quantile regression, the median as an estimate of a “typical” value.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>MAE is the average distance from the prediction to the truth: $\frac1n\sum|y_i-\hat y_i|$. Every error enters <i>linearly</i>: a miss of 2 weighs as much as four misses of $0.5$. That is why MAE is robust to outliers and its best constant is the <b>median</b>. The price is a kink at zero: the derivative exists everywhere except where an error equals zero, and its size does not shrink near the minimum.</p></div>
+
+    <h2 id="intuition">Intuition: the average length of a miss</h2>
+    <p>Draw the truth $y_i$ as points, the predictions $\hat y_i$ as blue markers and the error as a vertical segment between them. MAE is the <b>average length of the orange segments</b>. Direction does not matter: undershooting and overshooting by the same distance cost the same.</p>
+    <p>Below is the cheat sheet’s running example: $y=(3,\,5,\,8)$, $\hat y=(2.5,\,5,\,10)$. Drag the blue markers. On the lower plot every error $e_i=y_i-\hat y_i$ sits on the “V” of $|e|$; MAE is the average height of these points (the teal line).</p>
+    <figure class="viz"><div class="fv" data-viz="mae-errors" data-config="{&quot;yhat&quot;: [2.5, 5, 10]}"></div><figcaption><b>Figure 1.</b> The errors of the running example. The segments have lengths $0.5$, $0$ and $2$; their sum is $2.5$ and their mean is $\mathrm{MAE}=2.5/3\approx0.833$. Move the third prediction to $8$ and MAE drops to $0.5/3\approx0.167$.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>The largest error, $2$, makes up $80\%$ of the sum of absolute values ($2$ out of $2.5$). In <a href="../mse/">MSE</a> the same error would make up $94\%$ of the sum of squares ($4$ out of $4.25$). MAE is “more democratic”: it does not let one big miss overshadow the rest.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <p>Let us split the formula into four steps and see what each one does.</p>
+    <div class="eqd">$$\underbrace{y_i-\hat y_i}_{\text{error }e_i}\;\longrightarrow\;\underbrace{|e_i|}_{\text{length}}\;\longrightarrow\;\underbrace{\sum_{i=1}^{n}|e_i|}_{\text{total miss}}\;\longrightarrow\;\underbrace{\frac1n\sum_{i=1}^{n}|e_i|}_{\text{average miss}}$$</div>
+    <dl class="symbols"><dt>$y_i$</dt><dd>the true value for object $i$ (a price, a time, demand);</dd><dt>$\hat y_i$</dt><dd>the model’s prediction for the same object;</dd><dt>$e_i=y_i-\hat y_i$</dt><dd>the error (residual): positive means the model underestimated, negative means it overestimated;</dd><dt>$|e_i|$</dt><dd>the absolute value drops the sign so that undershoots and overshoots do not cancel out; $|e|=\sqrt{e^2}$ is a distance on the number line;</dd><dt>$\frac1n\sum$</dt><dd>averaging makes the metric independent of the sample size: MAE on 100 and on 10,000 objects can be compared.</dd></dl>
+    <p>Why can we not do without the absolute value? The mean error without it, $\frac1n\sum e_i$, equals $(0.5+0-2)/3=-0.5$ in our example, and it can be zero for an arbitrarily bad model: errors of $+100$ and $-100$ average to zero. This quantity is called the <b>bias</b> — useful, but a different metric.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$i$</th><th class=num>$y_i$</th><th class=num>$\hat y_i$</th><th class=num>$e_i$</th><th class=num>$|e_i|$</th><th class=num>$e_i^2$</th></tr></thead><tbody><tr><td class=num>1</td><td class=num>3</td><td class=num>2.5</td><td class=num>0.5</td><td class=num>0.5</td><td class=num>0.25</td></tr><tr><td class=num>2</td><td class=num>5</td><td class=num>5</td><td class=num>0</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>3</td><td class=num>8</td><td class=num>10</td><td class=num>−2</td><td class=num>2</td><td class=num>4</td></tr><tr><td class=num><b>Sum</b></td><td class=num></td><td class=num></td><td class=num></td><td class=num><b>2.5</b></td><td class=num><b>4.25</b></td></tr><tr><td class=num><b>Mean</b></td><td class=num></td><td class=num></td><td class=num></td><td class=num><b>0.833</b></td><td class=num><b>1.417</b></td></tr></tbody></table></div>
+    <p>The $e_i^2$ column is there for comparison with <a href="../mse/">MSE</a>. In vector form MAE is the $L_1$ norm of the error vector divided by $n$:</p>
+    <div class="eqd">$$\mathrm{MAE}(y,\hat y)=\frac{1}{n}\,\bigl\|y-\hat y\bigr\|_1,\qquad \|v\|_1=\sum_{i=1}^{n}|v_i|$$</div>
+    <p>Hence the second name of the loss, <b>L1 loss</b>. The distance $\|y-\hat y\|_1$ is called the Manhattan distance: it is how a taxi moves on a grid of blocks — the sum of the shifts along each axis.</p>
+
+    <h2 id="properties">Properties and the best constant</h2>
+    <ul class="flist"><li><b>Non-negativity</b>: $\mathrm{MAE}\ge0$, and $\mathrm{MAE}=0$ only if every prediction is exact.</li><li><b>Units</b> are those of $y$. Scale carries over directly: convert roubles to thousands of roubles and MAE shrinks exactly 1000 times.</li><li><b>Linear contribution of errors</b>: doubling one error doubles its contribution instead of quadrupling it as in MSE.</li><li><b>Convexity</b>: the absolute value is convex and a sum of convex functions is convex, so MAE has no “false” local minima — neither in the predictions nor in the parameters of a linear model. But the convexity is <i>not strict</i>: the minimum may be non-unique.</li><li><b>Piecewise linearity</b>: as a function of the predictions MAE consists of flat pieces glued along kinks where some error is zero. There is no derivative at the kinks.</li><li><b>Link with RMSE</b>: $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$. In the example: $0.833\le1.190\le1.443$. The larger the ratio RMSE/MAE, the “heavier the tails” of the errors.</li></ul>
+    <h3>The best constant is the median</h3>
+    <p>Let the model be as simple as possible: it answers the same number $c$ for every object. Which $c$ is best under MAE? The function $\mathrm{MAE}(c)=\frac1n\sum|y_i-c|$ is a sum of “V”s with their tips at the data points. Its slope anywhere between the data points is</p>
+    <div class="eqd">$$\frac{d\,\mathrm{MAE}}{dc}=\frac{\#\{i:\,y_i&lt;c\}-\#\{i:\,y_i&gt;c\}}{n}$$</div>
+    <p>While fewer than half the points lie to the left of $c$, the slope is negative and it pays to move $c$ to the right; once more than half lie to the left, the slope is positive. The minimum is where the points split in half, that is, at the <b>median</b>.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-median" data-config="{&quot;n&quot;: 5, &quot;c&quot;: 10}"></div><figcaption><b>Figure 2.</b> $\mathrm{MAE}(c)$ for the sample $(2,\,3,\,5,\,9,\,16)$ and its subgradient. At $c=10$ four points lie to the left and one to the right: the slope is $(4-1)/5=0.6$ and $\mathrm{MAE}(10)=5.4$. The minimum, $4$, is at the median $5$; at the mean $7$ MAE is larger: $4.4$. Switch to $n=6$ (the point $12$ is added): the bottom becomes flat over the whole interval $[5,\,9]$.</figcaption></figure>
+    <details class="deep"><summary>Proof: the minimum of MAE(c) is attained exactly at the medians</summary><div class="deep-body">
+      <p>Sort the data: $y_{(1)}\le\dots\le y_{(n)}$. The function $f(c)=\sum|y_i-c|$ is convex and piecewise linear. At a point $c$ that is not a data point its derivative is $L(c)-R(c)$, where $L$ and $R$ count the points to the left and to the right. At a data point $c=y_{(k)}$ (say it occurs once) the subdifferential is the interval $[L-R-1,\;L-R+1]$.</p>
+      <p>For a convex function, $c^*$ is a minimizer if and only if $0\in\partial f(c^*)$. For odd $n=2m+1$ this holds only at $c^*=y_{(m+1)}$: there $L=R=m$ and $0\in[-1,\,1]$. Left of the median $L-R\le-1$ and the derivative is negative; right of it, positive. So the minimum is unique.</p>
+      <p>For even $n=2m$, every $c$ strictly between $y_{(m)}$ and $y_{(m+1)}$ has $L=R=m$: the derivative is zero, and the whole band consists of minimizers. The usual convention “median $=(y_{(m)}+y_{(m+1)})/2$” is just one of equally valid answers.</p>
+    </div></details>
+    <div class="callout note"><b>Why it matters</b><p>The median barely reacts to extreme values: replace $16$ with $1600$ and the median stays $5$, while the mean flies off to $323.8$. A model trained on MAE behaves the same way: it predicts the <i>conditional median</i> of $y$ given the features, not the conditional mean.</p></div>
+
+    <h2 id="derivative">The derivative: the sign of the error and the subgradient</h2>
+    <p>The derivative of the absolute value is the sign: $|e|'=\operatorname{sign}(e)$ for $e\ne0$. At zero the “V” has a kink and there is no ordinary derivative. Convex analysis offers a substitute — the <b>subgradient</b>.</p>
+    <details class="deep"><summary>Derivation: the derivative of MAE with respect to the predictions and the parameters</summary><div class="deep-body">
+      <p>Write $|e|=\sqrt{e^2}$ and differentiate for $e\ne0$:</p>
+      <div class="eqd">$$\frac{d|e|}{de}=\frac{1}{2\sqrt{e^2}}\cdot2e=\frac{e}{|e|}=\operatorname{sign}(e)$$</div>
+      <p>The error depends on the prediction as $e_i=y_i-\hat y_i$, so $\partial e_i/\partial\hat y_i=-1$. By the chain rule:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MAE}}{\partial\hat y_i}=\frac1n\operatorname{sign}(e_i)\cdot(-1)=-\frac{1}{n}\operatorname{sign}\bigl(y_i-\hat y_i\bigr)$$</div>
+      <p>If the prediction comes from a linear model $\hat y_i=wx_i+b$, then $\partial\hat y_i/\partial w=x_i$, $\partial\hat y_i/\partial b=1$, and</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MAE}}{\partial w}=-\frac1n\sum_{i=1}^{n}\operatorname{sign}(e_i)\,x_i,\qquad \frac{\partial\,\mathrm{MAE}}{\partial b}=-\frac1n\sum_{i=1}^{n}\operatorname{sign}(e_i)$$</div>
+      <p>Only the <i>sign</i> of each error enters the gradient, not its size. An object with an error of $0.1$ and an object with an error of $100$ pull the parameters with the same force $1/n$.</p>
+    </div></details>
+    <div class="eqd">$$\frac{\partial\,\mathrm{MAE}}{\partial\hat y_i}=-\frac{1}{n}\operatorname{sign}\bigl(y_i-\hat y_i\bigr),\qquad \partial|e|\,\big|_{e=0}=[-1,\,1]$$</div>
+    <p>A <b>subgradient</b> of a convex function $f$ at a point $x$ is any number $g$ such that the line $f(x)+g\,(z-x)$ never rises above the graph: $f(z)\ge f(x)+g\,(z-x)$ for all $z$. For $|e|$ at zero these are all $g$ with $|g|\le1$: any line through the origin with slope between $-1$ and $1$ can be slid under the “V”. The set of subgradients is called the <b>subdifferential</b>.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-derivative" data-config="{&quot;e&quot;: 1.5}"></div><figcaption><b>Figure 3.</b> On the left, the loss $|e|$ and its tangent; on the right, the derivative $\operatorname{sign}(e)$. Bring the point to zero: the tangent falls apart into a fan of lines with slopes from $-1$ to $1$, which on the right corresponds to the whole segment $[-1,\,1]$. Turn on the comparison: the derivative of $e^2$ is $2e$ and shrinks smoothly towards zero, whereas for $|e|$ it stays $\pm1$ right up to the minimum.</figcaption></figure>
+    <div class="callout warn"><b>In practice, 0 is taken at zero</b><p>Frameworks do not store a set of subgradients: PyTorch, TensorFlow and NumPy use $\operatorname{sign}(0)=0$. That is a legitimate choice, since $0\in[-1,\,1]$. The second derivative of the absolute value is zero everywhere except at the kink, so methods that need a Hessian (Newton’s method, XGBoost leaves via $-G/H$) do not work with MAE directly: in boosting the leaf values for MAE are recomputed as medians of the residuals.</p></div>
+
+    <h2 id="robust">Robustness to outliers</h2>
+    <p>An outlier is an object with an anomalous $y$: a typo, a sensor glitch, a rare event. What matters for a loss is <b>how hard</b> such an object pulls the model. For MSE the pull is proportional to the error ($2e/n$); for MAE it is bounded: $1/n$, however far away the point lies.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-outlier" data-config="{&quot;y&quot;: 0, &quot;residuals&quot;: true}"></div><figcaption><b>Figure 4.</b> Ten points around the line $y=1+0.5x$ and one outlier at $x=9$ (drag the red point). Without the outlier both slopes are close to the true one: $0.467$ for MAE and $0.499$ for MSE. With the outlier at $y=0$ the MSE line tilts down to a slope of $0.291$, while the MAE line only goes to $0.438$. The outlier’s contribution to the gradient with respect to $b$: $1/11\approx0.091$ for MAE, $0.778$ for MSE.</figcaption></figure>
+    <p>Watch the blue line: while the outlier is below it, you can drag it down as far as you like — the line does not move at all. The sign of its error does not change, and MAE reacts only to signs. The MSE line, on the contrary, follows the outlier without limit.</p>
+    <div class="callout note"><b>The breakdown point</b><p>Robust statistics measures robustness by the share of corrupted data that can drive an estimate arbitrarily far. For the mean it is zero: one point is enough. For the median it is $50\%$: as long as less than half the sample is corrupted, the median stays within the range of the “clean” data. MAE regression is robust to outliers in $y$ but <i>not</i> to points with an anomalous $x$ (high leverage) — such a point can still swing the line.</p></div>
+
+    <h2 id="space">MAE in parameter space: a polyhedron</h2>
+    <p>Let the model be a line $\hat y=wx+b$ and the data five points with $x=(-2,\,-1,\,0,\,1,\,2)$ and $y=(1.3,\,2,\,3.1,\,4.5,\,7)$. Each pair $(w,\,b)$ gives its own line and its own MAE, so we get a surface over the parameter plane.</p>
+    <p>Each term $|y_i-wx_i-b|$ is a “gable roof” with its ridge along the line $b=y_i-wx_i$, where the $i$-th error is zero. The sum of five roofs is a <b>polyhedron</b>: flat faces, sharp edges, vertices. The minimum is always attained at a vertex where two edges cross, i.e. the line passes exactly through two data points.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-surface" data-config="{&quot;w&quot;: 0.4, &quot;b&quot;: 1.8, &quot;loss&quot;: &quot;mae&quot;}"></div><figcaption><b>Figure 5.</b> On the left, the surface $\mathrm{MAE}(w,b)$; you can rotate it. Top right, the view from above: the dashed orange lines are the edges (creases) $y_i=wx_i+b$, the red point is the minimum $\mathrm{MAE}=0.39$ at $(1.25,\,3.25)$. Drag the blue point: the corresponding line is shown below. At the starting point $(0.4,\,1.8)$, $\mathrm{MAE}=1.78$. Switch to MSE: instead of a crystal there is a smooth bowl with its minimum $0.229$ at $(1.39,\,3.58)$.</figcaption></figure>
+    <p>The two surfaces give different answers: the MAE line passes through the points at $x=-1$ and $x=1$ and almost ignores the “sticking-out” last point $y=7$; the MSE line is steeper to reduce that point’s square. Each is better by its own measure: the MSE line has $\mathrm{MAE}=0.456&gt;0.39$, the MAE line has $\mathrm{MSE}=0.378&gt;0.229$.</p>
+    <details class="deep"><summary>Why the optimum passes through two points</summary><div class="deep-body">
+      <p>The problem $\min_{w,b}\sum|y_i-wx_i-b|$ can be written as a linear program: introduce $u_i\ge0$, $v_i\ge0$ with $y_i-wx_i-b=u_i-v_i$ and minimize $\sum(u_i+v_i)$. The optimum of a linear program, if it exists, is attained at a vertex of the feasible set. At a vertex at least as many constraints are active as the line has free parameters — two: so at least two errors are zero.</p>
+      <p>This also explains the possible non-uniqueness: if a face of the polyhedron is horizontal, a whole edge or face is optimal, like the flat bottom of $\mathrm{MAE}(c)$ for even $n$. For the five points of our example the minimum is unique: the next best vertex gives $0.427$.</p>
+    </div></details>
+
+    <h2 id="training">MAE in training: subgradient descent</h2>
+    <p>Gradient descent steps against the gradient: $\theta\leftarrow\theta-\eta\,g$. MAE has a peculiarity: near the minimum the gradient <b>does not shrink</b>. It jumps between vectors built from $\pm1/n$, and with a constant step $\eta$ the parameters keep leaping over the bottom.</p>
+    <div class="eqd">$$\theta_{t+1}=\theta_t-\eta_t\,g_t,\qquad g_t\in\partial\,\mathrm{MAE}(\theta_t),\qquad \eta_t=\frac{\eta}{\sqrt{t+1}}$$</div>
+    <figure class="viz"><div class="fv" data-viz="mae-descent" data-config="{&quot;eta&quot;: 0.2}"></div><figcaption><b>Figure 6.</b> Subgradient descent on $\mathrm{MAE}(w,b)$ from the point $(-0.5,\,0.5)$, where $\mathrm{MAE}=3.16$, with $\eta=0.2$. The constant step (orange) reaches $0.424$ by $t=20$, but then keeps jumping around the minimum: for $t\ge100$ MAE oscillates between $0.392$ and $0.408$ and never gets to $0.390$. The decaying step (teal) starts more slowly — $1.085$ at $t=50$ and $0.481$ at $t=100$ — but by $t=200$ it arrives at the optimum $0.390$. On the right, the excess over the optimum $\mathrm{MAE}-\mathrm{MAE}^*$ on a log scale: for the constant step it gets stuck between $0.002$ and $0.018$, for the decaying step it falls to $3.5\cdot10^{-4}$ by $t=200$.</figcaption></figure>
+    <p>For convex functions theory gives an exact recipe: with a step $\eta_t\propto1/\sqrt t$ the best value found converges to the minimum at the rate $O(1/\sqrt t)$. With a constant step only an approach to a neighbourhood of the optimum of width of order $\eta$ is guaranteed. That is why in practice MAE is trained with a learning rate schedule, with the <a href="../adam/">Adam</a> optimizer, or replaced by the smooth <a href="../huber/">Huber loss</a>.</p>
+    <div class="callout intuition"><b>Compare with MSE</b><p>For MSE the gradient is proportional to the error, so the steps shorten by themselves as the minimum gets closer — a constant $\eta$ is enough for exact convergence. MAE has no “brakes”: the only sign of being near the optimum is that the error signs start to split evenly.</p></div>
+
+    <h2 id="quantile">Generalization: quantiles and the probabilistic meaning</h2>
+    <p>The median is the quantile of level $0.5$. Tilt the “V” so that the right branch is steeper than the left one, and the minimum moves to another quantile. This is the <b>pinball loss</b>, or quantile loss:</p>
+    <div class="eqd">$$\rho_\tau(e)=\max\bigl(\tau e,\;(\tau-1)\,e\bigr)=\begin{cases}\tau\,e, &amp; e\ge0,\\ (\tau-1)\,e, &amp; e&lt;0,\end{cases}\qquad \mathrm{MAE}=\frac{2}{n}\sum_{i=1}^{n}\rho_{0.5}(e_i)$$</div>
+    <p>With $\tau=0.9$ underestimation ($e&gt;0$) is penalized nine times harder than overestimation, and the optimal constant is the $90\%$ quantile. This is how prediction intervals are built: a model for $\tau=0.1$ and a model for $\tau=0.9$ give a band that should contain about $80\%$ of the observations.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-quantile" data-config="{&quot;tau&quot;: 0.9}"></div><figcaption><b>Figure 7.</b> On the left, the pinball loss and, for comparison, $\tfrac12|e|$ (that is $\tau=0.5$). On the right, 60 points whose spread grows with $x$, and the best line for the chosen $\tau$. At $\tau=0.9$, $53$ of the $60$ points lie below the line ($88\%$) and $2$ more lie on it; at $\tau=0.5$, $29$ lie below and $2$ on the line. The dashed lines are the fits for $\tau=0.1$, $0.5$ and $0.9$: because the spread grows, they fan out.</figcaption></figure>
+    <p>For the optimal line the share of points below it is at most $\tau$, and the share of points below or on it is at least $\tau$: $53/60\le0.9\le55/60$. This follows directly from the condition $0\in\partial$ — the same one that gave the median.</p>
+    <h3>MAE as maximum likelihood</h3>
+    <p>Let $y_i=\hat y_i+\varepsilon_i$, where the noise $\varepsilon$ follows the Laplace distribution with density $p(\varepsilon)=\frac{1}{2s}e^{-|\varepsilon|/s}$. Then the negative log-likelihood is</p>
+    <div class="eqd">$$-\ln L=n\ln(2s)+\frac{1}{s}\sum_{i=1}^{n}|y_i-\hat y_i|=n\ln(2s)+\frac{n}{s}\,\mathrm{MAE}$$</div>
+    <p>For a fixed $s$, maximizing the likelihood is the same as minimizing MAE, and the estimate of the noise scale is MAE itself: $\hat s=\mathrm{MAE}$. By choosing MAE we implicitly assume noise with heavier tails than the Gaussian. For MSE the same reasoning leads to normal noise — see <a href="../mse/">MSE</a>.</p>
+
+    <h2 id="code">In code</h2>
+    <p>MAE takes one line. The subgradient and training are more interesting. In NumPy:</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+
+def mae(y, y_hat):
+    return np.mean(np.abs(y - y_hat))
+
+def mae_grad(y, y_hat):
+    # subgradient w.r.t. the predictions: sign(ŷ − y) / n, 0 at zero
+    return np.sign(y_hat - y) / y.size
+
+print(mae(y, y_hat))        # 0.8333333333333334
+print(mae_grad(y, y_hat))   # [-0.33333333  0.          0.33333333]
+
+# the best constant under MAE is the median, not the mean
+data = np.array([2.0, 3.0, 5.0, 9.0, 16.0])
+print(np.median(data), mae(data, np.median(data)))   # 5.0 4.0
+print(data.mean(), mae(data, data.mean()))           # 7.0 4.4</code></pre>
+    <p>In PyTorch the loss is called <code>L1Loss</code>. Look at the gradient: the second object’s error is exactly zero and the framework takes the subgradient $0$. The second part of the listing trains the line of Figures 5–6 with a decaying step:</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+y     = torch.tensor([3.0, 5.0, 8.0])
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+
+loss = nn.L1Loss()(y_hat, y)     # same as (y_hat - y).abs().mean()
+loss.backward()
+print(loss.item())               # 0.8333333134651184
+print(y_hat.grad)                # tensor([-0.3333,  0.0000,  0.3333])
+
+# a linear model under MAE: the step decays as 1/√t
+x = torch.tensor([-2.0, -1.0, 0.0, 1.0, 2.0])
+t = torch.tensor([1.3, 2.0, 3.1, 4.5, 7.0])
+w = torch.zeros(1, requires_grad=True)
+b = torch.zeros(1, requires_grad=True)
+opt = torch.optim.SGD([w, b], lr=0.5)
+sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda k: 1 / (k + 1) ** 0.5)
+for step in range(3000):
+    opt.zero_grad()
+    nn.functional.l1_loss(w * x + b, t).backward()
+    opt.step(); sched.step()
+print(round(w.item(), 2), round(b.item(), 2))   # 1.25 3.25 — a line through 2 points</code></pre>
+    <p>scikit-learn has the metric, exact linear regression under MAE (via a linear program) and boosting with MAE:</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+from sklearn.metrics import mean_absolute_error
+from sklearn.linear_model import QuantileRegressor
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+print(mean_absolute_error([3, 5, 8], [2.5, 5, 10]))   # 0.8333333333333334
+
+# linear regression under MAE is quantile regression with τ = 0.5
+X = np.array([[-2.0], [-1.0], [0.0], [1.0], [2.0]])
+y = np.array([1.3, 2.0, 3.1, 4.5, 7.0])
+lad = QuantileRegressor(quantile=0.5, alpha=0.0).fit(X, y)   # alpha=0: no L1 penalty
+print(lad.coef_, lad.intercept_)                             # [1.25] 3.25
+
+# boosting on MAE: leaf values are medians of the residuals
+gbr = HistGradientBoostingRegressor(loss=&quot;absolute_error&quot;)</code></pre>
+    <div class="callout key"><b>The rule</b><p>If you need MAE as a <i>metric</i>, compute it as is. If you need it as a <i>loss</i> for gradient descent, decay the step on a schedule or use <a href="../huber/">Huber</a> with a small $\delta$: the same robustness to outliers, but a smooth minimum.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>Forgetting the absolute value</b>: <code>np.mean(y - y_hat)</code> is the bias, not MAE. Errors of opposite sign cancel, and a bad model can score zero.</li><li><b>Comparing MAE across tasks</b>. MAE $=5$ for prices in thousands and for temperature in degrees are incomparable numbers. For comparisons across scales there is <a href="../mape/">MAPE</a>, or MAE divided by the MAE of a simple baseline.</li><li><b>Training on MSE and reporting MAE</b> (or the other way round). MSE drives the model to the conditional mean, MAE to the median. On skewed data (prices, incomes, waiting times) these are different numbers, and the model that wins on one metric will lose on the other.</li><li><b>A constant step with an MAE loss</b>. The parameters will jitter around the minimum with an amplitude of order $\eta$. You need a step schedule or a smoothed loss.</li><li><b>Expecting a unique solution</b>. The minimum of MAE can be a whole interval (an even number of points) or an edge of the polyhedron. Different solvers will return different but equally good answers.</li><li><b>Reading MAE as the “typical error” without looking at the tail</b>. MAE $=1$ can hide rare misses of 50. Look at the error distribution, its quantiles and RMSE next to MAE.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href="../mse/">MSE</a>: a square instead of the absolute value — smoothness and the mean instead of the median, but sensitivity to outliers.</li><li><a href="../rmse/">RMSE</a>: $\mathrm{RMSE}\ge\mathrm{MAE}$. For normal errors $\mathrm{RMSE}/\mathrm{MAE}=\sqrt{\pi/2}\approx1.253$, for Laplace errors $\sqrt2\approx1.414$; in the running example $1.428$.</li><li><a href="../huber/">Huber</a>: a square near zero and the absolute value far away — a smooth minimum and robustness to outliers at the same time.</li><li><a href="../mape/">MAPE</a>: the same MAE, but of the relative errors $|e_i|/|y_i|$.</li><li><a href="../sgd/">SGD</a> and <a href="../adam/">Adam</a>: optimizers that need a decaying step with MAE.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $\mathrm{MAE}=\frac1n\sum|y_i-\hat y_i|$ is the average length of a miss in the units of $y$; $0.833$ in the running example. 2) Errors enter linearly, so MAE is robust to outliers and its best constant is the median (for even $n$, any point between the two middle ones). 3) The derivative is $-\operatorname{sign}(e_i)/n$; at zero the subdifferential is $[-1,\,1]$, and $0$ is used in practice. 4) The MAE surface over the parameters is a polyhedron; the minimum is at a vertex, and the line passes through two points. 5) The gradient does not shrink near the minimum: train with a decaying step or use Huber. 6) A tilted “V”, the pinball loss, gives quantiles; MAE corresponds to Laplace noise.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. $y=(1,\,4,\,6)$, $\hat y=(2,\,4,\,3)$. What is MAE?</legend><div class="opts"><button type="button" data-ok="1">$1.333$</button><button type="button" data-ok="0">$3.333$</button><button type="button" data-ok="0">$1.826$</button><button type="button" data-ok="0">$0.667$</button></div><div class="explain" hidden>The errors are $(-1,\,0,\,3)$, their absolute values $(1,\,0,\,3)$, $\mathrm{MAE}=4/3\approx1.333$. $3.333$ is MSE, $1.826$ is RMSE, $0.667$ is the mean error without the absolute value.</div></fieldset><fieldset class="q"><legend>2. Which constant minimizes MAE for the sample $(1,\,2,\,3,\,10,\,50)$?</legend><div class="opts"><button type="button" data-ok="0">$13.2$</button><button type="button" data-ok="1">$3$</button><button type="button" data-ok="0">$10$</button><button type="button" data-ok="0">$2.5$</button></div><div class="explain" hidden>The optimal constant is the median, $3$. The mean $13.2$ minimizes MSE, not MAE.</div></fieldset><fieldset class="q"><legend>3. What is the subdifferential of $|e|$ at $e=0$?</legend><div class="opts"><button type="button" data-ok="0">Only $\{0\}$</button><button type="button" data-ok="1">The interval $[-1,\,1]$</button><button type="button" data-ok="0">$\{-1,\,1\}$</button><button type="button" data-ok="0">The empty set</button></div><div class="explain" hidden>Every line $g\cdot e$ with $|g|\le1$ lies below the graph of $|e|$, so $\partial|e|(0)=[-1,\,1]$.</div></fieldset><fieldset class="q"><legend>4. Why does gradient descent on MAE with a constant step not converge exactly?</legend><div class="opts"><button type="button" data-ok="0">MAE is not convex</button><button type="button" data-ok="1">The size of the gradient does not shrink near the minimum, so the steps do not get shorter</button><button type="button" data-ok="0">MAE has no minimum</button><button type="button" data-ok="0">The gradient of MAE is always zero</button></div><div class="explain" hidden>Each object contributes $\pm1/n$ regardless of the size of its error, so the step $\eta g$ stays large and the parameters jump over the bottom. A decaying step $\eta_t\propto1/\sqrt t$ helps.</div></fieldset><fieldset class="q"><legend>5. What does the constant that minimizes the pinball loss with $\tau=0.9$ estimate?</legend><div class="opts"><button type="button" data-ok="0">The mean</button><button type="button" data-ok="0">The median</button><button type="button" data-ok="1">The $90\%$ quantile</button><button type="button" data-ok="0">The $10\%$ quantile</button></div><div class="explain" hidden>Underestimation is penalized with weight $0.9$, overestimation with weight $0.1$; the balance is reached when $90\%$ of the data lie below the constant.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../softmax/"><span class="kicker">← Previous formula</span><span class="big">Softmax</span><span class="kicker">“soft maximum”</span></a>
+<a class="next" href="../mse/"><span class="kicker">Next formula →</span><span class="big">MSE</span><span class="kicker">mean squared error</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

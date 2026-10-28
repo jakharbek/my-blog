@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MAE: средняя абсолютная ошибка — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="MAE подробно: формула, свойства, медиана как оптимальная константа, субградиент, поверхность потерь в 3D, устойчивость к выбросам, субградиентный спуск, квантильная потеря, код на NumPy, PyTorch и scikit-learn.">
+  <meta property="og:title" content="MAE: средняя абсолютная ошибка — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="MAE подробно: формула, свойства, медиана как оптимальная константа, субградиент, поверхность потерь в 3D, устойчивость к выбросам, субградиентный спуск, квантильная потеря, код на NumPy, PyTorch и scikit-learn.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/mae/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/mae/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/mae/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/mae/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/mae.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/mae/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/mae/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/mae/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Потери — регрессия</span>
+  <h1>MAE: средняя абсолютная ошибка</h1>
+  <p class="dek">Самая понятная метрика регрессии: на сколько в среднем ошибается модель. Разбираем MAE по косточкам: почему её минимизирует медиана, что такое субградиент и почему с постоянным шагом спуск «дрожит» у оптимума, как выглядит её поверхность-многогранник и почему она так спокойно переносит выбросы.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 32 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем она нужна</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: средняя длина промаха</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#properties"><span class="n">4</span>Свойства и лучшая константа</a>
+      <a href="#derivative"><span class="n">5</span>Производная: знак ошибки и субградиент</a>
+      <a href="#robust"><span class="n">6</span>Устойчивость к выбросам</a>
+      <a href="#space"><span class="n">7</span>MAE в пространстве параметров: многогранник</a>
+      <a href="#training"><span class="n">8</span>MAE в обучении: субградиентный спуск</a>
+      <a href="#quantile"><span class="n">9</span>Обобщение: квантили и вероятностный смысл</a>
+      <a href="#code"><span class="n">10</span>В коде</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}\bigl|y_i-\hat{y}_i\bigr|$$</div>
+
+    <h2 id="why">Зачем она нужна</h2>
+    <p>Модель предсказывает цену квартиры, время доставки, спрос на товар. Первый вопрос заказчика: «На сколько она ошибается?» Ответ «в среднем на 4 минуты» или «на 120 тысяч» — это и есть MAE (mean absolute error), <b>средняя абсолютная ошибка</b>. Её понимает любой человек без статистического образования, потому что она измеряется в тех же единицах, что и сама величина.</p>
+    <p>Где она встречается:</p>
+    <ul class="flist"><li><b>метрика качества регрессии</b> — прогноз спроса, времени в пути, цен, нагрузки на серверы; в отчётах её ставят рядом с <a href="../rmse/">RMSE</a>;</li><li><b>функция потерь</b> — <code>L1Loss</code> в PyTorch; её берут, когда в данных есть выбросы или нужен прогноз медианы, а не среднего;</li><li><b>компьютерное зрение</b> — L1 по пикселям в pix2pix и в задачах сверхразрешения (EDSR), L1 по координатам рамок в детекторе DETR;</li><li><b>градиентный бустинг</b> — <code>loss="absolute_error"</code> в scikit-learn, <code>objective="l1"</code> в LightGBM: значения в листьях — медианы остатков;</li><li><b>робастная статистика</b> — регрессия наименьших модулей (least absolute deviations, LAD), квантильная регрессия, медиана как оценка «типичного» значения.</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>MAE — среднее расстояние от прогноза до правды: $\frac1n\sum|y_i-\hat y_i|$. Каждая ошибка входит <i>линейно</i>: промах на 2 весит как четыре промаха по $0{,}5$. Поэтому MAE устойчива к выбросам, а лучшая константа для неё — <b>медиана</b>. Цена за это — излом в нуле: производная есть везде, кроме точки, где ошибка равна нулю, и её модуль не уменьшается у минимума.</p></div>
+
+    <h2 id="intuition">Интуиция: средняя длина промаха</h2>
+    <p>Нарисуем правду $y_i$ точками, прогнозы $\hat y_i$ — синими маркерами, а ошибку — вертикальным отрезком между ними. MAE — это <b>средняя длина оранжевых отрезков</b>. Направление не важно: недолёт и перелёт на одно и то же расстояние стоят одинаково.</p>
+    <p>Ниже — сквозной пример шпаргалки: $y=(3;\,5;\,8)$, $\hat y=(2{,}5;\,5;\,10)$. Тяните синие маркеры. На нижнем графике каждая ошибка $e_i=y_i-\hat y_i$ стоит на «галочке» $|e|$; MAE — средняя высота этих точек (бирюзовая линия).</p>
+    <figure class="viz"><div class="fv" data-viz="mae-errors" data-config="{&quot;yhat&quot;: [2.5, 5, 10]}"></div><figcaption><b>Рисунок 1.</b> Ошибки сквозного примера. Длины отрезков $0{,}5$, $0$ и $2$, их сумма $2{,}5$, среднее $\mathrm{MAE}=2{,}5/3\approx0{,}833$. Поставьте третий прогноз на $8$ — MAE упадёт до $0{,}5/3\approx0{,}167$.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Самая большая ошибка, $2$, даёт $80\%$ суммы модулей ($2$ из $2{,}5$). В <a href="../mse/">MSE</a> та же ошибка дала бы $94\%$ суммы квадратов ($4$ из $4{,}25$). MAE «демократичнее»: она не позволяет одному большому промаху заслонить остальные.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <p>Разберём формулу на четыре действия и посмотрим, что делает каждое.</p>
+    <div class="eqd">$$\underbrace{y_i-\hat y_i}_{\text{ошибка }e_i}\;\longrightarrow\;\underbrace{|e_i|}_{\text{длина}}\;\longrightarrow\;\underbrace{\sum_{i=1}^{n}|e_i|}_{\text{общий промах}}\;\longrightarrow\;\underbrace{\frac1n\sum_{i=1}^{n}|e_i|}_{\text{средний промах}}$$</div>
+    <dl class="symbols"><dt>$y_i$</dt><dd>истинное значение для объекта $i$ (цена, время, спрос);</dd><dt>$\hat y_i$</dt><dd>прогноз модели для того же объекта;</dd><dt>$e_i=y_i-\hat y_i$</dt><dd>ошибка (остаток, residual): положительная — модель недооценила, отрицательная — переоценила;</dd><dt>$|e_i|$</dt><dd>модуль убирает знак, чтобы недолёт и перелёт не гасили друг друга; $|e|=\sqrt{e^2}$ — расстояние на числовой прямой;</dd><dt>$\frac1n\sum$</dt><dd>усреднение делает метрику независимой от размера выборки: MAE на 100 и на 10 000 объектах можно сравнивать.</dd></dl>
+    <p>Почему нельзя обойтись без модуля? Средняя ошибка без него, $\frac1n\sum e_i$, на нашем примере равна $(0{,}5+0-2)/3=-0{,}5$, и её можно сделать нулевой при сколь угодно плохой модели: ошибки $+100$ и $-100$ в среднем дают ноль. Эта величина называется <b>смещением</b> (bias) — полезная, но другая метрика.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$i$</th><th class=num>$y_i$</th><th class=num>$\hat y_i$</th><th class=num>$e_i$</th><th class=num>$|e_i|$</th><th class=num>$e_i^2$</th></tr></thead><tbody><tr><td class=num>1</td><td class=num>3</td><td class=num>2,5</td><td class=num>0,5</td><td class=num>0,5</td><td class=num>0,25</td></tr><tr><td class=num>2</td><td class=num>5</td><td class=num>5</td><td class=num>0</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>3</td><td class=num>8</td><td class=num>10</td><td class=num>−2</td><td class=num>2</td><td class=num>4</td></tr><tr><td class=num><b>Сумма</b></td><td class=num></td><td class=num></td><td class=num></td><td class=num><b>2,5</b></td><td class=num><b>4,25</b></td></tr><tr><td class=num><b>Среднее</b></td><td class=num></td><td class=num></td><td class=num></td><td class=num><b>0,833</b></td><td class=num><b>1,417</b></td></tr></tbody></table></div>
+    <p>Столбец $e_i^2$ добавлен для сравнения с <a href="../mse/">MSE</a>. В векторной записи MAE — это норма $L_1$ вектора ошибок, делённая на $n$:</p>
+    <div class="eqd">$$\mathrm{MAE}(y,\hat y)=\frac{1}{n}\,\bigl\|y-\hat y\bigr\|_1,\qquad \|v\|_1=\sum_{i=1}^{n}|v_i|$$</div>
+    <p>Отсюда второе имя функции потерь — <b>L1-потеря</b> (L1 loss). Расстояние $\|y-\hat y\|_1$ называют манхэттенским: так ходит такси по сетке кварталов — сумма смещений по каждой оси.</p>
+
+    <h2 id="properties">Свойства и лучшая константа</h2>
+    <ul class="flist"><li><b>Неотрицательность</b>: $\mathrm{MAE}\ge0$, и $\mathrm{MAE}=0$ только если все прогнозы точные.</li><li><b>Единицы</b> — те же, что у $y$. Масштаб переносится напрямую: если перевести рубли в тысячи рублей, MAE уменьшится ровно в 1000 раз.</li><li><b>Линейный вклад ошибок</b>: удвоение одной ошибки удваивает её вклад, а не учетверяет, как в MSE.</li><li><b>Выпуклость</b>: модуль выпуклый, сумма выпуклых функций выпукла, поэтому у MAE нет «ложных» локальных минимумов — ни по прогнозам, ни по параметрам линейной модели. Но выпуклость <i>нестрогая</i>: минимум может быть не единственным.</li><li><b>Кусочная линейность</b>: как функция прогнозов MAE состоит из плоских кусков, склеенных по изломам там, где какая-то ошибка равна нулю. В изломах производной нет.</li><li><b>Связь с RMSE</b>: $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$. В примере: $0{,}833\le1{,}190\le1{,}443$. Чем больше отношение RMSE/MAE, тем «тяжелее хвосты» ошибок.</li></ul>
+    <h3>Лучшая константа — медиана</h3>
+    <p>Пусть модель совсем простая: для всех объектов она отвечает одним и тем же числом $c$. Какое $c$ лучшее по MAE? Функция $\mathrm{MAE}(c)=\frac1n\sum|y_i-c|$ — сумма «галочек» с вершинами в точках данных. Её наклон в любой точке между данными равен</p>
+    <div class="eqd">$$\frac{d\,\mathrm{MAE}}{dc}=\frac{\#\{i:\,y_i&lt;c\}-\#\{i:\,y_i&gt;c\}}{n}$$</div>
+    <p>Пока слева от $c$ меньше половины точек, наклон отрицательный, и $c$ выгодно двигать вправо; когда слева больше половины — наклон положительный. Минимум там, где точки делятся пополам, то есть в <b>медиане</b>.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-median" data-config="{&quot;n&quot;: 5, &quot;c&quot;: 10}"></div><figcaption><b>Рисунок 2.</b> $\mathrm{MAE}(c)$ для выборки $(2;\,3;\,5;\,9;\,16)$ и её субградиент. При $c=10$ слева четыре точки, справа одна: наклон $(4-1)/5=0{,}6$, $\mathrm{MAE}(10)=5{,}4$. Минимум $4$ — в медиане $5$; в среднем $7$ MAE больше: $4{,}4$. Переключите на $n=6$ (добавлена точка $12$): дно становится плоским на всём отрезке $[5;\,9]$.</figcaption></figure>
+    <details class="deep"><summary>Доказательство: минимум MAE(c) достигается ровно на медианах</summary><div class="deep-body">
+      <p>Упорядочим данные: $y_{(1)}\le\dots\le y_{(n)}$. Функция $f(c)=\sum|y_i-c|$ выпукла и кусочно линейна. В точке $c$, не совпадающей с данными, её производная равна $L(c)-R(c)$, где $L$ и $R$ — число точек слева и справа. В точке данных $c=y_{(k)}$ (пусть она встречается один раз) субдифференциал — отрезок $[L-R-1;\;L-R+1]$.</p>
+      <p>Для выпуклой функции $c^*$ — точка минимума тогда и только тогда, когда $0\in\partial f(c^*)$. При нечётном $n=2m+1$ это выполняется только в $c^*=y_{(m+1)}$: там $L=R=m$, и $0\in[-1;\,1]$. Левее медианы $L-R\le-1$ и производная отрицательна, правее — положительна. Значит, минимум единственный.</p>
+      <p>При чётном $n=2m$ для любого $c$ строго между $y_{(m)}$ и $y_{(m+1)}$ имеем $L=R=m$: производная равна нулю, и вся эта полоса — минимумы. Обычная договорённость «медиана $=(y_{(m)}+y_{(m+1)})/2$» — лишь один из равноправных ответов.</p>
+    </div></details>
+    <div class="callout note"><b>Почему это важно</b><p>Медиана почти не реагирует на крайние значения: если $16$ заменить на $1600$, медиана останется $5$, а среднее улетит к $323{,}8$. Модель, обученная на MAE, ведёт себя так же: она предсказывает <i>условную медиану</i> $y$ при данных признаках, а не условное среднее.</p></div>
+
+    <h2 id="derivative">Производная: знак ошибки и субградиент</h2>
+    <p>Производная модуля — это знак: $|e|'=\operatorname{sign}(e)$ при $e\ne0$. В нуле у «галочки» излом, и обычной производной нет. Выпуклый анализ предлагает замену — <b>субградиент</b>.</p>
+    <details class="deep"><summary>Вывод: производная MAE по прогнозам и по параметрам</summary><div class="deep-body">
+      <p>Запишем $|e|=\sqrt{e^2}$ и продифференцируем при $e\ne0$:</p>
+      <div class="eqd">$$\frac{d|e|}{de}=\frac{1}{2\sqrt{e^2}}\cdot2e=\frac{e}{|e|}=\operatorname{sign}(e)$$</div>
+      <p>Ошибка зависит от прогноза так: $e_i=y_i-\hat y_i$, поэтому $\partial e_i/\partial\hat y_i=-1$. По цепному правилу:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MAE}}{\partial\hat y_i}=\frac1n\operatorname{sign}(e_i)\cdot(-1)=-\frac{1}{n}\operatorname{sign}\bigl(y_i-\hat y_i\bigr)$$</div>
+      <p>Если прогноз даёт линейная модель $\hat y_i=wx_i+b$, то $\partial\hat y_i/\partial w=x_i$, $\partial\hat y_i/\partial b=1$, и</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MAE}}{\partial w}=-\frac1n\sum_{i=1}^{n}\operatorname{sign}(e_i)\,x_i,\qquad \frac{\partial\,\mathrm{MAE}}{\partial b}=-\frac1n\sum_{i=1}^{n}\operatorname{sign}(e_i)$$</div>
+      <p>В градиент входит только <i>знак</i> каждой ошибки, а не её размер. Объект с ошибкой $0{,}1$ и объект с ошибкой $100$ тянут параметры с одинаковой силой $1/n$.</p>
+    </div></details>
+    <div class="eqd">$$\frac{\partial\,\mathrm{MAE}}{\partial\hat y_i}=-\frac{1}{n}\operatorname{sign}\bigl(y_i-\hat y_i\bigr),\qquad \partial|e|\,\big|_{e=0}=[-1;\,1]$$</div>
+    <p><b>Субградиент</b> выпуклой функции $f$ в точке $x$ — любое число $g$, для которого прямая $f(x)+g\,(z-x)$ нигде не поднимается выше графика: $f(z)\ge f(x)+g\,(z-x)$ для всех $z$. Для $|e|$ в нуле это все $g$ с $|g|\le1$: любую прямую через начало координат с наклоном от $-1$ до $1$ можно «подложить» под галочку. Множество субградиентов называется <b>субдифференциалом</b>.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-derivative" data-config="{&quot;e&quot;: 1.5}"></div><figcaption><b>Рисунок 3.</b> Слева — потеря $|e|$ и касательная, справа — производная $\operatorname{sign}(e)$. Подведите точку к нулю: касательная распадается на веер прямых с наклонами от $-1$ до $1$, а справа этому соответствует весь отрезок $[-1;\,1]$. Включите сравнение: производная $e^2$ равна $2e$ и плавно уменьшается к нулю, а у $|e|$ она остаётся $\pm1$ вплоть до самого минимума.</figcaption></figure>
+    <div class="callout warn"><b>На практике в нуле берут 0</b><p>Фреймворки не хранят множество субградиентов: PyTorch, TensorFlow и NumPy считают $\operatorname{sign}(0)=0$. Это законный выбор — $0\in[-1;\,1]$. Вторая производная модуля равна нулю везде, кроме излома, поэтому методы, которым нужен гессиан (метод Ньютона, листья XGBoost по формуле $-G/H$), с MAE напрямую не работают: в бустинге значения листьев для MAE пересчитывают как медианы остатков.</p></div>
+
+    <h2 id="robust">Устойчивость к выбросам</h2>
+    <p>Выброс (outlier) — объект с аномальным $y$: опечатка, сбой датчика, редкое событие. Для потери важно, <b>с какой силой</b> такой объект тянет модель. У MSE сила пропорциональна ошибке ($2e/n$), у MAE она ограничена: $1/n$, как бы далеко ни лежала точка.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-outlier" data-config="{&quot;y&quot;: 0, &quot;residuals&quot;: true}"></div><figcaption><b>Рисунок 4.</b> Десять точек вокруг прямой $y=1+0{,}5x$ и один выброс в $x=9$ (тяните красную точку). Без выброса наклоны близки к истинному: $0{,}467$ у MAE и $0{,}499$ у MSE. С выбросом в $y=0$ прямая MSE заваливается до наклона $0{,}291$, а прямая MAE — лишь до $0{,}438$. Вклад выброса в градиент по $b$: у MAE $1/11\approx0{,}091$, у MSE $0{,}778$.</figcaption></figure>
+    <p>Обратите внимание на поведение синей прямой: пока выброс ниже неё, его можно тащить вниз сколько угодно — прямая не сдвинется вообще. Знак его ошибки не меняется, а MAE реагирует только на знаки. Прямая MSE, наоборот, ползёт за выбросом без ограничений.</p>
+    <div class="callout note"><b>Точка излома (breakdown point)</b><p>В робастной статистике устойчивость измеряют долей испорченных данных, которая может увести оценку сколь угодно далеко. У среднего она нулевая: одной точки достаточно. У медианы — $50\%$: пока испорчено меньше половины выборки, медиана остаётся в пределах «чистых» данных. Регрессия по MAE устойчива к выбросам по $y$, но <i>не</i> к точкам с аномальным $x$ (высоким рычагом, leverage) — такая точка всё ещё может развернуть прямую.</p></div>
+
+    <h2 id="space">MAE в пространстве параметров: многогранник</h2>
+    <p>Пусть модель — прямая $\hat y=wx+b$, данные — пять точек с $x=(-2;\,-1;\,0;\,1;\,2)$ и $y=(1{,}3;\,2;\,3{,}1;\,4{,}5;\,7)$. Каждой паре $(w;\,b)$ соответствует своя прямая и своя MAE. Получаем поверхность над плоскостью параметров.</p>
+    <p>Каждое слагаемое $|y_i-wx_i-b|$ — это «двускатная крыша» с коньком вдоль прямой $b=y_i-wx_i$, где $i$-я ошибка равна нулю. Сумма пяти крыш — <b>многогранник</b>: плоские грани, острые рёбра, вершины. Минимум всегда достигается в вершине, где пересекаются два ребра, то есть прямая проходит ровно через две точки данных.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-surface" data-config="{&quot;w&quot;: 0.4, &quot;b&quot;: 1.8, &quot;loss&quot;: &quot;mae&quot;}"></div><figcaption><b>Рисунок 5.</b> Слева — поверхность $\mathrm{MAE}(w,b)$, её можно вращать. Справа вверху — вид сверху: оранжевый пунктир — рёбра (сгибы) $y_i=wx_i+b$, красная точка — минимум $\mathrm{MAE}=0{,}39$ в $(1{,}25;\,3{,}25)$. Тяните синюю точку: внизу видна соответствующая прямая. В исходной точке $(0{,}4;\,1{,}8)$ $\mathrm{MAE}=1{,}78$. Переключитесь на MSE: вместо кристалла — гладкая чаша с минимумом $0{,}229$ в $(1{,}39;\,3{,}58)$.</figcaption></figure>
+    <p>Две поверхности дают разные ответы: прямая MAE проходит через точки $x=-1$ и $x=1$ и почти не замечает «оттопыренную» последнюю точку $y=7$; прямая MSE наклонена круче, чтобы уменьшить её квадрат. Каждая лучше по своей мере: у прямой MSE $\mathrm{MAE}=0{,}456&gt;0{,}39$, у прямой MAE $\mathrm{MSE}=0{,}378&gt;0{,}229$.</p>
+    <details class="deep"><summary>Почему оптимум проходит через две точки</summary><div class="deep-body">
+      <p>Задачу $\min_{w,b}\sum|y_i-wx_i-b|$ можно записать как линейную программу: введём $u_i\ge0$, $v_i\ge0$ с $y_i-wx_i-b=u_i-v_i$ и будем минимизировать $\sum(u_i+v_i)$. Оптимум линейной программы, если он существует, достигается в вершине допустимого множества. В вершине активны как минимум столько ограничений, сколько свободных параметров у прямой, — два: значит, хотя бы две ошибки равны нулю.</p>
+      <p>Отсюда же — возможная неединственность: если грань многогранника горизонтальна, минимумом будет целое ребро или грань, как плоское дно $\mathrm{MAE}(c)$ при чётном $n$. Для пяти точек нашего примера минимум единственный: следующая по качеству вершина даёт $0{,}427$.</p>
+    </div></details>
+
+    <h2 id="training">MAE в обучении: субградиентный спуск</h2>
+    <p>Градиентный спуск делает шаг против градиента: $\theta\leftarrow\theta-\eta\,g$. С MAE возникает особенность: у минимума градиент <b>не уменьшается</b>. Он скачет между векторами, составленными из $\pm1/n$, и с постоянным шагом $\eta$ параметры всё время перепрыгивают через дно.</p>
+    <div class="eqd">$$\theta_{t+1}=\theta_t-\eta_t\,g_t,\qquad g_t\in\partial\,\mathrm{MAE}(\theta_t),\qquad \eta_t=\frac{\eta}{\sqrt{t+1}}$$</div>
+    <figure class="viz"><div class="fv" data-viz="mae-descent" data-config="{&quot;eta&quot;: 0.2}"></div><figcaption><b>Рисунок 6.</b> Субградиентный спуск по $\mathrm{MAE}(w,b)$ из точки $(-0{,}5;\,0{,}5)$, где $\mathrm{MAE}=3{,}16$, при $\eta=0{,}2$. Постоянный шаг (оранжевый) уже к $t=20$ даёт $0{,}424$, но дальше скачет вокруг минимума: при $t\ge100$ MAE колеблется между $0{,}392$ и $0{,}408$ и до $0{,}390$ не доходит. Убывающий шаг (бирюзовый) стартует медленнее — $1{,}085$ при $t=50$ и $0{,}481$ при $t=100$, — но к $t=200$ приходит к оптимуму $0{,}390$. Справа — превышение над оптимумом $\mathrm{MAE}-\mathrm{MAE}^*$ в логарифмическом масштабе: у постоянного шага оно застревает между $0{,}002$ и $0{,}018$, у убывающего к $t=200$ падает до $3{,}5\cdot10^{-4}$.</figcaption></figure>
+    <p>Для выпуклых функций теория даёт точный рецепт: при шаге $\eta_t\propto1/\sqrt t$ лучшее найденное значение сходится к минимуму со скоростью $O(1/\sqrt t)$. С постоянным шагом гарантирован лишь выход в окрестность оптимума шириной порядка $\eta$. Поэтому на практике MAE обучают с расписанием шага (learning rate schedule), с оптимизатором <a href="../adam/">Adam</a> или заменяют на гладкую <a href="../huber/">функцию Хьюбера</a>.</p>
+    <div class="callout intuition"><b>Сравните с MSE</b><p>У MSE градиент пропорционален ошибке, поэтому шаги сами укорачиваются по мере приближения к минимуму — постоянного $\eta$ хватает для точной сходимости. У MAE «тормозов» нет: о близости к оптимуму говорит только то, что знаки ошибок начинают делиться поровну.</p></div>
+
+    <h2 id="quantile">Обобщение: квантили и вероятностный смысл</h2>
+    <p>Медиана — это квантиль уровня $0{,}5$. Если наклонить «галочку», сделав правую ветвь круче левой, минимум сдвинется к другому квантилю. Получается <b>пинбол-потеря</b> (pinball loss), или квантильная потеря:</p>
+    <div class="eqd">$$\rho_\tau(e)=\max\bigl(\tau e,\;(\tau-1)\,e\bigr)=\begin{cases}\tau\,e, &amp; e\ge0,\\ (\tau-1)\,e, &amp; e&lt;0,\end{cases}\qquad \mathrm{MAE}=\frac{2}{n}\sum_{i=1}^{n}\rho_{0{,}5}(e_i)$$</div>
+    <p>При $\tau=0{,}9$ недооценка ($e&gt;0$) штрафуется в девять раз сильнее переоценки, и оптимальная константа — $90\%$-й квантиль. Так строят прогнозные интервалы: модель для $\tau=0{,}1$ и модель для $\tau=0{,}9$ дают коридор, в который должно попадать около $80\%$ наблюдений.</p>
+    <figure class="viz"><div class="fv" data-viz="mae-quantile" data-config="{&quot;tau&quot;: 0.9}"></div><figcaption><b>Рисунок 7.</b> Слева — пинбол-потеря и для сравнения $\tfrac12|e|$ (это $\tau=0{,}5$). Справа — 60 точек с разбросом, растущим вместе с $x$, и лучшая прямая для выбранного $\tau$. При $\tau=0{,}9$ ниже прямой $53$ точки из $60$ ($88\%$), ещё $2$ лежат на ней; при $\tau=0{,}5$ ниже $29$, на прямой $2$. Пунктир — прямые для $\tau=0{,}1$, $0{,}5$ и $0{,}9$: из-за растущего разброса они расходятся веером.</figcaption></figure>
+    <p>Для оптимальной прямой доля точек ниже неё не больше $\tau$, а доля точек ниже или на ней — не меньше $\tau$: $53/60\le0{,}9\le55/60$. Это прямое следствие условия $0\in\partial$ — того же, что дало медиану.</p>
+    <h3>MAE как метод максимального правдоподобия</h3>
+    <p>Пусть $y_i=\hat y_i+\varepsilon_i$, где шум $\varepsilon$ имеет распределение Лапласа с плотностью $p(\varepsilon)=\frac{1}{2s}e^{-|\varepsilon|/s}$. Тогда отрицательный логарифм правдоподобия</p>
+    <div class="eqd">$$-\ln L=n\ln(2s)+\frac{1}{s}\sum_{i=1}^{n}|y_i-\hat y_i|=n\ln(2s)+\frac{n}{s}\,\mathrm{MAE}$$</div>
+    <p>При фиксированном $s$ минимизировать правдоподобие — то же, что минимизировать MAE, а оценка масштаба шума — сама MAE: $\hat s=\mathrm{MAE}$. Выбирая MAE, мы неявно предполагаем шум с «тяжёлыми» (по сравнению с гауссовским) хвостами. Для MSE та же логика приводит к нормальному шуму — см. <a href="../mse/">MSE</a>.</p>
+
+    <h2 id="code">В коде</h2>
+    <p>MAE считается в одну строку. Интереснее — субградиент и обучение. В NumPy:</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+
+def mae(y, y_hat):
+    return np.mean(np.abs(y - y_hat))
+
+def mae_grad(y, y_hat):
+    # субградиент по прогнозам: sign(ŷ − y) / n, в нуле берём 0
+    return np.sign(y_hat - y) / y.size
+
+print(mae(y, y_hat))        # 0.8333333333333334
+print(mae_grad(y, y_hat))   # [-0.33333333  0.          0.33333333]
+
+# лучшая константа по MAE — медиана, а не среднее
+data = np.array([2.0, 3.0, 5.0, 9.0, 16.0])
+print(np.median(data), mae(data, np.median(data)))   # 5.0 4.0
+print(data.mean(), mae(data, data.mean()))           # 7.0 4.4</code></pre>
+    <p>В PyTorch потеря называется <code>L1Loss</code>. Обратите внимание на градиент: у второго объекта ошибка ровно ноль, и фреймворк берёт субградиент $0$. Вторая часть листинга обучает прямую рисунков 5–6 с убывающим шагом:</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+y     = torch.tensor([3.0, 5.0, 8.0])
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+
+loss = nn.L1Loss()(y_hat, y)     # то же, что (y_hat - y).abs().mean()
+loss.backward()
+print(loss.item())               # 0.8333333134651184
+print(y_hat.grad)                # tensor([-0.3333,  0.0000,  0.3333])
+
+# линейная модель по MAE: шаг убывает как 1/√t
+x = torch.tensor([-2.0, -1.0, 0.0, 1.0, 2.0])
+t = torch.tensor([1.3, 2.0, 3.1, 4.5, 7.0])
+w = torch.zeros(1, requires_grad=True)
+b = torch.zeros(1, requires_grad=True)
+opt = torch.optim.SGD([w, b], lr=0.5)
+sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda k: 1 / (k + 1) ** 0.5)
+for step in range(3000):
+    opt.zero_grad()
+    nn.functional.l1_loss(w * x + b, t).backward()
+    opt.step(); sched.step()
+print(round(w.item(), 2), round(b.item(), 2))   # 1.25 3.25 — прямая через 2 точки</code></pre>
+    <p>В scikit-learn есть метрика, точная линейная регрессия по MAE (через линейную программу) и бустинг с MAE:</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+from sklearn.metrics import mean_absolute_error
+from sklearn.linear_model import QuantileRegressor
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+print(mean_absolute_error([3, 5, 8], [2.5, 5, 10]))   # 0.8333333333333334
+
+# линейная регрессия по MAE — это квантильная регрессия с τ = 0,5
+X = np.array([[-2.0], [-1.0], [0.0], [1.0], [2.0]])
+y = np.array([1.3, 2.0, 3.1, 4.5, 7.0])
+lad = QuantileRegressor(quantile=0.5, alpha=0.0).fit(X, y)   # alpha=0 — без L1-штрафа
+print(lad.coef_, lad.intercept_)                             # [1.25] 3.25
+
+# бустинг на MAE: значения в листьях — медианы остатков
+gbr = HistGradientBoostingRegressor(loss=&quot;absolute_error&quot;)</code></pre>
+    <div class="callout key"><b>Правило</b><p>Если нужна MAE как <i>метрика</i> — считайте её как есть. Если как <i>потеря</i> для градиентного спуска — уменьшайте шаг по расписанию или берите <a href="../huber/">Хьюбера</a> с малым $\delta$: та же устойчивость к выбросам, но гладкий минимум.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>Забыть модуль</b>: <code>np.mean(y - y_hat)</code> — это смещение, а не MAE. Ошибки разных знаков гасят друг друга, и плохая модель может получить ноль.</li><li><b>Сравнивать MAE разных задач</b>. MAE $=5$ для цен в тысячах и для температуры в градусах — несравнимые числа. Для сравнения между масштабами есть <a href="../mape/">MAPE</a> или MAE, делённая на MAE простой базовой модели.</li><li><b>Учить на MSE, а отчитываться MAE</b> (или наоборот). MSE ведёт модель к условному среднему, MAE — к медиане. На скошенных данных (цены, доходы, время ожидания) это разные числа, и модель, лучшая по одной метрике, проиграет по другой.</li><li><b>Постоянный шаг с MAE-потерей</b>. Параметры будут дрожать у минимума с амплитудой порядка $\eta$. Нужно расписание шага или сглаженная потеря.</li><li><b>Ждать единственного решения</b>. Минимум MAE может быть целым отрезком (чётное число точек) или ребром многогранника. Разные решатели вернут разные, но одинаково хорошие ответы.</li><li><b>Считать MAE «типичной ошибкой» без оглядки на хвост</b>. MAE $=1$ может скрывать редкие промахи на 50. Смотрите на распределение ошибок, квантили и RMSE рядом с MAE.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href="../mse/">MSE</a>: квадрат вместо модуля — гладкость и среднее вместо медианы, но чувствительность к выбросам.</li><li><a href="../rmse/">RMSE</a>: $\mathrm{RMSE}\ge\mathrm{MAE}$. Для нормальных ошибок $\mathrm{RMSE}/\mathrm{MAE}=\sqrt{\pi/2}\approx1{,}253$, для лапласовских $\sqrt2\approx1{,}414$; в сквозном примере $1{,}428$.</li><li><a href="../huber/">Huber</a>: квадрат около нуля и модуль вдали — гладкий минимум и устойчивость к выбросам одновременно.</li><li><a href="../mape/">MAPE</a>: та же MAE, но от относительных ошибок $|e_i|/|y_i|$.</li><li><a href="../sgd/">SGD</a> и <a href="../adam/">Adam</a>: оптимизаторы, которым с MAE нужен убывающий шаг.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $\mathrm{MAE}=\frac1n\sum|y_i-\hat y_i|$ — средняя длина промаха в единицах $y$; в сквозном примере $0{,}833$. 2) Ошибки входят линейно, поэтому MAE устойчива к выбросам, а лучшая константа — медиана (при чётном $n$ — любая точка между двумя средними). 3) Производная — $-\operatorname{sign}(e_i)/n$; в нуле субдифференциал $[-1;\,1]$, на практике берут $0$. 4) Поверхность MAE по параметрам — многогранник; минимум в вершине, прямая проходит через две точки. 5) Градиент не убывает у минимума: учите с убывающим шагом или берите Хьюбера. 6) Наклонная «галочка» — пинбол-потеря — даёт квантили; MAE соответствует шуму Лапласа.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. $y=(1;\,4;\,6)$, $\hat y=(2;\,4;\,3)$. Чему равна MAE?</legend><div class="opts"><button type="button" data-ok="1">$1{,}333$</button><button type="button" data-ok="0">$3{,}333$</button><button type="button" data-ok="0">$1{,}826$</button><button type="button" data-ok="0">$0{,}667$</button></div><div class="explain" hidden>Ошибки $(-1;\,0;\,3)$, модули $(1;\,0;\,3)$, $\mathrm{MAE}=4/3\approx1{,}333$. $3{,}333$ — это MSE, $1{,}826$ — RMSE, $0{,}667$ — средняя ошибка без модуля.</div></fieldset><fieldset class="q"><legend>2. Какая константа минимизирует MAE для выборки $(1;\,2;\,3;\,10;\,50)$?</legend><div class="opts"><button type="button" data-ok="0">$13{,}2$</button><button type="button" data-ok="1">$3$</button><button type="button" data-ok="0">$10$</button><button type="button" data-ok="0">$2{,}5$</button></div><div class="explain" hidden>Оптимальная константа — медиана, $3$. Среднее $13{,}2$ минимизирует MSE, а не MAE.</div></fieldset><fieldset class="q"><legend>3. Каков субдифференциал функции $|e|$ в точке $e=0$?</legend><div class="opts"><button type="button" data-ok="0">Только $\{0\}$</button><button type="button" data-ok="1">Отрезок $[-1;\,1]$</button><button type="button" data-ok="0">$\{-1;\,1\}$</button><button type="button" data-ok="0">Пустое множество</button></div><div class="explain" hidden>Любая прямая $g\cdot e$ с $|g|\le1$ лежит под графиком $|e|$, поэтому $\partial|e|(0)=[-1;\,1]$.</div></fieldset><fieldset class="q"><legend>4. Почему градиентный спуск по MAE с постоянным шагом не сходится точно?</legend><div class="opts"><button type="button" data-ok="0">MAE невыпукла</button><button type="button" data-ok="1">Модуль градиента не уменьшается у минимума — шаги не укорачиваются</button><button type="button" data-ok="0">У MAE нет минимума</button><button type="button" data-ok="0">Градиент MAE всегда равен нулю</button></div><div class="explain" hidden>Каждый объект даёт вклад $\pm1/n$ независимо от размера ошибки, поэтому шаг $\eta g$ остаётся крупным и параметры перескакивают через дно. Помогает убывающий шаг $\eta_t\propto1/\sqrt t$.</div></fieldset><fieldset class="q"><legend>5. Что оценивает константа, минимизирующая пинбол-потерю с $\tau=0{,}9$?</legend><div class="opts"><button type="button" data-ok="0">Среднее</button><button type="button" data-ok="0">Медиану</button><button type="button" data-ok="1">$90\%$-й квантиль</button><button type="button" data-ok="0">$10\%$-й квантиль</button></div><div class="explain" hidden>Недооценка штрафуется с весом $0{,}9$, переоценка — с весом $0{,}1$; равновесие наступает, когда ниже константы $90\%$ данных.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../softmax/"><span class="kicker">← Предыдущая формула</span><span class="big">Softmax</span><span class="kicker">«мягкий максимум»</span></a>
+<a class="next" href="../mse/"><span class="kicker">Следующая формула →</span><span class="big">MSE</span><span class="kicker">mean squared error</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

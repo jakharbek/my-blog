@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MSE: the mean squared error — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="MSE in depth: formula, properties, the mean as the optimal constant, the derivative, the loss bowl in 3D and least squares, gradient descent and the condition number, bias and variance, Gaussian likelihood, outliers, code in NumPy, PyTorch and scikit-learn.">
+  <meta property="og:title" content="MSE: the mean squared error — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="MSE in depth: formula, properties, the mean as the optimal constant, the derivative, the loss bowl in 3D and least squares, gradient descent and the condition number, bias and variance, Gaussian likelihood, outliers, code in NumPy, PyTorch and scikit-learn.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/mse/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/mse/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/mse/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/mse/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/mse.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/mse/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/mse/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/mse/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Losses — regression</span>
+  <h1>MSE: the mean squared error</h1>
+  <p class="dek">The main loss of regression and the foundation of least squares. We take MSE apart bone by bone: literal squares on the errors, why the mean minimizes it, the derivative 2e and the bowl over the model’s parameters, the critical step of gradient descent, the bias–variance decomposition, the link with Gaussian noise and the sensitivity to outliers.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: the area of the squares</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties and the best constant</a>
+      <a href="#derivative"><span class="n">5</span>The derivative: a force proportional to the error</a>
+      <a href="#space"><span class="n">6</span>The bowl over the parameters: least squares and gradient descent</a>
+      <a href="#biasvar"><span class="n">7</span>Bias and variance</a>
+      <a href="#probability"><span class="n">8</span>The probabilistic meaning: Gaussian noise</a>
+      <a href="#outliers"><span class="n">9</span>Outliers: unbounded influence</a>
+      <a href="#code"><span class="n">10</span>In code</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#links"><span class="n">12</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{MSE}=\frac{1}{n}\sum_{i=1}^{n}\bigl(y_i-\hat{y}_i\bigr)^2$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p>If a model predicts a number, it was almost certainly trained by reducing MSE, the <b>mean squared error</b>. It is the “default” loss for regression: it has an exact solution for linear models, a smooth gradient for neural networks and a clear statistical meaning. The method of least squares, with which Legendre and Gauss started data analysis at the beginning of the 19th century, is exactly the minimization of MSE.</p>
+    <p>Where it appears:</p>
+    <ul class="flist"><li><b>linear regression</b> — ordinary least squares (OLS) with a one-formula solution;</li><li><b>neural networks for regression</b> — <code>MSELoss</code> in PyTorch, <code>"mse"</code> in Keras; autoencoders that reconstruct their input;</li><li><b>diffusion models</b> — the network learns to predict the added noise, and the loss is the MSE between the true and the predicted noise;</li><li><b>reinforcement learning</b> — the value function is trained on the squared TD error;</li><li><b>gradient boosting</b> — <code>loss="squared_error"</code>: the negative gradient of MSE is the residual, so every tree is fitted to the residuals;</li><li><b>signal and image processing</b> — PSNR is computed from MSE, and the Kalman filter minimizes the expected squared error.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>MSE is the mean of the squared errors: $\frac1n\sum(y_i-\hat y_i)^2$. The square turns the loss into a smooth bowl with a single bottom, its gradient $-\frac2n(y_i-\hat y_i)$ is proportional to the error, and the best constant is the <b>mean</b>. The flip side is that the square inflates big misses: one error of 10 weighs as much as a hundred errors of 1, so MSE is sensitive to outliers and is measured in squared units.</p></div>
+
+    <h2 id="intuition">Intuition: the area of the squares</h2>
+    <p>The word “squared” can be taken literally here. Draw a square with side $|e_i|$ on each error. Its area is $e_i^2$, and MSE is the <b>average area of the squares</b>. Compare with MAE, where lengths of segments are averaged: area grows as the square of the side, so big errors take up a disproportionate amount of space.</p>
+    <p>Below is the cheat sheet’s running example: $y=(3,\,5,\,8)$, $\hat y=(2.5,\,5,\,10)$. Drag the blue predictions. On the lower plot the errors sit on the parabola $e^2$; MSE is the average height of these points.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-squares" data-config="{&quot;yhat&quot;: [2.5, 5, 10]}"></div><figcaption><b>Figure 1.</b> The squared errors of the running example. The areas are $0.25$, $0$ and $4$; the sum is $4.25$ and $\mathrm{MSE}=4.25/3\approx1.417$. The third square is $94\%$ of the total area. Move the third prediction to $8$ and MSE drops to $0.25/3\approx0.083$.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>The error $2$ is 4 times the error $0.5$, but its square is 16 times larger. A model trained on MSE is therefore “afraid” of big misses and readily trades several small errors for removing one large one. That is both a virtue (big errors are usually more costly) and a weakness (an outlier in the data also looks like a “big error”).</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <p>The same four steps as in MAE, only with a square instead of the absolute value.</p>
+    <div class="eqd">$$\underbrace{y_i-\hat y_i}_{\text{error }e_i}\;\longrightarrow\;\underbrace{e_i^2}_{\text{area}}\;\longrightarrow\;\underbrace{\sum_{i=1}^{n}e_i^2}_{\text{SSE}}\;\longrightarrow\;\underbrace{\frac1n\sum_{i=1}^{n}e_i^2}_{\text{MSE}}$$</div>
+    <dl class="symbols"><dt>$y_i$</dt><dd>the true value for object $i$;</dd><dt>$\hat y_i$</dt><dd>the model’s prediction;</dd><dt>$e_i=y_i-\hat y_i$</dt><dd>the error (residual); its sign disappears after squaring;</dd><dt>$e_i^2$</dt><dd>the square: non-negative, smooth, and growing faster the larger the error;</dd><dt>$\sum e_i^2$</dt><dd>the sum of squared residuals — SSE (sum of squared errors), or RSS (residual sum of squares);</dd><dt>$\frac1n$</dt><dd>averaging: MSE does not depend on the sample size.</dd></dl>
+    <p>Why a square and not the absolute value? There are three reasons. <b>Smoothness</b>: $e^2$ has the derivative $2e$ everywhere, including at zero. <b>Algebra</b>: a sum of squares is a quadratic form, and its minimum is found by solving a linear system (the normal equations). <b>Geometry</b>: $\sum e_i^2$ is a squared Euclidean distance, and the best prediction is an orthogonal projection, as in Pythagoras’ theorem.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$i$</th><th class=num>$y_i$</th><th class=num>$\hat y_i$</th><th class=num>$e_i$</th><th class=num>$e_i^2$</th><th class=num>share of the sum</th></tr></thead><tbody><tr><td class=num>1</td><td class=num>3</td><td class=num>2.5</td><td class=num>0.5</td><td class=num>0.25</td><td class=num>5.9%</td></tr><tr><td class=num>2</td><td class=num>5</td><td class=num>5</td><td class=num>0</td><td class=num>0</td><td class=num>0%</td></tr><tr><td class=num>3</td><td class=num>8</td><td class=num>10</td><td class=num>−2</td><td class=num>4</td><td class=num>94.1%</td></tr><tr><td class=num><b>Sum</b></td><td class=num></td><td class=num></td><td class=num></td><td class=num><b>4.25</b></td><td class=num>100%</td></tr><tr><td class=num><b>Mean (MSE)</b></td><td class=num></td><td class=num></td><td class=num></td><td class=num><b>1.417</b></td><td class=num></td></tr></tbody></table></div>
+    <p>In vector form MSE is the squared Euclidean norm of the error vector divided by $n$:</p>
+    <div class="eqd">$$\mathrm{MSE}(y,\hat y)=\frac{1}{n}\,\bigl\|y-\hat y\bigr\|_2^2,\qquad \mathrm{RMSE}=\sqrt{\mathrm{MSE}}$$</div>
+    <p>Hence its second name, the <b>L2 loss</b>. The units of MSE are the units of $y$ squared: roubles², minutes². To get back to the original units, take the square root and you get <a href="../rmse/">RMSE</a>; in the example $\sqrt{1.417}\approx1.190$.</p>
+
+    <h2 id="properties">Properties and the best constant</h2>
+    <ul class="flist"><li><b>Non-negativity</b>: $\mathrm{MSE}\ge0$, with equality only for exact predictions.</li><li><b>Quadratic scaling</b>: multiply $y$ and $\hat y$ by $k$ and MSE is multiplied by $k^2$. Converting roubles to thousands of roubles shrinks MSE a million times.</li><li><b>Smoothness and convexity</b>: MSE is a quadratic function of the predictions; for a linear model, a quadratic function of the parameters. If the features are linearly independent, it is strictly convex and the minimum is unique.</li><li><b>Error decomposition</b>: $\mathrm{MSE}=\bar e^{\,2}+\operatorname{Var}(e)$ — the squared mean bias plus the spread of the errors. In the example $\bar e=-0.5$: $1.417=0.25+1.167$.</li><li><b>Comparison with MAE</b>: $\mathrm{MSE}\ge\mathrm{MAE}^2$ (the mean of squares is at least the square of the mean). In the example: $1.417\ge0.833^2\approx0.694$.</li></ul>
+    <h3>The best constant is the mean</h3>
+    <p>If the model answers with a single number $c$, MSE as a function of $c$ is a parabola. Expand it by adding and subtracting the mean $\bar y$:</p>
+    <div class="eqd">$$\mathrm{MSE}(c)=\frac1n\sum_{i=1}^{n}(y_i-c)^2=\underbrace{\frac1n\sum_{i=1}^{n}(y_i-\bar y)^2}_{\operatorname{Var}(y)}+\;(c-\bar y)^2$$</div>
+    <p>The first term does not depend on $c$; the second is non-negative and vanishes only at $c=\bar y$. So the minimum of MSE is unique and is attained at the <b>mean</b>, and its value is the variance of the data. The derivative $2(c-\bar y)$ is a straight line proportional to the distance from the mean.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-mean" data-config="{&quot;c&quot;: 12}"></div><figcaption><b>Figure 2.</b> $\mathrm{MSE}(c)$ for the sample $(2,\,3,\,5,\,9,\,16)$ and its derivative. The mean is $\bar y=7$ and the minimum is $\operatorname{Var}=26$. At $c=12$: $\mathrm{MSE}=26+(12-7)^2=51$, and the derivative is $2\cdot5=10$. The median $5$ gives $30$ — under MSE it is worse than the mean. Turn on the outlier ($16\to40$): the mean moves to $11.8$, the variance grows to $204.56$, while the median stays at $5$.</figcaption></figure>
+    <details class="deep"><summary>Proof of the decomposition MSE(c) = Var + (c − ȳ)²</summary><div class="deep-body">
+      <p>Write $y_i-c=(y_i-\bar y)+(\bar y-c)$ and square it:</p>
+      <div class="eqd">$$\sum_{i=1}^{n}(y_i-c)^2=\sum_{i=1}^{n}(y_i-\bar y)^2+2(\bar y-c)\sum_{i=1}^{n}(y_i-\bar y)+n(\bar y-c)^2$$</div>
+      <p>The middle term is zero because deviations from the mean sum to zero: $\sum(y_i-\bar y)=n\bar y-n\bar y=0$. Divide by $n$ to get the decomposition. The same algebra gives the formula $\mathrm{MSE}=\bar e^{\,2}+\operatorname{Var}(e)$ and, in its probabilistic version, the bias–variance decomposition.</p>
+    </div></details>
+    <div class="callout note"><b>Compare with MAE</b><p>For MAE the best constant is the median, which ignores the outlier. For MSE it is the mean, which the outlier drags along: one point moved by $\Delta$ moves the mean by $\Delta/n$, however large $\Delta$ is. The <a href="../mae/">MAE page</a> runs the same experiment for the median.</p></div>
+
+    <h2 id="derivative">The derivative: a force proportional to the error</h2>
+    <p>The derivative of the square is $2e$. The further the prediction is from the truth, the harder the gradient pulls it back, and at the minimum itself the force fades out smoothly. This is exactly what makes MSE so convenient for gradient descent.</p>
+    <details class="deep"><summary>Derivation: the derivative of MSE with respect to the predictions and the parameters</summary><div class="deep-body">
+      <p>For one object $\ell=(y_i-\hat y_i)^2$. By the chain rule, with $\partial e_i/\partial\hat y_i=-1$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MSE}}{\partial\hat y_i}=\frac1n\cdot2e_i\cdot(-1)=-\frac{2}{n}\bigl(y_i-\hat y_i\bigr)$$</div>
+      <p>For a linear model $\hat y_i=wx_i+b$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MSE}}{\partial w}=-\frac2n\sum_{i=1}^{n}e_i\,x_i,\qquad \frac{\partial\,\mathrm{MSE}}{\partial b}=-\frac2n\sum_{i=1}^{n}e_i$$</div>
+      <p>In matrix form, with $\hat y=X\theta$: $\nabla_\theta\,\mathrm{MSE}=\frac2nX^\top(X\theta-y)$, and the Hessian $\frac2nX^\top X$ does not depend on $\theta$ — the curvature of the bowl is the same everywhere.</p>
+      <p>The second derivative with respect to each prediction is constant: $\partial^2\mathrm{MSE}/\partial\hat y_i^2=2/n$. That is why in gradient boosting on MSE the Newton step is simply the mean residual in a leaf, and each new tree is trained on the residuals $y_i-F(x_i)$.</p>
+    </div></details>
+    <div class="eqd">$$\frac{\partial\,\mathrm{MSE}}{\partial\hat y_i}=-\frac{2}{n}\bigl(y_i-\hat y_i\bigr)$$</div>
+    <p>Look at gradient descent on a single error. The step $\hat y\leftarrow\hat y-\eta\,\partial e^2/\partial\hat y=\hat y+2\eta e$ turns the error into $e\leftarrow(1-2\eta)\,e$. Each step multiplies the error by the same number — a geometric progression.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-derivative" data-config="{&quot;e&quot;: 2.5, &quot;eta&quot;: 0.3}"></div><figcaption><b>Figure 3.</b> On the left, the parabola $e^2$, the tangent at the starting point and the descent steps; on the right, the derivative $2e$: the lengths of the blue segments, i.e. the gradients, shrink together with the error. With $e_0=2.5$ and $\eta=0.3$ the factor is $1-2\eta=0.4$: the errors are $1$, $0.4$, $0.16$. Change the step: for $\eta&lt;0.5$ the error decreases monotonically, at $\eta=0.5$ it vanishes in one step, for $0.5&lt;\eta&lt;1$ it decreases with oscillations, at $\eta=1$ it swings forever, and for $\eta&gt;1$ it grows.</figcaption></figure>
+    <div class="callout intuition"><b>Compare with MAE</b><p>For $|e|$ the derivative $\pm1$ does not depend on the size of the error, so steps with a constant $\eta$ do not get shorter and the descent jitters around the minimum (see <a href="../mae/">MAE</a>). For $e^2$ the “brakes” are built in: the gradient shrinks by itself near the bottom, and a constant step is enough for exact convergence.</p></div>
+
+    <h2 id="space">The bowl over the parameters: least squares and gradient descent</h2>
+    <p>Take the line $\hat y=wx+b$ and five points: $x=(1,\,2,\,3,\,4,\,5)$, $y=(1.3,\,2,\,3.1,\,4.5,\,7)$. MSE as a function of $(w,\,b)$ is a quadratic form, and its graph is an <b>elliptic bowl</b> (a paraboloid) with a single bottom.</p>
+    <h3>The exact solution: the normal equations</h3>
+    <p>Setting the gradient to zero gives a linear system — the normal equations — and the least-squares solution:</p>
+    <div class="eqd">$$X^\top X\,\theta=X^\top y\quad\Longrightarrow\quad\theta^*=(X^\top X)^{-1}X^\top y;\qquad w^*=\frac{\operatorname{Cov}(x,y)}{\operatorname{Var}(x)},\quad b^*=\bar y-w^*\bar x$$</div>
+    <p>For our points $w^*=1.39$, $b^*=-0.59$, $\mathrm{MSE}^*=0.2294$. In practice the inverse matrix is not computed: QR or SVD decompositions are used (<code>np.linalg.lstsq</code>), and on large data, gradient descent.</p>
+    <h3>Gradient descent and the shape of the bowl</h3>
+    <p>The speed of descent is set by the shape of the bowl — the eigenvalues of the Hessian $H=\frac2nX^\top X$. Along the steep direction ($\lambda_{\max}$) too large a step throws you over the bottom; along the flat one ($\lambda_{\min}$) the descent crawls. For our data $\lambda_{\max}=23.66$ and $\lambda_{\min}=0.338$; their ratio, the condition number, is about $70$: the bowl is stretched into a narrow ravine, and any step above $\eta_{\text{crit}}=2/\lambda_{\max}\approx0.0845$ diverges.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-bowl" data-config="{&quot;eta&quot;: 0.05}"></div><figcaption><b>Figure 4.</b> On the left, the bowl $\mathrm{MSE}(w,b)$ (you can rotate it); on the right, the view from above and the excess over the minimum on a log scale. The start is the line $y=3$, $\eta=0.05$. In 150 steps the descent gets down the ravine only to an excess of $1.5\cdot10^{-2}$; at $\eta=0.09$ it blows up. Switch to the centred feature $x-\bar x$: the Hessian becomes diagonal ($\lambda=4$ and $2$), the condition number drops to $2$, the admissible step grows to $0.5$, and with the same $\eta=0.05$ the excess is below $10^{-6}$ already at step 61, and at $\eta=0.2$ at step 13.</figcaption></figure>
+    <details class="deep"><summary>Why the convergence condition is η < 2/λ_max</summary><div class="deep-body">
+      <p>For a quadratic function the gradient is linear: $\nabla\mathrm{MSE}(\theta)=H(\theta-\theta^*)$. A descent step gives</p>
+      <div class="eqd">$$\theta_{t+1}-\theta^*=(I-\eta H)(\theta_t-\theta^*)\quad\Longrightarrow\quad\theta_t-\theta^*=(I-\eta H)^t(\theta_0-\theta^*)$$</div>
+      <p>In the eigenbasis of $H$ each coordinate is multiplied by $1-\eta\lambda_k$ at every step. The descent converges if $|1-\eta\lambda_k|&lt;1$ for all $k$, i.e. $0&lt;\eta&lt;2/\lambda_{\max}$. For $1/\lambda_{\max}&lt;\eta&lt;2/\lambda_{\max}$ the factor is negative — hence the zigzag across the ravine. The slowest direction is $\lambda_{\min}$: even with the best constant step $\eta=2/(\lambda_{\max}+\lambda_{\min})$ the error shrinks by a factor $(\kappa-1)/(\kappa+1)$ per step, where $\kappa=\lambda_{\max}/\lambda_{\min}$. At $\kappa=70$ that is $0.97$ — hundreds of steps; at $\kappa=2$ it is $1/3$.</p>
+    </div></details>
+    <div class="callout key"><b>The practical takeaway</b><p>Standardize the features (subtract the mean, divide by the standard deviation): this rounds the bowl and allows a larger step. Adaptive optimizers (<a href="../adam/">Adam</a>, RMSProp) do a similar per-coordinate rescaling automatically.</p></div>
+
+    <h2 id="biasvar">Bias and variance</h2>
+    <p>MSE on new data splits into three parts, and this is perhaps the most important formula about overfitting. Let $y=f(x)+\varepsilon$, where the noise has mean $0$ and variance $\sigma^2$, and let the model $\hat f$ be trained on a random sample. Then the expected error at a point $x$ is:</p>
+    <div class="eqd">$$\mathbb E\bigl[(y-\hat f(x))^2\bigr]=\underbrace{\bigl(f(x)-\mathbb E\hat f(x)\bigr)^2}_{\text{bias}^2}+\underbrace{\mathbb E\bigl[(\hat f(x)-\mathbb E\hat f(x))^2\bigr]}_{\text{variance}}+\underbrace{\sigma^2}_{\text{noise}}$$</div>
+    <dl class="symbols"><dt>$\mathbb E\hat f(x)$</dt><dd>the average prediction over all possible training samples;</dd><dt>$\text{bias}^2$</dt><dd>how far the average model misses the truth — the price of a too simple model;</dd><dt>$\text{variance}$</dt><dd>how much the model changes from sample to sample — the price of a too flexible model;</dd><dt>$\sigma^2$</dt><dd>irreducible noise: no model can remove it.</dd></dl>
+    <figure class="viz"><div class="fv" data-viz="mse-biasvar" data-config="{&quot;d&quot;: 3}"></div><figcaption><b>Figure 5.</b> The truth $f(x)=\sin\pi x$, 15 points with noise $\sigma=0.3$, 200 different training samples, polynomials of degree $d$. A line ($d=1$) is biased: $0.204+0.012+0.09=0.306$. At $d=3$ the expected error is minimal: $0.005+0.025+0.09=0.120$. At $d=10$ the bias barely changes ($0.005$), but the variance shoots up to $0.777$ and the test MSE is $0.872$, even though the training MSE is only $0.022$ — less than the noise itself, $\sigma^2=0.09$: the model memorizes the noise.</figcaption></figure>
+    <details class="deep"><summary>Deriving the decomposition</summary><div class="deep-body">
+      <p>Denote $\bar f=\mathbb E\hat f(x)$. The noise $\varepsilon$ at a new point does not depend on the training sample, so</p>
+      <div class="eqd">$$\mathbb E(y-\hat f)^2=\mathbb E(f+\varepsilon-\hat f)^2=\sigma^2+\mathbb E(f-\hat f)^2$$</div>
+      <p>Then repeat the trick from the section on the constant: $f-\hat f=(f-\bar f)+(\bar f-\hat f)$, and the cross term vanishes because $\mathbb E(\bar f-\hat f)=0$:</p>
+      <div class="eqd">$$\mathbb E(f-\hat f)^2=(f-\bar f)^2+\mathbb E(\hat f-\bar f)^2$$</div>
+      <p>In the figure the same quantities are averaged over a uniform grid $x\in[-1,\,1]$. Even degrees add almost nothing for the odd function $\sin\pi x$: the bias at $d=1$ and $d=2$ is the same.</p>
+    </div></details>
+    <div class="callout note"><b>A biased estimate can be better</b><p>What has to be minimized is the sum, not the bias alone. Regularization (ridge regression, early stopping, model averaging) deliberately introduces bias to reduce variance even more, and often lowers the test MSE.</p></div>
+
+    <h2 id="probability">The probabilistic meaning: Gaussian noise</h2>
+    <p>Why the square of all things? The deepest answer was given by Gauss. Let $y_i=\hat y_i+\varepsilon_i$, where the noise $\varepsilon_i$ is independent and normally distributed, $N(0,\sigma^2)$. The density of one observation is a bell around the prediction, and the likelihood of the sample is the product of the heights of the bells at the data points. The negative log-likelihood is:</p>
+    <div class="eqd">$$-\ln L=\frac n2\ln(2\pi\sigma^2)+\frac{1}{2\sigma^2}\sum_{i=1}^{n}\bigl(y_i-\hat y_i\bigr)^2=\frac n2\ln(2\pi\sigma^2)+\frac{n}{2\sigma^2}\,\mathrm{MSE}$$</div>
+    <p>For any fixed $\sigma$ this is an increasing linear function of MSE. Hence <b>minimizing MSE is maximum likelihood under Gaussian noise</b>. Minimizing over $\sigma$ gives one more link: $\hat\sigma^2=\mathrm{MSE}$.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-gauss" data-config="{&quot;w&quot;: 1, &quot;b&quot;: 0.5, &quot;s&quot;: 0.6}"></div><figcaption><b>Figure 6.</b> On the left, a line and the normal bells $N(\hat y_i,\sigma^2)$ around it; the orange segments are the heights of the bells at the data points, i.e. each point’s contribution to the likelihood. On the right, $-\ln L$ as a function of MSE at the current $\sigma$: a straight line. For $w=1$, $b=0.5$, $\sigma=0.6$: $\mathrm{MSE}=0.540$ and $-\ln L=5.791$; the least-squares line (red point) with $\mathrm{MSE}=0.229$ gives $-\ln L=3.634$. The best $\sigma$ for the current line is $\sqrt{0.54}\approx0.735$.</figcaption></figure>
+    <p>One more statement of the same fact: among all functions $g(x)$ the expected squared error $\mathbb E(y-g(x))^2$ is smallest for $g(x)=\mathbb E[y\mid x]$. A model trained on MSE estimates the <b>conditional mean</b>. If the noise is asymmetric or heavy-tailed, the conditional mean can describe the “typical” outcome poorly — then one looks at the median (<a href="../mae/">MAE</a>) or at quantiles.</p>
+
+    <h2 id="outliers">Outliers: unbounded influence</h2>
+    <p>The flip side of the square is sensitivity to anomalous points. The gradient from an object is proportional to its error, so a distant outlier pulls the model harder the further away it is. Robust statistics says that least squares has an <b>unbounded influence function</b> and a breakdown point of zero: a single point is enough to drive the line arbitrarily far.</p>
+    <figure class="viz"><div class="fv" data-viz="mse-outlier" data-config="{&quot;y&quot;: 0}"></div><figcaption><b>Figure 7.</b> Ten points around $y=1+0.5x$ and an outlier at $x=9$. With the outlier at $y=0$ the slope of the MSE line drops to $0.291$, and the outlier alone accounts for $74\%$ of the sum of squares. On the right, the slope as a function of the outlier’s height: for MSE it is a straight line (each unit of height changes the slope by $0.0375$, from $0.104$ at $y=-5$ to $0.779$ at $y=13$), while for MAE the slope stays between $0.438$ and $0.514$.</figcaption></figure>
+    <p>What to do about outliers if you need MSE:</p>
+    <ul class="flist"><li>replace the loss with <a href="../huber/">Huber</a>: a square for small errors and the absolute value for large ones — the smoothness of MSE and the bounded influence of MAE;</li><li>transform the target ($\log y$ for prices and incomes) — but then the model estimates the mean of the logarithm, not the mean of $y$;</li><li>find and inspect outliers by their residuals: points with a huge $e_i^2$ stand out immediately;</li><li>use robust fitting algorithms (RANSAC, Theil–Sen) that learn from subsets of the data.</li></ul>
+
+    <h2 id="code">In code</h2>
+    <p>MSE and its gradient in NumPy, the exact least-squares solution, and a check that the best constant is the mean:</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+
+def mse(y, y_hat):
+    return np.mean((y - y_hat) ** 2)
+
+def mse_grad(y, y_hat):
+    # gradient w.r.t. the predictions: 2(ŷ − y) / n
+    return 2 * (y_hat - y) / y.size
+
+print(mse(y, y_hat))        # 1.4166666666666667
+print(mse_grad(y, y_hat))   # [-0.33333333  0.          1.33333333]
+
+# the least-squares line: the exact solution of the normal equations
+x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+t = np.array([1.3, 2.0, 3.1, 4.5, 7.0])
+A = np.column_stack([x, np.ones_like(x)])
+w, b = np.linalg.lstsq(A, t, rcond=None)[0]
+print(round(w, 4), round(b, 4), round(mse(t, A @ [w, b]), 4))   # 1.39 -0.59 0.2294
+
+# the best constant under MSE is the mean; MSE(c) = Var + (c − ȳ)²
+data = np.array([2.0, 3.0, 5.0, 9.0, 16.0])
+print(data.mean(), mse(data, data.mean()), mse(data, 12.0))   # 7.0 26.0 51.0</code></pre>
+    <p>In PyTorch it is <code>MSELoss</code>. The gradient with respect to the predictions is $2(\hat y-y)/n$; descent with step $0.05$ on the raw feature from Figure 4 reaches the same least-squares solution, but in thousands of steps:</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+y     = torch.tensor([3.0, 5.0, 8.0])
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+
+loss = nn.MSELoss()(y_hat, y)    # same as ((y_hat - y) ** 2).mean()
+loss.backward()
+print(loss.item())               # 1.4166666269302368
+print(y_hat.grad)                # tensor([-0.3333,  0.0000,  1.3333])
+
+# gradient descent for a line: with η &gt; 2/λ_max ≈ 0.0845 it diverges
+x = torch.tensor([1.0, 2.0, 3.0, 4.0, 5.0])
+t = torch.tensor([1.3, 2.0, 3.1, 4.5, 7.0])
+w = torch.zeros(1, requires_grad=True)
+b = torch.zeros(1, requires_grad=True)
+opt = torch.optim.SGD([w, b], lr=0.05)
+for step in range(2000):
+    opt.zero_grad()
+    nn.functional.mse_loss(w * x + b, t).backward()
+    opt.step()
+print(round(w.item(), 2), round(b.item(), 2))   # 1.39 -0.59</code></pre>
+    <p>In scikit-learn MSE is the default regression metric, <code>LinearRegression</code> minimizes it exactly, and boosting uses it as the default loss:</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+from sklearn.metrics import mean_squared_error, root_mean_squared_error
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+print(mean_squared_error([3, 5, 8], [2.5, 5, 10]))        # 1.4166666666666667
+print(root_mean_squared_error([3, 5, 8], [2.5, 5, 10]))   # 1.1902380714238083
+
+X = np.array([[1.0], [2.0], [3.0], [4.0], [5.0]])
+y = np.array([1.3, 2.0, 3.1, 4.5, 7.0])
+lr = LinearRegression().fit(X, y)                    # minimizes MSE exactly
+print(lr.coef_.round(4), round(lr.intercept_, 4))    # [1.39] -0.59
+
+# boosting on MSE: each tree is fitted to the residuals y − F(x)
+gbr = HistGradientBoostingRegressor(loss=&quot;squared_error&quot;)</code></pre>
+    <div class="callout key"><b>The rule</b><p>Train on MSE, but in reports show <a href="../rmse/">RMSE</a> (same units as $y$) next to <a href="../mae/">MAE</a>. A large gap between them signals a heavy tail or outliers in the errors.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>Reading MSE as the “average error”</b>. MSE $=1.417$ in the example is in squared units; the average error is of order $\sqrt{1.417}\approx1.19$ (RMSE) or $0.833$ (MAE).</li><li><b>MSE on data with outliers</b>. A few anomalies will drag the model along (Figure 7). Clean the data, or use <a href="../huber/">Huber</a> or MAE.</li><li><b>Unscaled features</b>. A stretched bowl means slow descent and a small admissible step (Figure 4). Standardize the features.</li><li><b>Too large a step</b>. With $\eta&gt;2/\lambda_{\max}$ the loss grows exponentially and quickly turns into <code>inf</code> and <code>nan</code>.</li><li><b>MSE for classification on top of a sigmoid</b>. The gradient $2(p-y)\,p(1-p)$ vanishes when the model is confidently wrong ($p\approx0$ for $y=1$). For probabilities use <a href="../bce/">BCE</a> or <a href="../cross-entropy/">cross-entropy</a>.</li><li><b>Judging a model by its training MSE</b>. A low MSE on the training data can mean memorized noise (Figure 5, $d=10$). Look at validation.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href="../mae/">MAE</a>: the absolute value instead of the square — the median instead of the mean, robustness to outliers, but a kink at zero.</li><li><a href="../rmse/">RMSE</a>: $\sqrt{\mathrm{MSE}}$ — the same optimal model, but the error in the units of $y$.</li><li><a href="../huber/">Huber</a>: MSE near zero and MAE in the tails.</li><li><a href="../bce/">BCE</a>: the analogue of MSE for probabilities — also maximum likelihood, but for the Bernoulli distribution.</li><li><a href="../sgd/">SGD</a> and <a href="../adam/">Adam</a>: MSE shows clearly how the step and the conditioning of the problem determine convergence.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $\mathrm{MSE}=\frac1n\sum(y_i-\hat y_i)^2$ is the average area of the squares on the errors; $1.417$ in the example, with $94\%$ coming from a single error. 2) The best constant is the mean, and $\mathrm{MSE}(c)=\operatorname{Var}+(c-\bar y)^2$. 3) The gradient $-\frac2n(y_i-\hat y_i)$ is proportional to the error and fades by itself near the minimum. 4) For a linear model MSE is a bowl with the exact solution $(X^\top X)^{-1}X^\top y$; gradient descent converges for $\eta&lt;2/\lambda_{\max}$, and its speed is set by the condition number. 5) Test MSE = bias² + variance + noise. 6) MSE is the likelihood under Gaussian noise; the model estimates the conditional mean. 7) The price is the unbounded influence of outliers.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. $y=(1,\,4,\,6)$, $\hat y=(2,\,4,\,3)$. What is MSE?</legend><div class="opts"><button type="button" data-ok="1">$3.333$</button><button type="button" data-ok="0">$1.333$</button><button type="button" data-ok="0">$1.826$</button><button type="button" data-ok="0">$10$</button></div><div class="explain" hidden>The errors are $(-1,\,0,\,3)$, the squares $(1,\,0,\,9)$, $\mathrm{MSE}=10/3\approx3.333$. $1.333$ is MAE, $1.826$ is RMSE, $10$ is the sum of squares without dividing by $n$.</div></fieldset><fieldset class="q"><legend>2. Which constant minimizes MSE for the sample $(1,\,2,\,3,\,10,\,50)$?</legend><div class="opts"><button type="button" data-ok="0">$3$</button><button type="button" data-ok="1">$13.2$</button><button type="button" data-ok="0">$10$</button><button type="button" data-ok="0">$50$</button></div><div class="explain" hidden>The minimum of MSE is at the mean: $(1+2+3+10+50)/5=13.2$. The median $3$ minimizes MAE.</div></fieldset><fieldset class="q"><legend>3. What is $\partial\,\mathrm{MSE}/\partial\hat y_i$?</legend><div class="opts"><button type="button" data-ok="1">$-\frac2n(y_i-\hat y_i)$</button><button type="button" data-ok="0">$-\frac1n\operatorname{sign}(y_i-\hat y_i)$</button><button type="button" data-ok="0">$(y_i-\hat y_i)^2$</button><button type="button" data-ok="0">$\frac2n$</button></div><div class="explain" hidden>$\frac{\partial}{\partial\hat y_i}\frac1n(y_i-\hat y_i)^2=\frac1n\cdot2(y_i-\hat y_i)\cdot(-1)$. The option with the sign is the derivative of MAE, and $\frac2n$ is the second derivative.</div></fieldset><fieldset class="q"><legend>4. The eigenvalues of the MSE Hessian are $4$ and $2$. Up to what constant step does gradient descent still converge?</legend><div class="opts"><button type="button" data-ok="0">$\eta&lt;0.25$</button><button type="button" data-ok="1">$\eta&lt;0.5$</button><button type="button" data-ok="0">$\eta&lt;1$</button><button type="button" data-ok="0">$\eta&lt;2$</button></div><div class="explain" hidden>The condition $|1-\eta\lambda|&lt;1$ for all eigenvalues gives $\eta&lt;2/\lambda_{\max}=2/4=0.5$. That is exactly the centred case of Figure 4.</div></fieldset><fieldset class="q"><legend>5. Minimizing MSE coincides with maximum likelihood if the noise is…</legend><div class="opts"><button type="button" data-ok="0">Laplace</button><button type="button" data-ok="1">normal</button><button type="button" data-ok="0">uniform</button><button type="button" data-ok="0">Poisson</button></div><div class="explain" hidden>With normal noise $-\ln L=\frac n2\ln(2\pi\sigma^2)+\frac{n}{2\sigma^2}\mathrm{MSE}$, an increasing function of MSE. Laplace noise corresponds to MAE.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../mae/"><span class="kicker">← Previous formula</span><span class="big">MAE</span><span class="kicker">mean absolute error</span></a>
+<a class="next" href="../rmse/"><span class="kicker">Next formula →</span><span class="big">RMSE</span><span class="kicker">root mean squared error</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>
