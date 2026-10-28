@@ -5,7 +5,7 @@
   const L = {
     ru: {
       x: "x", f: "LReLU(x)", df: "LReLU′(x)", alpha: "Наклон слева $\\alpha$", tangent: "наклон = производная", relu: "ReLU ($\\alpha=0$)", lin: "линейная ($\\alpha=1$)",
-      deriv: "Показать производную", undef: "в нуле не определена", maxTitle: "max(αx, x)", sumTitle: "линейная часть + модуль",
+      deriv: "Показать производную", undef: "в нуле производной нет", maxTitle: "max(αx, x)", sumTitle: "линейная часть + модуль",
       same: "max(αx, x) = LReLU?", yes: "да", no: "нет: при α > 1 max берёт αx справа", lineX: "y = x", lineAx: "y = αx", cases: "LReLU по определению", maxEnv: "max(αx, x)",
       linPart: "(1 + α)/2 · x", absPart: "(1 − α)/2 · |x|", sum: "сумма = LReLU", view: "Вид", fun: "функция", der: "производная",
       cmp: "Сравнить с", hoverX: "x =", data: "данные", leaky: "нейрон Leaky", reluN: "нейрон ReLU", kink: "излом −b/w", loss: "MSE", step: "шаг",
@@ -14,11 +14,11 @@
       grad: "|∇f|", flat: "доля плоскости с ∇f = 0", layer: "слой", rms: "RMS(z)", gain: "Инициализация", depth: "Глубина $L$", measured: "измерено",
       theory: "теория", perLayer: "множитель дисперсии за слой", last: "RMS на последнем слое", xavier: "$g=1$", heRelu: "$g=\\sqrt2$ (Хе для ReLU)", heLeaky: "$g=\\sqrt{2/(1+\\alpha^2)}$",
       w: "w", a: "α", landscape: "Ошибка L(w, α), лог. шкала", path: "путь градиентного спуска", start: "старт (тяните)", teacher: "истина (1,5; 0,2)", fit: "модель",
-      dragHint: "Тяните оранжевую точку старта на правом рисунке",
+      dragHint: "Тяните оранжевую точку старта на карте ошибки",
     },
     en: {
       x: "x", f: "LReLU(x)", df: "LReLU′(x)", alpha: "Left slope $\\alpha$", tangent: "slope = derivative", relu: "ReLU ($\\alpha=0$)", lin: "linear ($\\alpha=1$)",
-      deriv: "Show the derivative", undef: "undefined at zero", maxTitle: "max(αx, x)", sumTitle: "linear part + absolute value",
+      deriv: "Show the derivative", undef: "no derivative at zero", maxTitle: "max(αx, x)", sumTitle: "linear part + absolute value",
       same: "max(αx, x) = LReLU?", yes: "yes", no: "no: for α > 1 the max takes αx on the right", lineX: "y = x", lineAx: "y = αx", cases: "LReLU by definition", maxEnv: "max(αx, x)",
       linPart: "(1 + α)/2 · x", absPart: "(1 − α)/2 · |x|", sum: "sum = LReLU", view: "View", fun: "function", der: "derivative",
       cmp: "Compare with", hoverX: "x =", data: "data", leaky: "Leaky neuron", reluN: "ReLU neuron", kink: "kink −b/w", loss: "MSE", step: "step",
@@ -27,11 +27,11 @@
       grad: "|∇f|", flat: "share of the plane with ∇f = 0", layer: "layer", rms: "RMS(z)", gain: "Initialization", depth: "Depth $L$", measured: "measured",
       theory: "theory", perLayer: "variance factor per layer", last: "RMS at the last layer", xavier: "$g=1$", heRelu: "$g=\\sqrt2$ (He for ReLU)", heLeaky: "$g=\\sqrt{2/(1+\\alpha^2)}$",
       w: "w", a: "α", landscape: "Error L(w, α), log scale", path: "gradient-descent path", start: "start (drag)", teacher: "truth (1.5, 0.2)", fit: "model",
-      dragHint: "Drag the orange start point on the right plot",
+      dragHint: "Drag the orange start point on the error map",
     },
     uz: {
       x: "x", f: "LReLU(x)", df: "LReLU′(x)", alpha: "Chapdagi qiyalik $\\alpha$", tangent: "qiyalik = hosila", relu: "ReLU ($\\alpha=0$)", lin: "chiziqli ($\\alpha=1$)",
-      deriv: "Hosilani ko‘rsatish", undef: "nolda aniqlanmagan", maxTitle: "max(αx, x)", sumTitle: "chiziqli qism + modul",
+      deriv: "Hosilani ko‘rsatish", undef: "nolda hosila yo‘q", maxTitle: "max(αx, x)", sumTitle: "chiziqli qism + modul",
       same: "max(αx, x) = LReLU?", yes: "ha", no: "yo‘q: α > 1 da max o‘ngda αx ni oladi", lineX: "y = x", lineAx: "y = αx", cases: "ta’rif bo‘yicha LReLU", maxEnv: "max(αx, x)",
       linPart: "(1 + α)/2 · x", absPart: "(1 − α)/2 · |x|", sum: "yig‘indi = LReLU", view: "Ko‘rinish", fun: "funksiya", der: "hosila",
       cmp: "Taqqoslash", hoverX: "x =", data: "ma’lumotlar", leaky: "Leaky neyron", reluN: "ReLU neyron", kink: "sinish −b/w", loss: "MSE", step: "qadam",
@@ -40,7 +40,7 @@
       grad: "|∇f|", flat: "∇f = 0 bo‘lgan tekislik ulushi", layer: "qatlam", rms: "RMS(z)", gain: "Initsializatsiya", depth: "Chuqurlik $L$", measured: "o‘lchangan",
       theory: "nazariya", perLayer: "qatlamdagi dispersiya ko‘paytuvchisi", last: "oxirgi qatlamdagi RMS", xavier: "$g=1$", heRelu: "$g=\\sqrt2$ (ReLU uchun He)", heLeaky: "$g=\\sqrt{2/(1+\\alpha^2)}$",
       w: "w", a: "α", landscape: "L(w, α) xato, log. shkala", path: "gradiyent tushish yo‘li", start: "start (torting)", teacher: "haqiqat (1,5; 0,2)", fit: "model",
-      dragHint: "O‘ngdagi rasmda to‘q sariq start nuqtasini torting",
+      dragHint: "Xato xaritasidagi to‘q sariq start nuqtasini torting",
     },
   }[LANG] || {};
 
@@ -153,20 +153,20 @@
     w.controls.append(sa.el, show.el);
     const ro = FV.ui.readout(w.readout, [{ key: "x", label: "x =" }, { key: "f", label: "LReLU(x) =", c: "blue" }, { key: "d", label: "LReLU′(x) =", c: "orange" }]);
     let x0 = cfg.x != null ? cfg.x : -2;
-    const h = p.handle(x0, lrelu(x0, sa.value), { c: "blue", onDrag: (x) => { x0 = x; return [x, lrelu(x, sa.value)]; }, onChange: () => draw() });
+    const h = p.handle(x0, lrelu(x0, sa.value), { c: "blue", onDrag: (x) => { x0 = Math.abs(x) < 0.06 ? 0 : x; return [x0, lrelu(x0, sa.value)]; }, onChange: () => draw() });
     function draw() {
       const a = sa.value, f = (x) => lrelu(x, a);
       p.clear();
       p.fn((x) => Math.max(0, x), { c: "guide", w: 1.6, dash: "5 4" });
       p.fn((x) => x, { c: "faint", w: 1.2, dash: "2 4" });
-      const k = Math.abs(x0) < 1e-9 ? NaN : dlrelu(x0, a), y0 = f(x0);
+      const noKink = Math.abs(a - 1) < 1e-9, k = x0 === 0 && !noKink ? NaN : dlrelu(x0, a), y0 = f(x0);
       p.fn(f, { c: "blue", w: 2.6 });
       if (Number.isFinite(k)) {
         // slope triangle: one step to the right, the rise equals the derivative
         const dx = x0 < 0 ? -1 : 1, xa = x0 + dx;
         p.line(Math.min(x0, xa), x0 < 0 ? f(xa) : y0, Math.max(x0, xa), x0 < 0 ? f(xa) : y0, { c: "orange", w: 1.6, dash: "3 3" });
         p.line(x0 < 0 ? x0 : xa, x0 < 0 ? f(xa) : y0, x0 < 0 ? x0 : xa, x0 < 0 ? y0 : f(xa), { c: "orange", w: 2.4 });
-        p.text(x0 < 0 ? x0 + 0.08 : xa + 0.08, (f(xa) + y0) / 2 + 0.05, (x0 < 0 ? "α" : "1"), { c: "orange" });
+        p.text(x0 < 0 ? x0 : xa + 0.08, (f(xa) + y0) / 2 + 0.05, (x0 < 0 ? "α" : "1"), { c: "orange", dx: x0 < 0 ? 24 : 0 });
         p.text((x0 + xa) / 2, (x0 < 0 ? f(xa) : y0) - 0.22, "1", { c: "orange", anchor: "middle" });
       }
       p.line(x0, 0, x0, y0, { c: "guide", w: 1, dash: "3 3" });
@@ -184,9 +184,9 @@
         if (Number.isFinite(k)) d.dot(x0, k, { c: "orange" });
         d.text(-3.9, a + 0.07, "α = " + FV.fmt(a, 2), { c: "orange" });
         d.text(3.9, 0.8, "1", { c: "orange", anchor: "end" });
-        d.text(0.12, 0.5 * (a + 1), L.undef, { c: "faint", size: 12 });
+        if (a < 0.9 && !d.narrow) d.text(0.12, 0.5 * (a + 1), L.undef, { c: "faint", size: 12 });
       }
-      ro.set("x", FV.fmt(x0, 2)); ro.set("f", FV.fmt(y0, 3)); ro.set("d", Number.isFinite(k) ? FV.fmt(k, 2) : "—");
+      ro.set("x", FV.fmt(x0, 2)); ro.set("f", FV.fmt(y0, 3)); ro.set("d", Number.isFinite(k) ? FV.fmt(k, 2) : "∂ = [" + FV.fmt(a, 2) + (LANG === "en" ? ", " : "; ") + "1]; PyTorch: " + FV.fmt(a, 2));
     }
     p.onresize = draw; draw();
   });
@@ -290,7 +290,6 @@
         if (Math.abs(u.w2) > Math.abs(u.w1)) top.line(-RNG, (-u.b + u.w1 * RNG) / u.w2, RNG, (-u.b - u.w1 * RNG) / u.w2, { c: "ink", w: 1.3, opacity: 0.75 });
         else top.line((-u.b + u.w2 * RNG) / u.w1, -RNG, (-u.b - u.w2 * RNG) / u.w1, RNG, { c: "ink", w: 1.3, opacity: 0.75 });
       });
-      top.text(-RNG + 0.1, RNG - 0.25, L.x2, { c: "ink" });
       hd.set(P.x, P.y);
       const g = netGrad(P.x, P.y, a);
       ro.set("f", FV.fmt(f(P.x, P.y), 3)); ro.set("g", FV.fmt(g.g, 3)); ro.set("on", g.on + " / " + NET.length);

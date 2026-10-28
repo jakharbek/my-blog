@@ -147,7 +147,7 @@ GROUPS = [
                       "uz": "<b>Muammo:</b> «o‘layotgan ReLU» (dying ReLU). Neyron kirishi doim manfiy bo‘lsa, u 0 chiqaradi, gradiyent ham 0 — va neyron boshqa o‘rganmaydi."}),
             dict(id="leaky-relu", name="Leaky ReLU",
                  alt={"ru": "«протекающий» ReLU", "en": "“leaky” ReLU", "uz": "«oqadigan» ReLU"},
-                 tag="α ≈ 0.01", tex=r"\operatorname{LReLU}(x)=\max(\alpha x,\,x)=\begin{cases}x, & x>0\\ \alpha x, & x\le 0\end{cases}",
+                 tag="α ≈ 0.01", tex=r"\operatorname{LReLU}(x)=\begin{cases}x, & x>0\\ \alpha x, & x\le 0\end{cases}=\max(\alpha x,\,x)\ \ (0<\alpha<1)",
                  rows=[
                     ("p", "meaning", {"ru": "Как ReLU, но отрицательная часть не обнуляется, а умножается на маленький $\\alpha$ (при $0&lt;\\alpha&lt;1$). Лечит «умирающий ReLU».",
                                       "en": "Like ReLU, but the negative part is not zeroed: it is multiplied by a small $\\alpha$ (with $0&lt;\\alpha&lt;1$). It cures the dying ReLU.",

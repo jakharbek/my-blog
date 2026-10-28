@@ -602,7 +602,7 @@ SECTIONS = {
     dict(id="links", title="Boshqa formulalar bilan bog‘liqlik", blocks=[
         ("ul", [
             "<a href=\"../adam/\">Adam</a>: surat — EMA-inersiya, maxraj — RMSProp’dan $\\sqrt{v}$, ustiga siljishni tuzatish.",
-            "<a href=\"../mse/\">MSE</a>: uning gradiyenti $\\frac2n\\sum_i(\\hat y_i-y_i)\\,x_i$ — 2 ko‘paytuvchi aniqligida 2-rasmdagi chiziqli regressiyadagi o‘sha $g_t$ (u yerda yo‘qotish — MSE ning yarmi).",
+            "<a href=\"../mse/\">MSE</a>: uning gradiyenti $\\frac2n\\sum_i(\\hat y_i-y_i)\\,x_i$ — 2 ko‘paytuvchi aniqligida 2-rasmdagi chiziqli regressiyadagi o‘sha $g_t$ (u yerda yo‘qotish — MSE’ning yarmi).",
             "<a href=\"../bce/\">BCE</a> va <a href=\"../cross-entropy/\">kross-entropiya</a>: logitlar bo‘yicha $\\hat y-y$ gradiyent — tushish uchun eng oddiy signal.",
             "<a href=\"../sigmoid/\">Sigmoida</a>: to‘yinish juda kichik gradiyentlar beradi — SGD ularda deyarli turib qoladi, RMSProp esa qadamni cho‘zadi.",
             "<a href=\"../huber/\">Huber</a>: chetga chiqqan qiymatlar gradiyentini cheklaydi — gradiyentni kesishning qarindoshi.",

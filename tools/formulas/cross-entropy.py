@@ -391,8 +391,8 @@ SECTIONS = {
         ("ul", [
             r"<b>ko‘p sinfli klassifikatorlarni o‘qitish</b> — logistik regressiyadan ResNet va ViT’gacha: oxirgi qatlam logitlarni chiqaradi, <a href='../softmax/'>softmax</a> ularni ehtimolliklarga aylantiradi, CE javobni baholaydi;",
             r"<b>til modellari</b> — GPT, LLaMA, Qwen’ni oldindan o‘qitish — keyingi token CE sini minimallashtirish: sinflar — lug‘at tokenlari, $e^{\mathrm{CE}}$ esa mashhur perpleksiya;",
-            r"<b>bilimlar distillyatsiyasi</b> — o‘quvchi o‘qituvchining «yumshoq» ehtimolliklarigacha bo‘lgan CE ni minimallashtiradi;",
-            r"<b>statistika</b> — CE ni minimallashtirish kategorial taqsimot uchun maksimal haqqoniylik usuliga teng kuchli;",
+            r"<b>bilimlar distillyatsiyasi</b> — o‘quvchi o‘qituvchining «yumshoq» ehtimolliklarigacha bo‘lgan CE’ni minimallashtiradi;",
+            r"<b>statistika</b> — CE’ni minimallashtirish kategorial taqsimot uchun maksimal haqqoniylik usuliga teng kuchli;",
             r"<b>axborot nazariyasi</b> — ma’lumotlar $p$ taqsimotdan kelib, $q$ model bo‘yicha kodlansa, CE kodning o‘rtacha uzunligiga teng.",
         ]),
         ("callout", "key", "Bir daqiqada asosiysi", r"$\mathrm{CE}=-\sum_k y_k\ln\hat y_k$; one-hot belgi uchun bu to‘g‘ri sinf ehtimolligining minus logarifmi. Ishonchli xato qimmatga tushadi: $-\ln0{,}1\approx2{,}303$, $-\ln0{,}9\approx0{,}105$ ga qarshi. Softmax bilan juftlikda logitlar bo‘yicha gradiyent shunchaki $s-y$, to‘yinishsiz. Kross-entropiya = entropiya + KL-divergensiya, $e^{\mathrm{CE}}$ esa perpleksiya."),
@@ -421,7 +421,7 @@ SECTIONS = {
         ("deep", "CE va maksimal haqqoniylik", [
             ("p", r"$\theta$ parametrli model $c_n$ sinfga $q_\theta(c_n\mid x_n)$ ehtimollik bersin. Tanlanma haqqoniyligi — $\prod_n q_\theta(c_n\mid x_n)$ ko‘paytma. Logarifm ko‘paytmani yig‘indiga, ishorani almashtirish esa maksimallashtirishni minimallashtirishga aylantiradi:"),
             ("eq", r"\arg\max_\theta\prod_{n=1}^{N}q_\theta(c_n\mid x_n)=\arg\min_\theta\Bigl(-\frac1N\sum_{n=1}^{N}\ln q_\theta(c_n\mid x_n)\Bigr)=\arg\min_\theta\mathcal L"),
-            ("p", r"O‘rtacha CE ni minimallashtirish — kategorial taqsimot uchun maksimal haqqoniylik bahosini izlash bilan bir xil. Shuning uchun CE ixtiyoriy tanlov emas, balki ehtimoliy klassifikatorning «tug‘ma» yo‘qotishi."),
+            ("p", r"O‘rtacha CE’ni minimallashtirish — kategorial taqsimot uchun maksimal haqqoniylik bahosini izlash bilan bir xil. Shuning uchun CE ixtiyoriy tanlov emas, balki ehtimoliy klassifikatorning «tug‘ma» yo‘qotishi."),
         ]),
     ]),
     dict(id="information", title="Entropiya, kross-entropiya va KL-divergensiya", blocks=[
@@ -453,7 +453,7 @@ SECTIONS = {
         ]),
         ("viz", "cross-entropy-gradient", {"z": [2, 1, 0], "k": 0, "eta": 1}, r"<b>3-rasm.</b> $(2;\,1;\,0)$ logitli va birinchi sinfi to‘g‘ri bo‘lgan bitta misol. O‘ngda ustunlar — $s$ bashorat, qora tokchalar — $y$ maqsad, strelkalar $s_k$ dan $y_k$ ga yo‘nalgan, sonlar — $s_k-y_k$ (qadam $z_k$ logitni $-\eta(s_k-y_k)$ ga siljitadi). «Qadam» ni bosing: logitlar $\eta=1$ bilan $z\leftarrow z-\eta(s-y)$ qoidasi bo‘yicha yangilanadi va yo‘qotish kamayadi: $0{,}408\to0{,}258\to0{,}187\to0{,}146$, 10 qadamdan keyin $0{,}058$. 3-sinfni to‘g‘ri qiling — yo‘qotish $2{,}408$, gradiyent esa $(0{,}665;\,0{,}245;\,-0{,}910)$ bo‘ladi."),
         ("deep", "Ikkinchi hosila: CE logitlar bo‘yicha qavariq", [
-            ("p", r"$s_k-y_k$ ni yana bir marta differensiallaymiz: CE ning logitlar bo‘yicha gessiani softmax Yakobi matritsasiga teng, $\nabla^2_z\,\mathrm{CE}=\operatorname{diag}(s)-ss^\top$. Bu matritsa nomanfiy aniqlangan, shuning uchun CE — logitlarning qavariq funksiyasi, $z=Wx+b$ softmax-regressiyada esa yo‘qotish $(W,b)$ bo‘yicha qavariq: yomon lokal minimumlar yo‘q. $\mathbf 1$ yo‘nalishda matritsa xos — barcha logitlarni siljitish yo‘qotishni o‘zgartirmaydi."),
+            ("p", r"$s_k-y_k$ ni yana bir marta differensiallaymiz: CE’ning logitlar bo‘yicha gessiani softmax Yakobi matritsasiga teng, $\nabla^2_z\,\mathrm{CE}=\operatorname{diag}(s)-ss^\top$. Bu matritsa nomanfiy aniqlangan, shuning uchun CE — logitlarning qavariq funksiyasi, $z=Wx+b$ softmax-regressiyada esa yo‘qotish $(W,b)$ bo‘yicha qavariq: yomon lokal minimumlar yo‘q. $\mathbf 1$ yo‘nalishda matritsa xos — barcha logitlarni siljitish yo‘qotishni o‘zgartirmaydi."),
         ]),
     ]),
     dict(id="landscape", title="3D’da yo‘qotishlar landshafti", blocks=[
@@ -461,7 +461,7 @@ SECTIONS = {
         ("eq", r"\mathrm{CE}(z_1,z_2)=\ln\bigl(e^{z_1}+e^{z_2}+1\bigr)-z_1=\ln\bigl(1+e^{z_2-z_1}+e^{-z_1}\bigr)"),
         ("p", r"$z_1$ ham $z_2$ dan, ham noldan ancha katta bo‘lgan joyda logarifm ostidagi ikkala eksponenta kichik va yo‘qotish 0 ga yaqin. Birinchi sinf yutqazgan joyda yo‘qotish deyarli chiziqli — taxminan $\max(z_2,0)-z_1$ kabi o‘sadi. Asta pastga tushadigan, lekin nolga yetmaydigan qavariq «vodiy» hosil bo‘ladi."),
         ("viz", "cross-entropy-landscape", {"z": [2, 1], "k": 0}, r"<b>4-rasm.</b> Chapda — tanlangan to‘g‘ri sinf uchun $\mathrm{CE}(z_1,z_2,0)$ sirt (uni aylantirish mumkin). O‘ngda — yuqoridan ko‘rinish: rang va sath chiziqlari — yo‘qotish, strelkalar — $z_1$ va $z_2$ bo‘yicha $-(s-y)$ antigradiyent. Qizil nuqtani surish mumkin. «Boshlash» $(2;\,1)$ nuqtadan $z_1$, $z_2$ bo‘yicha $0{,}8$ qadamli gradiyentli tushishni ishga tushiradi: yo‘qotish 5 qadamda $0{,}408\to0{,}132$, 10 qadamda $0{,}079$, 79 qadamda $0{,}013$, nuqta esa o‘ngga-pastga ketaveradi — minimumga yetib bo‘lmaydi."),
-        ("callout", "warn", "Minimum yo‘q", r"One-hot maqsad uchun CE ning quyi chegarasi 0, lekin unga faqat to‘g‘ri logitning cheksiz ustunligida erishiladi. Agar model o‘qitish ma’lumotlarini ideal ajrata olsa, CE logitlar o‘sishi hisobiga kamayishda davom etadi va vaznlar cheksizlikka ketadi. Buni vaznlarni regulyarizatsiya qilish, erta to‘xtatish va belgilarni silliqlash bilan davolaydilar."),
+        ("callout", "warn", "Minimum yo‘q", r"One-hot maqsad uchun CE’ning quyi chegarasi 0, lekin unga faqat to‘g‘ri logitning cheksiz ustunligida erishiladi. Agar model o‘qitish ma’lumotlarini ideal ajrata olsa, CE logitlar o‘sishi hisobiga kamayishda davom etadi va vaznlar cheksizlikka ketadi. Buni vaznlarni regulyarizatsiya qilish, erta to‘xtatish va belgilarni silliqlash bilan davolaydilar."),
     ]),
     dict(id="smoothing", title="Belgilarni silliqlash", blocks=[
         ("p", r"Belgilarni silliqlash (label smoothing) one-hot maqsadni tekis taqsimot bilan aralashmaga almashtiradi:"),
@@ -475,18 +475,18 @@ SECTIONS = {
         ("p", r"Nega klassifikatorni ehtimolliklar va one-hot belgi orasidagi $\|s-y\|^2$ kvadratik xato bilan o‘qitmaslik kerak? Logitlar bo‘yicha gradiyentlarni solishtiramiz:"),
         ("eq", r"\frac{\partial\,\mathrm{CE}}{\partial z}=s-y,\qquad\frac{\partial\,\|s-y\|^2}{\partial z}=J^{\top}\,2(s-y)=2\,s\odot\bigl((s-y)-\langle s-y,\,s\rangle\,\mathbf 1\bigr)"),
         ("p", r"MSE gradiyentida Yakobi matritsasidan kelgan $s$ ko‘paytuvchi turadi. Agar model ishonch bilan xato qilsa — deyarli butun massa bitta noto‘g‘ri sinfda bo‘lsa, — gradiyent deyarli nolga aylanadi: kichik $s_k$ lar uchun $s_k$ ko‘paytuvchi kichik, noto‘g‘ri sevimli sinf uchun esa qavs deyarli nol. Model o‘zining qo‘pol xatosini «eshitmaydi». CE gradiyentida bunday ko‘paytuvchi yo‘q."),
-        ("viz", "cross-entropy-train", {}, r"<b>6-rasm.</b> Bir xil ma’lumotlar va bir xil «ishonchli noto‘g‘ri» boshlanish: vaznlar begona sinflar markazlariga yo‘nalgan, aniqlik $3{,}3\%$. Softmax-regressiyaning ikki nusxasi $0{,}5$ qadamli gradiyentli tushish bilan parallel o‘qitiladi — biri CE da, ikkinchisi MSE da. Boshlanishda logitlar bo‘yicha gradiyentning o‘rtacha normasi: CE da $1{,}3$, MSE da $0{,}13$. 10 qadamdan keyin aniqlik $85{,}6\%$ ga qarshi $5{,}6\%$, 50 qadamdan keyin — $93{,}3\%$ ga qarshi $25{,}6\%$; MSE faqat yuzinchi qadamga kelib yetib oladi ($90{,}0\%$), ikki yuzinchi qadamda esa ikkala model $95{,}6\%$ beradi."),
+        ("viz", "cross-entropy-train", {}, r"<b>6-rasm.</b> Bir xil ma’lumotlar va bir xil «ishonchli noto‘g‘ri» boshlanish: vaznlar begona sinflar markazlariga yo‘nalgan, aniqlik $3{,}3\%$. Softmax-regressiyaning ikki nusxasi $0{,}5$ qadamli gradiyentli tushish bilan parallel o‘qitiladi — biri CE’da, ikkinchisi MSE’da. Boshlanishda logitlar bo‘yicha gradiyentning o‘rtacha normasi: CE’da $1{,}3$, MSE’da $0{,}13$. 10 qadamdan keyin aniqlik $85{,}6\%$ ga qarshi $5{,}6\%$, 50 qadamdan keyin — $93{,}3\%$ ga qarshi $25{,}6\%$; MSE faqat yuzinchi qadamga kelib yetib oladi ($90{,}0\%$), ikki yuzinchi qadamda esa ikkala model $95{,}6\%$ beradi."),
         ("callout", "note", "Kvadratik xato baribir qachon ishlatiladi", r"Ehtimolliklar va belgi orasidagi kvadratik xato Brayer bahosi (Brier score) deb ataladi va kalibrlash <i>metrikasi</i> sifatida foydali. Klassifikatorlarni o‘qitish uchun deyarli doim CE olinadi: u logitlar bo‘yicha qavariq va xatolarda to‘yinmaydi."),
     ]),
     dict(id="llm", title="Til modellari va perpleksiya", blocks=[
         ("p", r"Til modeli har bir $t$ pozitsiyada keyingi tokenning $V$ ta tokenli (o‘n va yuz minglab) lug‘at bo‘yicha taqsimotini bashorat qiladi. Bu $V$ ta sinfga klassifikatsiya, yo‘qotish esa pozitsiyalar bo‘yicha o‘rtacha kross-entropiya:"),
         ("eq", r"\mathcal L=-\frac1T\sum_{t=1}^{T}\ln p_\theta(x_t\mid x_{<t}),\qquad\mathrm{PPL}=e^{\mathcal L}=\Bigl(\prod_{t=1}^{T}\frac{1}{p_\theta(x_t\mid x_{<t})}\Bigr)^{1/T}"),
-        ("p", r"<b>Perpleksiya</b> — CE ning eksponentasi, ya’ni $1/p_t$ qiymatlarning o‘rta geometrigi. Uni «variantlarning samarali soni» deb o‘qiydilar: ehtimollikni doim $k$ ta token orasida tekis taqsimlaydigan, to‘g‘ri token esa doim ular orasida bo‘lgan modelning perpleksiyasi aynan $k$. Til haqida hech narsa bilmaydigan model (lug‘at bo‘yicha tekis taqsimot) uchun $\mathcal L=\ln V$ va $\mathrm{PPL}=V$."),
+        ("p", r"<b>Perpleksiya</b> — CE’ning eksponentasi, ya’ni $1/p_t$ qiymatlarning o‘rta geometrigi. Uni «variantlarning samarali soni» deb o‘qiydilar: ehtimollikni doim $k$ ta token orasida tekis taqsimlaydigan, to‘g‘ri token esa doim ular orasida bo‘lgan modelning perpleksiyasi aynan $k$. Til haqida hech narsa bilmaydigan model (lug‘at bo‘yicha tekis taqsimot) uchun $\mathcal L=\ln V$ va $\mathrm{PPL}=V$."),
         ("viz", "cross-entropy-perplexity", {"lambda": 1}, r"<b>7-rasm.</b> Gapning har bir tokenidagi $-\ln p_t$ yo‘qotish (o‘quv misoli: ehtimolliklar qo‘lda berilgan). To‘q sariq chiziq — o‘rtacha, ya’ni CE; punktir — $V=50\,000$ lug‘at uchun $\ln V$. $\lambda=1$ da: $\mathrm{CE}\approx1{,}086$, perpleksiya $\approx2{,}963$ — model o‘rtacha uchta variant orasida ikkilanadi; eng qimmati birinchi so‘z ($p=0{,}05$, jarima $3{,}00$). $\lambda$ slayderi logitlarni ko‘paytiradi: $\lambda=0{,}5$ da perpleksiya allaqachon $\approx263{,}5$, $\lambda=0$ da taqsimot tekis, $\mathrm{CE}=\ln50\,000\approx10{,}82$ va perpleksiya $50\,000$."),
         ("callout", "note", "Perpleksiyalarni ehtiyotkorlik bilan solishtiring", r"Perpleksiya tokenizatorga bog‘liq: bir xil matnda yirikroq tokenli model kamroq bashorat qiladi va har biri qiyinroq. Faqat bir xil lug‘atli modellarni bir xil ma’lumotlarda solishtirish mumkin — yoki belgi yoki bayt boshiga bitlarga o‘tish kerak."),
     ]),
     dict(id="code", title="Kodda", blocks=[
-        ("p", r"Asosiy qoida — CE ni logitlardan log-softmax orqali hisoblash: $\mathrm{CE}=\operatorname{LSE}(z)-z_c$. «Avval softmax, keyin logarifm» yo‘li ishonchli xatolarda $\ln0=-\infty$ beradi: $(0;\,800;\,0)$ logitlar va to‘g‘ri birinchi sinf uchun sodda kod <code>inf</code> qaytaradi, barqarori esa aniq $800$ javobini."),
+        ("p", r"Asosiy qoida — CE’ni logitlardan log-softmax orqali hisoblash: $\mathrm{CE}=\operatorname{LSE}(z)-z_c$. «Avval softmax, keyin logarifm» yo‘li ishonchli xatolarda $\ln0=-\infty$ beradi: $(0;\,800;\,0)$ logitlar va to‘g‘ri birinchi sinf uchun sodda kod <code>inf</code> qaytaradi, barqarori esa aniq $800$ javobini."),
         ("code", "python", "CODE_NUMPY"),
         ("code", "python", "CODE_TORCH"),
         ("callout", "key", "PyTorch uchun tekshiruv ro‘yxati", r"<code>F.cross_entropy</code> / <code>nn.CrossEntropyLoss</code> <b>logitlarni</b> (softmax’siz!) va <code>long</code> turidagi sinf raqamlarini — yoki logitlar bilan bir xil shakldagi ehtimolliklarni qabul qiladi. Foydali parametrlar: <code>label_smoothing</code>, <code>weight</code> (nomutanosiblikda sinflar vaznlari), <code>ignore_index</code> (masalan, padding). Sinflar ikkinchi o‘lchovda turishi kerak, shuning uchun $(B,T,V)$ shaklli logitlarni <code>reshape</code> bilan $(BT,V)$ ga aylantirish eng oson."),
@@ -505,20 +505,20 @@ SECTIONS = {
         ("ul", [
             r"<a href='../softmax/'>Softmax</a>: $s$ ehtimolliklarni beradi; CE bilan birga — $s-y$ gradiyentni, $\mathrm{CE}=\operatorname{LSE}(z)-z_c$.",
             r"<a href='../bce/'>BCE</a>: bitta chiqishli $K=2$ holi: $-\bigl[y\ln\hat y+(1-y)\ln(1-\hat y)\bigr]$.",
-            r"<a href='../sigmoid/'>Sigmoida</a>: ikki sinf uchun softmax sigmoidaga keladi va CE BCE ga aylanadi.",
+            r"<a href='../sigmoid/'>Sigmoida</a>: ikki sinf uchun softmax sigmoidaga keladi va CE BCE’ga aylanadi.",
             r"<a href='../focal/'>Focal Loss</a>: $-(1-p_t)^\gamma\ln p_t$ — oson misollarda susaytirilgan kross-entropiya.",
             r"<a href='../mse/'>MSE</a>: softmax ustida ishonchli xatolarda to‘yinadi (<a href='#training'>solishtirish haqidagi</a> bo‘limga qarang).",
             r"<a href='../adam/'>Adam</a>: chuqur tarmoqlarda CE odatda shu optimizator bilan minimallashtiriladi.",
         ]),
     ]),
     dict(id="summary", title="Xulosa", blocks=[
-        ("callout", "key", None, r"1) One-hot belgi uchun $\mathrm{CE}=-\ln s_c$ — modelning to‘g‘ri javobdan hayrati; ma’lumotlar bo‘yicha o‘rtachasi — $N$ ga bo‘lingan minus log-haqqoniylik. 2) $H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$: $q$ bo‘yicha minimum $q=p$ da. 3) Softmax bilan logitlar bo‘yicha gradiyent $s-y$: chegaralangan, xatolarda to‘yinmaydi va muvaffaqiyatda yo‘qoladi; CE logitlar bo‘yicha qavariq. 4) One-hot maqsadlarda minimumga erishib bo‘lmaydi — logitlar o‘sadi; belgilarni silliqlash optimumni chekli qiladi. 5) CE ni logitlardan log-sum-exp orqali hisoblang; $e^{\mathrm{CE}}$ — perpleksiya."),
+        ("callout", "key", None, r"1) One-hot belgi uchun $\mathrm{CE}=-\ln s_c$ — modelning to‘g‘ri javobdan hayrati; ma’lumotlar bo‘yicha o‘rtachasi — $N$ ga bo‘lingan minus log-haqqoniylik. 2) $H(p,q)=H(p)+\mathrm{KL}(p\,\|\,q)$: $q$ bo‘yicha minimum $q=p$ da. 3) Softmax bilan logitlar bo‘yicha gradiyent $s-y$: chegaralangan, xatolarda to‘yinmaydi va muvaffaqiyatda yo‘qoladi; CE logitlar bo‘yicha qavariq. 4) One-hot maqsadlarda minimumga erishib bo‘lmaydi — logitlar o‘sadi; belgilarni silliqlash optimumni chekli qiladi. 5) CE’ni logitlardan log-sum-exp orqali hisoblang; $e^{\mathrm{CE}}$ — perpleksiya."),
     ]),
     dict(id="quiz", title="O‘zingizni tekshiring", blocks=[
         ("quiz", [
             dict(q=r"Model to‘g‘ri sinfga $0{,}25$ ehtimollik berdi. CE nimaga teng?", options=[r"$0{,}25$", r"$0{,}75$", r"$\approx1{,}386$", r"$\approx0{,}288$"], answer=2,
                  explain=r"$-\ln0{,}25=\ln4\approx1{,}386$ nat (aynan 2 bit)."),
-            dict(q="Ehtimolliklar softmax’dan olingan bo‘lsa, CE ning logitlar bo‘yicha gradiyenti nimaga teng?", options=[r"$-y/s$", r"$s-y$", r"$\operatorname{diag}(s)-ss^\top$", r"$(s-y)^2$"], answer=1,
+            dict(q="Ehtimolliklar softmax’dan olingan bo‘lsa, CE’ning logitlar bo‘yicha gradiyenti nimaga teng?", options=[r"$-y/s$", r"$s-y$", r"$\operatorname{diag}(s)-ss^\top$", r"$(s-y)^2$"], answer=1,
                  explain=r"$\mathrm{CE}=\operatorname{LSE}(z)-z_c$, $\nabla\operatorname{LSE}=s$ esa; $-y/s$ — logitlar emas, ehtimolliklar bo‘yicha gradiyent."),
             dict(q="Model 10 ta sinfda tekis javob beradi. CE va perpleksiya nimaga teng?", options=[r"$0$ va $1$", r"$\ln10\approx2{,}303$ va $10$", r"$0{,}1$ va $10$", r"$1$ va $e$"], answer=1,
                  explain=r"Har bir sinfga $0{,}1$, demak $\mathrm{CE}=-\ln0{,}1=\ln10$, $\mathrm{PPL}=e^{\ln10}=10$."),

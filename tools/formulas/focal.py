@@ -407,7 +407,7 @@ SECTIONS = {
     dict(id="properties", title="Xossalar", blocks=[
         ("ul", [
             "<b>Kross-entropiyani umumlashtiradi</b>: $\\gamma=0$, $\\alpha_t=1$ da $\\mathrm{CE}=-\\log p_t$ chiqadi.",
-            "<b>CE dan katta emas</b>: $0\\le\\mathrm{FL}\\le\\mathrm{CE}$, chunki $\\gamma\\ge0$ da $0\\le(1-p_t)^\\gamma\\le1$.",
+            "<b>CE’dan katta emas</b>: $0\\le\\mathrm{FL}\\le\\mathrm{CE}$, chunki $\\gamma\\ge0$ da $0\\le(1-p_t)^\\gamma\\le1$.",
             "<b>$p_t$ bo‘yicha kamayadi</b>: $(1-p_t)^\\gamma$ va $-\\log p_t$ ko‘paytuvchilarining ikkalasi manfiy emas va kamayuvchi, shuning uchun to‘g‘ri javob qancha ishonchli bo‘lsa, yo‘qotish shuncha kichik.",
             "<b>Chekkadagi xulq</b>: $p_t\\to1$ da $\\mathrm{FL}\\approx(1-p_t)^{\\gamma+1}$, chunki $-\\log p_t\\approx1-p_t$.",
             "<b>Logit bo‘yicha qavariq emas</b> $\\gamma&gt;0$ da: juda qiyin misollar uchun ($\\gamma=2$ da — $p_t&lt;0{,}058$, $z_t&lt;-2{,}79$ uchun) $z_t$ bo‘yicha ikkinchi hosila manfiy. Kross-entropiya logit bo‘yicha hamma joyda qavariq.",

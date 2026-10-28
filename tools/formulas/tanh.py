@@ -88,7 +88,7 @@ def _code(src, lang):
                ("tanh(20) в float64 округляется до 1", "float64 da tanh(20) 1 gacha yaxlitlanadi"),
                ("верное значение", "to‘g‘ri qiymat"),
                ("Инициализация под tanh: усиление 5/3", "tanh uchun initsializatsiya: kuchaytirish 5/3"),
-               ("Рекуррентная сеть с tanh и обрезка градиента от взрыва", "tanh li rekurrent tarmoq va portlashga qarshi gradiyentni kesish"),
+               ("Рекуррентная сеть с tanh и обрезка градиента от взрыва", "tanh’li rekurrent tarmoq va portlashga qarshi gradiyentni kesish"),
                ("8 последовательностей длины 100", "uzunligi 100 bo‘lgan 8 ta ketma-ketlik")],
     }[lang]
     for a, b in repl:
@@ -445,9 +445,9 @@ SECTIONS = {
             (r"|\sinh x|<\cosh x", r"ayirma moduli doim yig‘indidan kichik, shuning uchun $|\tanh x|&lt;1$;"),
             (r"x\to\pm\infty", r"eksponentalardan biri e’tiborsiz darajada kichik bo‘lib qoladi va kasr $\pm1$ ga intiladi."),
         ]),
-        ("p", r"Surat va maxrajni $e^{x}$ ga yoki $e^{-x}$ ga ko‘paytirib, hisoblash uchun qulay shakllarni olamiz, oxirgi shakl esa tanh ni sigmoida bilan bog‘laydi:"),
+        ("p", r"Surat va maxrajni $e^{x}$ ga yoki $e^{-x}$ ga ko‘paytirib, hisoblash uchun qulay shakllarni olamiz, oxirgi shakl esa tanh’ni sigmoida bilan bog‘laydi:"),
         ("eq", r"\begin{aligned}\tanh x&=\frac{e^{2x}-1}{e^{2x}+1}=\frac{1-e^{-2x}}{1+e^{-2x}}\\[4pt]&=2\sigma(2x)-1\end{aligned}"),
-        ("viz", "tanh-construction", {"x": 1, "t": 3}, r"<b>2-rasm.</b> Chapda: $\sinh$ va $\cosh$ — eksponentalarning yarim ayirmasi va yarim yig‘indisi; tanh — ularning nisbati. $x_0=1$ da: $\sinh 1=1{,}175$, $\cosh 1=1{,}543$, nisbat $0{,}7616=\tanh 1$. O‘ngda: «Boshlash»ni bosing — sigmoida uch qadamda tanh ga aylanadi: gorizontal bo‘yicha 2 marta siqamiz, vertikal bo‘yicha 2 marta cho‘zamiz, 1 ga pastga tushiramiz."),
+        ("viz", "tanh-construction", {"x": 1, "t": 3}, r"<b>2-rasm.</b> Chapda: $\sinh$ va $\cosh$ — eksponentalarning yarim ayirmasi va yarim yig‘indisi; tanh — ularning nisbati. $x_0=1$ da: $\sinh 1=1{,}175$, $\cosh 1=1{,}543$, nisbat $0{,}7616=\tanh 1$. O‘ngda: «Boshlash»ni bosing — sigmoida uch qadamda tanh’ga aylanadi: gorizontal bo‘yicha 2 marta siqamiz, vertikal bo‘yicha 2 marta cho‘zamiz, 1 ga pastga tushiramiz."),
         ("table", ["$x$", r"$\tanh x$", r"$\tanh' x$", r"$\sigma(x)$"], "TABLE", {"num": [0, 1, 2, 3]}),
         ("p", r"Jadval toqlikni ko‘rsatadi: $\tanh(-x)=-\tanh x$, hosila esa juft funksiya. Taqqoslash uchun yonida sigmoida: uning qiymatlari noldan emas, $0{,}5$ ga nisbatan simmetrik."),
     ]),
@@ -464,7 +464,7 @@ SECTIONS = {
         ("deep", "Nega tanh x = 2σ(2x) − 1", [
             ("p", r"Sigmoida ta’rifi $\sigma(u)=1/(1+e^{-u})$ ga $u=2x$ ni qo‘yamiz:"),
             ("eq", r"2\sigma(2x)-1=\frac{2}{1+e^{-2x}}-\frac{1+e^{-2x}}{1+e^{-2x}}=\frac{1-e^{-2x}}{1+e^{-2x}}=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}=\tanh x"),
-            ("p", r"Oxiridan oldingi qadamda surat va maxraj $e^{x}$ ga ko‘paytirilgan. Teskarisi: $\sigma(x)=\tfrac12\bigl(1+\tanh\tfrac x2\bigr)$. Demak, yashirin tanh li tarmoqni xuddi shunday ifoda kuchiga ega yashirin sigmoidali tarmoqqa qayta yozish mumkin — faqat vazn masshtablari va siljishlar o‘zgaradi. Farq o‘qitish qanday borishida (markazlashganlik bo‘limiga qarang)."),
+            ("p", r"Oxiridan oldingi qadamda surat va maxraj $e^{x}$ ga ko‘paytirilgan. Teskarisi: $\sigma(x)=\tfrac12\bigl(1+\tanh\tfrac x2\bigr)$. Demak, yashirin tanh’li tarmoqni xuddi shunday ifoda kuchiga ega yashirin sigmoidali tarmoqqa qayta yozish mumkin — faqat vazn masshtablari va siljishlar o‘zgaradi. Farq o‘qitish qanday borishida (markazlashganlik bo‘limiga qarang)."),
         ]),
         ("deep", "Teskari funksiya va qo‘shish formulasi", [
             ("p", r"$y=\tanh x$ ni $x$ ga nisbatan yechamiz: $y=\frac{e^{2x}-1}{e^{2x}+1}$ dan $e^{2x}=\frac{1+y}{1-y}$, bundan"),
@@ -493,7 +493,7 @@ SECTIONS = {
             ("p", r"Bundan darhol ko‘rinadiki, hosila maksimumi sigmoidadagidek $\tfrac14$ emas, $4\cdot\tfrac14=1$: chiqishning ikki baravar katta oralig‘i va kirishning ikki baravar siqilgan shkalasi 4 ko‘paytuvchini beradi."),
         ]),
         ("eq", r"\tanh' x=1-\tanh^{2}x"),
-        ("p", r"Amalda: to‘g‘ri o‘tishda tarmoq $t=\tanh z$ ni allaqachon hisoblagan. Teskari o‘tishda hosila bitta ko‘paytirish $1-t^2$ ga tushadi — yangi eksponentalarsiz. Shuning uchun freymvorklar teskari o‘tish uchun tanh ning kirishini emas, chiqishini saqlaydi."),
+        ("p", r"Amalda: to‘g‘ri o‘tishda tarmoq $t=\tanh z$ ni allaqachon hisoblagan. Teskari o‘tishda hosila bitta ko‘paytirish $1-t^2$ ga tushadi — yangi eksponentalarsiz. Shuning uchun freymvorklar teskari o‘tish uchun tanh’ning kirishini emas, chiqishini saqlaydi."),
         ("h3", "Ikkinchi hosila va eng keskin egilishlar"),
         ("p", r"Yana bir marta differensiallaymiz: $\tanh'' x=-2\tanh x\,(1-\tanh^2x)$. U faqat $x=0$ da (burilish nuqtasi) nolga teng, ekstremumlariga esa $\tanh^2x=\tfrac13$ da, ya’ni $x=\pm\operatorname{artanh}\tfrac{1}{\sqrt3}\approx\pm0{,}658$ da erishadi; u yerdagi qiymatlar $\mp\tfrac{4}{3\sqrt3}\approx\mp0{,}770$. Bu nuqtalarda qiyalik allaqachon $1-\tfrac13=\tfrac23$ va eng tez kamayadi: shu yerda $y\approx x$ to‘g‘ri chiziq to‘yinish tomon egilishga o‘tadi."),
         ("h3", "Nol atrofida Teylor qatori"),
@@ -511,7 +511,7 @@ SECTIONS = {
     ]),
     dict(id="space", title="Tekislikda tanh: burmalar, qirralar va tepaliklar", blocks=[
         ("p", r"Ikki kirishli neyron $\tanh(w_1x_1+w_2x_2+b)$ ni hisoblaydi. Tekislikda bu <b>burma</b>: sirt $w^\top x+b=0$ to‘g‘ri chiziq bo‘ylab $-1$ dan $+1$ ga o‘tadi va u bo‘ylab o‘zgarmaydi. Ikki qarama-qarshi burmaning yig‘indisi <b>qirra</b> beradi, to‘rt burma va chiqishdagi yana bitta tanh esa faqat kvadrat ichida $-1$ dan farq qiladigan <b>tepalik</b> beradi."),
-        ("viz", "tanh-surface", {"mode": "four", "k": 2}, r"<b>5-rasm.</b> tanh dan iborat kichik tarmoq. «1 neyron» — $\tanh(k(0{,}8x_1+0{,}6x_2))$; «2 neyron» — $\tanh(k(x_1+1))-\tanh(k(x_1-1))-1$; «4 + chiqish» — $x_1$ va $x_2$ bo‘yicha to‘rtta shunday burmaning yig‘indisi $s$, so‘ng $\tanh(2(s-3))$. $k=2$ da tepalik cho‘qqisida $f(0;\,0)=0{,}937$, uzoqda esa $f=-1{,}000$. Punktir — har bir yashirin neyron kirishi nolga teng bo‘lgan to‘g‘ri chiziqlar."),
+        ("viz", "tanh-surface", {"mode": "four", "k": 2}, r"<b>5-rasm.</b> tanh’dan iborat kichik tarmoq. «1 neyron» — $\tanh(k(0{,}8x_1+0{,}6x_2))$; «2 neyron» — $\tanh(k(x_1+1))-\tanh(k(x_1-1))-1$; «4 + chiqish» — $x_1$ va $x_2$ bo‘yicha to‘rtta shunday burmaning yig‘indisi $s$, so‘ng $\tanh(2(s-3))$. $k=2$ da tepalik cho‘qqisida $f(0;\,0)=0{,}937$, uzoqda esa $f=-1{,}000$. Punktir — har bir yashirin neyron kirishi nolga teng bo‘lgan to‘g‘ri chiziqlar."),
         ("p", r"<b>Universal approksimatsiya teoremasi</b> (Sibenko, 1989; Xornik, 1991) shunday ishlaydi: yetarlicha ko‘p tanh neyronli bitta yashirin qatlamli tarmoq chegaralangan yopiq to‘plamdagi istalgan uzluksiz funksiyani istalgan aniqlikda yaqinlashtiradi. Tepaliklar burmalardan yig‘iladi, tepaliklardan esa istalgan relyefni yig‘ish mumkin. Bizning tepalik ko‘rgazmalilik uchun chiqishda ikkinchi tanh ishlatadi, teoremaga esa chiziqli chiqishli bitta yashirin qatlam yetarli. U bunday vaznlar <i>mavjudligini</i> aytadi, lekin qancha neyron kerakligini va o‘qitish ularni topishini aytmaydi."),
     ]),
     dict(id="training", title="O‘qitishda tanh: qatlamlar bo‘yicha aktivatsiyalar va egri chiziqni moslash", blocks=[
@@ -522,17 +522,17 @@ SECTIONS = {
         ("h3", "tanh tarmog‘i egri chiziqni moslaydi"),
         ("p", r"$H$ neyronli yashirin qatlam va chiziqli chiqish: $\hat y(x)=\sum_{k=1}^{H}v_k\tanh(w_kx+b_k)+c$. Har bir qo‘shiluvchi — chetlari silliq «zina»; o‘qitish zinalarni suradi, cho‘zadi va masshtablaydi, toki ularning yig‘indisi ma’lumotlarga tushsin."),
         ("viz", "tanh-fit", {"h": 5}, r"<b>7-rasm.</b> Shovqinli ($\sigma=0{,}08$) $y=0{,}8\sin(2{,}2x)+0{,}3x$ ning 40 nuqtasi, to‘liq gradiyent va $0{,}05$ qadamli <a href='../adam/'>Adam</a>. Firuza egri chiziqlar — alohida neyronlar hissasi, ko‘k — ularning yig‘indisi. 5 neyron bilan MSE $1{,}059$ dan taxminan $0{,}05$ lik platogacha tushadi (200–380-qadamlar), so‘ng neyronlardan biri «o‘z rolini topadi»: 500-qadamda xato $0{,}006$, 800-qadamda — $0{,}0041$, ya’ni shovqin darajasida ($0{,}08^2=0{,}0064$). 3 neyron bilan tarmoq taxminan $0{,}11$ da tiqilib qoladi (2000-qadamda $0{,}106$), 8 neyron bilan 400-qadamdayoq $0{,}0039$ ga yetadi."),
-        ("callout", "note", "Plato — bu to‘yinish", r"Yo‘qotish egri chizig‘idagi uzun platolar ko‘pincha neyronlarning bir qismi tanh ning yassi chekkalarida ishlayotganini bildiradi: ularning hosilasi kichik va gradiyent parametrlarini deyarli siljitmaydi. Kirishlarni normallashtirish, ehtiyotkor initsializatsiya va Adam kabi adaptiv optimizatorlar yordam beradi."),
+        ("callout", "note", "Plato — bu to‘yinish", r"Yo‘qotish egri chizig‘idagi uzun platolar ko‘pincha neyronlarning bir qismi tanh’ning yassi chekkalarida ishlayotganini bildiradi: ularning hosilasi kichik va gradiyent parametrlarini deyarli siljitmaydi. Kirishlarni normallashtirish, ehtiyotkor initsializatsiya va Adam kabi adaptiv optimizatorlar yordam beradi."),
     ]),
     dict(id="rnn", title="Rekurrent tarmoqlarda va LSTM’da tanh", blocks=[
         ("p", r"Oddiy rekurrent tarmoq holatni har qadamda bir xil formula bilan yangilaydi: $h_t=\tanh(Wh_{t-1}+Ux_t+b)$. Bu yerda tanh saqlagich vazifasini bajaradi: matn qanchalik uzun bo‘lmasin, holat $(-1;\,1)$ da qoladi va «portlamaydi». Lekin chegaralanganlik uchun gradiyent bilan to‘lashga to‘g‘ri keladi (ko‘paytuvchilar chapda $s=T$ dan o‘ngda $s=t+1$ gacha ko‘paytiriladi):"),
         ("eq", r"\frac{\partial h_T}{\partial h_t}=\prod_{s=t+1}^{T}\operatorname{diag}\bigl(1-h_s^{2}\bigr)\,W"),
-        ("p", r"Har bir ko‘paytuvchida $1-h_s^2\le1$ bor. Vaznlar kichik bo‘lsa, ko‘paytma eksponensial so‘nadi. Vaznlar katta bo‘lsa, holatlar $\pm1$ ga bosiladi, $1-h_s^2\to0$ — va gradiyent yana so‘nadi. U faqat shu ikki rejim orasidagi tor oynada omon qoladi. Ko‘p o‘lchovli RNN’da bu oyna chegarasida gradiyent portlashi ham mumkin (Paskanu va boshq., 2013), shuning uchun tanh li RNN gradiyent normasini kesish bilan o‘qitiladi."),
+        ("p", r"Har bir ko‘paytuvchida $1-h_s^2\le1$ bor. Vaznlar kichik bo‘lsa, ko‘paytma eksponensial so‘nadi. Vaznlar katta bo‘lsa, holatlar $\pm1$ ga bosiladi, $1-h_s^2\to0$ — va gradiyent yana so‘nadi. U faqat shu ikki rejim orasidagi tor oynada omon qoladi. Ko‘p o‘lchovli RNN’da bu oyna chegarasida gradiyent portlashi ham mumkin (Paskanu va boshq., 2013), shuning uchun tanh’li RNN gradiyent normasini kesish bilan o‘qitiladi."),
         ("viz", "tanh-rnn", {"w": 1}, r"<b>8-rasm.</b> Skalyar RNN $h_t=\tanh(wh_{t-1}+x_t)$, 30 qadam, kirishlar $x_t\sim N(0;\,0{,}2^2)$ (kulrang ustunlar). Pastda — logarifmik shkalada $|\partial h_{30}/\partial h_t|$. $w=1$ da birinchi qadamdan oxirgisigacha gradiyent $3{,}1\cdot10^{-4}$ gacha kamayadi; $w=0{,}5$ da — $5{,}7\cdot10^{-11}$ gacha; $w=1{,}2$ da — $1{,}3\cdot10^{-3}$; holat to‘yingan $w=2$ va $w=3$ da esa — $7{,}2\cdot10^{-18}$ va $1{,}6\cdot10^{-38}$ gacha."),
         ("p", r"LSTM bu muammoni alohida «magistral» — tanh orqali emas, qo‘shish orqali yangilanadigan yacheyka holati $c_t$ bilan hal qiladi:"),
         ("eq", r"\begin{aligned}g_t&=\tanh\bigl(W_g[h_{t-1},x_t]+b_g\bigr)\\c_t&=f_t\odot c_{t-1}+i_t\odot g_t\\h_t&=o_t\odot\tanh(c_t)\end{aligned}"),
         ("p", r"Bu yerda $f_t,i_t,o_t\in(0;\,1)$ — <a href='../sigmoid/'>sigmoidalar</a>dagi ventillar, tanh esa ikki vazifani bajaradi: nomzod $g_t\in(-1;\,1)$ xotirani ham oshira, ham kamaytira oladi (sigmoida faqat qo‘sha olardi), $\tanh(c_t)$ esa chiqishni chegaralaydi. $c_{t-1}\to c_t$ zanjiri bo‘ylab gradiyent (ventillarning $h_{t-1}$ ga bog‘liqligini hisobga olmasak) $\tanh'$ ko‘paytuvchisiz $f_t$ ga ko‘payadi, shuning uchun $f_t\approx1$ da u uzoq qadamlargacha yetib boradi."),
-        ("callout", "history", "Biroz tarix", r"Yan LeKun 1998 yilda masshtablangan tangens $1{,}7159\tanh(2x/3)$ ni tavsiya qilgan: u $f(\pm1)=\pm1$ va chiqishning deyarli birlik dispersiyasini beradi. LSTM (Xoxrayter va Shmidxuber, 1997) tanh ni yigirma yil davomida rekurrent tarmoqlar standartiga aylantirdi. O‘ramli tarmoqlarda uni <a href='../relu/'>ReLU</a> siqib chiqardi: AlexNet maqolasida (2012) ReLU li to‘rt qatlamli o‘ramli tarmoq CIFAR-10 o‘quv to‘plamida 25% xatoga xuddi shunday tanh li tarmoqdan 6 marta tezroq yetdi."),
+        ("callout", "history", "Biroz tarix", r"Yan LeKun 1998 yilda masshtablangan tangens $1{,}7159\tanh(2x/3)$ ni tavsiya qilgan: u $f(\pm1)=\pm1$ va chiqishning deyarli birlik dispersiyasini beradi. LSTM (Xoxrayter va Shmidxuber, 1997) tanh’ni yigirma yil davomida rekurrent tarmoqlar standartiga aylantirdi. O‘ramli tarmoqlarda uni <a href='../relu/'>ReLU</a> siqib chiqardi: AlexNet maqolasida (2012) ReLU’li to‘rt qatlamli o‘ramli tarmoq CIFAR-10 o‘quv to‘plamida 25% xatoga xuddi shunday tanh’li tarmoqdan 6 marta tezroq yetdi."),
     ]),
     dict(id="code", title="Kodda: barqaror va kutilmagan holatlarsiz", blocks=[
         ("p", r"Eksponentalar orqali sodda formula $x=1000$ da $e^{1000}=\infty$ ni hisoblaydi va natijada $\infty/\infty=\text{nan}$ chiqadi. O‘rnatilgan <code>np.tanh</code> va <code>torch.tanh</code> barqaror: $x\gtrsim19$ da ular float64 da aynan $1{,}0$ qaytaradi. Lekin unda $1-\tanh^2 x$ aynan 0 beradi, holbuki $x=20$ da haqiqiy qiymat taxminan $1{,}7\cdot10^{-17}$. Agar uzoq chekkalarda hosila kerak bo‘lsa, uni $\operatorname{sech}^2$ orqali barqaror shaklda hisoblang."),
@@ -552,7 +552,7 @@ SECTIONS = {
     dict(id="links", title="Boshqa formulalar bilan bog‘lanish", blocks=[
         ("ul", [
             r"<a href='../sigmoid/'>Sigmoida</a>: $\tanh x=2\sigma(2x)-1$ va $\sigma(x)=\tfrac12(1+\tanh\tfrac x2)$; hosilalar $\tanh' x=4\sigma'(2x)$ kabi bog‘langan.",
-            r"<a href='../relu/'>ReLU</a>: $x&gt;0$ da to‘yinmaydi va tanh ni chuqur o‘ramli tarmoqlardan siqib chiqardi.",
+            r"<a href='../relu/'>ReLU</a>: $x&gt;0$ da to‘yinmaydi va tanh’ni chuqur o‘ramli tarmoqlardan siqib chiqardi.",
             r"<a href='../gelu/'>GELU</a>: mashhur yaqinlashuv $0{,}5x\bigl(1+\tanh\bigl(\sqrt{2/\pi}\,(x+0{,}044715x^3)\bigr)\bigr)$.",
             r"<a href='../silu/'>SiLU</a>: $x\sigma(x)=\tfrac x2\bigl(1+\tanh\tfrac x2\bigr)$ — «yumshoq ventil» rolidagi o‘sha S-egri chiziq.",
             r"<a href='../mse/'>MSE</a>: maqsadlar $[-1;\,1]$ da bo‘lganda tanh chiqishi uchun tabiiy juftlik.",
@@ -572,7 +572,7 @@ SECTIONS = {
                  explain=r"Sigmoida gorizontal bo‘yicha 2 marta siqiladi, vertikal bo‘yicha 2 marta cho‘ziladi va 1 ga pastga tushiriladi: $2\sigma(2x)-1$."),
             dict(q=r"Nega yashirin qatlamlarda tanh odatda sigmoidadan tezroq o‘qitiladi?", options=[r"U tezroq hisoblanadi", r"Uning chiqishlari markazlashgan va hosilasi 0,25 gacha emas, 1 gacha", r"U to‘yinmaydi", r"Uning nolda hosilasi yo‘q"], answer=1,
                  explain=r"Markazlashganlik keyingi qatlam yo‘qotish sirtini «yumaloqroq» qiladi, hosila maksimumining to‘rt marta kattaligi esa gradiyentni kamroq susaytiradi. tanh ham xuddi sigmoida kabi to‘yinadi."),
-            dict(q=r"tanh li RNN’da rekurrent vazn juda katta qilindi. Ko‘p qadamlar orqali gradiyent bilan nima bo‘ladi?", options=[r"Portlaydi: ko‘paytuvchilar $|w|&gt;1$", r"So‘nadi: holatlar to‘yinadi va $1-h^2\to0$", r"1 ga teng bo‘lib qoladi", r"Manfiy bo‘lib qoladi"], answer=1,
+            dict(q=r"tanh’li RNN’da rekurrent vazn juda katta qilindi. Ko‘p qadamlar orqali gradiyent bilan nima bo‘ladi?", options=[r"Portlaydi: ko‘paytuvchilar $|w|&gt;1$", r"So‘nadi: holatlar to‘yinadi va $1-h^2\to0$", r"1 ga teng bo‘lib qoladi", r"Manfiy bo‘lib qoladi"], answer=1,
                  explain=r"Har bir ko‘paytuvchi $w(1-h_s^2)$ ga teng. Katta $w$ da holat $\pm1$ ga bosiladi va $1-h_s^2$ juda kichik bo‘ladi — 8-rasmda $w=3$ da gradiyent $1{,}6\cdot10^{-38}$ gacha tushadi."),
         ]),
     ]),
