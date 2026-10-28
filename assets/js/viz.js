@@ -236,6 +236,7 @@
       this.gAxes = S("g", { class: "fv-axes" }, this.svg);
       this.gMain = S("g", { "clip-path": `url(#${id})` }, this.svg);
       this.gFree = S("g", {}, this.svg); // not clipped: labels
+      this.gLabels = S("g", { class: "fv-axes" }, this.svg); // axis names stay above heatmaps
       this.gHover = S("g", { class: "fv-hover", "clip-path": `url(#${id})` }, this.svg);
       this.overlay = S("rect", { class: "fv-overlay" }, this.svg);
       this.gHandles = S("g", {}, this.svg);
@@ -305,8 +306,9 @@
         const t = S("text", { x: (this.x0 + this.x1) / 2, y: this.H - 6, "text-anchor": "middle", class: "fv-label" }, g);
         t.textContent = o.xLabel;
       }
+      this.gLabels.textContent = "";
       if (o.yLabel) {
-        const t = S("text", { x: this.x0 + 6, y: this.y1 + 14, "text-anchor": "start", class: "fv-label fv-ylabel" }, g);
+        const t = S("text", { x: this.x0 + 6, y: this.y1 + 14, "text-anchor": "start", class: "fv-label fv-ylabel" }, this.gLabels);
         t.textContent = o.yLabel;
       }
     }

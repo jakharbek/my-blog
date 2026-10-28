@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Focal Loss: потеря, которая смотрит на трудные примеры — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="Focal loss подробно: p_t и модулирующий множитель, семейство кривых по γ, вывод градиента по логиту, 3D-поверхность FL(p_t, γ), дисбаланс классов, α-балансировка и калибровка, обучение логистической регрессии, код NumPy и PyTorch, RetinaNet.">
+  <meta property="og:title" content="Focal Loss: потеря, которая смотрит на трудные примеры — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="Focal loss подробно: p_t и модулирующий множитель, семейство кривых по γ, вывод градиента по логиту, 3D-поверхность FL(p_t, γ), дисбаланс классов, α-балансировка и калибровка, обучение логистической регрессии, код NumPy и PyTorch, RetinaNet.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/focal/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/focal/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/focal/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/focal/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/focal.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/focal/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/focal/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/focal/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Следующий уровень</span>
+  <h1>Focal Loss: потеря, которая смотрит на трудные примеры</h1>
+  <p class="dek">Кросс-энтропия с одним множителем (1 − p_t)^γ. Разбираем по косточкам, как он в сотни раз гасит лёгкие примеры, почему градиент перестаёт быть монотонным, откуда в RetinaNet γ = 2 и α = 0,25, что происходит с потерей при дисбалансе 1 : 1000 и почему модель, обученная на focal loss, выдаёт некалиброванные вероятности.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем она нужна</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: громкость для каждого примера</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#properties"><span class="n">4</span>Свойства</a>
+      <a href="#derivative"><span class="n">5</span>Производная: градиент по логиту</a>
+      <a href="#surface"><span class="n">6</span>Поверхность FL(p_t, γ) в 3D</a>
+      <a href="#imbalance"><span class="n">7</span>Дисбаланс: откуда берётся потеря</a>
+      <a href="#alpha"><span class="n">8</span>α-балансировка и калибровка</a>
+      <a href="#training"><span class="n">9</span>Focal loss в обучении</a>
+      <a href="#code"><span class="n">10</span>В коде</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{FL}(p_t)=-\alpha_t\,(1-p_t)^{\gamma}\,\log p_t$$</div>
+
+    <h2 id="why">Зачем она нужна</h2>
+    <p>Детектор объектов вроде RetinaNet проверяет на одной картинке около ста тысяч «якорей» — прямоугольников, в каждом из которых может оказаться объект. Объектов на кадре единицы, всё остальное — фон. Большинство фоновых якорей тривиальны: небо, стена, асфальт. Модель быстро учится уверенно называть их фоном, но <a href="../cross-entropy/">кросс-энтропия</a> всё равно начисляет за каждый маленькую потерю. Сто тысяч маленьких потерь складываются в большую — и эта сумма заглушает сигнал от немногих трудных примеров, ради которых всё и затевалось.</p>
+    <p>Лин, Гоял, Гиршик, Хе и Доллар (2017) предложили не выбрасывать лёгкие примеры и не пересэмплировать данные, а <b>изменить саму потерю</b>: умножить кросс-энтропию на $(1-p_t)^\gamma$. Для уверенно распознанного примера множитель почти ноль, для трудного — почти единица. Где это используется:</p>
+    <ul class="flist"><li><b>одностадийные детекторы</b> — RetinaNet, а за ней FCOS, ATSS и другие плотные детекторы;</li><li><b>сегментация</b> — особенно медицинская, где интересующая область занимает доли процента пикселей (часто в паре с Dice);</li><li><b>табличные задачи с редким классом</b> — мошенничество, отток, аномалии; в бустинге focal loss задают как пользовательскую целевую функцию;</li><li><b>классификация с «шумной» уверенностью</b> — focal loss иногда применяют, чтобы сеть не становилась чрезмерно уверенной.</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>$p_t$ — вероятность, которую модель дала правильному классу. $\mathrm{FL}=-(1-p_t)^\gamma\log p_t$: при $\gamma=0$ это обычная кросс-энтропия, при $\gamma=2$ пример с $p_t=0{,}9$ весит в 100 раз меньше, а с $p_t=0{,}3$ — всего в 2 раза. Множитель $\alpha_t$ дополнительно задаёт вес классов. Цена — модель перестаёт выдавать откалиброванные вероятности.</p></div>
+
+    <h2 id="intuition">Интуиция: громкость для каждого примера</h2>
+    <p>Представьте класс, где учитель отвечает на вопросы учеников. Тысяча учеников задают вопросы, ответ на которые они и так знают, и двадцать — действительно трудные. Если уделять каждому вопросу одинаковое время, на трудные его не останется. Focal loss — это регулятор громкости: чем увереннее модель уже отвечает на пример, тем тише его голос в общей сумме.</p>
+    <p>Потяните точку и меняйте $\gamma$. Серая пунктирная кривая — кросс-энтропия $-\ln p_t$. Синяя — focal loss: в правой половине, где примеры уже классифицированы верно, она прижимается к нулю гораздо раньше.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-curves" data-config="{&quot;gamma&quot;: 2, &quot;pt&quot;: 0.9}"></div><figcaption><b>Рисунок 1.</b> Семейство $\mathrm{FL}(p_t)$ для $\gamma=0;\,0{,}5;\,1;\,2;\,5$ (как на рисунке 1 статьи о RetinaNet). При $\gamma=2$ и $p_t=0{,}9$: $\mathrm{CE}=0{,}105$, множитель $(1-p_t)^2=0{,}01$, $\mathrm{FL}=0{,}00105$ — в 100 раз меньше. Слева, где $p_t$ мал, кривые почти совпадают.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Focal loss почти не трогает трудные примеры и очень сильно гасит лёгкие. При $p_t\to0$ множитель $(1-p_t)^\gamma\to1$, и $\mathrm{FL}\approx\mathrm{CE}$. При $p_t\to1$ потеря убывает как $(1-p_t)^{\gamma+1}$, а не как $1-p_t$ у CE.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <div class="eqd">$$\mathrm{FL}(p_t)=-\,\alpha_t\,(1-p_t)^{\gamma}\,\log p_t,\qquad p_t=\begin{cases}p, &amp; y=1,\\ 1-p, &amp; y=0\end{cases}$$</div>
+    <dl class="symbols"><dt>$p=\sigma(z)$</dt><dd>вероятность класса 1, которую модель получила из логита $z$ (через <a href="../sigmoid/">сигмоиду</a>; в многоклассовом случае — через <a href="../softmax/">softmax</a>);</dd><dt>$p_t$</dt><dd>вероятность <i>правильного</i> класса: насколько модель права на этом примере; $p_t&gt;0{,}5$ — пример классифицирован верно;</dd><dt>$-\log p_t$</dt><dd>обычная кросс-энтропия: ноль при $p_t=1$, бесконечность при $p_t\to0$;</dd><dt>$(1-p_t)^\gamma$</dt><dd>модулирующий множитель (modulating factor): «насколько модель ещё ошибается» в степени $\gamma$;</dd><dt>$\gamma\ge0$</dt><dd>параметр фокусировки (focusing parameter): $\gamma=0$ — CE, чем больше, тем сильнее гасятся лёгкие примеры; в RetinaNet $\gamma=2$;</dd><dt>$\alpha_t$</dt><dd>вес класса: $\alpha$ для позитивов и $1-\alpha$ для негативов; в RetinaNet $\alpha=0{,}25$.</dd></dl>
+    <p>Запись через $p_t$ — главный приём: вместо двух ветвей бинарной кросс-энтропии $-y\log p-(1-y)\log(1-p)$ получается одна, $-\log p_t$. В терминах логита удобно ввести $z_t=z$ при $y=1$ и $z_t=-z$ при $y=0$; тогда $p_t=\sigma(z_t)$.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$p_t$</th><th class=num>$\mathrm{CE}$</th><th class=num>$(1-p_t)^2$</th><th class=num>$\mathrm{FL}_{\gamma=2}$</th><th class=num>$\mathrm{CE}/\mathrm{FL}$</th></tr></thead><tbody><tr><td class=num>0,1</td><td class=num>2,303</td><td class=num>0,81</td><td class=num>1,865</td><td class=num>1,23</td></tr><tr><td class=num>0,3</td><td class=num>1,204</td><td class=num>0,49</td><td class=num>0,590</td><td class=num>2,04</td></tr><tr><td class=num>0,5</td><td class=num>0,693</td><td class=num>0,25</td><td class=num>0,173</td><td class=num>4</td></tr><tr><td class=num>0,7</td><td class=num>0,357</td><td class=num>0,09</td><td class=num>0,0321</td><td class=num>11,1</td></tr><tr><td class=num>0,9</td><td class=num>0,105</td><td class=num>0,01</td><td class=num>0,00105</td><td class=num>100</td></tr><tr><td class=num>0,99</td><td class=num>0,0101</td><td class=num>0,0001</td><td class=num>$1{,}0\cdot10^{-6}$</td><td class=num>10 000</td></tr></tbody></table></div>
+    <p>Последний столбец — во сколько раз focal loss меньше кросс-энтропии; это ровно $1/(1-p_t)^\gamma$. Пример из шпаргалки: при $\gamma=2$ лёгкий пример $p_t=0{,}9$ даёт $0{,}00105$ против $0{,}105$ (в 100 раз меньше), трудный $p_t=0{,}3$ — $0{,}590$ против $1{,}204$ (примерно вдвое).</p>
+    <p>На обычной шкале значения $0{,}001$ и $0{,}000001$ неразличимы, поэтому полезно посмотреть на потери в логарифмической шкале: там множитель превращается в вертикальный сдвиг.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-weight" data-config="{&quot;gamma&quot;: 2, &quot;pt&quot;: 0.9}"></div><figcaption><b>Рисунок 2.</b> Слева — модулирующий множитель $(1-p_t)^\gamma$ (бледные кривые — $\gamma=0{,}5;\,1;\,2;\,5$). Справа — CE и FL в логарифмической шкале; стрелка — разрыв между ними, $\log$ множителя. При $\gamma=2$: на $p_t=0{,}9$ разрыв 100 раз, на $p_t=0{,}99$ — 10 000 раз.</figcaption></figure>
+
+    <h2 id="properties">Свойства</h2>
+    <ul class="flist"><li><b>Обобщает кросс-энтропию</b>: $\gamma=0$, $\alpha_t=1$ дают $\mathrm{CE}=-\log p_t$.</li><li><b>Не больше CE</b>: $0\le\mathrm{FL}\le\mathrm{CE}$, потому что $0\le(1-p_t)^\gamma\le1$ при $\gamma\ge0$.</li><li><b>Убывает по $p_t$</b>: оба сомножителя $(1-p_t)^\gamma$ и $-\log p_t$ неотрицательны и убывают, поэтому чем увереннее верный ответ, тем меньше потеря.</li><li><b>Асимптотика у края</b>: при $p_t\to1$ $\mathrm{FL}\approx(1-p_t)^{\gamma+1}$, так как $-\log p_t\approx1-p_t$.</li><li><b>Не выпукла по логиту</b> при $\gamma&gt;0$: для очень трудных примеров (при $\gamma=2$ — для $p_t&lt;0{,}058$, $z_t&lt;-2{,}79$) вторая производная по $z_t$ отрицательна. Кросс-энтропия по логиту выпукла всюду.</li><li><b>Не является строго собственным правилом оценки</b> (proper scoring rule): минимум ожидаемой FL достигается не на истинной вероятности. Поэтому вероятности, выученные на FL, нужно калибровать (раздел про $\alpha$).</li></ul>
+    <div class="callout note"><b>Сравнение с другими способами борьбы с дисбалансом</b><p>Взвешивание классов ($\alpha$) меняет вес <i>класса</i> целиком, одинаково для лёгких и трудных примеров. Пересэмплирование и hard negative mining выбрасывают часть примеров по жёсткому правилу. Focal loss меняет вес <i>каждого примера</i> плавно, по тому, насколько модель уже справляется с ним, — и не требует сэмплирования.</p></div>
+
+    <h2 id="derivative">Производная: градиент по логиту</h2>
+    <p>Модель учится через градиент по логиту $z$, поэтому именно он показывает, кого «слышит» обучение. Для кросс-энтропии он прост: $\partial\,\mathrm{CE}/\partial z_t=-(1-p_t)$ — чем сильнее ошибка, тем сильнее градиент, монотонно. У focal loss появляется второй член.</p>
+    <details class="deep"><summary>Вывод по шагам</summary><div class="deep-body">
+      <p>Шаг 1. Производная по $p_t$ — правило произведения для $-(1-p_t)^\gamma\log p_t$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{FL}}{\partial p_t}=\gamma(1-p_t)^{\gamma-1}\log p_t-\frac{(1-p_t)^{\gamma}}{p_t}$$</div>
+      <p>Шаг 2. Производная сигмоиды: $\partial p_t/\partial z_t=p_t(1-p_t)$ (см. <a href="../sigmoid/">сигмоиду</a>).</p>
+      <p>Шаг 3. Цепное правило и вынесение общего множителя $(1-p_t)^\gamma$:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{FL}}{\partial z_t}=\gamma p_t(1-p_t)^{\gamma}\log p_t-(1-p_t)^{\gamma+1}=(1-p_t)^{\gamma}\bigl(\gamma p_t\log p_t+p_t-1\bigr)$$</div>
+      <p>Шаг 4. Для исходного логита $z$: $z_t=\pm z$, поэтому $\partial\,\mathrm{FL}/\partial z=\pm\,\partial\,\mathrm{FL}/\partial z_t$ (плюс при $y=1$, минус при $y=0$), а $\alpha_t$ просто умножает результат. Проверка: при $\gamma=0$ получаем $p_t-1$, градиент кросс-энтропии.</p>
+    </div></details>
+    <div class="eqd">$$\left|\frac{\partial\,\mathrm{FL}}{\partial z_t}\right|=(1-p_t)^{\gamma}\Bigl[(1-p_t)+\gamma\,p_t\,|\log p_t|\Bigr]$$</div>
+    <p>В квадратных скобках — градиент CE, $1-p_t$, плюс неотрицательная добавка $\gamma p_t|\log p_t|$. Снаружи — тот же множитель $(1-p_t)^\gamma$. Для лёгких примеров множитель побеждает, а для очень трудных добавка может сделать градиент даже <b>больше</b>, чем у CE.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-grad" data-config="{&quot;gamma&quot;: 2}"></div><figcaption><b>Рисунок 3.</b> Сила градиента по логиту правильного класса. Серый пунктир — CE, $1-p_t$. Оранжевая — FL: при $\gamma=2$ максимум $1{,}129$ достигается при $p_t=0{,}058$, при $p_t&lt;0{,}298$ градиент FL сильнее, чем у CE, а при $p_t=0{,}9$ он составляет лишь $0{,}029$ от градиента CE (в 35 раз меньше).</figcaption></figure>
+    <div class="callout warn"><b>Градиент больше не монотонен</b><p>У CE чем хуже пример, тем сильнее он тянет. У FL с $\gamma&gt;0$ самый сильный градиент — у примеров с $p_t$ около нескольких процентов, а дальше к $p_t\to0$ он снова падает до 1. Для $\gamma=1$ граница, где FL тянет сильнее CE, ровно $p_t=1/e\approx0{,}368$. Если в данных есть ошибочные метки, они как раз попадают в эту зону — focal loss будет усиленно их «учить».</p></div>
+
+    <h2 id="surface">Поверхность FL(p_t, γ) в 3D</h2>
+    <p>Сведём всё семейство кривых в одну поверхность над плоскостью $(p_t,\gamma)$. Срез при $\gamma=0$ — кросс-энтропия; при движении по $\gamma$ поверхность «оседает», причём тем быстрее, чем больше $p_t$.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-surface" data-config="{&quot;gamma&quot;: 2, &quot;pt&quot;: 0.5}"></div><figcaption><b>Рисунок 4.</b> Слева — $\mathrm{FL}(p_t,\gamma)$ (вращайте мышью), синяя линия — срез при выбранном $\gamma$, бирюзовая — при выбранном $p_t$. Справа — та же бирюзовая кривая в логарифмической шкале: это прямая с наклоном $\ln(1-p_t)$. При $p_t=0{,}5$ и $\gamma=2$: $\mathrm{FL}=0{,}173$, наклон $\ln0{,}5=-0{,}693$.</figcaption></figure>
+    <p>Почему прямая: $\log\mathrm{FL}=\log\mathrm{CE}+\gamma\log(1-p_t)$. По $\gamma$ потеря затухает экспоненциально, и скорость затухания — $|\ln(1-p_t)|$: для $p_t=0{,}5$ это $0{,}69$ на единицу $\gamma$, для $p_t=0{,}9$ — $2{,}30$, для $p_t=0{,}99$ — $4{,}61$. Параметр $\gamma$ раздвигает лёгкие и трудные примеры по шкале порядков.</p>
+
+    <h2 id="imbalance">Дисбаланс: откуда берётся потеря</h2>
+    <p>Смоделируем ситуацию одностадийного детектора. На каждый позитив приходится 1000 негативов. Негативы в основном лёгкие: логит правильного класса $z_t\sim N(4,\,1)$, то есть типичный $p_t=\sigma(4)\approx0{,}98$. Позитивы трудные: $z_t\sim N(0,\,1)$, типичный $p_t=0{,}5$. Посчитаем, какая доля суммарной потери приходится на каждую группу.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-imbalance" data-config="{&quot;gamma&quot;: 2, &quot;ratio&quot;: 1000}"></div><figcaption><b>Рисунок 5.</b> Слева — доля суммарной потери по корзинам $p_t$ шириной $0{,}05$ (серые — CE, синие — FL). Справа — состав суммы. Лёгкие негативы ($p_t\ge0{,}9$) — это $96{,}3\%$ примеров. В CE они дают $78{,}1\%$ потери, а позитивы — только $2{,}7\%$. В FL с $\gamma=2$ лёгкие дают $9{,}0\%$, а позитивы — $58{,}0\%$.</figcaption></figure>
+    <p>Именно это и есть «фокусировка». Градиентный спуск минимизирует сумму, и в CE эта сумма почти целиком состоит из примеров, которые уже решены. Focal loss перераспределяет «бюджет внимания»: потери лёгких примеров гасятся в десятки и сотни раз, и в сумме начинают доминировать трудные негативы и позитивы — те, на которых модель действительно может улучшиться.</p>
+    <div class="callout history"><b>RetinaNet</b><p>До 2017 года одностадийные детекторы заметно уступали двухстадийным (Faster R-CNN) по точности. Двухстадийные справлялись с дисбалансом за счёт этапа предложений и сэмплирования позитивов и негативов в пропорции 1 : 3. Лин и соавторы показали, что главная причина отставания — именно дисбаланс, и простая замена потери (RetinaNet = ResNet + FPN + focal loss) позволила одностадийному детектору превзойти двухстадийные. Работа получила награду за лучшую студенческую статью на ICCV 2017.</p></div>
+
+    <h2 id="alpha">α-балансировка и калибровка</h2>
+    <p>Множитель $\alpha_t$ — обычное взвешивание классов. Интуиция подсказывает дать редкому классу больший вес: $\alpha&gt;0{,}5$. Но в RetinaNet лучшим оказалось $\alpha=0{,}25$ — позитивы весят <i>меньше</i> негативов. Причина в том, что $\gamma$ уже сделал работу: лёгкие негативы погашены, и теперь перевес скорее у позитивов. $\alpha$ и $\gamma$ надо подбирать вместе; авторы советуют $\gamma=2$, $\alpha=0{,}25$, но отмечают, что результат устойчив к $\gamma$ в диапазоне $[0{,}5;\,5]$.</p>
+    <p>Есть и тонкость, о которой забывают. Возьмём самую простую «модель» — одно число $p$, одинаковое для всех примеров. Если доля позитивов $\pi$, то кросс-энтропия минимальна ровно при $p=\pi$: CE — собственное правило оценки, оно учит честным вероятностям. С focal loss это уже не так.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-prior" data-config="{&quot;pi&quot;: 0.01, &quot;gamma&quot;: 2, &quot;alpha&quot;: 0.25}"></div><figcaption><b>Рисунок 6.</b> Средняя потеря постоянного прогноза $p$, делённая на свой минимум. Доля позитивов $\pi=0{,}01$. CE минимальна при $p=0{,}01$. FL с $\gamma=2$, $\alpha=0{,}25$ — при $p=0{,}108$ (логит $-2{,}107$), то есть модель в 11 раз переоценивает частоту позитивов. Без $\alpha$ ($\alpha=0{,}5$) минимум был бы при $p=0{,}154$.</figcaption></figure>
+    <p>Вывод: модуль $(1-p_t)^\gamma$ тянет предсказания к середине — он «не любит» уверенность, потому что за уверенность перестают платить. Поэтому выход модели, обученной на focal loss, нельзя читать как вероятность: для порогов и ранжирования это нормально, а если нужны вероятности — откалибруйте их на валидации (Platt scaling, изотоническая регрессия, температурное шкалирование).</p>
+    <div class="callout key"><b>Инициализация под редкий класс</b><p>В начале обучения сеть выдаёт $p\approx0{,}5$ для всех якорей, и потери 100 000 негативов взрывают первые шаги. Поэтому сдвиг последнего слоя инициализируют так, чтобы $p=\pi$: $b=-\ln\frac{1-\pi}{\pi}$; для $\pi=0{,}01$ это $b\approx-4{,}595$. Кроме того, сумму FL по всем якорям делят на число <i>позитивных</i> якорей, а не на число всех.</p></div>
+
+    <h2 id="training">Focal loss в обучении</h2>
+    <p>Обучим логистическую регрессию на двумерных данных с дисбалансом 1 : 20 (400 негативов, 20 позитивов) двумя способами — на CE и на FL — с одинаковым стартом (сдвиг инициализирован под долю позитивов, как в RetinaNet) и одинаковым шагом. Размер каждой точки пропорционален её градиенту $|\partial L/\partial z|$: так видно, какие примеры «слышит» обучение.</p>
+    <figure class="viz"><div class="fv" data-viz="focal-train" data-config="{&quot;gamma&quot;: 2}"></div><figcaption><b>Рисунок 7.</b> Слева — CE, справа — FL с $\gamma=2$; сплошная линия — граница $p=0{,}5$, пунктир — $p=0{,}1$ и $p=0{,}9$. Нажмите «Пуск». В начале на лёгкие примеры ($p_t&gt;0{,}9$) приходится $50{,}0\%$ суммарного градиента CE и лишь $0{,}6\%$ у FL; после 400 шагов — $12{,}8\%$ и $0{,}7\%$. Обе модели находят 13 позитивов из 20 при 3 и 4 ложных тревогах соответственно.</figcaption></figure>
+    <p>Что видно на рисунке. У CE крупные точки рассеяны по всему облаку негативов: каждый из 400 лёгких примеров добавляет свою небольшую порцию градиента. У FL крупными остаются только точки у границы и позитивы — остальные почти исчезают. Сама граница у двух моделей получается похожей: для линейной модели на таких данных оптимальное направление почти одно и то же. Разница в другом: FL приходит к своей границе за несколько десятков шагов и больше её не двигает, а CE продолжает наращивать веса, делая лёгкие примеры ещё увереннее. В глубокой сети, где параметров миллионы, это различие решающее: градиент, потраченный на «и так понятный» фон, — это ёмкость сети, не потраченная на трудные случаи.</p>
+    <div class="eqd">$$w\leftarrow w-\eta\,\frac1n\sum_{i=1}^{n}\frac{\partial\,\mathrm{FL}_i}{\partial z_i}\,x_i,\qquad \frac{\partial\,\mathrm{FL}_i}{\partial z_i}=\pm(1-p_{t,i})^{\gamma}\bigl(\gamma p_{t,i}\log p_{t,i}+p_{t,i}-1\bigr)$$</div>
+    <div class="callout warn"><b>Честная оговорка</b><p>Focal loss — не волшебное средство от дисбаланса. Если модель простая, а классы хорошо разделимы, она даст почти ту же границу, что и CE, только с менее уверенными вероятностями. Выигрыш появляется там, где лёгких примеров на порядки больше, чем трудных, и они реально отнимают градиент: плотная детекция, сегментация, большие таблицы с редким классом.</p></div>
+
+    <h2 id="code">В коде</h2>
+    <p>Считайте focal loss по логитам, а не по вероятностям: $\log p_t=\log\sigma(z_t)=-\operatorname{softplus}(-z_t)$ — без $\log0$ и переполнения. Ниже — NumPy-версия с градиентом и проверкой на примере из шпаргалки.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def log_sigmoid(z):
+    return -np.logaddexp(0.0, -z)          # log σ(z) без переполнения
+
+def focal_loss(z, y, gamma=2.0, alpha=None):
+    &quot;&quot;&quot;Бинарная focal loss по логитам z и меткам y ∈ {0, 1}, поэлементно.&quot;&quot;&quot;
+    zt = np.where(y == 1, z, -z)           # логит правильного класса: p_t = σ(z_t)
+    log_pt = log_sigmoid(zt)
+    pt = np.exp(log_pt)
+    at = 1.0 if alpha is None else np.where(y == 1, alpha, 1 - alpha)
+    return -at * (1 - pt) ** gamma * log_pt
+
+def focal_grad(z, y, gamma=2.0, alpha=None):
+    &quot;&quot;&quot;dFL/dz = ±α_t (1 − p_t)^γ (γ p_t log p_t + p_t − 1).&quot;&quot;&quot;
+    zt = np.where(y == 1, z, -z)
+    log_pt = log_sigmoid(zt)
+    pt = np.exp(log_pt)
+    at = 1.0 if alpha is None else np.where(y == 1, alpha, 1 - alpha)
+    g = at * (1 - pt) ** gamma * (gamma * pt * log_pt + pt - 1)
+    return np.where(y == 1, g, -g)
+
+z = np.array([np.log(9.0), np.log(3 / 7), -np.log(9.0)])  # p_t = 0.9, 0.3, 0.9
+y = np.array([1, 1, 0])
+print(focal_loss(z, y, gamma=0.0).round(4))   # [0.1054 1.204  0.1054]  — это CE
+print(focal_loss(z, y).round(5))              # [0.00105 0.58995 0.00105]
+print(focal_grad(z, y, gamma=0.0).round(4))   # [-0.1 -0.7  0.1]
+print(focal_grad(z, y).round(4))              # [-0.0029 -0.697   0.0029]</code></pre>
+    <p>В PyTorch бинарная версия есть в torchvision; многоклассовую легко написать через <code>log_softmax</code>. Последняя строка — инициализация сдвига под редкий класс.</p>
+    <pre class="code"><span class="lang">python</span><code>import math
+import torch
+import torch.nn as nn
+from torchvision.ops import sigmoid_focal_loss
+
+# Бинарная (по каждому якорю и классу): α = 0.25, γ = 2 — как в RetinaNet
+logits = torch.tensor([math.log(9.0), math.log(3 / 7)])
+targets = torch.tensor([1.0, 1.0])
+loss = sigmoid_focal_loss(logits, targets, alpha=0.25, gamma=2.0, reduction=&quot;none&quot;)
+# ≈ [0.00026, 0.14749] = 0.25 · [0.00105, 0.58995]
+
+# Многоклассовая версия через log_softmax
+def focal_loss_multiclass(logits, target, gamma=2.0):
+    logp = torch.log_softmax(logits, dim=-1)
+    logp_t = logp.gather(-1, target[:, None]).squeeze(-1)
+    return (-(1 - logp_t.exp()) ** gamma * logp_t).mean()
+
+# Инициализация сдвига последнего слоя под редкий класс (π = 0.01)
+cls_head = nn.Conv2d(256, 9 * 80, kernel_size=3, padding=1)   # A = 9 якорей × K = 80 классов
+nn.init.constant_(cls_head.bias, -math.log((1 - 0.01) / 0.01))   # ≈ −4.595</code></pre>
+    <div class="callout note"><b>Проверка градиента</b><p>Численная производная $\bigl(\mathrm{FL}(z+\varepsilon)-\mathrm{FL}(z-\varepsilon)\bigr)/2\varepsilon$ при $\varepsilon=10^{-6}$ совпадает с <code>focal_grad</code> до четырёх знаков: $-0{,}0029$, $-0{,}697$, $0{,}0029$. При $p_t=0{,}3$ градиенты FL и CE почти равны ($0{,}697$ против $0{,}7$): это рядом с точкой пересечения $p_t\approx0{,}298$ на рисунке 3.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>$\alpha$ «по частоте» вместе с $\gamma$.</b> Ставить $\alpha=0{,}99$ для класса с долей 1% при $\gamma=2$ — двойная компенсация. Начинайте с $\gamma=2$, $\alpha=0{,}25$ и подбирайте их вместе.</li><li><b>Нет инициализации под редкий класс.</b> Со сдвигом 0 первые итерации тонут в потерях фона; в статье RetinaNet обучение с обычной CE без инициализации $\pi=0{,}01$ расходилось.</li><li><b>Нормировка на число всех примеров.</b> Среднее по 100 000 якорей делает потерю крошечной и зависит от размера картинки; в детекции делят на число позитивов.</li><li><b>Focal loss по вероятностям с <code>clamp</code>.</b> $\log(\max(p,\varepsilon))$ обнуляет градиент для самых трудных примеров. Считайте по логитам.</li><li><b>Чтение выхода как вероятности.</b> FL смещает прогнозы к середине (рисунок 6); для оценки рисков и ставок вероятности нужно калибровать.</li><li><b>Большое $\gamma$ при шумных метках.</b> Ошибочные метки выглядят как очень трудные примеры, а FL усиливает их относительный вес. При подозрении на шум уменьшайте $\gamma$ или чистите разметку.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href="../bce/">BCE</a> и <a href="../cross-entropy/">кросс-энтропия</a>: FL с $\gamma=0$, $\alpha_t=1$ совпадает с ними.</li><li><a href="../sigmoid/">Сигмоида</a>: $p_t=\sigma(z_t)$, и её производная $p_t(1-p_t)$ входит в градиент FL.</li><li><a href="../softmax/">Softmax</a>: в многоклассовом случае $p_t$ — компонента softmax для правильного класса.</li><li><a href="../huber/">Хьюбер</a> — противоположная философия: Хьюбер <i>ослабляет</i> вклад самых больших ошибок, считая их выбросами, а FL ослабляет самые <i>маленькие</i>, чтобы большие стали заметнее.</li><li><a href="../triplet/">Triplet loss</a> решает родственную задачу в обучении метрик: лёгкие тройки с нулевой потерей не дают градиента, и обучение фокусируется на трудных (hard negative mining).</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $\mathrm{FL}=-\alpha_t(1-p_t)^\gamma\log p_t$ — кросс-энтропия, умноженная на «степень ошибки» $(1-p_t)^\gamma$; $\gamma=0$ — CE. 2) Лёгкие примеры гасятся как $(1-p_t)^{\gamma+1}$: при $\gamma=2$ пример с $p_t=0{,}9$ весит в 100 раз меньше. 3) Градиент по логиту $(1-p_t)^\gamma(\gamma p_t\log p_t+p_t-1)$ не монотонен: при $\gamma=2$ максимум у $p_t\approx0{,}06$. 4) При дисбалансе 1 : 1000 FL переносит основную часть потерь с лёгких негативов на позитивы и трудные негативы. 5) Практика RetinaNet: $\gamma=2$, $\alpha=0{,}25$, инициализация $b=-\ln\frac{1-\pi}{\pi}$, нормировка на число позитивов; вероятности на выходе нужно калибровать.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Модель дала правильному классу вероятность $p_t=0{,}8$. Чему равен модулирующий множитель при $\gamma=2$?</legend><div class="opts"><button type="button" data-ok="0">$0{,}64$</button><button type="button" data-ok="0">$0{,}2$</button><button type="button" data-ok="1">$0{,}04$</button><button type="button" data-ok="0">$0{,}8$</button></div><div class="explain" hidden>$(1-p_t)^\gamma=0{,}2^2=0{,}04$: потеря этого примера в 25 раз меньше, чем в CE.</div></fieldset><fieldset class="q"><legend>2. Что получится из focal loss при $\gamma=0$ и $\alpha_t=1$?</legend><div class="opts"><button type="button" data-ok="0">MSE</button><button type="button" data-ok="1">Кросс-энтропия</button><button type="button" data-ok="0">Hinge loss</button><button type="button" data-ok="0">Ноль</button></div><div class="explain" hidden>Множитель $(1-p_t)^0=1$, остаётся $-\log p_t$ — кросс-энтропия.</div></fieldset><fieldset class="q"><legend>3. Как ведёт себя градиент FL по логиту при $\gamma=2$ в зависимости от $p_t$?</legend><div class="opts"><button type="button" data-ok="0">Монотонно убывает, как у CE</button><button type="button" data-ok="0">Растёт с $p_t$</button><button type="button" data-ok="1">Сначала растёт, достигает максимума около $p_t\approx0{,}06$, затем быстро падает</button><button type="button" data-ok="0">Постоянен</button></div><div class="explain" hidden>$|\partial\mathrm{FL}/\partial z_t|=(1-p_t)^\gamma[(1-p_t)+\gamma p_t|\log p_t|]$: при $p_t\to0$ он равен 1, растёт до $1{,}129$ при $p_t\approx0{,}058$ и затем убывает.</div></fieldset><fieldset class="q"><legend>4. Почему в RetinaNet $\alpha=0{,}25$, а не, скажем, $0{,}99$ для редкого класса объектов?</legend><div class="opts"><button type="button" data-ok="0">Это опечатка в статье</button><button type="button" data-ok="1">$\gamma$ уже погасил лёгкие негативы, и сильный перевес позитивов стал бы лишним</button><button type="button" data-ok="0">$\alpha$ не влияет на обучение</button><button type="button" data-ok="0">Объекты на самом деле не редки</button></div><div class="explain" hidden>После модулирующего множителя основная часть потерь и так идёт от позитивов и трудных негативов; $\alpha$ и $\gamma$ подбирают вместе, и лучшим оказалось $\alpha=0{,}25$.</div></fieldset><fieldset class="q"><legend>5. Модель обучена на focal loss с $\gamma=2$. Что верно про её выходные вероятности?</legend><div class="opts"><button type="button" data-ok="0">Они идеально откалиброваны</button><button type="button" data-ok="1">Они смещены к середине и требуют калибровки</button><button type="button" data-ok="0">Они всегда равны 0 или 1</button><button type="button" data-ok="0">Они совпадают с CE-моделью</button></div><div class="explain" hidden>FL не является собственным правилом оценки: даже для постоянного прогноза минимум не в $p=\pi$ (рисунок 6: $0{,}108$ вместо $0{,}01$).</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../triplet/"><span class="kicker">← Предыдущая формула</span><span class="big">Triplet Loss</span><span class="kicker">повторная идентификация (Re-ID)</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

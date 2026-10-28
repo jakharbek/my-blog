@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>The Huber loss: a bridge between MSE and MAE — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="The Huber loss in depth: the formula bone by bone, the smooth seam, the bounded gradient ψ(r), the 3D surface L(r, δ), the location estimate, choosing δ = 1.345σ, IRLS, gradient descent with outliers, pseudo-Huber, log-cosh, Smooth L1, NumPy and PyTorch code.">
+  <meta property="og:title" content="The Huber loss: a bridge between MSE and MAE — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="The Huber loss in depth: the formula bone by bone, the smooth seam, the bounded gradient ψ(r), the 3D surface L(r, δ), the location estimate, choosing δ = 1.345σ, IRLS, gradient descent with outliers, pseudo-Huber, log-cosh, Smooth L1, NumPy and PyTorch code.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/huber/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/huber/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/huber/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/huber/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/huber.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../../../en/#posts">All articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../">Cheat sheet</a>
+    <a href="../../../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../../../ru/materials/ml-formulas/huber/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/huber/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../../../uz/materials/ml-formulas/huber/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · Losses — regression</span>
+  <h1>The Huber loss: a bridge between MSE and MAE</h1>
+  <p class="dek">A parabola in the middle and straight lines at the edges. We look at why both the values and the slopes agree at the seam, how the threshold δ clips the gradient of outliers, why Huber’s estimate beats both the mean and the median, where the magic 1.345σ comes from, and where this loss works today — from robust regression to Fast R-CNN and DQN.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 October 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Why we need it</a>
+      <a href="#intuition"><span class="n">2</span>Intuition: a parabola with straight tails</a>
+      <a href="#anatomy"><span class="n">3</span>The formula, bone by bone</a>
+      <a href="#properties"><span class="n">4</span>Properties</a>
+      <a href="#derivative"><span class="n">5</span>The derivative: a clipped residual</a>
+      <a href="#surface"><span class="n">6</span>The surface L(r, δ) in 3D</a>
+      <a href="#statistics"><span class="n">7</span>Huber’s estimate and the choice of δ</a>
+      <a href="#training"><span class="n">8</span>Huber in training</a>
+      <a href="#variants"><span class="n">9</span>Smooth relatives: pseudo-Huber, log-cosh, Smooth L1</a>
+      <a href="#code"><span class="n">10</span>In code</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#links"><span class="n">12</span>Links to other formulas</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Check yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$L_\delta(r)=\begin{cases}\tfrac12 r^2, &amp; |r|\le\delta\\[1mm] \delta\bigl(|r|-\tfrac12\delta\bigr), &amp; |r|&gt;\delta\end{cases}$$</div>
+
+    <h2 id="why">Why we need it</h2>
+    <p>Regression learns from its errors $r=y-\hat y$. Two classic losses answer the question “how to penalise an error” differently. <a href="../mse/">MSE</a> penalises the square: it is smooth, its gradient is proportional to the error and fades gently near the minimum, but one outlier with error 10 weighs as much as a hundred errors of size 1. <a href="../mae/">MAE</a> penalises the absolute value: outliers hardly bother it, but it has a kink at zero and its gradient always has the same size, so the model struggles to polish small errors.</p>
+    <p>In 1964 Peter Huber proposed to take the best of both: <b>a parabola for small errors and a straight line for large ones</b>, switching at a threshold $\delta$. Where the idea works today:</p>
+    <ul class="flist"><li><b>robust regression</b> — <code>HuberRegressor</code> in scikit-learn, M-estimators in statistics;</li><li><b>object detection</b> — Smooth L1 in Fast R-CNN and its descendants for box-coordinate regression; it is Huber up to a factor;</li><li><b>reinforcement learning</b> — DQN clips the temporal-difference error to $[-1,\,1]$, which is equivalent to the Huber loss with $\delta=1$;</li><li><b>gradient boosting</b> — <code>loss='huber'</code> in scikit-learn, <code>objective='huber'</code> in LightGBM, pseudo-Huber in XGBoost;</li><li><b>any data with anomalies</b> — property prices, sensor readings, labels with typos.</li></ul>
+    <div class="callout key"><b>The essentials in a minute</b><p>$L_\delta(r)$ equals $\tfrac12r^2$ for $|r|\le\delta$ and $\delta(|r|-\tfrac12\delta)$ beyond. At $|r|=\delta$ both the values ($\tfrac12\delta^2$) and the slopes ($\delta$) agree. The derivative $\psi(r)=\operatorname{clip}(r,-\delta,\delta)$ is bounded: an outlier pulls the model no harder than $\delta$. Small $\delta$ is closer to MAE, large $\delta$ to MSE.</p></div>
+
+    <h2 id="intuition">Intuition: a parabola with straight tails</h2>
+    <p>Picture a spring that pulls the prediction towards the answer. While the error is small, it is an ordinary spring: the more it is stretched, the harder it pulls — that is the parabola $\tfrac12r^2$. But the spring has a safety catch: after a stretch of $\delta$ the force stops growing and stays equal to $\delta$. From there on the energy of such a spring grows only linearly — those are the straight tails.</p>
+    <p>Drag the point along the plot and move $\delta$. Inside the teal band $|r|\le\delta$ the blue curve lies on the grey parabola, outside it lies on the dashed line $\delta(|r|-\delta/2)$. The orange tangent passes the seam without a kink.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-explorer" data-config="{&quot;delta&quot;: 1, &quot;r&quot;: 2}"></div><figcaption><b>Figure 1.</b> The Huber loss $L_\delta(r)$ and its derivatives. Below: the orange $\psi(r)=L'_\delta(r)$ is sloped inside the band and flat outside; the violet $L''_\delta$ is a step: 1 inside, 0 outside. With $\delta=1$ and $r=2$: $L=1.5$ instead of $\tfrac12r^2=2$, and the slope is 1, not 2.</figcaption></figure>
+    <div class="callout intuition"><b>What to notice</b><p>At the seam $|r|=\delta$ the curve passes from the parabola to the line smoothly: the line $\delta(|r|-\delta/2)$ is the <i>tangent</i> to the parabola at $r=\pm\delta$. Only the second derivative has a jump: the curvature drops from 1 to 0.</p></div>
+
+    <h2 id="anatomy">The formula, bone by bone</h2>
+    <div class="eqd">$$L_\delta(r)=\begin{cases}\tfrac12 r^2, &amp; |r|\le\delta,\\[1mm] \delta\bigl(|r|-\tfrac12\delta\bigr), &amp; |r|&gt;\delta,\end{cases}\qquad r=y-\hat y$$</div>
+    <dl class="symbols"><dt>$r=y-\hat y$</dt><dd>the residual: how far the answer $y$ is above the prediction $\hat y$; the loss depends only on $|r|$, the sign does not matter;</dd><dt>$\delta&gt;0$</dt><dd>the threshold: errors below $\delta$ count as “ordinary noise”, larger ones as suspicious; it is measured in the units of $y$;</dd><dt>$\tfrac12 r^2$</dt><dd>the quadratic branch — exactly half the squared error, as in MSE; the factor $\tfrac12$ makes the derivative equal to $r$;</dd><dt>$\delta|r|$</dt><dd>the linear branch — the absolute error weighted by $\delta$, as in MAE;</dd><dt>$-\tfrac12\delta^2$</dt><dd>the downward shift that stitches the branches: without it the line $\delta|r|$ would give $\delta^2$ at $|r|=\delta$, while the parabola gives $\tfrac12\delta^2$.</dd></dl>
+    <p>Let us check the stitch. At $|r|=\delta$ the quadratic branch gives $\tfrac12\delta^2$ and the linear one $\delta(\delta-\tfrac12\delta)=\tfrac12\delta^2$: the values agree. The derivatives: $r=\delta$ for the parabola and $\delta\operatorname{sign}r=\delta$ for the line — the slopes agree too. The constant $-\tfrac12\delta^2$ was chosen precisely to make the line tangent to the parabola.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$r$</th><th class=num>$\tfrac12r^2$</th><th class=num>$|r|$</th><th class=num>$L_1(r)$</th><th class=num>$\psi_1(r)$</th></tr></thead><tbody><tr><td class=num>0</td><td class=num>0</td><td class=num>0</td><td class=num>0</td><td class=num>0</td></tr><tr><td class=num>0.5</td><td class=num>0.125</td><td class=num>0.5</td><td class=num>0.125</td><td class=num>0.5</td></tr><tr><td class=num>1</td><td class=num>0.5</td><td class=num>1</td><td class=num>0.5</td><td class=num>1</td></tr><tr><td class=num>2</td><td class=num>2</td><td class=num>2</td><td class=num>1.5</td><td class=num>1</td></tr><tr><td class=num>3</td><td class=num>4.5</td><td class=num>3</td><td class=num>2.5</td><td class=num>1</td></tr><tr><td class=num>5</td><td class=num>12.5</td><td class=num>5</td><td class=num>4.5</td><td class=num>1</td></tr><tr><td class=num>10</td><td class=num>50</td><td class=num>10</td><td class=num>9.5</td><td class=num>1</td></tr></tbody></table></div>
+    <p>The table for $\delta=1$ shows the main point: for an error of 10 the square gives 50 while Huber gives 9.5, and the derivative (last column) never exceeds 1.</p>
+    <h3>The running example</h3>
+    <p>Take the example from the cheat sheet: $y=(3,\,5,\,8)$, $\hat y=(2.5,\,5,\,10)$, errors $r=(0.5,\,0,\,-2)$. With $\delta=1$ the first error falls on the parabola: $\tfrac12\cdot0.5^2=0.125$; the second is zero; the third, $|r|=2&gt;1$, falls on the line: $1\cdot(2-0.5)=1.5$. The mean is $(0.125+0+1.5)/3\approx0.542$.</p>
+    <p>The gradients are more interesting. In half-MSE they equal the errors themselves, $(0.5,\,0,\,-2)$: the outlier pulls four times harder than the first point. For Huber $\psi=(0.5,\,0,\,-1)$ — only twice as hard: a big miss cannot shout down the others.</p>
+    <h3>Scale: one curve for every δ</h3>
+    <p>If the error is measured in units of the threshold, all Huber losses are one and the same curve:</p>
+    <div class="eqd">$$L_\delta(r)=\delta^2\,L_1\!\left(\frac{r}{\delta}\right)$$</div>
+    <p>That is why $\delta$ cannot be chosen “in general”: it depends on the units of $y$. An error of 1 dollar and of 1 million dollars are different things. Usually $\delta$ is set as a multiple of the typical noise spread $\sigma$ (see the section on choosing $\delta$).</p>
+
+    <h2 id="properties">Properties</h2>
+    <ul class="flist"><li><b>Non-negative and even</b>: $L_\delta(r)\ge0$, $L_\delta(-r)=L_\delta(r)$, the minimum $0$ only at $r=0$.</li><li><b>Convex</b>: a parabola and its tangent are glued without a “dip”, so linear regression with the Huber loss has no spurious local minima.</li><li><b>Smoothness $C^1$ but not $C^2$</b>: the first derivative is continuous, the second jumps from 1 to 0 at $|r|=\delta$.</li><li><b>Squeezed between a parabola and a line</b>: $\delta|r|-\tfrac12\delta^2\le L_\delta(r)\le\tfrac12r^2$; the gap to each equals $\tfrac12(|r|-\delta)^2$ wherever the curve does not coincide with it.</li><li><b>Bounded derivative</b>: $|L'_\delta(r)|\le\delta$ — the key property for robustness.</li><li><b>Limits</b>: as $\delta\to\infty$, $L_\delta(r)\to\tfrac12r^2$ (MSE); as $\delta\to0$, $L_\delta(r)/\delta\to|r|$ (MAE).</li></ul>
+    <details class="deep"><summary>Why the curve is squeezed, and where the limits come from</summary><div class="deep-body">
+      <p>For $|r|&gt;\delta$: $\tfrac12r^2-\bigl(\delta|r|-\tfrac12\delta^2\bigr)=\tfrac12(|r|-\delta)^2\ge0$, i.e. the line lies below the parabola. For $|r|\le\delta$ the same expression shows that the parabola lies above the line. So $L_\delta$ always sits between them and coincides with each on its own piece.</p>
+      <p>Limits: if $\delta\ge|r|$, then $L_\delta(r)=\tfrac12r^2$ exactly — a large enough threshold suffices. If $\delta&lt;|r|$, then $L_\delta(r)/\delta=|r|-\tfrac12\delta\to|r|$ as $\delta\to0$.</p>
+    </div></details>
+    <details class="deep"><summary>Huber as a “softened absolute value” (the Moreau envelope)</summary><div class="deep-body">
+      <p>There is an elegant equivalent form: the Huber loss is the best compromise when part of the error, $z$, may be “written off” at the price of the absolute value:</p>
+      <div class="eqd">$$L_\delta(r)=\min_{z\in\mathbb R}\Bigl(\tfrac12(r-z)^2+\delta|z|\Bigr)$$</div>
+      <p>The minimum is attained at the soft threshold $z^*=\operatorname{sign}(r)\max(|r|-\delta,\,0)$. If $|r|\le\delta$, then $z^*=0$ and $\tfrac12r^2$ remains. Otherwise $z^*=r-\delta\operatorname{sign}r$, which gives $\tfrac12\delta^2+\delta(|r|-\delta)=\delta|r|-\tfrac12\delta^2$. In convex analysis this is the Moreau envelope of $\delta|\cdot|$: it turns the non-smooth absolute value into a smooth function with the same behaviour at infinity.</p>
+      <p>A modelling reading: $y=\hat y+\text{noise}+z$, where $z$ is a rare “anomaly”. The Huber loss decides by itself which part of the error to explain by the anomaly and which by Gaussian noise.</p>
+    </div></details>
+
+    <h2 id="derivative">The derivative: a clipped residual</h2>
+    <p>In statistics the derivative with respect to the residual is denoted $\psi$ and called the influence function: it shows how hard a single point pulls the estimate.</p>
+    <div class="eqd">$$\psi_\delta(r)=L'_\delta(r)=\begin{cases}r, &amp; |r|\le\delta,\\ \delta\operatorname{sign}r, &amp; |r|&gt;\delta\end{cases}=\operatorname{clip}(r,\,-\delta,\,\delta)$$</div>
+    <details class="deep"><summary>Step-by-step derivation</summary><div class="deep-body">
+      <p>Inside the band $(\tfrac12r^2)'=r$. Outside, $|r|$ differentiates to $\operatorname{sign}r$, so $\bigl(\delta|r|-\tfrac12\delta^2\bigr)'=\delta\operatorname{sign}r$. At $r=\pm\delta$ the left and right derivatives agree ($\pm\delta$), so the derivative exists and is continuous.</p>
+      <p>With respect to the prediction — the chain rule: $\dfrac{\partial L_\delta}{\partial\hat y}=\psi_\delta(r)\cdot\dfrac{\partial r}{\partial\hat y}=-\psi_\delta(y-\hat y)$.</p>
+      <p>The second derivative: $L''_\delta(r)=1$ for $|r|&lt;\delta$ and $0$ for $|r|&gt;\delta$; at $\pm\delta$ it does not exist — the left and right ones differ.</p>
+    </div></details>
+    <div class="eqd">$$\frac{\partial L_\delta}{\partial\hat y}=-\operatorname{clip}\bigl(y-\hat y,\,-\delta,\,\delta\bigr)$$</div>
+    <p>Compare the three losses. For MSE ($\tfrac12r^2$) the pull $\psi=r$ grows without limit. For MAE it is constant. For Huber it grows while the point is “one of ours” and freezes at $\delta$ once the point is suspicious. A second useful picture is the <b>weight</b> of a point, $w(r)=\psi(r)/r$: what share of a “vote” the point gets compared with ordinary least squares.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-influence" data-config="{&quot;delta&quot;: 1, &quot;r&quot;: 4}"></div><figcaption><b>Figure 2.</b> Left: the pull $\psi(r)$; right: the weight $w(r)=\psi(r)/r$. A point with error $r=4$ at $\delta=1$ pulls with force 4 under MSE and with force 1 under Huber, i.e. it gets weight $0.25$. Inside the band $|r|\le\delta$ the weight is 1: Huber leaves ordinary points alone.</figcaption></figure>
+    <div class="callout note"><b>Why ψ matters more than the loss itself</b><p>The model’s optimum is defined by the equation $\sum_i\psi(r_i)\,\partial\hat y_i/\partial\theta=0$, not by the value of the loss. So robustness is a property of $\psi$: a bounded $\psi$ means no single outlier can move the solution arbitrarily far. For MSE $\psi$ is unbounded, and one outlier can drag the mean anywhere.</p></div>
+
+    <h2 id="surface">The surface L(r, δ) in 3D</h2>
+    <p>Let us view the loss as a function of two variables — the error $r$ and the threshold $\delta$. This shows the whole family of curves at once and how the threshold changes the shape.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-surface" data-config="{&quot;delta&quot;: 1}"></div><figcaption><b>Figure 3.</b> Left: the surface $L_\delta(r)$ (you can rotate it); the orange lines are the seam $|r|=\delta$, the blue one is the slice at the chosen $\delta$. Right: the view from above with level lines. Inside the “wedge” $|r|\le\delta$ the lines are vertical, outside they bend. Switch to pseudo-Huber: the seam disappears and the surface is smooth everywhere.</figcaption></figure>
+    <p>Two things are visible at once. First, under the seam, where $|r|\le\delta$, the surface does not depend on $\delta$: it is always $\tfrac12r^2$ there, and the level lines $L=c$ are the vertical lines $r=\pm\sqrt{2c}$. Second, outside, the level line $L=c$ is $|r|=c/\delta+\delta/2$: the smaller the threshold, the further you must go to collect the same loss.</p>
+    <div class="callout note"><b>The multidimensional case</b><p>When the target is a vector (for example, the four coordinates of a box in detection), the Huber loss is usually computed per coordinate and summed: $\sum_jL_\delta(r_j)$. The level lines of such a sum in the $(r_1,r_2)$ plane are squares with rounded corners, and the gradient is clipped per coordinate. This is not the same as $L_\delta(\|r\|)$, which clips the length of the whole error vector.</p></div>
+
+    <h2 id="statistics">Huber’s estimate and the choice of δ</h2>
+    <p>Huber designed his function for the simplest problem in statistics — estimating the centre of a sample $x_1,\dots,x_n$. Minimising $\sum(x_i-\mu)^2$ gives the mean; minimising $\sum|x_i-\mu|$ gives the median. Huber’s estimate $\hat\mu$ minimises $\sum L_\delta(x_i-\mu)$, i.e. it solves</p>
+    <div class="eqd">$$\sum_{i=1}^{n}\psi_\delta(x_i-\hat\mu)=0$$</div>
+    <p>Points inside the zone $|x_i-\hat\mu|\le\delta$ take part as in the mean, while far ones contribute only their sign, with force $\delta$, as in the median.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-location" data-config="{&quot;delta&quot;: 1}"></div><figcaption><b>Figure 4.</b> 13 values around 5 and two outliers (red; the right one can be dragged). The height of a bar is the weight of the point in the estimate. At $\delta=1$: the mean is $6.079$, the median $5.557$, Huber’s estimate $5.369$ — the closest to the true centre 5. On the right, the path $\hat\mu(\delta)$: as $\delta\to0$ the estimate tends to the median, and for $\delta\ge7.42$ it coincides with the mean.</figcaption></figure>
+    <p>Look at the right plot: the path $\hat\mu(\delta)$ <b>need not</b> lie between the median and the mean — at $\delta=1$ the estimate is below both. The limiting values are exact: as $\delta\to0$ we get the median, and as soon as $\delta$ exceeds the distance from the mean to the farthest point (here $13.5-6.079\approx7.42$), every point is in the quadratic zone and $\hat\mu$ equals the mean.</p>
+    <h3>The price of robustness: the 1.345σ rule</h3>
+    <p>If the data are actually normal, with no outliers, the best estimate is the mean. How much worse is Huber? This is measured by the <b>asymptotic efficiency</b>: the ratio of the mean’s variance to the estimate’s variance. For $\psi$ with threshold $k$ (in units of $\sigma$) and a standard normal $X$:</p>
+    <div class="eqd">$$\operatorname{Var}\hat\mu\approx\frac{\sigma^2}{n}\cdot\frac{\mathbb E\,\psi_k(X)^2}{\bigl(\mathbb E\,\psi'_k(X)\bigr)^2},\qquad \mathbb E\,\psi'_k=2\Phi(k)-1,\quad \mathbb E\,\psi_k^2=2\Phi(k)-1-2k\varphi(k)+2k^2\bigl(1-\Phi(k)\bigr)$$</div>
+    <p>Solving “efficiency $=95\%$” gives $k\approx1.345$. Hence the classic choice $\delta=1.345\,\sigma$: only a 5% loss on clean data in exchange for protection against outliers. The median’s efficiency is $2/\pi\approx64\%$.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-efficiency" data-config="{&quot;k&quot;: 1.345, &quot;eps&quot;: 0.05}"></div><figcaption><b>Figure 5.</b> The variance of the location estimate (in units of $\sigma^2/n$) for the mixture $(1-\varepsilon)N(0,1)+\varepsilon N(0,10^2)$. At $k=1.345$ the efficiency on clean data is $95.0\%$. At $\varepsilon=0.05$ the variance of the mean is $5.95$, of the median $1.722$, of Huber with $k=1.345$ $1.229$; the best threshold for this mixture is $k\approx1.48$ (the hollow circle).</figcaption></figure>
+    <div class="callout history"><b>Huber’s minimax</b><p>In the 1964 paper Huber proved more: if it is unknown which outliers will appear and only their share $\varepsilon$ is known, the estimate with $\psi_k$ minimises the <i>worst-case</i> variance. The threshold is tied to the share by $2\varphi(k)/k-2\Phi(-k)=\varepsilon/(1-\varepsilon)$: for $\varepsilon=0.05$ this is $k\approx1.40$, for $\varepsilon=0.01$ $k\approx1.95$.</p></div>
+    <div class="callout warn"><b>σ must be estimated robustly too</b><p>The rule $\delta=1.345\sigma$ is useless if $\sigma$ is computed as the ordinary standard deviation: outliers inflate it. Use the median absolute deviation: $\hat\sigma=\operatorname{MAD}/0.6745\approx1.4826\cdot\operatorname{median}|r_i-\operatorname{median}(r)|$. <code>HuberRegressor</code> estimates the scale jointly with the coefficients, and its default <code>epsilon=1.35</code> is exactly $k$.</p></div>
+
+    <h2 id="training">Huber in training</h2>
+    <p>Let us fit a line by gradient descent in two ways — on half-MSE and on the Huber loss — on the same data: 30 points around $y=1+0.5x$ with noise $\sigma=0.5$ and three outliers at the bottom right. The threshold is $\delta=0.7\approx1.345\cdot0.5$.</p>
+    <figure class="viz"><div class="fv" data-viz="huber-regression" data-config="{&quot;delta&quot;: 0.7}"></div><figcaption><b>Figure 6.</b> Press “Play”. Both models start from the line $y=0$ and take identical steps ($\eta=0.15$). MSE quickly converges to slope $0.363$ — the outliers tip the line over. Huber is slower at first (all errors are large and each pulls no harder than $\delta$), but arrives at slope $0.511$ against the true $0.5$. Drag the last outlier — during training or before it.</figcaption></figure>
+    <p>A descent step shows the mechanism: each point pulls the parameters in proportion to $\psi(r_i)$. While the line is far from all points, every Huber pull equals $\pm\delta$ — it moves like MAE, at a constant speed. Once the line reaches the bulk of the points, their errors enter the quadratic zone and the descent becomes ordinary least squares — now without the outliers, which stay on a $\delta$ leash.</p>
+    <div class="eqd">$$\theta\leftarrow\theta+\eta\,\frac1n\sum_{i=1}^{n}\psi_\delta\bigl(y_i-\hat y_i\bigr)\,\frac{\partial\hat y_i}{\partial\theta}$$</div>
+    <details class="deep"><summary>IRLS: Huber as weighted least squares</summary><div class="deep-body">
+      <p>For a linear model $\hat y_i=x_i^\top\beta$ the optimality condition $\sum_i\psi(r_i)x_i=0$ can be rewritten as $\sum_iw_ir_ix_i=0$ with weights $w_i=\psi(r_i)/r_i=\min(1,\delta/|r_i|)$. With the weights frozen, these are the normal equations of weighted least squares, solved explicitly:</p>
+      <div class="eqd">$$\beta^{(t+1)}=\bigl(X^\top W^{(t)}X\bigr)^{-1}X^\top W^{(t)}y,\qquad W^{(t)}=\operatorname{diag}\bigl(w_i(\beta^{(t)})\bigr)$$</div>
+      <p>The iterations “compute residuals → update weights → solve least squares” (iteratively reweighted least squares) converge to Huber’s estimate in about ten steps. The weights are the same as on the right of Figure 2.</p>
+    </div></details>
+    <h3>Where else Huber works inside training</h3>
+    <ul class="flist"><li><b>Gradient boosting.</b> Each new tree learns the negative gradient of the loss. For Huber this is $\psi(r_i)$ — <i>clipped</i> residuals, so a single anomalous value does not make a tree spend a leaf on the outlier. In scikit-learn the threshold $\delta$ is recomputed at every iteration as the $\alpha$-quantile of $|r_i|$ (default $\alpha=0.9$).</li><li><b>DQN.</b> In the DeepMind paper (2015) the temporal-difference error was clipped to $[-1,\,1]$. The clipped gradient is exactly $\psi_1$, i.e. training on the Huber loss with $\delta=1$: rare huge rewards do not wreck the network.</li><li><b>Fast R-CNN.</b> For regressing the box coordinates Girshick (2015) chose Smooth L1: it is “less sensitive to outliers than L2” and does not require careful tuning of the learning rate to avoid exploding gradients.</li></ul>
+
+    <h2 id="variants">Smooth relatives: pseudo-Huber, log-cosh, Smooth L1</h2>
+    <p>The jump in the second derivative does not hurt gradient descent, but it hurts second-order methods. XGBoost and LightGBM take a Newton step: a leaf gets the value $-\sum g_i/\sum h_i$, where $h_i$ are second derivatives. The true second derivative of Huber is zero for every outlier, and if a leaf receives only outliers, the denominator vanishes. So implementations either replace it with a constant (LightGBM does this in <code>objective='huber'</code>) or use a smooth variant.</p>
+    <div class="eqd">$$\text{pseudo-Huber: }\;\delta^2\Bigl(\sqrt{1+(r/\delta)^2}-1\Bigr),\qquad \text{log-cosh: }\;\delta^2\ln\cosh\frac{r}{\delta},\qquad \text{Smooth L1: }\;\frac{L_\beta(r)}{\beta}$$</div>
+    <figure class="viz"><div class="fv" data-viz="huber-variants" data-config="{&quot;variant&quot;: &quot;pseudo&quot;, &quot;delta&quot;: 1, &quot;r&quot;: 3}"></div><figcaption><b>Figure 7.</b> Huber and its relatives at the same $\delta$. Pseudo-Huber and log-cosh also behave like $\tfrac12r^2$ near zero and like $\delta|r|$ on the tails, but the transition is gradual and the second derivative (tick the box) is continuous. At $\delta=1$, $r=3$: Huber $2.5$, pseudo-Huber $2.162$, log-cosh $2.309$.</figcaption></figure>
+    <ul class="flist"><li><b>Pseudo-Huber</b> (in computer vision, up to the factor $\delta$, the Charbonnier loss $\sqrt{r^2+\delta^2}-\delta$): the derivative $r/\sqrt{1+(r/\delta)^2}$ approaches $\pm\delta$ slowly; the second derivative $(1+(r/\delta)^2)^{-3/2}$ is positive everywhere. In XGBoost it is <code>objective='reg:pseudohubererror'</code> with the parameter <code>huber_slope</code> ($=\delta$).</li><li><b>log-cosh</b>: the derivative $\delta\tanh(r/\delta)$ is a smooth “clip”; on the tails $\delta^2\ln\cosh(r/\delta)\approx\delta|r|-\delta^2\ln2$.</li><li><b>Smooth L1</b> is Huber divided by $\beta$: $\tfrac{0.5r^2}{\beta}$ for $|r|&lt;\beta$ and $|r|-\tfrac12\beta$ beyond. As $\beta\to0$ it tends to $|r|$ (while Huber tends to zero). In PyTorch: <code>HuberLoss(delta=δ) = δ · SmoothL1Loss(beta=δ)</code>.</li></ul>
+
+    <h2 id="code">In code</h2>
+    <p>The formula itself is one line with <code>np.where</code>. The gradient is <code>np.clip</code>. Below: an implementation, a check on the running example and Huber regression via IRLS.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def huber(r, delta=1.0):
+    &quot;&quot;&quot;Huber loss for the residuals r = y − ŷ (element-wise).&quot;&quot;&quot;
+    a = np.abs(r)
+    return np.where(a &lt;= delta, 0.5 * r**2, delta * (a - 0.5 * delta))
+
+def huber_grad(r, delta=1.0):
+    &quot;&quot;&quot;ψ(r) = dL/dr: the residual clipped to [−δ, δ]. With respect to ŷ the sign flips.&quot;&quot;&quot;
+    return np.clip(r, -delta, delta)
+
+def pseudo_huber(r, delta=1.0):
+    return delta**2 * (np.sqrt(1.0 + (r / delta)**2) - 1.0)
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+r = y - y_hat               # [ 0.5  0.  -2. ]
+print(huber(r))             # [0.125 0.    1.5  ]
+print(huber(r).mean())      # 0.5416666666666666
+print(huber_grad(r))        # [ 0.5  0.  -1. ]</code></pre>
+    <pre class="code"><span class="lang">python</span><code>def huber_regression(X, y, delta=1.345, iters=50):
+    &quot;&quot;&quot;Huber regression by IRLS: least squares with weights w_i = min(1, δ·s/|r_i|).&quot;&quot;&quot;
+    X1 = np.column_stack([np.ones(len(X)), X])
+    beta = np.linalg.lstsq(X1, y, rcond=None)[0]           # start from ordinary least squares
+    for _ in range(iters):
+        r = y - X1 @ beta
+        s = np.median(np.abs(r - np.median(r))) / 0.6745   # robust scale (MAD)
+        w = np.minimum(1.0, delta * s / np.maximum(np.abs(r), 1e-12))
+        sw = np.sqrt(w)
+        beta = np.linalg.lstsq(X1 * sw[:, None], y * sw, rcond=None)[0]
+    return beta
+
+rng = np.random.default_rng(0)
+x = np.linspace(0, 10, 30)
+y = 1 + 0.5 * x + rng.normal(0, 0.5, 30)
+y[-3:] -= 6                                                # three outliers
+X1 = np.column_stack([np.ones(30), x])
+print(np.linalg.lstsq(X1, y, rcond=None)[0].round(3))      # [1.931 0.182] — least squares
+print(huber_regression(x, y).round(3))                     # [1.134 0.442] — Huber</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+y = torch.tensor([3.0, 5.0, 8.0])
+
+loss = nn.HuberLoss(delta=1.0)(y_hat, y)   # mean: 0.5417
+loss.backward()
+print(y_hat.grad)       # tensor([-0.1667,  0.0000,  0.3333]) = ψ(ŷ − y) / n
+
+# Smooth L1 from Fast R-CNN is Huber divided by β (β = δ):
+huber2 = nn.HuberLoss(delta=2.0)(y_hat, y)        # 0.7083
+sl1_2 = nn.SmoothL1Loss(beta=2.0)(y_hat, y)       # 0.3542 = 0.7083 / 2</code></pre>
+    <div class="callout key"><b>Ready-made implementations</b><p>PyTorch: <code>nn.HuberLoss(delta)</code>, <code>nn.SmoothL1Loss(beta)</code>. Keras: <code>keras.losses.Huber(delta)</code>. scikit-learn: <code>HuberRegressor(epsilon=1.35)</code>, <code>GradientBoostingRegressor</code> (<code>loss='huber'</code>, <code>alpha=0.9</code>). LightGBM: <code>objective='huber'</code> (the threshold is the parameter <code>alpha</code>). XGBoost: <code>objective='reg:pseudohubererror'</code>.</p></div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ol class="flist"><li><b>δ without regard to scale.</b> $\delta=1$ for prices in dollars and for prices in millions are completely different losses. Normalise the target or set $\delta$ in units of a robust spread.</li><li><b>Confusing Huber and Smooth L1.</b> They differ by the factor $1/\beta$: at the same threshold Smooth L1 gives a $\beta$ times smaller loss and gradient. When swapping one for the other, re-tune the learning rate.</li><li><b>Estimating σ with the ordinary std</b> for the $1.345\sigma$ rule — outliers inflate the std, the threshold becomes too large, and the protection disappears. Use the MAD.</li><li><b>Expecting Huber to protect against outliers in the features.</b> It limits the influence of a large residual $r$, but a point with an extreme $x$ (high leverage) can still swing the line. That needs other methods (for example, weights based on $x$).</li><li><b>Huber in Newton-step boosting</b> without a check: zero second derivatives of the outliers make leaf steps unstable. Use pseudo-Huber or an implementation that accounts for this.</li><li><b>Comparing loss values at different δ.</b> $L_\delta$ grows with $\delta$, other things being equal; compare models by an external metric (MAE, RMSE on validation), not by the loss itself.</li></ol>
+
+    <h2 id="links">Links to other formulas</h2>
+    <ul class="flist"><li><a href="../mse/">MSE</a>: for $\delta\ge\max|r_i|$ the Huber loss equals half the squared error, and the estimate is least squares.</li><li><a href="../mae/">MAE</a>: as $\delta\to0$, $L_\delta/\delta\to|r|$; the location estimate tends to the median.</li><li><a href="../rmse/">RMSE</a>: the metric most easily spoiled by outliers; Huber lets you train robustly and still report RMSE on clean data.</li><li><a href="../relu/">ReLU</a> and clipping: $\psi_\delta(r)=\operatorname{clip}(r,-\delta,\delta)$ is the same “linear up to a threshold” idea as in ReLU6 and gradient clipping.</li><li><a href="../focal/">Focal Loss</a> is the opposite philosophy: Huber <i>weakens</i> the largest errors (treating them as outliers), while focal loss <i>increases</i> the weight of hard examples relative to easy ones.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <div class="callout key"><p>1) $L_\delta(r)$ is the parabola $\tfrac12r^2$ for $|r|\le\delta$ and the line $\delta(|r|-\tfrac12\delta)$, tangent to it, beyond; the function is convex and $C^1$ but not $C^2$. 2) The derivative $\psi=\operatorname{clip}(r,-\delta,\delta)$ is bounded — an outlier pulls no harder than $\delta$; the weight of a point is $\min(1,\delta/|r|)$. 3) $\delta\to\infty$ gives MSE and the mean, $\delta\to0$ gives MAE and the median. 4) $\delta=1.345\sigma$ (σ from the MAD) gives 95% efficiency on normal data. 5) Smooth versions — pseudo-Huber and log-cosh — are needed by second-order methods; Smooth L1 is the same Huber divided by β.</p></div>
+
+    <h2 id="quiz">Check yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. What is $L_1(3)$ — the Huber loss with $\delta=1$ for an error of 3?</legend><div class="opts"><button type="button" data-ok="0">$4.5$</button><button type="button" data-ok="0">$3$</button><button type="button" data-ok="1">$2.5$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>$|r|=3&gt;\delta$, the linear branch: $1\cdot(3-0.5)=2.5$. Half the square would give $4.5$.</div></fieldset><fieldset class="q"><legend>2. What is the largest possible value of $|\partial L_\delta/\partial\hat y|$?</legend><div class="opts"><button type="button" data-ok="0">Unbounded</button><button type="button" data-ok="1">$\delta$</button><button type="button" data-ok="0">$\tfrac12\delta^2$</button><button type="button" data-ok="0">$1$</button></div><div class="explain" hidden>The derivative is the clipped residual $\operatorname{clip}(r,-\delta,\delta)$, at most $\delta$ in magnitude.</div></fieldset><fieldset class="q"><legend>3. What happens at $|r|=\delta$?</legend><div class="opts"><button type="button" data-ok="0">The value jumps</button><button type="button" data-ok="0">A kink: the first derivative jumps</button><button type="button" data-ok="1">The value and the first derivative are continuous, the second jumps</button><button type="button" data-ok="0">Nothing, the function is infinitely smooth</button></div><div class="explain" hidden>The branches are stitched by the value $\tfrac12\delta^2$ and the slope $\delta$; the second derivative goes from 1 to 0. Hence Huber is $C^1$ but not $C^2$.</div></fieldset><fieldset class="q"><legend>4. What does Huber’s location estimate tend to as $\delta\to0$ and for a very large $\delta$?</legend><div class="opts"><button type="button" data-ok="0">The mean and the median</button><button type="button" data-ok="1">The median and the mean</button><button type="button" data-ok="0">The mode and the mean</button><button type="button" data-ok="0">Zero and infinity</button></div><div class="explain" hidden>A tiny threshold leaves only the sign of each point — that is the median; a huge threshold makes every point “one of ours” — that is the mean.</div></fieldset><fieldset class="q"><legend>5. Why is the threshold often set to $1.345\sigma$?</legend><div class="opts"><button type="button" data-ok="0">It makes the estimate unbiased</button><button type="button" data-ok="1">It gives 95% efficiency on normal data while keeping robustness</button><button type="button" data-ok="0">It discards exactly 5% of the points</button><button type="button" data-ok="0">It is the 0.9 quantile of the absolute residuals</button></div><div class="explain" hidden>At $k=1.345$ the variance of Huber’s estimate on a clean normal sample is only $1/0.95$ times that of the mean, while the influence of outliers is bounded. No points are discarded — far ones simply get smaller weights.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Cheat sheet">
+  <div class="wrap-m">
+    <a class="prev" href="../mape/"><span class="kicker">← Previous formula</span><span class="big">MAPE</span><span class="kicker">mean absolute percentage error</span></a>
+<a class="next" href="../bce/"><span class="kicker">Next formula →</span><span class="big">BCE</span><span class="kicker">binary cross-entropy</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../en/#posts">Articles</a>
+    <a href="../../../../en/materials/">Materials</a>
+    <a href="../../../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>
