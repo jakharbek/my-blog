@@ -32,6 +32,25 @@
     groups.forEach((s) => { if (!s.hidden) s.querySelectorAll(".fcard details").forEach((d) => { d.open = open; }); });
   }));
 
+  // ----- quizzes on formula pages: one answer per question, then the explanation
+  main.querySelectorAll(".quiz").forEach((quiz) => {
+    quiz.querySelectorAll(".q").forEach((q) => {
+      const btns = Array.from(q.querySelectorAll(".opts button"));
+      const ex = q.querySelector(".explain");
+      btns.forEach((b) => b.addEventListener("click", () => {
+        const ok = b.getAttribute("data-ok") === "1";
+        btns.forEach((x) => { x.disabled = true; if (x.getAttribute("data-ok") === "1") x.classList.add("right"); });
+        if (!ok) b.classList.add("wrong");
+        if (ex) {
+          const verdict = document.createElement("b");
+          verdict.textContent = (ok ? quiz.dataset.right : quiz.dataset.wrong) + " ";
+          ex.prepend(verdict);
+          ex.hidden = false;
+        }
+      }));
+    });
+  });
+
   // ----- a link to #card opens that card
   const follow = () => {
     const id = decodeURIComponent(location.hash.slice(1));

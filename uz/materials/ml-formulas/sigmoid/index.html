@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sigmoida: logistik funksiya — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="Sigmoida batafsil: formula, xossalar, hosilani keltirib chiqarish, Teylor qatori, logit va imkoniyatlar, 3D’da logistik regressiya, to‘yinish va gradiyent so‘nishi, barqaror kod.">
+  <meta property="og:title" content="Sigmoida: logistik funksiya — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="Sigmoida batafsil: formula, xossalar, hosilani keltirib chiqarish, Teylor qatori, logit va imkoniyatlar, 3D’da logistik regressiya, to‘yinish va gradiyent so‘nishi, barqaror kod.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/sigmoid/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/sigmoid/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/sigmoid/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/sigmoid/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/sigmoid.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/sigmoid/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/sigmoid/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/sigmoid/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Aktivatsiya funksiyalari</span>
+  <h1>Sigmoida: logistik funksiya</h1>
+  <p class="dek">Istalgan sonni ehtimollikka aylantiradigan funksiya. Uni mayda detallarigacha tahlil qilamiz: formula nimadan yig‘ilgan, σ(1 − σ) hosila qayerdan keladi, sigmoida logistik regressiyaning qaror chegarasini qanday chizadi va nega chuqur tarmoqlarda gradiyentlarni so‘ndiradi.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 30 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: cheksizlikni siqish</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#properties"><span class="n">4</span>Xossalar va shakl</a>
+      <a href="#derivative"><span class="n">5</span>Hosila: σ′ = σ(1 − σ)</a>
+      <a href="#probability"><span class="n">6</span>Ehtimollik ma’nosi: imkoniyatlar va logit</a>
+      <a href="#space"><span class="n">7</span>Ko‘p o‘lchovli fazodagi sigmoida</a>
+      <a href="#training"><span class="n">8</span>O‘qitishdagi sigmoida: to‘yinish va gradiyent so‘nishi</a>
+      <a href="#code"><span class="n">9</span>Kodda: barqaror va kutilmagan holatlarsiz</a>
+      <a href="#mistakes"><span class="n">10</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">11</span>Boshqa formulalar bilan bog‘lanishlar</a>
+      <a href="#summary"><span class="n">12</span>Xulosa</a>
+      <a href="#quiz"><span class="n">13</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\sigma(x)=\frac{1}{1+e^{-x}}$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>Neyron tarmoq, logistik regressiya, gradiyentli busting — barchasining ichida oddiy son hosil bo‘ladi: $3{,}7$, $-12$, $0{,}2$. Lekin savol ko‘pincha boshqacha: xat spam ekanligi, mijoz kreditni qaytarishi, kadrda odam borligi <i>qanday ehtimollik bilan</i>? Ehtimollik 0 va 1 orasida bo‘lishi shart. Sigmoida — «istalgan son»dan «ehtimollik»ka eng tabiiy ko‘prik.</p>
+    <p>U qayerda uchraydi:</p>
+    <ul class="flist"><li><b>binar klassifikator chiqishi</b> — logistik regressiya, tarmoqning oxirgi neyroni, $p=\sigma(z)$;</li><li><b>LSTM va GRU’dagi ventillar (gates)</b> — 0 dan 1 gacha son axborotning qancha qismini o‘tkazish, qanchasini unutishni hal qiladi;</li><li><b>klassifikatsiya uchun gradiyentli busting</b> — XGBoost, LightGBM va CatBoost daraxtlarni «xom» hisobga qo‘shadi, sigmoida esa uni ehtimollikka aylantiradi;</li><li><b>zamonaviy aktivatsiyalar</b> — LLaMA va Qwen’dagi SiLU (Swish) — bu $x\cdot\sigma(x)$;</li><li><b>statistika</b> — logistik taqsimot funksiyasi va ehtimollikning imkoniyatlar logarifmi (logit) bilan bog‘lanishi.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>$\sigma$ butun son o‘qini $(0;\,1)$ oralig‘iga siqadi, $(0;\,0{,}5)$ nuqtadan o‘tadi va simmetrik: $\sigma(-x)=1-\sigma(x)$. Uning hosilasi $\sigma'=\sigma(1-\sigma)$ $0{,}25$ dan oshmaydi — qulaylik (arzon backprop) ham, muammo (gradiyent so‘nishi) ham shundan.</p></div>
+
+    <h2 id="intuition">Intuitsiya: cheksizlikni siqish</h2>
+    <p>$y=0$ dagi pol va $y=1$ dagi shift orasidagi yo‘lni tasavvur qiling. Chapda yo‘l deyarli polda yotadi, o‘ngda deyarli shiftga tegadi, o‘rtada esa silliq ko‘tariladi. Chapga yoki o‘ngga qancha yursangiz ham, pol va shiftga yetib bo‘lmaydi — ular <b>asimptotalar</b>.</p>
+    <p>Grafikdagi nuqtani torting. To‘q sariq chiziq — urinma: uning qiyaligi $\sigma'(x)$ hosilaning o‘zi. Markazda ko‘tarilish eng tik, chekkalarda yo‘l deyarli gorizontal — u yerda hosila nolga yaqin.</p>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-explorer" data-config="{&quot;x&quot;: 1.5}"></div><figcaption><b>1-rasm.</b> Sigmoida, uning urinmasi va hosilasi. Ko‘k nuqtani torting yoki u fokusda bo‘lganda strelkalarni bosing. Hosilaning maksimumi $0{,}25$ — aynan $x=0$ markaz ostida.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor berish kerak</b><p>$x=4$ da sigmoida allaqachon $0{,}982$, hosila esa atigi $0{,}018$ — markazdagidan 14 marta kichik. Bu to‘yinish (saturation): kirish o‘sishda davom etadi, chiqish esa deyarli o‘zgarmaydi.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <p>Sigmoidani uchta oddiy amaldan yig‘amiz va har biri $x$ son bilan nima qilishini kuzatamiz.</p>
+    <div class="eqd">$$x\;\xrightarrow{\;\cdot(-1)\;}\;-x\;\xrightarrow{\;\exp\;}\;e^{-x}\in(0;\,\infty)\;\xrightarrow{\;+1\;}\;1+e^{-x}\in(1;\,\infty)\;\xrightarrow{\;1/\cdot\;}\;\sigma(x)\in(0;\,1)$$</div>
+    <dl class="symbols"><dt>$e^{-x}$</dt><dd>eksponenta doim musbat: $x\to+\infty$ da u 0 ga, $x\to-\infty$ da cheksizlikka intiladi;</dd><dt>$1+e^{-x}$</dt><dd>maxraj doim 1 dan katta — shuning uchun kasr doim 1 dan kichik;</dd><dt>$\frac{1}{1+e^{-x}}$</dt><dd>1 dan katta musbat sonning teskarisi qat’iy 0 va 1 orasida yotadi.</dd></dl>
+    <p>Shu funksiyani boshqa yozuvlarda ham tanib olish foydali:</p>
+    <div class="eqd">$$\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=\frac{1}{2}\Bigl(1+\tanh\frac{x}{2}\Bigr)$$</div>
+    <p>Ikkinchi shakl surat va maxrajni $e^x$ ga ko‘paytirishdan olinadi; u manfiy $x$ uchun qulay (kod bo‘limiga qarang). Uchinchisi sigmoidani giperbolik tangens bilan bog‘laydi: tanh — balandligi ikki marta cho‘zilgan va pastga surilgan o‘sha S-egri chiziq.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\sigma(x)$</th><th class=num>$\sigma'(x)$</th></tr></thead><tbody><tr><td class=num>−6</td><td class=num>0,0025</td><td class=num>0,0025</td></tr><tr><td class=num>−4</td><td class=num>0,0180</td><td class=num>0,0177</td></tr><tr><td class=num>−2</td><td class=num>0,1192</td><td class=num>0,1050</td></tr><tr><td class=num>−1</td><td class=num>0,2689</td><td class=num>0,1966</td></tr><tr><td class=num>0</td><td class=num>0,5000</td><td class=num>0,2500</td></tr><tr><td class=num>1</td><td class=num>0,7311</td><td class=num>0,1966</td></tr><tr><td class=num>2</td><td class=num>0,8808</td><td class=num>0,1050</td></tr><tr><td class=num>4</td><td class=num>0,9820</td><td class=num>0,0177</td></tr><tr><td class=num>6</td><td class=num>0,9975</td><td class=num>0,0025</td></tr></tbody></table></div>
+    <p>Jadval ikki simmetriyani ko‘rsatadi: $\pm x$ dagi sigmoida qiymatlari bir-birini birgacha to‘ldiradi, hosila esa juft funksiya.</p>
+
+    <h2 id="properties">Xossalar va shakl</h2>
+    <ul class="flist"><li><b>Aniqlanish sohasi</b> — barcha haqiqiy sonlar; <b>qiymatlar sohasi</b> — ochiq $(0;\,1)$ oraliq.</li><li><b>Monotonlik</b>: qat’iy o‘suvchi, chunki istalgan $x$ da $\sigma'(x)&gt;0$.</li><li><b>Asimptotalar</b>: $\lim_{x\to-\infty}\sigma(x)=0$ va $\lim_{x\to+\infty}\sigma(x)=1$.</li><li>$(0;\,0{,}5)$ nuqtaga nisbatan <b>markaziy simmetriya</b>: $\sigma(-x)=1-\sigma(x)$.</li><li><b>Burilish nuqtasi</b> — yagona, $x=0$: chapda funksiya pastga qavariq, o‘ngda — yuqoriga.</li><li><b>Lipshits sharti</b>: $|\sigma(a)-\sigma(b)|\le\tfrac14|a-b|$ — chiqish kirish o‘zgarishining choragidan tez o‘zgarmaydi.</li></ul>
+    <details class="deep"><summary>Nega σ(−x) = 1 − σ(x)</summary><div class="deep-body">
+      <div class="eqd">$$1-\sigma(x)=1-\frac{1}{1+e^{-x}}=\frac{e^{-x}}{1+e^{-x}}=\frac{1}{e^{x}+1}=\sigma(-x)$$</div>
+      <p>Oxiridan oldingi qadamda surat va maxraj $e^{x}$ ga ko‘paytirilgan.</p>
+    </div></details>
+    <h3>Vazn va siljish: neyron sigmoidani qanday o‘zgartiradi</h3>
+    <p>Neyronda sigmoida $x$ ni emas, $z=wx+b$ ni oladi. $w$ vazn egri chiziqni gorizontal cho‘zadi, $b$ siljish uni suradi. Chiqish $0{,}5$ ga teng bo‘lgan markaz $x_0=-b/w$ nuqtaga tushadi, markazdagi qiyalik esa $w/4$ ga teng.</p>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-shape" data-config="{&quot;w&quot;: 2, &quot;b&quot;: -2}"></div><figcaption><b>2-rasm.</b> $\sigma(wx+b)$. Katta $|w|$ da egri chiziq deyarli zinaga aylanadi, $w&lt;0$ da — ag‘dariladi. Xira chiziqlar — $w/4$ va $w/2$ vaznli o‘sha funksiya.</figcaption></figure>
+    <div class="callout note"><b>Zina — limit sifatida</b><p>$w\to+\infty$ da $\sigma(w x)$ Xevisayd zinasiga intiladi: noldan chapda 0, o‘ngda 1. Sigmoida neyron tarmoqlarga tarixan aynan shunday kirgan — Makkallok — Pitts chegaraviy neyronining silliq, differensiallanuvchi o‘rinbosari sifatida.</p></div>
+
+    <h2 id="derivative">Hosila: σ′ = σ(1 − σ)</h2>
+    <p>Bu sahifaning asosiy formulasi. Uni ikki usulda keltirib chiqaramiz — to‘g‘ridan-to‘g‘ri va nafis usulda.</p>
+    <details class="deep"><summary>1-usul. Bo‘linma hosilasi (qadamma-qadam)</summary><div class="deep-body">
+      <p>$\sigma(x)=(1+e^{-x})^{-1}$ deb yozamiz va murakkab funksiya hosilasi qoidasini qo‘llaymiz:</p>
+      <div class="eqd">$$\sigma'(x)=-(1+e^{-x})^{-2}\cdot\bigl(1+e^{-x}\bigr)'=-(1+e^{-x})^{-2}\cdot(-e^{-x})=\frac{e^{-x}}{(1+e^{-x})^{2}}$$</div>
+      <p>Kasrni ikki ko‘paytuvchiga ajratamiz:</p>
+      <div class="eqd">$$\frac{e^{-x}}{(1+e^{-x})^{2}}=\underbrace{\frac{1}{1+e^{-x}}}_{\sigma(x)}\cdot\underbrace{\frac{e^{-x}}{1+e^{-x}}}_{1-\sigma(x)}$$</div>
+      <p>Ikkinchi ko‘paytuvchi — $1-\sigma(x)$, buni xossalar bo‘limida isbotladik.</p>
+    </div></details>
+    <details class="deep"><summary>2-usul. Logarifm orqali</summary><div class="deep-body">
+      <p>Logarifm olamiz: $\ln\sigma(x)=-\ln(1+e^{-x})$. Ikkala tomonni differensiallaymiz:</p>
+      <div class="eqd">$$\frac{\sigma'(x)}{\sigma(x)}=\frac{e^{-x}}{1+e^{-x}}=1-\sigma(x)\quad\Longrightarrow\quad\sigma'(x)=\sigma(x)\bigl(1-\sigma(x)\bigr)$$</div>
+    </div></details>
+    <div class="eqd">$$\sigma'(x)=\sigma(x)\bigl(1-\sigma(x)\bigr)$$</div>
+    <p>Amalda nega muhim: to‘g‘ri o‘tishda tarmoq $s=\sigma(z)$ ni allaqachon hisoblagan. Teskari o‘tishda hosila bitta ko‘paytirish $s(1-s)$ ga tushadi — yangi eksponentasiz.</p>
+    <h3>Hosila maksimumi va ikkinchi hosila</h3>
+    <p>$s\in(0;1)$ da $s(1-s)$ ko‘paytma — uchi $s=\tfrac12$ da bo‘lgan ag‘darilgan parabola. Demak, $\max\sigma'=\tfrac12\cdot\tfrac12=\tfrac14$, u $x=0$ da erishiladi. Yana bir marta differensiallaymiz:</p>
+    <div class="eqd">$$\sigma''(x)=\sigma(x)\bigl(1-\sigma(x)\bigr)\bigl(1-2\sigma(x)\bigr)$$</div>
+    <p>Ikkinchi hosila $\sigma=\tfrac12$ da, ya’ni $x=0$ burilish nuqtasida nolga aylanadi. Uning ekstremumlari $x=\pm\ln(2+\sqrt3)\approx\pm1{,}317$ nuqtalarda, u yerda sigmoida qiyaligi eng tez o‘zgaradi; qiymati $\mp\sqrt3/18\approx\mp0{,}096$.</p>
+    <h3>Nol atrofidagi Teylor qatori</h3>
+    <p>tanh bilan bog‘lanishdan yoyilmani olamiz:</p>
+    <div class="eqd">$$\sigma(x)=\frac12+\frac{x}{4}-\frac{x^{3}}{48}+\frac{x^{5}}{480}-\frac{17x^{7}}{80640}+\dots$$</div>
+    <p>Nol atrofida sigmoida deyarli chiziqli: $\sigma(x)\approx\tfrac12+\tfrac{x}{4}$. Shuning uchun kichik vaznlarda sigmoidali tarmoq deyarli chiziqli model kabi ishlaydi. Qator faqat $|x|&lt;\pi$ da yaqinlashadi: funksiyaning kompleks tekislikda $x=\pm i\pi$ maxsus nuqtalari bor.</p>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-taylor" data-config="{}"></div><figcaption><b>3-rasm.</b> 1, 3, 5, 7-tartibli Teylor ko‘phadlari. $|x|&lt;\pi$ yo‘lak ichida aniqlik tartib bilan oshadi, undan tashqarida esa tartib qancha yuqori bo‘lsa, ko‘phad sigmoidadan shuncha tez uzoqlashadi. $x=2$ da uchinchi tartibli yaqinlashish $0{,}881$ o‘rniga $0{,}833$ beradi.</figcaption></figure>
+
+    <h2 id="probability">Ehtimollik ma’nosi: imkoniyatlar va logit</h2>
+    <p>Nega sigmoida chiqishini ehtimollik deb o‘qish o‘rinli? $p$ — hodisa ehtimolligi bo‘lsin. $p/(1-p)$ nisbat <b>imkoniyatlar</b> (odds) deyiladi: $p=0{,}8$ da imkoniyatlar $4:1$. Imkoniyatlar logarifmi — <b>logit</b>:</p>
+    <div class="eqd">$$\operatorname{logit}(p)=\ln\frac{p}{1-p}\qquad\Longleftrightarrow\qquad p=\sigma\bigl(\operatorname{logit}(p)\bigr)$$</div>
+    <p>Logit va sigmoida — o‘zaro teskari funksiyalar. Logit ehtimollikni $(0;1)$ dan butun son o‘qiga o‘tkazadi, u yerda belgilar hissalarini qo‘shish qulay. Logistik regressiya aynan shuni faraz qiladi: <b>imkoniyatlar logarifmi belgilarga chiziqli bog‘liq</b>, $\ln\frac{p}{1-p}=w^\top x+b$. Chiqishdagi sigmoida shundan.</p>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-logit" data-config="{&quot;p&quot;: 0.8}"></div><figcaption><b>4-rasm.</b> Chapda sigmoida $z$ logitni $p$ ehtimollikka o‘tkazadi, o‘ngda logit uni qaytaradi. $p=0{,}8$ da imkoniyatlar 4 ga, logit $\ln4\approx1{,}386$ ga teng. E’tibor bering: chekkalarda logit tez o‘sadi — $p=0{,}99$ dan $p=0{,}999$ gacha u $2{,}3$ ga o‘zgaradi.</figcaption></figure>
+    <div class="callout note"><b>Yana bir talqin</b><p>Sigmoida — logistik taqsimot funksiyasi: agar $\varepsilon$ shovqin logistik taqsimotga ega bo‘lsa, $P(\varepsilon\le x)=\sigma(x)$. Normal shovqinli o‘xshash model, $\Phi(x)$, probit-regressiya deyiladi; uning egri chizig‘i $\sigma(1{,}7x)$ bilan deyarli ustma-ust tushadi.</p></div>
+
+    <h2 id="space">Ko‘p o‘lchovli fazodagi sigmoida</h2>
+    <p>Neyronning kirishlari ko‘p: $z=w_1x_1+w_2x_2+\dots+b$. Giperteksislikdan olingan sigmoida — $w^\top x+b=0$ chegara bo‘ylab ko‘ndalang 0 dan 1 gacha ko‘tariladigan va chegara bo‘ylab o‘zgarmaydigan «burma». $w$ vaznlar vektori eng tik ko‘tarilish yo‘nalishini ko‘rsatadi, uning uzunligi esa burmaning tikligini belgilaydi.</p>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-logreg" data-config="{&quot;w1&quot;: -0.5, &quot;w2&quot;: 1.5, &quot;b&quot;: 1.5}"></div><figcaption><b>5-rasm.</b> Ikki belgili logistik regressiya. Chapda — 3D’dagi ehtimollik sirti (uni aylantirish mumkin), nuqtalar o‘z sinfi balandligida turibdi. O‘ngda — yuqoridan ko‘rinish: yaxlit chiziq — $p=0{,}5$ chegara, punktir — $p=0{,}1$ va $p=0{,}9$, strelka — $w$ yo‘nalishi. «Boshlash»ni bosing: $0{,}5$ qadamli BCE bo‘yicha gradiyent tushish vaznlarni o‘zi topadi.</figcaption></figure>
+    <p>O‘qitish o‘sha hosiladan foydalanadi. BCE yo‘qotishi uchun logit bo‘yicha gradiyent $\sigma(z)-y$ ga teng (keltirib chiqarilishi — <a href="../bce/">BCE</a> sahifasida), shuning uchun vaznlar bo‘yicha gradiyent tushish qadami:</p>
+    <div class="eqd">$$w\leftarrow w-\eta\,\frac1n\sum_{i=1}^{n}\bigl(\sigma(w^\top x_i+b)-y_i\bigr)\,x_i$$</div>
+    <div class="callout warn"><b>Chiziqli ajraladigan ma’lumotlar</b><p>Agar sinflarni to‘g‘ri chiziq bilan mukammal ajratish mumkin bo‘lsa, $\|w\|$ o‘sishi bilan BCE kamayishda davom etadi: burma tobora tiklashadi va zinaga intiladi, vaznlar cheksizlikka ketadi. Amalda bu regulyarizatsiya ($L_2$) yoki erta to‘xtatish bilan davolanadi.</p></div>
+
+    <h2 id="training">O‘qitishdagi sigmoida: to‘yinish va gradiyent so‘nishi</h2>
+    <p>Agar neyronning $z$ kirishlari modul bo‘yicha katta bo‘lsa, sigmoida $\sigma'(z)\approx0$ bo‘lgan yassi chekkalarda ishlaydi. Bunday neyron orqali gradiyent deyarli o‘tmaydi — neyron <b>to‘yingan</b>. $\sigma'&lt;0{,}01$ to‘yinish $|z|&gt;4{,}6$ da boshlanadi.</p>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-saturation" data-config="{&quot;s&quot;: 1}"></div><figcaption><b>6-rasm.</b> Ko‘k soha — $z\sim N(\mu,\,s^2)$ kirishlar taqsimoti, to‘q sariq — hosila. $s=1$ da o‘rtacha hosila $0{,}207$ va to‘yingan kirishlar deyarli yo‘q; $s=4$ da o‘rtacha hosila $0{,}091$ gacha tushadi, kirishlarning choragi ($25\%$) esa to‘yingan.</figcaption></figure>
+    <p>Initsializatsiya qoidasi shundan kelib chiqadi: vaznlar $z$ dispersiyasi birga yaqin bo‘ladigan qilib tanlanadi (Ksavye — Gloro initsializatsiyasi, $\operatorname{Var}w=1/n_{\text{in}}$), ma’lumotlar esa normallashtiriladi.</p>
+    <h3>Chuqur tarmoqda gradiyent so‘nishi</h3>
+    <p>Zanjir qoidasiga ko‘ra $l$ qatlamdagi gradiyent — yuqoridagi barcha qatlamlar hosilalarining ko‘paytmasi. Sigmoidada har bir hosila $\tfrac14$ dan oshmaydi, shuning uchun 10 qatlamdan keyin ko‘paytuvchi $0{,}25^{10}\approx9{,}5\cdot10^{-7}$ dan oshmaydi.</p>
+    <div class="eqd">$$\frac{\partial L}{\partial h_l}=\frac{\partial L}{\partial h_L}\prod_{k=l+1}^{L}W_k^{\top}\operatorname{diag}\bigl(\sigma'(z_k)\bigr)$$</div>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-vanishing" data-config="{&quot;depth&quot;: 10}"></div><figcaption><b>7-rasm.</b> Kengligi 64 bo‘lgan tasodifiy tarmoqning har bir qatlamidagi gradiyent normasi (sigmoid va tanh uchun Ksavye, ReLU uchun Xe initsializatsiyasi). Vertikal shkala logarifmik. Sigmoidada kirishdagi gradiyent chiqishdagidan bir necha tartibga kichik; tanh va ReLU’da u deyarli so‘nmaydi.</figcaption></figure>
+    <div class="callout history"><b>Nega sigmoida yashirin qatlamlardan ketdi</b><p>2010-yilgacha sigmoidali chuqur tarmoqlar yomon o‘qitilardi. Gloro va Benjio (2010) to‘yinish rolini ko‘rsatib, initsializatsiya taklif qildi, ReLU (Nair va Xinton, 2010; Gloro va boshq., 2011) esa muammoni deyarli bartaraf etdi. Bugun sigmoida aynan 0 dan 1 gacha ulush kerak bo‘lgan joyda yashaydi: binar klassifikator chiqishida va ventillarda.</p></div>
+
+    <h2 id="code">Kodda: barqaror va kutilmagan holatlarsiz</h2>
+    <p>Sodda $1/(1+e^{-x})$ formula $x=-1000$ da $e^{1000}$ ni hisoblaydi — to‘lib ketish. Natija baribir 0 chiqadi, lekin ogohlantirish bilan, $\log\sigma(x)$ da esa $-\infty$ paydo bo‘ladi. Ikkinchi muammo — aniqlik yo‘qolishi: float64 da $1-\sigma(40)$ aynan 0 ga teng, haqiqiy qiymat esa $\sigma(-40)\approx4{,}25\cdot10^{-18}$.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+def sigmoid(x):
+    &quot;&quot;&quot;Barqaror sigmoida: exp hech qachon katta musbat argument olmaydi.&quot;&quot;&quot;
+    x = np.asarray(x, dtype=float)
+    out = np.empty_like(x)
+    pos = x &gt;= 0
+    out[pos] = 1.0 / (1.0 + np.exp(-x[pos]))
+    ex = np.exp(x[~pos])
+    out[~pos] = ex / (1.0 + ex)
+    return out
+
+def sigmoid_grad(x):
+    s = sigmoid(x)
+    return s * (1.0 - s)
+
+def log_sigmoid(x):
+    # log σ(x) = −softplus(−x) = −log(1 + e^(−x)), log(0) siz
+    return -np.logaddexp(0.0, -x)
+
+print(sigmoid([-40.0, 0.0, 40.0]))   # [4.248e-18 0.5 1.0]
+print(1 - sigmoid(40.0), sigmoid(-40.0))  # 0.0 va 4.248e-18</code></pre>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+z = torch.tensor([-2.0, 0.0, 2.0], requires_grad=True)
+p = torch.sigmoid(z)            # tensor([0.1192, 0.5000, 0.8808])
+p.sum().backward()
+print(z.grad)                   # tensor([0.1050, 0.2500, 0.1050]) = σ(1 − σ)
+
+# Klassifikatsiyada yo‘qotishga σ(z) emas, logitlarni bering:
+loss_fn = nn.BCEWithLogitsLoss()  # ichida — barqaror log σ(z)
+loss = loss_fn(z, torch.tensor([0.0, 1.0, 1.0]))</code></pre>
+    <div class="callout key"><b>Qoida</b><p>Agar keyin logarifm kelsa, $\sigma$ ni alohida hisoblamang. $\log\sigma(x)=-\operatorname{softplus}(-x)$ yoki logitlardagi tayyor yo‘qotishlardan foydalaning: PyTorch’da <code>BCEWithLogitsLoss</code>, Keras’da <code>from_logits=True</code>.</p></div>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b>Chuqur tarmoqning yashirin qatlamlarida sigmoida</b> — gradiyent so‘nishi va siljigan (markazlashmagan) aktivatsiyalar. ReLU, GELU, SiLU oling; sigmoidani faqat chiqishda yoki ventillarda qoldiring.</li><li><b>Bitta chiqishda softmax o‘rniga sigmoida.</b> $K&gt;2$ ta o‘zaro istisno sinf uchun <a href="../softmax/">softmax</a> kerak; har bir chiqishdagi sigmoida — sinflar mustaqil bo‘lgan multi-label.</li><li><b>Ikki karra sigmoida</b>: model allaqachon ehtimollik qaytaradi, yo‘qotish esa σ ni yana qo‘llaydi (masalan, <code>sigmoid</code> ustidan <code>BCEWithLogitsLoss</code>). O‘qitish ketadi, lekin gradiyentlar buziladi.</li><li><b>«Standart» 0,5 chegara.</b> U faqat xato narxlari teng va sinflar muvozanatli bo‘lganda optimal. Chegara validatsiyada metrika bo‘yicha tanlanadi.</li><li><b>Kalibrlashsiz «σ(z) = 0,9, demak model 90% ishonchli» xulosasi.</b> Sigmoida $(0;1)$ dagi son beradi, kalibrlanganlik esa o‘qitish xossasi (BCE unga yordam beradi, qayta o‘qitish buzadi).</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘lanishlar</h2>
+    <ul class="flist"><li><a href="../tanh/">tanh</a>: $\tanh x=2\sigma(2x)-1$ — maksimal qiyaligi 1 bo‘lgan markazlashgan sigmoida.</li><li><a href="../softmax/">Softmax</a>: ikki sinf uchun $\operatorname{softmax}(z_1,z_2)_1=\sigma(z_1-z_2)$.</li><li><a href="../bce/">BCE</a>: sigmoida bilan juftlikda $\hat y-y$ gradiyent beradi — $\sigma'$ ko‘paytuvchisiz, demak model xato qilganda to‘yinishsiz.</li><li><a href="../silu/">SiLU / Swish</a>: $x\,\sigma(x)$ — kirishning o‘zi uchun «yumshoq ventil» sifatidagi sigmoida.</li><li><a href="../focal/">Focal Loss</a>: odatda to‘g‘ri sinf uchun $p_t=\sigma(z)$ dan hisoblanadi.</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) $\sigma(x)=1/(1+e^{-x})$ $\mathbb R$ ni $(0;1)$ ga o‘tkazadi, $(0;\,0{,}5)$ dan o‘tadi va simmetrik: $\sigma(-x)=1-\sigma(x)$. 2) $\sigma'=\sigma(1-\sigma)\le\tfrac14$: backprop arzon, lekin chekkalarda gradiyent so‘nadi. 3) Sigmoida logitga teskari: logistik regressiya imkoniyatlar logarifmini chiziqli funksiya bilan modellashtiradi. 4) Ko‘p o‘lchovli holatda bu $w^\top x+b=0$ giperteksislik bo‘ylab burma. 5) Kodda — barqaror shakllar va logitlardagi yo‘qotishlar.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. Agar $\sigma(3)\approx0{,}953$ bo‘lsa, $\sigma(-3)$ nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$-0{,}953$</button><button type="button" data-ok="1">$0{,}047$</button><button type="button" data-ok="0">$0{,}953$</button><button type="button" data-ok="0">$1/0{,}953$</button></div><div class="explain" hidden>Simmetriya bo‘yicha $\sigma(-x)=1-\sigma(x)=1-0{,}953=0{,}047$.</div></fieldset><fieldset class="q"><legend>2. Sigmoida hosilasi eng katta qanday qiymat qabul qiladi?</legend><div class="opts"><button type="button" data-ok="0">$1$</button><button type="button" data-ok="0">$0{,}5$</button><button type="button" data-ok="1">$0{,}25$</button><button type="button" data-ok="0">Chegaralanmagan</button></div><div class="explain" hidden>$s\in(0;1)$ da $\sigma'=s(1-s)$ $s=\tfrac12$ da maksimal: $\tfrac14$.</div></fieldset><fieldset class="q"><legend>3. Neyron $w=2$, $b=-4$ bilan $\sigma(wx+b)$ ni hisoblaydi. Chiqish qayerda $0{,}5$ ga teng?</legend><div class="opts"><button type="button" data-ok="0">$x=-2$</button><button type="button" data-ok="0">$x=0$</button><button type="button" data-ok="1">$x=2$</button><button type="button" data-ok="0">$x=4$</button></div><div class="explain" hidden>Markaz $x_0=-b/w=4/2=2$.</div></fieldset><fieldset class="q"><legend>4. Nega PyTorch’da binar klassifikatsiya uchun sigmoid + BCELoss o‘rniga BCEWithLogitsLoss tavsiya qilinadi?</legend><div class="opts"><button type="button" data-ok="0">U tezroq o‘qitadi</button><button type="button" data-ok="1">U $\log\sigma(z)$ ni to‘lib ketishsiz va log(0) siz barqaror hisoblaydi</button><button type="button" data-ok="0">Unga belgilar kerak emas</button><button type="button" data-ok="0">U regulyarizatsiya qo‘shadi</button></div><div class="explain" hidden>U sigmoida va logarifmni softplus orqali bitta barqaror formulaga birlashtiradi.</div></fieldset><fieldset class="q"><legend>5. 5 ta sigmoida zanjiri eng yaxshi holatda gradiyentni qanday ko‘paytuvchiga kamaytiradi?</legend><div class="opts"><button type="button" data-ok="1">$0{,}25^5\approx0{,}001$</button><button type="button" data-ok="0">$0{,}5^5\approx0{,}03$</button><button type="button" data-ok="0">$1$</button><button type="button" data-ok="0">$5\cdot0{,}25$</button></div><div class="explain" hidden>Har bir hosila $\tfrac14$ dan oshmaydi, shuning uchun ko‘paytma $0{,}25^5\approx9{,}8\cdot10^{-4}$ dan oshmaydi.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>
