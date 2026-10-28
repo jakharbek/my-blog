@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>RMSE: o‘rtacha kvadratik xatoning ildizi — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
-  <meta name="description" content="RMSE batafsil: formula, MSE va MAE bilan bog‘liqlik, MAE ≤ RMSE ≤ √n·MAE tengsizligi, siljish va tarqoqlikka ajratish, 3D geometriya, hosila, yo‘qotish landshafti, o‘qitish, RMSLE, NumPy, scikit-learn va PyTorch’da kod.">
+  <meta name="description" content="RMSE batafsil: MSE va MAE bilan bog‘liqlik, MAE ≤ RMSE ≤ √n·MAE, siljish va tarqoqlik, geometriya, gradiyent va o‘qitish, RMSLE, NumPy va PyTorch kodi.">
   <meta property="og:title" content="RMSE: o‘rtacha kvadratik xatoning ildizi — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
-  <meta property="og:description" content="RMSE batafsil: formula, MSE va MAE bilan bog‘liqlik, MAE ≤ RMSE ≤ √n·MAE tengsizligi, siljish va tarqoqlikka ajratish, 3D geometriya, hosila, yo‘qotish landshafti, o‘qitish, RMSLE, NumPy, scikit-learn va PyTorch’da kod.">
+  <meta property="og:description" content="RMSE batafsil: MSE va MAE bilan bog‘liqlik, MAE ≤ RMSE ≤ √n·MAE, siljish va tarqoqlik, geometriya, gradiyent va o‘qitish, RMSLE, NumPy va PyTorch kodi.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://javharbek.uz/uz/materials/ml-formulas/rmse/">
   <meta property="og:image" content="https://javharbek.uz/assets/img/javharbek.png">
@@ -89,13 +89,13 @@
     <h2 id="why">U nima uchun kerak</h2>
     <p>Model kvartira narxini, mahsulotga talabni, ertangi haroratni bashorat qiladi. U qanchalik adashishini bitta son bilan qanday aytish mumkin? Xatolarning oddiy o‘rtachasi yaramaydi: yuqoriga va pastga xatolar bir-birini yo‘qotadi. <a href="../mse/">MSE</a> xatolarni kvadratga oshiradi — lekin unda javob «so‘m kvadrat» yoki «gradus kvadrat»da chiqadi va «MSE 1 417 000 ga teng» degan gap buyurtmachiga hech narsa demaydi. RMSE ildiz chiqaradi va xatoni maqsadli o‘zgaruvchi birliklariga qaytaradi, MSE’ni yaxshi ko‘rishga sabab bo‘lgan barcha xossalarni saqlab qolgan holda.</p>
     <p>U qayerda uchraydi:</p>
-    <ul class="flist"><li><b>regressiya modellarini baholash</b> — hisobotlar, maqolalar va Kaggle musobaqalarida eng keng tarqalgan metrika;</li><li><b>vaqt qatorlarini bashorat qilish</b> — ob-havo, talab, energiya iste’moli; odatda uning yonida <a href="../mae/">MAE</a> va <a href="../mape/">MAPE</a> turadi;</li><li><b>tavsiya tizimlari</b> — mashhur Netflix Prize (2006–2009) reyting bashoratlarini aynan RMSE bo‘yicha baholagan;</li><li><b>fizika va metrologiya</b> — o‘lchovlarning o‘rtacha kvadratik xatosi, GPS aniqligi, signalning «RMS» qiymati;</li><li><b>modellarni o‘qitish</b> — RMSE va MSE’ni minimallashtirish bir xil modelni beradi, lekin ularning gradiyentlari har xil (hosila bo‘limiga qarang).</li></ul>
-    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>RMSE — bu ildiz ostidagi <a href="../mse/">MSE</a>: $y$ birliklaridagi xato, u ham MSE kabi katta xatolarni qattiqroq jazolaydi. Doim $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$, va $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — siljish kvadrati va qoldiqlar dispersiyasining yig‘indisi. RMSE minimumi MSE minimumi bilan ustma-ust tushadi, gradiyenti esa $2\,\mathrm{RMSE}$ marta kichik.</p></div>
+    <ul class="flist"><li><b>regressiya modellarini baholash</b> — hisobotlar, maqolalar va Kaggle musobaqalarida eng keng tarqalgan metrikalardan biri;</li><li><b>vaqt qatorlarini bashorat qilish</b> — ob-havo, talab, energiya iste’moli; odatda uning yonida <a href="../mae/">MAE</a> va <a href="../mape/">MAPE</a> turadi;</li><li><b>tavsiya tizimlari</b> — mashhur Netflix Prize (2006–2009) reyting bashoratlarini aynan RMSE bo‘yicha baholagan;</li><li><b>fizika va metrologiya</b> — o‘lchovlarning o‘rtacha kvadratik xatosi, GPS aniqligi, signalning «RMS» qiymati;</li><li><b>modellarni o‘qitish</b> — RMSE va MSE’ni minimallashtirish bir xil modelni beradi, lekin ularning gradiyentlari har xil (hosila bo‘limiga qarang).</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>RMSE — bu ildiz ostidagi <a href="../mse/">MSE</a>: $y$ birliklaridagi xato, u ham MSE kabi katta xatolarni qattiqroq jazolaydi. Doim $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$, va $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — siljish kvadrati va qoldiqlar dispersiyasining yig‘indisi. RMSE minimumi MSE minimumi bilan ustma-ust tushadi, gradiyenti esa — $2\,\mathrm{RMSE}$ ga bo‘lingan MSE gradiyenti.</p></div>
 
     <h2 id="intuition">Intuitsiya: o‘rtacha kvadratning tomoni</h2>
     <p>Har bir $r_i=y_i-\hat y_i$ xatoni tomoni $|r_i|$ bo‘lgan kvadrat sifatida chizamiz. Uning yuzi $r_i^2$ — obyektning MSE’ga qo‘shgan hissasi. Yuzlarni qo‘shib, $n$ ga bo‘lamiz — o‘rtacha yuz, ya’ni MSE chiqadi. RMSE esa — <b>yuzi o‘rtacha yuzga teng bo‘lgan kvadratning tomoni</b>.</p>
     <p>Ko‘k nuqtalarni — bashoratlarni torting. O‘ngda barcha xatolar kvadratlari bitta burchakka joylangan: ko‘k kvadratning tomoni RMSE, firuza rang punktirli kvadratning tomoni MAE.</p>
-    <figure class="viz"><div class="fv" data-viz="rmse-squares" data-config="{}"></div><figcaption><b>Rasm 1.</b> Umumiy misol: $y=(3;\,5;\,8)$, $\hat y=(2{,}5;\,5;\,10)$. $-2$ xato yuzi 4 bo‘lgan kvadratni, $0{,}5$ xato esa yuzi $0{,}25$ bo‘lganini beradi; o‘rtacha yuz $\mathrm{MSE}\approx1{,}417$, uning tomoni $\mathrm{RMSE}\approx1{,}190$. MAE tomoni kichikroq — $0{,}833$.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="rmse-squares" data-config="{}"></div><figcaption><b>1-rasm.</b> Umumiy misol: $y=(3;\,5;\,8)$, $\hat y=(2{,}5;\,5;\,10)$. $-2$ xato yuzi 4 bo‘lgan kvadratni, $0{,}5$ xato esa yuzi $0{,}25$ bo‘lganini beradi; o‘rtacha yuz $\mathrm{MSE}\approx1{,}417$, uning tomoni $\mathrm{RMSE}\approx1{,}190$. MAE tomoni kichikroq — $0{,}833$.</figcaption></figure>
     <div class="callout intuition"><b>Nimaga e’tibor bering</b><p>Katta kvadrat o‘rtacha yuzni uzun tomon o‘rtacha uzunlikni tortganidan kuchliroq tortadi: $-2$ xatoga modullar yig‘indisining $80\%$ i, lekin kvadratlar yig‘indisining $94\%$ i to‘g‘ri keladi. Shuning uchun RMSE MAE’dan katta — xatolar qancha notekis bo‘lsa, shuncha katta. Uchala xatoni modul bo‘yicha bir xil qiling — ko‘k kvadrat firuza rangli bilan ustma-ust tushadi.</p></div>
 
     <h2 id="anatomy">Formula mayda detallarigacha</h2>
@@ -107,7 +107,7 @@
     <div class="eqd">$$\mathrm{RMSE}=\sqrt{\frac{0{,}25+0+4}{3}}=\sqrt{1{,}417}\approx1{,}190,\qquad \mathrm{MAE}=\frac{0{,}5+0+2}{3}\approx0{,}833$$</div>
     <p>Xuddi shu kattalikni boshqa yozuvlarda ham tanish foydali:</p>
     <div class="eqd">$$\mathrm{RMSE}=\sqrt{\mathrm{MSE}}=\frac{\|y-\hat y\|_2}{\sqrt n}=M_2\bigl(|r_1|,\dots,|r_n|\bigr)$$</div>
-    <p>Ikkinchi yozuv — faktlar vektori va bashoratlar vektori orasidagi Yevklid masofasi, $\sqrt n$ ga bo‘lingan (unga 3D’da qaytamiz). Uchinchisi — xatolar modullarining <b>o‘rtacha kvadratigi</b> (quadratic mean, 2-tartibli darajali o‘rtacha). MAE — ularning o‘rta arifmetigi $M_1$, eng katta xato esa chegaraviy holat $M_\infty$. Darajali o‘rtachalar tengsizligi darhol $\mathrm{MAE}\le\mathrm{RMSE}\le\max_i|r_i|$ ni beradi.</p>
+    <p>Ikkinchi yozuv — faktlar vektori va bashoratlar vektori orasidagi Yevklid masofasi, $\sqrt n$ ga bo‘lingan (unga 3D’da qaytamiz). Uchinchisi — xatolar modullarining <b>kvadratik o‘rtachasi</b> (quadratic mean, 2-tartibli darajali o‘rtacha). MAE — ularning o‘rta arifmetigi $M_1$, eng katta xato esa chegaraviy holat $M_\infty$. Darajali o‘rtachalar tengsizligi darhol $\mathrm{MAE}\le\mathrm{RMSE}\le\max_i|r_i|$ ni beradi.</p>
     <div class="callout note"><b>Nega modul emas, kvadrat</b><p>Modullarni o‘rtachalash mumkin — bu <a href="../mae/">MAE</a>. Kvadrat tanlanadi, chunki u silliq (hamma joyda differensiallanuvchi), dispersiya va normal taqsimot bilan bog‘liq (MSE’ni minimallashtirish — gauss shovqinida maksimal haqiqatga o‘xshashlik usuli) va aniq formulalar beradi (eng kichik kvadratlar usuli). Tepadagi ildiz faqat o‘qish uchun kerak: u modellar tartibiga ta’sir qilmaydi.</p></div>
 
     <h2 id="properties">Xossalar</h2>
@@ -120,9 +120,9 @@
       <div class="eqd">$$\frac1n\sum_i r_i^2=\frac1n\sum_i\Bigl(\bar r^{\,2}+2\bar r\,(r_i-\bar r)+(r_i-\bar r)^2\Bigr)=\bar r^{\,2}+\frac{2\bar r}{n}\underbrace{\sum_i(r_i-\bar r)}_{=\,0}+\sigma_r^2$$</div>
       <p>O‘rta had yo‘qoladi: o‘rtachadan chetlanishlar yig‘indisi nolga teng. Bu $\operatorname{Var}X=\mathbb E X^2-(\mathbb E X)^2$ formulasidagi algebraning o‘zi.</p>
     </div></details>
-    <figure class="viz"><div class="fv" data-viz="rmse-pythagoras" data-config="{&quot;bias&quot;: 1, &quot;sd&quot;: 1.5}"></div><figcaption><b>Rasm 2.</b> Chapda — $\bar r$ siljish va $\sigma_r$ tarqoqlikka ega 40 ta qoldiq, o‘ngda — katetlari $|\bar r|$ va $\sigma_r$ bo‘lgan to‘g‘ri burchakli uchburchak: uning gipotenuzasi RMSE’ning o‘zi. $\bar r=1$ va $\sigma_r=1{,}5$ da $\mathrm{RMSE}=\sqrt{1+2{,}25}\approx1{,}80$ chiqadi.</figcaption></figure>
-    <p>Umumiy misolda $\bar r=-0{,}5$ (model o‘rtacha $0{,}5$ ga oshirib baholaydi), $\sigma_r\approx1{,}080$, va $0{,}25+1{,}167=1{,}417=\mathrm{MSE}$. Amaliy xulosa: siljish bepul olib tashlanadi — bashoratlarni validatsiyada baholangan $\bar r$ ga suring, va RMSE $\sigma_r$ gacha tushadi (bu yerda $1{,}190$ dan $1{,}080$ gacha).</p>
-    <div class="callout note"><b>RMSE va standart chetlanish</b><p>Agar qoldiqlar o‘rtachasi nolga teng bo‘lsa (ozod hadli chiziqli regressiyada o‘qitish tanlanmasida doim shunday), RMSE qoldiqlarning standart chetlanishi bilan ustma-ust tushadi. Shuning uchun RMSE modelning «standart xatosi» deb ataladi. Agar bundan tashqari xatolar normal bo‘lsa, qoldiqlarning taxminan $68\%$ i $\pm\mathrm{RMSE}$ oralig‘ida, taxminan $95\%$ i esa $\pm2\,\mathrm{RMSE}$ oralig‘ida yotadi.</p></div>
+    <figure class="viz"><div class="fv" data-viz="rmse-pythagoras" data-config="{&quot;bias&quot;: 1, &quot;sd&quot;: 1.5}"></div><figcaption><b>2-rasm.</b> Chapda — $\bar r$ siljish va $\sigma_r$ tarqoqlikka ega 40 ta qoldiq, o‘ngda — katetlari $|\bar r|$ va $\sigma_r$ bo‘lgan to‘g‘ri burchakli uchburchak: uning gipotenuzasi RMSE’ning o‘zi. $\bar r=1$ va $\sigma_r=1{,}5$ da $\mathrm{RMSE}=\sqrt{1+2{,}25}\approx1{,}80$ chiqadi.</figcaption></figure>
+    <p>Umumiy misolda $\bar r=-0{,}5$ (model o‘rtacha $0{,}5$ ga oshirib baholaydi), $\sigma_r\approx1{,}080$, va $0{,}25+1{,}167=1{,}417=\mathrm{MSE}$. Amaliy xulosa: siljish bepul olib tashlanadi — barcha bashoratlarga $\bar r$ ni qo‘shing, va u baholangan ma’lumotlarda RMSE roppa-rosa $\sigma_r$ gacha tushadi (bu yerda $1{,}190$ dan $1{,}080$ gacha). Amalda $\bar r$ validatsiyada baholanadi, yutuq esa testda tekshiriladi.</p>
+    <div class="callout note"><b>RMSE va standart chetlanish</b><p>Agar qoldiqlar o‘rtachasi nolga teng bo‘lsa (ozod hadli chiziqli regressiyada o‘qitish tanlanmasida doim shunday), RMSE qoldiqlarning standart chetlanishi bilan ustma-ust tushadi. Shundan uning statistikadagi «regressiyaning standart xatosi»ga yaqinligi kelib chiqadi — faqat u yerda qoldiqlar kvadratlari yig‘indisi $n$ ga emas, erkinlik darajalari soni $n-p$ ga bo‘linadi ($p$ — model parametrlari soni). Agar bundan tashqari xatolar normal bo‘lsa, qoldiqlarning taxminan $68\%$ i $\pm\mathrm{RMSE}$ oralig‘ida, taxminan $95\%$ i esa $\pm2\,\mathrm{RMSE}$ oralig‘ida yotadi.</p></div>
 
     <h2 id="gap">RMSE va MAE: farq nimani aytadi</h2>
     <p><a href="../mae/">MAE</a> «o‘rtacha qanchaga adashamiz» degan savolga, RMSE esa «kattalarini hisobga olganda xatoning odatiy kattaligi qancha» degan savolga javob beradi. Ularning nisbati $\mathrm{RMSE}/\mathrm{MAE}$ o‘lchamsiz va masshtabga bog‘liq emas: u faqat xatolar taqsimotining <b>shaklini</b> tasvirlaydi.</p>
@@ -132,7 +132,7 @@
       <div class="eqd">$$\mathbb E|r|=2\int_0^\infty \frac{x}{\sigma\sqrt{2\pi}}\,e^{-x^2/2\sigma^2}\,dx=\frac{2\sigma^2}{\sigma\sqrt{2\pi}}=\sigma\sqrt{\frac{2}{\pi}}$$</div>
       <p>Bundan $\sigma/\bigl(\sigma\sqrt{2/\pi}\bigr)=\sqrt{\pi/2}\approx1{,}2533$. Chekli tanlanmada bu taxminan bajariladi: 3-rasmda $n=2000$ da $1{,}248$ chiqadi.</p>
     </div></details>
-    <figure class="viz"><div class="fv" data-viz="rmse-vs-mae" data-config="{&quot;dist&quot;: &quot;normal&quot;, &quot;eps&quot;: 0}"></div><figcaption><b>Rasm 3.</b> Dispersiyasi birga teng 2000 ta xato (generatorning zerrasi qayd etilgan). Normal xatolar uchun nisbat $1{,}248$ (nazariya $1{,}253$), Laplas xatolari uchun $1{,}392$ ($1{,}414$), tekis xatolar uchun $1{,}153$ ($1{,}155$). Chetlanishlarni qo‘shing: har bir xato $\varepsilon$ ehtimollik bilan 10 ga ko‘paytiriladi. $\varepsilon=5\%$ dayoq RMSE $1{,}009$ dan $2{,}817$ gacha o‘sadi, MAE esa faqat $0{,}809$ dan $1{,}258$ gacha.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="rmse-vs-mae" data-config="{&quot;dist&quot;: &quot;normal&quot;, &quot;eps&quot;: 0}"></div><figcaption><b>3-rasm.</b> Dispersiyasi birga teng 2000 ta xato (generator urug‘i — seed — qayd etilgan). Normal xatolar uchun nisbat $1{,}248$ (nazariya $1{,}253$), Laplas xatolari uchun $1{,}392$ ($1{,}414$), tekis xatolar uchun $1{,}153$ ($1{,}155$). Chetlanishlarni qo‘shing: har bir xato $\varepsilon$ ehtimollik bilan 10 ga ko‘paytiriladi. $\varepsilon=5\%$ dayoq RMSE $1{,}009$ dan $2{,}817$ gacha o‘sadi, MAE esa faqat $0{,}809$ dan $1{,}258$ gacha.</figcaption></figure>
     <p>Bunday aralashmada MSE $1+99\varepsilon$ marta ($(1-\varepsilon)\cdot1+\varepsilon\cdot100$), MAE esa atigi $1+9\varepsilon$ marta o‘sadi, shuning uchun nazariy nisbat $\sqrt{1+99\varepsilon}\,/\bigl((1+9\varepsilon)\,\mathrm{MAE}_0\bigr)$ ga teng, bu yerda $\mathrm{MAE}_0$ — dastlabki taqsimotning MAE’i.</p>
     <h3>Chegaralar: MAE ≤ RMSE ≤ √n · MAE</h3>
     <div class="eqd">$$\mathrm{MAE}\;\le\;\mathrm{RMSE}\;\le\;\sqrt n\;\mathrm{MAE}$$</div>
@@ -144,14 +144,14 @@
       <div class="eqd">$$\sum_i r_i^2\le\Bigl(\sum_i|r_i|\Bigr)^2\quad\Longrightarrow\quad\sqrt{\frac1n\sum_i r_i^2}\le\frac{1}{\sqrt n}\sum_i|r_i|=\sqrt n\,\mathrm{MAE}$$</div>
       <p>Tenglik $i\ne j$ dagi barcha $|r_i|\,|r_j|$ ko‘paytmalar nolga teng bo‘lganda, ya’ni noldan farqli xato ko‘pi bilan bitta bo‘lganda bajariladi. Agar umumiy absolyut xato $n$ ta obyektdan $k$ tasiga teng bo‘lingan bo‘lsa, nisbat roppa-rosa $\sqrt{n/k}$ ga teng.</p>
     </div></details>
-    <figure class="viz"><div class="fv" data-viz="rmse-bounds" data-config="{&quot;r&quot;: [0.5, -2], &quot;n&quot;: 10, &quot;k&quot;: 1}"></div><figcaption><b>Rasm 4.</b> Chapda — ikki xato $(r_1;\,r_2)$. MAE bir xil bo‘lgan nuqtalar $|r_1|+|r_2|=2\,\mathrm{MAE}$ rombda, RMSE bir xil bo‘lganlari radiusi $\sqrt2\,\mathrm{RMSE}$ bo‘lgan aylanada yotadi. Romb $\mathrm{RMSE}=\mathrm{MAE}$ (unga $|r_1|=|r_2|$ da urinadi) va $\mathrm{RMSE}=\sqrt2\,\mathrm{MAE}$ (o‘qlardagi uchlardan o‘tadi) aylanalari orasida qisilgan. $(0{,}5;\,-2)$ nuqta uchun: $\mathrm{MAE}=1{,}25$, $\mathrm{RMSE}\approx1{,}458$. O‘ngda — xato $n$ ta obyektdan $k$ tasiga teng bo‘linganda $\sqrt{n/k}$ nisbati.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="rmse-bounds" data-config="{&quot;r&quot;: [0.5, -2], &quot;n&quot;: 10, &quot;k&quot;: 1}"></div><figcaption><b>4-rasm.</b> Chapda — ikki xato $(r_1;\,r_2)$. MAE bir xil bo‘lgan nuqtalar $|r_1|+|r_2|=2\,\mathrm{MAE}$ rombda, RMSE bir xil bo‘lganlari radiusi $\sqrt2\,\mathrm{RMSE}$ bo‘lgan aylanada yotadi. Romb $\mathrm{RMSE}=\mathrm{MAE}$ (unga $|r_1|=|r_2|$ da urinadi) va $\mathrm{RMSE}=\sqrt2\,\mathrm{MAE}$ (o‘qlardagi uchlardan o‘tadi) aylanalari orasida qisilgan. $(0{,}5;\,-2)$ nuqta uchun: $\mathrm{MAE}=1{,}25$, $\mathrm{RMSE}\approx1{,}458$. O‘ngda — xato $n$ ta obyektdan $k$ tasiga teng bo‘linganda $\sqrt{n/k}$ nisbati.</figcaption></figure>
     <div class="callout key"><b>Farqni qanday o‘qish kerak</b><p>$\mathrm{RMSE}\approx\mathrm{MAE}$ — xatolar taxminan bir xil kattalikda. $\mathrm{RMSE}/\mathrm{MAE}\approx1{,}25$ — normal shovqin uchun odatiy. $1{,}4$ dan sezilarli katta — og‘ir dumlar yoki bir nechta katta xato: o‘rtachalarga ishonishdan oldin eng katta qoldiqlarga qarang.</p></div>
 
     <h2 id="geometry">Geometriya: masofa sifatida RMSE</h2>
     <p>Faktlar va bashoratlarni $n$ o‘lchovli fazo nuqtalari sifatida yozamiz: $y=(y_1,\dots,y_n)$ va $\hat y=(\hat y_1,\dots,\hat y_n)$. Xatolar kvadratlari yig‘indisi ular orasidagi oddiy Yevklid masofasining kvadrati, shuning uchun</p>
     <div class="eqd">$$\mathrm{RMSE}(y,\hat y)=\frac{\|y-\hat y\|_2}{\sqrt n}$$</div>
     <p>$\sqrt n$ ga bo‘lish masofani turli o‘lchamdagi tanlanmalar uchun solishtiriladigan qiladi: har bir xato $c$ ga teng bo‘lsa, $\|y-\hat y\|=c\sqrt n$, RMSE esa roppa-rosa $c$. RMSE’si bir xil bo‘lgan barcha bashoratlar markazi $y$ da, radiusi $\sqrt n\,\mathrm{RMSE}$ bo‘lgan sferani hosil qiladi. $n=3$ da buni chizish mumkin.</p>
-    <figure class="viz"><div class="fv" data-viz="rmse-vectors" data-config="{}"></div><figcaption><b>Rasm 5.</b> $\mathbb R^3$ dagi umumiy misol: fakt $y=(3;\,5;\,8)$, bashorat $\hat y=(2{,}5;\,5;\,10)$; to‘q sariq kesma — uzunligi $\sqrt{4{,}25}\approx2{,}062$ bo‘lgan xato vektori, va $\mathrm{RMSE}=2{,}062/\sqrt3\approx1{,}190$. Kulrang sfera — RMSE’si xuddi shunday bo‘lgan barcha bashoratlar. Punktirli diagonal — konstant bashoratlar $(c;\,c;\,c)$; undagi $y$ ga eng yaqin nuqta — $\bar y\cdot\mathbf 1$, $\bar y=16/3$. Slayderlarni suring va sahnani aylantiring.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="rmse-vectors" data-config="{}"></div><figcaption><b>5-rasm.</b> $\mathbb R^3$ dagi umumiy misol: fakt $y=(3;\,5;\,8)$, bashorat $\hat y=(2{,}5;\,5;\,10)$; to‘q sariq kesma — uzunligi $\sqrt{4{,}25}\approx2{,}062$ bo‘lgan xato vektori, va $\mathrm{RMSE}=2{,}062/\sqrt3\approx1{,}190$. Kulrang sfera — RMSE’si xuddi shunday bo‘lgan barcha bashoratlar. Punktirli diagonal — konstant bashoratlar $(c;\,c;\,c)$; undagi $y$ ga eng yaqin nuqta — $\bar y\cdot\mathbf 1$, $\bar y=16/3$. Slayderlarni suring va sahnani aylantiring.</figcaption></figure>
     <h3>Eng yaxshi konstanta — o‘rtacha, uning RMSE’i esa standart chetlanish</h3>
     <p>Qaysi konstant bashorat $\hat y_i=c$ RMSE’ni minimallashtiradi? Geometrik jihatdan — $y$ ning diagonalga ortogonal proyeksiyasi, ya’ni $c=\bar y$. Uning RMSE’i — maqsadli o‘zgaruvchining standart chetlanishi:</p>
     <div class="eqd">$$\min_c\,\mathrm{RMSE}(y,\,c\mathbf 1)=\mathrm{RMSE}(y,\,\bar y\mathbf 1)=\sqrt{\frac1n\sum_i\bigl(y_i-\bar y\bigr)^2}=\sigma_y$$</div>
@@ -176,12 +176,12 @@
     <p>Misol ma’lumotlari $y=(3;\,5;\,8)$ da $\hat y_i=c$ konstant modelni olamiz. U holda $\mathrm{MSE}(c)=(c-\bar y)^2+\sigma_y^2$ — parabola, RMSE esa giperbola:</p>
     <div class="eqd">$$\mathrm{RMSE}(c)=\sqrt{(c-\bar y)^2+\sigma_y^2},\qquad \mathrm{RMSE}'(c)=\frac{c-\bar y}{\sqrt{(c-\bar y)^2+\sigma_y^2}}\in(-1;\,1)$$</div>
     <p>Minimum yaqinida giperbola parabolaga o‘xshaydi (RMSE o‘zini MSE kabi tutadi), uzoqda esa $|c-\bar y|$ to‘g‘ri chiziqlariga (MAE kabi). Hosila $-1$ dan $1$ gacha silliq o‘zgaradi va bu chegaralardan hech qachon chiqmaydi, MSE hosilasi esa chiziqli va cheksiz o‘sadi.</p>
-    <figure class="viz"><div class="fv" data-viz="rmse-derivative" data-config="{&quot;c&quot;: 8}"></div><figcaption><b>Rasm 6.</b> Yuqorida — $c$ konstant bashoratining RMSE, MSE va MAE’si (o‘qdagi nuqtalar — ma’lumotlar), pastda — hosilalar. $c=8$ da: $\mathrm{RMSE}\approx3{,}367$, $\mathrm{RMSE}'\approx0{,}792$, $\mathrm{MSE}'\approx5{,}333$; ularning nisbati $2\,\mathrm{RMSE}\approx6{,}733$. RMSE va MSE minimumlari $\bar y\approx5{,}333$ da, MAE minimumi mediana 5 da.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="rmse-derivative" data-config="{&quot;c&quot;: 8}"></div><figcaption><b>6-rasm.</b> Yuqorida — $c$ konstant bashoratining RMSE, MSE va MAE’si (o‘qdagi nuqtalar — ma’lumotlar), pastda — hosilalar. $c=8$ da: $\mathrm{RMSE}\approx3{,}367$, $\mathrm{RMSE}'\approx0{,}792$, $\mathrm{MSE}'\approx5{,}333$; ularning nisbati $2\,\mathrm{RMSE}\approx6{,}733$. RMSE va MSE minimumlari $\bar y\approx5{,}333$ da, MAE minimumi mediana 5 da.</figcaption></figure>
     <p>Ikkinchi hosila $\mathrm{RMSE}''(c)=\sigma_y^2/\mathrm{RMSE}(c)^3&gt;0$: $\sigma_y&gt;0$ ekan, funksiya qat’iy qavariq. Umumiy holda RMSE bashoratlar bo‘yicha qavariq (norma sifatida), demak, chiziqli model parametrlari bo‘yicha ham: chiziqli regressiyada na MSE, na RMSE uchun lokal minimumlar yo‘q.</p>
 
     <h2 id="training">RMSE(w, b) landshafti va o‘qitish</h2>
     <p>14 ta nuqtadagi $\hat y=wx+b$ chiziqli model. $(w,\,b)$ parametrlar tekisligi ustida RMSE kosa hosil qiladi. Sirtni MSE’ga almashtiring: sath chiziqlari o‘sha-o‘sha qoladi ($\mathrm{RMSE}=1{,}5$ sathi — bu $\mathrm{MSE}=2{,}25$ sathi), faqat balandlik o‘zgaradi: MSE kvadratik o‘sadi, RMSE esa minimumdan uzoqda deyarli chiziqli, konus kabi.</p>
-    <figure class="viz"><div class="fv" data-viz="rmse-landscape" data-config="{&quot;eta&quot;: 0.1}"></div><figcaption><b>Rasm 7.</b> Chapda — sirt (aylantiriladi), o‘ngda — RMSE sath chiziqlari bilan yuqoridan ko‘rinish, pastda — qadamlar bo‘yicha RMSE. Qora start nuqtasini torting: strelkalar MSE (ko‘k) va RMSE (to‘q sariq) uchun birinchi $-\eta\nabla$ qadamni ko‘rsatadi — yo‘nalish bitta, lekin to‘q sariq $2\,\mathrm{RMSE}\approx5{,}4$ marta qisqa. «Boshlash»ni bosing: $\eta=0{,}1$ da MSE bo‘yicha tushish $0{,}904$ minimumga $0{,}01$ aniqlik bilan 61 qadamda, RMSE bo‘yicha tushish esa 140 qadamda yetadi. $\eta=0{,}14$ qo‘ying: MSE bo‘yicha tushish uzoqlashib ketadi, RMSE bo‘yicha tushish esa maqsadga 100 qadamda yetadi.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="rmse-landscape" data-config="{&quot;eta&quot;: 0.1}"></div><figcaption><b>7-rasm.</b> Chapda — sirt (aylantiriladi), o‘ngda — RMSE sath chiziqlari bilan yuqoridan ko‘rinish, pastda — qadamlar bo‘yicha RMSE. Qora start nuqtasini torting: strelkalar MSE (ko‘k) va RMSE (to‘q sariq) uchun birinchi $-\eta\nabla$ qadamni ko‘rsatadi — yo‘nalish bitta, lekin to‘q sariq $2\,\mathrm{RMSE}\approx5{,}4$ marta qisqa. «Boshlash»ni bosing: $\eta=0{,}1$ da MSE bo‘yicha tushish $0{,}904$ minimumga $0{,}01$ aniqlik bilan 61 qadamda, RMSE bo‘yicha tushish esa 140 qadamda yetadi. $\eta=0{,}14$ qo‘ying: MSE bo‘yicha tushish uzoqlashib ketadi, RMSE bo‘yicha tushish esa maqsadga 100 qadamda yetadi.</figcaption></figure>
     <p>Nega shunday. RMSE bo‘yicha qadam — o‘zgaruvchan o‘qitish tezligi (learning rate) bilan MSE bo‘yicha qadam:</p>
     <div class="eqd">$$\theta\leftarrow\theta-\eta\,\nabla\mathrm{RMSE}=\theta-\underbrace{\frac{\eta}{2\,\mathrm{RMSE}(\theta)}}_{\eta_{\text{eff}}}\,\nabla\mathrm{MSE}$$</div>
     <p>Xatolar katta ekan, samarali qadam kichik — shuning uchun RMSE bo‘yicha tushish haddan tashqari katta $\eta$ ga chidamliroq. Minimum yaqinida $\eta_{\text{eff}}\to\eta/(2\,\mathrm{RMSE}_{\min})$; bu yerda $\mathrm{RMSE}_{\min}\approx0{,}904$, va qadam MSE’nikidan deyarli ikki baravar kichik — sekin marra shundan. MSE bo‘yicha tushish faqat $\eta&lt;2/\lambda_{\max}\approx0{,}133$ da barqaror, bu yerda $\lambda_{\max}\approx15{,}0$ — MSE gessianining eng katta xos qiymati.</p>
@@ -200,7 +200,7 @@
     <p><b>RMSLE</b> (root mean squared logarithmic error) — logarifmik shkaladagi RMSE:</p>
     <div class="eqd">$$\mathrm{RMSLE}=\sqrt{\frac1n\sum_{i=1}^{n}\bigl(\ln(1+\hat y_i)-\ln(1+y_i)\bigr)^2}$$</div>
     <p>Logarifm nisbatlarni ayirmalarga aylantiradi: xato $1+\hat y$ ning $1+y$ dan <i>qanchaga</i> emas, <i>necha marta</i> farq qilishi bilan belgilanadi. Shuning uchun RMSLE masshtablari keng tarqalgan manfiy bo‘lmagan maqsadlar (narxlar, sotuvlar, ko‘rishlar) uchun mos keladi va kam bashoratni xuddi shu absolyut kattalikdagi ortiq bashoratdan qattiqroq jazolaydi. Umumiy misolda $\mathrm{RMSLE}\approx0{,}139$.</p>
-    <figure class="viz"><div class="fv" data-viz="rmse-rmsle" data-config="{&quot;y&quot;: 10, &quot;yhat&quot;: 5}"></div><figcaption><b>Rasm 8.</b> Fakt $y=10$ bo‘lganda logarifmik xato kvadrati. 5 bashorati (5 ga kam) $0{,}367$ turadi, 15 bashorati (xuddi shu 5 ga ortiq) — $0{,}140$, $2{,}6$ marta kam. Punktir — egri chiziqning ko‘zgudagi aksi, nuqtalar — taqqoslash uchun $1+y$ ulushlaridagi kvadratik xato. Pastda — $\hat y$ bo‘yicha hosila: kam bashorat tomonida u tikroq.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="rmse-rmsle" data-config="{&quot;y&quot;: 10, &quot;yhat&quot;: 5}"></div><figcaption><b>8-rasm.</b> Fakt $y=10$ bo‘lganda logarifmik xato kvadrati. 5 bashorati (5 ga kam) $0{,}367$ turadi, 15 bashorati (xuddi shu 5 ga ortiq) — $0{,}140$, $2{,}6$ marta kam. Punktir — egri chiziqning ko‘zgudagi aksi, nuqtalar — taqqoslash uchun $1+y$ ulushlaridagi kvadratik xato. Pastda — $\hat y$ bo‘yicha hosila: kam bashorat tomonida u tikroq.</figcaption></figure>
     <p>Yana ikki foydali modifikatsiya:</p>
     <ul class="flist"><li><b>vaznli RMSE</b> $\sqrt{\sum_i w_i r_i^2/\sum_i w_i}$ — obyektlar teng qiymatli bo‘lmaganda (qimmat tovarlar, yangi kuzatuvlar);</li><li><b>NRMSE</b> $=\mathrm{RMSE}/\sigma_y=\sqrt{1-R^2}$ — turli masshtabdagi vazifalarni solishtirish uchun o‘lchamsiz versiya.</li></ul>
     <div class="callout note"><b>RMSLE — bu logarifmlardagi RMSE</b><p>RMSLE $\ln(1+y)$ va $\ln(1+\hat y)$ orasidagi RMSE’ga teng. Shuning uchun musobaqa metrikasi RMSLE bo‘lsa, modelni $\ln(1+y)$ maqsad bo‘yicha MSE’da o‘qitib, bashoratni $e^{z}-1$ orqali qaytarish oqilona.</p></div>
@@ -213,38 +213,39 @@ y     = np.array([3.0, 5.0, 8.0])
 y_hat = np.array([2.5, 5.0, 10.0])
 
 r    = y - y_hat                   # qoldiqlar: [ 0.5  0.  -2. ]
-mse  = np.mean(r ** 2)             # 1.4167
-rmse = np.sqrt(mse)                # 1.1902
-mae  = np.mean(np.abs(r))          # 0.8333
+mse  = np.mean(r ** 2)             # ≈ 1.4167
+rmse = np.sqrt(mse)                # ≈ 1.1902
+mae  = np.mean(np.abs(r))          # ≈ 0.8333
 
 # Xuddi shu, Yevklid normasi orqali: ‖y − ŷ‖ / √n
-print(np.linalg.norm(r) / np.sqrt(len(r)))     # 1.1902
+print(round(np.linalg.norm(r) / np.sqrt(len(r)), 4))   # 1.1902
 
 # Ajratish: RMSE² = siljish² + qoldiqlar dispersiyasi
-print(r.mean() ** 2 + r.var(), mse)            # 1.4167 1.4167
+print(round(r.mean() ** 2 + r.var(), 4), round(mse, 4))   # 1.4167 1.4167
 
 # Bashoratlar bo‘yicha gradiyent: ∂RMSE/∂ŷ = (ŷ − y) / (n · RMSE)
-print((y_hat - y) / (len(y) * rmse))           # [-0.14  0.    0.56]
+print(np.round((y_hat - y) / (len(y) * rmse), 4))       # [-0.14    0.      0.5601]
 
 # «Doim o‘rtacha» bazaviy modeli: uning RMSE’i — y ning standart chetlanishi
-print(np.std(y))                               # 2.0548</code></pre>
-    <p>scikit-learn’da tayyor funksiyalar bor (1.4 versiyasidan; avval <code>mean_squared_error(..., squared=False)</code> deb yozilardi). Fold’lar RMSE’larining o‘rtachasi bilan barcha obyektlar bo‘yicha RMSE orasidagi farqqa e’tibor bering:</p>
+print(round(np.std(y), 4))                               # 2.0548</code></pre>
+    <p>scikit-learn’da tayyor funksiyalar bor (1.4 versiyasidan; avval <code>mean_squared_error(..., squared=False)</code> deb yozilardi, 1.6 da esa <code>squared</code> parametri olib tashlangan). Fold’lar RMSE’larining o‘rtachasi bilan barcha obyektlar bo‘yicha RMSE orasidagi farqqa e’tibor bering:</p>
     <pre class="code"><span class="lang">python</span><code>from sklearn.metrics import root_mean_squared_error, root_mean_squared_log_error
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import KFold, cross_val_score, cross_val_predict
 
-print(root_mean_squared_error(y, y_hat))       # 1.1902  (scikit-learn ≥ 1.4)
-print(root_mean_squared_log_error(y, y_hat))   # 0.1392  — RMSLE
+# y, y_hat — yuqoridagi listingdan; funksiyalar scikit-learn ≥ 1.4 da bor
+print(round(root_mean_squared_error(y, y_hat), 4))       # 1.1902
+print(round(root_mean_squared_log_error(y, y_hat), 4))   # 0.1392 — RMSLE
 
 X, t = make_regression(n_samples=200, n_features=5, noise=10.0, random_state=0)
 cv = KFold(5, shuffle=True, random_state=0)
 # scorer’lar «qancha katta, shuncha yaxshi», shuning uchun RMSE minus ishora bilan
 scores = cross_val_score(LinearRegression(), X, t, cv=cv,
                          scoring=&quot;neg_root_mean_squared_error&quot;)
-print(-scores.mean())                          # 10.560 — fold’lar RMSE’larining o‘rtachasi
+print(round(-scores.mean(), 3))                # 10.56 — fold’lar RMSE’larining o‘rtachasi
 pred = cross_val_predict(LinearRegression(), X, t, cv=cv)
-print(root_mean_squared_error(t, pred))        # 10.614 — barcha obyektlar bo‘yicha RMSE</code></pre>
+print(round(root_mean_squared_error(t, pred), 3))   # 10.614 — barcha obyektlar bo‘yicha RMSE</code></pre>
     <p>PyTorch’da yo‘qotish funksiyasi sifatida RMSE nolda ehtiyotkorlikni talab qiladi:</p>
     <pre class="code"><span class="lang">python</span><code>import torch
 
@@ -253,7 +254,7 @@ y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
 
 rmse = torch.sqrt(torch.mean((y_hat - y) ** 2))
 rmse.backward()
-print(rmse.item(), y_hat.grad)   # 1.1902  tensor([-0.1400,  0.0000,  0.5601])
+print(round(rmse.item(), 4), y_hat.grad)   # 1.1902 tensor([-0.1400,  0.0000,  0.5601])
 
 # Ideal bashorat: √u ning noldagi hosilasi cheksiz → gradiyent NaN
 p = y.clone().requires_grad_(True)
@@ -269,7 +270,7 @@ def rmse_loss(pred, target, eps=1e-8):
     <ol class="flist"><li><b>Batch’lar yoki fold’lar bo‘yicha o‘rtacha RMSE’ni yakuniy RMSE deb olish.</b> Ildiz chiziqli emas: MSE’ni o‘rtachalang, ildizni oxirida oling.</li><li><b>RMSE’ni turli ma’lumotlarda solishtirish.</b> RMSE $y$ ning masshtabi va tarqoqligiga bog‘liq; modellarni bitta test tanlanmasida solishtiring yoki normallangan RMSE’dan foydalaning.</li><li><b>«Model o‘rtacha RMSE’ga adashadi».</b> O‘rtacha absolyut xato — bu MAE; RMSE undan kichik emas, og‘ir dumlarda esa sezilarli katta.</li><li><b>Nolni himoya qilmasdan RMSE’ni yo‘qotish sifatida ishlatish.</b> $\sqrt u$ ning noldagi hosilasi cheksiz: ideal batch gradiyentlarda NaN beradi. Ildiz ostiga $\varepsilon$ qo‘shing yoki MSE’da o‘qiting.</li><li><b>Chetga chiquvchi qiymatlarni e’tiborsiz qoldirish.</b> 99 ta ideal bashorat orasidagi 100 birlikli bitta xato $\mathrm{MAE}=1$ da $\mathrm{RMSE}=10$ beradi. Agar chetlanishlar muhim hodisa emas, shovqin bo‘lsa, MAE, <a href="../huber/">Huber</a> yoki xatolar kvantillariga qarang.</li><li><b>Dastlabki shkala o‘rniga logarifmlardagi RMSE.</b> Model $\ln(1+y)$ da o‘qitilsa, uning RMSE’i dastlabki vazifaning RMSLE’si, so‘mdagi RMSE emas; RMSE’ni hisoblashdan oldin bashoratlarni qaytarib o‘tkazing.</li></ol>
 
     <h2 id="links">Boshqa formulalar bilan bog‘lanishlar</h2>
-    <ul class="flist"><li><a href="../mse/">MSE</a>: $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ — minimum ham, modellar tartibi ham o‘sha, gradiyent $2\,\mathrm{RMSE}$ marta kichik.</li><li><a href="../mae/">MAE</a>: $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; MAE uchun eng yaxshi konstanta — mediana, RMSE uchun — o‘rtacha.</li><li><a href="../huber/">Huber</a>: nol yaqinida kvadratik, dumlarda chiziqli — MSE (demak, RMSE) va MAE orasidagi murosa.</li><li><a href="../mape/">MAPE</a>: absolyut o‘rniga nisbiy xato; RMSLE — logarifmik shkaladagi uning kvadratik qarindoshi.</li><li><a href="../sgd/">SGD</a>: RMSE bo‘yicha tushish — $\eta/(2\,\mathrm{RMSE})$ o‘qitish tezligi bilan MSE bo‘yicha tushish.</li><li><a href="../adam/">Adam</a>: qadamni gradiyent kvadratlarining sirpanuvchi o‘rtachasidan ildizga bo‘ladi — RMSE’dagi «o‘rtacha kvadratdan ildiz» (RMS) g‘oyasining o‘zi.</li></ul>
+    <ul class="flist"><li><a href="../mse/">MSE</a>: $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ — minimum ham, modellar tartibi ham o‘sha, gradiyent esa $2\,\mathrm{RMSE}$ ga bo‘linadi.</li><li><a href="../mae/">MAE</a>: $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; MAE uchun eng yaxshi konstanta — mediana, RMSE uchun — o‘rtacha.</li><li><a href="../huber/">Huber</a>: nol yaqinida kvadratik, dumlarda chiziqli — MSE (demak, RMSE) va MAE orasidagi murosa.</li><li><a href="../mape/">MAPE</a>: absolyut o‘rniga nisbiy xato; RMSLE — logarifmik shkaladagi uning kvadratik qarindoshi.</li><li><a href="../sgd/">SGD</a>: RMSE bo‘yicha tushish — $\eta/(2\,\mathrm{RMSE})$ o‘qitish tezligi bilan MSE bo‘yicha tushish.</li><li><a href="../adam/">Adam</a>: qadamni gradiyent kvadratlarining sirpanuvchi o‘rtachasidan ildizga bo‘ladi — RMSE’dagi «o‘rtacha kvadratdan ildiz» (RMS) g‘oyasining o‘zi.</li></ul>
 
     <h2 id="summary">Xulosa</h2>
     <div class="callout key"><p>1) $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ — katta xatolarga urg‘u bergan holda $y$ birliklaridagi xatoning odatiy kattaligi. 2) $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; RMSE/MAE nisbati — dumlar ko‘rsatkichi (normal shovqin uchun $\approx1{,}25$). 3) $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — siljish va tarqoqlik katetlar sifatida. 4) Geometrik jihatdan bu $\|y-\hat y\|/\sqrt n$ masofa; eng yaxshi konstanta — o‘rtacha, uning RMSE’i $\sigma_y$ ga teng. 5) $\nabla\mathrm{RMSE}=\nabla\mathrm{MSE}/(2\,\mathrm{RMSE})$: minimum umumiy, qadam boshqa, nolda hosila yo‘q.</p></div>

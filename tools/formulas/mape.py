@@ -12,9 +12,9 @@ META = dict(
         "uz": "Har qanday menejer tushunadigan metrika: «o‘rtacha 12% ga adashamiz». Soddalik ortida tuzoqlar yashiringan: haqiqiy qiymatga bo‘lish nol atrofida portlaydi, kam va ortiq bashorat har xil jazolanadi, MAPE’da o‘qitilgan model esa sistematik ravishda kamaytirib bashorat qiladi. Hammasini mayda detallarigacha tahlil qilamiz — hosila, xatoning 3D sirti, o‘qitish va biznes misoli bilan.",
     },
     description={
-        "ru": "MAPE подробно: формула, асимметрия, поведение возле нуля, производная, оптимальная константа — взвешенная медиана, 3D-поверхность ошибки, обучение с весами 1/y, сравнение с sMAPE, WAPE и MASE, бизнес-пример, код.",
-        "en": "MAPE in depth: formula, asymmetry, behaviour near zero, derivative, the optimal constant as a weighted median, a 3D error surface, training with 1/y weights, comparison with sMAPE, WAPE and MASE, a business example, code.",
-        "uz": "MAPE batafsil: formula, nosimmetriklik, nol atrofidagi xulq, hosila, optimal konstanta — vaznli mediana, xatoning 3D sirti, 1/y vaznlar bilan o‘qitish, sMAPE, WAPE va MASE bilan taqqoslash, biznes misoli, kod.",
+        "ru": "MAPE по косточкам: асимметрия, взрыв возле нуля, производная, лучшая константа — взвешенная медиана, недопрогноз, sMAPE, WAPE, MASE и код.",
+        "en": "MAPE explained: asymmetry, blow-up near zero, derivative, the weighted-median optimum, under-forecasting, sMAPE, WAPE, MASE and code.",
+        "uz": "MAPE batafsil: nosimmetriklik, nol atrofidagi portlash, hosila, eng yaxshi konstanta — vaznli mediana, kam bashorat, sMAPE, WAPE, MASE va kod.",
     },
 )
 
@@ -36,15 +36,15 @@ def _table(lang):
 
 ALT = {
     "ru": [["MAPE", "$\\frac{100\\%}{n}\\sum\\frac{|e_i|}{|y_i|}$", "не определена", "доля факта; асимметрична в разах; взрывается возле нуля"],
-           ["sMAPE", "$\\frac{100\\%}{n}\\sum\\frac{2|e_i|}{|y_i|+|\\hat y_i|}$", "допустимы, если $\\hat y_i\\ne0$", "ограничена $200\\%$; в штуках строже к недопрогнозу"],
+           ["sMAPE", "$\\frac{100\\%}{n}\\sum\\frac{2|e_i|}{|y_i|+|\\hat y_i|}$", "допустимы, если $\\hat y_i\\ne0$ (тогда $\\mathrm{sAPE}_i=200\\%$)", "ограничена $200\\%$; в штуках строже к недопрогнозу"],
            ["WAPE", "$100\\%\\cdot\\frac{\\sum|e_i|}{\\sum|y_i|}$", "допустимы (нужна ненулевая сумма)", "MAE, делённая на средний факт; крупные объекты весят больше"],
            ["MASE", "$\\frac{\\frac1n\\sum|e_i|}{\\frac{1}{T-1}\\sum_t|y_t-y_{t-1}|}$", "допустимы (ряд не постоянен)", "MAE относительно наивного прогноза «как в прошлый период»; $&lt;1$ — лучше наивного"]],
     "en": [["MAPE", "$\\frac{100\\%}{n}\\sum\\frac{|e_i|}{|y_i|}$", "undefined", "a share of the actual; asymmetric in ratios; explodes near zero"],
-           ["sMAPE", "$\\frac{100\\%}{n}\\sum\\frac{2|e_i|}{|y_i|+|\\hat y_i|}$", "allowed if $\\hat y_i\\ne0$", "bounded by $200\\%$; in units, harsher on under-forecasts"],
+           ["sMAPE", "$\\frac{100\\%}{n}\\sum\\frac{2|e_i|}{|y_i|+|\\hat y_i|}$", "allowed if $\\hat y_i\\ne0$ (then $\\mathrm{sAPE}_i=200\\%$)", "bounded by $200\\%$; in units, harsher on under-forecasts"],
            ["WAPE", "$100\\%\\cdot\\frac{\\sum|e_i|}{\\sum|y_i|}$", "allowed (a non-zero sum is needed)", "MAE divided by the mean actual; large objects weigh more"],
            ["MASE", "$\\frac{\\frac1n\\sum|e_i|}{\\frac{1}{T-1}\\sum_t|y_t-y_{t-1}|}$", "allowed (the series is not constant)", "MAE relative to the naive “same as last period” forecast; $&lt;1$ — better than naive"]],
     "uz": [["MAPE", "$\\frac{100\\%}{n}\\sum\\frac{|e_i|}{|y_i|}$", "aniqlanmagan", "haqiqiy qiymat ulushi; marta bo‘yicha nosimmetrik; nol atrofida portlaydi"],
-           ["sMAPE", "$\\frac{100\\%}{n}\\sum\\frac{2|e_i|}{|y_i|+|\\hat y_i|}$", "$\\hat y_i\\ne0$ bo‘lsa, mumkin", "$200\\%$ bilan chegaralangan; donada kam bashoratga qattiqroq"],
+           ["sMAPE", "$\\frac{100\\%}{n}\\sum\\frac{2|e_i|}{|y_i|+|\\hat y_i|}$", "$\\hat y_i\\ne0$ bo‘lsa, mumkin (unda $\\mathrm{sAPE}_i=200\\%$)", "$200\\%$ bilan chegaralangan; donada kam bashoratga qattiqroq"],
            ["WAPE", "$100\\%\\cdot\\frac{\\sum|e_i|}{\\sum|y_i|}$", "mumkin (yig‘indi nol bo‘lmasin)", "o‘rtacha haqiqiy qiymatga bo‘lingan MAE; katta obyektlar og‘irroq"],
            ["MASE", "$\\frac{\\frac1n\\sum|e_i|}{\\frac{1}{T-1}\\sum_t|y_t-y_{t-1}|}$", "mumkin (qator o‘zgarmas bo‘lmasin)", "«o‘tgan davrdagidek» sodda bashoratga nisbatan MAE; $&lt;1$ — sodda bashoratdan yaxshi"]],
 }
@@ -54,12 +54,12 @@ CODE_NUMPY = '''import numpy as np
 y     = np.array([3.0, 5.0, 8.0])
 y_hat = np.array([2.5, 5.0, 10.0])
 
-ape  = np.abs((y - y_hat) / y)      # [0.1667 0.     0.25  ]
-mape = 100 * ape.mean()             # 13.89
+ape  = np.abs((y - y_hat) / y)      # [0.16666667 0.         0.25      ]
+mape = 100 * ape.mean()             # 13.888888888888888
 
 # То же как взвешенная MAE с весами 1/|y|
 w = 1 / np.abs(y)
-print(100 * np.mean(w * np.abs(y - y_hat)))   # 13.89
+print(100 * np.mean(w * np.abs(y - y_hat)))   # 13.888888888888888
 
 def smape(y, f):
     return 100 * np.mean(2 * np.abs(f - y) / (np.abs(y) + np.abs(f)))
@@ -67,13 +67,15 @@ def smape(y, f):
 def wape(y, f):
     return 100 * np.sum(np.abs(y - f)) / np.sum(np.abs(y))
 
-print(smape(y, y_hat), wape(y, y_hat))        # ≈13.468 15.625'''
+print(smape(y, y_hat), wape(y, y_hat))        # 13.468013468013467 15.625'''
 
-CODE_SKLEARN = '''from sklearn.metrics import mean_absolute_percentage_error
+CODE_SKLEARN = '''import numpy as np
+from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.linear_model import LinearRegression, QuantileRegressor
 
-print(mean_absolute_percentage_error(y, y_hat))            # 0.1389 — доля, а не проценты!
-print(mean_absolute_percentage_error([0.0, 5.0], [1.0, 5.0]))  # 2.25e+15: деление на eps вместо нуля
+# y, y_hat — из листинга выше
+print(mean_absolute_percentage_error(y, y_hat))            # 0.13888888888888887 — доля, а не проценты!
+print(mean_absolute_percentage_error([0.0, 5.0], [1.0, 5.0]))  # 2251799813685248.0: деление на eps вместо нуля
 
 # Обучение «на MAPE»: медианная регрессия (MAE) с весами 1/y
 rng = np.random.default_rng(0)
@@ -82,7 +84,7 @@ t = 10 * x * np.exp(0.35 * rng.standard_normal(400))
 X = x[:, None]
 ols = LinearRegression(fit_intercept=False).fit(X, t)
 fit = QuantileRegressor(quantile=0.5, alpha=0, fit_intercept=False).fit(X, t, sample_weight=1 / t)
-print(ols.coef_, fit.coef_)   # ≈[10.58] [8.85] — модель по MAPE занижает сумму на 16%'''
+print(ols.coef_, fit.coef_)   # [10.57549043] [8.85148171] — модель по MAPE занижает сумму на 16%'''
 
 CODE_TORCH = '''import torch
 
@@ -94,15 +96,15 @@ y     = torch.tensor([3.0, 5.0, 8.0])
 y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
 loss = mape_loss(y_hat, y)
 loss.backward()
-print(loss.item(), y_hat.grad)   # 0.1389  tensor([-0.1111, -0.0000,  0.0417])'''
+print(loss.item(), y_hat.grad)   # 0.1388888955116272 tensor([-0.1111, -0.0000,  0.0417])'''
 
 _CODE_TR = {
-    "en": [("То же как взвешенная MAE с весами 1/|y|", "The same as a weighted MAE with weights 1/|y|"),
+    "en": [("То же как взвешенная MAE с весами 1/|y|", "The same as a weighted MAE with weights 1/|y|"), ("y, y_hat — из листинга выше", "y, y_hat come from the listing above"),
            ("доля, а не проценты!", "a fraction, not a percentage!"), ("деление на eps вместо нуля", "division by eps instead of zero"),
            ("Обучение «на MAPE»: медианная регрессия (MAE) с весами 1/y", "Training “on MAPE”: median (MAE) regression with weights 1/y"),
            ("модель по MAPE занижает сумму на 16%", "the MAPE model under-forecasts the total by 16%"),
            ("MAPE как функция потерь (доля). eps спасает от деления на 0, но не от огромных весов возле нуля.", "MAPE as a loss (a fraction). eps prevents division by 0 but not huge weights near zero.")],
-    "uz": [("То же как взвешенная MAE с весами 1/|y|", "Xuddi shu, 1/|y| vaznli MAE sifatida"),
+    "uz": [("То же как взвешенная MAE с весами 1/|y|", "Xuddi shu, 1/|y| vaznli MAE sifatida"), ("y, y_hat — из листинга выше", "y, y_hat — yuqoridagi listingdan"),
            ("доля, а не проценты!", "foiz emas, ulush!"), ("деление на eps вместо нуля", "nol o‘rniga eps ga bo‘lish"),
            ("Обучение «на MAPE»: медианная регрессия (MAE) с весами 1/y", "«MAPE bo‘yicha» o‘qitish: 1/y vaznli mediana regressiyasi (MAE)"),
            ("модель по MAPE занижает сумму на 16%", "MAPE bo‘yicha model yig‘indini 16% ga kamaytiradi"),
@@ -126,7 +128,7 @@ SECTIONS = {
             "<b>финансы и экономика</b> — точность прогнозов выручки, цен, макропоказателей;",
             "<b>энергетика</b> — прогноз нагрузки на сеть, где процент ошибки прямо пересчитывается в стоимость резерва;",
             "<b>сравнение рядов разного масштаба</b> — MAPE безразмерна, поэтому точность можно усреднять по тысячам товаров;",
-            "<b>соревнования по прогнозированию</b> — в M-соревнованиях использовали её симметричный вариант sMAPE.",
+            "<b>соревнования по прогнозированию</b> — в соревнованиях Макридакиса M3 одной из главных метрик был её «симметричный» вариант sMAPE, а в M4 методы ранжировали по sMAPE вместе с MASE.",
         ]),
         ("callout", "key", "Главное за минуту", "MAPE — средняя абсолютная ошибка, измеренная в долях факта. Она не зависит от масштаба, но не определена при $y_i=0$ и взрывается возле нуля. Для положительного факта недопрогноз стоит не больше $100\\%$, а перепрогноз — сколько угодно. MAPE — это MAE с весами $1/|y_i|$, поэтому лучшая по MAPE константа — взвешенная медиана, смещённая вниз, а модель, обученная на MAPE, занижает прогнозы."),
     ]),
@@ -200,15 +202,15 @@ SECTIONS = {
     dict(id="training", title="Обучение на MAPE: веса 1/y и недопрогноз", blocks=[
         ("p", "Раз MAPE — это MAE с весами $1/|y_i|$, обучить модель на MAPE можно любым алгоритмом, который минимизирует MAE с весами объектов: передайте <code>sample_weight=1/|y|</code>. В LightGBM есть готовая цель <code>objective=\"mape\"</code>, в PyTorch потеря пишется в одну строку (см. раздел с кодом)."),
         ("p", "Обучим простейшую модель $\\hat y=w\\,x$ на 40 объектах, у которых $y=10\\,x\\cdot e^{0{,}35\\,\\varepsilon}$, $\\varepsilon\\sim N(0,1)$: истинный наклон равен 10, шум мультипликативный — его размер растёт вместе с $y$, как у реальных продаж."),
-        ("viz", "mape-training", {}, "<b>Рисунок 5.</b> Слева — данные (размер точки пропорционален весу $1/y$) и две модели, справа — MAPE как функция наклона $w$. Нажмите «Пуск»: субградиентный спуск по MAPE с шагом $8/\\sqrt{t+1}$ из $w=4$ сходится к $w^*\\approx9{,}10$ с $\\mathrm{MAPE}\\approx20{,}28\\%$. Метод наименьших квадратов даёт $w\\approx10{,}74$ и $\\mathrm{MAPE}\\approx22{,}99\\%$, зато его суммарный прогноз почти не смещён ($-0{,}6\\%$), а у модели по MAPE сумма прогнозов примерно на $16\\%$ ниже суммы фактов."),
-        ("p", "Почему так: точки с малыми $y$ получают большой вес и тянут прямую вниз. В терминах отношений $q_i=y_i/x_i$ имеем $\\mathrm{MAPE}(w)=\\frac{100\\%}{n}\\sum_i|q_i-w|/q_i$, так что оптимум — взвешенная медиана $q_i$ с весами $1/q_i$. При логнормальном шуме это медиана, умноженная на $e^{-\\sigma^2}=e^{-0{,}1225}\\approx0{,}885$, то есть около $8{,}85$ вместо 10."),
+        ("viz", "mape-training", {}, "<b>Рисунок 5.</b> Слева — данные (чем больше вес $1/y$, тем крупнее точка) и две модели, справа — MAPE как функция наклона $w$. Нажмите «Пуск»: субградиентный спуск по MAPE с шагом $8/\\sqrt{t+1}$ из $w=4$ сходится к $w^*\\approx9{,}10$ с $\\mathrm{MAPE}\\approx20{,}28\\%$. Метод наименьших квадратов даёт $w\\approx10{,}74$ и $\\mathrm{MAPE}\\approx22{,}99\\%$, зато его суммарный прогноз почти не смещён ($-0{,}6\\%$), а у модели по MAPE сумма прогнозов примерно на $16\\%$ ниже суммы фактов."),
+        ("p", "Почему так: точки с малыми $y$ получают большой вес и тянут прямую вниз. В терминах отношений $q_i=y_i/x_i$ имеем $\\mathrm{MAPE}(w)=\\frac{100\\%}{n}\\sum_i|q_i-w|/q_i$, так что оптимум — взвешенная медиана $q_i$ с весами $1/q_i$. При логнормальном шуме это медиана, умноженная на $e^{-\\sigma^2}=e^{-0{,}1225}\\approx0{,}885$, то есть на большой выборке около $8{,}85$ вместо 10 (на 400 точках листинга scikit-learn ниже получается $8{,}85$). На 40 точках рисунка случайный разброс заметнее, и оптимум равен $9{,}10$."),
         ("callout", "key", "Как обойти смещение", "1) Обучайте на MAE или MSE от $\\ln y$, а MAPE используйте только для отчёта. 2) Если KPI — именно MAPE, а недопрогноз дорог (дефицит), корректируйте прогнозы множителем, подобранным на валидации, или выберите метрику, отражающую реальные издержки (WAPE, квантильная потеря). 3) Не обучайте на MAPE, если в данных есть нули или почти нули."),
     ]),
     dict(id="alternatives", title="MAPE, sMAPE, WAPE и MASE", blocks=[
         ("p", "Из-за перечисленных проблем у MAPE есть несколько популярных родственников ($e_i=y_i-\\hat y_i$):"),
         ("table", ["Метрика", "Формула", "Нули в $y$", "Особенность"], "ALT", {"num": []}),
-        ("p", "В сквозном примере $\\mathrm{MAPE}\\approx13{,}9\\%$, $\\mathrm{sMAPE}\\approx13{,}5\\%$, $\\mathrm{WAPE}=2{,}5/16\\approx15{,}6\\%$, а MASE с масштабом $\\tfrac12\\bigl(|5-3|+|8-5|\\bigr)=2{,}5$ равна $0{,}833/2{,}5\\approx0{,}33$."),
-        ("p", "WAPE (её ещё называют MAD/Mean ratio) — это MAE, делённая на средний факт: объекты с большими продажами весят больше, и общий итог не ломается от одного товара с почти нулевым спросом. MASE (Хайндман и Кёлер, 2006) сравнивает MAE модели с MAE наивного прогноза и годится даже для рядов с нулями. На одних и тех же данных WAPE и MASE отличаются лишь постоянным множителем, поэтому у них один и тот же оптимум."),
+        ("p", "В сквозном примере $\\mathrm{MAPE}\\approx13{,}9\\%$, $\\mathrm{sMAPE}\\approx13{,}5\\%$, $\\mathrm{WAPE}=2{,}5/16\\approx15{,}6\\%$, а MASE с масштабом $\\tfrac12\\bigl(|5-3|+|8-5|\\bigr)=2{,}5$ равна $0{,}833/2{,}5\\approx0{,}33$ (для простоты масштаб посчитан по тем же трём точкам)."),
+        ("p", "WAPE (её ещё называют MAD/Mean ratio) — это MAE, делённая на средний факт: объекты с большими продажами весят больше, и общий итог не ломается от одного товара с почти нулевым спросом. MASE (Хайндман и Кёлер, 2006) сравнивает MAE модели с MAE наивного прогноза «как в прошлый период», посчитанной на обучающей части ряда (для сезонных рядов — сезонного наивного прогноза), и годится даже для рядов с нулями. У sMAPE вариантов несколько: здесь используется $2|e_i|/(|y_i|+|\\hat y_i|)$ с пределом $200\\%$, как в M4; в M3 знаменатель брали без модулей, $y_i+\\hat y_i$, а встречается и версия без двойки с пределом $100\\%$ — прежде чем сравнивать числа, уточните формулу. На одних и тех же данных WAPE и MASE отличаются лишь постоянным множителем, поэтому у них один и тот же оптимум."),
         ("viz", "mape-metrics", {"k": 1}, "<b>Рисунок 6.</b> 52 недели спроса (точки) и прогноз $k\\cdot$база (синяя линия). Справа — метрики как функции множителя $k$, точки — минимумы. MAPE минимальна при $k\\approx0{,}89$, то есть при прогнозе, заниженном на 11%; sMAPE — при $k\\approx1{,}007$; WAPE (и MASE) — при $k\\approx1{,}012$. Включите провал спроса — одну неделю с $y=3$: MAPE при $k=1$ подскакивает с $24{,}5\\%$ до $68{,}8\\%$, а её минимум уезжает к $k\\approx0{,}78$; WAPE меняется лишь с $23{,}5\\%$ до $25{,}4\\%$."),
     ]),
     dict(id="business", title="Бизнес-пример: ассортимент магазина", blocks=[
@@ -226,7 +228,7 @@ SECTIONS = {
     dict(id="code", title="В коде", blocks=[
         ("p", "В NumPy MAPE — одна строка; ниже заодно sMAPE, WAPE и проверка формул на сквозном примере."),
         ("code", "python", "CODE_NUMPY"),
-        ("p", "scikit-learn возвращает долю и вместо деления на ноль делит на машинный эпсилон. Для обучения «на MAPE» подходит медианная регрессия с весами $1/y$:"),
+        ("p", "scikit-learn возвращает долю, а знаменатели меньше машинного эпсилона ($\\approx2{,}2\\cdot10^{-16}$) заменяет на эпсилон — поэтому вместо ошибки деления на ноль получается огромное число. Для обучения «на MAPE» подходит медианная регрессия с весами $1/y$:"),
         ("code", "python", "CODE_SKLEARN"),
         ("p", "В PyTorch MAPE как функция потерь:"),
         ("code", "python", "CODE_TORCH"),
@@ -277,7 +279,7 @@ SECTIONS = {
             "<b>finance and economics</b> — the accuracy of revenue, price and macro forecasts;",
             "<b>energy</b> — grid load forecasting, where the percentage error translates directly into the cost of reserves;",
             "<b>comparing series of different scales</b> — MAPE is dimensionless, so accuracy can be averaged over thousands of products;",
-            "<b>forecasting competitions</b> — the M competitions used its symmetric variant, sMAPE.",
+            "<b>forecasting competitions</b> — in Makridakis’s M3 competition its “symmetric” variant sMAPE was one of the key metrics, and in M4 methods were ranked by sMAPE together with MASE.",
         ]),
         ("callout", "key", "The gist in a minute", "MAPE is the mean absolute error measured as a share of the actual. It does not depend on scale, but it is undefined at $y_i=0$ and explodes near zero. For a positive actual an under-forecast costs at most $100\\%$, an over-forecast can cost any amount. MAPE is MAE with weights $1/|y_i|$, so the best constant under MAPE is a weighted median shifted downwards, and a model trained on MAPE forecasts too low."),
     ]),
@@ -351,15 +353,15 @@ SECTIONS = {
     dict(id="training", title="Training on MAPE: 1/y weights and under-forecasting", blocks=[
         ("p", "Since MAPE is MAE with weights $1/|y_i|$, a model can be trained on MAPE by any algorithm that minimises a weighted MAE: pass <code>sample_weight=1/|y|</code>. LightGBM has a ready-made <code>objective=\"mape\"</code>, and in PyTorch the loss is one line (see the code section)."),
         ("p", "Let us train the simplest model $\\hat y=w\\,x$ on 40 objects with $y=10\\,x\\cdot e^{0.35\\,\\varepsilon}$, $\\varepsilon\\sim N(0,1)$: the true slope is 10, and the noise is multiplicative — its size grows with $y$, as with real sales."),
-        ("viz", "mape-training", {}, "<b>Figure 5.</b> Left: the data (dot size is proportional to the weight $1/y$) and two models; right: MAPE as a function of the slope $w$. Press “Play”: subgradient descent on MAPE with step $8/\\sqrt{t+1}$ from $w=4$ converges to $w^*\\approx9.10$ with $\\mathrm{MAPE}\\approx20.28\\%$. Least squares gives $w\\approx10.74$ and $\\mathrm{MAPE}\\approx22.99\\%$, but its total forecast is almost unbiased ($-0.6\\%$), while the MAPE model’s total forecast is about $16\\%$ below the total actual."),
-        ("p", "Why: points with small $y$ get a large weight and pull the line down. In terms of the ratios $q_i=y_i/x_i$ we have $\\mathrm{MAPE}(w)=\\frac{100\\%}{n}\\sum_i|q_i-w|/q_i$, so the optimum is the weighted median of $q_i$ with weights $1/q_i$. With lognormal noise this is the median times $e^{-\\sigma^2}=e^{-0.1225}\\approx0.885$, i.e. about $8.85$ instead of 10."),
+        ("viz", "mape-training", {}, "<b>Figure 5.</b> Left: the data (the larger the weight $1/y$, the bigger the dot) and two models; right: MAPE as a function of the slope $w$. Press “Play”: subgradient descent on MAPE with step $8/\\sqrt{t+1}$ from $w=4$ converges to $w^*\\approx9.10$ with $\\mathrm{MAPE}\\approx20.28\\%$. Least squares gives $w\\approx10.74$ and $\\mathrm{MAPE}\\approx22.99\\%$, but its total forecast is almost unbiased ($-0.6\\%$), while the MAPE model’s total forecast is about $16\\%$ below the total actual."),
+        ("p", "Why: points with small $y$ get a large weight and pull the line down. In terms of the ratios $q_i=y_i/x_i$ we have $\\mathrm{MAPE}(w)=\\frac{100\\%}{n}\\sum_i|q_i-w|/q_i$, so the optimum is the weighted median of $q_i$ with weights $1/q_i$. With lognormal noise this is the median times $e^{-\\sigma^2}=e^{-0.1225}\\approx0.885$, i.e. on a large sample about $8.85$ instead of 10 (the 400 points of the scikit-learn listing below give $8.85$). On the 40 points of the figure sampling noise is larger, and the optimum is $9.10$."),
         ("callout", "key", "How to avoid the bias", "1) Train on MAE or MSE of $\\ln y$ and use MAPE only for reporting. 2) If the KPI really is MAPE but under-forecasts are costly (stock-outs), correct the forecasts with a multiplier tuned on validation data, or choose a metric that reflects the real costs (WAPE, the quantile loss). 3) Do not train on MAPE if the data contain zeros or near-zeros."),
     ]),
     dict(id="alternatives", title="MAPE, sMAPE, WAPE and MASE", blocks=[
         ("p", "Because of these problems MAPE has several popular relatives ($e_i=y_i-\\hat y_i$):"),
         ("table", ["Metric", "Formula", "Zeros in $y$", "Feature"], "ALT", {"num": []}),
-        ("p", "In the running example $\\mathrm{MAPE}\\approx13.9\\%$, $\\mathrm{sMAPE}\\approx13.5\\%$, $\\mathrm{WAPE}=2.5/16\\approx15.6\\%$, and MASE with the scale $\\tfrac12\\bigl(|5-3|+|8-5|\\bigr)=2.5$ equals $0.833/2.5\\approx0.33$."),
-        ("p", "WAPE (also called the MAD/Mean ratio) is MAE divided by the mean actual: objects with large sales weigh more, and the total is not ruined by a single product with near-zero demand. MASE (Hyndman and Koehler, 2006) compares the model’s MAE with the MAE of the naive forecast and works even for series with zeros. On the same data WAPE and MASE differ only by a constant factor, so they share the same optimum."),
+        ("p", "In the running example $\\mathrm{MAPE}\\approx13.9\\%$, $\\mathrm{sMAPE}\\approx13.5\\%$, $\\mathrm{WAPE}=2.5/16\\approx15.6\\%$, and MASE with the scale $\\tfrac12\\bigl(|5-3|+|8-5|\\bigr)=2.5$ equals $0.833/2.5\\approx0.33$ (for simplicity the scale is computed on the same three points)."),
+        ("p", "WAPE (also called the MAD/Mean ratio) is MAE divided by the mean actual: objects with large sales weigh more, and the total is not ruined by a single product with near-zero demand. MASE (Hyndman and Koehler, 2006) compares the model’s MAE with the MAE of the naive “same as last period” forecast computed on the training part of the series (for seasonal series, of the seasonal naive forecast), and works even for series with zeros. sMAPE comes in several variants: here we use $2|e_i|/(|y_i|+|\\hat y_i|)$, bounded by $200\\%$, as in M4; M3 used the denominator without absolute values, $y_i+\\hat y_i$, and there is also a version without the factor 2, bounded by $100\\%$ — check the formula before comparing numbers. On the same data WAPE and MASE differ only by a constant factor, so they share the same optimum."),
         ("viz", "mape-metrics", {"k": 1}, "<b>Figure 6.</b> 52 weeks of demand (dots) and the forecast $k\\cdot$base (blue line). Right: the metrics as functions of the multiplier $k$; dots mark the minima. MAPE is minimal at $k\\approx0.89$, i.e. for a forecast 11% too low; sMAPE at $k\\approx1.007$; WAPE (and MASE) at $k\\approx1.012$. Turn on the demand dip — one week with $y=3$: MAPE at $k=1$ jumps from $24.5\\%$ to $68.8\\%$ and its minimum moves to $k\\approx0.78$; WAPE only changes from $23.5\\%$ to $25.4\\%$."),
     ]),
     dict(id="business", title="A business example: a store’s assortment", blocks=[
@@ -377,7 +379,7 @@ SECTIONS = {
     dict(id="code", title="In code", blocks=[
         ("p", "In NumPy MAPE is one line; below we also compute sMAPE and WAPE and check the formulas on the running example."),
         ("code", "python", "CODE_NUMPY"),
-        ("p", "scikit-learn returns a fraction and divides by the machine epsilon instead of zero. Median regression with weights $1/y$ is a way to train “on MAPE”:"),
+        ("p", "scikit-learn returns a fraction and replaces denominators below the machine epsilon ($\\approx2.2\\cdot10^{-16}$) with the epsilon — so instead of a division-by-zero error you get a huge number. Median regression with weights $1/y$ is a way to train “on MAPE”:"),
         ("code", "python", "CODE_SKLEARN"),
         ("p", "MAPE as a loss in PyTorch:"),
         ("code", "python", "CODE_TORCH"),
@@ -428,14 +430,14 @@ SECTIONS = {
             "<b>moliya va iqtisodiyot</b> — tushum, narxlar, makroko‘rsatkichlar bashoratlarining aniqligi;",
             "<b>energetika</b> — tarmoq yuklamasini bashorat qilish, bunda xato foizi to‘g‘ridan-to‘g‘ri zaxira narxiga aylanadi;",
             "<b>turli masshtabdagi qatorlarni solishtirish</b> — MAPE o‘lchamsiz, shuning uchun aniqlikni minglab tovarlar bo‘yicha o‘rtachalash mumkin;",
-            "<b>bashorat musobaqalari</b> — M-musobaqalarda uning simmetrik varianti sMAPE ishlatilgan.",
+            "<b>bashorat musobaqalari</b> — Makridakisning M3 musobaqasida uning «simmetrik» varianti sMAPE asosiy metrikalardan biri bo‘lgan, M4 da esa usullar sMAPE va MASE bo‘yicha birgalikda reytinglangan.",
         ]),
         ("callout", "key", "Bir daqiqada asosiysi", "MAPE — haqiqiy qiymat ulushlarida o‘lchangan o‘rtacha absolyut xato. U masshtabga bog‘liq emas, lekin $y_i=0$ da aniqlanmagan va nol atrofida portlaydi. Musbat haqiqiy qiymat uchun kam bashorat ko‘pi bilan $100\\%$ turadi, ortiq bashorat esa istalgancha. MAPE — $1/|y_i|$ vaznli MAE, shuning uchun MAPE bo‘yicha eng yaxshi konstanta pastga siljigan vaznli mediana, MAPE’da o‘qitilgan model esa bashoratlarni kamaytiradi."),
     ]),
     dict(id="intuition", title="Intuitsiya: haqiqiy qiymat ulushlaridagi xato", blocks=[
         ("p", "3 dona sotilganda 1 donaga adashish — uchdan birga xato qilish. 100 dona sotilganda xuddi shu bir donaga adashish — deyarli aniq tegish. MAPE har bir xatoni o‘z haqiqiy qiymatiga nisbatan o‘lchaydi va hosil bo‘lgan foizlarni o‘rtachalaydi."),
         ("p", "Ko‘k nuqtalarni — bashoratlarni torting. O‘ngda — har bir obyektning foizdagi xatosi (APE, absolute percentage error) va ularning o‘rtachasi — MAPE."),
-        ("viz", "mape-explorer", {}, "<b>Rasm 1.</b> Umumiy misol: $y=(3;\\,5;\\,8)$, $\\hat y=(2{,}5;\\,5;\\,10)$. $0{,}5$ va $2$ xatolar $16{,}7\\%$ va $25\\%$ ga aylanadi, o‘rtacha $\\mathrm{MAPE}\\approx13{,}9\\%$. Birinchi bashoratni 2 gacha tushiring — bir donalik xato $33{,}3\\%$ turadi; uchinchi obyektdagi xuddi shunday xato (bashorat 7) atigi $12{,}5\\%$ turar edi."),
+        ("viz", "mape-explorer", {}, "<b>1-rasm.</b> Umumiy misol: $y=(3;\\,5;\\,8)$, $\\hat y=(2{,}5;\\,5;\\,10)$. $0{,}5$ va $2$ xatolar $16{,}7\\%$ va $25\\%$ ga aylanadi, o‘rtacha $\\mathrm{MAPE}\\approx13{,}9\\%$. Birinchi bashoratni 2 gacha tushiring — bir donalik xato $33{,}3\\%$ turadi; uchinchi obyektdagi xuddi shunday xato (bashorat 7) atigi $12{,}5\\%$ turar edi."),
         ("callout", "intuition", "Nimaga e’tibor bering", "Uchinchi obyektning absolyut xatosi birinchinikidan to‘rt baravar katta ($2$ va $0{,}5$), foizdagisi esa atigi $1{,}5$ baravar ($25\\%$ va $16{,}7\\%$): katta haqiqiy qiymat katta xatolarni «kechiradi». MAPE masshtabga befarq va kichik haqiqiy qiymatlarga juda sezgir."),
     ]),
     dict(id="anatomy", title="Formula mayda detallarigacha", blocks=[
@@ -467,7 +469,7 @@ SECTIONS = {
         ]),
         ("h3", "Donada simmetrik, marta bo‘yicha — yo‘q"),
         ("p", "Agar xatoni birliklarda hisoblasak, MAPE simmetrik: $y-d$ va $y+d$ bashoratlar bir xil, $d/y$ turadi. Lekin biznesda xatolar ko‘pincha marta bilan o‘lchanadi: «bir yarim baravar oshirib yubordik», «ikki baravar kam bashorat qildik». Bu yerda MAPE nosimmetrik: ikki baravar kam ($\\hat y=y/2$) $50\\%$ turadi, ikki baravar ko‘p ($\\hat y=2y$) — $100\\%$. Bir xil marta adashgan ikki bashoratdan MAPE doim kamrog‘ini afzal ko‘radi."),
-        ("viz", "mape-asymmetry", {"yhat": 150}, "<b>Rasm 2.</b> Haqiqiy qiymati $y=100$ bo‘lgan bitta obyekt xatosi bashorat funksiyasi sifatida. To‘q sariq APE — $\\hat y=y$ da singan «belgi»: chapda u $100\\%$ shiftga tiraladi, o‘ngda esa cheksiz o‘sadi. 150 bashorati (haqiqiy qiymatdan $1{,}5$ marta katta) $50\\%$ turadi, $100^2/150\\approx66{,}7$ bashorati ($1{,}5$ marta kichik) esa atigi $33{,}3\\%$. Binafsha sMAPE $200\\%$ bilan chegaralangan va xuddi shu absolyut xatoda kam bashoratga qattiqroq: $\\hat y=150$ da $40\\%$ va $\\hat y=50$ da $66{,}7\\%$. Pastda — hosilalar: APE’da bu bashoratning har bir birligiga $\\pm1\\%$ zinapoya."),
+        ("viz", "mape-asymmetry", {"yhat": 150}, "<b>2-rasm.</b> Haqiqiy qiymati $y=100$ bo‘lgan bitta obyekt xatosi bashorat funksiyasi sifatida. To‘q sariq APE — $\\hat y=y$ da singan «belgi»: chapda u $100\\%$ shiftga tiraladi, o‘ngda esa cheksiz o‘sadi. 150 bashorati (haqiqiy qiymatdan $1{,}5$ marta katta) $50\\%$ turadi, $100^2/150\\approx66{,}7$ bashorati ($1{,}5$ marta kichik) esa atigi $33{,}3\\%$. Binafsha sMAPE $200\\%$ bilan chegaralangan va xuddi shu absolyut xatoda kam bashoratga qattiqroq: $\\hat y=150$ da $40\\%$ va $\\hat y=50$ da $66{,}7\\%$. Pastda — hosilalar: APE’da bu bashoratning har bir birligiga $\\pm1\\%$ zinapoya."),
         ("deep", "Nega sMAPE unchalik simmetrik emas", [
             ("p", "sMAPE xatoni haqiqiy qiymat va bashoratning o‘rtachasiga bo‘ladi: $\\mathrm{sAPE}=2|y-\\hat y|/(|y|+|\\hat y|)$. Marta bo‘yicha u simmetrik: $\\hat y=k\\,y$ va $\\hat y=y/k$ da ($k&gt;0$, $y&gt;0$) bir xil qiymat chiqadi:"),
             ("eq", r"\frac{2|k-1|\,y}{y+k\,y}=\frac{2|k-1|}{k+1},\qquad\frac{2|1/k-1|\,y}{y+y/k}=\frac{2|1-k|}{k+1}"),
@@ -491,31 +493,31 @@ SECTIONS = {
             ("eq", r"\frac{f(y)}{y}\propto\frac{1}{y^2}\,e^{-\frac{(t-\mu)^2}{2\sigma^2}}=\frac{1}{y}\,e^{-\frac{(t-\mu)^2+2\sigma^2 t}{2\sigma^2}}\propto\frac{1}{y}\,e^{-\frac{(t-(\mu-\sigma^2))^2}{2\sigma^2}}"),
             ("p", "Bu yana lognormal zichlik, lekin $\\mu-\\sigma^2$ parametr bilan; uning medianasi $e^{\\mu-\\sigma^2}$. Taqqoslash uchun: dastlabki taqsimotning o‘rtachasi $e^{\\mu+\\sigma^2/2}$ medianadan yuqori. $\\sigma=0{,}6$ da MAPE optimumi medianadan $1-e^{-0{,}36}\\approx30\\%$ past."),
         ]),
-        ("viz", "mape-optimal", {"sigma": 0.6, "c": 100}, "<b>Rasm 3.</b> Medianasi taxminan 100 bo‘lgan lognormal talabning 60 ta qiymati (generator zerrasi qayd etilgan). Qora egri chiziq — $c$ konstant bashoratning MAPE’si, pastda — uning qiyaligi, zinapoyasimon funksiya. $\\sigma=0{,}6$ da $42{,}5\\%$ minimumga $c^*\\approx71{,}0$ da erishiladi, mediana esa $101{,}0$, o‘rtacha — $119{,}1$: MAPE bo‘yicha optimal bashorat medianadan $29{,}7\\%$ past (nazariya $e^{-0{,}36}-1\\approx-30{,}2\\%$). Medianaga teng bashorat $51{,}5\\%$, o‘rtachaga teng bashorat $63{,}0\\%$, nol bashorat esa roppa-rosa $100\\%$ turadi."),
+        ("viz", "mape-optimal", {"sigma": 0.6, "c": 100}, "<b>3-rasm.</b> Medianasi taxminan 100 bo‘lgan lognormal talabning 60 ta qiymati (generator urug‘i — seed — qayd etilgan). Qora egri chiziq — $c$ konstant bashoratning MAPE’si, pastda — uning qiyaligi, zinapoyasimon funksiya. $\\sigma=0{,}6$ da $42{,}5\\%$ minimumga $c^*\\approx71{,}0$ da erishiladi, mediana esa $101{,}0$, o‘rtacha — $119{,}1$: MAPE bo‘yicha optimal bashorat medianadan $29{,}7\\%$ past (nazariya $e^{-0{,}36}-1\\approx-30{,}2\\%$). Medianaga teng bashorat $51{,}5\\%$, o‘rtachaga teng bashorat $63{,}0\\%$, nol bashorat esa roppa-rosa $100\\%$ turadi."),
         ("callout", "warn", "MAPE’da o‘qitish kam bashoratga olib keladi", "MAPE’ni minimallashtirishga o‘qitilgan model bu siljishni meros qilib oladi: uning bashoratlari sistematik ravishda haqiqiy qiymatlardan past. Chakana savdoda bu bo‘sh javonlarni anglatadi, yo‘qotilgan sotuvlar esa hech bir metrikaga tushmaydi: omborda qancha bo‘lsa, roppa-rosa shuncha sotiladi."),
     ]),
     dict(id="surface", title="Xato xaritasi: (y, ŷ) tekisligi ustidagi APE", blocks=[
         ("p", "Bitta obyekt xatosiga ikki o‘zgaruvchining — haqiqiy qiymat $y$ va bashorat $\\hat y$ ning funksiyasi sifatida qaraymiz. APE sath chiziqlari — <b>koordinata boshidan chiqqan nurlar</b>: $|y-\\hat y|/y=a$ sharti $\\hat y=(1\\pm a)\\,y$ ga teng kuchli. Absolyut xatoning sath chiziqlari esa, aksincha, parallel $\\hat y=y\\pm e$ to‘g‘ri chiziqlar. Nurlar nolda tutashadi, shuning uchun $y=0$ yaqinida istalgan qayd etilgan absolyut xato APE’ning barcha sathlarini kesib o‘tadi — «portlash» shundan."),
-        ("viz", "mape-surface", {"p": [2, 3]}, "<b>Rasm 4.</b> Chapda — $200\\%$ da kesilgan $\\mathrm{APE}(y,\\hat y)$ sirti (uni aylantirish mumkin): $\\hat y=y$ diagonali (to‘q sariq chiziq) bo‘ylab nol xato vodiysi va $y\\to0$ da devor. O‘ngda — yuqoridan ko‘rinish: qora nurlar — APE sathlari, qizil punktir — 1 va 2 absolyut xato sathlari. $P=(2;\\,3)$ va $Q=(8;\\,9)$ nuqtalar bir xil bir birlikka adashadi, lekin $\\mathrm{APE}(P)=50\\%$, $\\mathrm{APE}(Q)=12{,}5\\%$."),
+        ("viz", "mape-surface", {"p": [2, 3]}, "<b>4-rasm.</b> Chapda — $200\\%$ da kesilgan $\\mathrm{APE}(y,\\hat y)$ sirti (uni aylantirish mumkin): $\\hat y=y$ diagonali (to‘q sariq chiziq) bo‘ylab nol xato vodiysi va $y\\to0$ da devor. O‘ngda — yuqoridan ko‘rinish: qora nurlar — APE sathlari, qizil punktir — 1 va 2 absolyut xato sathlari. $P=(2;\\,3)$ va $Q=(8;\\,9)$ nuqtalar bir xil bir birlikka adashadi, lekin $\\mathrm{APE}(P)=50\\%$, $\\mathrm{APE}(Q)=12{,}5\\%$."),
         ("p", "$n$ ta obyekt uchun MAPE — shunday funksiyalarning o‘rtachasi. $(\\hat y_1,\\dots,\\hat y_n)$ bashoratlar fazosida uning sath chiziqlari — markazi $y$ da, yarim o‘qlari $y_i$ ga proporsional bo‘lgan ko‘pyoqlar (2D’da romblar): kichik $y_i$ o‘qlari bo‘ylab katta jarimasiz uzoqqa ketib bo‘lmaydi."),
     ]),
     dict(id="training", title="MAPE’da o‘qitish: 1/y vaznlar va kam bashorat", blocks=[
         ("p", "MAPE — $1/|y_i|$ vaznli MAE bo‘lgani uchun, modelni MAPE’da obyekt vaznlari bilan MAE’ni minimallashtiradigan istalgan algoritm bilan o‘qitish mumkin: <code>sample_weight=1/|y|</code> ni bering. LightGBM’da tayyor <code>objective=\"mape\"</code> maqsadi bor, PyTorch’da esa yo‘qotish bir qatorda yoziladi (kod bo‘limiga qarang)."),
         ("p", "Eng oddiy $\\hat y=w\\,x$ modelni $y=10\\,x\\cdot e^{0{,}35\\,\\varepsilon}$, $\\varepsilon\\sim N(0,1)$ bo‘lgan 40 ta obyektda o‘qitamiz: haqiqiy qiyalik 10 ga teng, shovqin multiplikativ — uning kattaligi haqiqiy sotuvlardagi kabi $y$ bilan birga o‘sadi."),
-        ("viz", "mape-training", {}, "<b>Rasm 5.</b> Chapda — ma’lumotlar (nuqta o‘lchami $1/y$ vazniga proporsional) va ikki model, o‘ngda — $w$ qiyalik funksiyasi sifatida MAPE. «Boshlash»ni bosing: $w=4$ dan $8/\\sqrt{t+1}$ qadam bilan MAPE bo‘yicha subgradiyent tushish $\\mathrm{MAPE}\\approx20{,}28\\%$ bilan $w^*\\approx9{,}10$ ga yaqinlashadi. Eng kichik kvadratlar usuli $w\\approx10{,}74$ va $\\mathrm{MAPE}\\approx22{,}99\\%$ beradi, lekin uning umumiy bashorati deyarli siljimagan ($-0{,}6\\%$), MAPE bo‘yicha modelning bashoratlar yig‘indisi esa haqiqiy qiymatlar yig‘indisidan taxminan $16\\%$ past."),
-        ("p", "Nega shunday: kichik $y$ li nuqtalar katta vazn oladi va to‘g‘ri chiziqni pastga tortadi. $q_i=y_i/x_i$ nisbatlar tilida $\\mathrm{MAPE}(w)=\\frac{100\\%}{n}\\sum_i|q_i-w|/q_i$, demak, optimum — $1/q_i$ vaznli $q_i$ larning vaznli medianasi. Lognormal shovqinda bu $e^{-\\sigma^2}=e^{-0{,}1225}\\approx0{,}885$ ga ko‘paytirilgan mediana, ya’ni 10 o‘rniga taxminan $8{,}85$."),
+        ("viz", "mape-training", {}, "<b>5-rasm.</b> Chapda — ma’lumotlar ($1/y$ vazn qancha katta bo‘lsa, nuqta shuncha yirik) va ikki model, o‘ngda — $w$ qiyalik funksiyasi sifatida MAPE. «Boshlash»ni bosing: $w=4$ dan $8/\\sqrt{t+1}$ qadam bilan MAPE bo‘yicha subgradiyent tushish $\\mathrm{MAPE}\\approx20{,}28\\%$ bilan $w^*\\approx9{,}10$ ga yaqinlashadi. Eng kichik kvadratlar usuli $w\\approx10{,}74$ va $\\mathrm{MAPE}\\approx22{,}99\\%$ beradi, lekin uning umumiy bashorati deyarli siljimagan ($-0{,}6\\%$), MAPE bo‘yicha modelning bashoratlar yig‘indisi esa haqiqiy qiymatlar yig‘indisidan taxminan $16\\%$ past."),
+        ("p", "Nega shunday: kichik $y$ li nuqtalar katta vazn oladi va to‘g‘ri chiziqni pastga tortadi. $q_i=y_i/x_i$ nisbatlar tilida $\\mathrm{MAPE}(w)=\\frac{100\\%}{n}\\sum_i|q_i-w|/q_i$, demak, optimum — $1/q_i$ vaznli $q_i$ larning vaznli medianasi. Lognormal shovqinda bu $e^{-\\sigma^2}=e^{-0{,}1225}\\approx0{,}885$ ga ko‘paytirilgan mediana, ya’ni katta tanlanmada 10 o‘rniga taxminan $8{,}85$ (quyidagi scikit-learn listingidagi 400 ta nuqtada $8{,}85$ chiqadi). 5-rasmdagi 40 ta nuqtada tasodifiy tebranish sezilarliroq, va optimum $9{,}10$ ga teng."),
         ("callout", "key", "Siljishni qanday chetlab o‘tish mumkin", "1) $\\ln y$ dan MAE yoki MSE’da o‘qiting, MAPE’ni esa faqat hisobot uchun ishlating. 2) Agar KPI aynan MAPE bo‘lsa-yu, kam bashorat qimmat bo‘lsa (taqchillik), bashoratlarni validatsiyada tanlangan ko‘paytuvchi bilan to‘g‘rilang yoki haqiqiy xarajatlarni aks ettiruvchi metrikani tanlang (WAPE, kvantil yo‘qotish). 3) Ma’lumotlarda nollar yoki nolga yaqin qiymatlar bo‘lsa, MAPE’da o‘qitmang."),
     ]),
     dict(id="alternatives", title="MAPE, sMAPE, WAPE va MASE", blocks=[
         ("p", "Sanab o‘tilgan muammolar tufayli MAPE’ning bir nechta mashhur qarindoshlari bor ($e_i=y_i-\\hat y_i$):"),
         ("table", ["Metrika", "Formula", "$y$ dagi nollar", "Xususiyati"], "ALT", {"num": []}),
-        ("p", "Umumiy misolda $\\mathrm{MAPE}\\approx13{,}9\\%$, $\\mathrm{sMAPE}\\approx13{,}5\\%$, $\\mathrm{WAPE}=2{,}5/16\\approx15{,}6\\%$, masshtabi $\\tfrac12\\bigl(|5-3|+|8-5|\\bigr)=2{,}5$ bo‘lgan MASE esa $0{,}833/2{,}5\\approx0{,}33$ ga teng."),
-        ("p", "WAPE (uni MAD/Mean ratio deb ham atashadi) — o‘rtacha haqiqiy qiymatga bo‘lingan MAE: sotuvi katta obyektlar og‘irroq, umumiy natija esa talabi nolga yaqin bitta tovar tufayli buzilmaydi. MASE (Xayndman va Kyoler, 2006) model MAE’sini sodda bashorat MAE’si bilan solishtiradi va hatto nollari bor qatorlar uchun ham yaraydi. Bir xil ma’lumotlarda WAPE va MASE faqat o‘zgarmas ko‘paytuvchi bilan farq qiladi, shuning uchun ularning optimumi bitta."),
-        ("viz", "mape-metrics", {"k": 1}, "<b>Rasm 6.</b> 52 haftalik talab (nuqtalar) va $k\\cdot$baza bashorati (ko‘k chiziq). O‘ngda — $k$ ko‘paytuvchining funksiyasi sifatida metrikalar, nuqtalar — minimumlar. MAPE $k\\approx0{,}89$ da, ya’ni 11% ga kamaytirilgan bashoratda minimal; sMAPE — $k\\approx1{,}007$ da; WAPE (va MASE) — $k\\approx1{,}012$ da. Talab tushishini yoqing — $y=3$ bo‘lgan bitta hafta: $k=1$ da MAPE $24{,}5\\%$ dan $68{,}8\\%$ gacha sakraydi, uning minimumi esa $k\\approx0{,}78$ ga ko‘chadi; WAPE atigi $23{,}5\\%$ dan $25{,}4\\%$ gacha o‘zgaradi."),
+        ("p", "Umumiy misolda $\\mathrm{MAPE}\\approx13{,}9\\%$, $\\mathrm{sMAPE}\\approx13{,}5\\%$, $\\mathrm{WAPE}=2{,}5/16\\approx15{,}6\\%$, masshtabi $\\tfrac12\\bigl(|5-3|+|8-5|\\bigr)=2{,}5$ bo‘lgan MASE esa $0{,}833/2{,}5\\approx0{,}33$ ga teng (soddalik uchun masshtab o‘sha uchta nuqta bo‘yicha hisoblangan)."),
+        ("p", "WAPE (uni MAD/Mean ratio deb ham atashadi) — o‘rtacha haqiqiy qiymatga bo‘lingan MAE: sotuvi katta obyektlar og‘irroq, umumiy natija esa talabi nolga yaqin bitta tovar tufayli buzilmaydi. MASE (Xayndman va Kyoler, 2006) model MAE’sini qatorning o‘qitish qismida hisoblangan «o‘tgan davrdagidek» sodda bashorat MAE’si bilan solishtiradi (mavsumiy qatorlarda — mavsumiy sodda bashorat bilan) va hatto nollari bor qatorlar uchun ham yaraydi. sMAPE’ning bir nechta varianti bor: bu yerda M4 dagi kabi $200\\%$ bilan chegaralangan $2|e_i|/(|y_i|+|\\hat y_i|)$ ishlatiladi; M3 da maxraj modullarsiz, $y_i+\\hat y_i$ olingan, ikkisiz va $100\\%$ bilan chegaralangan versiya ham uchraydi — sonlarni solishtirishdan oldin formulani aniqlang. Bir xil ma’lumotlarda WAPE va MASE faqat o‘zgarmas ko‘paytuvchi bilan farq qiladi, shuning uchun ularning optimumi bitta."),
+        ("viz", "mape-metrics", {"k": 1}, "<b>6-rasm.</b> 52 haftalik talab (nuqtalar) va $k\\cdot$baza bashorati (ko‘k chiziq). O‘ngda — $k$ ko‘paytuvchining funksiyasi sifatida metrikalar, nuqtalar — minimumlar. MAPE $k\\approx0{,}89$ da, ya’ni 11% ga kamaytirilgan bashoratda minimal; sMAPE — $k\\approx1{,}007$ da; WAPE (va MASE) — $k\\approx1{,}012$ da. Talab tushishini yoqing — $y=3$ bo‘lgan bitta hafta: $k=1$ da MAPE $24{,}5\\%$ dan $68{,}8\\%$ gacha sakraydi, uning minimumi esa $k\\approx0{,}78$ ga ko‘chadi; WAPE atigi $23{,}5\\%$ dan $25{,}4\\%$ gacha o‘zgaradi."),
     ]),
     dict(id="business", title="Biznes misoli: do‘kon assortimenti", blocks=[
         ("p", "Tarmoq oltita tovarning haftalik sotuvlarini bashorat qiladi. Ulardan beshtasi o‘nlab va yuzlab dona sotiladi va $7{,}5\\%$ dan $16{,}7\\%$ gacha xato bilan bashorat qilinadi. Oltinchisi, F, — kam sotiladigan tovar: bashorat 10 dona, sotilgani esa 4."),
-        ("viz", "mape-portfolio", {"f": 4}, "<b>Rasm 7.</b> Chapda — haqiqiy qiymat va bashorat (logarifmik shkala), o‘ngda — har bir tovarning APE’si. Sotuvlarning $0{,}15\\%$ i to‘g‘ri keladigan F tovari $\\mathrm{APE}=150\\%$ va barcha APE’lar yig‘indisining $72\\%$ ini beradi: $\\mathrm{MAPE}=34{,}8\\%$, holbuki usiz u $11{,}7\\%$ ga teng. Xatoni donada hisoblaydigan WAPE $9{,}4\\%$ ga teng: 2714 ta sotilgan donaga 256 dona xato. F sotuvlarini suring: bitta dona sotilganda MAPE deyarli $160\\%$ ga yetadi."),
+        ("viz", "mape-portfolio", {"f": 4}, "<b>7-rasm.</b> Chapda — haqiqiy qiymat va bashorat (logarifmik shkala), o‘ngda — har bir tovarning APE’si. Sotuvlarning $0{,}15\\%$ i to‘g‘ri keladigan F tovari $\\mathrm{APE}=150\\%$ va barcha APE’lar yig‘indisining $72\\%$ ini beradi: $\\mathrm{MAPE}=34{,}8\\%$, holbuki usiz u $11{,}7\\%$ ga teng. Xatoni donada hisoblaydigan WAPE $9{,}4\\%$ ga teng: 2714 ta sotilgan donaga 256 dona xato. F sotuvlarini suring: bitta dona sotilganda MAPE deyarli $160\\%$ ga yetadi."),
         ("p", "Amalda nima qilish kerak:"),
         ("ul", [
             "<b>WAPE bilan hisobot bering</b> (yoki tushum bo‘yicha vaznlangan MAPE bilan), agar donada yoki pulda umumiy aniqlik muhim bo‘lsa;",
@@ -528,7 +530,7 @@ SECTIONS = {
     dict(id="code", title="Kodda", blocks=[
         ("p", "NumPy’da MAPE — bitta qator; quyida sMAPE, WAPE va formulalarni umumiy misolda tekshirish ham bor."),
         ("code", "python", "CODE_NUMPY"),
-        ("p", "scikit-learn ulush qaytaradi va nolga bo‘lish o‘rniga mashina epsiloniga bo‘ladi. «MAPE bo‘yicha» o‘qitish uchun $1/y$ vaznli mediana regressiyasi mos keladi:"),
+        ("p", "scikit-learn ulush qaytaradi va mashina epsilonidan ($\\approx2{,}2\\cdot10^{-16}$) kichik maxrajlarni epsilon bilan almashtiradi — shuning uchun nolga bo‘lish xatosi o‘rniga ulkan son chiqadi. «MAPE bo‘yicha» o‘qitish uchun $1/y$ vaznli mediana regressiyasi mos keladi:"),
         ("code", "python", "CODE_SKLEARN"),
         ("p", "PyTorch’da yo‘qotish funksiyasi sifatida MAPE:"),
         ("code", "python", "CODE_TORCH"),

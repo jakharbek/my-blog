@@ -77,7 +77,7 @@
           <div class="fc-row"><span class="lab">Derivative</span><div class="fx">$$\sigma'(x)=\sigma(x)\,\bigl(1-\sigma(x)\bigr)$$</div></div>
           <div class="fc-row"><span class="lab">Example</span><p>$\sigma(0)=0.5$, $\sigma(2)\approx0.881$, $\sigma(-2)\approx0.119$. The slope peaks at zero: $\sigma'(0)=0.25$, while $\sigma'(2)\approx0.105$.</p></div>
           <div class="fc-row"><span class="lab">In code</span><pre><code>def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+    return 0.5 * (1 + np.tanh(0.5 * x))  # = 1 / (1 + e^-x), no overflow
 
 def sigmoid_grad(x):
     s = sigmoid(x)
@@ -139,7 +139,7 @@ def relu_grad(x):
         </details>
       </article>
       <article class="fcard" id="softmax">
-        <div class="fc-top"><h3><span>Softmax</span><small>“soft maximum”</small></h3><span class="fc-tag mono">Σ = 1</span></div>
+        <div class="fc-top"><h3><span>Softmax</span><small>“soft argmax”</small></h3><span class="fc-tag mono">Σ = 1</span></div>
         <div class="fc-formula">$$\operatorname{softmax}(x)_i=s_i=\frac{e^{x_i}}{\sum_{j} e^{x_j}}$$</div>
         <a class="ul fc-full" href="softmax/">Full breakdown →</a>
         <details>
@@ -201,7 +201,7 @@ def relu_grad(x):
           <div class="fc-row"><span class="lab">Meaning</span><p>The square root of MSE brings the error back to the target’s units. It is as readable as MAE but still punishes large errors more.</p></div>
           <div class="fc-row"><span class="lab">Example</span><p>Running example: $y=(3,\,5,\,8)$, $\hat{y}=(2.5,\,5,\,10)$, errors $y-\hat{y}=(0.5,\,0,\,-2)$. $\mathrm{RMSE}=\sqrt{1.417}\approx1.190$ versus $\mathrm{MAE}\approx0.833$.</p></div>
           <div class="fc-row"><span class="lab">In code</span><pre><code>rmse = np.sqrt(np.mean((y - y_hat) ** 2))</code></pre></div>
-          <div class="fc-key">Always $\mathrm{RMSE}\ge\mathrm{MAE}$, with equality only when all errors have the same magnitude. The wider the gap, the more the errors vary: it is an outlier indicator.</div>
+          <div class="fc-key">Always $\mathrm{RMSE}\ge\mathrm{MAE}$, with equality only when all errors have the same magnitude. The wider the gap, the more uneven the error magnitudes: it is an outlier indicator.</div>
           </div>
         </details>
       </article>
@@ -215,7 +215,7 @@ def relu_grad(x):
           <div class="fc-row"><span class="lab">Meaning</span><p>The error as a percentage of the actual value: “on average the model is off by MAPE %”. Useful when the relative error matters more than the absolute one.</p></div>
           <div class="fc-row"><span class="lab">Example</span><p>Running example: $y=(3,\,5,\,8)$, $\hat{y}=(2.5,\,5,\,10)$, errors $y-\hat{y}=(0.5,\,0,\,-2)$. $\mathrm{MAPE}=\frac{100\%}{3}\bigl(\tfrac{0.5}{3}+0+\tfrac{2}{8}\bigr)\approx13.9\%$.</p></div>
           <div class="fc-row"><span class="lab">In code</span><pre><code>mape = 100 * np.mean(np.abs((y - y_hat) / y))</code></pre></div>
-          <div class="fc-key">⚠ Undefined at $y_i=0$ and explodes near zero. Asymmetric: an under-forecast of a positive value costs at most 100%, an over-forecast can cost any amount. The symmetric variant is sMAPE.</div>
+          <div class="fc-key">⚠ Undefined at $y_i=0$ and explodes near zero. Asymmetric: an under-forecast of a positive value costs at most 100%, an over-forecast can cost any amount. The “symmetric” variant is sMAPE, but it is symmetric only in ratios, not in units.</div>
           </div>
         </details>
       </article>
@@ -272,7 +272,7 @@ bce = -np.mean(y * np.log(p)
           <div class="fc-row"><span class="lab">In code</span><pre><code>def cross_entropy(logits, k):
     z = logits - logits.max()
     return np.log(np.exp(z).sum()) - z[k]</code></pre></div>
-          <div class="fc-key"><b>The key payoff:</b> the whole softmax Jacobian together with the logarithm collapses into $s_k-y_k$. This pair sits at the end of every classifier and every language model (LLM), where the classes are vocabulary tokens.</div>
+          <div class="fc-key"><b>The key payoff:</b> the whole softmax Jacobian together with the logarithm collapses into $s_k-y_k$. This pair sits at the end of most classifiers and language models (LLMs), where the classes are vocabulary tokens.</div>
           </div>
         </details>
       </article>
@@ -292,7 +292,7 @@ bce = -np.mean(y * np.log(p)
           <div class="fc-row"><span class="lab">Step 2 · second moment (scale)</span><div class="fx">$$v_t=\beta_2 v_{t-1}+(1-\beta_2)\,g_t^2$$</div></div>
           <div class="fc-row"><span class="lab">Step 3 · bias correction</span><div class="fx">$$\hat{m}_t=\frac{m_t}{1-\beta_1^{\,t}}\qquad \hat{v}_t=\frac{v_t}{1-\beta_2^{\,t}}$$</div></div>
           <div class="fc-row"><span class="lab">Default hyperparameters</span><p>$\eta=0.001$ (learning rate), $\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=10^{-8}$. All operations are element-wise: every weight has its own $m$ and $v$.</p></div>
-          <div class="fc-row"><span class="lab">Example</span><p>First step, $g_1=0.5$, $m_0=v_0=0$: $m_1=0.05$, $v_1=0.00025$. Without correction the step would be $3.16$ times too large: $0.05/\sqrt{0.00025}\approx3.16$, because $v$ is understated more than $m$; with it $\hat{m}_1=0.5$, $\hat{v}_1=0.25$, and $\hat{m}_1/\sqrt{\hat{v}_1}=1$. The weight moves by exactly $\eta$, whatever the scale of the gradient.</p></div>
+          <div class="fc-row"><span class="lab">Example</span><p>First step, $g_1=0.5$, $m_0=v_0=0$: $m_1=0.05$, $v_1=0.00025$. Without correction the step would be $3.16$ times too large: $0.05/\sqrt{0.00025}\approx3.16$, because $v$ is understated more than $m$; with it $\hat{m}_1=0.5$, $\hat{v}_1=0.25$, and $\hat{m}_1/\sqrt{\hat{v}_1}=1$. On the first step the weight moves by exactly $\eta$, whatever the scale of the gradient.</p></div>
           <div class="fc-row"><span class="lab">In code</span><pre><code>m = b1 * m + (1 - b1) * g
 v = b2 * v + (1 - b2) * g ** 2
 m_hat = m / (1 - b1 ** t)
@@ -308,7 +308,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
     <div class="fg-head"><span class="glyph math" aria-hidden="true">→</span><h2>The next level</h2><p>Activations of modern transformers, the predecessors of Adam, metric learning and imbalanced classes — in the order of study.</p></div>
     <div class="fgrid">
       <article class="fcard" id="silu">
-        <div class="fc-top"><h3><span>SiLU / Swish</span><small>the activation of Qwen and LLaMA</small></h3><span class="fc-tag mono">priority 1</span></div>
+        <div class="fc-top"><h3><span>SiLU / Swish</span><small>the activation of Qwen and LLaMA</small></h3><span class="fc-tag mono">x·σ(x)</span></div>
         <div class="fc-formula">$$\operatorname{SiLU}(x)=x\cdot\sigma(x)$$</div>
         <a class="ul fc-full" href="silu/">Full breakdown →</a>
         <details>
@@ -320,19 +320,19 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
         </details>
       </article>
       <article class="fcard" id="gelu">
-        <div class="fc-top"><h3><span>GELU</span><small>BERT, GPT</small></h3><span class="fc-tag mono">priority 1</span></div>
+        <div class="fc-top"><h3><span>GELU</span><small>BERT, GPT</small></h3><span class="fc-tag mono">x·Φ(x)</span></div>
         <div class="fc-formula">$$\operatorname{GELU}(x)=x\cdot\Phi(x)$$</div>
         <a class="ul fc-full" href="gelu/">Full breakdown →</a>
         <details>
           <summary>Details</summary>
           <div class="fc-body">
           <div class="fc-row"><span class="lab">Example</span><p>$\operatorname{GELU}(1)\approx0.841$, $\operatorname{GELU}(-1)\approx-0.159$.</p></div>
-          <div class="fc-key">$\Phi(x)$ is the cumulative distribution function of the standard normal: the input is scaled by the probability that it is “above the noise”. The standard activation in BERT and GPT.</div>
+          <div class="fc-key">$\Phi(x)$ is the cumulative distribution function of the standard normal: the input is scaled by the probability that it is “above the noise”. The standard activation in BERT, GPT-2 and GPT-3.</div>
           </div>
         </details>
       </article>
       <article class="fcard" id="sgd">
-        <div class="fc-top"><h3><span>SGD → Momentum → RMSProp</span><small>the groundwork for Adam</small></h3><span class="fc-tag mono">priority 2</span></div>
+        <div class="fc-top"><h3><span>SGD → Momentum → RMSProp</span><small>the groundwork for Adam</small></h3><span class="fc-tag mono">momentum</span></div>
         <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,g_t$$</div>
         <a class="ul fc-full" href="sgd/">Full breakdown →</a>
         <details>
@@ -345,7 +345,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
         </details>
       </article>
       <article class="fcard" id="triplet">
-        <div class="fc-top"><h3><span>Triplet Loss</span><small>re-identification (Re-ID)</small></h3><span class="fc-tag mono">priority 2</span></div>
+        <div class="fc-top"><h3><span>Triplet Loss</span><small>re-identification (Re-ID)</small></h3><span class="fc-tag mono">margin m</span></div>
         <div class="fc-formula">$$L=\max\bigl(0,\;d(a,p)-d(a,n)+m\bigr)$$</div>
         <a class="ul fc-full" href="triplet/">Full breakdown →</a>
         <details>
@@ -357,7 +357,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
         </details>
       </article>
       <article class="fcard" id="focal">
-        <div class="fc-top"><h3><span>Focal Loss</span><small>imbalanced classes</small></h3><span class="fc-tag mono">priority 3</span></div>
+        <div class="fc-top"><h3><span>Focal Loss</span><small>imbalanced classes</small></h3><span class="fc-tag mono">γ ≈ 2</span></div>
         <div class="fc-formula">$$\mathrm{FL}=-(1-p_t)^{\gamma}\log p_t$$</div>
         <a class="ul fc-full" href="focal/">Full breakdown →</a>
         <details>
@@ -385,7 +385,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
   <section class="takeaway mat-links">
     <h2>Key connections</h2>
     <ul>
-      <li>$\tanh(x)=2\sigma(2x)-1$: the hyperbolic tangent is a stretched and shifted sigmoid.</li>
+      <li>$\tanh(x)=2\sigma(2x)-1$: the hyperbolic tangent is the sigmoid squeezed twice horizontally, stretched twice vertically and shifted down.</li>
       <li>Softmax over two classes equals the sigmoid of the logit difference, and the diagonal of its derivative, $s_i(1-s_i)$, is the derivative of the sigmoid.</li>
       <li>Sigmoid + BCE and softmax + CE give the same gradient with respect to the logits: “prediction − truth”, $\hat{y}-y$.</li>
       <li>Huber bridges MSE and MAE: quadratic near zero and linear for large errors.</li>

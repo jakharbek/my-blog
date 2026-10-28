@@ -12,9 +12,9 @@ META = dict(
         "uz": "Regressiyaning eng mashhur metrikasi — va eng ko‘p noto‘g‘ri o‘qiladiganlaridan biri. Uni mayda detallarigacha tahlil qilamiz: ildiz nima uchun kerak, RMSE va MAE orasidagi farq nimani bildiradi, nega RMSE vektorlar orasidagi masofa, u qanday qilib siljish va tarqoqlikka ajraladi va minimum bir xil bo‘lsa-da, uning gradiyenti MSE gradiyentidan nimasi bilan farq qiladi.",
     },
     description={
-        "ru": "RMSE подробно: формула, связь с MSE и MAE, неравенство MAE ≤ RMSE ≤ √n·MAE, разложение на смещение и разброс, геометрия в 3D, производная, ландшафт потерь, обучение, RMSLE, код на NumPy, scikit-learn и PyTorch.",
-        "en": "RMSE in depth: formula, link to MSE and MAE, the inequality MAE ≤ RMSE ≤ √n·MAE, the bias–spread decomposition, 3D geometry, derivative, loss landscape, training, RMSLE, code in NumPy, scikit-learn and PyTorch.",
-        "uz": "RMSE batafsil: formula, MSE va MAE bilan bog‘liqlik, MAE ≤ RMSE ≤ √n·MAE tengsizligi, siljish va tarqoqlikka ajratish, 3D geometriya, hosila, yo‘qotish landshafti, o‘qitish, RMSLE, NumPy, scikit-learn va PyTorch’da kod.",
+        "ru": "RMSE по косточкам: связь с MSE и MAE, MAE ≤ RMSE ≤ √n·MAE, смещение и разброс, геометрия, градиент и обучение, RMSLE, код на NumPy и PyTorch.",
+        "en": "RMSE explained: links to MSE and MAE, MAE ≤ RMSE ≤ √n·MAE, bias and spread, geometry, gradient and training, RMSLE, NumPy and PyTorch code.",
+        "uz": "RMSE batafsil: MSE va MAE bilan bog‘liqlik, MAE ≤ RMSE ≤ √n·MAE, siljish va tarqoqlik, geometriya, gradiyent va o‘qitish, RMSLE, NumPy va PyTorch kodi.",
     },
 )
 
@@ -58,38 +58,39 @@ y     = np.array([3.0, 5.0, 8.0])
 y_hat = np.array([2.5, 5.0, 10.0])
 
 r    = y - y_hat                   # остатки: [ 0.5  0.  -2. ]
-mse  = np.mean(r ** 2)             # 1.4167
-rmse = np.sqrt(mse)                # 1.1902
-mae  = np.mean(np.abs(r))          # 0.8333
+mse  = np.mean(r ** 2)             # ≈ 1.4167
+rmse = np.sqrt(mse)                # ≈ 1.1902
+mae  = np.mean(np.abs(r))          # ≈ 0.8333
 
 # То же через евклидову норму: ‖y − ŷ‖ / √n
-print(np.linalg.norm(r) / np.sqrt(len(r)))     # 1.1902
+print(round(np.linalg.norm(r) / np.sqrt(len(r)), 4))   # 1.1902
 
 # Разложение: RMSE² = смещение² + дисперсия остатков
-print(r.mean() ** 2 + r.var(), mse)            # 1.4167 1.4167
+print(round(r.mean() ** 2 + r.var(), 4), round(mse, 4))   # 1.4167 1.4167
 
 # Градиент по прогнозам: ∂RMSE/∂ŷ = (ŷ − y) / (n · RMSE)
-print((y_hat - y) / (len(y) * rmse))           # [-0.14  0.    0.56]
+print(np.round((y_hat - y) / (len(y) * rmse), 4))       # [-0.14    0.      0.5601]
 
 # Бейзлайн «всегда среднее»: его RMSE — стандартное отклонение y
-print(np.std(y))                               # 2.0548'''
+print(round(np.std(y), 4))                               # 2.0548'''
 
 CODE_SKLEARN = '''from sklearn.metrics import root_mean_squared_error, root_mean_squared_log_error
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import KFold, cross_val_score, cross_val_predict
 
-print(root_mean_squared_error(y, y_hat))       # 1.1902  (scikit-learn ≥ 1.4)
-print(root_mean_squared_log_error(y, y_hat))   # 0.1392  — RMSLE
+# y, y_hat — из листинга выше; функции есть в scikit-learn ≥ 1.4
+print(round(root_mean_squared_error(y, y_hat), 4))       # 1.1902
+print(round(root_mean_squared_log_error(y, y_hat), 4))   # 0.1392 — RMSLE
 
 X, t = make_regression(n_samples=200, n_features=5, noise=10.0, random_state=0)
 cv = KFold(5, shuffle=True, random_state=0)
 # scorer «чем больше, тем лучше», поэтому RMSE идёт со знаком минус
 scores = cross_val_score(LinearRegression(), X, t, cv=cv,
                          scoring="neg_root_mean_squared_error")
-print(-scores.mean())                          # 10.560 — среднее RMSE фолдов
+print(round(-scores.mean(), 3))                # 10.56 — среднее RMSE фолдов
 pred = cross_val_predict(LinearRegression(), X, t, cv=cv)
-print(root_mean_squared_error(t, pred))        # 10.614 — RMSE по всем объектам'''
+print(round(root_mean_squared_error(t, pred), 3))   # 10.614 — RMSE по всем объектам'''
 
 CODE_TORCH = '''import torch
 
@@ -98,7 +99,7 @@ y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
 
 rmse = torch.sqrt(torch.mean((y_hat - y) ** 2))
 rmse.backward()
-print(rmse.item(), y_hat.grad)   # 1.1902  tensor([-0.1400,  0.0000,  0.5601])
+print(round(rmse.item(), 4), y_hat.grad)   # 1.1902 tensor([-0.1400,  0.0000,  0.5601])
 
 # Идеальный прогноз: производная √u в нуле бесконечна → градиент NaN
 p = y.clone().requires_grad_(True)
@@ -115,6 +116,7 @@ _CODE_TR = {
            ("Градиент по прогнозам", "Gradient with respect to the forecasts"),
            ("Бейзлайн «всегда среднее»: его RMSE — стандартное отклонение y", "The “always the mean” baseline: its RMSE is the standard deviation of y"),
            ("scorer «чем больше, тем лучше», поэтому RMSE идёт со знаком минус", "scorers are “higher is better”, so RMSE comes with a minus sign"),
+           ("y, y_hat — из листинга выше; функции есть в scikit-learn ≥ 1.4", "y, y_hat come from the listing above; the functions exist in scikit-learn ≥ 1.4"),
            ("среднее RMSE фолдов", "mean RMSE of the folds"), ("RMSE по всем объектам", "RMSE over all objects"),
            ("Идеальный прогноз: производная √u в нуле бесконечна → градиент NaN", "A perfect forecast: the derivative of √u at zero is infinite → NaN gradient"),
            ("RMSE как функция потерь: eps под корнем убирает NaN.", "RMSE as a loss: eps under the root removes the NaN.")],
@@ -123,6 +125,7 @@ _CODE_TR = {
            ("Градиент по прогнозам", "Bashoratlar bo‘yicha gradiyent"),
            ("Бейзлайн «всегда среднее»: его RMSE — стандартное отклонение y", "«Doim o‘rtacha» bazaviy modeli: uning RMSE’i — y ning standart chetlanishi"),
            ("scorer «чем больше, тем лучше», поэтому RMSE идёт со знаком минус", "scorer’lar «qancha katta, shuncha yaxshi», shuning uchun RMSE minus ishora bilan"),
+           ("y, y_hat — из листинга выше; функции есть в scikit-learn ≥ 1.4", "y, y_hat — yuqoridagi listingdan; funksiyalar scikit-learn ≥ 1.4 da bor"),
            ("среднее RMSE фолдов", "fold’lar RMSE’larining o‘rtachasi"), ("RMSE по всем объектам", "barcha obyektlar bo‘yicha RMSE"),
            ("Идеальный прогноз: производная √u в нуле бесконечна → градиент NaN", "Ideal bashorat: √u ning noldagi hosilasi cheksiz → gradiyent NaN"),
            ("RMSE как функция потерь: eps под корнем убирает NaN.", "Yo‘qotish funksiyasi sifatida RMSE: ildiz ostidagi eps NaN’ni yo‘qotadi.")],
@@ -141,13 +144,13 @@ SECTIONS = {
         ("p", "Модель предсказывает цену квартиры, спрос на товар, температуру завтра. Как одним числом сказать, насколько она ошибается? Простое среднее ошибок не годится: промахи вверх и вниз гасят друг друга. <a href=\"../mse/\">MSE</a> возводит ошибки в квадрат — но тогда ответ получается в «рублях в квадрате» или «градусах в квадрате», и фраза «MSE равна 1 417 000» заказчику ничего не скажет. RMSE извлекает корень и возвращает ошибку в единицы целевой переменной, сохраняя всё, за что любят MSE."),
         ("p", "Где она встречается:"),
         ("ul", [
-            "<b>оценка регрессионных моделей</b> — самая распространённая метрика в отчётах, статьях и соревнованиях Kaggle;",
+            "<b>оценка регрессионных моделей</b> — одна из самых распространённых метрик в отчётах, статьях и соревнованиях Kaggle;",
             "<b>прогнозирование временных рядов</b> — погода, спрос, энергопотребление; рядом с ней обычно стоят <a href=\"../mae/\">MAE</a> и <a href=\"../mape/\">MAPE</a>;",
             "<b>рекомендательные системы</b> — знаменитый Netflix Prize (2006–2009) оценивал предсказания рейтингов именно по RMSE;",
             "<b>физика и метрология</b> — среднеквадратичная погрешность измерений, точность GPS, «RMS»-значение сигнала;",
             "<b>обучение моделей</b> — минимизация RMSE и MSE даёт одну и ту же модель, но градиенты у них разные (об этом — в разделе про производную).",
         ]),
-        ("callout", "key", "Главное за минуту", "RMSE — это <a href=\"../mse/\">MSE</a> под корнем: ошибка в единицах $y$, которая, как и MSE, сильнее наказывает крупные промахи. Всегда $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\sqrt n\\,\\mathrm{MAE}$, а $\\mathrm{RMSE}^2=\\bar r^{\\,2}+\\sigma_r^2$ — квадрат смещения плюс дисперсия остатков. Минимум RMSE совпадает с минимумом MSE, а градиент в $2\\,\\mathrm{RMSE}$ раз меньше."),
+        ("callout", "key", "Главное за минуту", "RMSE — это <a href=\"../mse/\">MSE</a> под корнем: ошибка в единицах $y$, которая, как и MSE, сильнее наказывает крупные промахи. Всегда $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\sqrt n\\,\\mathrm{MAE}$, а $\\mathrm{RMSE}^2=\\bar r^{\\,2}+\\sigma_r^2$ — квадрат смещения плюс дисперсия остатков. Минимум RMSE совпадает с минимумом MSE, а её градиент — это градиент MSE, делённый на $2\\,\\mathrm{RMSE}$."),
     ]),
     dict(id="intuition", title="Интуиция: сторона среднего квадрата", blocks=[
         ("p", "Нарисуем каждую ошибку $r_i=y_i-\\hat y_i$ квадратом со стороной $|r_i|$. Его площадь $r_i^2$ — это вклад объекта в MSE. Сложим площади и разделим на $n$ — получится средняя площадь, то есть MSE. А RMSE — это <b>сторона квадрата, площадь которого равна средней площади</b>."),
@@ -193,8 +196,8 @@ SECTIONS = {
             ("p", "Средний член исчезает: отклонения от среднего в сумме дают ноль. Это та же алгебра, что в формуле $\\operatorname{Var}X=\\mathbb E X^2-(\\mathbb E X)^2$."),
         ]),
         ("viz", "rmse-pythagoras", {"bias": 1, "sd": 1.5}, "<b>Рисунок 2.</b> Слева — 40 остатков со смещением $\\bar r$ и разбросом $\\sigma_r$, справа — прямоугольный треугольник с катетами $|\\bar r|$ и $\\sigma_r$: его гипотенуза и есть RMSE. При $\\bar r=1$ и $\\sigma_r=1{,}5$ получаем $\\mathrm{RMSE}=\\sqrt{1+2{,}25}\\approx1{,}80$."),
-        ("p", "В сквозном примере $\\bar r=-0{,}5$ (модель в среднем завышает на $0{,}5$), $\\sigma_r\\approx1{,}080$, и $0{,}25+1{,}167=1{,}417=\\mathrm{MSE}$. Практический вывод: смещение убирается бесплатно — сдвиньте прогнозы на $\\bar r$, оценённое на валидации, и RMSE снизится до $\\sigma_r$ (здесь — с $1{,}190$ до $1{,}080$)."),
-        ("callout", "note", "RMSE и стандартное отклонение", "Если среднее остатков равно нулю (так всегда бывает у линейной регрессии со свободным членом на обучающей выборке), RMSE совпадает со стандартным отклонением остатков. Поэтому RMSE называют «стандартной ошибкой» модели. Если к тому же ошибки нормальны, около $68\\%$ остатков лежат в пределах $\\pm\\mathrm{RMSE}$ и около $95\\%$ — в пределах $\\pm2\\,\\mathrm{RMSE}$."),
+        ("p", "В сквозном примере $\\bar r=-0{,}5$ (модель в среднем завышает на $0{,}5$), $\\sigma_r\\approx1{,}080$, и $0{,}25+1{,}167=1{,}417=\\mathrm{MSE}$. Практический вывод: смещение убирается бесплатно — прибавьте $\\bar r$ ко всем прогнозам, и на тех данных, где оно оценено, RMSE снизится ровно до $\\sigma_r$ (здесь — с $1{,}190$ до $1{,}080$). На практике $\\bar r$ оценивают на валидации, а выигрыш проверяют на тесте."),
+        ("callout", "note", "RMSE и стандартное отклонение", "Если среднее остатков равно нулю (так всегда бывает у линейной регрессии со свободным членом на обучающей выборке), RMSE совпадает со стандартным отклонением остатков. Отсюда её родство со «стандартной ошибкой регрессии» из статистики — только там сумму квадратов остатков делят не на $n$, а на число степеней свободы $n-p$ ($p$ — число параметров модели). Если к тому же ошибки нормальны, около $68\\%$ остатков лежат в пределах $\\pm\\mathrm{RMSE}$ и около $95\\%$ — в пределах $\\pm2\\,\\mathrm{RMSE}$."),
     ]),
     dict(id="gap", title="RMSE против MAE: что говорит разрыв", blocks=[
         ("p", "<a href=\"../mae/\">MAE</a> отвечает на вопрос «на сколько в среднем ошибаемся», RMSE — «каков типичный размер ошибки с учётом крупных». Их отношение $\\mathrm{RMSE}/\\mathrm{MAE}$ безразмерно и не зависит от масштаба: оно описывает только <b>форму</b> распределения ошибок."),
@@ -293,7 +296,7 @@ SECTIONS = {
     dict(id="code", title="В коде", blocks=[
         ("p", "В NumPy RMSE — одна строка; ниже заодно проверяются формулы этой страницы на сквозном примере."),
         ("code", "python", "CODE_NUMPY"),
-        ("p", "В scikit-learn есть готовые функции (с версии 1.4; раньше писали <code>mean_squared_error(..., squared=False)</code>). Обратите внимание на разницу между средним RMSE фолдов и RMSE по всем объектам:"),
+        ("p", "В scikit-learn есть готовые функции (с версии 1.4; раньше писали <code>mean_squared_error(..., squared=False)</code>, а в 1.6 параметр <code>squared</code> удалён). Обратите внимание на разницу между средним RMSE фолдов и RMSE по всем объектам:"),
         ("code", "python", "CODE_SKLEARN"),
         ("p", "В PyTorch RMSE как функция потерь требует осторожности в нуле:"),
         ("code", "python", "CODE_TORCH"),
@@ -311,7 +314,7 @@ SECTIONS = {
     ]),
     dict(id="links", title="Связи с другими формулами", blocks=[
         ("ul", [
-            "<a href=\"../mse/\">MSE</a>: $\\mathrm{RMSE}=\\sqrt{\\mathrm{MSE}}$ — тот же минимум и тот же порядок моделей, градиент в $2\\,\\mathrm{RMSE}$ раз меньше.",
+            "<a href=\"../mse/\">MSE</a>: $\\mathrm{RMSE}=\\sqrt{\\mathrm{MSE}}$ — тот же минимум и тот же порядок моделей, а градиент делится на $2\\,\\mathrm{RMSE}$.",
             "<a href=\"../mae/\">MAE</a>: $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\sqrt n\\,\\mathrm{MAE}$; лучшая константа для MAE — медиана, для RMSE — среднее.",
             "<a href=\"../huber/\">Huber</a>: квадратичная возле нуля и линейная на хвостах — компромисс между MSE (а значит, RMSE) и MAE.",
             "<a href=\"../mape/\">MAPE</a>: относительная ошибка вместо абсолютной; RMSLE — её квадратичный родственник в логарифмической шкале.",
@@ -342,13 +345,13 @@ SECTIONS = {
         ("p", "A model predicts the price of a flat, the demand for a product, tomorrow’s temperature. How do you say with a single number how wrong it is? A plain mean of the errors will not do: misses up and down cancel out. <a href=\"../mse/\">MSE</a> squares the errors — but then the answer is in “dollars squared” or “degrees squared”, and “the MSE is 1,417,000” tells a client nothing. RMSE takes the square root and brings the error back to the units of the target, keeping everything people like about MSE."),
         ("p", "Where it shows up:"),
         ("ul", [
-            "<b>evaluating regression models</b> — the most common metric in reports, papers and Kaggle competitions;",
+            "<b>evaluating regression models</b> — one of the most common metrics in reports, papers and Kaggle competitions;",
             "<b>time-series forecasting</b> — weather, demand, energy use; it usually sits next to <a href=\"../mae/\">MAE</a> and <a href=\"../mape/\">MAPE</a>;",
             "<b>recommender systems</b> — the famous Netflix Prize (2006–2009) scored rating predictions by RMSE;",
             "<b>physics and metrology</b> — the root-mean-square error of measurements, GPS accuracy, the “RMS” value of a signal;",
             "<b>training models</b> — minimising RMSE and minimising MSE give the same model, but their gradients differ (see the section on the derivative).",
         ]),
-        ("callout", "key", "The gist in a minute", "RMSE is <a href=\"../mse/\">MSE</a> under a square root: an error in the units of $y$ that, like MSE, punishes large misses harder. Always $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\sqrt n\\,\\mathrm{MAE}$, and $\\mathrm{RMSE}^2=\\bar r^{\\,2}+\\sigma_r^2$ — squared bias plus the variance of the residuals. The minimum of RMSE coincides with the minimum of MSE, while the gradient is $2\\,\\mathrm{RMSE}$ times smaller."),
+        ("callout", "key", "The gist in a minute", "RMSE is <a href=\"../mse/\">MSE</a> under a square root: an error in the units of $y$ that, like MSE, punishes large misses harder. Always $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\sqrt n\\,\\mathrm{MAE}$, and $\\mathrm{RMSE}^2=\\bar r^{\\,2}+\\sigma_r^2$ — squared bias plus the variance of the residuals. The minimum of RMSE coincides with the minimum of MSE, and its gradient is the gradient of MSE divided by $2\\,\\mathrm{RMSE}$."),
     ]),
     dict(id="intuition", title="Intuition: the side of the mean square", blocks=[
         ("p", "Draw every error $r_i=y_i-\\hat y_i$ as a square with side $|r_i|$. Its area $r_i^2$ is the object’s contribution to MSE. Add up the areas and divide by $n$ — that is the mean area, i.e. MSE. And RMSE is <b>the side of the square whose area equals the mean area</b>."),
@@ -394,8 +397,8 @@ SECTIONS = {
             ("p", "The middle term vanishes: deviations from the mean sum to zero. It is the same algebra as in $\\operatorname{Var}X=\\mathbb E X^2-(\\mathbb E X)^2$."),
         ]),
         ("viz", "rmse-pythagoras", {"bias": 1, "sd": 1.5}, "<b>Figure 2.</b> On the left, 40 residuals with bias $\\bar r$ and spread $\\sigma_r$; on the right, a right triangle with legs $|\\bar r|$ and $\\sigma_r$ — its hypotenuse is RMSE. With $\\bar r=1$ and $\\sigma_r=1.5$ we get $\\mathrm{RMSE}=\\sqrt{1+2.25}\\approx1.80$."),
-        ("p", "In the running example $\\bar r=-0.5$ (the model over-estimates by $0.5$ on average), $\\sigma_r\\approx1.080$, and $0.25+1.167=1.417=\\mathrm{MSE}$. The practical takeaway: bias can be removed for free — shift the forecasts by $\\bar r$ estimated on validation data, and RMSE drops to $\\sigma_r$ (here from $1.190$ to $1.080$)."),
-        ("callout", "note", "RMSE and the standard deviation", "If the mean residual is zero (which is always the case for linear regression with an intercept on its training data), RMSE equals the standard deviation of the residuals. That is why RMSE is called the model’s “standard error”. If, in addition, the errors are normal, about $68\\%$ of the residuals lie within $\\pm\\mathrm{RMSE}$ and about $95\\%$ within $\\pm2\\,\\mathrm{RMSE}$."),
+        ("p", "In the running example $\\bar r=-0.5$ (the model over-estimates by $0.5$ on average), $\\sigma_r\\approx1.080$, and $0.25+1.167=1.417=\\mathrm{MSE}$. The practical takeaway: bias can be removed for free — add $\\bar r$ to every forecast, and on the data where it was estimated RMSE drops exactly to $\\sigma_r$ (here from $1.190$ to $1.080$). In practice $\\bar r$ is estimated on validation data and the gain is checked on the test set."),
+        ("callout", "note", "RMSE and the standard deviation", "If the mean residual is zero (which is always the case for linear regression with an intercept on its training data), RMSE equals the standard deviation of the residuals. Hence its kinship with the “standard error of the regression” in statistics — except that there the sum of squared residuals is divided not by $n$ but by the degrees of freedom $n-p$ ($p$ is the number of model parameters). If, in addition, the errors are normal, about $68\\%$ of the residuals lie within $\\pm\\mathrm{RMSE}$ and about $95\\%$ within $\\pm2\\,\\mathrm{RMSE}$."),
     ]),
     dict(id="gap", title="RMSE versus MAE: what the gap says", blocks=[
         ("p", "<a href=\"../mae/\">MAE</a> answers “how far off are we on average”, RMSE answers “how large is a typical error, counting the big ones”. Their ratio $\\mathrm{RMSE}/\\mathrm{MAE}$ is dimensionless and scale-free: it describes only the <b>shape</b> of the error distribution."),
@@ -494,7 +497,7 @@ SECTIONS = {
     dict(id="code", title="In code", blocks=[
         ("p", "In NumPy RMSE is one line; below we also check the formulas of this page on the running example."),
         ("code", "python", "CODE_NUMPY"),
-        ("p", "scikit-learn has ready-made functions (since version 1.4; before that one wrote <code>mean_squared_error(..., squared=False)</code>). Note the difference between the mean fold RMSE and the RMSE over all objects:"),
+        ("p", "scikit-learn has ready-made functions (since version 1.4; before that one wrote <code>mean_squared_error(..., squared=False)</code>; the <code>squared</code> parameter was removed in 1.6). Note the difference between the mean fold RMSE and the RMSE over all objects:"),
         ("code", "python", "CODE_SKLEARN"),
         ("p", "In PyTorch RMSE as a loss needs care at zero:"),
         ("code", "python", "CODE_TORCH"),
@@ -512,7 +515,7 @@ SECTIONS = {
     ]),
     dict(id="links", title="Links to other formulas", blocks=[
         ("ul", [
-            "<a href=\"../mse/\">MSE</a>: $\\mathrm{RMSE}=\\sqrt{\\mathrm{MSE}}$ — the same minimum and the same ranking of models, a gradient $2\\,\\mathrm{RMSE}$ times smaller.",
+            "<a href=\"../mse/\">MSE</a>: $\\mathrm{RMSE}=\\sqrt{\\mathrm{MSE}}$ — the same minimum and the same ranking of models, while the gradient is divided by $2\\,\\mathrm{RMSE}$.",
             "<a href=\"../mae/\">MAE</a>: $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\sqrt n\\,\\mathrm{MAE}$; the best constant for MAE is the median, for RMSE the mean.",
             "<a href=\"../huber/\">Huber</a>: quadratic near zero and linear in the tails — a compromise between MSE (and hence RMSE) and MAE.",
             "<a href=\"../mape/\">MAPE</a>: a relative error instead of an absolute one; RMSLE is its quadratic relative on a log scale.",
@@ -543,18 +546,18 @@ SECTIONS = {
         ("p", "Model kvartira narxini, mahsulotga talabni, ertangi haroratni bashorat qiladi. U qanchalik adashishini bitta son bilan qanday aytish mumkin? Xatolarning oddiy o‘rtachasi yaramaydi: yuqoriga va pastga xatolar bir-birini yo‘qotadi. <a href=\"../mse/\">MSE</a> xatolarni kvadratga oshiradi — lekin unda javob «so‘m kvadrat» yoki «gradus kvadrat»da chiqadi va «MSE 1 417 000 ga teng» degan gap buyurtmachiga hech narsa demaydi. RMSE ildiz chiqaradi va xatoni maqsadli o‘zgaruvchi birliklariga qaytaradi, MSE’ni yaxshi ko‘rishga sabab bo‘lgan barcha xossalarni saqlab qolgan holda."),
         ("p", "U qayerda uchraydi:"),
         ("ul", [
-            "<b>regressiya modellarini baholash</b> — hisobotlar, maqolalar va Kaggle musobaqalarida eng keng tarqalgan metrika;",
+            "<b>regressiya modellarini baholash</b> — hisobotlar, maqolalar va Kaggle musobaqalarida eng keng tarqalgan metrikalardan biri;",
             "<b>vaqt qatorlarini bashorat qilish</b> — ob-havo, talab, energiya iste’moli; odatda uning yonida <a href=\"../mae/\">MAE</a> va <a href=\"../mape/\">MAPE</a> turadi;",
             "<b>tavsiya tizimlari</b> — mashhur Netflix Prize (2006–2009) reyting bashoratlarini aynan RMSE bo‘yicha baholagan;",
             "<b>fizika va metrologiya</b> — o‘lchovlarning o‘rtacha kvadratik xatosi, GPS aniqligi, signalning «RMS» qiymati;",
             "<b>modellarni o‘qitish</b> — RMSE va MSE’ni minimallashtirish bir xil modelni beradi, lekin ularning gradiyentlari har xil (hosila bo‘limiga qarang).",
         ]),
-        ("callout", "key", "Bir daqiqada asosiysi", "RMSE — bu ildiz ostidagi <a href=\"../mse/\">MSE</a>: $y$ birliklaridagi xato, u ham MSE kabi katta xatolarni qattiqroq jazolaydi. Doim $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\sqrt n\\,\\mathrm{MAE}$, va $\\mathrm{RMSE}^2=\\bar r^{\\,2}+\\sigma_r^2$ — siljish kvadrati va qoldiqlar dispersiyasining yig‘indisi. RMSE minimumi MSE minimumi bilan ustma-ust tushadi, gradiyenti esa $2\\,\\mathrm{RMSE}$ marta kichik."),
+        ("callout", "key", "Bir daqiqada asosiysi", "RMSE — bu ildiz ostidagi <a href=\"../mse/\">MSE</a>: $y$ birliklaridagi xato, u ham MSE kabi katta xatolarni qattiqroq jazolaydi. Doim $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\sqrt n\\,\\mathrm{MAE}$, va $\\mathrm{RMSE}^2=\\bar r^{\\,2}+\\sigma_r^2$ — siljish kvadrati va qoldiqlar dispersiyasining yig‘indisi. RMSE minimumi MSE minimumi bilan ustma-ust tushadi, gradiyenti esa — $2\\,\\mathrm{RMSE}$ ga bo‘lingan MSE gradiyenti."),
     ]),
     dict(id="intuition", title="Intuitsiya: o‘rtacha kvadratning tomoni", blocks=[
         ("p", "Har bir $r_i=y_i-\\hat y_i$ xatoni tomoni $|r_i|$ bo‘lgan kvadrat sifatida chizamiz. Uning yuzi $r_i^2$ — obyektning MSE’ga qo‘shgan hissasi. Yuzlarni qo‘shib, $n$ ga bo‘lamiz — o‘rtacha yuz, ya’ni MSE chiqadi. RMSE esa — <b>yuzi o‘rtacha yuzga teng bo‘lgan kvadratning tomoni</b>."),
         ("p", "Ko‘k nuqtalarni — bashoratlarni torting. O‘ngda barcha xatolar kvadratlari bitta burchakka joylangan: ko‘k kvadratning tomoni RMSE, firuza rang punktirli kvadratning tomoni MAE."),
-        ("viz", "rmse-squares", {}, "<b>Rasm 1.</b> Umumiy misol: $y=(3;\\,5;\\,8)$, $\\hat y=(2{,}5;\\,5;\\,10)$. $-2$ xato yuzi 4 bo‘lgan kvadratni, $0{,}5$ xato esa yuzi $0{,}25$ bo‘lganini beradi; o‘rtacha yuz $\\mathrm{MSE}\\approx1{,}417$, uning tomoni $\\mathrm{RMSE}\\approx1{,}190$. MAE tomoni kichikroq — $0{,}833$."),
+        ("viz", "rmse-squares", {}, "<b>1-rasm.</b> Umumiy misol: $y=(3;\\,5;\\,8)$, $\\hat y=(2{,}5;\\,5;\\,10)$. $-2$ xato yuzi 4 bo‘lgan kvadratni, $0{,}5$ xato esa yuzi $0{,}25$ bo‘lganini beradi; o‘rtacha yuz $\\mathrm{MSE}\\approx1{,}417$, uning tomoni $\\mathrm{RMSE}\\approx1{,}190$. MAE tomoni kichikroq — $0{,}833$."),
         ("callout", "intuition", "Nimaga e’tibor bering", "Katta kvadrat o‘rtacha yuzni uzun tomon o‘rtacha uzunlikni tortganidan kuchliroq tortadi: $-2$ xatoga modullar yig‘indisining $80\\%$ i, lekin kvadratlar yig‘indisining $94\\%$ i to‘g‘ri keladi. Shuning uchun RMSE MAE’dan katta — xatolar qancha notekis bo‘lsa, shuncha katta. Uchala xatoni modul bo‘yicha bir xil qiling — ko‘k kvadrat firuza rangli bilan ustma-ust tushadi."),
     ]),
     dict(id="anatomy", title="Formula mayda detallarigacha", blocks=[
@@ -573,7 +576,7 @@ SECTIONS = {
         ("eq", r"\mathrm{RMSE}=\sqrt{\frac{0{,}25+0+4}{3}}=\sqrt{1{,}417}\approx1{,}190,\qquad \mathrm{MAE}=\frac{0{,}5+0+2}{3}\approx0{,}833"),
         ("p", "Xuddi shu kattalikni boshqa yozuvlarda ham tanish foydali:"),
         ("eq", r"\mathrm{RMSE}=\sqrt{\mathrm{MSE}}=\frac{\|y-\hat y\|_2}{\sqrt n}=M_2\bigl(|r_1|,\dots,|r_n|\bigr)"),
-        ("p", "Ikkinchi yozuv — faktlar vektori va bashoratlar vektori orasidagi Yevklid masofasi, $\\sqrt n$ ga bo‘lingan (unga 3D’da qaytamiz). Uchinchisi — xatolar modullarining <b>o‘rtacha kvadratigi</b> (quadratic mean, 2-tartibli darajali o‘rtacha). MAE — ularning o‘rta arifmetigi $M_1$, eng katta xato esa chegaraviy holat $M_\\infty$. Darajali o‘rtachalar tengsizligi darhol $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\max_i|r_i|$ ni beradi."),
+        ("p", "Ikkinchi yozuv — faktlar vektori va bashoratlar vektori orasidagi Yevklid masofasi, $\\sqrt n$ ga bo‘lingan (unga 3D’da qaytamiz). Uchinchisi — xatolar modullarining <b>kvadratik o‘rtachasi</b> (quadratic mean, 2-tartibli darajali o‘rtacha). MAE — ularning o‘rta arifmetigi $M_1$, eng katta xato esa chegaraviy holat $M_\\infty$. Darajali o‘rtachalar tengsizligi darhol $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\max_i|r_i|$ ni beradi."),
         ("callout", "note", "Nega modul emas, kvadrat", "Modullarni o‘rtachalash mumkin — bu <a href=\"../mae/\">MAE</a>. Kvadrat tanlanadi, chunki u silliq (hamma joyda differensiallanuvchi), dispersiya va normal taqsimot bilan bog‘liq (MSE’ni minimallashtirish — gauss shovqinida maksimal haqiqatga o‘xshashlik usuli) va aniq formulalar beradi (eng kichik kvadratlar usuli). Tepadagi ildiz faqat o‘qish uchun kerak: u modellar tartibiga ta’sir qilmaydi."),
     ]),
     dict(id="properties", title="Xossalar", blocks=[
@@ -594,9 +597,9 @@ SECTIONS = {
             ("eq", r"\frac1n\sum_i r_i^2=\frac1n\sum_i\Bigl(\bar r^{\,2}+2\bar r\,(r_i-\bar r)+(r_i-\bar r)^2\Bigr)=\bar r^{\,2}+\frac{2\bar r}{n}\underbrace{\sum_i(r_i-\bar r)}_{=\,0}+\sigma_r^2"),
             ("p", "O‘rta had yo‘qoladi: o‘rtachadan chetlanishlar yig‘indisi nolga teng. Bu $\\operatorname{Var}X=\\mathbb E X^2-(\\mathbb E X)^2$ formulasidagi algebraning o‘zi."),
         ]),
-        ("viz", "rmse-pythagoras", {"bias": 1, "sd": 1.5}, "<b>Rasm 2.</b> Chapda — $\\bar r$ siljish va $\\sigma_r$ tarqoqlikka ega 40 ta qoldiq, o‘ngda — katetlari $|\\bar r|$ va $\\sigma_r$ bo‘lgan to‘g‘ri burchakli uchburchak: uning gipotenuzasi RMSE’ning o‘zi. $\\bar r=1$ va $\\sigma_r=1{,}5$ da $\\mathrm{RMSE}=\\sqrt{1+2{,}25}\\approx1{,}80$ chiqadi."),
-        ("p", "Umumiy misolda $\\bar r=-0{,}5$ (model o‘rtacha $0{,}5$ ga oshirib baholaydi), $\\sigma_r\\approx1{,}080$, va $0{,}25+1{,}167=1{,}417=\\mathrm{MSE}$. Amaliy xulosa: siljish bepul olib tashlanadi — bashoratlarni validatsiyada baholangan $\\bar r$ ga suring, va RMSE $\\sigma_r$ gacha tushadi (bu yerda $1{,}190$ dan $1{,}080$ gacha)."),
-        ("callout", "note", "RMSE va standart chetlanish", "Agar qoldiqlar o‘rtachasi nolga teng bo‘lsa (ozod hadli chiziqli regressiyada o‘qitish tanlanmasida doim shunday), RMSE qoldiqlarning standart chetlanishi bilan ustma-ust tushadi. Shuning uchun RMSE modelning «standart xatosi» deb ataladi. Agar bundan tashqari xatolar normal bo‘lsa, qoldiqlarning taxminan $68\\%$ i $\\pm\\mathrm{RMSE}$ oralig‘ida, taxminan $95\\%$ i esa $\\pm2\\,\\mathrm{RMSE}$ oralig‘ida yotadi."),
+        ("viz", "rmse-pythagoras", {"bias": 1, "sd": 1.5}, "<b>2-rasm.</b> Chapda — $\\bar r$ siljish va $\\sigma_r$ tarqoqlikka ega 40 ta qoldiq, o‘ngda — katetlari $|\\bar r|$ va $\\sigma_r$ bo‘lgan to‘g‘ri burchakli uchburchak: uning gipotenuzasi RMSE’ning o‘zi. $\\bar r=1$ va $\\sigma_r=1{,}5$ da $\\mathrm{RMSE}=\\sqrt{1+2{,}25}\\approx1{,}80$ chiqadi."),
+        ("p", "Umumiy misolda $\\bar r=-0{,}5$ (model o‘rtacha $0{,}5$ ga oshirib baholaydi), $\\sigma_r\\approx1{,}080$, va $0{,}25+1{,}167=1{,}417=\\mathrm{MSE}$. Amaliy xulosa: siljish bepul olib tashlanadi — barcha bashoratlarga $\\bar r$ ni qo‘shing, va u baholangan ma’lumotlarda RMSE roppa-rosa $\\sigma_r$ gacha tushadi (bu yerda $1{,}190$ dan $1{,}080$ gacha). Amalda $\\bar r$ validatsiyada baholanadi, yutuq esa testda tekshiriladi."),
+        ("callout", "note", "RMSE va standart chetlanish", "Agar qoldiqlar o‘rtachasi nolga teng bo‘lsa (ozod hadli chiziqli regressiyada o‘qitish tanlanmasida doim shunday), RMSE qoldiqlarning standart chetlanishi bilan ustma-ust tushadi. Shundan uning statistikadagi «regressiyaning standart xatosi»ga yaqinligi kelib chiqadi — faqat u yerda qoldiqlar kvadratlari yig‘indisi $n$ ga emas, erkinlik darajalari soni $n-p$ ga bo‘linadi ($p$ — model parametrlari soni). Agar bundan tashqari xatolar normal bo‘lsa, qoldiqlarning taxminan $68\\%$ i $\\pm\\mathrm{RMSE}$ oralig‘ida, taxminan $95\\%$ i esa $\\pm2\\,\\mathrm{RMSE}$ oralig‘ida yotadi."),
     ]),
     dict(id="gap", title="RMSE va MAE: farq nimani aytadi", blocks=[
         ("p", "<a href=\"../mae/\">MAE</a> «o‘rtacha qanchaga adashamiz» degan savolga, RMSE esa «kattalarini hisobga olganda xatoning odatiy kattaligi qancha» degan savolga javob beradi. Ularning nisbati $\\mathrm{RMSE}/\\mathrm{MAE}$ o‘lchamsiz va masshtabga bog‘liq emas: u faqat xatolar taqsimotining <b>shaklini</b> tasvirlaydi."),
@@ -606,7 +609,7 @@ SECTIONS = {
             ("eq", r"\mathbb E|r|=2\int_0^\infty \frac{x}{\sigma\sqrt{2\pi}}\,e^{-x^2/2\sigma^2}\,dx=\frac{2\sigma^2}{\sigma\sqrt{2\pi}}=\sigma\sqrt{\frac{2}{\pi}}"),
             ("p", "Bundan $\\sigma/\\bigl(\\sigma\\sqrt{2/\\pi}\\bigr)=\\sqrt{\\pi/2}\\approx1{,}2533$. Chekli tanlanmada bu taxminan bajariladi: 3-rasmda $n=2000$ da $1{,}248$ chiqadi."),
         ]),
-        ("viz", "rmse-vs-mae", {"dist": "normal", "eps": 0}, "<b>Rasm 3.</b> Dispersiyasi birga teng 2000 ta xato (generatorning zerrasi qayd etilgan). Normal xatolar uchun nisbat $1{,}248$ (nazariya $1{,}253$), Laplas xatolari uchun $1{,}392$ ($1{,}414$), tekis xatolar uchun $1{,}153$ ($1{,}155$). Chetlanishlarni qo‘shing: har bir xato $\\varepsilon$ ehtimollik bilan 10 ga ko‘paytiriladi. $\\varepsilon=5\\%$ dayoq RMSE $1{,}009$ dan $2{,}817$ gacha o‘sadi, MAE esa faqat $0{,}809$ dan $1{,}258$ gacha."),
+        ("viz", "rmse-vs-mae", {"dist": "normal", "eps": 0}, "<b>3-rasm.</b> Dispersiyasi birga teng 2000 ta xato (generator urug‘i — seed — qayd etilgan). Normal xatolar uchun nisbat $1{,}248$ (nazariya $1{,}253$), Laplas xatolari uchun $1{,}392$ ($1{,}414$), tekis xatolar uchun $1{,}153$ ($1{,}155$). Chetlanishlarni qo‘shing: har bir xato $\\varepsilon$ ehtimollik bilan 10 ga ko‘paytiriladi. $\\varepsilon=5\\%$ dayoq RMSE $1{,}009$ dan $2{,}817$ gacha o‘sadi, MAE esa faqat $0{,}809$ dan $1{,}258$ gacha."),
         ("p", "Bunday aralashmada MSE $1+99\\varepsilon$ marta ($(1-\\varepsilon)\\cdot1+\\varepsilon\\cdot100$), MAE esa atigi $1+9\\varepsilon$ marta o‘sadi, shuning uchun nazariy nisbat $\\sqrt{1+99\\varepsilon}\\,/\\bigl((1+9\\varepsilon)\\,\\mathrm{MAE}_0\\bigr)$ ga teng, bu yerda $\\mathrm{MAE}_0$ — dastlabki taqsimotning MAE’i."),
         ("h3", "Chegaralar: MAE ≤ RMSE ≤ √n · MAE"),
         ("eq", r"\mathrm{MAE}\;\le\;\mathrm{RMSE}\;\le\;\sqrt n\;\mathrm{MAE}"),
@@ -618,14 +621,14 @@ SECTIONS = {
             ("eq", r"\sum_i r_i^2\le\Bigl(\sum_i|r_i|\Bigr)^2\quad\Longrightarrow\quad\sqrt{\frac1n\sum_i r_i^2}\le\frac{1}{\sqrt n}\sum_i|r_i|=\sqrt n\,\mathrm{MAE}"),
             ("p", "Tenglik $i\\ne j$ dagi barcha $|r_i|\\,|r_j|$ ko‘paytmalar nolga teng bo‘lganda, ya’ni noldan farqli xato ko‘pi bilan bitta bo‘lganda bajariladi. Agar umumiy absolyut xato $n$ ta obyektdan $k$ tasiga teng bo‘lingan bo‘lsa, nisbat roppa-rosa $\\sqrt{n/k}$ ga teng."),
         ]),
-        ("viz", "rmse-bounds", {"r": [0.5, -2], "n": 10, "k": 1}, "<b>Rasm 4.</b> Chapda — ikki xato $(r_1;\\,r_2)$. MAE bir xil bo‘lgan nuqtalar $|r_1|+|r_2|=2\\,\\mathrm{MAE}$ rombda, RMSE bir xil bo‘lganlari radiusi $\\sqrt2\\,\\mathrm{RMSE}$ bo‘lgan aylanada yotadi. Romb $\\mathrm{RMSE}=\\mathrm{MAE}$ (unga $|r_1|=|r_2|$ da urinadi) va $\\mathrm{RMSE}=\\sqrt2\\,\\mathrm{MAE}$ (o‘qlardagi uchlardan o‘tadi) aylanalari orasida qisilgan. $(0{,}5;\\,-2)$ nuqta uchun: $\\mathrm{MAE}=1{,}25$, $\\mathrm{RMSE}\\approx1{,}458$. O‘ngda — xato $n$ ta obyektdan $k$ tasiga teng bo‘linganda $\\sqrt{n/k}$ nisbati."),
+        ("viz", "rmse-bounds", {"r": [0.5, -2], "n": 10, "k": 1}, "<b>4-rasm.</b> Chapda — ikki xato $(r_1;\\,r_2)$. MAE bir xil bo‘lgan nuqtalar $|r_1|+|r_2|=2\\,\\mathrm{MAE}$ rombda, RMSE bir xil bo‘lganlari radiusi $\\sqrt2\\,\\mathrm{RMSE}$ bo‘lgan aylanada yotadi. Romb $\\mathrm{RMSE}=\\mathrm{MAE}$ (unga $|r_1|=|r_2|$ da urinadi) va $\\mathrm{RMSE}=\\sqrt2\\,\\mathrm{MAE}$ (o‘qlardagi uchlardan o‘tadi) aylanalari orasida qisilgan. $(0{,}5;\\,-2)$ nuqta uchun: $\\mathrm{MAE}=1{,}25$, $\\mathrm{RMSE}\\approx1{,}458$. O‘ngda — xato $n$ ta obyektdan $k$ tasiga teng bo‘linganda $\\sqrt{n/k}$ nisbati."),
         ("callout", "key", "Farqni qanday o‘qish kerak", "$\\mathrm{RMSE}\\approx\\mathrm{MAE}$ — xatolar taxminan bir xil kattalikda. $\\mathrm{RMSE}/\\mathrm{MAE}\\approx1{,}25$ — normal shovqin uchun odatiy. $1{,}4$ dan sezilarli katta — og‘ir dumlar yoki bir nechta katta xato: o‘rtachalarga ishonishdan oldin eng katta qoldiqlarga qarang."),
     ]),
     dict(id="geometry", title="Geometriya: masofa sifatida RMSE", blocks=[
         ("p", "Faktlar va bashoratlarni $n$ o‘lchovli fazo nuqtalari sifatida yozamiz: $y=(y_1,\\dots,y_n)$ va $\\hat y=(\\hat y_1,\\dots,\\hat y_n)$. Xatolar kvadratlari yig‘indisi ular orasidagi oddiy Yevklid masofasining kvadrati, shuning uchun"),
         ("eq", r"\mathrm{RMSE}(y,\hat y)=\frac{\|y-\hat y\|_2}{\sqrt n}"),
         ("p", "$\\sqrt n$ ga bo‘lish masofani turli o‘lchamdagi tanlanmalar uchun solishtiriladigan qiladi: har bir xato $c$ ga teng bo‘lsa, $\\|y-\\hat y\\|=c\\sqrt n$, RMSE esa roppa-rosa $c$. RMSE’si bir xil bo‘lgan barcha bashoratlar markazi $y$ da, radiusi $\\sqrt n\\,\\mathrm{RMSE}$ bo‘lgan sferani hosil qiladi. $n=3$ da buni chizish mumkin."),
-        ("viz", "rmse-vectors", {}, "<b>Rasm 5.</b> $\\mathbb R^3$ dagi umumiy misol: fakt $y=(3;\\,5;\\,8)$, bashorat $\\hat y=(2{,}5;\\,5;\\,10)$; to‘q sariq kesma — uzunligi $\\sqrt{4{,}25}\\approx2{,}062$ bo‘lgan xato vektori, va $\\mathrm{RMSE}=2{,}062/\\sqrt3\\approx1{,}190$. Kulrang sfera — RMSE’si xuddi shunday bo‘lgan barcha bashoratlar. Punktirli diagonal — konstant bashoratlar $(c;\\,c;\\,c)$; undagi $y$ ga eng yaqin nuqta — $\\bar y\\cdot\\mathbf 1$, $\\bar y=16/3$. Slayderlarni suring va sahnani aylantiring."),
+        ("viz", "rmse-vectors", {}, "<b>5-rasm.</b> $\\mathbb R^3$ dagi umumiy misol: fakt $y=(3;\\,5;\\,8)$, bashorat $\\hat y=(2{,}5;\\,5;\\,10)$; to‘q sariq kesma — uzunligi $\\sqrt{4{,}25}\\approx2{,}062$ bo‘lgan xato vektori, va $\\mathrm{RMSE}=2{,}062/\\sqrt3\\approx1{,}190$. Kulrang sfera — RMSE’si xuddi shunday bo‘lgan barcha bashoratlar. Punktirli diagonal — konstant bashoratlar $(c;\\,c;\\,c)$; undagi $y$ ga eng yaqin nuqta — $\\bar y\\cdot\\mathbf 1$, $\\bar y=16/3$. Slayderlarni suring va sahnani aylantiring."),
         ("h3", "Eng yaxshi konstanta — o‘rtacha, uning RMSE’i esa standart chetlanish"),
         ("p", "Qaysi konstant bashorat $\\hat y_i=c$ RMSE’ni minimallashtiradi? Geometrik jihatdan — $y$ ning diagonalga ortogonal proyeksiyasi, ya’ni $c=\\bar y$. Uning RMSE’i — maqsadli o‘zgaruvchining standart chetlanishi:"),
         ("eq", r"\min_c\,\mathrm{RMSE}(y,\,c\mathbf 1)=\mathrm{RMSE}(y,\,\bar y\mathbf 1)=\sqrt{\frac1n\sum_i\bigl(y_i-\bar y\bigr)^2}=\sigma_y"),
@@ -655,12 +658,12 @@ SECTIONS = {
         ("p", "Misol ma’lumotlari $y=(3;\\,5;\\,8)$ da $\\hat y_i=c$ konstant modelni olamiz. U holda $\\mathrm{MSE}(c)=(c-\\bar y)^2+\\sigma_y^2$ — parabola, RMSE esa giperbola:"),
         ("eq", r"\mathrm{RMSE}(c)=\sqrt{(c-\bar y)^2+\sigma_y^2},\qquad \mathrm{RMSE}'(c)=\frac{c-\bar y}{\sqrt{(c-\bar y)^2+\sigma_y^2}}\in(-1;\,1)"),
         ("p", "Minimum yaqinida giperbola parabolaga o‘xshaydi (RMSE o‘zini MSE kabi tutadi), uzoqda esa $|c-\\bar y|$ to‘g‘ri chiziqlariga (MAE kabi). Hosila $-1$ dan $1$ gacha silliq o‘zgaradi va bu chegaralardan hech qachon chiqmaydi, MSE hosilasi esa chiziqli va cheksiz o‘sadi."),
-        ("viz", "rmse-derivative", {"c": 8}, "<b>Rasm 6.</b> Yuqorida — $c$ konstant bashoratining RMSE, MSE va MAE’si (o‘qdagi nuqtalar — ma’lumotlar), pastda — hosilalar. $c=8$ da: $\\mathrm{RMSE}\\approx3{,}367$, $\\mathrm{RMSE}'\\approx0{,}792$, $\\mathrm{MSE}'\\approx5{,}333$; ularning nisbati $2\\,\\mathrm{RMSE}\\approx6{,}733$. RMSE va MSE minimumlari $\\bar y\\approx5{,}333$ da, MAE minimumi mediana 5 da."),
+        ("viz", "rmse-derivative", {"c": 8}, "<b>6-rasm.</b> Yuqorida — $c$ konstant bashoratining RMSE, MSE va MAE’si (o‘qdagi nuqtalar — ma’lumotlar), pastda — hosilalar. $c=8$ da: $\\mathrm{RMSE}\\approx3{,}367$, $\\mathrm{RMSE}'\\approx0{,}792$, $\\mathrm{MSE}'\\approx5{,}333$; ularning nisbati $2\\,\\mathrm{RMSE}\\approx6{,}733$. RMSE va MSE minimumlari $\\bar y\\approx5{,}333$ da, MAE minimumi mediana 5 da."),
         ("p", "Ikkinchi hosila $\\mathrm{RMSE}''(c)=\\sigma_y^2/\\mathrm{RMSE}(c)^3&gt;0$: $\\sigma_y&gt;0$ ekan, funksiya qat’iy qavariq. Umumiy holda RMSE bashoratlar bo‘yicha qavariq (norma sifatida), demak, chiziqli model parametrlari bo‘yicha ham: chiziqli regressiyada na MSE, na RMSE uchun lokal minimumlar yo‘q."),
     ]),
     dict(id="training", title="RMSE(w, b) landshafti va o‘qitish", blocks=[
         ("p", "14 ta nuqtadagi $\\hat y=wx+b$ chiziqli model. $(w,\\,b)$ parametrlar tekisligi ustida RMSE kosa hosil qiladi. Sirtni MSE’ga almashtiring: sath chiziqlari o‘sha-o‘sha qoladi ($\\mathrm{RMSE}=1{,}5$ sathi — bu $\\mathrm{MSE}=2{,}25$ sathi), faqat balandlik o‘zgaradi: MSE kvadratik o‘sadi, RMSE esa minimumdan uzoqda deyarli chiziqli, konus kabi."),
-        ("viz", "rmse-landscape", {"eta": 0.1}, "<b>Rasm 7.</b> Chapda — sirt (aylantiriladi), o‘ngda — RMSE sath chiziqlari bilan yuqoridan ko‘rinish, pastda — qadamlar bo‘yicha RMSE. Qora start nuqtasini torting: strelkalar MSE (ko‘k) va RMSE (to‘q sariq) uchun birinchi $-\\eta\\nabla$ qadamni ko‘rsatadi — yo‘nalish bitta, lekin to‘q sariq $2\\,\\mathrm{RMSE}\\approx5{,}4$ marta qisqa. «Boshlash»ni bosing: $\\eta=0{,}1$ da MSE bo‘yicha tushish $0{,}904$ minimumga $0{,}01$ aniqlik bilan 61 qadamda, RMSE bo‘yicha tushish esa 140 qadamda yetadi. $\\eta=0{,}14$ qo‘ying: MSE bo‘yicha tushish uzoqlashib ketadi, RMSE bo‘yicha tushish esa maqsadga 100 qadamda yetadi."),
+        ("viz", "rmse-landscape", {"eta": 0.1}, "<b>7-rasm.</b> Chapda — sirt (aylantiriladi), o‘ngda — RMSE sath chiziqlari bilan yuqoridan ko‘rinish, pastda — qadamlar bo‘yicha RMSE. Qora start nuqtasini torting: strelkalar MSE (ko‘k) va RMSE (to‘q sariq) uchun birinchi $-\\eta\\nabla$ qadamni ko‘rsatadi — yo‘nalish bitta, lekin to‘q sariq $2\\,\\mathrm{RMSE}\\approx5{,}4$ marta qisqa. «Boshlash»ni bosing: $\\eta=0{,}1$ da MSE bo‘yicha tushish $0{,}904$ minimumga $0{,}01$ aniqlik bilan 61 qadamda, RMSE bo‘yicha tushish esa 140 qadamda yetadi. $\\eta=0{,}14$ qo‘ying: MSE bo‘yicha tushish uzoqlashib ketadi, RMSE bo‘yicha tushish esa maqsadga 100 qadamda yetadi."),
         ("p", "Nega shunday. RMSE bo‘yicha qadam — o‘zgaruvchan o‘qitish tezligi (learning rate) bilan MSE bo‘yicha qadam:"),
         ("eq", r"\theta\leftarrow\theta-\eta\,\nabla\mathrm{RMSE}=\theta-\underbrace{\frac{\eta}{2\,\mathrm{RMSE}(\theta)}}_{\eta_{\text{eff}}}\,\nabla\mathrm{MSE}"),
         ("p", "Xatolar katta ekan, samarali qadam kichik — shuning uchun RMSE bo‘yicha tushish haddan tashqari katta $\\eta$ ga chidamliroq. Minimum yaqinida $\\eta_{\\text{eff}}\\to\\eta/(2\\,\\mathrm{RMSE}_{\\min})$; bu yerda $\\mathrm{RMSE}_{\\min}\\approx0{,}904$, va qadam MSE’nikidan deyarli ikki baravar kichik — sekin marra shundan. MSE bo‘yicha tushish faqat $\\eta&lt;2/\\lambda_{\\max}\\approx0{,}133$ da barqaror, bu yerda $\\lambda_{\\max}\\approx15{,}0$ — MSE gessianining eng katta xos qiymati."),
@@ -684,7 +687,7 @@ SECTIONS = {
         ("p", "<b>RMSLE</b> (root mean squared logarithmic error) — logarifmik shkaladagi RMSE:"),
         ("eq", r"\mathrm{RMSLE}=\sqrt{\frac1n\sum_{i=1}^{n}\bigl(\ln(1+\hat y_i)-\ln(1+y_i)\bigr)^2}"),
         ("p", "Logarifm nisbatlarni ayirmalarga aylantiradi: xato $1+\\hat y$ ning $1+y$ dan <i>qanchaga</i> emas, <i>necha marta</i> farq qilishi bilan belgilanadi. Shuning uchun RMSLE masshtablari keng tarqalgan manfiy bo‘lmagan maqsadlar (narxlar, sotuvlar, ko‘rishlar) uchun mos keladi va kam bashoratni xuddi shu absolyut kattalikdagi ortiq bashoratdan qattiqroq jazolaydi. Umumiy misolda $\\mathrm{RMSLE}\\approx0{,}139$."),
-        ("viz", "rmse-rmsle", {"y": 10, "yhat": 5}, "<b>Rasm 8.</b> Fakt $y=10$ bo‘lganda logarifmik xato kvadrati. 5 bashorati (5 ga kam) $0{,}367$ turadi, 15 bashorati (xuddi shu 5 ga ortiq) — $0{,}140$, $2{,}6$ marta kam. Punktir — egri chiziqning ko‘zgudagi aksi, nuqtalar — taqqoslash uchun $1+y$ ulushlaridagi kvadratik xato. Pastda — $\\hat y$ bo‘yicha hosila: kam bashorat tomonida u tikroq."),
+        ("viz", "rmse-rmsle", {"y": 10, "yhat": 5}, "<b>8-rasm.</b> Fakt $y=10$ bo‘lganda logarifmik xato kvadrati. 5 bashorati (5 ga kam) $0{,}367$ turadi, 15 bashorati (xuddi shu 5 ga ortiq) — $0{,}140$, $2{,}6$ marta kam. Punktir — egri chiziqning ko‘zgudagi aksi, nuqtalar — taqqoslash uchun $1+y$ ulushlaridagi kvadratik xato. Pastda — $\\hat y$ bo‘yicha hosila: kam bashorat tomonida u tikroq."),
         ("p", "Yana ikki foydali modifikatsiya:"),
         ("ul", [
             "<b>vaznli RMSE</b> $\\sqrt{\\sum_i w_i r_i^2/\\sum_i w_i}$ — obyektlar teng qiymatli bo‘lmaganda (qimmat tovarlar, yangi kuzatuvlar);",
@@ -695,7 +698,7 @@ SECTIONS = {
     dict(id="code", title="Kodda", blocks=[
         ("p", "NumPy’da RMSE — bitta qator; quyida bu sahifadagi formulalar ham umumiy misolda tekshiriladi."),
         ("code", "python", "CODE_NUMPY"),
-        ("p", "scikit-learn’da tayyor funksiyalar bor (1.4 versiyasidan; avval <code>mean_squared_error(..., squared=False)</code> deb yozilardi). Fold’lar RMSE’larining o‘rtachasi bilan barcha obyektlar bo‘yicha RMSE orasidagi farqqa e’tibor bering:"),
+        ("p", "scikit-learn’da tayyor funksiyalar bor (1.4 versiyasidan; avval <code>mean_squared_error(..., squared=False)</code> deb yozilardi, 1.6 da esa <code>squared</code> parametri olib tashlangan). Fold’lar RMSE’larining o‘rtachasi bilan barcha obyektlar bo‘yicha RMSE orasidagi farqqa e’tibor bering:"),
         ("code", "python", "CODE_SKLEARN"),
         ("p", "PyTorch’da yo‘qotish funksiyasi sifatida RMSE nolda ehtiyotkorlikni talab qiladi:"),
         ("code", "python", "CODE_TORCH"),
@@ -713,7 +716,7 @@ SECTIONS = {
     ]),
     dict(id="links", title="Boshqa formulalar bilan bog‘lanishlar", blocks=[
         ("ul", [
-            "<a href=\"../mse/\">MSE</a>: $\\mathrm{RMSE}=\\sqrt{\\mathrm{MSE}}$ — minimum ham, modellar tartibi ham o‘sha, gradiyent $2\\,\\mathrm{RMSE}$ marta kichik.",
+            "<a href=\"../mse/\">MSE</a>: $\\mathrm{RMSE}=\\sqrt{\\mathrm{MSE}}$ — minimum ham, modellar tartibi ham o‘sha, gradiyent esa $2\\,\\mathrm{RMSE}$ ga bo‘linadi.",
             "<a href=\"../mae/\">MAE</a>: $\\mathrm{MAE}\\le\\mathrm{RMSE}\\le\\sqrt n\\,\\mathrm{MAE}$; MAE uchun eng yaxshi konstanta — mediana, RMSE uchun — o‘rtacha.",
             "<a href=\"../huber/\">Huber</a>: nol yaqinida kvadratik, dumlarda chiziqli — MSE (demak, RMSE) va MAE orasidagi murosa.",
             "<a href=\"../mape/\">MAPE</a>: absolyut o‘rniga nisbiy xato; RMSLE — logarifmik shkaladagi uning kvadratik qarindoshi.",

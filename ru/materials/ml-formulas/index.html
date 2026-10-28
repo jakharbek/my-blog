@@ -77,7 +77,7 @@
           <div class="fc-row"><span class="lab">Производная</span><div class="fx">$$\sigma'(x)=\sigma(x)\,\bigl(1-\sigma(x)\bigr)$$</div></div>
           <div class="fc-row"><span class="lab">Пример</span><p>$\sigma(0)=0{,}5$, $\sigma(2)\approx0{,}881$, $\sigma(-2)\approx0{,}119$. Наклон максимален в нуле: $\sigma'(0)=0{,}25$, а уже $\sigma'(2)\approx0{,}105$.</p></div>
           <div class="fc-row"><span class="lab">В коде</span><pre><code>def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+    return 0.5 * (1 + np.tanh(0.5 * x))  # = 1 / (1 + e^-x), no overflow
 
 def sigmoid_grad(x):
     s = sigmoid(x)
@@ -139,7 +139,7 @@ def relu_grad(x):
         </details>
       </article>
       <article class="fcard" id="softmax">
-        <div class="fc-top"><h3><span>Softmax</span><small>«мягкий максимум»</small></h3><span class="fc-tag mono">Σ = 1</span></div>
+        <div class="fc-top"><h3><span>Softmax</span><small>«мягкий argmax»</small></h3><span class="fc-tag mono">Σ = 1</span></div>
         <div class="fc-formula">$$\operatorname{softmax}(x)_i=s_i=\frac{e^{x_i}}{\sum_{j} e^{x_j}}$$</div>
         <a class="ul fc-full" href="softmax/">Полный разбор →</a>
         <details>
@@ -201,7 +201,7 @@ def relu_grad(x):
           <div class="fc-row"><span class="lab">Смысл</span><p>Корень из MSE возвращает ошибку в единицы целевой переменной. Наглядна, как MAE, но по-прежнему сильнее наказывает крупные ошибки.</p></div>
           <div class="fc-row"><span class="lab">Пример</span><p>Сквозной пример: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, ошибки $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{RMSE}=\sqrt{1{,}417}\approx1{,}190$ против $\mathrm{MAE}\approx0{,}833$.</p></div>
           <div class="fc-row"><span class="lab">В коде</span><pre><code>rmse = np.sqrt(np.mean((y - y_hat) ** 2))</code></pre></div>
-          <div class="fc-key">Всегда $\mathrm{RMSE}\ge\mathrm{MAE}$, равенство — только когда все ошибки одинаковы по модулю. Чем больше разрыв, тем сильнее разброс ошибок: это индикатор выбросов.</div>
+          <div class="fc-key">Всегда $\mathrm{RMSE}\ge\mathrm{MAE}$, равенство — только когда все ошибки одинаковы по модулю. Чем больше разрыв, тем неравномернее ошибки по модулю: это индикатор выбросов.</div>
           </div>
         </details>
       </article>
@@ -215,7 +215,7 @@ def relu_grad(x):
           <div class="fc-row"><span class="lab">Смысл</span><p>Ошибка в процентах от факта: «в среднем модель ошибается на MAPE %». Удобна, когда важна относительная, а не абсолютная ошибка.</p></div>
           <div class="fc-row"><span class="lab">Пример</span><p>Сквозной пример: $y=(3;\,5;\,8)$, $\hat{y}=(2{,}5;\,5;\,10)$, ошибки $y-\hat{y}=(0{,}5;\,0;\,-2)$. $\mathrm{MAPE}=\frac{100\%}{3}\bigl(\tfrac{0{,}5}{3}+0+\tfrac{2}{8}\bigr)\approx13{,}9\%$.</p></div>
           <div class="fc-row"><span class="lab">В коде</span><pre><code>mape = 100 * np.mean(np.abs((y - y_hat) / y))</code></pre></div>
-          <div class="fc-key">⚠ Не определена при $y_i=0$ и взрывается возле нуля. Асимметрична: заниженный положительный прогноз даёт не больше 100%, а завышенный — сколько угодно. Симметричный вариант — sMAPE.</div>
+          <div class="fc-key">⚠ Не определена при $y_i=0$ и взрывается возле нуля. Асимметрична: заниженный положительный прогноз даёт не больше 100%, а завышенный — сколько угодно. «Симметричный» вариант — sMAPE, но он симметричен лишь в разах, а не в единицах.</div>
           </div>
         </details>
       </article>
@@ -272,7 +272,7 @@ bce = -np.mean(y * np.log(p)
           <div class="fc-row"><span class="lab">В коде</span><pre><code>def cross_entropy(logits, k):
     z = logits - logits.max()
     return np.log(np.exp(z).sum()) - z[k]</code></pre></div>
-          <div class="fc-key"><b>Главная развязка:</b> вся матрица Якоби softmax вместе с логарифмом схлопывается в $s_k-y_k$. Эта связка стоит в конце любого классификатора и любой языковой модели (LLM): там классы — токены словаря.</div>
+          <div class="fc-key"><b>Главная развязка:</b> вся матрица Якоби softmax вместе с логарифмом схлопывается в $s_k-y_k$. Эта связка стоит в конце большинства классификаторов и языковых моделей (LLM): там классы — токены словаря.</div>
           </div>
         </details>
       </article>
@@ -292,7 +292,7 @@ bce = -np.mean(y * np.log(p)
           <div class="fc-row"><span class="lab">Шаг 2 · второй момент (масштаб)</span><div class="fx">$$v_t=\beta_2 v_{t-1}+(1-\beta_2)\,g_t^2$$</div></div>
           <div class="fc-row"><span class="lab">Шаг 3 · поправка смещения</span><div class="fx">$$\hat{m}_t=\frac{m_t}{1-\beta_1^{\,t}}\qquad \hat{v}_t=\frac{v_t}{1-\beta_2^{\,t}}$$</div></div>
           <div class="fc-row"><span class="lab">Гиперпараметры по умолчанию</span><p>$\eta=0{,}001$ (темп обучения, learning rate), $\beta_1=0{,}9$, $\beta_2=0{,}999$, $\epsilon=10^{-8}$. Все операции — поэлементные: у каждого веса свои $m$ и $v$.</p></div>
-          <div class="fc-row"><span class="lab">Пример</span><p>Первый шаг, $g_1=0{,}5$, $m_0=v_0=0$: $m_1=0{,}05$, $v_1=0{,}00025$. Без поправки шаг был бы в $3{,}16$ раза больше: $0{,}05/\sqrt{0{,}00025}\approx3{,}16$, потому что $v$ занижен сильнее, чем $m$; с поправкой $\hat{m}_1=0{,}5$, $\hat{v}_1=0{,}25$, и $\hat{m}_1/\sqrt{\hat{v}_1}=1$. Вес сдвигается ровно на $\eta$ — каким бы ни был масштаб градиента.</p></div>
+          <div class="fc-row"><span class="lab">Пример</span><p>Первый шаг, $g_1=0{,}5$, $m_0=v_0=0$: $m_1=0{,}05$, $v_1=0{,}00025$. Без поправки шаг был бы в $3{,}16$ раза больше: $0{,}05/\sqrt{0{,}00025}\approx3{,}16$, потому что $v$ занижен сильнее, чем $m$; с поправкой $\hat{m}_1=0{,}5$, $\hat{v}_1=0{,}25$, и $\hat{m}_1/\sqrt{\hat{v}_1}=1$. На первом шаге вес сдвигается ровно на $\eta$ — каким бы ни был масштаб градиента.</p></div>
           <div class="fc-row"><span class="lab">В коде</span><pre><code>m = b1 * m + (1 - b1) * g
 v = b2 * v + (1 - b2) * g ** 2
 m_hat = m / (1 - b1 ** t)
@@ -308,7 +308,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
     <div class="fg-head"><span class="glyph math" aria-hidden="true">→</span><h2>Следующий уровень</h2><p>Активации современных трансформеров, предшественники Adam, метрическое обучение и несбалансированные классы — в порядке изучения.</p></div>
     <div class="fgrid">
       <article class="fcard" id="silu">
-        <div class="fc-top"><h3><span>SiLU / Swish</span><small>активация Qwen и LLaMA</small></h3><span class="fc-tag mono">приоритет 1</span></div>
+        <div class="fc-top"><h3><span>SiLU / Swish</span><small>активация Qwen и LLaMA</small></h3><span class="fc-tag mono">x·σ(x)</span></div>
         <div class="fc-formula">$$\operatorname{SiLU}(x)=x\cdot\sigma(x)$$</div>
         <a class="ul fc-full" href="silu/">Полный разбор →</a>
         <details>
@@ -320,19 +320,19 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
         </details>
       </article>
       <article class="fcard" id="gelu">
-        <div class="fc-top"><h3><span>GELU</span><small>BERT, GPT</small></h3><span class="fc-tag mono">приоритет 1</span></div>
+        <div class="fc-top"><h3><span>GELU</span><small>BERT, GPT</small></h3><span class="fc-tag mono">x·Φ(x)</span></div>
         <div class="fc-formula">$$\operatorname{GELU}(x)=x\cdot\Phi(x)$$</div>
         <a class="ul fc-full" href="gelu/">Полный разбор →</a>
         <details>
           <summary>Подробнее</summary>
           <div class="fc-body">
           <div class="fc-row"><span class="lab">Пример</span><p>$\operatorname{GELU}(1)\approx0{,}841$, $\operatorname{GELU}(-1)\approx-0{,}159$.</p></div>
-          <div class="fc-key">$\Phi(x)$ — функция распределения стандартного нормального закона: вход умножается на вероятность того, что он «больше шума». Стандартная активация в BERT и GPT.</div>
+          <div class="fc-key">$\Phi(x)$ — функция распределения стандартного нормального закона: вход умножается на вероятность того, что он «больше шума». Стандартная активация в BERT, GPT-2 и GPT-3.</div>
           </div>
         </details>
       </article>
       <article class="fcard" id="sgd">
-        <div class="fc-top"><h3><span>SGD → Momentum → RMSProp</span><small>основа под Adam</small></h3><span class="fc-tag mono">приоритет 2</span></div>
+        <div class="fc-top"><h3><span>SGD → Momentum → RMSProp</span><small>основа под Adam</small></h3><span class="fc-tag mono">инерция</span></div>
         <div class="fc-formula">$$\theta_t=\theta_{t-1}-\eta\,g_t$$</div>
         <a class="ul fc-full" href="sgd/">Полный разбор →</a>
         <details>
@@ -345,7 +345,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
         </details>
       </article>
       <article class="fcard" id="triplet">
-        <div class="fc-top"><h3><span>Triplet Loss</span><small>повторная идентификация (Re-ID)</small></h3><span class="fc-tag mono">приоритет 2</span></div>
+        <div class="fc-top"><h3><span>Triplet Loss</span><small>повторная идентификация (Re-ID)</small></h3><span class="fc-tag mono">зазор m</span></div>
         <div class="fc-formula">$$L=\max\bigl(0,\;d(a,p)-d(a,n)+m\bigr)$$</div>
         <a class="ul fc-full" href="triplet/">Полный разбор →</a>
         <details>
@@ -357,7 +357,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
         </details>
       </article>
       <article class="fcard" id="focal">
-        <div class="fc-top"><h3><span>Focal Loss</span><small>несбалансированные классы</small></h3><span class="fc-tag mono">приоритет 3</span></div>
+        <div class="fc-top"><h3><span>Focal Loss</span><small>несбалансированные классы</small></h3><span class="fc-tag mono">γ ≈ 2</span></div>
         <div class="fc-formula">$$\mathrm{FL}=-(1-p_t)^{\gamma}\log p_t$$</div>
         <a class="ul fc-full" href="focal/">Полный разбор →</a>
         <details>
@@ -385,7 +385,7 @@ theta -= lr * m_hat / (np.sqrt(v_hat) + eps)</code></pre></div>
   <section class="takeaway mat-links">
     <h2>Главные связи</h2>
     <ul>
-      <li>$\tanh(x)=2\sigma(2x)-1$: тангенс — это растянутая и сдвинутая сигмоида.</li>
+      <li>$\tanh(x)=2\sigma(2x)-1$: тангенс — это сигмоида, сжатая вдвое по горизонтали, растянутая вдвое по вертикали и сдвинутая вниз.</li>
       <li>Softmax для двух классов совпадает с сигмоидой разности логитов, а диагональ его производной $s_i(1-s_i)$ — производная сигмоиды.</li>
       <li>Sigmoid + BCE и softmax + CE дают один и тот же градиент по логитам: «предсказание − правда», $\hat{y}-y$.</li>
       <li>Huber — мост между MSE и MAE: квадратичен возле нуля и линеен на больших ошибках.</li>

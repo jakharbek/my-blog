@@ -373,7 +373,7 @@
       let last = -1;
       labs.sort((u, v) => u.y - v.y).forEach((q) => { const y = Math.max(q.y, last + 0.075); last = y; p.text(T - 8, y, q.s, { anchor: "end", dy: -6, c: q.c }); });
       p.legend([{ label: L.adamL2, c: "orange" }, { label: L.adamw, c: "violet" }, { label: "c = 0", c: "faint" }, { label: "c = " + L.c1, c: "faint", dash: true }, { label: L.expd, c: "guide", dash: true }]);
-      ro.set("l2", A.map((s) => FV.fmt(s[T], 3)).join(" / ")); ro.set("w", W.map((s) => FV.fmt(s[T], 3)).join(" / "));
+      ro.set("l2", A.map((s) => FV.fmt(s[T], 4)).join(" / ")); ro.set("w", W.map((s) => FV.fmt(s[T], 4)).join(" / "));
     }
     p.onresize = draw; draw();
   });

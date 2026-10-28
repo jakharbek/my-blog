@@ -5,16 +5,16 @@ META = dict(
     date="2026-10-28",
     minutes=35,
     hero=r"L(a,p,n)=\max\bigl(0,\;d(a,p)-d(a,n)+m\bigr)",
-    title={"ru": "Triplet Loss: свой ближе чужого", "en": "Triplet Loss: the positive closer than the negative", "uz": "Triplet Loss: o‘ziniki begonadan yaqinroq"},
+    title={"ru": "Triplet Loss: свой ближе чужого", "en": "Triplet Loss: the positive must be closer than the negative", "uz": "Triplet Loss: o‘ziniki begonadan yaqinroq"},
     dek={
         "ru": "Функция потерь, которая учит не классы, а расстояния: якорь должен быть ближе к «своему», чем к «чужому», хотя бы на зазор m. Разбираем по косточкам формулу, три режима троек, градиенты, майнинг batch-hard, нормализацию на сфере и то, как на этой математике держатся FaceNet и повторная идентификация людей (Re-ID).",
         "en": "A loss that learns distances rather than classes: the anchor must be closer to its positive than to the negative by at least a margin m. We take apart the formula, the three regimes of triplets, the gradients, batch-hard mining, normalization on the sphere, and how FaceNet and person re-identification (Re-ID) rest on this mathematics.",
-        "uz": "Sinflarni emas, masofalarni o‘rgatadigan yo‘qotish funksiyasi: langar «o‘ziniki»ga «begona»dan kamida m oraliqqa yaqinroq bo‘lishi kerak. Formulani, uchliklarning uch rejimini, gradiyentlarni, batch-hard maynigni, sferada normallashtirishni va FaceNet hamda odamlarni qayta identifikatsiya qilish (Re-ID) shu matematikaga qanday tayanishini mayda detallarigacha ko‘rib chiqamiz.",
+        "uz": "Sinflarni emas, masofalarni o‘rgatadigan yo‘qotish funksiyasi: langar «o‘ziniki»ga «begona»dan kamida m oraliqqa yaqinroq bo‘lishi kerak. Formulani, uchliklarning uch rejimini, gradiyentlarni, batch-hard mayningni, sferada normallashtirishni va FaceNet hamda odamlarni qayta identifikatsiya qilish (Re-ID) shu matematikaga qanday tayanishini mayda detallarigacha ko‘rib chiqamiz.",
     },
     description={
-        "ru": "Triplet Loss подробно: формула и зазор, лёгкие, полутрудные и трудные тройки, градиенты и 3D-поверхность потерь, batch-hard и batch-all, обучение эмбеддингов, нормализация, FaceNet и Re-ID, код NumPy и PyTorch.",
-        "en": "Triplet Loss in depth: the formula and the margin, easy, semi-hard and hard triplets, gradients and the 3D loss surface, batch-hard and batch-all, embedding training, normalization, FaceNet and Re-ID, NumPy and PyTorch code.",
-        "uz": "Triplet Loss batafsil: formula va oraliq, oson, yarim qiyin va qiyin uchliklar, gradiyentlar va 3D yo‘qotish sirti, batch-hard va batch-all, embeddinglarni o‘qitish, normallashtirish, FaceNet va Re-ID, NumPy va PyTorch kodi.",
+        "ru": "Triplet Loss по косточкам: зазор, лёгкие, полутрудные и трудные тройки, градиенты, майнинг batch-hard, нормировка на сфере, FaceNet и Re-ID, код.",
+        "en": "Triplet Loss in depth: the margin, easy, semi-hard and hard triplets, gradients, batch-hard mining, normalization on the sphere, FaceNet, Re-ID and code.",
+        "uz": "Triplet Loss batafsil: oraliq, oson, yarim qiyin va qiyin uchliklar, gradiyentlar, batch-hard mayning, sferada normallash, FaceNet, Re-ID va kod.",
     },
 )
 
@@ -31,17 +31,19 @@ def batch_hard_triplet(E, labels, margin=0.3):
     same = labels[:, None] == labels[None, :]
     hardest_pos = np.where(same, D, 0.0).max(1)       # самый далёкий «свой»
     hardest_neg = np.where(same, np.inf, D).min(1)    # самый близкий «чужой»
-    return np.maximum(hardest_pos - hardest_neg + margin, 0.0).mean()
+    has_pos = same.sum(1) > 1                         # якорь без «своих» в батче пропускаем
+    loss = np.maximum(hardest_pos - hardest_neg + margin, 0.0)
+    return loss[has_pos].mean()
 
 E = np.array([[0.0, 0.0], [0.9, 0.0], [0.6, 0.8]])   # якорь, свой, чужой
 labels = np.array([0, 0, 1])
-print(batch_hard_triplet(E, labels, margin=0.2))      # ≈ 0.1152 = (0.1 + 0.2456 + 0) / 3'''
+print(batch_hard_triplet(E, labels, margin=0.2))      # ≈ 0.1728 = (0.1 + 0.2456) / 2: у чужого нет «своих»'''
 
 CODE_TORCH = '''import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# 1) Тройки собраны заранее: готовая потеря
+# 1) Тройки собраны заранее: готовая потеря (по умолчанию margin=1.0, p=2, swap=False)
 loss_fn = nn.TripletMarginLoss(margin=0.2, p=2)
 a = torch.tensor([[0.0, 0.0]], requires_grad=True)
 p = torch.tensor([[0.9, 0.0]], requires_grad=True)
@@ -58,26 +60,29 @@ def batch_hard(emb, labels, margin=0.3, normalize=True):
     same = labels[:, None] == labels[None, :]
     pos = (D * same).max(1).values             # самый далёкий «свой»
     neg = D.masked_fill(same, float("inf")).min(1).values   # самый близкий «чужой»
-    return F.relu(pos - neg + margin).mean()'''
+    has_pos = same.sum(1) > 1                  # якорь без «своих» в батче пропускаем
+    return F.relu(pos - neg + margin)[has_pos].mean()'''
 
 
 def _code(src, lang):
     if lang == "ru":
         return src
     repl = {
-        "en": [("Матрица евклидовых расстояний между строками E (n × d).", "Matrix of Euclidean distances between the rows of E (n × d)."),
+        "en": [("якорь без «своих» в батче пропускаем", "skip anchors that have no positive in the batch"), ("у чужого нет «своих»", "the negative has no positive"), ("готовая потеря (по умолчанию margin=1.0, p=2, swap=False)", "the built-in loss (defaults: margin=1.0, p=2, swap=False)"),
+               ("Матрица евклидовых расстояний между строками E (n × d).", "Matrix of Euclidean distances between the rows of E (n × d)."),
                ("max: защита от −1e-16 и корня из нуля", "max: guards against −1e-16 and the root of zero"),
                ("самый далёкий «свой»", "the farthest positive"), ("самый близкий «чужой»", "the closest negative"),
                ("якорь, свой, чужой", "anchor, positive, negative"),
-               ("Тройки собраны заранее: готовая потеря", "Triplets prepared in advance: the built-in loss"),
+               ("Тройки собраны заранее: ", "Triplets prepared in advance: "),
                ("≈ [1, 0] и [−0.6, −0.8]: единичные векторы", "≈ [1, 0] and [−0.6, −0.8]: unit vectors"),
                ("Майнинг внутри батча P × K (batch-hard)", "Mining inside a P × K batch (batch-hard)"),
                ("точки на единичной сфере", "points on the unit sphere"), ("n × n евклидовых расстояний", "n × n Euclidean distances")],
-        "uz": [("Матрица евклидовых расстояний между строками E (n × d).", "E (n × d) satrlari orasidagi Evklid masofalari matritsasi."),
-               ("max: защита от −1e-16 и корня из нуля", "max: −1e-16 va noldan ildizdan himoya"),
+        "uz": [("якорь без «своих» в батче пропускаем", "batchda o‘zinikisi yo‘q langarni o‘tkazib yuboramiz"), ("у чужого нет «своих»", "begonaning o‘zinikisi yo‘q"), ("готовая потеря (по умолчанию margin=1.0, p=2, swap=False)", "tayyor yo‘qotish (standart: margin=1.0, p=2, swap=False)"),
+               ("Матрица евклидовых расстояний между строками E (n × d).", "E (n × d) satrlari orasidagi Evklid masofalari matritsasi."),
+               ("max: защита от −1e-16 и корня из нуля", "max: −1e-16 dan va noldan ildiz olishdan himoya"),
                ("самый далёкий «свой»", "eng uzoq o‘ziniki"), ("самый близкий «чужой»", "eng yaqin begona"),
                ("якорь, свой, чужой", "langar, o‘ziniki, begona"),
-               ("Тройки собраны заранее: готовая потеря", "Uchliklar oldindan yig‘ilgan: tayyor yo‘qotish"),
+               ("Тройки собраны заранее: ", "Uchliklar oldindan yig‘ilgan: "),
                ("≈ [1, 0] и [−0.6, −0.8]: единичные векторы", "≈ [1, 0] va [−0.6, −0.8]: birlik vektorlar"),
                ("Майнинг внутри батча P × K (batch-hard)", "P × K batch ichida mayning (batch-hard)"),
                ("точки на единичной сфере", "birlik sferadagi nuqtalar"), ("n × n евклидовых расстояний", "n × n Evklid masofalari")],
@@ -95,7 +100,7 @@ SECTIONS = {
         ("p", "Triplet Loss задаёт это требование напрямую. Берём тройку: <b>якорь</b> $a$ (anchor), <b>свой</b> $p$ (positive, тот же человек) и <b>чужой</b> $n$ (negative, другой человек). Требуем, чтобы свой был ближе чужого хотя бы на зазор $m$ (margin)."),
         ("ul", [
             "<b>распознавание лиц</b> — FaceNet (Google, 2015): 128-мерные эмбеддинги, зазор $0{,}2$, точность $99{,}63\\%$ на наборе LFW;",
-            "<b>повторная идентификация людей между камерами</b> — batch-hard triplet loss (Херманс и др., 2017) и библиотека torchreid, где он дополняет кросс-энтропию при обучении OSNet;",
+            "<b>повторная идентификация людей между камерами</b> — batch-hard triplet loss (Херманс и др., 2017); в библиотеке torchreid его можно обучать вместе с кросс-энтропией по личностям (движок <code>ImageTripletEngine</code>);",
             "<b>поиск похожих изображений, товаров, голосов</b> и вообще любой поиск по смыслу, где вопрос звучит «что ближе к этому образцу?».",
         ]),
         ("callout", "key", "Главное за минуту", "$L=\\max\\bigl(0,\\,d(a,p)-d(a,n)+m\\bigr)$. Если чужой дальше своего больше чем на $m$, потеря равна нулю и тройка ничему не учит. Иначе градиент тянет своего к якорю и отталкивает чужого. Почти все случайные тройки лёгкие, поэтому главное искусство — выбирать трудные (майнинг), например самого далёкого своего и самого близкого чужого в батче (batch-hard)."),
@@ -103,7 +108,7 @@ SECTIONS = {
     dict(id="intuition", title="Интуиция: свой ближе чужого", blocks=[
         ("p", "Нарисуем эмбеддинги на плоскости. Вокруг якоря $a$ проведём окружность через своего $p$ — её радиус $d(a,p)$. Добавим вторую, шире на зазор: радиус $d(a,p)+m$. Требование формулы простое: <b>чужой должен лежать за внешней окружностью</b>. Попал в оранжевое кольцо или внутрь — потеря положительна."),
         ("viz", "triplet-play", {"a": [-0.5, 0], "p": [0.4, 0], "n": [0.1, 0.8], "m": 0.2}, "<b>Рисунок 1.</b> Тяните якорь, своего и чужого. Оранжевые стрелки — направления, в которых градиентный спуск сдвинет каждую точку. В начальном положении $d(a,p)=0{,}9$, $d(a,n)=1{,}0$, $m=0{,}2$: чужой внутри кольца, $L=0{,}9-1{,}0+0{,}2=0{,}1$. Вытащите его за кольцо — стрелки исчезнут."),
-        ("callout", "intuition", "Что заметить", "Стрелки у своего и чужого всегда направлены вдоль линий к якорю, а их длины в обычной (не квадратной) метрике одинаковы и равны 1: важна не величина ошибки, а сам факт нарушения. Включите квадраты расстояний — длины стрелок станут пропорциональны расстояниям."),
+        ("callout", "intuition", "Что заметить", "Стрелки у своего и чужого всегда направлены вдоль линий к якорю, а в обычной (не квадратной) метрике их длины одинаковы при любом положении точек: норма градиента равна 1, важна не величина ошибки, а сам факт нарушения. Стрелка якоря — сумма двух единичных векторов, её длина от 0 до 2. Включите квадраты расстояний — длины стрелок станут пропорциональны расстояниям."),
     ]),
     dict(id="anatomy", title="Формула по косточкам", blocks=[
         ("p", "Запишем потерю полностью — с сетью, расстояниями и усреднением по тройкам:"),
@@ -128,12 +133,12 @@ SECTIONS = {
             ["полутрудная (semi-hard)", "$d(a,p)&lt;d(a,n)&lt;d(a,p)+m$", "от $0$ до $m$", "есть"],
             ["трудная (hard)", "$d(a,n)\\le d(a,p)$", "не меньше $m$", "есть"],
         ], {}),
-        ("p", "На плоскости $(d(a,p),\\,d(a,n))$ границы режимов — две параллельные прямые: $d(a,n)=d(a,p)$ и $d(a,n)=d(a,p)+m$. Потеря — плоскость, наклонённая под углом к этим прямым, обрезанная нулём выше верхней из них."),
+        ("p", "На плоскости $(d(a,p),\\,d(a,n))$ границы режимов — две параллельные прямые: $d(a,n)=d(a,p)$ и $d(a,n)=d(a,p)+m$. Потеря $d(a,p)-d(a,n)+m$ — наклонная плоскость, линии уровня которой параллельны этим прямым; выше верхней прямой она обрезана нулём."),
         ("viz", "triplet-regimes", {"m": 0.2, "pt": [0.9, 1.0]}, "<b>Рисунок 3.</b> Потеря на плоскости $(d(a,p),\\,d(a,n))$: чем насыщеннее красный, тем она больше. Точки — все 576 троек батча из рисунка 5 (4 человека по 4 снимка). При $m=0{,}2$ из них 510 лёгких, 31 полутрудная и 35 трудных: только 66 троек из 576 дают градиент. Увеличьте зазор — полоса полутрудных расширится."),
         ("callout", "warn", "Почему случайные тройки бесполезны", "Как только сеть немного обучилась, подавляющее большинство случайных троек становится лёгкими: их потеря и градиент равны нулю. Усреднение по ним разбавляет полезный сигнал, и обучение почти останавливается. Отсюда майнинг — целенаправленный выбор трудных и полутрудных троек."),
     ]),
     dict(id="gradients", title="Градиенты: куда тянет каждую точку", blocks=[
-        ("p", "Для активной тройки ($L&gt;0$) потеря равна $d(a,p)-d(a,n)+m$, и всё сводится к градиенту расстояния. Для евклидовой нормы $\\nabla_u\\|u-v\\|=\\frac{u-v}{\\|u-v\\|}$ — единичный вектор от $v$ к $u$."),
+        ("p", "Для активной тройки ($L&gt;0$) потеря равна $d(a,p)-d(a,n)+m$, и всё сводится к градиенту расстояния. Для евклидовой нормы $\\nabla_u\\|u-v\\|=\\frac{u-v}{\\|u-v\\|}$ при $u\\ne v$ — единичный вектор от $v$ к $u$ (при $u=v$ норма не дифференцируема; её субградиенты — все векторы длины не больше 1, в коде обычно берут 0)."),
         ("deep", "Вывод градиентов по трём точкам", [
             ("p", "Обозначим $a,p,n$ эмбеддинги и $d_{ap}=\\|a-p\\|$, $d_{an}=\\|a-n\\|$. Дифференцируем $d_{ap}=\\sqrt{(a-p)^\\top(a-p)}$ по правилу цепочки:"),
             ("eq", r"\nabla_a d_{ap}=\frac{1}{2d_{ap}}\cdot2(a-p)=\frac{a-p}{d_{ap}},\qquad \nabla_p d_{ap}=\frac{p-a}{d_{ap}}"),
@@ -141,17 +146,17 @@ SECTIONS = {
             ("eq", r"\nabla_p L=\frac{p-a}{d_{ap}},\qquad \nabla_n L=-\frac{n-a}{d_{an}},\qquad \nabla_a L=\frac{a-p}{d_{ap}}-\frac{a-n}{d_{an}}"),
             ("p", "Сумма трёх градиентов равна нулю: сдвиг всех трёх точек на один вектор не меняет расстояний, значит, и потеря не меняется. Для квадратов расстояний $L=d_{ap}^2-d_{an}^2+m$ получаем $\\nabla_pL=2(p-a)$, $\\nabla_nL=-2(n-a)$ и $\\nabla_aL=2(n-p)$ — у якоря градиент вообще не зависит от его положения."),
         ]),
-        ("p", "Шаг градиентного спуска идёт против градиента: свой $p$ сдвигается <b>к якорю</b>, чужой $n$ — <b>от якоря</b>, а якорь — к своему и от чужого. В обычной метрике длины этих сдвигов равны 1 при любых расстояниях; в квадратной — пропорциональны расстояниям."),
+        ("p", "Шаг градиентного спуска идёт против градиента: свой $p$ сдвигается <b>к якорю</b>, чужой $n$ — <b>от якоря</b>, а якорь — к своему и от чужого. В обычной метрике сдвиги своего и чужого имеют длину 1 при любых расстояниях (сдвиг якоря — от 0 до 2); в квадратной — $2\\,d(a,p)$ и $2\\,d(a,n)$, то есть пропорциональны расстояниям."),
         ("p", "Это видно на 3D-поверхности. Закрепим якорь в начале координат и своего на расстоянии $0{,}6$; как зависит потеря от положения чужого $n=(x,y)$? Получается перевёрнутый конус: в центре $L=0{,}6+m$, к краю круга радиуса $0{,}6+m$ — ноль. Склон конуса везде одинаковый, $|\\nabla L|=1$."),
-        ("viz", "triplet-surface", {"m": 0.4, "who": "neg"}, "<b>Рисунок 4.</b> Потеря как функция положения чужого (или своего) при закреплённом якоре; поверхность можно вращать. Справа — срез вдоль луча из якоря: сама потеря и норма градиента. При $m=0{,}4$ и обычном расстоянии конус имеет высоту $1{,}0$ и радиус $1{,}0$. Переключитесь на $d^2$: поверхность станет параболоидом высотой $0{,}76$ и радиусом $0{,}872$, а градиент у самого якоря обнулится. Для своего (чужой на расстоянии $1{,}2$) — воронка: потеря растёт за окружностью радиуса $0{,}8$."),
+        ("viz", "triplet-surface", {"m": 0.4, "who": "neg"}, "<b>Рисунок 4.</b> Потеря как функция положения чужого (или своего) при закреплённом якоре; поверхность можно вращать. Справа — срез вдоль луча из якоря: сама потеря и норма градиента. При $m=0{,}4$ и обычном расстоянии конус имеет высоту $1{,}0$ и радиус $1{,}0$. Переключитесь на $d^2$: поверхность станет параболоидом высотой $0{,}76$ и радиусом $0{,}872$, а градиент у самого якоря обнулится. Для своего (чужой на расстоянии $1{,}2$, обычное расстояние) — воронка: потеря растёт за окружностью радиуса $1{,}2-0{,}4=0{,}8$."),
         ("callout", "warn", "Квадрат расстояния и трудные чужие", "С квадратами расстояний сила отталкивания $2\\,d(a,n)$ тем слабее, чем ближе чужой к якорю — то есть именно для самых опасных ошибок. В обычной метрике она постоянна. Поэтому в Re-ID (Херманс и др., 2017) рекомендуют обычное евклидово расстояние; FaceNet использует квадраты, но на нормированных векторах и с полутрудными тройками."),
     ]),
     dict(id="mining", title="Майнинг: какие тройки брать", blocks=[
         ("p", "В наборе из $N$ изображений троек порядка $N^3$ — перебрать их все нельзя, да и почти все лёгкие. Тройки выбирают <b>онлайн</b>, внутри батча. Батч строят по схеме $P\\times K$: $P$ человек, по $K$ снимков каждого. Внутри такого батча"),
         ("eq", r"|T|=\underbrace{PK}_{\text{якорей}}\cdot\underbrace{(K-1)}_{\text{своих}}\cdot\underbrace{(P-1)K}_{\text{чужих}}"),
-        ("p", "При $P=4$, $K=4$ это 576 троек, при $P=18$, $K=4$ (батч Херманса и др. для набора Market-1501) — уже 14 688. Основные стратегии:"),
+        ("p", "При $P=4$, $K=4$ это 576 троек, при $P=18$, $K=4$ (такой батч использовали Херманс и др.) — уже 14 688. Основные стратегии:"),
         ("ul", [
-            "<b>batch-all</b> — берём все тройки батча и усредняем потерю только по активным ($L&gt;0$), чтобы лёгкие не разбавляли сигнал;",
+            "<b>batch-all</b> — берём все тройки батча и усредняем потерю только по активным ($L&gt;0$), чтобы лёгкие не разбавляли сигнал (у Херманса и др. — вариант BA$_{\\ne0}$);",
             "<b>batch-hard</b> — для каждого якоря одна тройка: <i>самый далёкий свой</i> и <i>самый близкий чужой</i>; $PK$ троек, самые информативные;",
             "<b>semi-hard</b> (FaceNet) — для пары $(a,p)$ берут чужого, который дальше своего, но внутри зазора; так обучение мягче на старте.",
         ]),
@@ -162,19 +167,19 @@ SECTIONS = {
     dict(id="training", title="Как это работает в обучении", blocks=[
         ("p", "Соберём всё вместе. Пусть у каждого снимка два признака: $x_1$ — помеха (ракурс, освещение), которая сильно меняется у одного и того же человека, и $x_2$ — признак личности, слегка искривлённый помехой. Во входном пространстве два снимка одного человека могут быть дальше друг от друга, чем снимки разных людей: верно упорядочены только $62{,}7\\%$ троек."),
         ("p", "Маленькая сеть $f:\\mathbb R^2\\to\\mathbb R^2$ (12 нейронов tanh) учится с batch-hard triplet loss при $m=0{,}5$ и оптимизатором <a href=\"../adam/\">Adam</a>. Ей не говорят, где какой человек должен оказаться, — только что свои ближе чужих."),
-        ("viz", "triplet-train", {"m": 0.5}, "<b>Рисунок 6.</b> Слева — входы 4 человек по 12 снимков, справа — их эмбеддинги, внизу — потеря. Нажмите «Пуск». В начале $L=1{,}266$, все 48 якорей активны, верно упорядочено $64{,}9\\%$ троек. К шагу 60 упорядочены все $100\\%$, но зазора ещё не хватает 42 якорям; к шагу 300 активных остаётся 4, к шагу 600 потеря равна нулю. Сеть «выпрямила» полосы: помеха $x_1$ больше не влияет на расстояния."),
+        ("viz", "triplet-train", {"m": 0.5}, "<b>Рисунок 6.</b> Слева — входы 4 человек по 12 снимков, справа — их эмбеддинги, внизу — потеря. Нажмите «Пуск». В начале $L=1{,}266$, все 48 якорей активны, верно упорядочено $64{,}9\\%$ троек. К шагу 60 упорядочены все $100\\%$, но зазора ещё не хватает 42 якорям; к шагу 300 активных остаётся 4, к шагу 600 потеря равна нулю. Сеть «выпрямила» полосы: несмотря на помеху $x_1$, каждый снимок теперь ближе ко всем своим, чем к любому чужому, с запасом $0{,}5$."),
         ("p", "Так же устроена Re-ID: запрос (query) — снимок человека с одной камеры, галерея (gallery) — снимки со всех остальных. Эмбеддинги галереи сортируют по расстоянию до запроса и смотрят, на каком месте первый верный ответ. Метрики — Rank-1 (верный ответ на первом месте) и mAP (средняя точность по всем верным)."),
-        ("callout", "history", "Откуда это пошло", "Идея зазора между своими и чужими — из метода ближайших соседей с большим зазором (LMNN, Вайнбергер и Сол, 2005). Пары своих и чужих с зазором ввели в контрастной потере (Хадселл, Чопра и Лекун, 2006). Шрофф, Калениченко и Филбин сделали тройки основой FaceNet (2015), а Херманс, Байер и Лейбе в работе «In Defense of the Triplet Loss for Person Re-Identification» (2017) показали, что с batch-hard майнингом тройки хорошо работают и в Re-ID."),
+        ("callout", "history", "Откуда это пошло", "Идея зазора между своими и чужими — из метода ближайших соседей с большим зазором (LMNN, Вайнбергер, Блитцер и Сол, 2005). Пары своих и чужих с зазором ввели в контрастной потере (Хадселл, Чопра и Лекун, 2006). Шрофф, Калениченко и Филбин сделали тройки основой FaceNet (2015), а Херманс, Байер и Лейбе в работе «In Defense of the Triplet Loss for Person Re-Identification» (2017) показали, что с batch-hard майнингом тройки хорошо работают и в Re-ID."),
     ]),
     dict(id="sphere", title="Нормализация на сфере и выбор зазора", blocks=[
         ("p", "Без ограничений сеть может увеличивать все расстояния, просто растягивая пространство: в обычной метрике зазор $m$ теряет смысл, если масштаб не фиксирован. Поэтому эмбеддинги часто нормируют: $\\hat f=f/\\|f\\|$, все точки лежат на единичной сфере. Для единичных векторов"),
         ("eq", r"\|u-v\|^{2}=\|u\|^2+\|v\|^2-2\,u^\top v=2-2\cos\theta"),
         ("p", "где $\\theta$ — угол между векторами. Квадрат расстояния меняется от 0 (совпадают) до 4 (противоположны), и зазор $m=0{,}2$ в FaceNet — это $5\\%$ всего диапазона. Требование $d^2(a,n)\\ge d^2(a,p)+m$ превращается в требование к углам: $\\cos\\theta_{an}\\le\\cos\\theta_{ap}-m/2$."),
         ("viz", "triplet-sphere", {"a": 0, "p": 40, "n": -45, "m": 0.2}, "<b>Рисунок 7.</b> Нормированные эмбеддинги на единичной окружности (тяните точки по ней) и квадрат расстояния как функция угла. Оранжевая дуга — зона, где чужой нарушал бы зазор. При $\\theta_{ap}=40^\\circ$ и $m=0{,}2$ чужой должен быть не ближе $48{,}2^\\circ$ от якоря; в начальном положении он на $45^\\circ$: $d^2(a,p)=0{,}468$, $d^2(a,n)=0{,}586$, $L=0{,}082$."),
-        ("callout", "note", "Как выбрать зазор", "Зазор измеряется в единицах расстояния, поэтому зависит от нормировки и от того, квадрат расстояния или нет. Для нормированных эмбеддингов типичны $0{,}2$ (FaceNet, $d^2$) и $0{,}3$ (torchreid, $d$). Слишком маленький зазор почти не требует разделения, слишком большой может быть недостижим и держит все тройки активными."),
+        ("callout", "note", "Как выбрать зазор", "Зазор измеряется в единицах расстояния, поэтому зависит от нормировки и от того, квадрат расстояния или нет. Типичные значения: $0{,}2$ в FaceNet ($d^2$ на нормированных эмбеддингах) и $0{,}3$ в torchreid (обычное $d$ на ненормированных признаках); у <code>nn.TripletMarginLoss</code> по умолчанию $m=1$. Слишком маленький зазор почти не требует разделения, слишком большой может быть недостижим и держит все тройки активными."),
     ]),
     dict(id="code", title="В коде: батч-майнинг и устойчивость", blocks=[
-        ("p", "Ключ к эффективности — матрица всех попарных расстояний батча, из которой майнинг берётся масками без циклов. Численная тонкость: $\\|u-v\\|$ не дифференцируема при $u=v$ (производная корня в нуле бесконечна), а через формулу $\\|u\\|^2-2u^\\top v+\\|v\\|^2$ из-за округления может получиться крошечное отрицательное число. Поэтому под корень ставят $\\max(\\cdot,\\varepsilon)$, а <code>nn.TripletMarginLoss</code> добавляет $\\varepsilon=10^{-6}$ к разности векторов."),
+        ("p", "Ключ к эффективности — матрица всех попарных расстояний батча, из которой майнинг берётся масками без циклов. Численная тонкость: $\\|u-v\\|$ не дифференцируема при $u=v$ (производная корня в нуле бесконечна), а через формулу $\\|u\\|^2-2u^\\top v+\\|v\\|^2$ из-за округления может получиться крошечное отрицательное число. Поэтому под корень ставят $\\max(\\cdot,\\varepsilon)$, а <code>nn.TripletMarginLoss</code> добавляет $\\varepsilon=10^{-6}$ к разности векторов. У неё есть и параметр <code>swap=True</code> — «перестановка расстояний» (distance swap, Балнтас и др., 2016): вместо $d(a,n)$ берётся $\\min\\bigl(d(a,n),\\,d(p,n)\\bigr)$, то есть чужой сравнивается с более близкой из двух «своих» точек."),
         ("code", "python", "CODE_NUMPY"),
         ("code", "python", "CODE_TORCH"),
         ("callout", "key", "Практика", "Батч $P\\times K$ (например, $P=16$, $K=4$) нужен обязательно: без нескольких снимков одного человека в батче не будет своих. Triplet loss обычно комбинируют с кросс-энтропией по личностям — так обучение быстрее и устойчивее."),
@@ -225,7 +230,7 @@ SECTIONS = {
         ("p", "Triplet Loss states this requirement directly. Take a triplet: an <b>anchor</b> $a$, a <b>positive</b> $p$ (the same person) and a <b>negative</b> $n$ (a different person). Require the positive to be closer than the negative by at least a margin $m$."),
         ("ul", [
             "<b>face recognition</b> — FaceNet (Google, 2015): 128-dimensional embeddings, margin $0.2$, accuracy $99.63\\%$ on the LFW benchmark;",
-            "<b>re-identifying people across cameras</b> — the batch-hard triplet loss (Hermans et al., 2017) and the torchreid library, where it complements cross-entropy when training OSNet;",
+            "<b>re-identifying people across cameras</b> — the batch-hard triplet loss (Hermans et al., 2017); in the torchreid library it can be trained together with cross-entropy over identities (the <code>ImageTripletEngine</code>);",
             "<b>searching for similar images, products, voices</b> and any search by meaning where the question is “what is closest to this sample?”.",
         ]),
         ("callout", "key", "The essentials in a minute", "$L=\\max\\bigl(0,\\,d(a,p)-d(a,n)+m\\bigr)$. If the negative is farther than the positive by more than $m$, the loss is zero and the triplet teaches nothing. Otherwise the gradient pulls the positive towards the anchor and pushes the negative away. Almost all random triplets are easy, so the main skill is choosing hard ones (mining), for example the farthest positive and the closest negative in the batch (batch-hard)."),
@@ -233,7 +238,7 @@ SECTIONS = {
     dict(id="intuition", title="Intuition: the positive closer than the negative", blocks=[
         ("p", "Draw the embeddings on a plane. Around the anchor $a$ draw a circle through the positive $p$ — its radius is $d(a,p)$. Add a second one, wider by the margin: radius $d(a,p)+m$. The formula’s requirement is simple: <b>the negative must lie outside the outer circle</b>. If it falls into the orange ring or inside it, the loss is positive."),
         ("viz", "triplet-play", {"a": [-0.5, 0], "p": [0.4, 0], "n": [0.1, 0.8], "m": 0.2}, "<b>Figure 1.</b> Drag the anchor, the positive and the negative. The orange arrows show where gradient descent will move each point. In the starting position $d(a,p)=0.9$, $d(a,n)=1.0$, $m=0.2$: the negative is inside the ring, $L=0.9-1.0+0.2=0.1$. Pull it out of the ring and the arrows disappear."),
-        ("callout", "intuition", "What to notice", "The arrows at the positive and the negative always point along the lines to the anchor, and in the ordinary (non-squared) metric their lengths are equal to 1: what matters is not the size of the violation but the fact of it. Turn on squared distances and the arrow lengths become proportional to the distances."),
+        ("callout", "intuition", "What to notice", "The arrows at the positive and the negative always point along the lines to the anchor, and in the ordinary (non-squared) metric their lengths are the same wherever the points are: the gradient norm is 1, and what matters is not the size of the violation but the fact of it. The anchor’s arrow is the sum of two unit vectors, so its length is between 0 and 2. Turn on squared distances and the arrow lengths become proportional to the distances."),
     ]),
     dict(id="anatomy", title="The formula, bone by bone", blocks=[
         ("p", "Let us write the loss in full — with the network, the distances and the average over triplets:"),
@@ -258,12 +263,12 @@ SECTIONS = {
             ["semi-hard", "$d(a,p)&lt;d(a,n)&lt;d(a,p)+m$", "from $0$ to $m$", "yes"],
             ["hard", "$d(a,n)\\le d(a,p)$", "at least $m$", "yes"],
         ], {}),
-        ("p", "In the $(d(a,p),\\,d(a,n))$ plane the regime boundaries are two parallel lines: $d(a,n)=d(a,p)$ and $d(a,n)=d(a,p)+m$. The loss is a tilted plane cut off at zero above the upper of them."),
+        ("p", "In the $(d(a,p),\\,d(a,n))$ plane the regime boundaries are two parallel lines: $d(a,n)=d(a,p)$ and $d(a,n)=d(a,p)+m$. The loss $d(a,p)-d(a,n)+m$ is a tilted plane whose level lines are parallel to these lines; above the upper line it is cut off at zero."),
         ("viz", "triplet-regimes", {"m": 0.2, "pt": [0.9, 1.0]}, "<b>Figure 3.</b> The loss on the $(d(a,p),\\,d(a,n))$ plane: the deeper the red, the larger it is. The dots are all 576 triplets of the batch from Figure 5 (4 people with 4 pictures each). At $m=0.2$, 510 of them are easy, 31 semi-hard and 35 hard: only 66 triplets out of 576 give a gradient. Increase the margin and the semi-hard band widens."),
         ("callout", "warn", "Why random triplets are useless", "As soon as the network has learned a little, the vast majority of random triplets become easy: their loss and gradient are zero. Averaging over them dilutes the useful signal, and training almost stalls. Hence mining — deliberately choosing hard and semi-hard triplets."),
     ]),
     dict(id="gradients", title="Gradients: where each point is pulled", blocks=[
-        ("p", "For an active triplet ($L&gt;0$) the loss equals $d(a,p)-d(a,n)+m$, and everything reduces to the gradient of a distance. For the Euclidean norm $\\nabla_u\\|u-v\\|=\\frac{u-v}{\\|u-v\\|}$ — the unit vector from $v$ to $u$."),
+        ("p", "For an active triplet ($L&gt;0$) the loss equals $d(a,p)-d(a,n)+m$, and everything reduces to the gradient of a distance. For the Euclidean norm $\\nabla_u\\|u-v\\|=\\frac{u-v}{\\|u-v\\|}$ for $u\\ne v$ — the unit vector from $v$ to $u$ (at $u=v$ the norm is not differentiable; its subgradients are all vectors of length at most 1, and code usually takes 0)."),
         ("deep", "Deriving the gradients for the three points", [
             ("p", "Denote the embeddings $a,p,n$ and $d_{ap}=\\|a-p\\|$, $d_{an}=\\|a-n\\|$. Differentiate $d_{ap}=\\sqrt{(a-p)^\\top(a-p)}$ by the chain rule:"),
             ("eq", r"\nabla_a d_{ap}=\frac{1}{2d_{ap}}\cdot2(a-p)=\frac{a-p}{d_{ap}},\qquad \nabla_p d_{ap}=\frac{p-a}{d_{ap}}"),
@@ -271,17 +276,17 @@ SECTIONS = {
             ("eq", r"\nabla_p L=\frac{p-a}{d_{ap}},\qquad \nabla_n L=-\frac{n-a}{d_{an}},\qquad \nabla_a L=\frac{a-p}{d_{ap}}-\frac{a-n}{d_{an}}"),
             ("p", "The three gradients add up to zero: shifting all three points by the same vector does not change the distances, so the loss does not change either. For squared distances $L=d_{ap}^2-d_{an}^2+m$ we get $\\nabla_pL=2(p-a)$, $\\nabla_nL=-2(n-a)$ and $\\nabla_aL=2(n-p)$ — the anchor’s gradient does not even depend on its position."),
         ]),
-        ("p", "A gradient-descent step goes against the gradient: the positive $p$ moves <b>towards the anchor</b>, the negative $n$ <b>away from the anchor</b>, and the anchor moves towards the positive and away from the negative. In the ordinary metric the lengths of these moves equal 1 at any distance; in the squared one they are proportional to the distances."),
+        ("p", "A gradient-descent step goes against the gradient: the positive $p$ moves <b>towards the anchor</b>, the negative $n$ <b>away from the anchor</b>, and the anchor moves towards the positive and away from the negative. In the ordinary metric the moves of the positive and the negative have length 1 at any distance (the anchor’s move is between 0 and 2); in the squared one they are $2\\,d(a,p)$ and $2\\,d(a,n)$, that is, proportional to the distances."),
         ("p", "This is visible on a 3D surface. Fix the anchor at the origin and the positive at distance $0.6$; how does the loss depend on the position of the negative $n=(x,y)$? We get an upside-down cone: $L=0.6+m$ in the centre, falling to zero at the edge of a disc of radius $0.6+m$. The slope of the cone is the same everywhere, $|\\nabla L|=1$."),
-        ("viz", "triplet-surface", {"m": 0.4, "who": "neg"}, "<b>Figure 4.</b> The loss as a function of the position of the negative (or the positive) with the anchor fixed; the surface can be rotated. On the right, a slice along a ray from the anchor: the loss itself and the gradient norm. At $m=0.4$ and the ordinary distance the cone has height $1.0$ and radius $1.0$. Switch to $d^2$: the surface becomes a paraboloid of height $0.76$ and radius $0.872$, and the gradient vanishes right at the anchor. For the positive (with the negative at distance $1.2$) it is a funnel: the loss grows outside the circle of radius $0.8$."),
+        ("viz", "triplet-surface", {"m": 0.4, "who": "neg"}, "<b>Figure 4.</b> The loss as a function of the position of the negative (or the positive) with the anchor fixed; the surface can be rotated. On the right, a slice along a ray from the anchor: the loss itself and the gradient norm. At $m=0.4$ and the ordinary distance the cone has height $1.0$ and radius $1.0$. Switch to $d^2$: the surface becomes a paraboloid of height $0.76$ and radius $0.872$, and the gradient vanishes right at the anchor. For the positive (with the negative at distance $1.2$, ordinary distance) it is a funnel: the loss grows outside the circle of radius $1.2-0.4=0.8$."),
         ("callout", "warn", "Squared distance and hard negatives", "With squared distances the repelling force $2\\,d(a,n)$ is the weaker the closer the negative is to the anchor — that is, exactly for the most dangerous mistakes. In the ordinary metric it is constant. That is why in Re-ID (Hermans et al., 2017) the plain Euclidean distance is recommended; FaceNet uses squares, but on normalized vectors and with semi-hard triplets."),
     ]),
     dict(id="mining", title="Mining: which triplets to take", blocks=[
         ("p", "A set of $N$ images contains on the order of $N^3$ triplets — they cannot all be enumerated, and almost all of them are easy anyway. Triplets are chosen <b>online</b>, inside a batch. The batch is built as $P\\times K$: $P$ people with $K$ pictures each. Inside such a batch"),
         ("eq", r"|T|=\underbrace{PK}_{\text{anchors}}\cdot\underbrace{(K-1)}_{\text{positives}}\cdot\underbrace{(P-1)K}_{\text{negatives}}"),
-        ("p", "With $P=4$, $K=4$ this is 576 triplets; with $P=18$, $K=4$ (the batch of Hermans et al. for the Market-1501 dataset) it is already 14,688. The main strategies:"),
+        ("p", "With $P=4$, $K=4$ this is 576 triplets; with $P=18$, $K=4$ (the batch used by Hermans et al.) it is already 14,688. The main strategies:"),
         ("ul", [
-            "<b>batch-all</b> — take all triplets of the batch and average the loss over the active ones ($L&gt;0$) only, so that the easy ones do not dilute the signal;",
+            "<b>batch-all</b> — take all triplets of the batch and average the loss over the active ones ($L&gt;0$) only, so that the easy ones do not dilute the signal (the BA$_{\\ne0}$ variant of Hermans et al.);",
             "<b>batch-hard</b> — one triplet per anchor: <i>the farthest positive</i> and <i>the closest negative</i>; $PK$ triplets, the most informative ones;",
             "<b>semi-hard</b> (FaceNet) — for a pair $(a,p)$ take a negative that is farther than the positive but inside the margin; this makes training gentler at the start.",
         ]),
@@ -292,19 +297,19 @@ SECTIONS = {
     dict(id="training", title="How it works in training", blocks=[
         ("p", "Let us put everything together. Suppose every picture has two features: $x_1$ is a nuisance (pose, lighting) that varies a lot for the same person, and $x_2$ is an identity feature slightly bent by the nuisance. In the input space two pictures of the same person can be farther apart than pictures of different people: only $62.7\\%$ of the triplets are correctly ordered."),
         ("p", "A small network $f:\\mathbb R^2\\to\\mathbb R^2$ (12 tanh neurons) is trained with the batch-hard triplet loss at $m=0.5$ and the <a href=\"../adam/\">Adam</a> optimizer. It is not told where each person should end up — only that positives must be closer than negatives."),
-        ("viz", "triplet-train", {"m": 0.5}, "<b>Figure 6.</b> Left: the inputs of 4 people with 12 pictures each; right: their embeddings; bottom: the loss. Press “Play”. At the start $L=1.266$, all 48 anchors are active, $64.9\\%$ of the triplets are correctly ordered. By step 60 all $100\\%$ are ordered, but 42 anchors still lack the margin; by step 300 only 4 are active, and by step 600 the loss is zero. The network has “straightened” the bands: the nuisance $x_1$ no longer affects the distances."),
+        ("viz", "triplet-train", {"m": 0.5}, "<b>Figure 6.</b> Left: the inputs of 4 people with 12 pictures each; right: their embeddings; bottom: the loss. Press “Play”. At the start $L=1.266$, all 48 anchors are active, $64.9\\%$ of the triplets are correctly ordered. By step 60 all $100\\%$ are ordered, but 42 anchors still lack the margin; by step 300 only 4 are active, and by step 600 the loss is zero. The network has “straightened” the bands: despite the nuisance $x_1$, every picture is now closer to all its positives than to any negative, with a reserve of $0.5$."),
         ("p", "Re-ID works the same way: the query is a picture of a person from one camera, the gallery holds pictures from all the others. The gallery embeddings are sorted by distance to the query, and one looks at the position of the first correct match. The metrics are Rank-1 (the correct match comes first) and mAP (mean average precision over all correct matches)."),
-        ("callout", "history", "Where it came from", "The idea of a margin between positives and negatives comes from large margin nearest neighbour (LMNN, Weinberger and Saul, 2005). Pairs of positives and negatives with a margin were introduced in the contrastive loss (Hadsell, Chopra and LeCun, 2006). Schroff, Kalenichenko and Philbin made triplets the basis of FaceNet (2015), and Hermans, Beyer and Leibe in “In Defense of the Triplet Loss for Person Re-Identification” (2017) showed that with batch-hard mining triplets work well in Re-ID too."),
+        ("callout", "history", "Where it came from", "The idea of a margin between positives and negatives comes from large margin nearest neighbour (LMNN, Weinberger, Blitzer and Saul, 2005). Pairs of positives and negatives with a margin were introduced in the contrastive loss (Hadsell, Chopra and LeCun, 2006). Schroff, Kalenichenko and Philbin made triplets the basis of FaceNet (2015), and Hermans, Beyer and Leibe in “In Defense of the Triplet Loss for Person Re-Identification” (2017) showed that with batch-hard mining triplets work well in Re-ID too."),
     ]),
     dict(id="sphere", title="Normalization on the sphere and choosing the margin", blocks=[
         ("p", "Without constraints the network can increase all distances by simply stretching the space: in the ordinary metric the margin $m$ loses its meaning if the scale is not fixed. That is why embeddings are often normalized: $\\hat f=f/\\|f\\|$, and all points lie on the unit sphere. For unit vectors"),
         ("eq", r"\|u-v\|^{2}=\|u\|^2+\|v\|^2-2\,u^\top v=2-2\cos\theta"),
         ("p", "where $\\theta$ is the angle between the vectors. The squared distance ranges from 0 (identical) to 4 (opposite), and FaceNet’s margin $m=0.2$ is $5\\%$ of the whole range. The requirement $d^2(a,n)\\ge d^2(a,p)+m$ becomes a requirement on angles: $\\cos\\theta_{an}\\le\\cos\\theta_{ap}-m/2$."),
         ("viz", "triplet-sphere", {"a": 0, "p": 40, "n": -45, "m": 0.2}, "<b>Figure 7.</b> Normalized embeddings on the unit circle (drag the points along it) and the squared distance as a function of the angle. The orange arc is the zone where the negative would violate the margin. With $\\theta_{ap}=40^\\circ$ and $m=0.2$ the negative must be at least $48.2^\\circ$ from the anchor; in the starting position it is at $45^\\circ$: $d^2(a,p)=0.468$, $d^2(a,n)=0.586$, $L=0.082$."),
-        ("callout", "note", "How to choose the margin", "The margin is measured in units of distance, so it depends on the normalization and on whether the distance is squared. For normalized embeddings typical values are $0.2$ (FaceNet, $d^2$) and $0.3$ (torchreid, $d$). A margin that is too small hardly demands any separation; one that is too large may be unreachable and keeps all triplets active."),
+        ("callout", "note", "How to choose the margin", "The margin is measured in units of distance, so it depends on the normalization and on whether the distance is squared. Typical values are $0.2$ in FaceNet ($d^2$ on normalized embeddings) and $0.3$ in torchreid (plain $d$ on unnormalized features); <code>nn.TripletMarginLoss</code> defaults to $m=1$. A margin that is too small hardly demands any separation; one that is too large may be unreachable and keeps all triplets active."),
     ]),
     dict(id="code", title="In code: batch mining and stability", blocks=[
-        ("p", "The key to efficiency is the matrix of all pairwise distances in the batch, from which mining is done with masks and no loops. A numerical subtlety: $\\|u-v\\|$ is not differentiable at $u=v$ (the derivative of the square root at zero is infinite), and the formula $\\|u\\|^2-2u^\\top v+\\|v\\|^2$ may produce a tiny negative number due to rounding. So $\\max(\\cdot,\\varepsilon)$ is put under the root, and <code>nn.TripletMarginLoss</code> adds $\\varepsilon=10^{-6}$ to the difference of vectors."),
+        ("p", "The key to efficiency is the matrix of all pairwise distances in the batch, from which mining is done with masks and no loops. A numerical subtlety: $\\|u-v\\|$ is not differentiable at $u=v$ (the derivative of the square root at zero is infinite), and the formula $\\|u\\|^2-2u^\\top v+\\|v\\|^2$ may produce a tiny negative number due to rounding. So $\\max(\\cdot,\\varepsilon)$ is put under the root, and <code>nn.TripletMarginLoss</code> adds $\\varepsilon=10^{-6}$ to the difference of vectors. It also has <code>swap=True</code>, the distance swap (Balntas et al., 2016): $\\min\\bigl(d(a,n),\\,d(p,n)\\bigr)$ is used instead of $d(a,n)$, so the negative is compared with the closer of the two same-identity points."),
         ("code", "python", "CODE_NUMPY"),
         ("code", "python", "CODE_TORCH"),
         ("callout", "key", "In practice", "A $P\\times K$ batch (for example $P=16$, $K=4$) is a must: without several pictures of the same person in the batch there are no positives. The triplet loss is usually combined with cross-entropy over identities — training is then faster and more stable."),
@@ -355,7 +360,7 @@ SECTIONS = {
         ("p", "Triplet Loss bu talabni to‘g‘ridan-to‘g‘ri qo‘yadi. Uchlik olamiz: <b>langar</b> $a$ (anchor), <b>o‘ziniki</b> $p$ (positive, o‘sha odam) va <b>begona</b> $n$ (negative, boshqa odam). O‘ziniki begonadan kamida $m$ oraliqqa (margin) yaqinroq bo‘lishini talab qilamiz."),
         ("ul", [
             "<b>yuzni tanish</b> — FaceNet (Google, 2015): 128 o‘lchovli embeddinglar, $0{,}2$ oraliq, LFW to‘plamida $99{,}63\\%$ aniqlik;",
-            "<b>odamlarni kameralar orasida qayta identifikatsiya qilish</b> — batch-hard triplet loss (Xermans va boshq., 2017) va torchreid kutubxonasi, unda u OSNet’ni o‘qitishda kross-entropiyani to‘ldiradi;",
+            "<b>odamlarni kameralar orasida qayta identifikatsiya qilish</b> — batch-hard triplet loss (Xermans va boshq., 2017); torchreid kutubxonasida uni shaxslar bo‘yicha kross-entropiya bilan birga o‘qitish mumkin (<code>ImageTripletEngine</code>);",
             "<b>o‘xshash tasvirlar, tovarlar, ovozlarni qidirish</b> va umuman savol «bu namunaga nima yaqinroq?» bo‘lgan har qanday ma’no bo‘yicha qidiruv.",
         ]),
         ("callout", "key", "Bir daqiqada asosiysi", "$L=\\max\\bigl(0,\\,d(a,p)-d(a,n)+m\\bigr)$. Agar begona o‘zinikidan $m$ dan ko‘proq uzoq bo‘lsa, yo‘qotish nolga teng va uchlik hech narsa o‘rgatmaydi. Aks holda gradiyent o‘zinikini langarga tortadi va begonani itaradi. Tasodifiy uchliklarning deyarli hammasi oson, shuning uchun asosiy mahorat — qiyinlarini tanlash (mayning), masalan batch ichidagi eng uzoq o‘ziniki va eng yaqin begonani (batch-hard)."),
@@ -363,7 +368,7 @@ SECTIONS = {
     dict(id="intuition", title="Intuitsiya: o‘ziniki begonadan yaqinroq", blocks=[
         ("p", "Embeddinglarni tekislikda chizamiz. $a$ langar atrofida o‘ziniki $p$ orqali aylana o‘tkazamiz — uning radiusi $d(a,p)$. Ikkinchisini oraliq qadar kengroq qo‘shamiz: radiusi $d(a,p)+m$. Formula talabi oddiy: <b>begona tashqi aylanadan tashqarida yotishi kerak</b>. To‘q sariq halqaga yoki ichkariga tushsa — yo‘qotish musbat."),
         ("viz", "triplet-play", {"a": [-0.5, 0], "p": [0.4, 0], "n": [0.1, 0.8], "m": 0.2}, "<b>1-rasm.</b> Langar, o‘ziniki va begonani torting. To‘q sariq strelkalar — gradiyent tushish har bir nuqtani siljitadigan yo‘nalishlar. Boshlang‘ich holatda $d(a,p)=0{,}9$, $d(a,n)=1{,}0$, $m=0{,}2$: begona halqa ichida, $L=0{,}9-1{,}0+0{,}2=0{,}1$. Uni halqadan tashqariga chiqaring — strelkalar yo‘qoladi."),
-        ("callout", "intuition", "Nimaga e’tibor berish kerak", "O‘ziniki va begonadagi strelkalar doim langarga boruvchi chiziqlar bo‘ylab yo‘nalgan, oddiy (kvadratsiz) metrikada esa ularning uzunliklari bir xil va 1 ga teng: buzilish kattaligi emas, uning faktining o‘zi muhim. Masofalar kvadratlarini yoqing — strelkalar uzunligi masofalarga proporsional bo‘lib qoladi."),
+        ("callout", "intuition", "Nimaga e’tibor berish kerak", "O‘ziniki va begonadagi strelkalar doim langarga boruvchi chiziqlar bo‘ylab yo‘nalgan, oddiy (kvadratsiz) metrikada esa nuqtalar qayerda bo‘lmasin, ularning uzunliklari bir xil: gradiyent normasi 1 ga teng, buzilish kattaligi emas, uning faktining o‘zi muhim. Langar strelkasi ikki birlik vektor yig‘indisi, uning uzunligi 0 dan 2 gacha. Masofalar kvadratlarini yoqing — strelkalar uzunligi masofalarga proporsional bo‘lib qoladi."),
     ]),
     dict(id="anatomy", title="Formula mayda detallarigacha", blocks=[
         ("p", "Yo‘qotishni to‘liq yozamiz — tarmoq, masofalar va uchliklar bo‘yicha o‘rtachalash bilan:"),
@@ -388,12 +393,12 @@ SECTIONS = {
             ["yarim qiyin (semi-hard)", "$d(a,p)&lt;d(a,n)&lt;d(a,p)+m$", "$0$ dan $m$ gacha", "bor"],
             ["qiyin (hard)", "$d(a,n)\\le d(a,p)$", "$m$ dan kam emas", "bor"],
         ], {}),
-        ("p", "$(d(a,p),\\,d(a,n))$ tekisligida rejimlar chegaralari — ikkita parallel to‘g‘ri chiziq: $d(a,n)=d(a,p)$ va $d(a,n)=d(a,p)+m$. Yo‘qotish — ulardan yuqoridagisidan tepada nol bilan kesilgan qiya tekislik."),
+        ("p", "$(d(a,p),\\,d(a,n))$ tekisligida rejimlar chegaralari — ikkita parallel to‘g‘ri chiziq: $d(a,n)=d(a,p)$ va $d(a,n)=d(a,p)+m$. $d(a,p)-d(a,n)+m$ yo‘qotish — sath chiziqlari shu to‘g‘ri chiziqlarga parallel bo‘lgan qiya tekislik; yuqoridagi chiziqdan tepada u nol bilan kesilgan."),
         ("viz", "triplet-regimes", {"m": 0.2, "pt": [0.9, 1.0]}, "<b>3-rasm.</b> $(d(a,p),\\,d(a,n))$ tekisligidagi yo‘qotish: qizil rang qancha to‘q bo‘lsa, u shuncha katta. Nuqtalar — 5-rasmdagi batchning barcha 576 uchligi (4 kishi, har biri 4 suratdan). $m=0{,}2$ da ulardan 510 tasi oson, 31 tasi yarim qiyin va 35 tasi qiyin: 576 tadan faqat 66 uchlik gradiyent beradi. Oraliqni oshiring — yarim qiyinlar polosasi kengayadi."),
         ("callout", "warn", "Nega tasodifiy uchliklar foydasiz", "Tarmoq ozgina o‘rgangan zahoti tasodifiy uchliklarning aksariyati oson bo‘lib qoladi: ularning yo‘qotishi va gradiyenti nolga teng. Ular bo‘yicha o‘rtachalash foydali signalni suyultiradi va o‘qitish deyarli to‘xtaydi. Mayning shundan kelib chiqadi — qiyin va yarim qiyin uchliklarni maqsadli tanlash."),
     ]),
     dict(id="gradients", title="Gradiyentlar: har bir nuqta qayerga tortiladi", blocks=[
-        ("p", "Faol uchlik ($L&gt;0$) uchun yo‘qotish $d(a,p)-d(a,n)+m$ ga teng va hammasi masofa gradiyentiga keltiriladi. Evklid normasi uchun $\\nabla_u\\|u-v\\|=\\frac{u-v}{\\|u-v\\|}$ — $v$ dan $u$ ga yo‘nalgan birlik vektor."),
+        ("p", "Faol uchlik ($L&gt;0$) uchun yo‘qotish $d(a,p)-d(a,n)+m$ ga teng va hammasi masofa gradiyentiga keltiriladi. Evklid normasi uchun $u\\ne v$ da $\\nabla_u\\|u-v\\|=\\frac{u-v}{\\|u-v\\|}$ — $v$ dan $u$ ga yo‘nalgan birlik vektor ($u=v$ da norma differensiallanmaydi; uning subgradiyentlari — uzunligi 1 dan oshmaydigan barcha vektorlar, kodda odatda 0 olinadi)."),
         ("deep", "Uch nuqta bo‘yicha gradiyentlarni keltirib chiqarish", [
             ("p", "Embeddinglarni $a,p,n$ va $d_{ap}=\\|a-p\\|$, $d_{an}=\\|a-n\\|$ deb belgilaymiz. $d_{ap}=\\sqrt{(a-p)^\\top(a-p)}$ ni zanjir qoidasi bo‘yicha differensiallaymiz:"),
             ("eq", r"\nabla_a d_{ap}=\frac{1}{2d_{ap}}\cdot2(a-p)=\frac{a-p}{d_{ap}},\qquad \nabla_p d_{ap}=\frac{p-a}{d_{ap}}"),
@@ -401,17 +406,17 @@ SECTIONS = {
             ("eq", r"\nabla_p L=\frac{p-a}{d_{ap}},\qquad \nabla_n L=-\frac{n-a}{d_{an}},\qquad \nabla_a L=\frac{a-p}{d_{ap}}-\frac{a-n}{d_{an}}"),
             ("p", "Uch gradiyent yig‘indisi nolga teng: uchala nuqtani bir xil vektorga surish masofalarni o‘zgartirmaydi, demak, yo‘qotish ham o‘zgarmaydi. Masofalar kvadratlari uchun $L=d_{ap}^2-d_{an}^2+m$ dan $\\nabla_pL=2(p-a)$, $\\nabla_nL=-2(n-a)$ va $\\nabla_aL=2(n-p)$ ni olamiz — langarning gradiyenti umuman uning holatiga bog‘liq emas."),
         ]),
-        ("p", "Gradiyent tushish qadami gradiyentga qarshi yo‘naladi: o‘ziniki $p$ <b>langarga qarab</b>, begona $n$ <b>langardan uzoqqa</b> siljiydi, langar esa o‘zinikiga qarab va begonadan uzoqlashadi. Oddiy metrikada bu siljishlar uzunligi istalgan masofada 1 ga teng; kvadratli metrikada — masofalarga proporsional."),
+        ("p", "Gradiyent tushish qadami gradiyentga qarshi yo‘naladi: o‘ziniki $p$ <b>langarga qarab</b>, begona $n$ <b>langardan uzoqqa</b> siljiydi, langar esa o‘zinikiga qarab va begonadan uzoqlashadi. Oddiy metrikada o‘ziniki va begonaning siljishlari istalgan masofada 1 uzunlikka ega (langarniki — 0 dan 2 gacha); kvadratli metrikada — $2\\,d(a,p)$ va $2\\,d(a,n)$, ya’ni masofalarga proporsional."),
         ("p", "Buni 3D sirtda ko‘rish mumkin. Langarni koordinata boshida, o‘zinikini esa $0{,}6$ masofada mahkamlaymiz; yo‘qotish begonaning $n=(x,y)$ holatiga qanday bog‘liq? To‘ntarilgan konus hosil bo‘ladi: markazda $L=0{,}6+m$, radiusi $0{,}6+m$ bo‘lgan doira chetida — nol. Konus qiyaligi hamma joyda bir xil, $|\\nabla L|=1$."),
-        ("viz", "triplet-surface", {"m": 0.4, "who": "neg"}, "<b>4-rasm.</b> Langar mahkamlanganda begona (yoki o‘ziniki) holatining funksiyasi sifatidagi yo‘qotish; sirtni aylantirish mumkin. O‘ngda — langardan chiqqan nur bo‘ylab kesim: yo‘qotishning o‘zi va gradiyent normasi. $m=0{,}4$ va oddiy masofada konus balandligi $1{,}0$ va radiusi $1{,}0$. $d^2$ ga o‘ting: sirt balandligi $0{,}76$ va radiusi $0{,}872$ bo‘lgan paraboloidga aylanadi, langarning o‘zida esa gradiyent nolga aylanadi. O‘ziniki uchun (begona $1{,}2$ masofada) — voronka: yo‘qotish radiusi $0{,}8$ bo‘lgan aylanadan tashqarida o‘sadi."),
+        ("viz", "triplet-surface", {"m": 0.4, "who": "neg"}, "<b>4-rasm.</b> Langar mahkamlanganda begona (yoki o‘ziniki) holatining funksiyasi sifatidagi yo‘qotish; sirtni aylantirish mumkin. O‘ngda — langardan chiqqan nur bo‘ylab kesim: yo‘qotishning o‘zi va gradiyent normasi. $m=0{,}4$ va oddiy masofada konus balandligi $1{,}0$ va radiusi $1{,}0$. $d^2$ ga o‘ting: sirt balandligi $0{,}76$ va radiusi $0{,}872$ bo‘lgan paraboloidga aylanadi, langarning o‘zida esa gradiyent nolga aylanadi. O‘ziniki uchun (begona $1{,}2$ masofada, oddiy masofa) — voronka: yo‘qotish radiusi $1{,}2-0{,}4=0{,}8$ bo‘lgan aylanadan tashqarida o‘sadi."),
         ("callout", "warn", "Masofa kvadrati va qiyin begonalar", "Masofalar kvadratlarida itarish kuchi $2\\,d(a,n)$ begona langarga qancha yaqin bo‘lsa, shuncha zaif — ya’ni aynan eng xavfli xatolar uchun. Oddiy metrikada u doimiy. Shuning uchun Re-ID’da (Xermans va boshq., 2017) oddiy Evklid masofasi tavsiya etiladi; FaceNet kvadratlardan foydalanadi, lekin normallashtirilgan vektorlarda va yarim qiyin uchliklar bilan."),
     ]),
     dict(id="mining", title="Mayning: qaysi uchliklarni olish kerak", blocks=[
         ("p", "$N$ ta tasvir to‘plamida $N^3$ tartibidagi uchlik bor — hammasini sanab chiqib bo‘lmaydi, ularning deyarli barchasi oson ham. Uchliklar batch ichida <b>onlayn</b> tanlanadi. Batch $P\\times K$ sxemasida quriladi: $P$ kishi, har biridan $K$ surat. Bunday batch ichida"),
         ("eq", r"|T|=\underbrace{PK}_{\text{langarlar}}\cdot\underbrace{(K-1)}_{\text{o‘zinikilar}}\cdot\underbrace{(P-1)K}_{\text{begonalar}}"),
-        ("p", "$P=4$, $K=4$ da bu 576 uchlik, $P=18$, $K=4$ da (Xermans va boshqalarning Market-1501 to‘plami uchun batchi) — allaqachon 14 688. Asosiy strategiyalar:"),
+        ("p", "$P=4$, $K=4$ da bu 576 uchlik, $P=18$, $K=4$ da (Xermans va boshqalar shunday batchdan foydalangan) — allaqachon 14 688. Asosiy strategiyalar:"),
         ("ul", [
-            "<b>batch-all</b> — batchning barcha uchliklarini olamiz va osonlari signalni suyultirmasligi uchun yo‘qotishni faqat faollari ($L&gt;0$) bo‘yicha o‘rtachalaymiz;",
+            "<b>batch-all</b> — batchning barcha uchliklarini olamiz va osonlari signalni suyultirmasligi uchun yo‘qotishni faqat faollari ($L&gt;0$) bo‘yicha o‘rtachalaymiz (Xermans va boshqalarda — BA$_{\\ne0}$ varianti);",
             "<b>batch-hard</b> — har bir langar uchun bitta uchlik: <i>eng uzoq o‘ziniki</i> va <i>eng yaqin begona</i>; $PK$ ta eng informativ uchlik;",
             "<b>semi-hard</b> (FaceNet) — $(a,p)$ juftligi uchun o‘zinikidan uzoqroq, lekin oraliq ichidagi begona olinadi; shunda boshida o‘qitish yumshoqroq bo‘ladi.",
         ]),
@@ -422,19 +427,19 @@ SECTIONS = {
     dict(id="training", title="O‘qitishda bu qanday ishlaydi", blocks=[
         ("p", "Hammasini birlashtiramiz. Har bir suratning ikki belgisi bo‘lsin: $x_1$ — bir odamning o‘zida kuchli o‘zgaradigan xalaqit (rakurs, yoritilish), $x_2$ esa — xalaqit ozgina egib yuborgan shaxs belgisi. Kirish fazosida bir odamning ikki surati turli odamlarning suratlaridan uzoqroq bo‘lishi mumkin: uchliklarning faqat $62{,}7\\%$ i to‘g‘ri tartiblangan."),
         ("p", "Kichik $f:\\mathbb R^2\\to\\mathbb R^2$ tarmoq (12 ta tanh neyron) $m=0{,}5$ dagi batch-hard triplet loss va <a href=\"../adam/\">Adam</a> optimizatori bilan o‘qitiladi. Unga qaysi odam qayerda bo‘lishi kerakligi aytilmaydi — faqat o‘zinikilar begonalardan yaqinroq bo‘lishi kerakligi."),
-        ("viz", "triplet-train", {"m": 0.5}, "<b>6-rasm.</b> Chapda — har biri 12 suratli 4 kishining kirishlari, o‘ngda — ularning embeddinglari, pastda — yo‘qotish. «Boshlash»ni bosing. Boshida $L=1{,}266$, barcha 48 langar faol, uchliklarning $64{,}9\\%$ i to‘g‘ri tartiblangan. 60-qadamga kelib $100\\%$ i tartiblangan, lekin 42 langarga hali oraliq yetmaydi; 300-qadamga kelib 4 tasi faol qoladi, 600-qadamda yo‘qotish nolga teng. Tarmoq polosalarni «to‘g‘riladi»: $x_1$ xalaqit endi masofalarga ta’sir qilmaydi."),
+        ("viz", "triplet-train", {"m": 0.5}, "<b>6-rasm.</b> Chapda — har biri 12 suratli 4 kishining kirishlari, o‘ngda — ularning embeddinglari, pastda — yo‘qotish. «Boshlash»ni bosing. Boshida $L=1{,}266$, barcha 48 langar faol, uchliklarning $64{,}9\\%$ i to‘g‘ri tartiblangan. 60-qadamga kelib $100\\%$ i tartiblangan, lekin 42 langarga hali oraliq yetmaydi; 300-qadamga kelib 4 tasi faol qoladi, 600-qadamda yo‘qotish nolga teng. Tarmoq polosalarni «to‘g‘riladi»: $x_1$ xalaqitga qaramay, endi har bir surat barcha o‘zinikilariga istalgan begonadan $0{,}5$ zaxira bilan yaqinroq."),
         ("p", "Re-ID ham xuddi shunday ishlaydi: so‘rov (query) — bir kameradagi odam surati, galereya (gallery) — qolgan barcha kameralardagi suratlar. Galereya embeddinglari so‘rovgacha bo‘lgan masofa bo‘yicha saralanadi va birinchi to‘g‘ri javob nechanchi o‘rinda ekaniga qaraladi. Metrikalar — Rank-1 (to‘g‘ri javob birinchi o‘rinda) va mAP (barcha to‘g‘rilar bo‘yicha o‘rtacha aniqlik)."),
-        ("callout", "history", "Bu qayerdan boshlangan", "O‘zinikilar va begonalar orasidagi oraliq g‘oyasi — katta oraliqli eng yaqin qo‘shnilar usulidan (LMNN, Vaynberger va Sol, 2005). Oraliqli o‘ziniki va begona juftliklarini kontrastiv yo‘qotish kiritgan (Xadsell, Chopra va LeKun, 2006). Shroff, Kalenichenko va Filbin uchliklarni FaceNet asosiga aylantirdi (2015), Xermans, Bayer va Leybe esa «In Defense of the Triplet Loss for Person Re-Identification» (2017) ishida batch-hard mayning bilan uchliklar Re-ID’da ham yaxshi ishlashini ko‘rsatdi."),
+        ("callout", "history", "Bu qayerdan boshlangan", "O‘zinikilar va begonalar orasidagi oraliq g‘oyasi — katta oraliqli eng yaqin qo‘shnilar usulidan (LMNN, Vaynberger, Blitser va Sol, 2005). Oraliqli o‘ziniki va begona juftliklarini kontrastiv yo‘qotish kiritgan (Xadsell, Chopra va LeKun, 2006). Shroff, Kalenichenko va Filbin uchliklarni FaceNet asosiga aylantirdi (2015), Xermans, Bayer va Leybe esa «In Defense of the Triplet Loss for Person Re-Identification» (2017) ishida batch-hard mayning bilan uchliklar Re-ID’da ham yaxshi ishlashini ko‘rsatdi."),
     ]),
     dict(id="sphere", title="Sferada normallashtirish va oraliqni tanlash", blocks=[
         ("p", "Cheklovlarsiz tarmoq fazoni shunchaki cho‘zib, barcha masofalarni oshirishi mumkin: oddiy metrikada masshtab qat’iy bo‘lmasa, $m$ oraliq ma’nosini yo‘qotadi. Shuning uchun embeddinglar ko‘pincha normallashtiriladi: $\\hat f=f/\\|f\\|$, barcha nuqtalar birlik sferada yotadi. Birlik vektorlar uchun"),
         ("eq", r"\|u-v\|^{2}=\|u\|^2+\|v\|^2-2\,u^\top v=2-2\cos\theta"),
         ("p", "bunda $\\theta$ — vektorlar orasidagi burchak. Masofa kvadrati 0 dan (ustma-ust) 4 gacha (qarama-qarshi) o‘zgaradi va FaceNet’dagi $m=0{,}2$ oraliq butun diapazonning $5\\%$ i. $d^2(a,n)\\ge d^2(a,p)+m$ talabi burchaklarga qo‘yilgan talabga aylanadi: $\\cos\\theta_{an}\\le\\cos\\theta_{ap}-m/2$."),
         ("viz", "triplet-sphere", {"a": 0, "p": 40, "n": -45, "m": 0.2}, "<b>7-rasm.</b> Birlik aylanadagi normallashtirilgan embeddinglar (nuqtalarni aylana bo‘ylab torting) va burchak funksiyasi sifatidagi masofa kvadrati. To‘q sariq yoy — begona oraliqni buzadigan zona. $\\theta_{ap}=40^\\circ$ va $m=0{,}2$ da begona langardan kamida $48{,}2^\\circ$ uzoqda bo‘lishi kerak; boshlang‘ich holatda u $45^\\circ$ da: $d^2(a,p)=0{,}468$, $d^2(a,n)=0{,}586$, $L=0{,}082$."),
-        ("callout", "note", "Oraliqni qanday tanlash kerak", "Oraliq masofa birliklarida o‘lchanadi, shuning uchun normallashtirishga va masofa kvadratmi yoki yo‘qligiga bog‘liq. Normallashtirilgan embeddinglar uchun odatiy qiymatlar $0{,}2$ (FaceNet, $d^2$) va $0{,}3$ (torchreid, $d$). Juda kichik oraliq deyarli ajratishni talab qilmaydi, juda kattasiga esa erishib bo‘lmasligi mumkin va u barcha uchliklarni faol ushlab turadi."),
+        ("callout", "note", "Oraliqni qanday tanlash kerak", "Oraliq masofa birliklarida o‘lchanadi, shuning uchun normallashtirishga va masofa kvadratmi yoki yo‘qligiga bog‘liq. Odatiy qiymatlar: FaceNet’da $0{,}2$ (normallashtirilgan embeddinglarda $d^2$) va torchreid’da $0{,}3$ (normallashtirilmagan belgilarda oddiy $d$); <code>nn.TripletMarginLoss</code>’da standart $m=1$. Juda kichik oraliq deyarli ajratishni talab qilmaydi, juda kattasiga esa erishib bo‘lmasligi mumkin va u barcha uchliklarni faol ushlab turadi."),
     ]),
     dict(id="code", title="Kodda: batch ichida mayning va barqarorlik", blocks=[
-        ("p", "Samaradorlik kaliti — batchdagi barcha juft masofalar matritsasi, undan mayning sikllarsiz, niqoblar bilan olinadi. Sonli nozik jihat: $\\|u-v\\|$ $u=v$ da differensiallanmaydi (ildizning noldagi hosilasi cheksiz), $\\|u\\|^2-2u^\\top v+\\|v\\|^2$ formulasi esa yaxlitlash tufayli juda kichik manfiy son berishi mumkin. Shuning uchun ildiz ostiga $\\max(\\cdot,\\varepsilon)$ qo‘yiladi, <code>nn.TripletMarginLoss</code> esa vektorlar ayirmasiga $\\varepsilon=10^{-6}$ qo‘shadi."),
+        ("p", "Samaradorlik kaliti — batchdagi barcha juft masofalar matritsasi, undan mayning sikllarsiz, niqoblar bilan olinadi. Sonli nozik jihat: $\\|u-v\\|$ $u=v$ da differensiallanmaydi (ildizning noldagi hosilasi cheksiz), $\\|u\\|^2-2u^\\top v+\\|v\\|^2$ formulasi esa yaxlitlash tufayli juda kichik manfiy son berishi mumkin. Shuning uchun ildiz ostiga $\\max(\\cdot,\\varepsilon)$ qo‘yiladi, <code>nn.TripletMarginLoss</code> esa vektorlar ayirmasiga $\\varepsilon=10^{-6}$ qo‘shadi. Unda <code>swap=True</code> parametri ham bor — «masofalarni almashtirish» (distance swap, Balntas va boshq., 2016): $d(a,n)$ o‘rniga $\\min\\bigl(d(a,n),\\,d(p,n)\\bigr)$ olinadi, ya’ni begona ikki «o‘ziniki» nuqtaning yaqinrog‘i bilan solishtiriladi."),
         ("code", "python", "CODE_NUMPY"),
         ("code", "python", "CODE_TORCH"),
         ("callout", "key", "Amaliyot", "$P\\times K$ batch (masalan, $P=16$, $K=4$) albatta kerak: batchda bir odamning bir nechta surati bo‘lmasa, o‘zinikilar bo‘lmaydi. Triplet loss odatda shaxslar bo‘yicha kross-entropiya bilan birlashtiriladi — shunda o‘qitish tezroq va barqarorroq."),

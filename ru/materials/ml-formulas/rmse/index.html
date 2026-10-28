@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>RMSE: корень из среднеквадратичной ошибки — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
-  <meta name="description" content="RMSE подробно: формула, связь с MSE и MAE, неравенство MAE ≤ RMSE ≤ √n·MAE, разложение на смещение и разброс, геометрия в 3D, производная, ландшафт потерь, обучение, RMSLE, код на NumPy, scikit-learn и PyTorch.">
+  <meta name="description" content="RMSE по косточкам: связь с MSE и MAE, MAE ≤ RMSE ≤ √n·MAE, смещение и разброс, геометрия, градиент и обучение, RMSLE, код на NumPy и PyTorch.">
   <meta property="og:title" content="RMSE: корень из среднеквадратичной ошибки — Шпаргалка формул нейросетей — Абдулатипов Ж.">
-  <meta property="og:description" content="RMSE подробно: формула, связь с MSE и MAE, неравенство MAE ≤ RMSE ≤ √n·MAE, разложение на смещение и разброс, геометрия в 3D, производная, ландшафт потерь, обучение, RMSLE, код на NumPy, scikit-learn и PyTorch.">
+  <meta property="og:description" content="RMSE по косточкам: связь с MSE и MAE, MAE ≤ RMSE ≤ √n·MAE, смещение и разброс, геометрия, градиент и обучение, RMSLE, код на NumPy и PyTorch.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://javharbek.uz/ru/materials/ml-formulas/rmse/">
   <meta property="og:image" content="https://javharbek.uz/assets/img/javharbek.png">
@@ -89,8 +89,8 @@
     <h2 id="why">Зачем она нужна</h2>
     <p>Модель предсказывает цену квартиры, спрос на товар, температуру завтра. Как одним числом сказать, насколько она ошибается? Простое среднее ошибок не годится: промахи вверх и вниз гасят друг друга. <a href="../mse/">MSE</a> возводит ошибки в квадрат — но тогда ответ получается в «рублях в квадрате» или «градусах в квадрате», и фраза «MSE равна 1 417 000» заказчику ничего не скажет. RMSE извлекает корень и возвращает ошибку в единицы целевой переменной, сохраняя всё, за что любят MSE.</p>
     <p>Где она встречается:</p>
-    <ul class="flist"><li><b>оценка регрессионных моделей</b> — самая распространённая метрика в отчётах, статьях и соревнованиях Kaggle;</li><li><b>прогнозирование временных рядов</b> — погода, спрос, энергопотребление; рядом с ней обычно стоят <a href="../mae/">MAE</a> и <a href="../mape/">MAPE</a>;</li><li><b>рекомендательные системы</b> — знаменитый Netflix Prize (2006–2009) оценивал предсказания рейтингов именно по RMSE;</li><li><b>физика и метрология</b> — среднеквадратичная погрешность измерений, точность GPS, «RMS»-значение сигнала;</li><li><b>обучение моделей</b> — минимизация RMSE и MSE даёт одну и ту же модель, но градиенты у них разные (об этом — в разделе про производную).</li></ul>
-    <div class="callout key"><b>Главное за минуту</b><p>RMSE — это <a href="../mse/">MSE</a> под корнем: ошибка в единицах $y$, которая, как и MSE, сильнее наказывает крупные промахи. Всегда $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$, а $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — квадрат смещения плюс дисперсия остатков. Минимум RMSE совпадает с минимумом MSE, а градиент в $2\,\mathrm{RMSE}$ раз меньше.</p></div>
+    <ul class="flist"><li><b>оценка регрессионных моделей</b> — одна из самых распространённых метрик в отчётах, статьях и соревнованиях Kaggle;</li><li><b>прогнозирование временных рядов</b> — погода, спрос, энергопотребление; рядом с ней обычно стоят <a href="../mae/">MAE</a> и <a href="../mape/">MAPE</a>;</li><li><b>рекомендательные системы</b> — знаменитый Netflix Prize (2006–2009) оценивал предсказания рейтингов именно по RMSE;</li><li><b>физика и метрология</b> — среднеквадратичная погрешность измерений, точность GPS, «RMS»-значение сигнала;</li><li><b>обучение моделей</b> — минимизация RMSE и MSE даёт одну и ту же модель, но градиенты у них разные (об этом — в разделе про производную).</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>RMSE — это <a href="../mse/">MSE</a> под корнем: ошибка в единицах $y$, которая, как и MSE, сильнее наказывает крупные промахи. Всегда $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$, а $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — квадрат смещения плюс дисперсия остатков. Минимум RMSE совпадает с минимумом MSE, а её градиент — это градиент MSE, делённый на $2\,\mathrm{RMSE}$.</p></div>
 
     <h2 id="intuition">Интуиция: сторона среднего квадрата</h2>
     <p>Нарисуем каждую ошибку $r_i=y_i-\hat y_i$ квадратом со стороной $|r_i|$. Его площадь $r_i^2$ — это вклад объекта в MSE. Сложим площади и разделим на $n$ — получится средняя площадь, то есть MSE. А RMSE — это <b>сторона квадрата, площадь которого равна средней площади</b>.</p>
@@ -121,8 +121,8 @@
       <p>Средний член исчезает: отклонения от среднего в сумме дают ноль. Это та же алгебра, что в формуле $\operatorname{Var}X=\mathbb E X^2-(\mathbb E X)^2$.</p>
     </div></details>
     <figure class="viz"><div class="fv" data-viz="rmse-pythagoras" data-config="{&quot;bias&quot;: 1, &quot;sd&quot;: 1.5}"></div><figcaption><b>Рисунок 2.</b> Слева — 40 остатков со смещением $\bar r$ и разбросом $\sigma_r$, справа — прямоугольный треугольник с катетами $|\bar r|$ и $\sigma_r$: его гипотенуза и есть RMSE. При $\bar r=1$ и $\sigma_r=1{,}5$ получаем $\mathrm{RMSE}=\sqrt{1+2{,}25}\approx1{,}80$.</figcaption></figure>
-    <p>В сквозном примере $\bar r=-0{,}5$ (модель в среднем завышает на $0{,}5$), $\sigma_r\approx1{,}080$, и $0{,}25+1{,}167=1{,}417=\mathrm{MSE}$. Практический вывод: смещение убирается бесплатно — сдвиньте прогнозы на $\bar r$, оценённое на валидации, и RMSE снизится до $\sigma_r$ (здесь — с $1{,}190$ до $1{,}080$).</p>
-    <div class="callout note"><b>RMSE и стандартное отклонение</b><p>Если среднее остатков равно нулю (так всегда бывает у линейной регрессии со свободным членом на обучающей выборке), RMSE совпадает со стандартным отклонением остатков. Поэтому RMSE называют «стандартной ошибкой» модели. Если к тому же ошибки нормальны, около $68\%$ остатков лежат в пределах $\pm\mathrm{RMSE}$ и около $95\%$ — в пределах $\pm2\,\mathrm{RMSE}$.</p></div>
+    <p>В сквозном примере $\bar r=-0{,}5$ (модель в среднем завышает на $0{,}5$), $\sigma_r\approx1{,}080$, и $0{,}25+1{,}167=1{,}417=\mathrm{MSE}$. Практический вывод: смещение убирается бесплатно — прибавьте $\bar r$ ко всем прогнозам, и на тех данных, где оно оценено, RMSE снизится ровно до $\sigma_r$ (здесь — с $1{,}190$ до $1{,}080$). На практике $\bar r$ оценивают на валидации, а выигрыш проверяют на тесте.</p>
+    <div class="callout note"><b>RMSE и стандартное отклонение</b><p>Если среднее остатков равно нулю (так всегда бывает у линейной регрессии со свободным членом на обучающей выборке), RMSE совпадает со стандартным отклонением остатков. Отсюда её родство со «стандартной ошибкой регрессии» из статистики — только там сумму квадратов остатков делят не на $n$, а на число степеней свободы $n-p$ ($p$ — число параметров модели). Если к тому же ошибки нормальны, около $68\%$ остатков лежат в пределах $\pm\mathrm{RMSE}$ и около $95\%$ — в пределах $\pm2\,\mathrm{RMSE}$.</p></div>
 
     <h2 id="gap">RMSE против MAE: что говорит разрыв</h2>
     <p><a href="../mae/">MAE</a> отвечает на вопрос «на сколько в среднем ошибаемся», RMSE — «каков типичный размер ошибки с учётом крупных». Их отношение $\mathrm{RMSE}/\mathrm{MAE}$ безразмерно и не зависит от масштаба: оно описывает только <b>форму</b> распределения ошибок.</p>
@@ -213,38 +213,39 @@ y     = np.array([3.0, 5.0, 8.0])
 y_hat = np.array([2.5, 5.0, 10.0])
 
 r    = y - y_hat                   # остатки: [ 0.5  0.  -2. ]
-mse  = np.mean(r ** 2)             # 1.4167
-rmse = np.sqrt(mse)                # 1.1902
-mae  = np.mean(np.abs(r))          # 0.8333
+mse  = np.mean(r ** 2)             # ≈ 1.4167
+rmse = np.sqrt(mse)                # ≈ 1.1902
+mae  = np.mean(np.abs(r))          # ≈ 0.8333
 
 # То же через евклидову норму: ‖y − ŷ‖ / √n
-print(np.linalg.norm(r) / np.sqrt(len(r)))     # 1.1902
+print(round(np.linalg.norm(r) / np.sqrt(len(r)), 4))   # 1.1902
 
 # Разложение: RMSE² = смещение² + дисперсия остатков
-print(r.mean() ** 2 + r.var(), mse)            # 1.4167 1.4167
+print(round(r.mean() ** 2 + r.var(), 4), round(mse, 4))   # 1.4167 1.4167
 
 # Градиент по прогнозам: ∂RMSE/∂ŷ = (ŷ − y) / (n · RMSE)
-print((y_hat - y) / (len(y) * rmse))           # [-0.14  0.    0.56]
+print(np.round((y_hat - y) / (len(y) * rmse), 4))       # [-0.14    0.      0.5601]
 
 # Бейзлайн «всегда среднее»: его RMSE — стандартное отклонение y
-print(np.std(y))                               # 2.0548</code></pre>
-    <p>В scikit-learn есть готовые функции (с версии 1.4; раньше писали <code>mean_squared_error(..., squared=False)</code>). Обратите внимание на разницу между средним RMSE фолдов и RMSE по всем объектам:</p>
+print(round(np.std(y), 4))                               # 2.0548</code></pre>
+    <p>В scikit-learn есть готовые функции (с версии 1.4; раньше писали <code>mean_squared_error(..., squared=False)</code>, а в 1.6 параметр <code>squared</code> удалён). Обратите внимание на разницу между средним RMSE фолдов и RMSE по всем объектам:</p>
     <pre class="code"><span class="lang">python</span><code>from sklearn.metrics import root_mean_squared_error, root_mean_squared_log_error
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import KFold, cross_val_score, cross_val_predict
 
-print(root_mean_squared_error(y, y_hat))       # 1.1902  (scikit-learn ≥ 1.4)
-print(root_mean_squared_log_error(y, y_hat))   # 0.1392  — RMSLE
+# y, y_hat — из листинга выше; функции есть в scikit-learn ≥ 1.4
+print(round(root_mean_squared_error(y, y_hat), 4))       # 1.1902
+print(round(root_mean_squared_log_error(y, y_hat), 4))   # 0.1392 — RMSLE
 
 X, t = make_regression(n_samples=200, n_features=5, noise=10.0, random_state=0)
 cv = KFold(5, shuffle=True, random_state=0)
 # scorer «чем больше, тем лучше», поэтому RMSE идёт со знаком минус
 scores = cross_val_score(LinearRegression(), X, t, cv=cv,
                          scoring=&quot;neg_root_mean_squared_error&quot;)
-print(-scores.mean())                          # 10.560 — среднее RMSE фолдов
+print(round(-scores.mean(), 3))                # 10.56 — среднее RMSE фолдов
 pred = cross_val_predict(LinearRegression(), X, t, cv=cv)
-print(root_mean_squared_error(t, pred))        # 10.614 — RMSE по всем объектам</code></pre>
+print(round(root_mean_squared_error(t, pred), 3))   # 10.614 — RMSE по всем объектам</code></pre>
     <p>В PyTorch RMSE как функция потерь требует осторожности в нуле:</p>
     <pre class="code"><span class="lang">python</span><code>import torch
 
@@ -253,7 +254,7 @@ y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
 
 rmse = torch.sqrt(torch.mean((y_hat - y) ** 2))
 rmse.backward()
-print(rmse.item(), y_hat.grad)   # 1.1902  tensor([-0.1400,  0.0000,  0.5601])
+print(round(rmse.item(), 4), y_hat.grad)   # 1.1902 tensor([-0.1400,  0.0000,  0.5601])
 
 # Идеальный прогноз: производная √u в нуле бесконечна → градиент NaN
 p = y.clone().requires_grad_(True)
@@ -269,7 +270,7 @@ def rmse_loss(pred, target, eps=1e-8):
     <ol class="flist"><li><b>Среднее RMSE по батчам или фолдам как итоговая RMSE.</b> Корень нелинеен: усредняйте MSE, а корень берите в конце.</li><li><b>Сравнение RMSE на разных данных.</b> RMSE зависит от масштаба и разброса $y$; сравнивайте модели на одной тестовой выборке или используйте нормированную RMSE.</li><li><b>«Модель ошибается в среднем на RMSE».</b> Средняя абсолютная ошибка — это MAE; RMSE не меньше её, а на тяжёлых хвостах заметно больше.</li><li><b>RMSE как потеря без защиты нуля.</b> Производная $\sqrt u$ в нуле бесконечна: идеальный батч даёт NaN в градиентах. Добавляйте $\varepsilon$ под корень или учите на MSE.</li><li><b>Игнорирование выбросов.</b> Одна ошибка в 100 единиц среди 99 идеальных прогнозов даёт $\mathrm{RMSE}=10$ при $\mathrm{MAE}=1$. Если выбросы — шум, а не важные события, смотрите MAE, <a href="../huber/">Huber</a> или квантили ошибок.</li><li><b>RMSE по логарифмам вместо исходной шкалы.</b> Если модель учится на $\ln(1+y)$, её RMSE — это RMSLE исходной задачи, а не RMSE в рублях; переводите прогнозы обратно, прежде чем считать RMSE.</li></ol>
 
     <h2 id="links">Связи с другими формулами</h2>
-    <ul class="flist"><li><a href="../mse/">MSE</a>: $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ — тот же минимум и тот же порядок моделей, градиент в $2\,\mathrm{RMSE}$ раз меньше.</li><li><a href="../mae/">MAE</a>: $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; лучшая константа для MAE — медиана, для RMSE — среднее.</li><li><a href="../huber/">Huber</a>: квадратичная возле нуля и линейная на хвостах — компромисс между MSE (а значит, RMSE) и MAE.</li><li><a href="../mape/">MAPE</a>: относительная ошибка вместо абсолютной; RMSLE — её квадратичный родственник в логарифмической шкале.</li><li><a href="../sgd/">SGD</a>: спуск по RMSE — это спуск по MSE с темпом обучения $\eta/(2\,\mathrm{RMSE})$.</li><li><a href="../adam/">Adam</a>: делит шаг на корень из скользящего среднего квадратов градиента — та же идея «корня из среднего квадрата» (RMS), что и в RMSE.</li></ul>
+    <ul class="flist"><li><a href="../mse/">MSE</a>: $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ — тот же минимум и тот же порядок моделей, а градиент делится на $2\,\mathrm{RMSE}$.</li><li><a href="../mae/">MAE</a>: $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; лучшая константа для MAE — медиана, для RMSE — среднее.</li><li><a href="../huber/">Huber</a>: квадратичная возле нуля и линейная на хвостах — компромисс между MSE (а значит, RMSE) и MAE.</li><li><a href="../mape/">MAPE</a>: относительная ошибка вместо абсолютной; RMSLE — её квадратичный родственник в логарифмической шкале.</li><li><a href="../sgd/">SGD</a>: спуск по RMSE — это спуск по MSE с темпом обучения $\eta/(2\,\mathrm{RMSE})$.</li><li><a href="../adam/">Adam</a>: делит шаг на корень из скользящего среднего квадратов градиента — та же идея «корня из среднего квадрата» (RMS), что и в RMSE.</li></ul>
 
     <h2 id="summary">Итоги</h2>
     <div class="callout key"><p>1) $\mathrm{RMSE}=\sqrt{\mathrm{MSE}}$ — типичный размер ошибки в единицах $y$ с упором на крупные промахи. 2) $\mathrm{MAE}\le\mathrm{RMSE}\le\sqrt n\,\mathrm{MAE}$; отношение RMSE/MAE — индикатор хвостов ($\approx1{,}25$ для нормального шума). 3) $\mathrm{RMSE}^2=\bar r^{\,2}+\sigma_r^2$ — смещение и разброс как катеты. 4) Геометрически это расстояние $\|y-\hat y\|/\sqrt n$; лучшая константа — среднее, её RMSE равна $\sigma_y$. 5) $\nabla\mathrm{RMSE}=\nabla\mathrm{MSE}/(2\,\mathrm{RMSE})$: минимум общий, шаг другой, в нуле производной нет.</p></div>

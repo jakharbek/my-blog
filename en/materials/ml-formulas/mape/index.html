@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>MAPE: the mean absolute percentage error — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
-  <meta name="description" content="MAPE in depth: formula, asymmetry, behaviour near zero, derivative, the optimal constant as a weighted median, a 3D error surface, training with 1/y weights, comparison with sMAPE, WAPE and MASE, a business example, code.">
+  <meta name="description" content="MAPE explained: asymmetry, blow-up near zero, derivative, the weighted-median optimum, under-forecasting, sMAPE, WAPE, MASE and code.">
   <meta property="og:title" content="MAPE: the mean absolute percentage error — Neural network formulas: a cheat sheet — Abdulatipov J.">
-  <meta property="og:description" content="MAPE in depth: formula, asymmetry, behaviour near zero, derivative, the optimal constant as a weighted median, a 3D error surface, training with 1/y weights, comparison with sMAPE, WAPE and MASE, a business example, code.">
+  <meta property="og:description" content="MAPE explained: asymmetry, blow-up near zero, derivative, the weighted-median optimum, under-forecasting, sMAPE, WAPE, MASE and code.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://javharbek.uz/en/materials/ml-formulas/mape/">
   <meta property="og:image" content="https://javharbek.uz/assets/img/javharbek.png">
@@ -88,7 +88,7 @@
     <h2 id="why">Why it is needed</h2>
     <p>The sales team asks: “how accurate is the forecast?”. The answer “MAE is 37 units” says little: for bread that is excellent, for cars a disaster. The answer “on average we are off by 12%” needs no explanation and reads the same for bread and for cars. That is why MAPE (mean absolute percentage error) is one of the most popular metrics in demand forecasting, finance and energy.</p>
     <p>Where it shows up:</p>
-    <ul class="flist"><li><b>demand and sales forecasting</b> — retail, logistics, purchase planning; it is often the main KPI of a forecasting team;</li><li><b>finance and economics</b> — the accuracy of revenue, price and macro forecasts;</li><li><b>energy</b> — grid load forecasting, where the percentage error translates directly into the cost of reserves;</li><li><b>comparing series of different scales</b> — MAPE is dimensionless, so accuracy can be averaged over thousands of products;</li><li><b>forecasting competitions</b> — the M competitions used its symmetric variant, sMAPE.</li></ul>
+    <ul class="flist"><li><b>demand and sales forecasting</b> — retail, logistics, purchase planning; it is often the main KPI of a forecasting team;</li><li><b>finance and economics</b> — the accuracy of revenue, price and macro forecasts;</li><li><b>energy</b> — grid load forecasting, where the percentage error translates directly into the cost of reserves;</li><li><b>comparing series of different scales</b> — MAPE is dimensionless, so accuracy can be averaged over thousands of products;</li><li><b>forecasting competitions</b> — in Makridakis’s M3 competition its “symmetric” variant sMAPE was one of the key metrics, and in M4 methods were ranked by sMAPE together with MASE.</li></ul>
     <div class="callout key"><b>The gist in a minute</b><p>MAPE is the mean absolute error measured as a share of the actual. It does not depend on scale, but it is undefined at $y_i=0$ and explodes near zero. For a positive actual an under-forecast costs at most $100\%$, an over-forecast can cost any amount. MAPE is MAE with weights $1/|y_i|$, so the best constant under MAPE is a weighted median shifted downwards, and a model trained on MAPE forecasts too low.</p></div>
 
     <h2 id="intuition">Intuition: the error as a share of the actual</h2>
@@ -148,15 +148,15 @@
     <h2 id="training">Training on MAPE: 1/y weights and under-forecasting</h2>
     <p>Since MAPE is MAE with weights $1/|y_i|$, a model can be trained on MAPE by any algorithm that minimises a weighted MAE: pass <code>sample_weight=1/|y|</code>. LightGBM has a ready-made <code>objective="mape"</code>, and in PyTorch the loss is one line (see the code section).</p>
     <p>Let us train the simplest model $\hat y=w\,x$ on 40 objects with $y=10\,x\cdot e^{0.35\,\varepsilon}$, $\varepsilon\sim N(0,1)$: the true slope is 10, and the noise is multiplicative — its size grows with $y$, as with real sales.</p>
-    <figure class="viz"><div class="fv" data-viz="mape-training" data-config="{}"></div><figcaption><b>Figure 5.</b> Left: the data (dot size is proportional to the weight $1/y$) and two models; right: MAPE as a function of the slope $w$. Press “Play”: subgradient descent on MAPE with step $8/\sqrt{t+1}$ from $w=4$ converges to $w^*\approx9.10$ with $\mathrm{MAPE}\approx20.28\%$. Least squares gives $w\approx10.74$ and $\mathrm{MAPE}\approx22.99\%$, but its total forecast is almost unbiased ($-0.6\%$), while the MAPE model’s total forecast is about $16\%$ below the total actual.</figcaption></figure>
-    <p>Why: points with small $y$ get a large weight and pull the line down. In terms of the ratios $q_i=y_i/x_i$ we have $\mathrm{MAPE}(w)=\frac{100\%}{n}\sum_i|q_i-w|/q_i$, so the optimum is the weighted median of $q_i$ with weights $1/q_i$. With lognormal noise this is the median times $e^{-\sigma^2}=e^{-0.1225}\approx0.885$, i.e. about $8.85$ instead of 10.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-training" data-config="{}"></div><figcaption><b>Figure 5.</b> Left: the data (the larger the weight $1/y$, the bigger the dot) and two models; right: MAPE as a function of the slope $w$. Press “Play”: subgradient descent on MAPE with step $8/\sqrt{t+1}$ from $w=4$ converges to $w^*\approx9.10$ with $\mathrm{MAPE}\approx20.28\%$. Least squares gives $w\approx10.74$ and $\mathrm{MAPE}\approx22.99\%$, but its total forecast is almost unbiased ($-0.6\%$), while the MAPE model’s total forecast is about $16\%$ below the total actual.</figcaption></figure>
+    <p>Why: points with small $y$ get a large weight and pull the line down. In terms of the ratios $q_i=y_i/x_i$ we have $\mathrm{MAPE}(w)=\frac{100\%}{n}\sum_i|q_i-w|/q_i$, so the optimum is the weighted median of $q_i$ with weights $1/q_i$. With lognormal noise this is the median times $e^{-\sigma^2}=e^{-0.1225}\approx0.885$, i.e. on a large sample about $8.85$ instead of 10 (the 400 points of the scikit-learn listing below give $8.85$). On the 40 points of the figure sampling noise is larger, and the optimum is $9.10$.</p>
     <div class="callout key"><b>How to avoid the bias</b><p>1) Train on MAE or MSE of $\ln y$ and use MAPE only for reporting. 2) If the KPI really is MAPE but under-forecasts are costly (stock-outs), correct the forecasts with a multiplier tuned on validation data, or choose a metric that reflects the real costs (WAPE, the quantile loss). 3) Do not train on MAPE if the data contain zeros or near-zeros.</p></div>
 
     <h2 id="alternatives">MAPE, sMAPE, WAPE and MASE</h2>
     <p>Because of these problems MAPE has several popular relatives ($e_i=y_i-\hat y_i$):</p>
-    <div class="table-wrap"><table class="data"><thead><tr><th>Metric</th><th>Formula</th><th>Zeros in $y$</th><th>Feature</th></tr></thead><tbody><tr><td>MAPE</td><td>$\frac{100\%}{n}\sum\frac{|e_i|}{|y_i|}$</td><td>undefined</td><td>a share of the actual; asymmetric in ratios; explodes near zero</td></tr><tr><td>sMAPE</td><td>$\frac{100\%}{n}\sum\frac{2|e_i|}{|y_i|+|\hat y_i|}$</td><td>allowed if $\hat y_i\ne0$</td><td>bounded by $200\%$; in units, harsher on under-forecasts</td></tr><tr><td>WAPE</td><td>$100\%\cdot\frac{\sum|e_i|}{\sum|y_i|}$</td><td>allowed (a non-zero sum is needed)</td><td>MAE divided by the mean actual; large objects weigh more</td></tr><tr><td>MASE</td><td>$\frac{\frac1n\sum|e_i|}{\frac{1}{T-1}\sum_t|y_t-y_{t-1}|}$</td><td>allowed (the series is not constant)</td><td>MAE relative to the naive “same as last period” forecast; $&lt;1$ — better than naive</td></tr></tbody></table></div>
-    <p>In the running example $\mathrm{MAPE}\approx13.9\%$, $\mathrm{sMAPE}\approx13.5\%$, $\mathrm{WAPE}=2.5/16\approx15.6\%$, and MASE with the scale $\tfrac12\bigl(|5-3|+|8-5|\bigr)=2.5$ equals $0.833/2.5\approx0.33$.</p>
-    <p>WAPE (also called the MAD/Mean ratio) is MAE divided by the mean actual: objects with large sales weigh more, and the total is not ruined by a single product with near-zero demand. MASE (Hyndman and Koehler, 2006) compares the model’s MAE with the MAE of the naive forecast and works even for series with zeros. On the same data WAPE and MASE differ only by a constant factor, so they share the same optimum.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Metric</th><th>Formula</th><th>Zeros in $y$</th><th>Feature</th></tr></thead><tbody><tr><td>MAPE</td><td>$\frac{100\%}{n}\sum\frac{|e_i|}{|y_i|}$</td><td>undefined</td><td>a share of the actual; asymmetric in ratios; explodes near zero</td></tr><tr><td>sMAPE</td><td>$\frac{100\%}{n}\sum\frac{2|e_i|}{|y_i|+|\hat y_i|}$</td><td>allowed if $\hat y_i\ne0$ (then $\mathrm{sAPE}_i=200\%$)</td><td>bounded by $200\%$; in units, harsher on under-forecasts</td></tr><tr><td>WAPE</td><td>$100\%\cdot\frac{\sum|e_i|}{\sum|y_i|}$</td><td>allowed (a non-zero sum is needed)</td><td>MAE divided by the mean actual; large objects weigh more</td></tr><tr><td>MASE</td><td>$\frac{\frac1n\sum|e_i|}{\frac{1}{T-1}\sum_t|y_t-y_{t-1}|}$</td><td>allowed (the series is not constant)</td><td>MAE relative to the naive “same as last period” forecast; $&lt;1$ — better than naive</td></tr></tbody></table></div>
+    <p>In the running example $\mathrm{MAPE}\approx13.9\%$, $\mathrm{sMAPE}\approx13.5\%$, $\mathrm{WAPE}=2.5/16\approx15.6\%$, and MASE with the scale $\tfrac12\bigl(|5-3|+|8-5|\bigr)=2.5$ equals $0.833/2.5\approx0.33$ (for simplicity the scale is computed on the same three points).</p>
+    <p>WAPE (also called the MAD/Mean ratio) is MAE divided by the mean actual: objects with large sales weigh more, and the total is not ruined by a single product with near-zero demand. MASE (Hyndman and Koehler, 2006) compares the model’s MAE with the MAE of the naive “same as last period” forecast computed on the training part of the series (for seasonal series, of the seasonal naive forecast), and works even for series with zeros. sMAPE comes in several variants: here we use $2|e_i|/(|y_i|+|\hat y_i|)$, bounded by $200\%$, as in M4; M3 used the denominator without absolute values, $y_i+\hat y_i$, and there is also a version without the factor 2, bounded by $100\%$ — check the formula before comparing numbers. On the same data WAPE and MASE differ only by a constant factor, so they share the same optimum.</p>
     <figure class="viz"><div class="fv" data-viz="mape-metrics" data-config="{&quot;k&quot;: 1}"></div><figcaption><b>Figure 6.</b> 52 weeks of demand (dots) and the forecast $k\cdot$base (blue line). Right: the metrics as functions of the multiplier $k$; dots mark the minima. MAPE is minimal at $k\approx0.89$, i.e. for a forecast 11% too low; sMAPE at $k\approx1.007$; WAPE (and MASE) at $k\approx1.012$. Turn on the demand dip — one week with $y=3$: MAPE at $k=1$ jumps from $24.5\%$ to $68.8\%$ and its minimum moves to $k\approx0.78$; WAPE only changes from $23.5\%$ to $25.4\%$.</figcaption></figure>
 
     <h2 id="business">A business example: a store’s assortment</h2>
@@ -173,12 +173,12 @@
 y     = np.array([3.0, 5.0, 8.0])
 y_hat = np.array([2.5, 5.0, 10.0])
 
-ape  = np.abs((y - y_hat) / y)      # [0.1667 0.     0.25  ]
-mape = 100 * ape.mean()             # 13.89
+ape  = np.abs((y - y_hat) / y)      # [0.16666667 0.         0.25      ]
+mape = 100 * ape.mean()             # 13.888888888888888
 
 # The same as a weighted MAE with weights 1/|y|
 w = 1 / np.abs(y)
-print(100 * np.mean(w * np.abs(y - y_hat)))   # 13.89
+print(100 * np.mean(w * np.abs(y - y_hat)))   # 13.888888888888888
 
 def smape(y, f):
     return 100 * np.mean(2 * np.abs(f - y) / (np.abs(y) + np.abs(f)))
@@ -186,13 +186,15 @@ def smape(y, f):
 def wape(y, f):
     return 100 * np.sum(np.abs(y - f)) / np.sum(np.abs(y))
 
-print(smape(y, y_hat), wape(y, y_hat))        # ≈13.468 15.625</code></pre>
-    <p>scikit-learn returns a fraction and divides by the machine epsilon instead of zero. Median regression with weights $1/y$ is a way to train “on MAPE”:</p>
-    <pre class="code"><span class="lang">python</span><code>from sklearn.metrics import mean_absolute_percentage_error
+print(smape(y, y_hat), wape(y, y_hat))        # 13.468013468013467 15.625</code></pre>
+    <p>scikit-learn returns a fraction and replaces denominators below the machine epsilon ($\approx2.2\cdot10^{-16}$) with the epsilon — so instead of a division-by-zero error you get a huge number. Median regression with weights $1/y$ is a way to train “on MAPE”:</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.linear_model import LinearRegression, QuantileRegressor
 
-print(mean_absolute_percentage_error(y, y_hat))            # 0.1389 — a fraction, not a percentage!
-print(mean_absolute_percentage_error([0.0, 5.0], [1.0, 5.0]))  # 2.25e+15: division by eps instead of zero
+# y, y_hat come from the listing above
+print(mean_absolute_percentage_error(y, y_hat))            # 0.13888888888888887 — a fraction, not a percentage!
+print(mean_absolute_percentage_error([0.0, 5.0], [1.0, 5.0]))  # 2251799813685248.0: division by eps instead of zero
 
 # Training “on MAPE”: median (MAE) regression with weights 1/y
 rng = np.random.default_rng(0)
@@ -201,7 +203,7 @@ t = 10 * x * np.exp(0.35 * rng.standard_normal(400))
 X = x[:, None]
 ols = LinearRegression(fit_intercept=False).fit(X, t)
 fit = QuantileRegressor(quantile=0.5, alpha=0, fit_intercept=False).fit(X, t, sample_weight=1 / t)
-print(ols.coef_, fit.coef_)   # ≈[10.58] [8.85] — the MAPE model under-forecasts the total by 16%</code></pre>
+print(ols.coef_, fit.coef_)   # [10.57549043] [8.85148171] — the MAPE model under-forecasts the total by 16%</code></pre>
     <p>MAPE as a loss in PyTorch:</p>
     <pre class="code"><span class="lang">python</span><code>import torch
 
@@ -213,7 +215,7 @@ y     = torch.tensor([3.0, 5.0, 8.0])
 y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
 loss = mape_loss(y_hat, y)
 loss.backward()
-print(loss.item(), y_hat.grad)   # 0.1389  tensor([-0.1111, -0.0000,  0.0417])</code></pre>
+print(loss.item(), y_hat.grad)   # 0.1388888955116272 tensor([-0.1111, -0.0000,  0.0417])</code></pre>
     <div class="callout key"><b>Rule of thumb</b><p>Before computing MAPE, look at the minimum of $|y|$ in the data. If there are zeros or values that are tiny compared with typical ones, report WAPE or MASE and do not use MAPE as a loss.</p></div>
 
     <h2 id="mistakes">Common mistakes</h2>
