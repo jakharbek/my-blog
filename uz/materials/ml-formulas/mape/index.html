@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MAPE: o‘rtacha absolyut foiz xatosi — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.</title>
+  <meta name="description" content="MAPE batafsil: formula, nosimmetriklik, nol atrofidagi xulq, hosila, optimal konstanta — vaznli mediana, xatoning 3D sirti, 1/y vaznlar bilan o‘qitish, sMAPE, WAPE va MASE bilan taqqoslash, biznes misoli, kod.">
+  <meta property="og:title" content="MAPE: o‘rtacha absolyut foiz xatosi — Neyron tarmoq formulalari: qo‘llanma — Abdulatipov J.">
+  <meta property="og:description" content="MAPE batafsil: formula, nosimmetriklik, nol atrofidagi xulq, hosila, optimal konstanta — vaznli mediana, xatoning 3D sirti, 1/y vaznlar bilan o‘qitish, sMAPE, WAPE va MASE bilan taqqoslash, biznes misoli, kod.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/mape/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/mape/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/mape/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/mape/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/mape.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../uz/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+    <a href="../../../../uz/#posts">Barcha maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../">Qo‘llanma</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Til"><a href="../../../../ru/materials/ml-formulas/mape/" lang="ru" hreflang="ru">RU</a> <a href="../../../../en/materials/ml-formulas/mape/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/mape/" lang="uz" hreflang="uz" aria-current="true">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Qorong‘i mavzu&quot;, &quot;toLight&quot;: &quot;Yorug‘ mavzu&quot;}" aria-label="Qorong‘i mavzu">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Neyron tarmoq formulalari: qo‘llanma</a> · Yo‘qotishlar — regressiya</span>
+  <h1>MAPE: o‘rtacha absolyut foiz xatosi</h1>
+  <p class="dek">Har qanday menejer tushunadigan metrika: «o‘rtacha 12% ga adashamiz». Soddalik ortida tuzoqlar yashiringan: haqiqiy qiymatga bo‘lish nol atrofida portlaydi, kam va ortiq bashorat har xil jazolanadi, MAPE’da o‘qitilgan model esa sistematik ravishda kamaytirib bashorat qiladi. Hammasini mayda detallarigacha tahlil qilamiz — hosila, xatoning 3D sirti, o‘qitish va biznes misoli bilan.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">2026-yil 28-oktabr</time> · 35 daq o‘qish</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Mundarija">
+    <span>Mundarija</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>U nima uchun kerak</a>
+      <a href="#intuition"><span class="n">2</span>Intuitsiya: haqiqiy qiymat ulushlaridagi xato</a>
+      <a href="#anatomy"><span class="n">3</span>Formula mayda detallarigacha</a>
+      <a href="#properties"><span class="n">4</span>Xossalar va nosimmetriklik</a>
+      <a href="#derivative"><span class="n">5</span>Hosila va eng yaxshi konstanta</a>
+      <a href="#surface"><span class="n">6</span>Xato xaritasi: (y, ŷ) tekisligi ustidagi APE</a>
+      <a href="#training"><span class="n">7</span>MAPE’da o‘qitish: 1/y vaznlar va kam bashorat</a>
+      <a href="#alternatives"><span class="n">8</span>MAPE, sMAPE, WAPE va MASE</a>
+      <a href="#business"><span class="n">9</span>Biznes misoli: do‘kon assortimenti</a>
+      <a href="#code"><span class="n">10</span>Kodda</a>
+      <a href="#mistakes"><span class="n">11</span>Ko‘p uchraydigan xatolar</a>
+      <a href="#links"><span class="n">12</span>Boshqa formulalar bilan bog‘lanishlar</a>
+      <a href="#summary"><span class="n">13</span>Xulosa</a>
+      <a href="#quiz"><span class="n">14</span>O‘zingizni tekshiring</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\left|\frac{y_i-\hat{y}_i}{y_i}\right|$$</div>
+
+    <h2 id="why">U nima uchun kerak</h2>
+    <p>Savdo bo‘limi so‘raydi: «bashorat qanchalik aniq?». «MAE 37 dona» degan javob kam narsa aytadi: non uchun bu a’lo, avtomobillar uchun esa falokat. «O‘rtacha 12% ga adashamiz» degan javob izohsiz tushunarli va non uchun ham, avtomobillar uchun ham bir xil o‘qiladi. Shuning uchun MAPE (mean absolute percentage error) talabni bashorat qilish, moliya va energetikadagi eng mashhur metrikalardan biri.</p>
+    <p>U qayerda uchraydi:</p>
+    <ul class="flist"><li><b>talab va sotuvlarni bashorat qilish</b> — chakana savdo, logistika, xaridlarni rejalashtirish; ko‘pincha bu bashorat bo‘limining asosiy KPI’i;</li><li><b>moliya va iqtisodiyot</b> — tushum, narxlar, makroko‘rsatkichlar bashoratlarining aniqligi;</li><li><b>energetika</b> — tarmoq yuklamasini bashorat qilish, bunda xato foizi to‘g‘ridan-to‘g‘ri zaxira narxiga aylanadi;</li><li><b>turli masshtabdagi qatorlarni solishtirish</b> — MAPE o‘lchamsiz, shuning uchun aniqlikni minglab tovarlar bo‘yicha o‘rtachalash mumkin;</li><li><b>bashorat musobaqalari</b> — M-musobaqalarda uning simmetrik varianti sMAPE ishlatilgan.</li></ul>
+    <div class="callout key"><b>Bir daqiqada asosiysi</b><p>MAPE — haqiqiy qiymat ulushlarida o‘lchangan o‘rtacha absolyut xato. U masshtabga bog‘liq emas, lekin $y_i=0$ da aniqlanmagan va nol atrofida portlaydi. Musbat haqiqiy qiymat uchun kam bashorat ko‘pi bilan $100\%$ turadi, ortiq bashorat esa istalgancha. MAPE — $1/|y_i|$ vaznli MAE, shuning uchun MAPE bo‘yicha eng yaxshi konstanta pastga siljigan vaznli mediana, MAPE’da o‘qitilgan model esa bashoratlarni kamaytiradi.</p></div>
+
+    <h2 id="intuition">Intuitsiya: haqiqiy qiymat ulushlaridagi xato</h2>
+    <p>3 dona sotilganda 1 donaga adashish — uchdan birga xato qilish. 100 dona sotilganda xuddi shu bir donaga adashish — deyarli aniq tegish. MAPE har bir xatoni o‘z haqiqiy qiymatiga nisbatan o‘lchaydi va hosil bo‘lgan foizlarni o‘rtachalaydi.</p>
+    <p>Ko‘k nuqtalarni — bashoratlarni torting. O‘ngda — har bir obyektning foizdagi xatosi (APE, absolute percentage error) va ularning o‘rtachasi — MAPE.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-explorer" data-config="{}"></div><figcaption><b>Rasm 1.</b> Umumiy misol: $y=(3;\,5;\,8)$, $\hat y=(2{,}5;\,5;\,10)$. $0{,}5$ va $2$ xatolar $16{,}7\%$ va $25\%$ ga aylanadi, o‘rtacha $\mathrm{MAPE}\approx13{,}9\%$. Birinchi bashoratni 2 gacha tushiring — bir donalik xato $33{,}3\%$ turadi; uchinchi obyektdagi xuddi shunday xato (bashorat 7) atigi $12{,}5\%$ turar edi.</figcaption></figure>
+    <div class="callout intuition"><b>Nimaga e’tibor bering</b><p>Uchinchi obyektning absolyut xatosi birinchinikidan to‘rt baravar katta ($2$ va $0{,}5$), foizdagisi esa atigi $1{,}5$ baravar ($25\%$ va $16{,}7\%$): katta haqiqiy qiymat katta xatolarni «kechiradi». MAPE masshtabga befarq va kichik haqiqiy qiymatlarga juda sezgir.</p></div>
+
+    <h2 id="anatomy">Formula mayda detallarigacha</h2>
+    <p>Formulani ichkaridan tashqariga qarab tahlil qilamiz.</p>
+    <div class="eqd">$$e_i=y_i-\hat y_i\;\xrightarrow{\;|\cdot|\;}\;|e_i|\;\xrightarrow{\;:\,|y_i|\;}\;\mathrm{APE}_i=\frac{|e_i|}{|y_i|}\;\xrightarrow{\;\frac1n\sum\;}\;\text{ulush}\;\xrightarrow{\;\times100\%\;}\;\mathrm{MAPE}$$</div>
+    <dl class="symbols"><dt>$y_i$</dt><dd>haqiqiy qiymat; noldan farqli bo‘lishi shart;</dd><dt>$\hat y_i$</dt><dd>model bashorati;</dd><dt>$|y_i-\hat y_i|$</dt><dd>absolyut xato, <a href="../mae/">MAE</a>dagi kabi;</dd><dt>$\frac{|y_i-\hat y_i|}{|y_i|}$</dt><dd>nisbiy xato APE — haqiqiy qiymatning biz adashgan ulushi; o‘lchov birliklariga bog‘liq emas;</dd><dt>$\frac{100\%}{n}\sum_{i=1}^n$</dt><dd>obyektlar bo‘yicha o‘rtacha, foizlarga o‘tkazilgan.</dd></dl>
+    <p>Umumiy misol qadamma-qadam:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$i$</th><th class=num>$y_i$</th><th class=num>$\hat y_i$</th><th class=num>$|y_i-\hat y_i|$</th><th class=num>$\mathrm{APE}_i$</th></tr></thead><tbody><tr><td>1</td><td class=num>3</td><td class=num>2,5</td><td class=num>0,5</td><td class=num>16,7%</td></tr><tr><td>2</td><td class=num>5</td><td class=num>5</td><td class=num>0</td><td class=num>0%</td></tr><tr><td>3</td><td class=num>8</td><td class=num>10</td><td class=num>2</td><td class=num>25,0%</td></tr><tr><td>o‘rtacha</td><td class=num></td><td class=num></td><td class=num>0,833</td><td class=num>13,9%</td></tr></tbody></table></div>
+    <div class="eqd">$$\mathrm{MAPE}=\frac{100\%}{3}\Bigl(\frac{0{,}5}{3}+\frac{0}{5}+\frac{2}{8}\Bigr)=\frac{100\%}{3}\,(0{,}1667+0+0{,}25)\approx13{,}9\%$$</div>
+    <p>Ikkita teng kuchli yozuv metrikaning tuzilishini ochib beradi:</p>
+    <div class="eqd">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\underbrace{\frac{1}{|y_i|}}_{w_i}\,|y_i-\hat y_i|=\frac{100\%}{n}\sum_{i=1}^{n}\Bigl|1-\frac{\hat y_i}{y_i}\Bigr|$$</div>
+    <p>Birinchisi: MAPE — $w_i=1/|y_i|$ vaznli <b>vaznli MAE</b>; haqiqiy qiymati kichik obyektlar ulkan vazn oladi. Ikkinchisi: musbat haqiqiy qiymatlar uchun APE faqat $q_i=\hat y_i/y_i$ nisbatga bog‘liq, $\mathrm{APE}_i=|1-q_i|$. Shuning uchun barcha haqiqiy qiymatlar va bashoratlar bir xil songa ko‘paytirilsa, MAPE o‘zgarmaydi.</p>
+    <div class="callout note"><b>Foizmi yoki ulush</b><p>Kutubxonalar ko‘pincha MAPE’ni 100 ga ko‘paytirmasdan, ulush sifatida qaytaradi: <code>sklearn.metrics.mean_absolute_percentage_error</code> umumiy misolda $13{,}9$ emas, $0{,}139$ beradi. Aynan nimani solishtirayotganingizni tekshiring.</p></div>
+
+    <h2 id="properties">Xossalar va nosimmetriklik</h2>
+    <ul class="flist"><li><b>O‘lchamsizlik</b>: istalgan $c\ne0$ da $\mathrm{MAPE}(c\,y,\,c\,\hat y)=\mathrm{MAPE}(y,\hat y)$. So‘mmi yoki ming so‘mmi — farqi yo‘q.</li><li><b>Siljishga invariant emas</b>: haqiqiy qiymatlar va bashoratlarga 1000 qo‘shing — absolyut xatolar o‘sha, MAPE esa bir necha marta tushib ketadi. Shuning uchun MAPE °C dagi harorat va shartli nolga ega boshqa shkalalar uchun ma’nosiz.</li><li><b>$y_i=0$ da aniqlanmagan</b> va $y_i\to0$ da cheksiz o‘sadi: haqiqiy qiymat $0{,}01$ bo‘lganda 1 bashorati — $9900\%$ xato.</li><li><b>Nol bashorat roppa-rosa $100\%$ turadi</b>: $\hat y_i=0$ da har bir $\mathrm{APE}_i=1$. «Doim nol» modeli istalgan nolmas ma’lumotlarda $\mathrm{MAPE}=100\%$ ga ega.</li><li><b>Nosimmetriklik</b>: musbat haqiqiy qiymat va manfiy bo‘lmagan bashorat uchun kam bashorat $\mathrm{APE}\le100\%$ beradi, ortiq bashorat esa chegaralanmagan.</li><li><b>Qavariqlik</b>: MAPE — bashoratlarning chiziqli funksiyalari modullari yig‘indisi, shuning uchun u bashoratlar bo‘yicha (va chiziqli model parametrlari bo‘yicha) qavariq; faqat ideal bashoratda nolga teng.</li></ul>
+    <h3>Donada simmetrik, marta bo‘yicha — yo‘q</h3>
+    <p>Agar xatoni birliklarda hisoblasak, MAPE simmetrik: $y-d$ va $y+d$ bashoratlar bir xil, $d/y$ turadi. Lekin biznesda xatolar ko‘pincha marta bilan o‘lchanadi: «bir yarim baravar oshirib yubordik», «ikki baravar kam bashorat qildik». Bu yerda MAPE nosimmetrik: ikki baravar kam ($\hat y=y/2$) $50\%$ turadi, ikki baravar ko‘p ($\hat y=2y$) — $100\%$. Bir xil marta adashgan ikki bashoratdan MAPE doim kamrog‘ini afzal ko‘radi.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-asymmetry" data-config="{&quot;yhat&quot;: 150}"></div><figcaption><b>Rasm 2.</b> Haqiqiy qiymati $y=100$ bo‘lgan bitta obyekt xatosi bashorat funksiyasi sifatida. To‘q sariq APE — $\hat y=y$ da singan «belgi»: chapda u $100\%$ shiftga tiraladi, o‘ngda esa cheksiz o‘sadi. 150 bashorati (haqiqiy qiymatdan $1{,}5$ marta katta) $50\%$ turadi, $100^2/150\approx66{,}7$ bashorati ($1{,}5$ marta kichik) esa atigi $33{,}3\%$. Binafsha sMAPE $200\%$ bilan chegaralangan va xuddi shu absolyut xatoda kam bashoratga qattiqroq: $\hat y=150$ da $40\%$ va $\hat y=50$ da $66{,}7\%$. Pastda — hosilalar: APE’da bu bashoratning har bir birligiga $\pm1\%$ zinapoya.</figcaption></figure>
+    <details class="deep"><summary>Nega sMAPE unchalik simmetrik emas</summary><div class="deep-body">
+      <p>sMAPE xatoni haqiqiy qiymat va bashoratning o‘rtachasiga bo‘ladi: $\mathrm{sAPE}=2|y-\hat y|/(|y|+|\hat y|)$. Marta bo‘yicha u simmetrik: $\hat y=k\,y$ va $\hat y=y/k$ da ($k&gt;0$, $y&gt;0$) bir xil qiymat chiqadi:</p>
+      <div class="eqd">$$\frac{2|k-1|\,y}{y+k\,y}=\frac{2|k-1|}{k+1},\qquad\frac{2|1/k-1|\,y}{y+y/k}=\frac{2|1-k|}{k+1}$$</div>
+      <p>Donada esa yo‘q: $\hat y=y\pm d$ da $2y-d$ va $2y+d$ maxrajlar farq qiladi, va kam bashorat qattiqroq jazolanadi. Bu metrikalarning hech biri bir vaqtda ham «marta bo‘yicha», ham «donada» simmetriyani bermaydi; marta bo‘yicha qat’iy simmetrik — logarifmik xato $|\ln(\hat y/y)|$.</p>
+    </div></details>
+
+    <h2 id="derivative">Hosila va eng yaxshi konstanta</h2>
+    <p>Bitta obyekt uchun APE bashoratning chiziqli funksiyasi moduli, shuning uchun uning hosilasi — zinapoya:</p>
+    <div class="eqd">$$\frac{\partial\,\mathrm{APE}_i}{\partial\hat y_i}=\frac{\operatorname{sign}(\hat y_i-y_i)}{|y_i|},\qquad\hat y_i\ne y_i$$</div>
+    <details class="deep"><summary>Keltirib chiqarish va parametrlar bo‘yicha gradiyent</summary><div class="deep-body">
+      <p>$\hat y_i&gt;y_i$ da $\mathrm{APE}_i=(\hat y_i-y_i)/|y_i|$ — qiyaligi $1/|y_i|$ bo‘lgan to‘g‘ri chiziq; $\hat y_i&lt;y_i$ da — qiyaligi $-1/|y_i|$ bo‘lgan $(y_i-\hat y_i)/|y_i|$ to‘g‘ri chiziq. $\hat y_i=y_i$ nuqtada hosila yo‘q (sinish); subgradiyent — $[-1/|y_i|;\,1/|y_i|]$ dan istalgan son, kutubxonalar odatda 0 ni oladi. Model parametrlari uchun zanjir qoidasiga ko‘ra:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MAPE}}{\partial\theta}=\frac{100\%}{n}\sum_{i=1}^{n}\frac{\operatorname{sign}(\hat y_i-y_i)}{|y_i|}\cdot\frac{\partial\hat y_i}{\partial\theta}$$</div>
+    </div></details>
+    <p>Hosila moduli xato kattaligiga bog‘liq emas — <a href="../mae/">MAE</a>dagi kabi, — lekin $1/|y_i|$ ga ko‘paytirilgan: haqiqiy qiymati 1 bo‘lgan obyekt modelni haqiqiy qiymati 100 bo‘lgan obyektdan 100 marta kuchliroq tortadi. Umumiy misolda bashoratning har bir birligiga $\partial\,\mathrm{MAPE}/\partial\hat y=\tfrac{100\%}{3}\,\bigl(-\tfrac13;\;0;\;\tfrac18\bigr)\approx(-11{,}1\%;\;0;\;4{,}2\%)$: xatosi to‘rt baravar kichik birinchi obyekt uchinchisidan $2{,}7$ marta kuchliroq tortadi.</p>
+    <h3>Eng yaxshi konstanta — pastga siljigan vaznli mediana</h3>
+    <p>Barcha obyektlar uchun qaysi yagona $c$ bashorati MAPE’ni minimallashtiradi? $\mathrm{MAPE}(c)=\frac{100\%}{n}\sum_i|y_i-c|/y_i$ funksiyasi bo‘lakli-chiziqli va qavariq; qo‘shni ma’lumot nuqtalari orasida uning qiyaligi $\frac{100\%}{n}\bigl(\sum_{y_i&lt;c}\tfrac1{y_i}-\sum_{y_i&gt;c}\tfrac1{y_i}\bigr)$ ga teng. Minimum qiyalik ishorasini o‘zgartirgan joyda — chapdagi $1/y$ umumiy vazni o‘ngdagisi bilan tenglashgan joyda. Bu $1/y_i$ vaznli <b>vaznli mediana</b>:</p>
+    <div class="eqd">$$c^*=\operatorname*{arg\,min}_c\sum_{i=1}^{n}\frac{|y_i-c|}{y_i}=\frac{1}{y_i}\text{ vaznli } y_i \text{ larning vaznli medianasi}$$</div>
+    <p>Vaznlar $y$ o‘sishi bilan kamayadi, shuning uchun vaznli mediana oddiysidan katta emas: MAPE bashoratni sistematik ravishda pastga tortadi. Lognormal talab uchun buni aniq hisoblash mumkin: agar $\ln y\sim N(\mu,\sigma^2)$ bo‘lsa, $c^*=e^{\mu-\sigma^2}$ — $e^{-\sigma^2}$ ga ko‘paytirilgan $e^{\mu}$ mediana.</p>
+    <details class="deep"><summary>e^(−σ²) ko‘paytuvchi qayerdan keladi</summary><div class="deep-body">
+      <p>Vaznli mediana — zichligi $f(y)/y$ ga proporsional bo‘lgan taqsimotning medianasi. Lognormal $f$ zichlik uchun $t=\ln y$ deb belgilab:</p>
+      <div class="eqd">$$\frac{f(y)}{y}\propto\frac{1}{y^2}\,e^{-\frac{(t-\mu)^2}{2\sigma^2}}=\frac{1}{y}\,e^{-\frac{(t-\mu)^2+2\sigma^2 t}{2\sigma^2}}\propto\frac{1}{y}\,e^{-\frac{(t-(\mu-\sigma^2))^2}{2\sigma^2}}$$</div>
+      <p>Bu yana lognormal zichlik, lekin $\mu-\sigma^2$ parametr bilan; uning medianasi $e^{\mu-\sigma^2}$. Taqqoslash uchun: dastlabki taqsimotning o‘rtachasi $e^{\mu+\sigma^2/2}$ medianadan yuqori. $\sigma=0{,}6$ da MAPE optimumi medianadan $1-e^{-0{,}36}\approx30\%$ past.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="mape-optimal" data-config="{&quot;sigma&quot;: 0.6, &quot;c&quot;: 100}"></div><figcaption><b>Rasm 3.</b> Medianasi taxminan 100 bo‘lgan lognormal talabning 60 ta qiymati (generator zerrasi qayd etilgan). Qora egri chiziq — $c$ konstant bashoratning MAPE’si, pastda — uning qiyaligi, zinapoyasimon funksiya. $\sigma=0{,}6$ da $42{,}5\%$ minimumga $c^*\approx71{,}0$ da erishiladi, mediana esa $101{,}0$, o‘rtacha — $119{,}1$: MAPE bo‘yicha optimal bashorat medianadan $29{,}7\%$ past (nazariya $e^{-0{,}36}-1\approx-30{,}2\%$). Medianaga teng bashorat $51{,}5\%$, o‘rtachaga teng bashorat $63{,}0\%$, nol bashorat esa roppa-rosa $100\%$ turadi.</figcaption></figure>
+    <div class="callout warn"><b>MAPE’da o‘qitish kam bashoratga olib keladi</b><p>MAPE’ni minimallashtirishga o‘qitilgan model bu siljishni meros qilib oladi: uning bashoratlari sistematik ravishda haqiqiy qiymatlardan past. Chakana savdoda bu bo‘sh javonlarni anglatadi, yo‘qotilgan sotuvlar esa hech bir metrikaga tushmaydi: omborda qancha bo‘lsa, roppa-rosa shuncha sotiladi.</p></div>
+
+    <h2 id="surface">Xato xaritasi: (y, ŷ) tekisligi ustidagi APE</h2>
+    <p>Bitta obyekt xatosiga ikki o‘zgaruvchining — haqiqiy qiymat $y$ va bashorat $\hat y$ ning funksiyasi sifatida qaraymiz. APE sath chiziqlari — <b>koordinata boshidan chiqqan nurlar</b>: $|y-\hat y|/y=a$ sharti $\hat y=(1\pm a)\,y$ ga teng kuchli. Absolyut xatoning sath chiziqlari esa, aksincha, parallel $\hat y=y\pm e$ to‘g‘ri chiziqlar. Nurlar nolda tutashadi, shuning uchun $y=0$ yaqinida istalgan qayd etilgan absolyut xato APE’ning barcha sathlarini kesib o‘tadi — «portlash» shundan.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-surface" data-config="{&quot;p&quot;: [2, 3]}"></div><figcaption><b>Rasm 4.</b> Chapda — $200\%$ da kesilgan $\mathrm{APE}(y,\hat y)$ sirti (uni aylantirish mumkin): $\hat y=y$ diagonali (to‘q sariq chiziq) bo‘ylab nol xato vodiysi va $y\to0$ da devor. O‘ngda — yuqoridan ko‘rinish: qora nurlar — APE sathlari, qizil punktir — 1 va 2 absolyut xato sathlari. $P=(2;\,3)$ va $Q=(8;\,9)$ nuqtalar bir xil bir birlikka adashadi, lekin $\mathrm{APE}(P)=50\%$, $\mathrm{APE}(Q)=12{,}5\%$.</figcaption></figure>
+    <p>$n$ ta obyekt uchun MAPE — shunday funksiyalarning o‘rtachasi. $(\hat y_1,\dots,\hat y_n)$ bashoratlar fazosida uning sath chiziqlari — markazi $y$ da, yarim o‘qlari $y_i$ ga proporsional bo‘lgan ko‘pyoqlar (2D’da romblar): kichik $y_i$ o‘qlari bo‘ylab katta jarimasiz uzoqqa ketib bo‘lmaydi.</p>
+
+    <h2 id="training">MAPE’da o‘qitish: 1/y vaznlar va kam bashorat</h2>
+    <p>MAPE — $1/|y_i|$ vaznli MAE bo‘lgani uchun, modelni MAPE’da obyekt vaznlari bilan MAE’ni minimallashtiradigan istalgan algoritm bilan o‘qitish mumkin: <code>sample_weight=1/|y|</code> ni bering. LightGBM’da tayyor <code>objective="mape"</code> maqsadi bor, PyTorch’da esa yo‘qotish bir qatorda yoziladi (kod bo‘limiga qarang).</p>
+    <p>Eng oddiy $\hat y=w\,x$ modelni $y=10\,x\cdot e^{0{,}35\,\varepsilon}$, $\varepsilon\sim N(0,1)$ bo‘lgan 40 ta obyektda o‘qitamiz: haqiqiy qiyalik 10 ga teng, shovqin multiplikativ — uning kattaligi haqiqiy sotuvlardagi kabi $y$ bilan birga o‘sadi.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-training" data-config="{}"></div><figcaption><b>Rasm 5.</b> Chapda — ma’lumotlar (nuqta o‘lchami $1/y$ vazniga proporsional) va ikki model, o‘ngda — $w$ qiyalik funksiyasi sifatida MAPE. «Boshlash»ni bosing: $w=4$ dan $8/\sqrt{t+1}$ qadam bilan MAPE bo‘yicha subgradiyent tushish $\mathrm{MAPE}\approx20{,}28\%$ bilan $w^*\approx9{,}10$ ga yaqinlashadi. Eng kichik kvadratlar usuli $w\approx10{,}74$ va $\mathrm{MAPE}\approx22{,}99\%$ beradi, lekin uning umumiy bashorati deyarli siljimagan ($-0{,}6\%$), MAPE bo‘yicha modelning bashoratlar yig‘indisi esa haqiqiy qiymatlar yig‘indisidan taxminan $16\%$ past.</figcaption></figure>
+    <p>Nega shunday: kichik $y$ li nuqtalar katta vazn oladi va to‘g‘ri chiziqni pastga tortadi. $q_i=y_i/x_i$ nisbatlar tilida $\mathrm{MAPE}(w)=\frac{100\%}{n}\sum_i|q_i-w|/q_i$, demak, optimum — $1/q_i$ vaznli $q_i$ larning vaznli medianasi. Lognormal shovqinda bu $e^{-\sigma^2}=e^{-0{,}1225}\approx0{,}885$ ga ko‘paytirilgan mediana, ya’ni 10 o‘rniga taxminan $8{,}85$.</p>
+    <div class="callout key"><b>Siljishni qanday chetlab o‘tish mumkin</b><p>1) $\ln y$ dan MAE yoki MSE’da o‘qiting, MAPE’ni esa faqat hisobot uchun ishlating. 2) Agar KPI aynan MAPE bo‘lsa-yu, kam bashorat qimmat bo‘lsa (taqchillik), bashoratlarni validatsiyada tanlangan ko‘paytuvchi bilan to‘g‘rilang yoki haqiqiy xarajatlarni aks ettiruvchi metrikani tanlang (WAPE, kvantil yo‘qotish). 3) Ma’lumotlarda nollar yoki nolga yaqin qiymatlar bo‘lsa, MAPE’da o‘qitmang.</p></div>
+
+    <h2 id="alternatives">MAPE, sMAPE, WAPE va MASE</h2>
+    <p>Sanab o‘tilgan muammolar tufayli MAPE’ning bir nechta mashhur qarindoshlari bor ($e_i=y_i-\hat y_i$):</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Metrika</th><th>Formula</th><th>$y$ dagi nollar</th><th>Xususiyati</th></tr></thead><tbody><tr><td>MAPE</td><td>$\frac{100\%}{n}\sum\frac{|e_i|}{|y_i|}$</td><td>aniqlanmagan</td><td>haqiqiy qiymat ulushi; marta bo‘yicha nosimmetrik; nol atrofida portlaydi</td></tr><tr><td>sMAPE</td><td>$\frac{100\%}{n}\sum\frac{2|e_i|}{|y_i|+|\hat y_i|}$</td><td>$\hat y_i\ne0$ bo‘lsa, mumkin</td><td>$200\%$ bilan chegaralangan; donada kam bashoratga qattiqroq</td></tr><tr><td>WAPE</td><td>$100\%\cdot\frac{\sum|e_i|}{\sum|y_i|}$</td><td>mumkin (yig‘indi nol bo‘lmasin)</td><td>o‘rtacha haqiqiy qiymatga bo‘lingan MAE; katta obyektlar og‘irroq</td></tr><tr><td>MASE</td><td>$\frac{\frac1n\sum|e_i|}{\frac{1}{T-1}\sum_t|y_t-y_{t-1}|}$</td><td>mumkin (qator o‘zgarmas bo‘lmasin)</td><td>«o‘tgan davrdagidek» sodda bashoratga nisbatan MAE; $&lt;1$ — sodda bashoratdan yaxshi</td></tr></tbody></table></div>
+    <p>Umumiy misolda $\mathrm{MAPE}\approx13{,}9\%$, $\mathrm{sMAPE}\approx13{,}5\%$, $\mathrm{WAPE}=2{,}5/16\approx15{,}6\%$, masshtabi $\tfrac12\bigl(|5-3|+|8-5|\bigr)=2{,}5$ bo‘lgan MASE esa $0{,}833/2{,}5\approx0{,}33$ ga teng.</p>
+    <p>WAPE (uni MAD/Mean ratio deb ham atashadi) — o‘rtacha haqiqiy qiymatga bo‘lingan MAE: sotuvi katta obyektlar og‘irroq, umumiy natija esa talabi nolga yaqin bitta tovar tufayli buzilmaydi. MASE (Xayndman va Kyoler, 2006) model MAE’sini sodda bashorat MAE’si bilan solishtiradi va hatto nollari bor qatorlar uchun ham yaraydi. Bir xil ma’lumotlarda WAPE va MASE faqat o‘zgarmas ko‘paytuvchi bilan farq qiladi, shuning uchun ularning optimumi bitta.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-metrics" data-config="{&quot;k&quot;: 1}"></div><figcaption><b>Rasm 6.</b> 52 haftalik talab (nuqtalar) va $k\cdot$baza bashorati (ko‘k chiziq). O‘ngda — $k$ ko‘paytuvchining funksiyasi sifatida metrikalar, nuqtalar — minimumlar. MAPE $k\approx0{,}89$ da, ya’ni 11% ga kamaytirilgan bashoratda minimal; sMAPE — $k\approx1{,}007$ da; WAPE (va MASE) — $k\approx1{,}012$ da. Talab tushishini yoqing — $y=3$ bo‘lgan bitta hafta: $k=1$ da MAPE $24{,}5\%$ dan $68{,}8\%$ gacha sakraydi, uning minimumi esa $k\approx0{,}78$ ga ko‘chadi; WAPE atigi $23{,}5\%$ dan $25{,}4\%$ gacha o‘zgaradi.</figcaption></figure>
+
+    <h2 id="business">Biznes misoli: do‘kon assortimenti</h2>
+    <p>Tarmoq oltita tovarning haftalik sotuvlarini bashorat qiladi. Ulardan beshtasi o‘nlab va yuzlab dona sotiladi va $7{,}5\%$ dan $16{,}7\%$ gacha xato bilan bashorat qilinadi. Oltinchisi, F, — kam sotiladigan tovar: bashorat 10 dona, sotilgani esa 4.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-portfolio" data-config="{&quot;f&quot;: 4}"></div><figcaption><b>Rasm 7.</b> Chapda — haqiqiy qiymat va bashorat (logarifmik shkala), o‘ngda — har bir tovarning APE’si. Sotuvlarning $0{,}15\%$ i to‘g‘ri keladigan F tovari $\mathrm{APE}=150\%$ va barcha APE’lar yig‘indisining $72\%$ ini beradi: $\mathrm{MAPE}=34{,}8\%$, holbuki usiz u $11{,}7\%$ ga teng. Xatoni donada hisoblaydigan WAPE $9{,}4\%$ ga teng: 2714 ta sotilgan donaga 256 dona xato. F sotuvlarini suring: bitta dona sotilganda MAPE deyarli $160\%$ ga yetadi.</figcaption></figure>
+    <p>Amalda nima qilish kerak:</p>
+    <ul class="flist"><li><b>WAPE bilan hisobot bering</b> (yoki tushum bo‘yicha vaznlangan MAPE bilan), agar donada yoki pulda umumiy aniqlik muhim bo‘lsa;</li><li><b>MAPE’ni guruhlar bo‘yicha hisoblang</b> — tez va sekin sotiladigan tovarlarni alohida — yoki sotuvi chegaradan past pozitsiyalarni chegarani aniq ko‘rsatgan holda chiqarib tashlang;</li><li><b>sekin sotiladigan tovarlar uchun</b> MASE yoki uzilishli talab uchun maxsus metrikalardan foydalaning;</li><li><b>xato ishorasini alohida kuzating</b>: bashoratlar yig‘indisining siljishi (bias) — mustaqil KPI, MAPE uni ko‘rsatmaydi.</li></ul>
+    <div class="callout history"><b>Nega MAPE shunchalik mashhur</b><p>MAPE statistik ma’lumotsiz ham tushunarli, shuning uchun u allaqachon soha hisobotlarining standartiga aylangan. Tanqid ham eski: kam bashoratlar foydasiga siljish va kichik haqiqiy qiymatlar muammosiga 1980–1990-yillardayoq e’tibor qaratilgan (masalan, Armstrong va Kollopi, 1992), Xayndman va Kyoler (2006) esa bu kamchiliklarsiz masshtabga bog‘liq bo‘lmagan muqobil sifatida MASE’ni taklif qilishgan.</p></div>
+
+    <h2 id="code">Kodda</h2>
+    <p>NumPy’da MAPE — bitta qator; quyida sMAPE, WAPE va formulalarni umumiy misolda tekshirish ham bor.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+
+ape  = np.abs((y - y_hat) / y)      # [0.1667 0.     0.25  ]
+mape = 100 * ape.mean()             # 13.89
+
+# Xuddi shu, 1/|y| vaznli MAE sifatida
+w = 1 / np.abs(y)
+print(100 * np.mean(w * np.abs(y - y_hat)))   # 13.89
+
+def smape(y, f):
+    return 100 * np.mean(2 * np.abs(f - y) / (np.abs(y) + np.abs(f)))
+
+def wape(y, f):
+    return 100 * np.sum(np.abs(y - f)) / np.sum(np.abs(y))
+
+print(smape(y, y_hat), wape(y, y_hat))        # ≈13.468 15.625</code></pre>
+    <p>scikit-learn ulush qaytaradi va nolga bo‘lish o‘rniga mashina epsiloniga bo‘ladi. «MAPE bo‘yicha» o‘qitish uchun $1/y$ vaznli mediana regressiyasi mos keladi:</p>
+    <pre class="code"><span class="lang">python</span><code>from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.linear_model import LinearRegression, QuantileRegressor
+
+print(mean_absolute_percentage_error(y, y_hat))            # 0.1389 — foiz emas, ulush!
+print(mean_absolute_percentage_error([0.0, 5.0], [1.0, 5.0]))  # 2.25e+15: nol o‘rniga eps ga bo‘lish
+
+# «MAPE bo‘yicha» o‘qitish: 1/y vaznli mediana regressiyasi (MAE)
+rng = np.random.default_rng(0)
+x = rng.uniform(1, 10, 400)
+t = 10 * x * np.exp(0.35 * rng.standard_normal(400))
+X = x[:, None]
+ols = LinearRegression(fit_intercept=False).fit(X, t)
+fit = QuantileRegressor(quantile=0.5, alpha=0, fit_intercept=False).fit(X, t, sample_weight=1 / t)
+print(ols.coef_, fit.coef_)   # ≈[10.58] [8.85] — MAPE bo‘yicha model yig‘indini 16% ga kamaytiradi</code></pre>
+    <p>PyTorch’da yo‘qotish funksiyasi sifatida MAPE:</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+
+def mape_loss(pred, target, eps=1e-8):
+    &quot;&quot;&quot;Yo‘qotish funksiyasi sifatida MAPE (ulush). eps 0 ga bo‘lishdan saqlaydi, lekin nol atrofidagi ulkan vaznlardan emas.&quot;&quot;&quot;
+    return torch.mean(torch.abs(target - pred) / target.abs().clamp_min(eps))
+
+y     = torch.tensor([3.0, 5.0, 8.0])
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+loss = mape_loss(y_hat, y)
+loss.backward()
+print(loss.item(), y_hat.grad)   # 0.1389  tensor([-0.1111, -0.0000,  0.0417])</code></pre>
+    <div class="callout key"><b>Qoida</b><p>MAPE’ni hisoblashdan oldin ma’lumotlardagi $|y|$ minimumiga qarang. U yerda nollar yoki odatiy qiymatlarga nisbatan juda kichik qiymatlar bo‘lsa, WAPE yoki MASE bilan hisobot bering va MAPE’ni yo‘qotish funksiyasi sifatida ishlatmang.</p></div>
+
+    <h2 id="mistakes">Ko‘p uchraydigan xatolar</h2>
+    <ol class="flist"><li><b>Nollari bor ma’lumotlarda MAPE.</b> Nolga bo‘lish cheksizlik yoki NaN beradi, $\varepsilon$ orqali «himoya» esa astronomik sonlar beradi: scikit-learn $2{,}25\cdot10^{15}$ qaytaradi. Nollarni aniq filtrlang va bu haqda xabar bering yoki WAPE va MASE’ni oling.</li><li><b>Shartli nolli shkalalar uchun MAPE</b> — °C dagi harorat, indekslar, sanalar. 2° da ham, 30° da ham 1° xato bir xil, MAPE esa 15 marta farq qiladi.</li><li><b>Siljishni hisobga olmasdan MAPE’da o‘qitish.</b> Model bashoratni sistematik ravishda kamaytiradi, chakana savdoda bu javonlardagi taqchillikka aylanadi.</li><li><b>Kichik qiymatlar ulushi har xil bo‘lgan to‘plamlar orasida MAPE’ni solishtirish.</b> Bitta model tez sotiladigan tovarlarda 12%, sekin sotiladiganlarda 60% ko‘rsatadi — gap sifatda emas, ma’lumotlarda.</li><li><b>Ulush va foizni chalkashtirish</b>: scikit-learn $13{,}9$ emas, $0{,}139$ qaytaradi.</li><li><b>«MAPE kichikroq — demak, reja aniqroq».</b> MAPE xatolar ishorasini ko‘rmaydi: MAPE’si kichikroq bashorat 5-rasmdagi kabi talabni yig‘indida 16% ga kamaytirishi mumkin.</li></ol>
+
+    <h2 id="links">Boshqa formulalar bilan bog‘lanishlar</h2>
+    <ul class="flist"><li><a href="../mae/">MAE</a>: MAPE — $1/|y_i|$ vaznli MAE; gradiyent moduli ham xato kattaligiga bog‘liq emas, lekin $1/|y_i|$ ga masshtablangan.</li><li><a href="../mse/">MSE</a> va <a href="../rmse/">RMSE</a>: absolyut kvadratik xatolar; ularning nisbiy qarindoshi — RMSLE, logarifmik shkaladagi RMSE.</li><li><a href="../huber/">Huber</a>: noldagi sinishni silliqlaydi; xuddi shu g‘oyani nisbiy xatoga ham qo‘llash mumkin.</li><li><a href="../sgd/">SGD</a>: MAPE’da o‘qitish — qadami kamaytirilishi kerak bo‘lgan subgradiyent tushish (5-rasmda — $1/\sqrt t$ kabi).</li></ul>
+
+    <h2 id="summary">Xulosa</h2>
+    <div class="callout key"><p>1) $\mathrm{MAPE}=\frac{100\%}{n}\sum|y_i-\hat y_i|/|y_i|$ — haqiqiy qiymatga nisbatan foizdagi o‘rtacha xato; masshtabga bog‘liq emas va biznesga tushunarli. 2) $y=0$ da aniqlanmagan va nol atrofida portlaydi; nol bashorat roppa-rosa $100\%$ turadi. 3) Marta bo‘yicha nosimmetrik: ikki baravar kam — $50\%$, ikki baravar ko‘p — $100\%$. 4) MAPE — $1/|y|$ vaznli MAE: hosila $\operatorname{sign}(\hat y-y)/|y|$, eng yaxshi konstanta — oddiysidan past vaznli mediana, MAPE’da o‘qitish kam bashoratga olib keladi. 5) Assortiment bo‘yicha hisobotlar uchun odatda WAPE va MASE ishonchliroq.</p></div>
+
+    <h2 id="quiz">O‘zingizni tekshiring</h2>
+    <div class="quiz" data-right="To‘g‘ri." data-wrong="Unchalik emas."><fieldset class="q"><legend>1. Haqiqiy qiymat 200, bashorat 150. APE nimaga teng?</legend><div class="opts"><button type="button" data-ok="1">$25\%$</button><button type="button" data-ok="0">$33{,}3\%$</button><button type="button" data-ok="0">$50\%$</button><button type="button" data-ok="0">$12{,}5\%$</button></div><div class="explain" hidden>Haqiqiy qiymatga bo‘lamiz: $50/200=25\%$. Xato qilib bashoratga bo‘linsa, $33{,}3\%$ chiqadi.</div></fieldset><fieldset class="q"><legend>2. Haqiqiy qiymat 100. Qaysi bashorat kattaroq APE beradi: 50 yoki 200?</legend><div class="opts"><button type="button" data-ok="0">50</button><button type="button" data-ok="1">200</button><button type="button" data-ok="0">Bir xil</button><button type="button" data-ok="0">$n$ ga bog‘liq</button></div><div class="explain" hidden>$|100-50|/100=50\%$, $|100-200|/100=100\%$ esa. Ikkalasi ham ikki baravar adashgan, lekin ortiq bashorat ikki baravar qimmat.</div></fieldset><fieldset class="q"><legend>3. Model musbat sotuvlarda doim 0 bashorat qiladi. Uning MAPE’si nimaga teng?</legend><div class="opts"><button type="button" data-ok="0">$0\%$</button><button type="button" data-ok="0">$50\%$</button><button type="button" data-ok="1">$100\%$</button><button type="button" data-ok="0">Cheksizlikka</button></div><div class="explain" hidden>Har bir $\mathrm{APE}_i=|y_i-0|/|y_i|=1$, shuning uchun istalgan ma’lumotlarda $\mathrm{MAPE}=100\%$.</div></fieldset><fieldset class="q"><legend>4. Haqiqiy qiymatlar: 1, 10 va 100. Qaysi konstant bashorat MAPE’ni minimallashtiradi?</legend><div class="opts"><button type="button" data-ok="1">1</button><button type="button" data-ok="0">10</button><button type="button" data-ok="0">37</button><button type="button" data-ok="0">100</button></div><div class="explain" hidden>$1/y_i$ vaznlar $1$, $0{,}1$ va $0{,}01$ ga teng; birinchi obyekt vazni qolganlari yig‘indisidan katta, shuning uchun vaznli mediana — 1: $\mathrm{MAPE}=(0+0{,}9+0{,}99)/3=63\%$, $c=10$ da esa $330\%$.</div></fieldset><fieldset class="q"><legend>5. Nega kam sotiladigan tovarlari bor assortimentda WAPE MAPE’dan barqarorroq?</legend><div class="opts"><button type="button" data-ok="0">WAPE kam sotiladigan tovarlar xatolarini hisobga olmaydi</button><button type="button" data-ok="1">WAPE umumiy xatoni umumiy haqiqiy qiymatga bo‘ladi, va kichik haqiqiy qiymatlar ulkan vazn olmaydi</button><button type="button" data-ok="0">WAPE doim MAPE’dan kichik</button><button type="button" data-ok="0">WAPE xatolarni kvadratga oshiradi</button></div><div class="explain" hidden>WAPE’da har bir obyekt o‘zining donadagi absolyut xatosi bilan kiradi, bo‘lish esa bir marta — haqiqiy qiymatlar yig‘indisiga bajariladi. Kam sotiladigan tovarning 6 donalik xatosi 6 donalik xato bo‘lib qoladi.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Qo‘llanma">
+  <div class="wrap-m">
+    <a class="prev" href="../rmse/"><span class="kicker">← Oldingi formula</span><span class="big">RMSE</span><span class="kicker">root mean squared error</span></a>
+<a class="next" href="../huber/"><span class="kicker">Keyingi formula →</span><span class="big">Huber</span><span class="kicker">MSE va MAE gibridi</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Pastki havolalar">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../uz/#posts">Maqolalar</a>
+    <a href="../../../../uz/materials/">Materiallar</a>
+    <a href="../../../../uz/about/">Men haqimda</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>

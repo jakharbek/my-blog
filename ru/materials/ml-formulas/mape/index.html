@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MAPE: средняя абсолютная процентная ошибка — Шпаргалка формул нейросетей — Абдулатипов Ж.</title>
+  <meta name="description" content="MAPE подробно: формула, асимметрия, поведение возле нуля, производная, оптимальная константа — взвешенная медиана, 3D-поверхность ошибки, обучение с весами 1/y, сравнение с sMAPE, WAPE и MASE, бизнес-пример, код.">
+  <meta property="og:title" content="MAPE: средняя абсолютная процентная ошибка — Шпаргалка формул нейросетей — Абдулатипов Ж.">
+  <meta property="og:description" content="MAPE подробно: формула, асимметрия, поведение возле нуля, производная, оптимальная константа — взвешенная медиана, 3D-поверхность ошибки, обучение с весами 1/y, сравнение с sMAPE, WAPE и MASE, бизнес-пример, код.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../../../assets/img/javharbek.png">
+  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/mape/">
+  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/mape/">
+  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/mape/">
+  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/mape/">
+  <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../../../assets/css/site.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../../../assets/js/viz.js"></script>
+  <script defer src="../../../../assets/js/formulas/mape.js"></script>
+  <script defer src="../../../../assets/js/materials.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../../../ru/#posts">Все статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../">Шпаргалка</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../../../ru/materials/ml-formulas/mape/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../../../en/materials/ml-formulas/mape/" lang="en" hreflang="en">EN</a> <a href="../../../../uz/materials/ml-formulas/mape/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">Шпаргалка формул нейросетей</a> · Потери — регрессия</span>
+  <h1>MAPE: средняя абсолютная процентная ошибка</h1>
+  <p class="dek">Метрика, которую понимает любой менеджер: «в среднем ошибаемся на 12%». За простотой прячутся подвохи: деление на факт взрывается возле нуля, недопрогноз и перепрогноз наказываются по-разному, а модель, обученная на MAPE, систематически занижает. Разбираем всё по косточкам — с производной, 3D-поверхностью ошибки, обучением и бизнес-примером.</p>
+  <div class="author">
+    <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-10-28">28 октября 2026</time> · 35 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#why"><span class="n">1</span>Зачем она нужна</a>
+      <a href="#intuition"><span class="n">2</span>Интуиция: ошибка в долях от факта</a>
+      <a href="#anatomy"><span class="n">3</span>Формула по косточкам</a>
+      <a href="#properties"><span class="n">4</span>Свойства и асимметрия</a>
+      <a href="#derivative"><span class="n">5</span>Производная и лучшая константа</a>
+      <a href="#surface"><span class="n">6</span>Карта ошибки: APE над плоскостью (y, ŷ)</a>
+      <a href="#training"><span class="n">7</span>Обучение на MAPE: веса 1/y и недопрогноз</a>
+      <a href="#alternatives"><span class="n">8</span>MAPE, sMAPE, WAPE и MASE</a>
+      <a href="#business"><span class="n">9</span>Бизнес-пример: ассортимент магазина</a>
+      <a href="#code"><span class="n">10</span>В коде</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#links"><span class="n">12</span>Связи с другими формулами</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#quiz"><span class="n">14</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\left|\frac{y_i-\hat{y}_i}{y_i}\right|$$</div>
+
+    <h2 id="why">Зачем она нужна</h2>
+    <p>Отдел продаж спрашивает: «насколько точен прогноз?». Ответ «MAE равна 37 штукам» мало что скажет: для хлеба это отлично, для автомобилей — катастрофа. Ответ «в среднем ошибаемся на 12%» понятен без пояснений и одинаково читается для хлеба и автомобилей. Поэтому MAPE (mean absolute percentage error) — одна из самых популярных метрик в прогнозировании спроса, финансах и энергетике.</p>
+    <p>Где она встречается:</p>
+    <ul class="flist"><li><b>прогноз спроса и продаж</b> — розница, логистика, планирование закупок; часто это главный KPI отдела прогнозирования;</li><li><b>финансы и экономика</b> — точность прогнозов выручки, цен, макропоказателей;</li><li><b>энергетика</b> — прогноз нагрузки на сеть, где процент ошибки прямо пересчитывается в стоимость резерва;</li><li><b>сравнение рядов разного масштаба</b> — MAPE безразмерна, поэтому точность можно усреднять по тысячам товаров;</li><li><b>соревнования по прогнозированию</b> — в M-соревнованиях использовали её симметричный вариант sMAPE.</li></ul>
+    <div class="callout key"><b>Главное за минуту</b><p>MAPE — средняя абсолютная ошибка, измеренная в долях факта. Она не зависит от масштаба, но не определена при $y_i=0$ и взрывается возле нуля. Для положительного факта недопрогноз стоит не больше $100\%$, а перепрогноз — сколько угодно. MAPE — это MAE с весами $1/|y_i|$, поэтому лучшая по MAPE константа — взвешенная медиана, смещённая вниз, а модель, обученная на MAPE, занижает прогнозы.</p></div>
+
+    <h2 id="intuition">Интуиция: ошибка в долях от факта</h2>
+    <p>Промахнуться на 1 штуку, когда продано 3, — ошибиться на треть. Промахнуться на ту же штуку, когда продано 100, — почти точное попадание. MAPE измеряет каждую ошибку относительно своего факта и усредняет получившиеся проценты.</p>
+    <p>Потяните синие точки — прогнозы. Справа — процентная ошибка каждого объекта (APE, absolute percentage error) и их среднее — MAPE.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-explorer" data-config="{}"></div><figcaption><b>Рисунок 1.</b> Сквозной пример: $y=(3;\,5;\,8)$, $\hat y=(2{,}5;\,5;\,10)$. Ошибки $0{,}5$ и $2$ превращаются в $16{,}7\%$ и $25\%$, среднее $\mathrm{MAPE}\approx13{,}9\%$. Опустите первый прогноз до 2 — промах на одну штуку будет стоить $33{,}3\%$; тот же промах на третьем объекте (прогноз 7) стоил бы лишь $12{,}5\%$.</figcaption></figure>
+    <div class="callout intuition"><b>Что заметить</b><p>Абсолютная ошибка третьего объекта вчетверо больше, чем первого ($2$ против $0{,}5$), а процентная — лишь в $1{,}5$ раза ($25\%$ против $16{,}7\%$): большой факт «прощает» большие ошибки. MAPE равнодушна к масштабу и очень чувствительна к малым фактам.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам</h2>
+    <p>Разберём формулу изнутри наружу.</p>
+    <div class="eqd">$$e_i=y_i-\hat y_i\;\xrightarrow{\;|\cdot|\;}\;|e_i|\;\xrightarrow{\;:\,|y_i|\;}\;\mathrm{APE}_i=\frac{|e_i|}{|y_i|}\;\xrightarrow{\;\frac1n\sum\;}\;\text{доля}\;\xrightarrow{\;\times100\%\;}\;\mathrm{MAPE}$$</div>
+    <dl class="symbols"><dt>$y_i$</dt><dd>факт; должен быть ненулевым;</dd><dt>$\hat y_i$</dt><dd>прогноз модели;</dd><dt>$|y_i-\hat y_i|$</dt><dd>абсолютная ошибка, как в <a href="../mae/">MAE</a>;</dd><dt>$\frac{|y_i-\hat y_i|}{|y_i|}$</dt><dd>относительная ошибка APE — доля факта, на которую мы промахнулись; не зависит от единиц измерения;</dd><dt>$\frac{100\%}{n}\sum_{i=1}^n$</dt><dd>среднее по объектам, переведённое в проценты.</dd></dl>
+    <p>Сквозной пример по шагам:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$i$</th><th class=num>$y_i$</th><th class=num>$\hat y_i$</th><th class=num>$|y_i-\hat y_i|$</th><th class=num>$\mathrm{APE}_i$</th></tr></thead><tbody><tr><td>1</td><td class=num>3</td><td class=num>2,5</td><td class=num>0,5</td><td class=num>16,7%</td></tr><tr><td>2</td><td class=num>5</td><td class=num>5</td><td class=num>0</td><td class=num>0%</td></tr><tr><td>3</td><td class=num>8</td><td class=num>10</td><td class=num>2</td><td class=num>25,0%</td></tr><tr><td>среднее</td><td class=num></td><td class=num></td><td class=num>0,833</td><td class=num>13,9%</td></tr></tbody></table></div>
+    <div class="eqd">$$\mathrm{MAPE}=\frac{100\%}{3}\Bigl(\frac{0{,}5}{3}+\frac{0}{5}+\frac{2}{8}\Bigr)=\frac{100\%}{3}\,(0{,}1667+0+0{,}25)\approx13{,}9\%$$</div>
+    <p>Две эквивалентные записи раскрывают устройство метрики:</p>
+    <div class="eqd">$$\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}\underbrace{\frac{1}{|y_i|}}_{w_i}\,|y_i-\hat y_i|=\frac{100\%}{n}\sum_{i=1}^{n}\Bigl|1-\frac{\hat y_i}{y_i}\Bigr|$$</div>
+    <p>Первая: MAPE — это <b>взвешенная MAE</b> с весами $w_i=1/|y_i|$; объекты с малым фактом получают огромный вес. Вторая: для положительных фактов APE зависит только от отношения $q_i=\hat y_i/y_i$, $\mathrm{APE}_i=|1-q_i|$. Поэтому MAPE не меняется, если умножить все факты и прогнозы на одно и то же число.</p>
+    <div class="callout note"><b>Проценты или доли</b><p>Библиотеки часто возвращают MAPE долей, без умножения на 100: <code>sklearn.metrics.mean_absolute_percentage_error</code> на сквозном примере даёт $0{,}139$, а не $13{,}9$. Проверяйте, что именно вы сравниваете.</p></div>
+
+    <h2 id="properties">Свойства и асимметрия</h2>
+    <ul class="flist"><li><b>Безразмерность</b>: $\mathrm{MAPE}(c\,y,\,c\,\hat y)=\mathrm{MAPE}(y,\hat y)$ при любом $c\ne0$. Рубли или тысячи рублей — всё равно.</li><li><b>Нет инвариантности к сдвигу</b>: прибавьте 1000 к фактам и прогнозам — абсолютные ошибки те же, а MAPE упадёт в разы. Поэтому MAPE бессмысленна для температуры в °C и других шкал с условным нулём.</li><li><b>Не определена при $y_i=0$</b> и неограниченно растёт при $y_i\to0$: прогноз 1 при факте $0{,}01$ — это ошибка $9900\%$.</li><li><b>Нулевой прогноз стоит ровно $100\%$</b>: при $\hat y_i=0$ каждая $\mathrm{APE}_i=1$. Модель «всегда ноль» имеет $\mathrm{MAPE}=100\%$ на любых ненулевых данных.</li><li><b>Асимметрия</b>: для положительного факта и неотрицательного прогноза недопрогноз даёт $\mathrm{APE}\le100\%$, а перепрогноз не ограничен.</li><li><b>Выпуклость</b>: MAPE — сумма модулей линейных функций прогнозов, поэтому она выпукла по прогнозам (и по параметрам линейной модели); равна нулю только при идеальном прогнозе.</li></ul>
+    <h3>В штуках симметрична, в разах — нет</h3>
+    <p>Если считать промах в единицах, MAPE симметрична: прогнозы $y-d$ и $y+d$ стоят одинаково, $d/y$. Но в бизнесе промахи часто меряют в разах: «завысили в полтора раза», «занизили вдвое». Тут MAPE несимметрична: занизить вдвое ($\hat y=y/2$) стоит $50\%$, завысить вдвое ($\hat y=2y$) — $100\%$. Из двух прогнозов, ошибающихся в одно и то же число раз, MAPE всегда предпочтёт заниженный.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-asymmetry" data-config="{&quot;yhat&quot;: 150}"></div><figcaption><b>Рисунок 2.</b> Ошибка одного объекта с фактом $y=100$ как функция прогноза. Оранжевая APE — «галочка» с изломом в $\hat y=y$: слева она упирается в потолок $100\%$, справа растёт без ограничений. Прогноз 150 (в $1{,}5$ раза больше факта) стоит $50\%$, а прогноз $100^2/150\approx66{,}7$ (в $1{,}5$ раза меньше) — только $33{,}3\%$. Фиолетовая sMAPE ограничена $200\%$ и при той же абсолютной ошибке строже к недопрогнозу: $40\%$ при $\hat y=150$ и $66{,}7\%$ при $\hat y=50$. Внизу — производные: у APE это ступенька $\pm1\%$ на единицу прогноза.</figcaption></figure>
+    <details class="deep"><summary>Почему sMAPE не такая уж симметричная</summary><div class="deep-body">
+      <p>sMAPE делит ошибку на среднее факта и прогноза: $\mathrm{sAPE}=2|y-\hat y|/(|y|+|\hat y|)$. В разах она симметрична: при $\hat y=k\,y$ и при $\hat y=y/k$ (с $k&gt;0$, $y&gt;0$) получается одно и то же:</p>
+      <div class="eqd">$$\frac{2|k-1|\,y}{y+k\,y}=\frac{2|k-1|}{k+1},\qquad\frac{2|1/k-1|\,y}{y+y/k}=\frac{2|1-k|}{k+1}$$</div>
+      <p>Но в штуках — нет: при $\hat y=y\pm d$ знаменатели $2y-d$ и $2y+d$ различаются, и недопрогноз штрафуется сильнее. Симметрию «в разах» и «в штуках» одновременно не даёт ни одна из этих метрик; строго симметрична в разах логарифмическая ошибка $|\ln(\hat y/y)|$.</p>
+    </div></details>
+
+    <h2 id="derivative">Производная и лучшая константа</h2>
+    <p>Для одного объекта APE — модуль линейной функции прогноза, поэтому её производная — ступенька:</p>
+    <div class="eqd">$$\frac{\partial\,\mathrm{APE}_i}{\partial\hat y_i}=\frac{\operatorname{sign}(\hat y_i-y_i)}{|y_i|},\qquad\hat y_i\ne y_i$$</div>
+    <details class="deep"><summary>Вывод и градиент по параметрам</summary><div class="deep-body">
+      <p>При $\hat y_i&gt;y_i$ имеем $\mathrm{APE}_i=(\hat y_i-y_i)/|y_i|$ — прямая с наклоном $1/|y_i|$; при $\hat y_i&lt;y_i$ — прямая $(y_i-\hat y_i)/|y_i|$ с наклоном $-1/|y_i|$. В точке $\hat y_i=y_i$ производной нет (излом); субградиент — любое число из $[-1/|y_i|;\,1/|y_i|]$, библиотеки обычно берут 0. Для параметров модели по цепному правилу:</p>
+      <div class="eqd">$$\frac{\partial\,\mathrm{MAPE}}{\partial\theta}=\frac{100\%}{n}\sum_{i=1}^{n}\frac{\operatorname{sign}(\hat y_i-y_i)}{|y_i|}\cdot\frac{\partial\hat y_i}{\partial\theta}$$</div>
+    </div></details>
+    <p>Модуль производной не зависит от размера ошибки — как у <a href="../mae/">MAE</a>, — но умножен на $1/|y_i|$: объект с фактом 1 тянет модель в 100 раз сильнее объекта с фактом 100. В сквозном примере $\partial\,\mathrm{MAPE}/\partial\hat y=\tfrac{100\%}{3}\,\bigl(-\tfrac13;\;0;\;\tfrac18\bigr)\approx(-11{,}1\%;\;0;\;4{,}2\%)$ на единицу прогноза: первый объект с вчетверо меньшей ошибкой тянет в $2{,}7$ раза сильнее третьего.</p>
+    <h3>Лучшая константа — взвешенная медиана, смещённая вниз</h3>
+    <p>Какой один прогноз $c$ для всех объектов минимизирует MAPE? Функция $\mathrm{MAPE}(c)=\frac{100\%}{n}\sum_i|y_i-c|/y_i$ кусочно-линейна и выпукла; между соседними точками данных её наклон равен $\frac{100\%}{n}\bigl(\sum_{y_i&lt;c}\tfrac1{y_i}-\sum_{y_i&gt;c}\tfrac1{y_i}\bigr)$. Минимум там, где наклон меняет знак, — где суммарный вес $1/y$ слева сравнивается с весом справа. Это <b>взвешенная медиана</b> с весами $1/y_i$:</p>
+    <div class="eqd">$$c^*=\operatorname*{arg\,min}_c\sum_{i=1}^{n}\frac{|y_i-c|}{y_i}=\text{взвешенная медиана } y_i \text{ с весами } \frac{1}{y_i}$$</div>
+    <p>Веса убывают с ростом $y$, поэтому взвешенная медиана не больше обычной: MAPE систематически тянет прогноз вниз. Для логнормального спроса это считается точно: если $\ln y\sim N(\mu,\sigma^2)$, то $c^*=e^{\mu-\sigma^2}$ — медиана $e^{\mu}$, умноженная на $e^{-\sigma^2}$.</p>
+    <details class="deep"><summary>Откуда множитель e^(−σ²)</summary><div class="deep-body">
+      <p>Взвешенная медиана — медиана распределения с плотностью, пропорциональной $f(y)/y$. Для логнормальной плотности $f$, обозначив $t=\ln y$:</p>
+      <div class="eqd">$$\frac{f(y)}{y}\propto\frac{1}{y^2}\,e^{-\frac{(t-\mu)^2}{2\sigma^2}}=\frac{1}{y}\,e^{-\frac{(t-\mu)^2+2\sigma^2 t}{2\sigma^2}}\propto\frac{1}{y}\,e^{-\frac{(t-(\mu-\sigma^2))^2}{2\sigma^2}}$$</div>
+      <p>Это снова логнормальная плотность, но с параметром $\mu-\sigma^2$; её медиана $e^{\mu-\sigma^2}$. Для сравнения: среднее исходного распределения $e^{\mu+\sigma^2/2}$ выше медианы. При $\sigma=0{,}6$ оптимум MAPE на $1-e^{-0{,}36}\approx30\%$ ниже медианы.</p>
+    </div></details>
+    <figure class="viz"><div class="fv" data-viz="mape-optimal" data-config="{&quot;sigma&quot;: 0.6, &quot;c&quot;: 100}"></div><figcaption><b>Рисунок 3.</b> 60 значений логнормального спроса с медианой около 100 (фиксированное зерно генератора). Чёрная кривая — MAPE константного прогноза $c$, внизу — её наклон, ступенчатая функция. При $\sigma=0{,}6$ минимум $42{,}5\%$ достигается в $c^*\approx71{,}0$, тогда как медиана равна $101{,}0$, а среднее — $119{,}1$: оптимальный по MAPE прогноз на $29{,}7\%$ ниже медианы (теория $e^{-0{,}36}-1\approx-30{,}2\%$). Прогноз, равный медиане, стоит $51{,}5\%$, равный среднему — $63{,}0\%$, нулевой — ровно $100\%$.</figcaption></figure>
+    <div class="callout warn"><b>Обучение на MAPE даёт недопрогноз</b><p>Модель, обученная минимизировать MAPE, наследует это смещение: её прогнозы систематически ниже фактов. В рознице это означает пустые полки, а потерянные продажи не попадут ни в одну метрику: продано ровно столько, сколько было на складе.</p></div>
+
+    <h2 id="surface">Карта ошибки: APE над плоскостью (y, ŷ)</h2>
+    <p>Посмотрим на ошибку одного объекта как на функцию двух переменных — факта $y$ и прогноза $\hat y$. Линии уровня APE — это <b>лучи из начала координат</b>: условие $|y-\hat y|/y=a$ равносильно $\hat y=(1\pm a)\,y$. Линии уровня абсолютной ошибки, наоборот, — параллельные прямые $\hat y=y\pm e$. Лучи сходятся в нуле, поэтому вблизи $y=0$ любая фиксированная абсолютная ошибка пересекает все уровни APE — отсюда и «взрыв».</p>
+    <figure class="viz"><div class="fv" data-viz="mape-surface" data-config="{&quot;p&quot;: [2, 3]}"></div><figcaption><b>Рисунок 4.</b> Слева — поверхность $\mathrm{APE}(y,\hat y)$, обрезанная на $200\%$ (её можно вращать): долина нулевой ошибки вдоль диагонали $\hat y=y$ (оранжевая линия) и стена у $y\to0$. Справа — вид сверху: чёрные лучи — уровни APE, красный пунктир — уровни абсолютной ошибки 1 и 2. Точки $P=(2;\,3)$ и $Q=(8;\,9)$ ошибаются на одну и ту же единицу, но $\mathrm{APE}(P)=50\%$, а $\mathrm{APE}(Q)=12{,}5\%$.</figcaption></figure>
+    <p>Для $n$ объектов MAPE — среднее таких функций. В пространстве прогнозов $(\hat y_1,\dots,\hat y_n)$ её линии уровня — многогранники (ромбы в 2D) с центром в $y$ и полуосями, пропорциональными $y_i$: вдоль осей с малыми $y_i$ далеко не отойдёшь без большого штрафа.</p>
+
+    <h2 id="training">Обучение на MAPE: веса 1/y и недопрогноз</h2>
+    <p>Раз MAPE — это MAE с весами $1/|y_i|$, обучить модель на MAPE можно любым алгоритмом, который минимизирует MAE с весами объектов: передайте <code>sample_weight=1/|y|</code>. В LightGBM есть готовая цель <code>objective="mape"</code>, в PyTorch потеря пишется в одну строку (см. раздел с кодом).</p>
+    <p>Обучим простейшую модель $\hat y=w\,x$ на 40 объектах, у которых $y=10\,x\cdot e^{0{,}35\,\varepsilon}$, $\varepsilon\sim N(0,1)$: истинный наклон равен 10, шум мультипликативный — его размер растёт вместе с $y$, как у реальных продаж.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-training" data-config="{}"></div><figcaption><b>Рисунок 5.</b> Слева — данные (размер точки пропорционален весу $1/y$) и две модели, справа — MAPE как функция наклона $w$. Нажмите «Пуск»: субградиентный спуск по MAPE с шагом $8/\sqrt{t+1}$ из $w=4$ сходится к $w^*\approx9{,}10$ с $\mathrm{MAPE}\approx20{,}28\%$. Метод наименьших квадратов даёт $w\approx10{,}74$ и $\mathrm{MAPE}\approx22{,}99\%$, зато его суммарный прогноз почти не смещён ($-0{,}6\%$), а у модели по MAPE сумма прогнозов примерно на $16\%$ ниже суммы фактов.</figcaption></figure>
+    <p>Почему так: точки с малыми $y$ получают большой вес и тянут прямую вниз. В терминах отношений $q_i=y_i/x_i$ имеем $\mathrm{MAPE}(w)=\frac{100\%}{n}\sum_i|q_i-w|/q_i$, так что оптимум — взвешенная медиана $q_i$ с весами $1/q_i$. При логнормальном шуме это медиана, умноженная на $e^{-\sigma^2}=e^{-0{,}1225}\approx0{,}885$, то есть около $8{,}85$ вместо 10.</p>
+    <div class="callout key"><b>Как обойти смещение</b><p>1) Обучайте на MAE или MSE от $\ln y$, а MAPE используйте только для отчёта. 2) Если KPI — именно MAPE, а недопрогноз дорог (дефицит), корректируйте прогнозы множителем, подобранным на валидации, или выберите метрику, отражающую реальные издержки (WAPE, квантильная потеря). 3) Не обучайте на MAPE, если в данных есть нули или почти нули.</p></div>
+
+    <h2 id="alternatives">MAPE, sMAPE, WAPE и MASE</h2>
+    <p>Из-за перечисленных проблем у MAPE есть несколько популярных родственников ($e_i=y_i-\hat y_i$):</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Метрика</th><th>Формула</th><th>Нули в $y$</th><th>Особенность</th></tr></thead><tbody><tr><td>MAPE</td><td>$\frac{100\%}{n}\sum\frac{|e_i|}{|y_i|}$</td><td>не определена</td><td>доля факта; асимметрична в разах; взрывается возле нуля</td></tr><tr><td>sMAPE</td><td>$\frac{100\%}{n}\sum\frac{2|e_i|}{|y_i|+|\hat y_i|}$</td><td>допустимы, если $\hat y_i\ne0$</td><td>ограничена $200\%$; в штуках строже к недопрогнозу</td></tr><tr><td>WAPE</td><td>$100\%\cdot\frac{\sum|e_i|}{\sum|y_i|}$</td><td>допустимы (нужна ненулевая сумма)</td><td>MAE, делённая на средний факт; крупные объекты весят больше</td></tr><tr><td>MASE</td><td>$\frac{\frac1n\sum|e_i|}{\frac{1}{T-1}\sum_t|y_t-y_{t-1}|}$</td><td>допустимы (ряд не постоянен)</td><td>MAE относительно наивного прогноза «как в прошлый период»; $&lt;1$ — лучше наивного</td></tr></tbody></table></div>
+    <p>В сквозном примере $\mathrm{MAPE}\approx13{,}9\%$, $\mathrm{sMAPE}\approx13{,}5\%$, $\mathrm{WAPE}=2{,}5/16\approx15{,}6\%$, а MASE с масштабом $\tfrac12\bigl(|5-3|+|8-5|\bigr)=2{,}5$ равна $0{,}833/2{,}5\approx0{,}33$.</p>
+    <p>WAPE (её ещё называют MAD/Mean ratio) — это MAE, делённая на средний факт: объекты с большими продажами весят больше, и общий итог не ломается от одного товара с почти нулевым спросом. MASE (Хайндман и Кёлер, 2006) сравнивает MAE модели с MAE наивного прогноза и годится даже для рядов с нулями. На одних и тех же данных WAPE и MASE отличаются лишь постоянным множителем, поэтому у них один и тот же оптимум.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-metrics" data-config="{&quot;k&quot;: 1}"></div><figcaption><b>Рисунок 6.</b> 52 недели спроса (точки) и прогноз $k\cdot$база (синяя линия). Справа — метрики как функции множителя $k$, точки — минимумы. MAPE минимальна при $k\approx0{,}89$, то есть при прогнозе, заниженном на 11%; sMAPE — при $k\approx1{,}007$; WAPE (и MASE) — при $k\approx1{,}012$. Включите провал спроса — одну неделю с $y=3$: MAPE при $k=1$ подскакивает с $24{,}5\%$ до $68{,}8\%$, а её минимум уезжает к $k\approx0{,}78$; WAPE меняется лишь с $23{,}5\%$ до $25{,}4\%$.</figcaption></figure>
+
+    <h2 id="business">Бизнес-пример: ассортимент магазина</h2>
+    <p>Сеть прогнозирует недельные продажи шести товаров. Пять из них продаются десятками и сотнями штук и прогнозируются с ошибкой от $7{,}5\%$ до $16{,}7\%$. Шестой, F, — редкий товар: прогноз 10 штук, а продано 4.</p>
+    <figure class="viz"><div class="fv" data-viz="mape-portfolio" data-config="{&quot;f&quot;: 4}"></div><figcaption><b>Рисунок 7.</b> Слева — факт и прогноз (логарифмическая шкала), справа — APE каждого товара. Товар F, на который приходится $0{,}15\%$ продаж, даёт $\mathrm{APE}=150\%$ и $72\%$ суммы всех APE: $\mathrm{MAPE}=34{,}8\%$, хотя без него она равна $11{,}7\%$. WAPE, считающая ошибку в штуках, равна $9{,}4\%$: 256 штук ошибки на 2714 проданных. Подвигайте продажи F: при одной проданной штуке MAPE почти достигает $160\%$.</figcaption></figure>
+    <p>Что делать на практике:</p>
+    <ul class="flist"><li><b>отчитываться WAPE</b> (или MAPE, взвешенной по выручке), если важна общая точность в штуках или деньгах;</li><li><b>считать MAPE по группам</b> — быстрые и медленные товары отдельно — или исключать позиции с продажами ниже порога, явно указав порог;</li><li><b>для медленных товаров</b> использовать MASE или специальные метрики для прерывистого спроса;</li><li><b>отдельно следить за знаком ошибки</b>: смещение суммы прогнозов (bias) — самостоятельный KPI, MAPE его не показывает.</li></ul>
+    <div class="callout history"><b>Почему MAPE так популярна</b><p>MAPE понятна без статистического образования, поэтому давно стала стандартом отраслевых отчётов. Критика тоже давняя: на смещение в пользу заниженных прогнозов и проблему малых фактов указывали ещё в 1980–1990-х (например, Армстронг и Коллопи, 1992), а Хайндман и Кёлер (2006) предложили MASE как масштабно-независимую альтернативу без этих недостатков.</p></div>
+
+    <h2 id="code">В коде</h2>
+    <p>В NumPy MAPE — одна строка; ниже заодно sMAPE, WAPE и проверка формул на сквозном примере.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+y     = np.array([3.0, 5.0, 8.0])
+y_hat = np.array([2.5, 5.0, 10.0])
+
+ape  = np.abs((y - y_hat) / y)      # [0.1667 0.     0.25  ]
+mape = 100 * ape.mean()             # 13.89
+
+# То же как взвешенная MAE с весами 1/|y|
+w = 1 / np.abs(y)
+print(100 * np.mean(w * np.abs(y - y_hat)))   # 13.89
+
+def smape(y, f):
+    return 100 * np.mean(2 * np.abs(f - y) / (np.abs(y) + np.abs(f)))
+
+def wape(y, f):
+    return 100 * np.sum(np.abs(y - f)) / np.sum(np.abs(y))
+
+print(smape(y, y_hat), wape(y, y_hat))        # ≈13.468 15.625</code></pre>
+    <p>scikit-learn возвращает долю и вместо деления на ноль делит на машинный эпсилон. Для обучения «на MAPE» подходит медианная регрессия с весами $1/y$:</p>
+    <pre class="code"><span class="lang">python</span><code>from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.linear_model import LinearRegression, QuantileRegressor
+
+print(mean_absolute_percentage_error(y, y_hat))            # 0.1389 — доля, а не проценты!
+print(mean_absolute_percentage_error([0.0, 5.0], [1.0, 5.0]))  # 2.25e+15: деление на eps вместо нуля
+
+# Обучение «на MAPE»: медианная регрессия (MAE) с весами 1/y
+rng = np.random.default_rng(0)
+x = rng.uniform(1, 10, 400)
+t = 10 * x * np.exp(0.35 * rng.standard_normal(400))
+X = x[:, None]
+ols = LinearRegression(fit_intercept=False).fit(X, t)
+fit = QuantileRegressor(quantile=0.5, alpha=0, fit_intercept=False).fit(X, t, sample_weight=1 / t)
+print(ols.coef_, fit.coef_)   # ≈[10.58] [8.85] — модель по MAPE занижает сумму на 16%</code></pre>
+    <p>В PyTorch MAPE как функция потерь:</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+
+def mape_loss(pred, target, eps=1e-8):
+    &quot;&quot;&quot;MAPE как функция потерь (доля). eps спасает от деления на 0, но не от огромных весов возле нуля.&quot;&quot;&quot;
+    return torch.mean(torch.abs(target - pred) / target.abs().clamp_min(eps))
+
+y     = torch.tensor([3.0, 5.0, 8.0])
+y_hat = torch.tensor([2.5, 5.0, 10.0], requires_grad=True)
+loss = mape_loss(y_hat, y)
+loss.backward()
+print(loss.item(), y_hat.grad)   # 0.1389  tensor([-0.1111, -0.0000,  0.0417])</code></pre>
+    <div class="callout key"><b>Правило</b><p>Перед тем как считать MAPE, посмотрите на минимум $|y|$ в данных. Если там нули или значения, несопоставимо малые по сравнению с типичными, — отчитывайтесь WAPE или MASE и не используйте MAPE как функцию потерь.</p></div>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ol class="flist"><li><b>MAPE на данных с нулями.</b> Деление на ноль даёт бесконечность или NaN, а «защита» через $\varepsilon$ — астрономические числа: scikit-learn вернёт $2{,}25\cdot10^{15}$. Фильтруйте нули явно и сообщайте об этом или берите WAPE и MASE.</li><li><b>MAPE для шкал с условным нулём</b> — температуры в °C, индексов, дат. Ошибка в 1° при 2° и при 30° одна и та же, а MAPE различается в 15 раз.</li><li><b>Обучение на MAPE без учёта смещения.</b> Модель систематически занижает прогноз, и в рознице это превращается в дефицит на полках.</li><li><b>Сравнение MAPE между наборами с разной долей малых значений.</b> Одна и та же модель покажет 12% на быстрых товарах и 60% на медленных — дело в данных, а не в качестве.</li><li><b>Путаница долей и процентов</b>: scikit-learn возвращает $0{,}139$, а не $13{,}9$.</li><li><b>«MAPE меньше — значит, план точнее».</b> MAPE не видит знака ошибок: прогноз с меньшей MAPE может в сумме занижать спрос на 16%, как на рисунке 5.</li></ol>
+
+    <h2 id="links">Связи с другими формулами</h2>
+    <ul class="flist"><li><a href="../mae/">MAE</a>: MAPE — это MAE с весами $1/|y_i|$; модуль градиента тоже не зависит от размера ошибки, но масштабирован на $1/|y_i|$.</li><li><a href="../mse/">MSE</a> и <a href="../rmse/">RMSE</a>: абсолютные квадратичные ошибки; их относительный родственник — RMSLE, RMSE в логарифмической шкале.</li><li><a href="../huber/">Huber</a>: сглаживает излом в нуле; ту же идею можно применить к относительной ошибке.</li><li><a href="../sgd/">SGD</a>: обучение на MAPE — субградиентный спуск, шаг которого нужно уменьшать (на рисунке 5 — как $1/\sqrt t$).</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <div class="callout key"><p>1) $\mathrm{MAPE}=\frac{100\%}{n}\sum|y_i-\hat y_i|/|y_i|$ — средняя ошибка в процентах от факта; не зависит от масштаба и понятна бизнесу. 2) Не определена при $y=0$ и взрывается возле нуля; нулевой прогноз стоит ровно $100\%$. 3) Асимметрична в разах: занизить вдвое — $50\%$, завысить вдвое — $100\%$. 4) MAPE — MAE с весами $1/|y|$: производная $\operatorname{sign}(\hat y-y)/|y|$, лучшая константа — взвешенная медиана ниже обычной, обучение на MAPE даёт недопрогноз. 5) Для отчётов по ассортименту обычно надёжнее WAPE и MASE.</p></div>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Факт 200, прогноз 150. Чему равна APE?</legend><div class="opts"><button type="button" data-ok="1">$25\%$</button><button type="button" data-ok="0">$33{,}3\%$</button><button type="button" data-ok="0">$50\%$</button><button type="button" data-ok="0">$12{,}5\%$</button></div><div class="explain" hidden>Делим на факт: $50/200=25\%$. Если по ошибке разделить на прогноз, получится $33{,}3\%$.</div></fieldset><fieldset class="q"><legend>2. Факт 100. Какой прогноз даёт большую APE: 50 или 200?</legend><div class="opts"><button type="button" data-ok="0">50</button><button type="button" data-ok="1">200</button><button type="button" data-ok="0">Одинаково</button><button type="button" data-ok="0">Зависит от $n$</button></div><div class="explain" hidden>$|100-50|/100=50\%$, а $|100-200|/100=100\%$. Оба промаха — вдвое, но перепрогноз стоит вдвое дороже.</div></fieldset><fieldset class="q"><legend>3. Модель всегда прогнозирует 0 при положительных продажах. Чему равна её MAPE?</legend><div class="opts"><button type="button" data-ok="0">$0\%$</button><button type="button" data-ok="0">$50\%$</button><button type="button" data-ok="1">$100\%$</button><button type="button" data-ok="0">Бесконечности</button></div><div class="explain" hidden>Каждая $\mathrm{APE}_i=|y_i-0|/|y_i|=1$, поэтому $\mathrm{MAPE}=100\%$ при любых данных.</div></fieldset><fieldset class="q"><legend>4. Факты: 1, 10 и 100. Какой константный прогноз минимизирует MAPE?</legend><div class="opts"><button type="button" data-ok="1">1</button><button type="button" data-ok="0">10</button><button type="button" data-ok="0">37</button><button type="button" data-ok="0">100</button></div><div class="explain" hidden>Веса $1/y_i$ равны $1$, $0{,}1$ и $0{,}01$; вес первого объекта больше суммы остальных, поэтому взвешенная медиана — 1: $\mathrm{MAPE}=(0+0{,}9+0{,}99)/3=63\%$, а при $c=10$ — $330\%$.</div></fieldset><fieldset class="q"><legend>5. Почему WAPE устойчивее MAPE на ассортименте с редкими товарами?</legend><div class="opts"><button type="button" data-ok="0">WAPE не учитывает ошибки редких товаров</button><button type="button" data-ok="1">WAPE делит суммарную ошибку на суммарный факт, и малые факты не получают огромных весов</button><button type="button" data-ok="0">WAPE всегда меньше MAPE</button><button type="button" data-ok="0">WAPE возводит ошибки в квадрат</button></div><div class="explain" hidden>В WAPE каждый объект входит своей абсолютной ошибкой в штуках, а деление происходит один раз — на сумму фактов. Ошибка редкого товара в 6 штук остаётся ошибкой в 6 штук.</div></fieldset></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Шпаргалка">
+  <div class="wrap-m">
+    <a class="prev" href="../rmse/"><span class="kicker">← Предыдущая формула</span><span class="big">RMSE</span><span class="kicker">root mean squared error</span></a>
+<a class="next" href="../huber/"><span class="kicker">Следующая формула →</span><span class="big">Huber</span><span class="kicker">гибрид MSE и MAE</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../../../ru/#posts">Статьи</a>
+    <a href="../../../../ru/materials/">Материалы</a>
+    <a href="../../../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../../../assets/js/site.js" defer></script>
+</body>
+</html>
