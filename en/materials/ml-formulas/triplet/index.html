@@ -3,16 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Triplet Loss: the positive closer than the negative — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
-  <meta name="description" content="Triplet Loss in depth: the formula and the margin, easy, semi-hard and hard triplets, gradients and the 3D loss surface, batch-hard and batch-all, embedding training, normalization, FaceNet and Re-ID, NumPy and PyTorch code.">
-  <meta property="og:title" content="Triplet Loss: the positive closer than the negative — Neural network formulas: a cheat sheet — Abdulatipov J.">
-  <meta property="og:description" content="Triplet Loss in depth: the formula and the margin, easy, semi-hard and hard triplets, gradients and the 3D loss surface, batch-hard and batch-all, embedding training, normalization, FaceNet and Re-ID, NumPy and PyTorch code.">
+  <title>Triplet Loss: the positive must be closer than the negative — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
+  <meta name="description" content="Triplet Loss in depth: the margin, easy, semi-hard and hard triplets, gradients, batch-hard mining, normalization on the sphere, FaceNet, Re-ID and code.">
+  <meta property="og:title" content="Triplet Loss: the positive must be closer than the negative — Neural network formulas: a cheat sheet — Abdulatipov J.">
+  <meta property="og:description" content="Triplet Loss in depth: the margin, easy, semi-hard and hard triplets, gradients, batch-hard mining, normalization on the sphere, FaceNet, Re-ID and code.">
   <meta property="og:type" content="article">
-  <meta property="og:image" content="../../../../assets/img/javharbek.png">
-  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/triplet/">
-  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/triplet/">
-  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/triplet/">
-  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/triplet/">
+  <meta property="og:url" content="https://javharbek.uz/en/materials/ml-formulas/triplet/">
+  <meta property="og:image" content="https://javharbek.uz/assets/img/javharbek.png">
+  <meta property="og:site_name" content="Abdulatipov J.">
+  <link rel="canonical" href="https://javharbek.uz/en/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="en" href="https://javharbek.uz/en/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/materials/ml-formulas/triplet/">
+  <link rel="alternate" hreflang="x-default" href="https://javharbek.uz/en/materials/ml-formulas/triplet/">
   <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
   <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,7 +53,7 @@
 <main class="material fx-page">
 <section class="art-head wrap-xs">
   <span class="kicker"><a class="ul" href="../">Neural network formulas: a cheat sheet</a> · The next level</span>
-  <h1>Triplet Loss: the positive closer than the negative</h1>
+  <h1>Triplet Loss: the positive must be closer than the negative</h1>
   <p class="dek">A loss that learns distances rather than classes: the anchor must be closer to its positive than to the negative by at least a margin m. We take apart the formula, the three regimes of triplets, the gradients, batch-hard mining, normalization on the sphere, and how FaceNet and person re-identification (Re-ID) rest on this mathematics.</p>
   <div class="author">
     <img src="../../../../assets/img/javharbek.png" alt="" width="44" height="44">
@@ -85,13 +88,13 @@
     <p>An ordinary classifier knows a fixed list of classes. But a face recognition system must recognize people who were not in the training set, and a re-identification (Re-ID) system must find the same person in another camera’s footage, from another angle and under different light. Retraining the network for every new person is impossible.</p>
     <p>The way out is to learn not classes but a <b>metric</b> (metric learning). The network $f$ turns an image into an embedding vector $f(x)\in\mathbb R^d$ so that pictures of the same person end up close together and pictures of different people far apart. Then “who is this?” becomes a nearest-neighbour search by distance, and a new person is added as a single embedding in the database.</p>
     <p>Triplet Loss states this requirement directly. Take a triplet: an <b>anchor</b> $a$, a <b>positive</b> $p$ (the same person) and a <b>negative</b> $n$ (a different person). Require the positive to be closer than the negative by at least a margin $m$.</p>
-    <ul class="flist"><li><b>face recognition</b> — FaceNet (Google, 2015): 128-dimensional embeddings, margin $0.2$, accuracy $99.63\%$ on the LFW benchmark;</li><li><b>re-identifying people across cameras</b> — the batch-hard triplet loss (Hermans et al., 2017) and the torchreid library, where it complements cross-entropy when training OSNet;</li><li><b>searching for similar images, products, voices</b> and any search by meaning where the question is “what is closest to this sample?”.</li></ul>
+    <ul class="flist"><li><b>face recognition</b> — FaceNet (Google, 2015): 128-dimensional embeddings, margin $0.2$, accuracy $99.63\%$ on the LFW benchmark;</li><li><b>re-identifying people across cameras</b> — the batch-hard triplet loss (Hermans et al., 2017); in the torchreid library it can be trained together with cross-entropy over identities (the <code>ImageTripletEngine</code>);</li><li><b>searching for similar images, products, voices</b> and any search by meaning where the question is “what is closest to this sample?”.</li></ul>
     <div class="callout key"><b>The essentials in a minute</b><p>$L=\max\bigl(0,\,d(a,p)-d(a,n)+m\bigr)$. If the negative is farther than the positive by more than $m$, the loss is zero and the triplet teaches nothing. Otherwise the gradient pulls the positive towards the anchor and pushes the negative away. Almost all random triplets are easy, so the main skill is choosing hard ones (mining), for example the farthest positive and the closest negative in the batch (batch-hard).</p></div>
 
     <h2 id="intuition">Intuition: the positive closer than the negative</h2>
     <p>Draw the embeddings on a plane. Around the anchor $a$ draw a circle through the positive $p$ — its radius is $d(a,p)$. Add a second one, wider by the margin: radius $d(a,p)+m$. The formula’s requirement is simple: <b>the negative must lie outside the outer circle</b>. If it falls into the orange ring or inside it, the loss is positive.</p>
     <figure class="viz"><div class="fv" data-viz="triplet-play" data-config="{&quot;a&quot;: [-0.5, 0], &quot;p&quot;: [0.4, 0], &quot;n&quot;: [0.1, 0.8], &quot;m&quot;: 0.2}"></div><figcaption><b>Figure 1.</b> Drag the anchor, the positive and the negative. The orange arrows show where gradient descent will move each point. In the starting position $d(a,p)=0.9$, $d(a,n)=1.0$, $m=0.2$: the negative is inside the ring, $L=0.9-1.0+0.2=0.1$. Pull it out of the ring and the arrows disappear.</figcaption></figure>
-    <div class="callout intuition"><b>What to notice</b><p>The arrows at the positive and the negative always point along the lines to the anchor, and in the ordinary (non-squared) metric their lengths are equal to 1: what matters is not the size of the violation but the fact of it. Turn on squared distances and the arrow lengths become proportional to the distances.</p></div>
+    <div class="callout intuition"><b>What to notice</b><p>The arrows at the positive and the negative always point along the lines to the anchor, and in the ordinary (non-squared) metric their lengths are the same wherever the points are: the gradient norm is 1, and what matters is not the size of the violation but the fact of it. The anchor’s arrow is the sum of two unit vectors, so its length is between 0 and 2. Turn on squared distances and the arrow lengths become proportional to the distances.</p></div>
 
     <h2 id="anatomy">The formula, bone by bone</h2>
     <p>Let us write the loss in full — with the network, the distances and the average over triplets:</p>
@@ -105,12 +108,12 @@
     <h2 id="regimes">Three regimes: easy, semi-hard, hard</h2>
     <p>Every triplet falls into one of three regimes depending on $d(a,p)$ and $d(a,n)$:</p>
     <div class="table-wrap"><table class="data"><thead><tr><th>Regime</th><th>Condition</th><th>$L$</th><th>Gradient</th></tr></thead><tbody><tr><td>easy</td><td>$d(a,n)\ge d(a,p)+m$</td><td>$0$</td><td>none</td></tr><tr><td>semi-hard</td><td>$d(a,p)&lt;d(a,n)&lt;d(a,p)+m$</td><td>from $0$ to $m$</td><td>yes</td></tr><tr><td>hard</td><td>$d(a,n)\le d(a,p)$</td><td>at least $m$</td><td>yes</td></tr></tbody></table></div>
-    <p>In the $(d(a,p),\,d(a,n))$ plane the regime boundaries are two parallel lines: $d(a,n)=d(a,p)$ and $d(a,n)=d(a,p)+m$. The loss is a tilted plane cut off at zero above the upper of them.</p>
+    <p>In the $(d(a,p),\,d(a,n))$ plane the regime boundaries are two parallel lines: $d(a,n)=d(a,p)$ and $d(a,n)=d(a,p)+m$. The loss $d(a,p)-d(a,n)+m$ is a tilted plane whose level lines are parallel to these lines; above the upper line it is cut off at zero.</p>
     <figure class="viz"><div class="fv" data-viz="triplet-regimes" data-config="{&quot;m&quot;: 0.2, &quot;pt&quot;: [0.9, 1.0]}"></div><figcaption><b>Figure 3.</b> The loss on the $(d(a,p),\,d(a,n))$ plane: the deeper the red, the larger it is. The dots are all 576 triplets of the batch from Figure 5 (4 people with 4 pictures each). At $m=0.2$, 510 of them are easy, 31 semi-hard and 35 hard: only 66 triplets out of 576 give a gradient. Increase the margin and the semi-hard band widens.</figcaption></figure>
     <div class="callout warn"><b>Why random triplets are useless</b><p>As soon as the network has learned a little, the vast majority of random triplets become easy: their loss and gradient are zero. Averaging over them dilutes the useful signal, and training almost stalls. Hence mining — deliberately choosing hard and semi-hard triplets.</p></div>
 
     <h2 id="gradients">Gradients: where each point is pulled</h2>
-    <p>For an active triplet ($L&gt;0$) the loss equals $d(a,p)-d(a,n)+m$, and everything reduces to the gradient of a distance. For the Euclidean norm $\nabla_u\|u-v\|=\frac{u-v}{\|u-v\|}$ — the unit vector from $v$ to $u$.</p>
+    <p>For an active triplet ($L&gt;0$) the loss equals $d(a,p)-d(a,n)+m$, and everything reduces to the gradient of a distance. For the Euclidean norm $\nabla_u\|u-v\|=\frac{u-v}{\|u-v\|}$ for $u\ne v$ — the unit vector from $v$ to $u$ (at $u=v$ the norm is not differentiable; its subgradients are all vectors of length at most 1, and code usually takes 0).</p>
     <details class="deep"><summary>Deriving the gradients for the three points</summary><div class="deep-body">
       <p>Denote the embeddings $a,p,n$ and $d_{ap}=\|a-p\|$, $d_{an}=\|a-n\|$. Differentiate $d_{ap}=\sqrt{(a-p)^\top(a-p)}$ by the chain rule:</p>
       <div class="eqd">$$\nabla_a d_{ap}=\frac{1}{2d_{ap}}\cdot2(a-p)=\frac{a-p}{d_{ap}},\qquad \nabla_p d_{ap}=\frac{p-a}{d_{ap}}$$</div>
@@ -118,16 +121,16 @@
       <div class="eqd">$$\nabla_p L=\frac{p-a}{d_{ap}},\qquad \nabla_n L=-\frac{n-a}{d_{an}},\qquad \nabla_a L=\frac{a-p}{d_{ap}}-\frac{a-n}{d_{an}}$$</div>
       <p>The three gradients add up to zero: shifting all three points by the same vector does not change the distances, so the loss does not change either. For squared distances $L=d_{ap}^2-d_{an}^2+m$ we get $\nabla_pL=2(p-a)$, $\nabla_nL=-2(n-a)$ and $\nabla_aL=2(n-p)$ — the anchor’s gradient does not even depend on its position.</p>
     </div></details>
-    <p>A gradient-descent step goes against the gradient: the positive $p$ moves <b>towards the anchor</b>, the negative $n$ <b>away from the anchor</b>, and the anchor moves towards the positive and away from the negative. In the ordinary metric the lengths of these moves equal 1 at any distance; in the squared one they are proportional to the distances.</p>
+    <p>A gradient-descent step goes against the gradient: the positive $p$ moves <b>towards the anchor</b>, the negative $n$ <b>away from the anchor</b>, and the anchor moves towards the positive and away from the negative. In the ordinary metric the moves of the positive and the negative have length 1 at any distance (the anchor’s move is between 0 and 2); in the squared one they are $2\,d(a,p)$ and $2\,d(a,n)$, that is, proportional to the distances.</p>
     <p>This is visible on a 3D surface. Fix the anchor at the origin and the positive at distance $0.6$; how does the loss depend on the position of the negative $n=(x,y)$? We get an upside-down cone: $L=0.6+m$ in the centre, falling to zero at the edge of a disc of radius $0.6+m$. The slope of the cone is the same everywhere, $|\nabla L|=1$.</p>
-    <figure class="viz"><div class="fv" data-viz="triplet-surface" data-config="{&quot;m&quot;: 0.4, &quot;who&quot;: &quot;neg&quot;}"></div><figcaption><b>Figure 4.</b> The loss as a function of the position of the negative (or the positive) with the anchor fixed; the surface can be rotated. On the right, a slice along a ray from the anchor: the loss itself and the gradient norm. At $m=0.4$ and the ordinary distance the cone has height $1.0$ and radius $1.0$. Switch to $d^2$: the surface becomes a paraboloid of height $0.76$ and radius $0.872$, and the gradient vanishes right at the anchor. For the positive (with the negative at distance $1.2$) it is a funnel: the loss grows outside the circle of radius $0.8$.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="triplet-surface" data-config="{&quot;m&quot;: 0.4, &quot;who&quot;: &quot;neg&quot;}"></div><figcaption><b>Figure 4.</b> The loss as a function of the position of the negative (or the positive) with the anchor fixed; the surface can be rotated. On the right, a slice along a ray from the anchor: the loss itself and the gradient norm. At $m=0.4$ and the ordinary distance the cone has height $1.0$ and radius $1.0$. Switch to $d^2$: the surface becomes a paraboloid of height $0.76$ and radius $0.872$, and the gradient vanishes right at the anchor. For the positive (with the negative at distance $1.2$, ordinary distance) it is a funnel: the loss grows outside the circle of radius $1.2-0.4=0.8$.</figcaption></figure>
     <div class="callout warn"><b>Squared distance and hard negatives</b><p>With squared distances the repelling force $2\,d(a,n)$ is the weaker the closer the negative is to the anchor — that is, exactly for the most dangerous mistakes. In the ordinary metric it is constant. That is why in Re-ID (Hermans et al., 2017) the plain Euclidean distance is recommended; FaceNet uses squares, but on normalized vectors and with semi-hard triplets.</p></div>
 
     <h2 id="mining">Mining: which triplets to take</h2>
     <p>A set of $N$ images contains on the order of $N^3$ triplets — they cannot all be enumerated, and almost all of them are easy anyway. Triplets are chosen <b>online</b>, inside a batch. The batch is built as $P\times K$: $P$ people with $K$ pictures each. Inside such a batch</p>
     <div class="eqd">$$|T|=\underbrace{PK}_{\text{anchors}}\cdot\underbrace{(K-1)}_{\text{positives}}\cdot\underbrace{(P-1)K}_{\text{negatives}}$$</div>
-    <p>With $P=4$, $K=4$ this is 576 triplets; with $P=18$, $K=4$ (the batch of Hermans et al. for the Market-1501 dataset) it is already 14,688. The main strategies:</p>
-    <ul class="flist"><li><b>batch-all</b> — take all triplets of the batch and average the loss over the active ones ($L&gt;0$) only, so that the easy ones do not dilute the signal;</li><li><b>batch-hard</b> — one triplet per anchor: <i>the farthest positive</i> and <i>the closest negative</i>; $PK$ triplets, the most informative ones;</li><li><b>semi-hard</b> (FaceNet) — for a pair $(a,p)$ take a negative that is farther than the positive but inside the margin; this makes training gentler at the start.</li></ul>
+    <p>With $P=4$, $K=4$ this is 576 triplets; with $P=18$, $K=4$ (the batch used by Hermans et al.) it is already 14,688. The main strategies:</p>
+    <ul class="flist"><li><b>batch-all</b> — take all triplets of the batch and average the loss over the active ones ($L&gt;0$) only, so that the easy ones do not dilute the signal (the BA$_{\ne0}$ variant of Hermans et al.);</li><li><b>batch-hard</b> — one triplet per anchor: <i>the farthest positive</i> and <i>the closest negative</i>; $PK$ triplets, the most informative ones;</li><li><b>semi-hard</b> (FaceNet) — for a pair $(a,p)$ take a negative that is farther than the positive but inside the margin; this makes training gentler at the start.</li></ul>
     <div class="eqd">$$\mathcal L_{\text{BH}}=\frac{1}{PK}\sum_{a}\max\Bigl(0,\;\max_{p:\,y_p=y_a}d(a,p)-\min_{n:\,y_n\ne y_a}d(a,n)+m\Bigr)$$</div>
     <figure class="viz"><div class="fv" data-viz="triplet-mining" data-config="{&quot;anchor&quot;: 1, &quot;m&quot;: 0.2, &quot;strategy&quot;: &quot;hard&quot;}"></div><figcaption><b>Figure 5.</b> A batch with $P=4$, $K=4$ in the embedding space. Choose an anchor and a strategy. In batch-hard mode the thick lines lead to the farthest positive and the closest negative, the dashed circle has radius $d_{\max}(a,p)+m$. At $m=0.2$ batch-hard gives $L=0.353$, batch-all $0.306$ over 66 active triplets out of 576. For the first anchor 34 of its 36 triplets are easy and 2 are semi-hard.</figcaption></figure>
     <div class="callout warn"><b>The danger of the hardest ones</b><p>The very hardest triplets are often labelling errors or nearly indistinguishable pictures. Early in training, when the embeddings are random, chasing them can “collapse” the model: all $f(x)$ shrink to one point where $L=m$ for every triplet. Semi-hard triplets at the start, normalized embeddings, a soft margin and combining with cross-entropy all help.</p></div>
@@ -135,19 +138,19 @@
     <h2 id="training">How it works in training</h2>
     <p>Let us put everything together. Suppose every picture has two features: $x_1$ is a nuisance (pose, lighting) that varies a lot for the same person, and $x_2$ is an identity feature slightly bent by the nuisance. In the input space two pictures of the same person can be farther apart than pictures of different people: only $62.7\%$ of the triplets are correctly ordered.</p>
     <p>A small network $f:\mathbb R^2\to\mathbb R^2$ (12 tanh neurons) is trained with the batch-hard triplet loss at $m=0.5$ and the <a href="../adam/">Adam</a> optimizer. It is not told where each person should end up — only that positives must be closer than negatives.</p>
-    <figure class="viz"><div class="fv" data-viz="triplet-train" data-config="{&quot;m&quot;: 0.5}"></div><figcaption><b>Figure 6.</b> Left: the inputs of 4 people with 12 pictures each; right: their embeddings; bottom: the loss. Press “Play”. At the start $L=1.266$, all 48 anchors are active, $64.9\%$ of the triplets are correctly ordered. By step 60 all $100\%$ are ordered, but 42 anchors still lack the margin; by step 300 only 4 are active, and by step 600 the loss is zero. The network has “straightened” the bands: the nuisance $x_1$ no longer affects the distances.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="triplet-train" data-config="{&quot;m&quot;: 0.5}"></div><figcaption><b>Figure 6.</b> Left: the inputs of 4 people with 12 pictures each; right: their embeddings; bottom: the loss. Press “Play”. At the start $L=1.266$, all 48 anchors are active, $64.9\%$ of the triplets are correctly ordered. By step 60 all $100\%$ are ordered, but 42 anchors still lack the margin; by step 300 only 4 are active, and by step 600 the loss is zero. The network has “straightened” the bands: despite the nuisance $x_1$, every picture is now closer to all its positives than to any negative, with a reserve of $0.5$.</figcaption></figure>
     <p>Re-ID works the same way: the query is a picture of a person from one camera, the gallery holds pictures from all the others. The gallery embeddings are sorted by distance to the query, and one looks at the position of the first correct match. The metrics are Rank-1 (the correct match comes first) and mAP (mean average precision over all correct matches).</p>
-    <div class="callout history"><b>Where it came from</b><p>The idea of a margin between positives and negatives comes from large margin nearest neighbour (LMNN, Weinberger and Saul, 2005). Pairs of positives and negatives with a margin were introduced in the contrastive loss (Hadsell, Chopra and LeCun, 2006). Schroff, Kalenichenko and Philbin made triplets the basis of FaceNet (2015), and Hermans, Beyer and Leibe in “In Defense of the Triplet Loss for Person Re-Identification” (2017) showed that with batch-hard mining triplets work well in Re-ID too.</p></div>
+    <div class="callout history"><b>Where it came from</b><p>The idea of a margin between positives and negatives comes from large margin nearest neighbour (LMNN, Weinberger, Blitzer and Saul, 2005). Pairs of positives and negatives with a margin were introduced in the contrastive loss (Hadsell, Chopra and LeCun, 2006). Schroff, Kalenichenko and Philbin made triplets the basis of FaceNet (2015), and Hermans, Beyer and Leibe in “In Defense of the Triplet Loss for Person Re-Identification” (2017) showed that with batch-hard mining triplets work well in Re-ID too.</p></div>
 
     <h2 id="sphere">Normalization on the sphere and choosing the margin</h2>
     <p>Without constraints the network can increase all distances by simply stretching the space: in the ordinary metric the margin $m$ loses its meaning if the scale is not fixed. That is why embeddings are often normalized: $\hat f=f/\|f\|$, and all points lie on the unit sphere. For unit vectors</p>
     <div class="eqd">$$\|u-v\|^{2}=\|u\|^2+\|v\|^2-2\,u^\top v=2-2\cos\theta$$</div>
     <p>where $\theta$ is the angle between the vectors. The squared distance ranges from 0 (identical) to 4 (opposite), and FaceNet’s margin $m=0.2$ is $5\%$ of the whole range. The requirement $d^2(a,n)\ge d^2(a,p)+m$ becomes a requirement on angles: $\cos\theta_{an}\le\cos\theta_{ap}-m/2$.</p>
     <figure class="viz"><div class="fv" data-viz="triplet-sphere" data-config="{&quot;a&quot;: 0, &quot;p&quot;: 40, &quot;n&quot;: -45, &quot;m&quot;: 0.2}"></div><figcaption><b>Figure 7.</b> Normalized embeddings on the unit circle (drag the points along it) and the squared distance as a function of the angle. The orange arc is the zone where the negative would violate the margin. With $\theta_{ap}=40^\circ$ and $m=0.2$ the negative must be at least $48.2^\circ$ from the anchor; in the starting position it is at $45^\circ$: $d^2(a,p)=0.468$, $d^2(a,n)=0.586$, $L=0.082$.</figcaption></figure>
-    <div class="callout note"><b>How to choose the margin</b><p>The margin is measured in units of distance, so it depends on the normalization and on whether the distance is squared. For normalized embeddings typical values are $0.2$ (FaceNet, $d^2$) and $0.3$ (torchreid, $d$). A margin that is too small hardly demands any separation; one that is too large may be unreachable and keeps all triplets active.</p></div>
+    <div class="callout note"><b>How to choose the margin</b><p>The margin is measured in units of distance, so it depends on the normalization and on whether the distance is squared. Typical values are $0.2$ in FaceNet ($d^2$ on normalized embeddings) and $0.3$ in torchreid (plain $d$ on unnormalized features); <code>nn.TripletMarginLoss</code> defaults to $m=1$. A margin that is too small hardly demands any separation; one that is too large may be unreachable and keeps all triplets active.</p></div>
 
     <h2 id="code">In code: batch mining and stability</h2>
-    <p>The key to efficiency is the matrix of all pairwise distances in the batch, from which mining is done with masks and no loops. A numerical subtlety: $\|u-v\|$ is not differentiable at $u=v$ (the derivative of the square root at zero is infinite), and the formula $\|u\|^2-2u^\top v+\|v\|^2$ may produce a tiny negative number due to rounding. So $\max(\cdot,\varepsilon)$ is put under the root, and <code>nn.TripletMarginLoss</code> adds $\varepsilon=10^{-6}$ to the difference of vectors.</p>
+    <p>The key to efficiency is the matrix of all pairwise distances in the batch, from which mining is done with masks and no loops. A numerical subtlety: $\|u-v\|$ is not differentiable at $u=v$ (the derivative of the square root at zero is infinite), and the formula $\|u\|^2-2u^\top v+\|v\|^2$ may produce a tiny negative number due to rounding. So $\max(\cdot,\varepsilon)$ is put under the root, and <code>nn.TripletMarginLoss</code> adds $\varepsilon=10^{-6}$ to the difference of vectors. It also has <code>swap=True</code>, the distance swap (Balntas et al., 2016): $\min\bigl(d(a,n),\,d(p,n)\bigr)$ is used instead of $d(a,n)$, so the negative is compared with the closer of the two same-identity points.</p>
     <pre class="code"><span class="lang">python</span><code>import numpy as np
 
 def pairwise_dist(E, eps=1e-12):
@@ -161,16 +164,18 @@ def batch_hard_triplet(E, labels, margin=0.3):
     same = labels[:, None] == labels[None, :]
     hardest_pos = np.where(same, D, 0.0).max(1)       # the farthest positive
     hardest_neg = np.where(same, np.inf, D).min(1)    # the closest negative
-    return np.maximum(hardest_pos - hardest_neg + margin, 0.0).mean()
+    has_pos = same.sum(1) &gt; 1                         # skip anchors that have no positive in the batch
+    loss = np.maximum(hardest_pos - hardest_neg + margin, 0.0)
+    return loss[has_pos].mean()
 
 E = np.array([[0.0, 0.0], [0.9, 0.0], [0.6, 0.8]])   # anchor, positive, negative
 labels = np.array([0, 0, 1])
-print(batch_hard_triplet(E, labels, margin=0.2))      # ≈ 0.1152 = (0.1 + 0.2456 + 0) / 3</code></pre>
+print(batch_hard_triplet(E, labels, margin=0.2))      # ≈ 0.1728 = (0.1 + 0.2456) / 2: the negative has no positive</code></pre>
     <pre class="code"><span class="lang">python</span><code>import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# 1) Triplets prepared in advance: the built-in loss
+# 1) Triplets prepared in advance: the built-in loss (defaults: margin=1.0, p=2, swap=False)
 loss_fn = nn.TripletMarginLoss(margin=0.2, p=2)
 a = torch.tensor([[0.0, 0.0]], requires_grad=True)
 p = torch.tensor([[0.9, 0.0]], requires_grad=True)
@@ -187,7 +192,8 @@ def batch_hard(emb, labels, margin=0.3, normalize=True):
     same = labels[:, None] == labels[None, :]
     pos = (D * same).max(1).values             # the farthest positive
     neg = D.masked_fill(same, float(&quot;inf&quot;)).min(1).values   # the closest negative
-    return F.relu(pos - neg + margin).mean()</code></pre>
+    has_pos = same.sum(1) &gt; 1                  # skip anchors that have no positive in the batch
+    return F.relu(pos - neg + margin)[has_pos].mean()</code></pre>
     <div class="callout key"><b>In practice</b><p>A $P\times K$ batch (for example $P=16$, $K=4$) is a must: without several pictures of the same person in the batch there are no positives. The triplet loss is usually combined with cross-entropy over identities — training is then faster and more stable.</p></div>
 
     <h2 id="mistakes">Common mistakes</h2>

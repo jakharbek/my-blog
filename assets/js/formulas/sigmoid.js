@@ -7,7 +7,7 @@
       asym: "асимптоты", slope: "наклон", w: "Вес $w$", b: "Сдвиг $b$", center: "центр $x_0=-b/w$", ref: "σ(x) для сравнения",
       steep: "наклон в центре $w/4$", p: "Вероятность $p$", odds: "шансы $p/(1-p)$", logit: "логит $\\ln\\frac{p}{1-p}$",
       x1: "x₁", x2: "x₂", prob: "p", train: "Обучать", acc: "точность", loss: "BCE", epoch: "шаг",
-      depth: "Глубина сети $L$", layer: "слой", grad: "|∂L/∂h|", first: "градиент у входа / у выхода",
+      depth: "Глубина сети $L$", layer: "слой", grad: "‖∂ℒ/∂h‖", first: "градиент у входа / у выхода",
       spread: "Разброс входов $s$", mean: "Среднее входов $\\mu$", density: "плотность входов", avg: "средняя σ′", dead: "доля входов с σ′ < 0,01",
       order: "Порядок", err: "ошибка в x", approx: "приближение", w1: "$w_1$", w2: "$w_2$", class0: "класс 0", class1: "класс 1", boundary: "граница p = 0,5",
     },
@@ -16,7 +16,7 @@
       asym: "asymptotes", slope: "slope", w: "Weight $w$", b: "Bias $b$", center: "centre $x_0=-b/w$", ref: "σ(x) for reference",
       steep: "slope at the centre $w/4$", p: "Probability $p$", odds: "odds $p/(1-p)$", logit: "logit $\\ln\\frac{p}{1-p}$",
       x1: "x₁", x2: "x₂", prob: "p", train: "Train", acc: "accuracy", loss: "BCE", epoch: "step",
-      depth: "Network depth $L$", layer: "layer", grad: "|∂L/∂h|", first: "gradient at the input / at the output",
+      depth: "Network depth $L$", layer: "layer", grad: "‖∂ℒ/∂h‖", first: "gradient at the input / at the output",
       spread: "Input spread $s$", mean: "Input mean $\\mu$", density: "input density", avg: "mean σ′", dead: "share of inputs with σ′ < 0.01",
       order: "Order", err: "error at x", approx: "approximation", w1: "$w_1$", w2: "$w_2$", class0: "class 0", class1: "class 1", boundary: "boundary p = 0.5",
     },
@@ -25,7 +25,7 @@
       asym: "asimptotalar", slope: "qiyalik", w: "Vazn $w$", b: "Siljish $b$", center: "markaz $x_0=-b/w$", ref: "taqqoslash uchun σ(x)",
       steep: "markazdagi qiyalik $w/4$", p: "Ehtimollik $p$", odds: "imkoniyat $p/(1-p)$", logit: "logit $\\ln\\frac{p}{1-p}$",
       x1: "x₁", x2: "x₂", prob: "p", train: "O‘qitish", acc: "aniqlik", loss: "BCE", epoch: "qadam",
-      depth: "Tarmoq chuqurligi $L$", layer: "qatlam", grad: "|∂L/∂h|", first: "kirishdagi / chiqishdagi gradiyent",
+      depth: "Tarmoq chuqurligi $L$", layer: "qatlam", grad: "‖∂ℒ/∂h‖", first: "kirishdagi / chiqishdagi gradiyent",
       spread: "Kirishlar tarqoqligi $s$", mean: "Kirishlar o‘rtachasi $\\mu$", density: "kirishlar zichligi", avg: "o‘rtacha σ′", dead: "σ′ < 0,01 bo‘lgan kirishlar ulushi",
       order: "Tartib", err: "x dagi xato", approx: "yaqinlashish", w1: "$w_1$", w2: "$w_2$", class0: "0-sinf", class1: "1-sinf", boundary: "chegara p = 0,5",
     },
@@ -99,7 +99,7 @@
           p.dot(c, 0.5, { c: "orange" });
         }
         ro.set("c", FV.fmt(c, 2)); ro.set("k", FV.fmt(W / 4, 3));
-      } else { ro.set("c", "—"); ro.set("k", "0"); }
+      } else { ro.set("c", "—"); ro.set("k", FV.fmt(0, 3)); }
       p.legend([{ label: "σ(wx + b)", c: "blue" }, { label: L.ref, c: "guide", dash: true }, { label: L.center, c: "orange", dot: true }]);
     }
     p.onresize = draw; draw();

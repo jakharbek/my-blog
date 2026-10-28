@@ -197,11 +197,12 @@
     for (let e = Math.ceil(Math.log10(a) - 1e-9); e <= Math.floor(Math.log10(b) + 1e-9); e++) out.push(Math.pow(10, e));
     return out;
   }
-  function tickLabel(v, d, log) {
+  // On a log axis plain numbers are used only when every tick is between 0.01 and 1000;
+  // otherwise all ticks use powers of ten, so one axis never mixes "1000" with "10⁴".
+  function tickLabel(v, d, log, plain) {
     if (log) {
       const e = Math.round(Math.log10(v));
-      if (e >= 0 && e <= 3) return String(Math.pow(10, e));
-      if (e < 0 && e >= -2) return FV.fmt(v, -e);
+      if (plain || e === 0 || e === 1) return e >= 0 ? String(Math.pow(10, e)) : FV.fmt(v, -e);
       return "10" + String(e).split("").map((c) => SUP[c]).join("");
     }
     return FV.fmt(v, d);
@@ -316,7 +317,11 @@
     _ticks(axis) {
       const o = this.o, dom = o[axis], type = o[axis + "Type"], given = o[axis + "Ticks"];
       if (given) return given.map((t) => (typeof t === "object" ? { v: t.v, label: t.label } : { v: t, label: FV.num(t) }));
-      if (type === "log") return logTicks(dom[0], dom[1]).map((v) => ({ v, label: tickLabel(v, 0, true) }));
+      if (type === "log") {
+        const vs = logTicks(dom[0], dom[1]);
+        const plain = vs.every((v) => v >= 0.0099 && v <= 1001);
+        return vs.map((v) => ({ v, label: tickLabel(v, 0, true, plain) }));
+      }
       const n = axis === "x" ? (this.narrow ? 4 : 7) : this.narrow ? 4 : 5;
       const t = FV.ticks(dom[0], dom[1], n);
       return t.values.map((v) => ({ v, label: tickLabel(v, t.d, false) }));

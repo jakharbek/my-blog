@@ -12,9 +12,9 @@ META = dict(
         "uz": "Istalgan sonni ehtimollikka aylantiradigan funksiya. Uni mayda detallarigacha tahlil qilamiz: formula nimadan yig‘ilgan, σ(1 − σ) hosila qayerdan keladi, sigmoida logistik regressiyaning qaror chegarasini qanday chizadi va nega chuqur tarmoqlarda gradiyentlarni so‘ndiradi.",
     },
     description={
-        "ru": "Сигмоида подробно: формула, свойства, вывод производной, ряд Тейлора, логит и шансы, логистическая регрессия в 3D, насыщение и затухание градиента, устойчивый код.",
-        "en": "The sigmoid in depth: formula, properties, derivation of the derivative, Taylor series, logit and odds, logistic regression in 3D, saturation and vanishing gradients, stable code.",
-        "uz": "Sigmoida batafsil: formula, xossalar, hosilani keltirib chiqarish, Teylor qatori, logit va imkoniyatlar, 3D’da logistik regressiya, to‘yinish va gradiyent so‘nishi, barqaror kod.",
+        "ru": "Сигмоида по косточкам: формула, свойства, вывод σ′ = σ(1 − σ), ряд Тейлора, логит и шансы, логистическая регрессия, затухание градиента, устойчивый код.",
+        "en": "The sigmoid in depth: formula, properties, the derivative σ(1 − σ), Taylor series, logit and odds, logistic regression, vanishing gradients, stable code.",
+        "uz": "Sigmoida batafsil: formula, xossalar, σ′ = σ(1 − σ) hosila, Teylor qatori, logit va imkoniyatlar, logistik regressiya, gradiyent so‘nishi, barqaror kod.",
     },
 )
 
@@ -48,8 +48,9 @@ def log_sigmoid(x):
     # log σ(x) = −softplus(−x) = −log(1 + e^(−x)), без log(0)
     return -np.logaddexp(0.0, -x)
 
-print(sigmoid([-40.0, 0.0, 40.0]))   # [4.248e-18 0.5 1.0]
-print(1 - sigmoid(40.0), sigmoid(-40.0))  # 0.0 против 4.248e-18'''
+print(sigmoid([-40.0, 0.0, 40.0]))        # [4.24835426e-18 5.00000000e-01 1.00000000e+00]
+print(1 - sigmoid(40.0), sigmoid(-40.0))  # 0.0 4.248354255291589e-18 — разность «съела» всё
+print(log_sigmoid(-1000.0))               # -1000.0 (наивный np.log(sigmoid) дал бы -inf)'''
 
 CODE_TORCH = '''import torch
 import torch.nn as nn
@@ -69,11 +70,13 @@ def _code(src, lang):
         return src
     repl = {
         "en": [("Устойчивая сигмоида: exp никогда не получает большой положительный аргумент.", "Stable sigmoid: exp never gets a large positive argument."),
-               ("без log(0)", "without log(0)"), ("0.0 против 4.248e-18", "0.0 versus 4.248e-18"),
+               ("без log(0)", "without log(0)"), ("разность «съела» всё", "the subtraction ate everything"),
+               ("наивный np.log(sigmoid) дал бы -inf", "a naive np.log(sigmoid) would give -inf"),
                ("Для классификации отдавайте в потерю логиты, а не σ(z):", "For classification pass the logits to the loss, not σ(z):"),
                ("внутри — устойчивый log σ(z)", "a stable log σ(z) inside")],
         "uz": [("Устойчивая сигмоида: exp никогда не получает большой положительный аргумент.", "Barqaror sigmoida: exp hech qachon katta musbat argument olmaydi."),
-               ("без log(0)", "log(0) siz"), ("0.0 против 4.248e-18", "0.0 va 4.248e-18"),
+               ("без log(0)", "log(0) siz"), ("разность «съела» всё", "ayirma hammasini «yeb qo‘ydi»"),
+               ("наивный np.log(sigmoid) дал бы -inf", "sodda np.log(sigmoid) -inf berardi"),
                ("Для классификации отдавайте в потерю логиты, а не σ(z):", "Klassifikatsiyada yo‘qotishga σ(z) emas, logitlarni bering:"),
                ("внутри — устойчивый log σ(z)", "ichida — barqaror log σ(z)")],
     }[lang]
@@ -91,7 +94,7 @@ SECTIONS = {
             "<b>выход бинарного классификатора</b> — логистическая регрессия, последний нейрон сети, $p=\\sigma(z)$;",
             "<b>вентили (gates) в LSTM и GRU</b> — число от 0 до 1 решает, какую долю информации пропустить, а какую забыть;",
             "<b>градиентный бустинг для классификации</b> — XGBoost, LightGBM и CatBoost складывают деревья в «сырой» счёт, а сигмоида превращает его в вероятность;",
-            "<b>современные активации</b> — SiLU (Swish) в LLaMA и Qwen — это $x\\cdot\\sigma(x)$;",
+            "<b>современные активации</b> — SiLU (Swish) — это $x\\cdot\\sigma(x)$; на ней построен блок SwiGLU в LLaMA и Qwen;",
             "<b>статистика</b> — функция распределения логистического закона и связь вероятности с логарифмом шансов (logit).",
         ]),
         ("callout", "key", "Главное за минуту", "$\\sigma$ сжимает всю числовую прямую в интервал $(0;\\,1)$, проходит через $(0;\\,0{,}5)$, симметрична: $\\sigma(-x)=1-\\sigma(x)$. Её производная $\\sigma'=\\sigma(1-\\sigma)$ не больше $0{,}25$ — отсюда и удобство (дешёвый backprop), и беда (затухание градиента)."),
@@ -112,7 +115,7 @@ SECTIONS = {
         ]),
         ("p", "Ту же функцию полезно узнавать в других записях:"),
         ("eq", r"\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=\frac{1}{2}\Bigl(1+\tanh\frac{x}{2}\Bigr)"),
-        ("p", "Вторая форма получается умножением числителя и знаменателя на $e^x$; она удобна для отрицательных $x$ (см. раздел про код). Третья связывает сигмоиду с гиперболическим тангенсом: tanh — это та же S-кривая, растянутая в два раза по высоте и сдвинутая вниз."),
+        ("p", "Вторая форма получается умножением числителя и знаменателя на $e^x$; она удобна для отрицательных $x$ (см. раздел про код). Третья связывает сигмоиду с гиперболическим тангенсом: $\\tanh x=2\\sigma(2x)-1$ — та же S-кривая, сжатая вдвое по горизонтали, растянутая вдвое по высоте и сдвинутая вниз на 1."),
         ("table", ["$x$", "$\\sigma(x)$", "$\\sigma'(x)$"], "TABLE", {"num": [0, 1, 2]}),
         ("p", "Таблица показывает две симметрии: значения сигмоиды при $\\pm x$ дополняют друг друга до единицы, а производная — чётная функция."),
     ]),
@@ -131,12 +134,12 @@ SECTIONS = {
         ]),
         ("h3", "Вес и сдвиг: как нейрон перестраивает сигмоиду"),
         ("p", "В нейроне сигмоида получает не $x$, а $z=wx+b$. Вес $w$ растягивает кривую по горизонтали, сдвиг $b$ двигает её. Центр, где выход равен $0{,}5$, оказывается в точке $x_0=-b/w$, а наклон в центре равен $w/4$."),
-        ("viz", "sigmoid-shape", {"w": 2, "b": -2}, "<b>Рисунок 2.</b> $\\sigma(wx+b)$. При большом $|w|$ кривая превращается почти в ступеньку, при $w&lt;0$ — переворачивается. Бледные кривые — та же функция с весами $w/4$ и $w/2$."),
-        ("callout", "note", "Ступенька как предел", "При $w\\to+\\infty$ функция $\\sigma(w x)$ стремится к ступеньке Хевисайда: 0 слева от нуля, 1 справа. Так сигмоида исторически и появилась в нейросетях — как гладкая, дифференцируемая замена пороговому нейрону Маккаллока — Питтса."),
+        ("viz", "sigmoid-shape", {"w": 2, "b": -2}, "<b>Рисунок 2.</b> $\\sigma(wx+b)$. При большом $|w|$ кривая превращается почти в ступеньку, при $w&lt;0$ — переворачивается. Бледные кривые — $\\sigma\\bigl((wx+b)/4\\bigr)$ и $\\sigma\\bigl((wx+b)/2\\bigr)$: центр тот же, а наклон в 4 и 2 раза меньше."),
+        ("callout", "note", "Ступенька как предел", "При $w\\to+\\infty$ функция $\\sigma(w x)$ стремится к ступеньке Хевисайда: 0 слева от нуля, 1 справа (в самой точке $x=0$ значение всегда $0{,}5$). Так сигмоида исторически и появилась в нейросетях — как гладкая, дифференцируемая замена пороговому нейрону Маккаллока — Питтса."),
     ]),
     dict(id="derivative", title="Производная: σ′ = σ(1 − σ)", blocks=[
         ("p", "Это главная формула страницы. Выведем её двумя способами — «в лоб» и изящно."),
-        ("deep", "Способ 1. Производная частного (по шагам)", [
+        ("deep", "Способ 1. Цепное правило (по шагам)", [
             ("p", "Запишем $\\sigma(x)=(1+e^{-x})^{-1}$ и применим правило производной сложной функции:"),
             ("eq", r"\sigma'(x)=-(1+e^{-x})^{-2}\cdot\bigl(1+e^{-x}\bigr)'=-(1+e^{-x})^{-2}\cdot(-e^{-x})=\frac{e^{-x}}{(1+e^{-x})^{2}}"),
             ("p", "Разобьём дробь на произведение двух сомножителей:"),
@@ -163,11 +166,11 @@ SECTIONS = {
         ("p", "Почему выход сигмоиды разумно читать как вероятность? Пусть $p$ — вероятность события. Отношение $p/(1-p)$ называют <b>шансами</b> (odds): при $p=0{,}8$ шансы $4:1$. Логарифм шансов — <b>логит</b>:"),
         ("eq", r"\operatorname{logit}(p)=\ln\frac{p}{1-p}\qquad\Longleftrightarrow\qquad p=\sigma\bigl(\operatorname{logit}(p)\bigr)"),
         ("p", "Логит и сигмоида — взаимно обратные функции. Логит переводит вероятность из $(0;1)$ на всю числовую прямую, где удобно складывать вклады признаков. Логистическая регрессия предполагает ровно это: <b>логарифм шансов линейно зависит от признаков</b>, $\\ln\\frac{p}{1-p}=w^\\top x+b$. Отсюда и сигмоида на выходе."),
-        ("viz", "sigmoid-logit", {"p": 0.8}, "<b>Рисунок 4.</b> Слева сигмоида переводит логит $z$ в вероятность $p$, справа логит возвращает обратно. При $p=0{,}8$ шансы равны 4, логит $\\ln4\\approx1{,}386$. Обратите внимание: логит быстро растёт у краях — от $p=0{,}99$ до $p=0{,}999$ он меняется на $2{,}3$."),
+        ("viz", "sigmoid-logit", {"p": 0.8}, "<b>Рисунок 4.</b> Слева сигмоида переводит логит $z$ в вероятность $p$, справа логит возвращает обратно. При $p=0{,}8$ шансы равны 4, логит $\\ln4\\approx1{,}386$. Обратите внимание: логит быстро растёт у краёв — от $p=0{,}99$ до $p=0{,}999$ он меняется на $2{,}3$."),
         ("callout", "note", "Ещё одна интерпретация", "Сигмоида — функция распределения логистического закона: если шум $\\varepsilon$ имеет логистическое распределение, то $P(\\varepsilon\\le x)=\\sigma(x)$. Похожая модель с нормальным шумом, $\\Phi(x)$, называется пробит-регрессией; её кривая почти совпадает с $\\sigma(1{,}7x)$."),
     ]),
     dict(id="space", title="Сигмоида в многомерном пространстве", blocks=[
-        ("p", "У нейрона много входов: $z=w_1x_1+w_2x_2+\\dots+b$. Сигмоида от гиперплоскости — это «складка», которая поднимается от 0 до 1 поперёк границы $w^\\top x+b=0$ и не меняется вдоль неё. Вектор весов $w$ указывает направление самого крутого подъёма, а его длина — крутизну складки."),
+        ("p", "У нейрона много входов: $z=w_1x_1+w_2x_2+\\dots+b$. Сигмоида от такой линейной функции — это «складка», которая поднимается от 0 до 1 поперёк границы $w^\\top x+b=0$ и не меняется вдоль неё. Вектор весов $w$ указывает направление самого крутого подъёма, а его длина — крутизну складки."),
         ("viz", "sigmoid-logreg", {"w1": -0.5, "w2": 1.5, "b": 1.5}, "<b>Рисунок 5.</b> Логистическая регрессия на двух признаках. Слева — поверхность вероятности в 3D (её можно вращать), точки стоят на высоте своего класса. Справа — вид сверху: сплошная линия — граница $p=0{,}5$, пунктир — $p=0{,}1$ и $p=0{,}9$, стрелка — направление $w$. Нажмите «Пуск»: градиентный спуск по BCE с шагом $0{,}5$ сам находит веса."),
         ("p", "Обучение использует ту же производную. Для потери BCE градиент по логиту равен $\\sigma(z)-y$ (вывод — на странице <a href=\"../bce/\">BCE</a>), поэтому шаг градиентного спуска по весам:"),
         ("eq", r"w\leftarrow w-\eta\,\frac1n\sum_{i=1}^{n}\bigl(\sigma(w^\top x_i+b)-y_i\bigr)\,x_i"),
@@ -175,13 +178,14 @@ SECTIONS = {
     ]),
     dict(id="training", title="Сигмоида в обучении: насыщение и затухание градиента", blocks=[
         ("p", "Если входы нейрона $z$ велики по модулю, сигмоида работает на плоских хвостах, где $\\sigma'(z)\\approx0$. Градиент через такой нейрон почти не проходит — нейрон <b>насыщен</b>. Насыщение $\\sigma'&lt;0{,}01$ начинается при $|z|&gt;4{,}6$."),
-        ("viz", "sigmoid-saturation", {"s": 1}, "<b>Рисунок 6.</b> Синяя область — распределение входов $z\\sim N(\\mu,\\,s^2)$, оранжевая — производная. При $s=1$ средняя производная $0{,}207$ и насыщенных входов почти нет; при $s=4$ средняя производная падает до $0{,}091$, а насыщена уже четверть входов ($25\\%$)."),
-        ("p", "Отсюда правило инициализации: веса выбирают так, чтобы дисперсия $z$ была порядка единицы (инициализация Ксавье — Глоро, $\\operatorname{Var}w=1/n_{\\text{in}}$), а данные нормализуют."),
+        ("viz", "sigmoid-saturation", {"s": 1}, "<b>Рисунок 6.</b> Синяя область — распределение входов $z\\sim N(\\mu,\\,s^2)$, оранжевая — производная (высота синей кривой показана в условном масштабе). При $s=1$ средняя производная $0{,}207$ и насыщенных входов почти нет; при $s=4$ средняя производная падает до $0{,}091$, а насыщена уже четверть входов ($25\\%$)."),
+        ("p", "Отсюда правило инициализации: веса выбирают так, чтобы дисперсия $z$ была порядка единицы (инициализация ЛеКуна, $\\operatorname{Var}w=1/n_{\\text{in}}$, или Глоро (Xavier), $\\operatorname{Var}w=2/(n_{\\text{in}}+n_{\\text{out}})$), а данные нормализуют."),
         ("h3", "Затухание градиента в глубокой сети"),
-        ("p", "По цепному правилу градиент на слое $l$ — произведение производных всех слоёв выше. У сигмоиды каждая производная не больше $\\tfrac14$, поэтому через 10 слоёв множитель не больше $0{,}25^{10}\\approx9{,}5\\cdot10^{-7}$."),
-        ("eq", r"\frac{\partial L}{\partial h_l}=\frac{\partial L}{\partial h_L}\prod_{k=l+1}^{L}W_k^{\top}\operatorname{diag}\bigl(\sigma'(z_k)\bigr)"),
-        ("viz", "sigmoid-vanishing", {"depth": 10}, "<b>Рисунок 7.</b> Норма градиента на каждом слое случайной сети ширины 64 (инициализация Ксавье для sigmoid и tanh, Хе для ReLU). Шкала по вертикали логарифмическая. У сигмоиды градиент у входа меньше, чем у выхода, на несколько порядков; у tanh и ReLU он почти не затухает."),
-        ("callout", "history", "Почему сигмоида ушла из скрытых слоёв", "До 2010 года глубокие сети с сигмоидами обучались плохо. Гло́ро и Бенжио (2010) показали роль насыщения и предложили инициализацию, а ReLU (Наир и Хинтон, 2010; Глоро и др., 2011) почти сняли проблему. Сегодня сигмоида живёт там, где нужна именно доля от 0 до 1: на выходе бинарного классификатора и в вентилях."),
+        ("p", "Пусть $h_k=\\sigma(z_k)$, $z_k=W_kh_{k-1}$. По цепному правилу градиент потери $\\mathcal L$ по выходу слоя $l$ — произведение якобианов всех слоёв выше, и в каждый входит $\\operatorname{diag}\\bigl(\\sigma'(z_k)\\bigr)$:"),
+        ("eq", r"\frac{\partial \mathcal L}{\partial h_l}=\frac{\partial \mathcal L}{\partial h_L}\,\frac{\partial h_L}{\partial h_{L-1}}\cdots\frac{\partial h_{l+1}}{\partial h_l},\qquad \frac{\partial h_k}{\partial h_{k-1}}=\operatorname{diag}\bigl(\sigma'(z_k)\bigr)\,W_k"),
+        ("p", "У сигмоиды каждое $\\sigma'\\le\\tfrac14$, поэтому через 10 слоёв множитель от одних только производных не больше $0{,}25^{10}\\approx9{,}5\\cdot10^{-7}$. Веса $W_k$ при инициализации Глоро этот множитель не компенсируют: они сохраняют норму сигнала примерно на уровне единицы."),
+        ("viz", "sigmoid-vanishing", {"depth": 10}, "<b>Рисунок 7.</b> Норма градиента на каждом слое случайной сети ширины 64 (инициализация Глоро для sigmoid и tanh, Хе для ReLU). Шкала по вертикали логарифмическая, пунктир — оценка $0{,}25^{L-l}$. При глубине 10 у сигмоиды градиент у входа в $2{,}4\\cdot10^{-6}$ раза меньше, чем у выхода; у tanh отношение около $0{,}2$, у ReLU — около $2{,}4$ (градиент даже немного растёт)."),
+        ("callout", "history", "Почему сигмоида ушла из скрытых слоёв", "До 2010 года глубокие сети с сигмоидами обучались плохо, если не прибегать к послойному предобучению (Хинтон и др., 2006). Глоро и Бенжио (2010) показали роль насыщения и предложили инициализацию, а ReLU (Наир и Хинтон, 2010; Глоро и др., 2011) почти сняли проблему. Сегодня сигмоида живёт там, где нужна именно доля от 0 до 1: на выходе бинарного классификатора и в вентилях."),
     ]),
     dict(id="code", title="В коде: устойчиво и без сюрпризов", blocks=[
         ("p", "Наивная формула $1/(1+e^{-x})$ при $x=-1000$ вычисляет $e^{1000}$ — переполнение. Результат всё равно получится 0, но с предупреждением, а в $\\log\\sigma(x)$ уже появится $-\\infty$. Вторая проблема — потеря точности: $1-\\sigma(40)$ в float64 равно ровно 0, хотя истинное значение $\\sigma(-40)\\approx4{,}25\\cdot10^{-18}$."),
@@ -192,9 +196,9 @@ SECTIONS = {
     dict(id="mistakes", title="Частые ошибки", blocks=[
         ("ol", [
             "<b>Сигмоида в скрытых слоях глубокой сети</b> — затухание градиента и смещённые (не центрированные) активации. Берите ReLU, GELU, SiLU; сигмоиду — только на выходе или в вентилях.",
-            "<b>Сигмоида + softmax на одном выходе.</b> Для $K&gt;2$ взаимоисключающих классов нужен <a href=\"../softmax/\">softmax</a>; сигмоида на каждом выходе — это multi-label, где классы независимы.",
-            "<b>Двойная сигмоида</b>: модель уже возвращает вероятность, а потеря применяет σ ещё раз (например, <code>BCEWithLogitsLoss</code> поверх <code>sigmoid</code>). Обучение идёт, но градиенты искажены.",
-            "<b>Порог 0,5 «по умолчанию»</b>. Он оптимален только для равных цен ошибок и сбалансированных классов. Порог подбирают по метрике на валидации.",
+            "<b>Сигмоиды вместо softmax для взаимоисключающих классов.</b> Для $K&gt;2$ взаимоисключающих классов нужен <a href=\"../softmax/\">softmax</a>; сигмоида на каждом выходе — это multi-label, где классы независимы.",
+            "<b>Двойная сигмоида</b>: модель уже возвращает вероятность, а потеря применяет σ ещё раз (например, <code>BCEWithLogitsLoss</code> поверх <code>sigmoid</code>). Обучение идёт, но «вероятности» сжаты в $(0{,}5;\\,0{,}73)$, потеря не может стать малой, а градиенты искажены.",
+            "<b>Порог 0,5 «по умолчанию»</b>. Для откалиброванных вероятностей он минимизирует долю ошибок, но только если обе ошибки стоят одинаково. При разной цене ошибок, а также для F1 или полноты при дисбалансе классов лучший порог другой — его подбирают по метрике на валидации.",
             "<b>Вывод «σ(z) = 0,9, значит модель уверена на 90%»</b> без калибровки. Сигмоида даёт число в $(0;1)$, но откалиброванность — свойство обучения (BCE способствует ей, переобучение — портит).",
         ]),
     ]),
@@ -202,9 +206,9 @@ SECTIONS = {
         ("ul", [
             "<a href=\"../tanh/\">tanh</a>: $\\tanh x=2\\sigma(2x)-1$ — центрированная сигмоида с максимальным наклоном 1.",
             "<a href=\"../softmax/\">Softmax</a>: для двух классов $\\operatorname{softmax}(z_1,z_2)_1=\\sigma(z_1-z_2)$.",
-            "<a href=\"../bce/\">BCE</a>: в паре с сигмоидой даёт градиент $\\hat y-y$ — без множителя $\\sigma'$, а значит без насыщения при ошибке.",
+            "<a href=\"../bce/\">BCE</a>: в паре с сигмоидой даёт градиент по логиту $\\hat y-y$ — без множителя $\\sigma'$, а значит без насыщения при ошибке.",
             "<a href=\"../silu/\">SiLU / Swish</a>: $x\\,\\sigma(x)$ — сигмоида как «мягкий вентиль» для самого входа.",
-            "<a href=\"../focal/\">Focal Loss</a>: обычно считается от $p_t=\\sigma(z)$ для правильного класса.",
+            "<a href=\"../focal/\">Focal Loss</a>: обычно считается от вероятности правильного класса $p_t$: $\\sigma(z)$ при $y=1$ и $1-\\sigma(z)=\\sigma(-z)$ при $y=0$.",
         ]),
     ]),
     dict(id="summary", title="Итоги", blocks=[
@@ -233,7 +237,7 @@ SECTIONS = {
             "<b>the output of a binary classifier</b> — logistic regression, the last neuron of a network, $p=\\sigma(z)$;",
             "<b>gates in LSTM and GRU</b> — a number between 0 and 1 decides what share of the information to let through and what to forget;",
             "<b>gradient boosting for classification</b> — XGBoost, LightGBM and CatBoost add trees into a raw score, and the sigmoid turns it into a probability;",
-            "<b>modern activations</b> — SiLU (Swish) in LLaMA and Qwen is $x\\cdot\\sigma(x)$;",
+            "<b>modern activations</b> — SiLU (Swish) is $x\\cdot\\sigma(x)$; the SwiGLU block of LLaMA and Qwen is built on it;",
             "<b>statistics</b> — the cumulative distribution function of the logistic law and the link between probability and log-odds (logit).",
         ]),
         ("callout", "key", "The essentials in a minute", "$\\sigma$ squeezes the whole real line into $(0,\\,1)$, passes through $(0,\\,0.5)$ and is symmetric: $\\sigma(-x)=1-\\sigma(x)$. Its derivative $\\sigma'=\\sigma(1-\\sigma)$ never exceeds $0.25$ — the source of both convenience (cheap backprop) and trouble (vanishing gradients)."),
@@ -254,7 +258,7 @@ SECTIONS = {
         ]),
         ("p", "It pays to recognise the same function in other forms:"),
         ("eq", r"\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=\frac{1}{2}\Bigl(1+\tanh\frac{x}{2}\Bigr)"),
-        ("p", "The second form comes from multiplying the numerator and the denominator by $e^x$; it is convenient for negative $x$ (see the section on code). The third links the sigmoid to the hyperbolic tangent: tanh is the same S-curve, stretched twice as tall and shifted down."),
+        ("p", "The second form comes from multiplying the numerator and the denominator by $e^x$; it is convenient for negative $x$ (see the section on code). The third links the sigmoid to the hyperbolic tangent: $\\tanh x=2\\sigma(2x)-1$ is the same S-curve, squeezed horizontally by 2, stretched twice as tall and shifted down by 1."),
         ("table", ["$x$", "$\\sigma(x)$", "$\\sigma'(x)$"], "TABLE", {"num": [0, 1, 2]}),
         ("p", "The table shows two symmetries: the sigmoid values at $\\pm x$ add up to one, and the derivative is an even function."),
     ]),
@@ -273,12 +277,12 @@ SECTIONS = {
         ]),
         ("h3", "Weight and bias: how a neuron reshapes the sigmoid"),
         ("p", "In a neuron the sigmoid receives not $x$ but $z=wx+b$. The weight $w$ stretches the curve horizontally, the bias $b$ shifts it. The centre, where the output equals $0.5$, lands at $x_0=-b/w$, and the slope at the centre is $w/4$."),
-        ("viz", "sigmoid-shape", {"w": 2, "b": -2}, "<b>Figure 2.</b> $\\sigma(wx+b)$. For large $|w|$ the curve becomes almost a step; for $w&lt;0$ it flips. The pale curves are the same function with weights $w/4$ and $w/2$."),
-        ("callout", "note", "A step as the limit", "As $w\\to+\\infty$, $\\sigma(w x)$ tends to the Heaviside step: 0 to the left of zero, 1 to the right. That is how the sigmoid historically entered neural networks — as a smooth, differentiable replacement for the McCulloch–Pitts threshold neuron."),
+        ("viz", "sigmoid-shape", {"w": 2, "b": -2}, "<b>Figure 2.</b> $\\sigma(wx+b)$. For large $|w|$ the curve becomes almost a step; for $w&lt;0$ it flips. The pale curves are $\\sigma\\bigl((wx+b)/4\\bigr)$ and $\\sigma\\bigl((wx+b)/2\\bigr)$: the same centre, but a slope 4 and 2 times smaller."),
+        ("callout", "note", "A step as the limit", "As $w\\to+\\infty$, $\\sigma(w x)$ tends to the Heaviside step: 0 to the left of zero, 1 to the right (at $x=0$ itself the value is always $0.5$). That is how the sigmoid historically entered neural networks — as a smooth, differentiable replacement for the McCulloch–Pitts threshold neuron."),
     ]),
     dict(id="derivative", title="The derivative: σ′ = σ(1 − σ)", blocks=[
         ("p", "This is the key formula of the page. Let us derive it in two ways — head-on and elegantly."),
-        ("deep", "Method 1. The quotient, step by step", [
+        ("deep", "Method 1. The chain rule, step by step", [
             ("p", "Write $\\sigma(x)=(1+e^{-x})^{-1}$ and apply the chain rule:"),
             ("eq", r"\sigma'(x)=-(1+e^{-x})^{-2}\cdot\bigl(1+e^{-x}\bigr)'=-(1+e^{-x})^{-2}\cdot(-e^{-x})=\frac{e^{-x}}{(1+e^{-x})^{2}}"),
             ("p", "Split the fraction into a product of two factors:"),
@@ -309,7 +313,7 @@ SECTIONS = {
         ("callout", "note", "Another interpretation", "The sigmoid is the cumulative distribution function of the logistic law: if the noise $\\varepsilon$ is logistic, then $P(\\varepsilon\\le x)=\\sigma(x)$. The similar model with normal noise, $\\Phi(x)$, is called probit regression; its curve nearly coincides with $\\sigma(1.7x)$."),
     ]),
     dict(id="space", title="The sigmoid in many dimensions", blocks=[
-        ("p", "A neuron has many inputs: $z=w_1x_1+w_2x_2+\\dots+b$. The sigmoid of a hyperplane is a “fold” that rises from 0 to 1 across the boundary $w^\\top x+b=0$ and stays constant along it. The weight vector $w$ points in the direction of the steepest ascent, and its length sets how steep the fold is."),
+        ("p", "A neuron has many inputs: $z=w_1x_1+w_2x_2+\\dots+b$. The sigmoid of such a linear function is a “fold” that rises from 0 to 1 across the boundary $w^\\top x+b=0$ and stays constant along it. The weight vector $w$ points in the direction of the steepest ascent, and its length sets how steep the fold is."),
         ("viz", "sigmoid-logreg", {"w1": -0.5, "w2": 1.5, "b": 1.5}, "<b>Figure 5.</b> Logistic regression on two features. On the left, the probability surface in 3D (you can rotate it); the points sit at the height of their class. On the right, the view from above: the solid line is the boundary $p=0.5$, the dashed lines are $p=0.1$ and $p=0.9$, the arrow is the direction of $w$. Press “Play”: gradient descent on BCE with step $0.5$ finds the weights by itself."),
         ("p", "Training uses the same derivative. For the BCE loss the gradient with respect to the logit is $\\sigma(z)-y$ (derived on the <a href=\"../bce/\">BCE</a> page), so a gradient-descent step on the weights is:"),
         ("eq", r"w\leftarrow w-\eta\,\frac1n\sum_{i=1}^{n}\bigl(\sigma(w^\top x_i+b)-y_i\bigr)\,x_i"),
@@ -317,13 +321,14 @@ SECTIONS = {
     ]),
     dict(id="training", title="The sigmoid in training: saturation and vanishing gradients", blocks=[
         ("p", "If a neuron’s inputs $z$ are large in magnitude, the sigmoid works on its flat tails, where $\\sigma'(z)\\approx0$. Hardly any gradient flows through such a neuron — it is <b>saturated</b>. Saturation, $\\sigma'&lt;0.01$, starts at $|z|&gt;4.6$."),
-        ("viz", "sigmoid-saturation", {"s": 1}, "<b>Figure 6.</b> The blue area is the distribution of the inputs $z\\sim N(\\mu,\\,s^2)$, the orange one is the derivative. At $s=1$ the mean derivative is $0.207$ and there are almost no saturated inputs; at $s=4$ the mean derivative drops to $0.091$, and a quarter of the inputs ($25\\%$) are already saturated."),
-        ("p", "This gives the initialization rule: weights are chosen so that the variance of $z$ is of order one (Xavier–Glorot initialization, $\\operatorname{Var}w=1/n_{\\text{in}}$), and the data are normalized."),
+        ("viz", "sigmoid-saturation", {"s": 1}, "<b>Figure 6.</b> The blue area is the distribution of the inputs $z\\sim N(\\mu,\\,s^2)$, the orange one is the derivative (the blue curve’s height is in arbitrary units). At $s=1$ the mean derivative is $0.207$ and there are almost no saturated inputs; at $s=4$ the mean derivative drops to $0.091$, and a quarter of the inputs ($25\\%$) are already saturated."),
+        ("p", "This gives the initialization rule: weights are chosen so that the variance of $z$ is of order one (LeCun initialization, $\\operatorname{Var}w=1/n_{\\text{in}}$, or Glorot (Xavier) initialization, $\\operatorname{Var}w=2/(n_{\\text{in}}+n_{\\text{out}})$), and the data are normalized."),
         ("h3", "Vanishing gradients in a deep network"),
-        ("p", "By the chain rule the gradient at layer $l$ is a product of the derivatives of all layers above it. For the sigmoid each derivative is at most $\\tfrac14$, so after 10 layers the factor is at most $0.25^{10}\\approx9.5\\cdot10^{-7}$."),
-        ("eq", r"\frac{\partial L}{\partial h_l}=\frac{\partial L}{\partial h_L}\prod_{k=l+1}^{L}W_k^{\top}\operatorname{diag}\bigl(\sigma'(z_k)\bigr)"),
-        ("viz", "sigmoid-vanishing", {"depth": 10}, "<b>Figure 7.</b> The gradient norm at every layer of a random network of width 64 (Xavier initialization for sigmoid and tanh, He for ReLU). The vertical scale is logarithmic. With the sigmoid the gradient at the input is several orders of magnitude smaller than at the output; with tanh and ReLU it barely fades."),
-        ("callout", "history", "Why the sigmoid left the hidden layers", "Before 2010 deep networks with sigmoids trained poorly. Glorot and Bengio (2010) showed the role of saturation and proposed an initialization, and ReLU (Nair and Hinton, 2010; Glorot et al., 2011) all but removed the problem. Today the sigmoid lives where a share between 0 and 1 is exactly what is needed: at the output of a binary classifier and in gates."),
+        ("p", "Let $h_k=\\sigma(z_k)$, $z_k=W_kh_{k-1}$. By the chain rule the gradient of the loss $\\mathcal L$ with respect to the output of layer $l$ is a product of the Jacobians of all layers above it, and each of them contains $\\operatorname{diag}\\bigl(\\sigma'(z_k)\\bigr)$:"),
+        ("eq", r"\frac{\partial \mathcal L}{\partial h_l}=\frac{\partial \mathcal L}{\partial h_L}\,\frac{\partial h_L}{\partial h_{L-1}}\cdots\frac{\partial h_{l+1}}{\partial h_l},\qquad \frac{\partial h_k}{\partial h_{k-1}}=\operatorname{diag}\bigl(\sigma'(z_k)\bigr)\,W_k"),
+        ("p", "For the sigmoid every $\\sigma'\\le\\tfrac14$, so after 10 layers the factor from the derivatives alone is at most $0.25^{10}\\approx9.5\\cdot10^{-7}$. With Glorot initialization the weights $W_k$ do not compensate for it: they keep the norm of the signal at roughly one."),
+        ("viz", "sigmoid-vanishing", {"depth": 10}, "<b>Figure 7.</b> The gradient norm at every layer of a random network of width 64 (Glorot initialization for sigmoid and tanh, He for ReLU). The vertical scale is logarithmic; the dashed line is the estimate $0.25^{L-l}$. At depth 10 the sigmoid’s gradient at the input is $2.4\\cdot10^{-6}$ times its value at the output; for tanh the ratio is about $0.2$, for ReLU about $2.4$ (the gradient even grows a little)."),
+        ("callout", "history", "Why the sigmoid left the hidden layers", "Before 2010 deep networks with sigmoids trained poorly unless one resorted to layer-wise pre-training (Hinton et al., 2006). Glorot and Bengio (2010) showed the role of saturation and proposed an initialization, and ReLU (Nair and Hinton, 2010; Glorot et al., 2011) all but removed the problem. Today the sigmoid lives where a share between 0 and 1 is exactly what is needed: at the output of a binary classifier and in gates."),
     ]),
     dict(id="code", title="In code: stable and without surprises", blocks=[
         ("p", "The naive formula $1/(1+e^{-x})$ at $x=-1000$ computes $e^{1000}$ — an overflow. The result still comes out as 0, but with a warning, and $\\log\\sigma(x)$ already yields $-\\infty$. The second problem is loss of precision: $1-\\sigma(40)$ in float64 is exactly 0, while the true value $\\sigma(-40)\\approx4.25\\cdot10^{-18}$."),
@@ -334,9 +339,9 @@ SECTIONS = {
     dict(id="mistakes", title="Common mistakes", blocks=[
         ("ol", [
             "<b>Sigmoids in the hidden layers of a deep network</b> — vanishing gradients and shifted (non-centred) activations. Use ReLU, GELU, SiLU; keep the sigmoid for the output or for gates.",
-            "<b>Sigmoid instead of softmax on one output.</b> For $K&gt;2$ mutually exclusive classes you need <a href=\"../softmax/\">softmax</a>; a sigmoid on every output means multi-label, where the classes are independent.",
-            "<b>A double sigmoid</b>: the model already returns a probability and the loss applies σ again (for example, <code>BCEWithLogitsLoss</code> on top of <code>sigmoid</code>). Training runs, but the gradients are distorted.",
-            "<b>The “default” 0.5 threshold.</b> It is optimal only for equal error costs and balanced classes. Tune the threshold for your metric on validation data.",
+            "<b>Sigmoids instead of softmax for mutually exclusive classes.</b> For $K&gt;2$ mutually exclusive classes you need <a href=\"../softmax/\">softmax</a>; a sigmoid on every output means multi-label, where the classes are independent.",
+            "<b>A double sigmoid</b>: the model already returns a probability and the loss applies σ again (for example, <code>BCEWithLogitsLoss</code> on top of <code>sigmoid</code>). Training runs, but the “probabilities” are squeezed into $(0.5,\\,0.73)$, the loss cannot get small, and the gradients are distorted.",
+            "<b>The “default” 0.5 threshold.</b> For calibrated probabilities it minimizes the error rate, but only when both kinds of error cost the same. With unequal costs, or for F1 or recall on imbalanced classes, the best threshold is different — tune it for your metric on validation data.",
             "<b>Reading “σ(z) = 0.9 means the model is 90% sure”</b> without calibration. The sigmoid gives a number in $(0,1)$, but calibration is a property of training (BCE encourages it, overfitting spoils it).",
         ]),
     ]),
@@ -344,9 +349,9 @@ SECTIONS = {
         ("ul", [
             "<a href=\"../tanh/\">tanh</a>: $\\tanh x=2\\sigma(2x)-1$ — a centred sigmoid with maximum slope 1.",
             "<a href=\"../softmax/\">Softmax</a>: for two classes $\\operatorname{softmax}(z_1,z_2)_1=\\sigma(z_1-z_2)$.",
-            "<a href=\"../bce/\">BCE</a>: paired with the sigmoid it gives the gradient $\\hat y-y$ — without the factor $\\sigma'$, so no saturation while the model is wrong.",
+            "<a href=\"../bce/\">BCE</a>: paired with the sigmoid it gives the gradient $\\hat y-y$ with respect to the logit — without the factor $\\sigma'$, so no saturation while the model is wrong.",
             "<a href=\"../silu/\">SiLU / Swish</a>: $x\\,\\sigma(x)$ — the sigmoid as a “soft gate” for the input itself.",
-            "<a href=\"../focal/\">Focal Loss</a>: usually computed from $p_t=\\sigma(z)$ for the correct class.",
+            "<a href=\"../focal/\">Focal Loss</a>: usually computed from the probability of the correct class $p_t$: $\\sigma(z)$ for $y=1$ and $1-\\sigma(z)=\\sigma(-z)$ for $y=0$.",
         ]),
     ]),
     dict(id="summary", title="Summary", blocks=[
@@ -375,7 +380,7 @@ SECTIONS = {
             "<b>binar klassifikator chiqishi</b> — logistik regressiya, tarmoqning oxirgi neyroni, $p=\\sigma(z)$;",
             "<b>LSTM va GRU’dagi ventillar (gates)</b> — 0 dan 1 gacha son axborotning qancha qismini o‘tkazish, qanchasini unutishni hal qiladi;",
             "<b>klassifikatsiya uchun gradiyentli busting</b> — XGBoost, LightGBM va CatBoost daraxtlarni «xom» hisobga qo‘shadi, sigmoida esa uni ehtimollikka aylantiradi;",
-            "<b>zamonaviy aktivatsiyalar</b> — LLaMA va Qwen’dagi SiLU (Swish) — bu $x\\cdot\\sigma(x)$;",
+            "<b>zamonaviy aktivatsiyalar</b> — SiLU (Swish) — bu $x\\cdot\\sigma(x)$; LLaMA va Qwen’dagi SwiGLU bloki shunga asoslangan;",
             "<b>statistika</b> — logistik taqsimot funksiyasi va ehtimollikning imkoniyatlar logarifmi (logit) bilan bog‘lanishi.",
         ]),
         ("callout", "key", "Bir daqiqada asosiysi", "$\\sigma$ butun son o‘qini $(0;\\,1)$ oralig‘iga siqadi, $(0;\\,0{,}5)$ nuqtadan o‘tadi va simmetrik: $\\sigma(-x)=1-\\sigma(x)$. Uning hosilasi $\\sigma'=\\sigma(1-\\sigma)$ $0{,}25$ dan oshmaydi — qulaylik (arzon backprop) ham, muammo (gradiyent so‘nishi) ham shundan."),
@@ -396,7 +401,7 @@ SECTIONS = {
         ]),
         ("p", "Shu funksiyani boshqa yozuvlarda ham tanib olish foydali:"),
         ("eq", r"\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=\frac{1}{2}\Bigl(1+\tanh\frac{x}{2}\Bigr)"),
-        ("p", "Ikkinchi shakl surat va maxrajni $e^x$ ga ko‘paytirishdan olinadi; u manfiy $x$ uchun qulay (kod bo‘limiga qarang). Uchinchisi sigmoidani giperbolik tangens bilan bog‘laydi: tanh — balandligi ikki marta cho‘zilgan va pastga surilgan o‘sha S-egri chiziq."),
+        ("p", "Ikkinchi shakl surat va maxrajni $e^x$ ga ko‘paytirishdan olinadi; u manfiy $x$ uchun qulay (kod bo‘limiga qarang). Uchinchisi sigmoidani giperbolik tangens bilan bog‘laydi: $\\tanh x=2\\sigma(2x)-1$ — gorizontal bo‘yicha ikki marta siqilgan, balandligi ikki marta cho‘zilgan va 1 ga pastga surilgan o‘sha S-egri chiziq."),
         ("table", ["$x$", "$\\sigma(x)$", "$\\sigma'(x)$"], "TABLE", {"num": [0, 1, 2]}),
         ("p", "Jadval ikki simmetriyani ko‘rsatadi: $\\pm x$ dagi sigmoida qiymatlari bir-birini birgacha to‘ldiradi, hosila esa juft funksiya."),
     ]),
@@ -415,12 +420,12 @@ SECTIONS = {
         ]),
         ("h3", "Vazn va siljish: neyron sigmoidani qanday o‘zgartiradi"),
         ("p", "Neyronda sigmoida $x$ ni emas, $z=wx+b$ ni oladi. $w$ vazn egri chiziqni gorizontal cho‘zadi, $b$ siljish uni suradi. Chiqish $0{,}5$ ga teng bo‘lgan markaz $x_0=-b/w$ nuqtaga tushadi, markazdagi qiyalik esa $w/4$ ga teng."),
-        ("viz", "sigmoid-shape", {"w": 2, "b": -2}, "<b>2-rasm.</b> $\\sigma(wx+b)$. Katta $|w|$ da egri chiziq deyarli zinaga aylanadi, $w&lt;0$ da — ag‘dariladi. Xira chiziqlar — $w/4$ va $w/2$ vaznli o‘sha funksiya."),
-        ("callout", "note", "Zina — limit sifatida", "$w\\to+\\infty$ da $\\sigma(w x)$ Xevisayd zinasiga intiladi: noldan chapda 0, o‘ngda 1. Sigmoida neyron tarmoqlarga tarixan aynan shunday kirgan — Makkallok — Pitts chegaraviy neyronining silliq, differensiallanuvchi o‘rinbosari sifatida."),
+        ("viz", "sigmoid-shape", {"w": 2, "b": -2}, "<b>2-rasm.</b> $\\sigma(wx+b)$. Katta $|w|$ da egri chiziq deyarli zinaga aylanadi, $w&lt;0$ da — ag‘dariladi. Xira chiziqlar — $\\sigma\\bigl((wx+b)/4\\bigr)$ va $\\sigma\\bigl((wx+b)/2\\bigr)$: markaz o‘sha, qiyalik esa 4 va 2 marta kichik."),
+        ("callout", "note", "Zina — limit sifatida", "$w\\to+\\infty$ da $\\sigma(w x)$ Xevisayd zinasiga intiladi: noldan chapda 0, o‘ngda 1 ($x=0$ nuqtaning o‘zida qiymat doim $0{,}5$). Sigmoida neyron tarmoqlarga tarixan aynan shunday kirgan — Makkallok — Pitts chegaraviy neyronining silliq, differensiallanuvchi o‘rinbosari sifatida."),
     ]),
     dict(id="derivative", title="Hosila: σ′ = σ(1 − σ)", blocks=[
         ("p", "Bu sahifaning asosiy formulasi. Uni ikki usulda keltirib chiqaramiz — to‘g‘ridan-to‘g‘ri va nafis usulda."),
-        ("deep", "1-usul. Bo‘linma hosilasi (qadamma-qadam)", [
+        ("deep", "1-usul. Zanjir qoidasi (qadamma-qadam)", [
             ("p", "$\\sigma(x)=(1+e^{-x})^{-1}$ deb yozamiz va murakkab funksiya hosilasi qoidasini qo‘llaymiz:"),
             ("eq", r"\sigma'(x)=-(1+e^{-x})^{-2}\cdot\bigl(1+e^{-x}\bigr)'=-(1+e^{-x})^{-2}\cdot(-e^{-x})=\frac{e^{-x}}{(1+e^{-x})^{2}}"),
             ("p", "Kasrni ikki ko‘paytuvchiga ajratamiz:"),
@@ -451,7 +456,7 @@ SECTIONS = {
         ("callout", "note", "Yana bir talqin", "Sigmoida — logistik taqsimot funksiyasi: agar $\\varepsilon$ shovqin logistik taqsimotga ega bo‘lsa, $P(\\varepsilon\\le x)=\\sigma(x)$. Normal shovqinli o‘xshash model, $\\Phi(x)$, probit-regressiya deyiladi; uning egri chizig‘i $\\sigma(1{,}7x)$ bilan deyarli ustma-ust tushadi."),
     ]),
     dict(id="space", title="Ko‘p o‘lchovli fazodagi sigmoida", blocks=[
-        ("p", "Neyronning kirishlari ko‘p: $z=w_1x_1+w_2x_2+\\dots+b$. Giperteksislikdan olingan sigmoida — $w^\\top x+b=0$ chegara bo‘ylab ko‘ndalang 0 dan 1 gacha ko‘tariladigan va chegara bo‘ylab o‘zgarmaydigan «burma». $w$ vaznlar vektori eng tik ko‘tarilish yo‘nalishini ko‘rsatadi, uning uzunligi esa burmaning tikligini belgilaydi."),
+        ("p", "Neyronning kirishlari ko‘p: $z=w_1x_1+w_2x_2+\\dots+b$. Bunday chiziqli funksiyadan olingan sigmoida — $w^\\top x+b=0$ chegara bo‘ylab ko‘ndalang 0 dan 1 gacha ko‘tariladigan va chegara bo‘ylab o‘zgarmaydigan «burma». $w$ vaznlar vektori eng tik ko‘tarilish yo‘nalishini ko‘rsatadi, uning uzunligi esa burmaning tikligini belgilaydi."),
         ("viz", "sigmoid-logreg", {"w1": -0.5, "w2": 1.5, "b": 1.5}, "<b>5-rasm.</b> Ikki belgili logistik regressiya. Chapda — 3D’dagi ehtimollik sirti (uni aylantirish mumkin), nuqtalar o‘z sinfi balandligida turibdi. O‘ngda — yuqoridan ko‘rinish: yaxlit chiziq — $p=0{,}5$ chegara, punktir — $p=0{,}1$ va $p=0{,}9$, strelka — $w$ yo‘nalishi. «Boshlash»ni bosing: $0{,}5$ qadamli BCE bo‘yicha gradiyent tushish vaznlarni o‘zi topadi."),
         ("p", "O‘qitish o‘sha hosiladan foydalanadi. BCE yo‘qotishi uchun logit bo‘yicha gradiyent $\\sigma(z)-y$ ga teng (keltirib chiqarilishi — <a href=\"../bce/\">BCE</a> sahifasida), shuning uchun vaznlar bo‘yicha gradiyent tushish qadami:"),
         ("eq", r"w\leftarrow w-\eta\,\frac1n\sum_{i=1}^{n}\bigl(\sigma(w^\top x_i+b)-y_i\bigr)\,x_i"),
@@ -459,13 +464,14 @@ SECTIONS = {
     ]),
     dict(id="training", title="O‘qitishdagi sigmoida: to‘yinish va gradiyent so‘nishi", blocks=[
         ("p", "Agar neyronning $z$ kirishlari modul bo‘yicha katta bo‘lsa, sigmoida $\\sigma'(z)\\approx0$ bo‘lgan yassi chekkalarda ishlaydi. Bunday neyron orqali gradiyent deyarli o‘tmaydi — neyron <b>to‘yingan</b>. $\\sigma'&lt;0{,}01$ to‘yinish $|z|&gt;4{,}6$ da boshlanadi."),
-        ("viz", "sigmoid-saturation", {"s": 1}, "<b>6-rasm.</b> Ko‘k soha — $z\\sim N(\\mu,\\,s^2)$ kirishlar taqsimoti, to‘q sariq — hosila. $s=1$ da o‘rtacha hosila $0{,}207$ va to‘yingan kirishlar deyarli yo‘q; $s=4$ da o‘rtacha hosila $0{,}091$ gacha tushadi, kirishlarning choragi ($25\\%$) esa to‘yingan."),
-        ("p", "Initsializatsiya qoidasi shundan kelib chiqadi: vaznlar $z$ dispersiyasi birga yaqin bo‘ladigan qilib tanlanadi (Ksavye — Gloro initsializatsiyasi, $\\operatorname{Var}w=1/n_{\\text{in}}$), ma’lumotlar esa normallashtiriladi."),
+        ("viz", "sigmoid-saturation", {"s": 1}, "<b>6-rasm.</b> Ko‘k soha — $z\\sim N(\\mu,\\,s^2)$ kirishlar taqsimoti, to‘q sariq — hosila (ko‘k egri chiziq balandligi shartli masshtabda). $s=1$ da o‘rtacha hosila $0{,}207$ va to‘yingan kirishlar deyarli yo‘q; $s=4$ da o‘rtacha hosila $0{,}091$ gacha tushadi, kirishlarning choragi ($25\\%$) esa to‘yingan."),
+        ("p", "Initsializatsiya qoidasi shundan kelib chiqadi: vaznlar $z$ dispersiyasi birga yaqin bo‘ladigan qilib tanlanadi (LeKun initsializatsiyasi, $\\operatorname{Var}w=1/n_{\\text{in}}$, yoki Gloro (Xavier) initsializatsiyasi, $\\operatorname{Var}w=2/(n_{\\text{in}}+n_{\\text{out}})$), ma’lumotlar esa normallashtiriladi."),
         ("h3", "Chuqur tarmoqda gradiyent so‘nishi"),
-        ("p", "Zanjir qoidasiga ko‘ra $l$ qatlamdagi gradiyent — yuqoridagi barcha qatlamlar hosilalarining ko‘paytmasi. Sigmoidada har bir hosila $\\tfrac14$ dan oshmaydi, shuning uchun 10 qatlamdan keyin ko‘paytuvchi $0{,}25^{10}\\approx9{,}5\\cdot10^{-7}$ dan oshmaydi."),
-        ("eq", r"\frac{\partial L}{\partial h_l}=\frac{\partial L}{\partial h_L}\prod_{k=l+1}^{L}W_k^{\top}\operatorname{diag}\bigl(\sigma'(z_k)\bigr)"),
-        ("viz", "sigmoid-vanishing", {"depth": 10}, "<b>7-rasm.</b> Kengligi 64 bo‘lgan tasodifiy tarmoqning har bir qatlamidagi gradiyent normasi (sigmoid va tanh uchun Ksavye, ReLU uchun Xe initsializatsiyasi). Vertikal shkala logarifmik. Sigmoidada kirishdagi gradiyent chiqishdagidan bir necha tartibga kichik; tanh va ReLU’da u deyarli so‘nmaydi."),
-        ("callout", "history", "Nega sigmoida yashirin qatlamlardan ketdi", "2010-yilgacha sigmoidali chuqur tarmoqlar yomon o‘qitilardi. Gloro va Benjio (2010) to‘yinish rolini ko‘rsatib, initsializatsiya taklif qildi, ReLU (Nair va Xinton, 2010; Gloro va boshq., 2011) esa muammoni deyarli bartaraf etdi. Bugun sigmoida aynan 0 dan 1 gacha ulush kerak bo‘lgan joyda yashaydi: binar klassifikator chiqishida va ventillarda."),
+        ("p", "$h_k=\\sigma(z_k)$, $z_k=W_kh_{k-1}$ bo‘lsin. Zanjir qoidasiga ko‘ra $\\mathcal L$ yo‘qotishning $l$ qatlam chiqishi bo‘yicha gradiyenti — yuqoridagi barcha qatlamlar yakobianlarining ko‘paytmasi, ularning har birida $\\operatorname{diag}\\bigl(\\sigma'(z_k)\\bigr)$ bor:"),
+        ("eq", r"\frac{\partial \mathcal L}{\partial h_l}=\frac{\partial \mathcal L}{\partial h_L}\,\frac{\partial h_L}{\partial h_{L-1}}\cdots\frac{\partial h_{l+1}}{\partial h_l},\qquad \frac{\partial h_k}{\partial h_{k-1}}=\operatorname{diag}\bigl(\sigma'(z_k)\bigr)\,W_k"),
+        ("p", "Sigmoidada har bir $\\sigma'\\le\\tfrac14$, shuning uchun 10 qatlamdan keyin faqat hosilalardan kelgan ko‘paytuvchi $0{,}25^{10}\\approx9{,}5\\cdot10^{-7}$ dan oshmaydi. Gloro initsializatsiyasida $W_k$ vaznlar buni qoplamaydi: ular signal normasini taxminan bir darajasida saqlaydi."),
+        ("viz", "sigmoid-vanishing", {"depth": 10}, "<b>7-rasm.</b> Kengligi 64 bo‘lgan tasodifiy tarmoqning har bir qatlamidagi gradiyent normasi (sigmoid va tanh uchun Gloro, ReLU uchun Xe initsializatsiyasi). Vertikal shkala logarifmik, punktir — $0{,}25^{L-l}$ bahosi. Chuqurlik 10 bo‘lganda sigmoidada kirishdagi gradiyent chiqishdagidan $2{,}4\\cdot10^{-6}$ marta kichik; tanh’da nisbat taxminan $0{,}2$, ReLU’da — taxminan $2{,}4$ (gradiyent hatto biroz o‘sadi)."),
+        ("callout", "history", "Nega sigmoida yashirin qatlamlardan ketdi", "2010-yilgacha sigmoidali chuqur tarmoqlar, qatlamma-qatlam oldindan o‘qitishsiz (Xinton va boshq., 2006), yomon o‘qitilardi. Gloro va Benjio (2010) to‘yinish rolini ko‘rsatib, initsializatsiya taklif qildi, ReLU (Nair va Xinton, 2010; Gloro va boshq., 2011) esa muammoni deyarli bartaraf etdi. Bugun sigmoida aynan 0 dan 1 gacha ulush kerak bo‘lgan joyda yashaydi: binar klassifikator chiqishida va ventillarda."),
     ]),
     dict(id="code", title="Kodda: barqaror va kutilmagan holatlarsiz", blocks=[
         ("p", "Sodda $1/(1+e^{-x})$ formula $x=-1000$ da $e^{1000}$ ni hisoblaydi — to‘lib ketish. Natija baribir 0 chiqadi, lekin ogohlantirish bilan, $\\log\\sigma(x)$ da esa $-\\infty$ paydo bo‘ladi. Ikkinchi muammo — aniqlik yo‘qolishi: float64 da $1-\\sigma(40)$ aynan 0 ga teng, haqiqiy qiymat esa $\\sigma(-40)\\approx4{,}25\\cdot10^{-18}$."),
@@ -476,9 +482,9 @@ SECTIONS = {
     dict(id="mistakes", title="Ko‘p uchraydigan xatolar", blocks=[
         ("ol", [
             "<b>Chuqur tarmoqning yashirin qatlamlarida sigmoida</b> — gradiyent so‘nishi va siljigan (markazlashmagan) aktivatsiyalar. ReLU, GELU, SiLU oling; sigmoidani faqat chiqishda yoki ventillarda qoldiring.",
-            "<b>Bitta chiqishda softmax o‘rniga sigmoida.</b> $K&gt;2$ ta o‘zaro istisno sinf uchun <a href=\"../softmax/\">softmax</a> kerak; har bir chiqishdagi sigmoida — sinflar mustaqil bo‘lgan multi-label.",
-            "<b>Ikki karra sigmoida</b>: model allaqachon ehtimollik qaytaradi, yo‘qotish esa σ ni yana qo‘llaydi (masalan, <code>sigmoid</code> ustidan <code>BCEWithLogitsLoss</code>). O‘qitish ketadi, lekin gradiyentlar buziladi.",
-            "<b>«Standart» 0,5 chegara.</b> U faqat xato narxlari teng va sinflar muvozanatli bo‘lganda optimal. Chegara validatsiyada metrika bo‘yicha tanlanadi.",
+            "<b>O‘zaro istisno sinflar uchun softmax o‘rniga sigmoidalar.</b> $K&gt;2$ ta o‘zaro istisno sinf uchun <a href=\"../softmax/\">softmax</a> kerak; har bir chiqishdagi sigmoida — sinflar mustaqil bo‘lgan multi-label.",
+            "<b>Ikki karra sigmoida</b>: model allaqachon ehtimollik qaytaradi, yo‘qotish esa σ ni yana qo‘llaydi (masalan, <code>sigmoid</code> ustidan <code>BCEWithLogitsLoss</code>). O‘qitish ketadi, lekin «ehtimolliklar» $(0{,}5;\\,0{,}73)$ ga siqiladi, yo‘qotish kichik bo‘la olmaydi va gradiyentlar buziladi.",
+            "<b>«Standart» 0,5 chegara.</b> Kalibrlangan ehtimolliklar uchun u xatolar ulushini minimallashtiradi, lekin faqat ikkala xato narxi teng bo‘lsa. Xato narxlari har xil bo‘lsa, shuningdek sinflar nomutanosib bo‘lganda F1 yoki to‘liqlik (recall) uchun eng yaxshi chegara boshqacha — u validatsiyada metrika bo‘yicha tanlanadi.",
             "<b>Kalibrlashsiz «σ(z) = 0,9, demak model 90% ishonchli» xulosasi.</b> Sigmoida $(0;1)$ dagi son beradi, kalibrlanganlik esa o‘qitish xossasi (BCE unga yordam beradi, qayta o‘qitish buzadi).",
         ]),
     ]),
@@ -486,13 +492,13 @@ SECTIONS = {
         ("ul", [
             "<a href=\"../tanh/\">tanh</a>: $\\tanh x=2\\sigma(2x)-1$ — maksimal qiyaligi 1 bo‘lgan markazlashgan sigmoida.",
             "<a href=\"../softmax/\">Softmax</a>: ikki sinf uchun $\\operatorname{softmax}(z_1,z_2)_1=\\sigma(z_1-z_2)$.",
-            "<a href=\"../bce/\">BCE</a>: sigmoida bilan juftlikda $\\hat y-y$ gradiyent beradi — $\\sigma'$ ko‘paytuvchisiz, demak model xato qilganda to‘yinishsiz.",
+            "<a href=\"../bce/\">BCE</a>: sigmoida bilan juftlikda logit bo‘yicha $\\hat y-y$ gradiyent beradi — $\\sigma'$ ko‘paytuvchisiz, demak model xato qilganda to‘yinishsiz.",
             "<a href=\"../silu/\">SiLU / Swish</a>: $x\\,\\sigma(x)$ — kirishning o‘zi uchun «yumshoq ventil» sifatidagi sigmoida.",
-            "<a href=\"../focal/\">Focal Loss</a>: odatda to‘g‘ri sinf uchun $p_t=\\sigma(z)$ dan hisoblanadi.",
+            "<a href=\"../focal/\">Focal Loss</a>: odatda to‘g‘ri sinf ehtimolligi $p_t$ dan hisoblanadi: $y=1$ da $\\sigma(z)$, $y=0$ da $1-\\sigma(z)=\\sigma(-z)$.",
         ]),
     ]),
     dict(id="summary", title="Xulosa", blocks=[
-        ("callout", "key", None, "1) $\\sigma(x)=1/(1+e^{-x})$ $\\mathbb R$ ni $(0;1)$ ga o‘tkazadi, $(0;\\,0{,}5)$ dan o‘tadi va simmetrik: $\\sigma(-x)=1-\\sigma(x)$. 2) $\\sigma'=\\sigma(1-\\sigma)\\le\\tfrac14$: backprop arzon, lekin chekkalarda gradiyent so‘nadi. 3) Sigmoida logitga teskari: logistik regressiya imkoniyatlar logarifmini chiziqli funksiya bilan modellashtiradi. 4) Ko‘p o‘lchovli holatda bu $w^\\top x+b=0$ giperteksislik bo‘ylab burma. 5) Kodda — barqaror shakllar va logitlardagi yo‘qotishlar."),
+        ("callout", "key", None, "1) $\\sigma(x)=1/(1+e^{-x})$ $\\mathbb R$ ni $(0;1)$ ga o‘tkazadi, $(0;\\,0{,}5)$ dan o‘tadi va simmetrik: $\\sigma(-x)=1-\\sigma(x)$. 2) $\\sigma'=\\sigma(1-\\sigma)\\le\\tfrac14$: backprop arzon, lekin chekkalarda gradiyent so‘nadi. 3) Sigmoida logitga teskari: logistik regressiya imkoniyatlar logarifmini chiziqli funksiya bilan modellashtiradi. 4) Ko‘p o‘lchovli holatda bu $w^\\top x+b=0$ gipertekislik bo‘ylab burma. 5) Kodda — barqaror shakllar va logitlardagi yo‘qotishlar."),
     ]),
     dict(id="quiz", title="O‘zingizni tekshiring", blocks=[
         ("quiz", [

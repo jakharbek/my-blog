@@ -12,9 +12,9 @@ META = dict(
         "uz": "Zamonaviy til modellarining aktivatsiyasi: kirish o‘zining sigmoidasiga ko‘paytiriladi. Mayda detallarigacha tahlil qilamiz: nega uning −0,278 minimumi va birdan katta hosilasi bor, u ReLU va GELU bilan qanday bog‘liq, Swish-β oilasi qayerdan keladi va SiLU LLaMA va Qwen’dagi SwiGLU bloki ichida qanday ishlaydi.",
     },
     description={
-        "ru": "SiLU (Swish) подробно: самовентиль x·σ(x), минимум через W-функцию Ламберта, производная и её выброс выше 1, Swish-β, сравнение с ReLU и GELU, вероятностный смысл, SwiGLU в 3D, обучение, код на NumPy и PyTorch.",
-        "en": "SiLU (Swish) in depth: the self-gate x·σ(x), the minimum via the Lambert W function, the derivative and its overshoot above 1, Swish-β, comparison with ReLU and GELU, the probabilistic meaning, SwiGLU in 3D, training, code in NumPy and PyTorch.",
-        "uz": "SiLU (Swish) batafsil: x·σ(x) o‘z-o‘zini ventillash, Lambert W funksiyasi orqali minimum, hosila va uning 1 dan yuqori chiqishi, Swish-β, ReLU va GELU bilan taqqoslash, ehtimollik ma’nosi, 3D’da SwiGLU, o‘qitish, NumPy va PyTorch’da kod.",
+        "ru": "SiLU (Swish) x·σ(x) по косточкам: минимум через W-функцию Ламберта, производная выше 1, Swish-β, связь с ReLU и GELU, SwiGLU в LLaMA, код NumPy и PyTorch.",
+        "en": "SiLU (Swish) x·σ(x) in depth: the minimum via Lambert W, a derivative above 1, Swish-β, links to ReLU and GELU, SwiGLU in LLaMA, NumPy and PyTorch code.",
+        "uz": "SiLU (Swish) x·σ(x) batafsil: Lambert W orqali minimum, 1 dan katta hosila, Swish-β, ReLU va GELU bilan bog‘liqlik, LLaMA’dagi SwiGLU, NumPy va PyTorch kodi.",
     },
 )
 
@@ -46,6 +46,7 @@ def silu_grad(x):
 def swish(x, beta=1.0):
     return x * sigmoid(beta * x)
 
+np.set_printoptions(precision=4, suppress=True)
 x = np.array([-1000.0, -1.0, 0.0, 1.0, 2.3994])
 print(silu(x))        # [-0.     -0.2689  0.      0.7311  2.1997]
 print(silu_grad(x))   # [-0.      0.0723  0.5     0.9277  1.0998]'''
@@ -96,7 +97,7 @@ SECTIONS = {
         ("p", "Где она встречается:"),
         ("ul", [
             "<b>большие языковые модели</b> — LLaMA, Qwen, Mistral и PaLM используют SiLU внутри блока SwiGLU (раздел 7); в конфигурациях моделей это строка <code>hidden_act = \"silu\"</code>;",
-            "<b>компьютерное зрение</b> — EfficientNet (2019) построен на Swish, детекторы семейства YOLO начиная с YOLOv5 — на SiLU;",
+            "<b>компьютерное зрение</b> — EfficientNet (2019) построен на Swish, детекторы YOLOv5 и YOLOv8 — на SiLU;",
             "<b>мобильные сети</b> — MobileNetV3 использует «жёсткий» Swish, дешёвое кусочно-полиномиальное приближение $x\\cdot\\operatorname{ReLU6}(x+3)/6$;",
             "<b>обучение с подкреплением</b> — Элфвинг, Утибе и Дойя (2017) применили её для аппроксимации функций ценности под именем SiLU.",
         ]),
@@ -130,7 +131,7 @@ SECTIONS = {
             "<b>Ограниченность снизу</b>: область значений $[-0{,}2785;\\,+\\infty)$. Сверху не ограничена.",
             "<b>Связь с ReLU</b>: $\\operatorname{ReLU}(x)-\\operatorname{SiLU}(x)=|x|\\,\\sigma(-|x|)$ — чётная функция от 0 до $0{,}2785$. SiLU всегда лежит ниже ReLU, но не дальше чем на $0{,}2785$.",
             "<b>Антисимметрия разности</b>: $\\operatorname{SiLU}(x)-\\operatorname{SiLU}(-x)=x$, потому что $\\sigma(x)+\\sigma(-x)=1$.",
-            "<b>Выпуклость</b>: функция выпукла на $(-2{,}3994;\\,2{,}3994)$ и вогнута вне этого отрезка; это точки перегиба.",
+            "<b>Выпуклость</b>: функция выпукла на интервале $(-2{,}3994;\\,2{,}3994)$ и вогнута вне его; концы интервала $\\pm2{,}3994$ — точки перегиба.",
         ]),
         ("h3", "Минимум: где и почему −0,278"),
         ("p", "Минимум находится там, где производная равна нулю. Результат удобно записать через W-функцию Ламберта — решение уравнения $We^{W}=c$:"),
@@ -147,7 +148,7 @@ SECTIONS = {
         ("eq", r"\operatorname{Swish}_\beta(x)=x\,\sigma(\beta x),\qquad \lim_{\beta\to\infty}\operatorname{Swish}_\beta(x)=\operatorname{ReLU}(x),\qquad \operatorname{Swish}_0(x)=\frac{x}{2}"),
         ("p", "При $\\beta=0$ вентиль всегда открыт наполовину, и функция линейна. При $\\beta\\to\\infty$ сигмоида превращается в ступеньку, и получается ReLU. Swish-β — это мост между линейной функцией и ReLU, а SiLU — точка $\\beta=1$ на этом мосту. Замена $u=\\beta x$ показывает, что все члены семейства — один и тот же график в другом масштабе: $\\operatorname{Swish}_\\beta(x)=\\frac{1}{\\beta}\\operatorname{SiLU}(\\beta x)$."),
         ("viz", "silu-beta", {"beta": 1}, "<b>Рисунок 2.</b> $x\\,\\sigma(\\beta x)$ и её производная. При $\\beta=1$ минимум $(-1{,}278;\\,-0{,}278)$, наклон в нуле $0{,}5$, максимум производной $1{,}0998$. Подвигайте $\\beta$: минимум перемещается в $(-1{,}278/\\beta;\\,-0{,}278/\\beta)$, а наклон в нуле и максимум производной не меняются. При $\\beta=1{,}702$ функция почти совпадает с GELU."),
-        ("p", "Рамачандран, Зоф и Ле (2017) нашли $x\\,\\sigma(\\beta x)$ автоматическим поиском среди тысяч формул-кандидатов и назвали Swish; обучаемое $\\beta$ почти ничего не добавило, и на практике закрепилось $\\beta=1$."),
+        ("callout", "history", "Одна функция — два имени", "Название SiLU (Sigmoid Linear Unit) впервые появилось в статье Хендрикса и Гимпела о <a href=\"../gelu/\">GELU</a> (2016). Элфвинг, Утибе и Дойя (2017) применили $x\\,\\sigma(x)$ в обучении с подкреплением. Рамачандран, Зоф и Ле (2017) независимо нашли $x\\,\\sigma(\\beta x)$ автоматическим поиском по пространству формул-кандидатов и назвали Swish; обучаемое $\\beta$ мало что добавило, и на практике закрепилось $\\beta=1$. Отсюда два имени одной функции: <code>silu</code> в PyTorch и Hugging Face, <code>swish</code> в Keras."),
     ]),
     dict(id="derivative", title="Производная: больше единицы и меньше нуля", blocks=[
         ("p", "По правилу произведения производная SiLU складывается из двух частей: вентиля и того, как быстро вентиль открывается."),
@@ -177,7 +178,7 @@ SECTIONS = {
         ("ul", [
             "<b>ReLU</b>: первая производная — ступенька, вторая — дельта-функция. Для оптимизатора поверхность ошибки состоит из плоских кусков с резкими рёбрами.",
             "<b>SiLU и GELU</b>: производные непрерывны, вторые производные — гладкие «горбы» с максимумом в нуле ($0{,}5$ у SiLU, $2\\varphi(0)\\approx0{,}798$ у GELU). Ландшафт ошибки становится гладким, и градиент меняется постепенно.",
-            "<b>GELU ≈ Swish с $\\beta=1{,}702$</b>: $x\\,\\Phi(x)\\approx x\\,\\sigma(1{,}702x)$ с наибольшей ошибкой около $0{,}02$. GELU — чуть более «крутой» SiLU: минимум мельче ($-0{,}170$ против $-0{,}278$), максимум производной выше ($1{,}129$ против $1{,}100$).",
+            "<b>GELU ≈ Swish с $\\beta=1{,}702$</b>: $x\\,\\Phi(x)\\approx x\\,\\sigma(1{,}702x)$ с наибольшей ошибкой около $0{,}02$. Поэтому GELU похожа на уменьшенную в $1{,}702$ раза копию SiLU: минимум мельче и ближе к нулю ($-0{,}170$ при $x\\approx-0{,}752$ против $-0{,}278$ при $x\\approx-1{,}278$; у самой Swish-1,702 было бы $-0{,}164$). А вот максимум производной у GELU выше ($1{,}129$ против $1{,}100$), и масштабом это не объяснить: у всех Swish-β он один и тот же, $1{,}0998$. Это уже разница между нормальным и логистическим законом (см. ниже).",
         ]),
         ("h3", "Вероятностный смысл: случайный вентиль"),
         ("p", "У SiLU и GELU есть общее объяснение. Пусть нейрон пропускает вход целиком, если вход больше случайного шума $\\varepsilon$, и полностью блокирует, если меньше: $y=x\\cdot[\\varepsilon\\le x]$. Тогда среднее значение выхода"),
@@ -196,14 +197,14 @@ SECTIONS = {
             (r"W_2", "проекция обратно в размерность $d$."),
         ]),
         ("p", "Для одной компоненты это функция двух чисел: $g(a,b)=\\operatorname{SiLU}(a)\\cdot b$, где $a$ — компонента ветки вентиля, $b$ — ветки значения. Её и стоит увидеть в 3D."),
-        ("viz", "silu-swiglu", {"gate": "silu", "a": 1.5, "b": 2}, "<b>Рисунок 6.</b> Поверхность $\\operatorname{SiLU}(a)\\cdot b$ (её можно вращать) и вид сверху. При $a&lt;0$ вентиль почти закрыт, и поверхность почти плоская при любом $b$; при $a&gt;0$ она становится «седлом» $\\approx a\\cdot b$. В точке $(1{,}5;\\,2)$: вентиль $\\operatorname{SiLU}(1{,}5)=1{,}226$, выход $2{,}453$, $\\partial/\\partial a=\\operatorname{SiLU}'(1{,}5)\\cdot b=2{,}083$, $\\partial/\\partial b=1{,}226$. Переключите вентиль на ReLU, GELU, сигмоиду или уберите его совсем."),
+        ("viz", "silu-swiglu", {"gate": "silu", "a": 1.5, "b": 2}, "<b>Рисунок 6.</b> Поверхность $\\operatorname{SiLU}(a)\\cdot b$ (её можно вращать) и вид сверху. При $a&lt;0$ вентиль почти закрыт ($|\\operatorname{SiLU}(a)|\\le0{,}278$), и поверхность почти плоская; при больших $a&gt;0$ она приближается к седлу $a\\cdot b$. В точке $(1{,}5;\\,2)$: вентиль $\\operatorname{SiLU}(1{,}5)=1{,}226$, выход $2{,}453$, $\\partial/\\partial a=\\operatorname{SiLU}'(1{,}5)\\cdot b=2{,}083$, $\\partial/\\partial b=1{,}226$. Переключите вентиль на ReLU, GELU, сигмоиду или уберите его совсем."),
         ("p", "Градиенты здесь простые и поучительные: $\\frac{\\partial g}{\\partial b}=\\operatorname{SiLU}(a)$ — ветка значения учится пропорционально тому, насколько открыт вентиль; $\\frac{\\partial g}{\\partial a}=\\operatorname{SiLU}'(a)\\cdot b$ — вентиль учится, только если через него есть что пропускать."),
         ("h3", "Почему скрытый размер 8/3·d"),
         ("p", "В SwiGLU три матрицы вместо двух. Чтобы число параметров осталось как у обычного FFN с $h=4d$ ($2\\cdot d\\cdot4d=8d^2$), скрытый размер уменьшают до $h=\\frac{2}{3}\\cdot4d=\\frac83 d$: тогда $3\\cdot d\\cdot\\frac83d=8d^2$. У LLaMA-7B $\\frac83\\cdot4096\\approx10923$ округлено вверх до кратного 256: $h=11008$. Получается $3\\cdot4096\\cdot11008=135\\,266\\,304$ параметра на блок против $134\\,217\\,728$ у FFN с $h=4d$ — всего на $0{,}8\\%$ больше."),
         ("callout", "history", "Откуда это пришло", "Вентильные линейные блоки (GLU, $\\sigma(W_1x)\\odot W_3x$) предложили Дофин и др. (2017) для свёрточных языковых моделей. Шазир (2020) сравнил варианты с разными вентилями — ReGLU, GEGLU, SwiGLU — и все они обошли обычный FFN. SwiGLU выбрали для PaLM (2022), затем для LLaMA (2023), и с тех пор он стал стандартом открытых LLM: Qwen, Mistral и многие другие."),
     ]),
     dict(id="training", title="SiLU в обучении", blocks=[
-        ("p", "Чем гладкая активация помогает на практике? Сеть из нейронов ReLU собирает функцию из отрезков прямых, сеть из SiLU — из гладких «изгибов». Если целевая зависимость гладкая, SiLU-нейронам проще её повторить. Кроме того, у SiLU нет точного нуля градиента: при отрицательном входе производная маленькая, но не нулевая, и нейрон не «умирает»."),
+        ("p", "Чем гладкая активация помогает на практике? Сеть из нейронов ReLU собирает функцию из отрезков прямых, сеть из SiLU — из гладких «изгибов». Если целевая зависимость гладкая, SiLU-нейронам проще её повторить. Кроме того, у SiLU нет «мёртвой» зоны: производная обращается в ноль лишь в одной точке $x^*\\approx-1{,}278$, а при остальных отрицательных входах она маленькая, но не нулевая, так что нейрон не «умирает», как ReLU с отрицательным входом."),
         ("p", "Эксперимент: сеть $1\\to6\\to1$ приближает кривую $y=\\sin1{,}5x+0{,}3x$ по 40 точкам. Две сети стартуют с одинаковых весов, отличаются только активацией; обучение — Adam с шагом $0{,}03$, 2000 шагов."),
         ("viz", "silu-train", {"seed": 1}, "<b>Рисунок 7.</b> Нажмите «Пуск». Синяя кривая — сеть с SiLU, чёрный пунктир — с ReLU. При инициализации №1 через 2000 шагов ошибка SiLU $0{,}00139$, ReLU — $0{,}00406$, почти втрое больше. Включите «Показать нейроны»: у ReLU каждый нейрон — «уголок», у SiLU — гладкий изгиб. Редкие всплески на графике ошибки — обычные колебания Adam с постоянным шагом."),
         ("p", "Чтобы не делать выводов по одному запуску, мы повторили опыт для восьми разных инициализаций. SiLU оказалась точнее во всех восьми, с выигрышем от $1{,}4$ до $5{,}2$ раза. Но это свойство гладкой цели: на кусочно-линейной зависимости ReLU может оказаться не хуже. Поэтому выбор активации — эмпирический вопрос, и в больших моделях его решают экспериментом."),
@@ -260,7 +261,7 @@ SECTIONS = {
         ("p", "Where it appears:"),
         ("ul", [
             "<b>large language models</b> — LLaMA, Qwen, Mistral and PaLM use SiLU inside the SwiGLU block (section 7); in model configs it is the line <code>hidden_act = \"silu\"</code>;",
-            "<b>computer vision</b> — EfficientNet (2019) is built on Swish, and the YOLO family of detectors uses SiLU starting with YOLOv5;",
+            "<b>computer vision</b> — EfficientNet (2019) is built on Swish, and the YOLOv5 and YOLOv8 detectors use SiLU;",
             "<b>mobile networks</b> — MobileNetV3 uses the “hard” Swish, a cheap piecewise-polynomial approximation $x\\cdot\\operatorname{ReLU6}(x+3)/6$;",
             "<b>reinforcement learning</b> — Elfwing, Uchibe and Doya (2017) used it to approximate value functions under the name SiLU.",
         ]),
@@ -294,7 +295,7 @@ SECTIONS = {
             "<b>Bounded below</b>: the range is $[-0.2785,\\,+\\infty)$. It is unbounded above.",
             "<b>Link with ReLU</b>: $\\operatorname{ReLU}(x)-\\operatorname{SiLU}(x)=|x|\\,\\sigma(-|x|)$ — an even function between 0 and $0.2785$. SiLU always lies below ReLU, but never more than $0.2785$ below.",
             "<b>Antisymmetry of the difference</b>: $\\operatorname{SiLU}(x)-\\operatorname{SiLU}(-x)=x$, because $\\sigma(x)+\\sigma(-x)=1$.",
-            "<b>Convexity</b>: the function is convex on $(-2.3994,\\,2.3994)$ and concave outside it; these are the inflection points.",
+            "<b>Convexity</b>: the function is convex on the interval $(-2.3994,\\,2.3994)$ and concave outside it; the endpoints $\\pm2.3994$ are the inflection points.",
         ]),
         ("h3", "The minimum: where and why −0.278"),
         ("p", "The minimum is where the derivative is zero. The result is neatly written through the Lambert W function — the solution of $We^{W}=c$:"),
@@ -311,7 +312,7 @@ SECTIONS = {
         ("eq", r"\operatorname{Swish}_\beta(x)=x\,\sigma(\beta x),\qquad \lim_{\beta\to\infty}\operatorname{Swish}_\beta(x)=\operatorname{ReLU}(x),\qquad \operatorname{Swish}_0(x)=\frac{x}{2}"),
         ("p", "With $\\beta=0$ the gate is always half open, and the function is linear. As $\\beta\\to\\infty$ the sigmoid turns into a step, and we get ReLU. Swish-β is a bridge between a linear function and ReLU, and SiLU is the point $\\beta=1$ on that bridge. The substitution $u=\\beta x$ shows that all members of the family are one and the same graph at a different scale: $\\operatorname{Swish}_\\beta(x)=\\frac{1}{\\beta}\\operatorname{SiLU}(\\beta x)$."),
         ("viz", "silu-beta", {"beta": 1}, "<b>Figure 2.</b> $x\\,\\sigma(\\beta x)$ and its derivative. At $\\beta=1$ the minimum is $(-1.278,\\,-0.278)$, the slope at zero is $0.5$, and the maximum of the derivative is $1.0998$. Move $\\beta$: the minimum shifts to $(-1.278/\\beta,\\,-0.278/\\beta)$, while the slope at zero and the maximum of the derivative stay the same. At $\\beta=1.702$ the function nearly coincides with GELU."),
-        ("p", "Ramachandran, Zoph and Le (2017) found $x\\,\\sigma(\\beta x)$ by an automated search among thousands of candidate formulas and called it Swish; a learnable $\\beta$ added almost nothing, and in practice $\\beta=1$ stuck."),
+        ("callout", "history", "One function, two names", "The name SiLU (Sigmoid Linear Unit) first appeared in Hendrycks and Gimpel’s paper on <a href=\"../gelu/\">GELU</a> (2016). Elfwing, Uchibe and Doya (2017) used $x\\,\\sigma(x)$ in reinforcement learning. Ramachandran, Zoph and Le (2017) independently found $x\\,\\sigma(\\beta x)$ by an automated search over a space of candidate formulas and called it Swish; a learnable $\\beta$ added little, and in practice $\\beta=1$ stuck. Hence two names for one function: <code>silu</code> in PyTorch and Hugging Face, <code>swish</code> in Keras."),
     ]),
     dict(id="derivative", title="The derivative: above one and below zero", blocks=[
         ("p", "By the product rule the derivative of SiLU is made of two parts: the gate and how fast the gate opens."),
@@ -341,7 +342,7 @@ SECTIONS = {
         ("ul", [
             "<b>ReLU</b>: the first derivative is a step, the second a delta function. For the optimizer the loss surface is made of flat pieces with sharp edges.",
             "<b>SiLU and GELU</b>: the derivatives are continuous, the second derivatives are smooth “humps” peaking at zero ($0.5$ for SiLU, $2\\varphi(0)\\approx0.798$ for GELU). The loss landscape becomes smooth, and the gradient changes gradually.",
-            "<b>GELU ≈ Swish with $\\beta=1.702$</b>: $x\\,\\Phi(x)\\approx x\\,\\sigma(1.702x)$ with a largest error of about $0.02$. GELU is a slightly “steeper” SiLU: its dip is shallower ($-0.170$ versus $-0.278$), and its maximum derivative is higher ($1.129$ versus $1.100$).",
+            "<b>GELU ≈ Swish with $\\beta=1.702$</b>: $x\\,\\Phi(x)\\approx x\\,\\sigma(1.702x)$ with a largest error of about $0.02$. So GELU looks like a copy of SiLU shrunk $1.702$ times: its dip is shallower and closer to zero ($-0.170$ at $x\\approx-0.752$ versus $-0.278$ at $x\\approx-1.278$; Swish-1.702 itself would give $-0.164$). Its maximum derivative, however, is higher ($1.129$ versus $1.100$), and scaling cannot explain that: it is the same $1.0998$ for every Swish-β. This is the difference between the normal and the logistic law (see below).",
         ]),
         ("h3", "The probabilistic meaning: a random gate"),
         ("p", "SiLU and GELU share an explanation. Let a neuron pass the input in full if the input is larger than a random noise $\\varepsilon$, and block it completely otherwise: $y=x\\cdot[\\varepsilon\\le x]$. Then the mean output is"),
@@ -360,14 +361,14 @@ SECTIONS = {
             (r"W_2", "the projection back to dimension $d$."),
         ]),
         ("p", "For a single component this is a function of two numbers: $g(a,b)=\\operatorname{SiLU}(a)\\cdot b$, where $a$ is a component of the gate branch and $b$ of the value branch. It is worth seeing in 3D."),
-        ("viz", "silu-swiglu", {"gate": "silu", "a": 1.5, "b": 2}, "<b>Figure 6.</b> The surface $\\operatorname{SiLU}(a)\\cdot b$ (you can rotate it) and the view from above. For $a&lt;0$ the gate is almost closed, and the surface is almost flat for any $b$; for $a&gt;0$ it becomes the “saddle” $\\approx a\\cdot b$. At the point $(1.5,\\,2)$: the gate $\\operatorname{SiLU}(1.5)=1.226$, the output $2.453$, $\\partial/\\partial a=\\operatorname{SiLU}'(1.5)\\cdot b=2.083$, $\\partial/\\partial b=1.226$. Switch the gate to ReLU, GELU, the sigmoid, or remove it altogether."),
+        ("viz", "silu-swiglu", {"gate": "silu", "a": 1.5, "b": 2}, "<b>Figure 6.</b> The surface $\\operatorname{SiLU}(a)\\cdot b$ (you can rotate it) and the view from above. For $a&lt;0$ the gate is almost closed ($|\\operatorname{SiLU}(a)|\\le0.278$), and the surface is almost flat; for large $a&gt;0$ it approaches the saddle $a\\cdot b$. At the point $(1.5,\\,2)$: the gate $\\operatorname{SiLU}(1.5)=1.226$, the output $2.453$, $\\partial/\\partial a=\\operatorname{SiLU}'(1.5)\\cdot b=2.083$, $\\partial/\\partial b=1.226$. Switch the gate to ReLU, GELU, the sigmoid, or remove it altogether."),
         ("p", "The gradients here are simple and instructive: $\\frac{\\partial g}{\\partial b}=\\operatorname{SiLU}(a)$ — the value branch learns in proportion to how far the gate is open; $\\frac{\\partial g}{\\partial a}=\\operatorname{SiLU}'(a)\\cdot b$ — the gate learns only if there is something to pass through it."),
         ("h3", "Why the hidden size is 8/3·d"),
         ("p", "SwiGLU has three matrices instead of two. To keep the parameter count of an ordinary FFN with $h=4d$ ($2\\cdot d\\cdot4d=8d^2$), the hidden size is reduced to $h=\\frac{2}{3}\\cdot4d=\\frac83 d$: then $3\\cdot d\\cdot\\frac83d=8d^2$. For LLaMA-7B $\\frac83\\cdot4096\\approx10923$ is rounded up to a multiple of 256: $h=11008$. That gives $3\\cdot4096\\cdot11008=135{,}266{,}304$ parameters per block versus $134{,}217{,}728$ for an FFN with $h=4d$ — only $0.8\\%$ more."),
         ("callout", "history", "Where it came from", "Gated linear units (GLU, $\\sigma(W_1x)\\odot W_3x$) were proposed by Dauphin et al. (2017) for convolutional language models. Shazeer (2020) compared variants with different gates — ReGLU, GEGLU, SwiGLU — and all of them beat the ordinary FFN. SwiGLU was chosen for PaLM (2022), then for LLaMA (2023), and since then it has been the standard of open LLMs: Qwen, Mistral and many others."),
     ]),
     dict(id="training", title="SiLU in training", blocks=[
-        ("p", "How does a smooth activation help in practice? A network of ReLU neurons assembles a function from line segments, a network of SiLUs from smooth “bends”. If the target dependence is smooth, SiLU neurons find it easier to reproduce. Besides, SiLU has no exact zero gradient: for a negative input the derivative is small but not zero, and the neuron does not “die”."),
+        ("p", "How does a smooth activation help in practice? A network of ReLU neurons assembles a function from line segments, a network of SiLUs from smooth “bends”. If the target dependence is smooth, SiLU neurons find it easier to reproduce. Besides, SiLU has no “dead” zone: its derivative vanishes only at the single point $x^*\\approx-1.278$, and for other negative inputs it is small but not zero, so the neuron does not “die” the way a ReLU with a negative input does."),
         ("p", "The experiment: a $1\\to6\\to1$ network approximates the curve $y=\\sin1.5x+0.3x$ from 40 points. Both networks start from the same weights and differ only in the activation; training is Adam with step $0.03$ for 2000 steps."),
         ("viz", "silu-train", {"seed": 1}, "<b>Figure 7.</b> Press “Play”. The blue curve is the network with SiLU, the black dashes the one with ReLU. With initialization #1, after 2000 steps the SiLU error is $0.00139$ and the ReLU error $0.00406$, almost three times larger. Turn on “Show the neurons”: in ReLU every neuron is a “corner”, in SiLU a smooth bend. The rare spikes in the error curve are the usual oscillations of Adam with a constant step."),
         ("p", "To avoid conclusions from a single run, we repeated the experiment for eight different initializations. SiLU was more accurate in all eight, by a factor of $1.4$ to $5.2$. But this is a property of a smooth target: on a piecewise-linear dependence ReLU may do no worse. So the choice of activation is an empirical question, and in large models it is settled by experiment."),
@@ -424,9 +425,9 @@ SECTIONS = {
         ("p", "U qayerda uchraydi:"),
         ("ul", [
             "<b>katta til modellari</b> — LLaMA, Qwen, Mistral va PaLM SiLU’ni SwiGLU bloki ichida ishlatadi (7-bo‘lim); model konfiguratsiyalarida bu <code>hidden_act = \"silu\"</code> qatori;",
-            "<b>kompyuter ko‘rishi</b> — EfficientNet (2019) Swish asosida qurilgan, YOLO oilasidagi detektorlar YOLOv5 dan boshlab SiLU’dan foydalanadi;",
+            "<b>kompyuter ko‘rishi</b> — EfficientNet (2019) Swish asosida qurilgan, YOLOv5 va YOLOv8 detektorlari SiLU’dan foydalanadi;",
             "<b>mobil tarmoqlar</b> — MobileNetV3 «qattiq» Swish’dan, arzon bo‘lak-polinomial $x\\cdot\\operatorname{ReLU6}(x+3)/6$ yaqinlashishdan foydalanadi;",
-            "<b>mustahkamlab o‘qitish</b> — Elfving, Utibe va Doya (2017) uni SiLU nomi bilan qiymat funksiyalarini approksimatsiya qilish uchun qo‘llagan.",
+            "<b>mustahkamlab o‘qitish</b> — Elfving, Uchibe va Doya (2017) uni SiLU nomi bilan qiymat funksiyalarini approksimatsiya qilish uchun qo‘llagan.",
         ]),
         ("callout", "key", "Bir daqiqada asosiysi", "$\\operatorname{SiLU}(x)=x\\,\\sigma(x)$. O‘ngda uzoqda u deyarli $x$ ga, chapda uzoqda deyarli 0 ga teng — ReLU kabi, lekin silliq. U nomonoton: minimum $x\\approx-1{,}278$ nuqtada $\\approx-0{,}278$. $\\sigma(x)\\bigl(1+x(1-\\sigma(x))\\bigr)$ hosila nolda $0{,}5$ ga teng va $x&gt;1{,}278$ da 1 dan oshadi (maksimum $\\approx1{,}100$). LLM’larda SiLU SwiGLU’da ventil vazifasini bajaradi: $\\operatorname{SiLU}(W_1x)\\odot W_3x$."),
     ]),
@@ -458,7 +459,7 @@ SECTIONS = {
             "<b>Quyidan chegaralanganlik</b>: qiymatlar sohasi $[-0{,}2785;\\,+\\infty)$. Yuqoridan chegaralanmagan.",
             "<b>ReLU bilan bog‘liqlik</b>: $\\operatorname{ReLU}(x)-\\operatorname{SiLU}(x)=|x|\\,\\sigma(-|x|)$ — 0 dan $0{,}2785$ gacha juft funksiya. SiLU doim ReLU’dan pastda yotadi, lekin $0{,}2785$ dan uzoq emas.",
             "<b>Ayirmaning antisimmetriyasi</b>: $\\operatorname{SiLU}(x)-\\operatorname{SiLU}(-x)=x$, chunki $\\sigma(x)+\\sigma(-x)=1$.",
-            "<b>Qavariqlik</b>: funksiya $(-2{,}3994;\\,2{,}3994)$ da qavariq va bu kesmadan tashqarida botiq; bular burilish nuqtalari.",
+            "<b>Qavariqlik</b>: funksiya $(-2{,}3994;\\,2{,}3994)$ oraliqda qavariq va undan tashqarida botiq; oraliq uchlari $\\pm2{,}3994$ — burilish nuqtalari.",
         ]),
         ("h3", "Minimum: qayerda va nega −0,278"),
         ("p", "Minimum hosila nolga teng bo‘lgan joyda. Natijani Lambert W-funksiyasi — $We^{W}=c$ tenglama yechimi orqali yozish qulay:"),
@@ -475,7 +476,7 @@ SECTIONS = {
         ("eq", r"\operatorname{Swish}_\beta(x)=x\,\sigma(\beta x),\qquad \lim_{\beta\to\infty}\operatorname{Swish}_\beta(x)=\operatorname{ReLU}(x),\qquad \operatorname{Swish}_0(x)=\frac{x}{2}"),
         ("p", "$\\beta=0$ da ventil doim yarim ochiq va funksiya chiziqli. $\\beta\\to\\infty$ da sigmoida zinaga aylanadi va ReLU hosil bo‘ladi. Swish-β — chiziqli funksiya va ReLU orasidagi ko‘prik, SiLU esa bu ko‘prikdagi $\\beta=1$ nuqta. $u=\\beta x$ almashtirish oilaning barcha a’zolari boshqa masshtabdagi bitta grafik ekanini ko‘rsatadi: $\\operatorname{Swish}_\\beta(x)=\\frac{1}{\\beta}\\operatorname{SiLU}(\\beta x)$."),
         ("viz", "silu-beta", {"beta": 1}, "<b>2-rasm.</b> $x\\,\\sigma(\\beta x)$ va uning hosilasi. $\\beta=1$ da minimum $(-1{,}278;\\,-0{,}278)$, noldagi qiyalik $0{,}5$, hosila maksimumi $1{,}0998$. $\\beta$ ni suring: minimum $(-1{,}278/\\beta;\\,-0{,}278/\\beta)$ ga ko‘chadi, noldagi qiyalik va hosila maksimumi esa o‘zgarmaydi. $\\beta=1{,}702$ da funksiya GELU bilan deyarli ustma-ust tushadi."),
-        ("p", "Ramachandran, Zof va Le (2017) $x\\,\\sigma(\\beta x)$ ni minglab nomzod formulalar orasidan avtomatik qidiruv bilan topib, Swish deb atashgan; o‘rganiladigan $\\beta$ deyarli hech narsa qo‘shmagan va amalda $\\beta=1$ qaror topgan."),
+        ("callout", "history", "Bitta funksiya — ikki nom", "SiLU (Sigmoid Linear Unit) nomi birinchi marta Xendriks va Gimpelning <a href=\"../gelu/\">GELU</a> haqidagi maqolasida (2016) paydo bo‘lgan. Elfving, Uchibe va Doya (2017) $x\\,\\sigma(x)$ ni mustahkamlab o‘qitishda qo‘llagan. Ramachandran, Zof va Le (2017) $x\\,\\sigma(\\beta x)$ ni mustaqil ravishda nomzod formulalar fazosida avtomatik qidiruv bilan topib, Swish deb atashgan; o‘rganiladigan $\\beta$ kam narsa qo‘shgan va amalda $\\beta=1$ qaror topgan. Shu sababli bitta funksiyaning ikki nomi bor: PyTorch va Hugging Face’da <code>silu</code>, Keras’da <code>swish</code>."),
     ]),
     dict(id="derivative", title="Hosila: birdan katta va noldan kichik", blocks=[
         ("p", "Ko‘paytma qoidasiga ko‘ra SiLU hosilasi ikki qismdan iborat: ventil va ventil qanchalik tez ochilishi."),
@@ -505,7 +506,7 @@ SECTIONS = {
         ("ul", [
             "<b>ReLU</b>: birinchi hosila — zina, ikkinchisi — delta-funksiya. Optimizator uchun xato sirti keskin qirrali tekis bo‘laklardan iborat.",
             "<b>SiLU va GELU</b>: hosilalar uzluksiz, ikkinchi hosilalar — maksimumi nolda bo‘lgan silliq «do‘ngliklar» (SiLU’da $0{,}5$, GELU’da $2\\varphi(0)\\approx0{,}798$). Xato landshafti silliq bo‘ladi va gradiyent asta-sekin o‘zgaradi.",
-            "<b>GELU ≈ $\\beta=1{,}702$ li Swish</b>: $x\\,\\Phi(x)\\approx x\\,\\sigma(1{,}702x)$, eng katta xato taxminan $0{,}02$. GELU — biroz «tikroq» SiLU: chuqurchasi sayozroq ($-0{,}170$, SiLU’da esa $-0{,}278$), hosila maksimumi yuqoriroq ($1{,}129$, SiLU’da esa $1{,}100$).",
+            "<b>GELU ≈ $\\beta=1{,}702$ li Swish</b>: $x\\,\\Phi(x)\\approx x\\,\\sigma(1{,}702x)$, eng katta xato taxminan $0{,}02$. Shuning uchun GELU SiLU’ning $1{,}702$ marta kichraytirilgan nusxasiga o‘xshaydi: chuqurchasi sayozroq va nolga yaqinroq ($x\\approx-0{,}752$ da $-0{,}170$, SiLU’da esa $x\\approx-1{,}278$ da $-0{,}278$; Swish-1,702 ning o‘zida $-0{,}164$ bo‘lardi). Lekin GELU’ning hosila maksimumi yuqoriroq ($1{,}129$, SiLU’da esa $1{,}100$), buni masshtab bilan tushuntirib bo‘lmaydi: barcha Swish-β larda u bir xil, $1{,}0998$. Bu endi normal va logistik qonunlar orasidagi farq (pastga qarang).",
         ]),
         ("h3", "Ehtimollik ma’nosi: tasodifiy ventil"),
         ("p", "SiLU va GELU’ning umumiy tushuntirishi bor. Neyron kirish tasodifiy $\\varepsilon$ shovqindan katta bo‘lsa, uni to‘liq o‘tkazsin, kichik bo‘lsa — butunlay to‘sib qo‘ysin: $y=x\\cdot[\\varepsilon\\le x]$. U holda chiqishning o‘rtacha qiymati"),
@@ -514,7 +515,7 @@ SECTIONS = {
         ("viz", "silu-noise", {"noise": "logistic"}, "<b>5-rasm.</b> «Boshlash»ni bosing. $x$ ning 33 ta qiymati uchun logistik $\\varepsilon$ shovqin tanlanadi va chiqish yo $x$ ga, yo 0 ga teng (punktirlardagi kulrang nuqtalar). To‘q sariq nuqtalar — o‘rtacha chiqishlar; har nuqtada 2000 ta tanlovdan keyin ular SiLU egri chizig‘idan ko‘pi bilan $0{,}031$ ga chetlashadi. Shovqinni normalga almashtiring: o‘rtachalar GELU egri chizig‘ida to‘planadi (chetlanish $0{,}015$)."),
     ]),
     dict(id="swiglu", title="SwiGLU: katta til modellaridagi SiLU", blocks=[
-        ("p", "Transformerda e’tibor blokidan keyin to‘liq bog‘langan blok (feed-forward network, FFN) turadi. Klassik varianti — $W_2\\,\\operatorname{ReLU}(W_1x)$ (yoki ReLU o‘rniga GELU). Shazir (2020) uni bir tarmoq ikkinchisidan qanchasini o‘tkazishni hal qiladigan <b>ventilli</b> blok (gated linear unit) bilan almashtirishni taklif qilgan:"),
+        ("p", "Transformerda diqqat (attention) blokidan keyin to‘liq bog‘langan blok (feed-forward network, FFN) turadi. Klassik varianti — $W_2\\,\\operatorname{ReLU}(W_1x)$ (yoki ReLU o‘rniga GELU). Shazir (2020) uni bir tarmoq ikkinchisidan qanchasini o‘tkazishni hal qiladigan <b>ventilli</b> blok (gated linear unit) bilan almashtirishni taklif qilgan:"),
         ("eq", r"\operatorname{FFN}_{\text{SwiGLU}}(x)=W_2\bigl(\operatorname{SiLU}(W_1x)\odot W_3x\bigr)"),
         ("symbols", [
             (r"x\in\mathbb R^{d}", "$d$ o‘lchamli token vektori (LLaMA-7B da $d=4096$);"),
@@ -524,14 +525,14 @@ SECTIONS = {
             (r"W_2", "$d$ o‘lchamga qaytarish proyeksiyasi."),
         ]),
         ("p", "Bitta komponent uchun bu ikki sonning funksiyasi: $g(a,b)=\\operatorname{SiLU}(a)\\cdot b$, bu yerda $a$ — ventil tarmog‘ining, $b$ — qiymat tarmog‘ining komponenti. Uni 3D’da ko‘rish arziydi."),
-        ("viz", "silu-swiglu", {"gate": "silu", "a": 1.5, "b": 2}, "<b>6-rasm.</b> $\\operatorname{SiLU}(a)\\cdot b$ sirti (uni aylantirish mumkin) va yuqoridan ko‘rinish. $a&lt;0$ da ventil deyarli yopiq va sirt istalgan $b$ da deyarli tekis; $a&gt;0$ da u $\\approx a\\cdot b$ «egar»ga aylanadi. $(1{,}5;\\,2)$ nuqtada: ventil $\\operatorname{SiLU}(1{,}5)=1{,}226$, chiqish $2{,}453$, $\\partial/\\partial a=\\operatorname{SiLU}'(1{,}5)\\cdot b=2{,}083$, $\\partial/\\partial b=1{,}226$. Ventilni ReLU, GELU, sigmoidaga almashtiring yoki uni butunlay olib tashlang."),
+        ("viz", "silu-swiglu", {"gate": "silu", "a": 1.5, "b": 2}, "<b>6-rasm.</b> $\\operatorname{SiLU}(a)\\cdot b$ sirti (uni aylantirish mumkin) va yuqoridan ko‘rinish. $a&lt;0$ da ventil deyarli yopiq ($|\\operatorname{SiLU}(a)|\\le0{,}278$) va sirt deyarli tekis; katta $a&gt;0$ larda u $a\\cdot b$ egarga yaqinlashadi. $(1{,}5;\\,2)$ nuqtada: ventil $\\operatorname{SiLU}(1{,}5)=1{,}226$, chiqish $2{,}453$, $\\partial/\\partial a=\\operatorname{SiLU}'(1{,}5)\\cdot b=2{,}083$, $\\partial/\\partial b=1{,}226$. Ventilni ReLU, GELU, sigmoidaga almashtiring yoki uni butunlay olib tashlang."),
         ("p", "Bu yerdagi gradiyentlar sodda va ibratli: $\\frac{\\partial g}{\\partial b}=\\operatorname{SiLU}(a)$ — qiymat tarmog‘i ventil qanchalik ochiq bo‘lsa, shunga mutanosib o‘rganadi; $\\frac{\\partial g}{\\partial a}=\\operatorname{SiLU}'(a)\\cdot b$ — ventil faqat u orqali o‘tkazadigan narsa bo‘lsagina o‘rganadi."),
         ("h3", "Nega yashirin o‘lcham 8/3·d"),
         ("p", "SwiGLU’da ikkita o‘rniga uchta matritsa bor. Parametrlar soni $h=4d$ li oddiy FFN’dagidek ($2\\cdot d\\cdot4d=8d^2$) qolishi uchun yashirin o‘lcham $h=\\frac{2}{3}\\cdot4d=\\frac83 d$ gacha kamaytiriladi: u holda $3\\cdot d\\cdot\\frac83d=8d^2$. LLaMA-7B da $\\frac83\\cdot4096\\approx10923$ 256 ga karrali songacha yuqoriga yaxlitlanadi: $h=11008$. Natijada blokka $3\\cdot4096\\cdot11008=135\\,266\\,304$ parametr to‘g‘ri keladi, $h=4d$ li FFN’da esa $134\\,217\\,728$ — atigi $0{,}8\\%$ ko‘p."),
         ("callout", "history", "Bu qayerdan kelgan", "Ventilli chiziqli bloklarni (GLU, $\\sigma(W_1x)\\odot W_3x$) Dofin va boshq. (2017) konvolyutsion til modellari uchun taklif qilgan. Shazir (2020) turli ventilli variantlarni — ReGLU, GEGLU, SwiGLU — taqqoslagan va ularning barchasi oddiy FFN’dan o‘zib ketgan. SwiGLU PaLM (2022), keyin LLaMA (2023) uchun tanlangan va shundan beri ochiq LLM’lar standartiga aylangan: Qwen, Mistral va boshqa ko‘plari."),
     ]),
     dict(id="training", title="O‘qitishdagi SiLU", blocks=[
-        ("p", "Silliq aktivatsiya amalda nima bilan yordam beradi? ReLU neyronlaridan iborat tarmoq funksiyani to‘g‘ri chiziq kesmalaridan, SiLU tarmog‘i esa silliq «egilishlar»dan yig‘adi. Agar maqsadli bog‘liqlik silliq bo‘lsa, SiLU neyronlariga uni takrorlash osonroq. Bundan tashqari, SiLU’da gradiyent aynan nolga teng bo‘lmaydi: manfiy kirishda hosila kichik, lekin nol emas va neyron «o‘lmaydi»."),
+        ("p", "Silliq aktivatsiya amalda nima bilan yordam beradi? ReLU neyronlaridan iborat tarmoq funksiyani to‘g‘ri chiziq kesmalaridan, SiLU tarmog‘i esa silliq «egilishlar»dan yig‘adi. Agar maqsadli bog‘liqlik silliq bo‘lsa, SiLU neyronlariga uni takrorlash osonroq. Bundan tashqari, SiLU’da «o‘lik» zona yo‘q: hosila faqat bitta $x^*\\approx-1{,}278$ nuqtada nolga aylanadi, boshqa manfiy kirishlarda esa u kichik, lekin nol emas, shuning uchun neyron manfiy kirishli ReLU kabi «o‘lmaydi»."),
         ("p", "Tajriba: $1\\to6\\to1$ tarmoq 40 nuqta bo‘yicha $y=\\sin1{,}5x+0{,}3x$ egri chiziqni yaqinlashtiradi. Ikkala tarmoq bir xil vaznlardan boshlaydi va faqat aktivatsiya bilan farqlanadi; o‘qitish — $0{,}03$ qadamli Adam, 2000 qadam."),
         ("viz", "silu-train", {"seed": 1}, "<b>7-rasm.</b> «Boshlash»ni bosing. Ko‘k egri chiziq — SiLU’li tarmoq, qora punktir — ReLU’li. 1-initsializatsiyada 2000 qadamdan keyin SiLU xatosi $0{,}00139$, ReLU’niki — $0{,}00406$, deyarli uch barobar ko‘p. «Neyronlarni ko‘rsatish»ni yoqing: ReLU’da har bir neyron — «burchak», SiLU’da — silliq egilish. Xato grafigidagi kamdan-kam sakrashlar — doimiy qadamli Adam’ning odatiy tebranishlari."),
         ("p", "Bitta ishga tushirish bo‘yicha xulosa chiqarmaslik uchun tajribani sakkizta turli initsializatsiya uchun takrorladik. SiLU sakkiztasining hammasida aniqroq chiqdi, yutuq $1{,}4$ dan $5{,}2$ martagacha. Lekin bu silliq maqsadning xossasi: bo‘lak-chiziqli bog‘liqlikda ReLU yomonroq bo‘lmasligi mumkin. Shuning uchun aktivatsiyani tanlash — empirik masala, katta modellarda u tajriba bilan hal qilinadi."),
@@ -560,7 +561,7 @@ SECTIONS = {
             "<a href=\"../gelu/\">GELU</a>: $x\\Phi(x)\\approx x\\sigma(1{,}702x)$ — logistik o‘rniga normal shovqinli o‘sha o‘z-o‘zini ventillash.",
             "<a href=\"../leaky-relu/\">Leaky ReLU</a>: manfiy qismni nolga aylantirmaslikning boshqa usuli — silliq chuqurcha o‘rniga $\\alpha x$ to‘g‘ri chiziq.",
             "<a href=\"../tanh/\">tanh</a>: $\\operatorname{SiLU}(x)=\\frac x2\\bigl(1+\\tanh\\frac x2\\bigr)$.",
-            "<a href=\"../softmax/\">Softmax</a> va <a href=\"../adam/\">Adam</a>: transformerda SwiGLU’ning qo‘shnilari — e’tibor mexanizmi va bunday modellar o‘qitiladigan optimizator.",
+            "<a href=\"../softmax/\">Softmax</a> va <a href=\"../adam/\">Adam</a>: transformerda SwiGLU’ning qo‘shnilari — diqqat (attention) mexanizmi va bunday modellar o‘qitiladigan optimizator.",
         ]),
     ]),
     dict(id="summary", title="Xulosa", blocks=[

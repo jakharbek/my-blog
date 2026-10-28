@@ -12,9 +12,9 @@ META = dict(
         "uz": "Kichik tuzatishli ReLU: noldan chapda funksiya signalni nolga aylantirmaydi, uni kichik α ga ko‘paytiradi. Mayda detallarigacha tahlil qilamiz: nega shu neyronlar o‘lmasligi uchun yetarli, 1 + α² ko‘paytuvchili He initsializatsiyasi qayerdan keladi, bunday neyronlardan iborat tarmoq fazoni qanday tekis bo‘laklarga kesadi va PReLU α ni o‘zi qanday o‘rganadi.",
     },
     description={
-        "ru": "Leaky ReLU подробно: формула в трёх записях, производная и субградиент, умирающий ReLU и оживление нейрона, кусочно-линейная сеть в 3D, инициализация Хе для α, PReLU, RReLU, ELU и SELU, код на NumPy и PyTorch.",
-        "en": "Leaky ReLU in depth: the formula in three forms, the derivative and subgradient, the dying ReLU and neuron revival, a piecewise-linear network in 3D, He initialization for α, PReLU, RReLU, ELU and SELU, code in NumPy and PyTorch.",
-        "uz": "Leaky ReLU batafsil: formulaning uch yozuvi, hosila va subgradiyent, o‘layotgan ReLU va neyronning jonlanishi, 3D’da bo‘lak-chiziqli tarmoq, α uchun He initsializatsiyasi, PReLU, RReLU, ELU va SELU, NumPy va PyTorch’da kod.",
+        "ru": "Leaky ReLU по косточкам: три записи формулы, производная, оживление мёртвого нейрона, инициализация Хе с 1 + α², PReLU, RReLU, ELU, SELU и код.",
+        "en": "Leaky ReLU in depth: three forms of the formula, the derivative, reviving a dead neuron, He initialization with 1 + α², PReLU, RReLU, ELU, SELU, code.",
+        "uz": "Leaky ReLU batafsil: formulaning uch yozuvi, hosila, o‘lik neyronni jonlantirish, 1 + α² li He initsializatsiyasi, PReLU, RReLU, ELU, SELU va kod.",
     },
 )
 
@@ -34,19 +34,19 @@ FAMILY = {
            ["Leaky ReLU", "$\\alpha x$", "$\\alpha$", "фиксированный наклон, обычно $0{,}01$–$0{,}3$"],
            ["PReLU", "$\\alpha x$, $\\alpha$ обучается", "$\\alpha$", "+1 параметр на слой или канал"],
            ["RReLU", "$\\alpha x$, $\\alpha\\sim U(\\tfrac18;\\,\\tfrac13)$", "$\\alpha$", "шум как регуляризация"],
-           ["ELU", "$\\alpha(e^{x}-1)$", "$\\alpha e^{x}$", "гладкая при $\\alpha=1$, насыщение на $-\\alpha$"],
+           ["ELU", "$\\alpha(e^{x}-1)$", "$\\alpha e^{x}$", "производная непрерывна при $\\alpha=1$, насыщение на $-\\alpha$"],
            ["SELU", "$\\lambda\\alpha(e^{x}-1)$", "$\\lambda\\alpha e^{x}$", "самонормализация, $\\lambda\\approx1{,}0507$"]],
     "en": [["ReLU", "$0$", "$0$", "zero gradient, “dead” neurons"],
            ["Leaky ReLU", "$\\alpha x$", "$\\alpha$", "fixed slope, usually $0.01$–$0.3$"],
            ["PReLU", "$\\alpha x$, $\\alpha$ is learned", "$\\alpha$", "+1 parameter per layer or channel"],
            ["RReLU", "$\\alpha x$, $\\alpha\\sim U(\\tfrac18,\\,\\tfrac13)$", "$\\alpha$", "noise as regularization"],
-           ["ELU", "$\\alpha(e^{x}-1)$", "$\\alpha e^{x}$", "smooth for $\\alpha=1$, saturates at $-\\alpha$"],
+           ["ELU", "$\\alpha(e^{x}-1)$", "$\\alpha e^{x}$", "continuous derivative for $\\alpha=1$, saturates at $-\\alpha$"],
            ["SELU", "$\\lambda\\alpha(e^{x}-1)$", "$\\lambda\\alpha e^{x}$", "self-normalizing, $\\lambda\\approx1.0507$"]],
     "uz": [["ReLU", "$0$", "$0$", "nol gradiyent, «o‘lik» neyronlar"],
            ["Leaky ReLU", "$\\alpha x$", "$\\alpha$", "qat’iy qiyalik, odatda $0{,}01$–$0{,}3$"],
            ["PReLU", "$\\alpha x$, $\\alpha$ o‘rganiladi", "$\\alpha$", "qatlam yoki kanalga +1 parametr"],
            ["RReLU", "$\\alpha x$, $\\alpha\\sim U(\\tfrac18;\\,\\tfrac13)$", "$\\alpha$", "regulyarizatsiya sifatida shovqin"],
-           ["ELU", "$\\alpha(e^{x}-1)$", "$\\alpha e^{x}$", "$\\alpha=1$ da silliq, $-\\alpha$ da to‘yinadi"],
+           ["ELU", "$\\alpha(e^{x}-1)$", "$\\alpha e^{x}$", "$\\alpha=1$ da hosila uzluksiz, $-\\alpha$ da to‘yinadi"],
            ["SELU", "$\\lambda\\alpha(e^{x}-1)$", "$\\lambda\\alpha e^{x}$", "o‘z-o‘zini normallashtirish, $\\lambda\\approx1{,}0507$"]],
 }
 
@@ -66,7 +66,7 @@ def he_std(n_in, alpha=0.01):
 x = np.array([-3.0, -0.5, 0.0, 2.0])
 print(leaky_relu(x))        # [-0.03  -0.005  0.     2.   ]
 print(leaky_relu_grad(x))   # [0.01 0.01 0.01 1.  ]
-print(he_std(256, 0.2))     # 0.08667...'''
+print(he_std(256, 0.2))     # 0.08667190566019205'''
 
 CODE_TORCH = '''import torch
 import torch.nn as nn
@@ -77,7 +77,7 @@ act(x).sum().backward()
 print(x.grad)                    # tensor([0.0100, 0.0100, 1.0000]) — в нуле α
 
 prelu = nn.PReLU(num_parameters=1, init=0.25)   # α — обучаемый параметр
-print(prelu(torch.tensor([-2.0, 3.0])))         # tensor([-0.5000, 3.0000])
+print(prelu(torch.tensor([-2.0, 3.0])).detach())  # tensor([-0.5000,  3.0000])
 
 lin = nn.Linear(256, 256)
 # std = √(2 / ((1 + a²) · 256)); по умолчанию a=0, то есть «как для ReLU»
@@ -116,7 +116,7 @@ SECTIONS = {
             "<b>дискриминаторы GAN</b> — в DCGAN (Рэдфорд и др., 2015) все слои дискриминатора используют Leaky ReLU с $\\alpha=0{,}2$;",
             "<b>детекторы YOLO</b> — сеть Darknet в YOLOv2 и YOLOv3 построена на Leaky ReLU с $\\alpha=0{,}1$;",
             "<b>графовые сети</b> — коэффициенты внимания в GAT считаются через Leaky ReLU с $\\alpha=0{,}2$;",
-            "<b>свёрточные сети с PReLU</b> — вариант с обучаемым $\\alpha$ (Хе и др., 2015) помог впервые опустить ошибку top-5 на ImageNet ниже человеческой;",
+            "<b>свёрточные сети с PReLU</b> — вариант с обучаемым $\\alpha$ (Хе и др., 2015) помог впервые опустить ошибку top-5 на ImageNet ниже оценки человеческой ошибки;",
             "<b>любая сеть, где ReLU «умирает»</b> — замена занимает одну строку и почти ничего не стоит.",
         ]),
         ("callout", "key", "Главное за минуту", "$\\operatorname{LReLU}(x)=x$ при $x&gt;0$ и $\\alpha x$ при $x\\le0$. Производная — ступенька: $1$ справа и $\\alpha$ слева, поэтому градиент никогда не обнуляется целиком. Функция остаётся кусочно-линейной, монотонной и почти такой же дешёвой, как ReLU. При $\\alpha=0$ это ReLU, при $\\alpha=1$ — тождественная функция, при обучаемом $\\alpha$ — PReLU."),
@@ -124,7 +124,7 @@ SECTIONS = {
     dict(id="intuition", title="Интуиция: дверь, которая не закрывается до конца", blocks=[
         ("p", "ReLU похож на дверь: положительный сигнал проходит целиком, отрицательный упирается в закрытую створку. Leaky ReLU оставляет щель — отрицательный сигнал проходит, но ослабленным в $1/\\alpha$ раз. При $\\alpha=0{,}1$ вход $-2$ превращается в $-0{,}2$."),
         ("p", "Потяните точку по графику. Оранжевый «треугольник наклона» показывает производную: шаг на 1 вдоль оси $x$ меняет значение на $\\alpha$ слева от нуля и на 1 справа. Ниже — сама производная: две горизонтальные ступеньки с разрывом в нуле. Подвигайте ползунок $\\alpha$: от ReLU ($\\alpha=0$) через «протекающий» вариант к прямой $y=x$ ($\\alpha=1$)."),
-        ("viz", "leaky-relu-explorer", {"alpha": 0.1, "x": -2}, "<b>Рисунок 1.</b> Leaky ReLU и его производная при $\\alpha=0{,}1$. В точке $x=-2$ значение равно $-0{,}2$, производная — $0{,}1$. Серый пунктир — ReLU, точечная линия — $y=x$. В нуле производная не определена: слева она равна $\\alpha$, справа — 1."),
+        ("viz", "leaky-relu-explorer", {"alpha": 0.1, "x": -2}, "<b>Рисунок 1.</b> Leaky ReLU и его производная при $\\alpha=0{,}1$. В точке $x=-2$ значение равно $-0{,}2$, производная — $0{,}1$. Серый пунктир — ReLU, точечная линия — $y=x$. В нуле производной нет: слева она равна $\\alpha$, справа — 1; подведите точку к нулю — в показаниях появится субдифференциал $[\\alpha;\\,1]$ и значение $\\alpha$, которое берёт PyTorch."),
         ("callout", "intuition", "Что заметить", "Слева график не плоский, но очень пологий: при $\\alpha=0{,}01$ вход $-100$ даёт всего $-1$. Вся нелинейность Leaky ReLU сосредоточена в одной точке — изломе в нуле, где наклон меняется с $\\alpha$ на 1. Выразительная сила сети из таких нейронов берётся именно из этих изломов."),
     ]),
     dict(id="anatomy", title="Формула по косточкам", blocks=[
@@ -153,7 +153,7 @@ SECTIONS = {
             "<b>Непрерывность и кусочная линейность</b>: две прямые, склеенные в нуле. Функция дифференцируема везде, кроме $x=0$.",
             "<b>Строгая монотонность</b> при $\\alpha&gt;0$: больший вход даёт больший выход. Поэтому функция обратима: $\\operatorname{LReLU}_\\alpha^{-1}(y)=y$ при $y&gt;0$ и $y/\\alpha$ при $y\\le0$, то есть $\\operatorname{LReLU}_{1/\\alpha}$. У ReLU обратной нет: все отрицательные входы склеены в ноль.",
             "<b>Положительная однородность</b>: $\\operatorname{LReLU}(cx)=c\\,\\operatorname{LReLU}(x)$ при $c\\ge0$. Масштаб входа просто переносится на выход — отсюда простые формулы инициализации.",
-            "<b>Липшицевость</b> с константой $\\max(1,\\alpha)$, то есть 1 при $\\alpha\\le1$: $|\\operatorname{LReLU}(a)-\\operatorname{LReLU}(b)|\\le|a-b|$.",
+            "<b>Липшицевость</b> с константой $\\max(1,|\\alpha|)$, то есть 1 при $\\alpha\\le1$: $|\\operatorname{LReLU}(a)-\\operatorname{LReLU}(b)|\\le|a-b|$.",
             "<b>Неограниченность</b> сверху и снизу, но вниз функция растёт в $1/\\alpha$ раз медленнее.",
             "<b>Частные случаи</b>: $\\alpha=0$ — ReLU, $\\alpha=1$ — тождественная функция, $\\alpha=-1$ — модуль $|x|$ (уже не монотонный).",
         ]),
@@ -187,14 +187,14 @@ SECTIONS = {
         ("p", "Наклон $\\alpha$ учится только на примерах, попавших в левую ветку, — так устроен PReLU (раздел 9). Вторая производная по $x$ равна нулю везде, кроме нуля: вся кривизна сосредоточена в изломе, и в смысле обобщённых функций $\\operatorname{LReLU}''(x)=(1-\\alpha)\\,\\delta(x)$."),
     ]),
     dict(id="dying", title="Умирающий ReLU и как Leaky его лечит", blocks=[
-        ("p", "Как умирает нейрон. Пусть после неудачного большого шага (слишком большой темп обучения, выброс в данных, неудачная инициализация) сдвиг $b$ нейрона стал сильно отрицательным. Тогда $z=w^\\top x+b&lt;0$ на всех примерах, ReLU выдаёт 0, производная $\\operatorname{ReLU}'(z)=0$ — и градиенты по $w$, $b$ и по выходному весу $v$ обнуляются одновременно. Градиентный спуск больше никогда не сдвинет этот нейрон: он мёртв. В конспектах курса CS231n отмечают, что при слишком большом темпе обучения мёртвой может оказаться до 40% сети."),
+        ("p", "Как умирает нейрон. Пусть после неудачного большого шага (слишком большой темп обучения, выброс в данных, неудачная инициализация) сдвиг $b$ нейрона стал сильно отрицательным. Тогда $z=w^\\top x+b&lt;0$ на всех примерах, ReLU выдаёт 0, производная $\\operatorname{ReLU}'(z)=0$ — и градиенты по $w$, $b$ и по выходному весу $v$ обнуляются одновременно. Градиентный спуск больше не сдвинет этот нейрон: он мёртв (строго навсегда — для нейрона первого слоя при обычном SGD; в глубоких слоях вход нейрона меняется вместе с предыдущими слоями, и изредка нейроны оживают). В конспектах курса CS231n отмечают, что при слишком большом темпе обучения мёртвой может оказаться до 40% сети."),
         ("p", "Ниже — самый чистый эксперимент. Один нейрон $f(x)=v\\cdot\\operatorname{act}(wx+b)$ должен выучить «шарнир» $y=1{,}5\\max(0,\\,x-1)$ по 41 точке отрезка $[-3;\\,3]$. Старт: $w=1$, $b=-4$, $v=1$ — излом в точке $x=4$, за пределами данных, поэтому на всех примерах $z&lt;0$. Обучение — градиентный спуск по MSE с шагом $0{,}1$."),
         ("viz", "leaky-relu-revive", {"alpha": 0.1}, "<b>Рисунок 3.</b> Нажмите «Пуск». Нейрон ReLU (чёрный пунктир) заморожен: все его градиенты равны нулю, и ошибка навсегда остаётся $1{,}09$. Нейрон Leaky ReLU с $\\alpha=0{,}1$ получает слабый градиент, его прямая наклоняется и сдвигается, и на 24-м шаге излом входит в область данных. Через 1500 шагов ошибка равна $0{,}0549$. При $\\alpha=0{,}01$ оживление занимает 135 шагов, зато итоговая ошибка — $0{,}00082$."),
         ("p", "Обратите внимание на компромисс. Большой $\\alpha$ быстро возвращает нейрон к жизни, но левая ветка остаётся наклонной: при $\\alpha=0{,}1$ итоговая модель слева имеет наклон $\\alpha v w\\approx0{,}116$ вместо нуля, отсюда остаточная ошибка. Маленький $\\alpha$ почти не искажает форму функции, но оживляет медленнее."),
         ("callout", "warn", "Leaky — не гарантия", "Ненулевой градиент не означает, что нейрон обязательно вернётся: он может так и остаться на левой ветке, работая как линейная функция $\\alpha(w^\\top x+b)$. Leaky ReLU гарантирует другое — нейрон никогда не замерзает намертво и продолжает учиться. Против самой причины гибели помогают умеренный темп обучения, разогрев (warmup), нормализация и правильная инициализация."),
     ]),
     dict(id="space", title="Сеть из Leaky ReLU: кусочно-линейный рельеф", blocks=[
-        ("p", "В сети с двумя входами каждый нейрон $\\operatorname{LReLU}(w_k^\\top x+b_k)$ «сгибает» плоскость вдоль прямой $w_k^\\top x+b_k=0$: по одну сторону от неё наклон в $1/\\alpha$ раз меньше, чем по другую. Сумма нейронов $f(x)=\\sum_k v_k\\operatorname{LReLU}(w_k^\\top x+b_k)$ — многогранная поверхность: внутри каждой области, где набор включённых нейронов не меняется, она плоская, а на прямых-изломах меняет наклон."),
+        ("p", "В сети с двумя входами каждый нейрон $\\operatorname{LReLU}(w_k^\\top x+b_k)$ «сгибает» плоскость вдоль прямой $w_k^\\top x+b_k=0$: по одну сторону от неё вклад нейрона в $1/\\alpha$ раз положе, чем по другую. Сумма нейронов $f(x)=\\sum_k v_k\\operatorname{LReLU}(w_k^\\top x+b_k)$ — многогранная поверхность: внутри каждой области, где набор включённых нейронов не меняется, она плоская, а на прямых-изломах меняет наклон."),
         ("viz", "leaky-relu-surface", {"alpha": 0.1}, "<b>Рисунок 4.</b> Сеть из шести нейронов Leaky ReLU. Слева — поверхность $f(x_1,x_2)$ в 3D (её можно вращать), справа — вид сверху с шестью прямыми изломов. Они делят квадрат $[-3;\\,3]^2$ на 19 линейных областей. Тяните оранжевую точку: в центре, в точке $(0{,}2;\\,-0{,}3)$, выключены все шесть нейронов, но градиент не нулевой: $|\\nabla f|=0{,}100$. Поставьте $\\alpha=0$: центральная область станет плоской — это 5% квадрата, где у сети из ReLU градиент по входу равен нулю. При $\\alpha=1$ вся сеть превращается в одну плоскость."),
         ("p", "Число областей не зависит от $\\alpha$ (пока $\\alpha\\ne1$): его задают только прямые изломов. Зато от $\\alpha$ зависит, что происходит там, где все нейроны выключены. У ReLU там плато с нулевым градиентом, и примеры, попавшие на него, ничего не сообщают сети. У Leaky ReLU плато наклонено, и градиент там, как правило, не нулевой."),
         ("callout", "note", "Сколько областей может быть", "$n$ прямых общего положения делят плоскость не более чем на $1+n+\\binom n2$ частей: для $n=6$ это 22. В квадрате на рисунке видно 19 из них. У глубоких сетей число линейных областей может расти с глубиной экспоненциально — это одно из объяснений их выразительной силы."),
@@ -218,13 +218,13 @@ SECTIONS = {
         ("ul", [
             "<b>Фиксированный $\\alpha$</b> — классический Leaky ReLU (Маас, Ханнун, Ын, 2013, $\\alpha=0{,}01$). Сегодня часто берут $0{,}1$–$0{,}3$: в сравнении Сюй и др. (2015) «сильно протекающий» вариант с $\\alpha=1/5{,}5\\approx0{,}18$ работал лучше, чем $0{,}01$.",
             "<b>Обучаемый $\\alpha$</b> — PReLU (Parametric ReLU, Хе и др., 2015). $\\alpha$ становится параметром — один на слой или по одному на канал — и учится градиентным спуском вместе с весами. Начальное значение в PyTorch — $0{,}25$.",
-            "<b>Случайный $\\alpha$</b> — RReLU (Randomized ReLU): при обучении $\\alpha$ для каждого примера берётся из равномерного распределения $U(1/8;\\,1/3)$ (границы по умолчанию в PyTorch), при выводе — среднее $\\frac{1/8+1/3}{2}=\\frac{11}{48}\\approx0{,}229$. Шум действует как регуляризация.",
+            "<b>Случайный $\\alpha$</b> — RReLU (Randomized ReLU): при обучении $\\alpha$ заново берётся для каждого элемента входа из равномерного распределения $U(1/8;\\,1/3)$ (границы по умолчанию в PyTorch), при выводе — среднее $\\frac{1/8+1/3}{2}=\\frac{11}{48}\\approx0{,}229$. Шум действует как регуляризация.",
         ]),
         ("p", "У PReLU градиент по $\\alpha$ — это $\\min(0,\\,z)$ из раздела о производной: наклон учится только на отрицательных входах. Посмотрим, как градиентный спуск находит сразу и вес, и наклон."),
         ("viz", "leaky-relu-prelu", {"w": 0.5, "a": 1.3}, "<b>Рисунок 6.</b> Модель $\\operatorname{PReLU}_\\alpha(wx)$ с двумя параметрами учится на 31 точке, сгенерированной «учителем» $w^*=1{,}5$, $\\alpha^*=0{,}2$ с шумом. Справа — поверхность ошибки $L(w,\\alpha)$ (чем светлее, тем меньше). Из старта $(0{,}5;\\,1{,}3)$ градиентный спуск с шагом $0{,}05$ за 87 шагов приходит в $w=1{,}521$, $\\alpha=0{,}209$ с ошибкой $0{,}0158$ — это минимум для этих зашумлённых данных (у самого учителя ошибка $0{,}0170$). Перетащите старт в другое место."),
         ("p", "PReLU добавляет всего по одному параметру на канал, но в работе Хе и др. он вместе с новой инициализацией позволил обучить очень глубокие свёрточные сети и получить ошибку top-5 $4{,}94\\%$ на ImageNet — ниже оценки человеческой ошибки $5{,}1\\%$. Авторы отмечают, что к $\\alpha$ не стоит применять затухание весов (weight decay): оно тянет $\\alpha$ к нулю, то есть обратно к ReLU."),
         ("h3", "Гладкие родственники"),
-        ("p", "Излом в нуле можно сгладить. ELU заменяет левую прямую экспонентой $\\alpha(e^x-1)$, которая насыщается на уровне $-\\alpha$. SELU добавляет масштаб: $\\lambda\\approx1{,}0507$ и $\\alpha\\approx1{,}6733$ подобраны так, чтобы активации сами поддерживали нулевое среднее и единичную дисперсию. <a href=\"../gelu/\">GELU</a> и <a href=\"../silu/\">SiLU</a> — гладкие и даже немонотонные функции, которые сегодня стоят в трансформерах."),
+        ("p", "Излом в нуле можно сгладить. ELU заменяет левую прямую экспонентой $\\alpha(e^x-1)$, которая насыщается на уровне $-\\alpha$ (здесь $\\alpha$ — свой параметр ELU, обычно 1). SELU добавляет масштаб: $\\lambda\\approx1{,}0507$ и $\\alpha\\approx1{,}6733$ подобраны так, чтобы в полносвязной сети с инициализацией LeCun активации сами поддерживали нулевое среднее и единичную дисперсию. <a href=\"../gelu/\">GELU</a> и <a href=\"../silu/\">SiLU</a> — гладкие и даже немонотонные функции, которые сегодня стоят в трансформерах."),
         ("viz", "leaky-relu-zoo", {"cmp": "elu", "x": -2}, "<b>Рисунок 7.</b> Leaky ReLU с $\\alpha=0{,}1$ рядом с родственниками. Наведите курсор: при $x=-2$ Leaky ReLU даёт $-0{,}2$, ELU — $-0{,}865$, SELU — $-1{,}520$, GELU — $-0{,}046$, SiLU — $-0{,}238$. Переключитесь на производные: у Leaky ReLU и SELU это ступенька с разрывом в нуле (у SELU слева $\\lambda\\alpha\\approx1{,}758$, справа $\\lambda\\approx1{,}051$), у ELU, GELU и SiLU — непрерывная кривая."),
         ("table", ["Функция", "При $x\\le0$", "Производная слева", "Особенность"], "FAMILY", {}),
     ]),
@@ -239,7 +239,7 @@ SECTIONS = {
         ("ol", [
             "<b>Запись <code>max(alpha * x, x)</code> при $\\alpha&gt;1$.</b> Формула верна только при $\\alpha\\le1$; при больших $\\alpha$ получается другая функция. Безопасная запись — <code>where(x &gt; 0, x, alpha * x)</code>.",
             "<b>Слишком большой $\\alpha$.</b> При $\\alpha\\to1$ доля нелинейности $\\frac{1-\\alpha}{2}$ стремится к нулю, функция становится почти линейной, и глубокая сеть теряет выразительность. Разумный диапазон — от $0{,}01$ до $0{,}3$.",
-            "<b>Инициализация «как для ReLU» без поправки на $\\alpha$.</b> Множитель дисперсии $1+\\alpha^2$ за слой: при $\\alpha=0{,}3$ за 50 слоёв сигнал вырастает примерно в 8 раз (рисунок 5). Передавайте $\\alpha$ в <code>kaiming_normal_(..., a=alpha)</code>.",
+            "<b>Инициализация «как для ReLU» без поправки на $\\alpha$.</b> Множитель дисперсии $1+\\alpha^2$ за слой: при $\\alpha=0{,}3$ RMS сигнала с 1-го по 50-й слой вырастает примерно в $1{,}09^{24{,}5}\\approx8{,}3$ раза (рисунок 5). Передавайте $\\alpha$ в <code>kaiming_normal_(..., a=alpha)</code>.",
             "<b>Надежда, что Leaky ReLU сам вылечит нестабильное обучение.</b> Он убирает нулевой градиент, но не причину: слишком большой темп обучения по-прежнему опасен.",
             "<b>Затухание весов на $\\alpha$ у PReLU.</b> Оно тянет $\\alpha$ к нулю, и PReLU превращается в ReLU. Исключайте $\\alpha$ из группы параметров с weight decay.",
             "<b>Разные значения по умолчанию</b> в PyTorch ($0{,}01$), TensorFlow ($0{,}2$) и Keras ($0{,}3$): при переносе модели между фреймворками результат молча меняется.",
@@ -266,7 +266,7 @@ SECTIONS = {
             dict(q="При каких $\\alpha$ верно $\\operatorname{LReLU}_\\alpha(x)=\\max(\\alpha x,x)$?", options=["При любом $\\alpha$", "Только при $\\alpha\\le1$", "Только при $\\alpha&gt;1$", "Только при $\\alpha=0{,}01$"], answer=1,
                  explain="При $\\alpha\\le1$ справа $x\\ge\\alpha x$, слева $\\alpha x\\ge x$. При $\\alpha&gt;1$ справа максимум выберет $\\alpha x$ — получится другая функция."),
             dict(q="Сеть с Leaky ReLU ($\\alpha=0{,}3$) инициализирована «как для ReLU», $g=\\sqrt2$. Каков множитель дисперсии за слой?", options=["$1$", "$1{,}09$", "$0{,}545$", "$2$"], answer=1,
-                 explain="$g^2(1+\\alpha^2)/2=2\\cdot1{,}09/2=1{,}09$. За 50 слоёв RMS вырастает примерно в $1{,}09^{24{,}5}\\approx8{,}3$ раза."),
+                 explain="$g^2(1+\\alpha^2)/2=2\\cdot1{,}09/2=1{,}09$. С 1-го по 50-й слой RMS вырастает примерно в $1{,}09^{24{,}5}\\approx8{,}3$ раза."),
             dict(q="Нейрон ReLU получает $z&lt;0$ на всех примерах. Что верно?", options=["Градиенты по его параметрам равны нулю, и градиентный спуск его больше не изменит", "Градиент маленький, но не нулевой", "Нейрон выдаёт отрицательные значения", "Достаточно уменьшить темп обучения, и он оживёт"], answer=0,
                  explain="$\\operatorname{ReLU}'(z)=0$ при $z&lt;0$, поэтому все градиенты обнуляются — это мёртвый нейрон. Уменьшение шага тут не поможет: шаг, умноженный на ноль, остаётся нулём."),
         ]),
@@ -281,7 +281,7 @@ SECTIONS = {
             "<b>GAN discriminators</b> — in DCGAN (Radford et al., 2015) every discriminator layer uses Leaky ReLU with $\\alpha=0.2$;",
             "<b>YOLO detectors</b> — the Darknet network of YOLOv2 and YOLOv3 is built on Leaky ReLU with $\\alpha=0.1$;",
             "<b>graph networks</b> — the attention coefficients in GAT are computed through Leaky ReLU with $\\alpha=0.2$;",
-            "<b>convolutional networks with PReLU</b> — the variant with a learnable $\\alpha$ (He et al., 2015) helped push the ImageNet top-5 error below the human level for the first time;",
+            "<b>convolutional networks with PReLU</b> — the variant with a learnable $\\alpha$ (He et al., 2015) helped push the ImageNet top-5 error below the estimated human error for the first time;",
             "<b>any network where ReLU “dies”</b> — the swap is one line and costs almost nothing.",
         ]),
         ("callout", "key", "The essentials in a minute", "$\\operatorname{LReLU}(x)=x$ for $x&gt;0$ and $\\alpha x$ for $x\\le0$. The derivative is a step: $1$ on the right and $\\alpha$ on the left, so the gradient never vanishes completely. The function stays piecewise linear, monotonic and almost as cheap as ReLU. With $\\alpha=0$ it is ReLU, with $\\alpha=1$ the identity, with a learnable $\\alpha$ it is PReLU."),
@@ -289,7 +289,7 @@ SECTIONS = {
     dict(id="intuition", title="Intuition: a door that never closes completely", blocks=[
         ("p", "ReLU is like a door: a positive signal passes through in full, a negative one hits the closed leaf. Leaky ReLU leaves a gap — the negative signal gets through, but weakened $1/\\alpha$ times. With $\\alpha=0.1$ the input $-2$ becomes $-0.2$."),
         ("p", "Drag the point along the graph. The orange “slope triangle” shows the derivative: one step of 1 along $x$ changes the value by $\\alpha$ to the left of zero and by 1 to the right. Below is the derivative itself: two horizontal steps with a jump at zero. Move the $\\alpha$ slider: from ReLU ($\\alpha=0$) through the leaky variant to the line $y=x$ ($\\alpha=1$)."),
-        ("viz", "leaky-relu-explorer", {"alpha": 0.1, "x": -2}, "<b>Figure 1.</b> Leaky ReLU and its derivative at $\\alpha=0.1$. At $x=-2$ the value is $-0.2$ and the derivative is $0.1$. The grey dashed line is ReLU, the dotted line is $y=x$. At zero the derivative is undefined: it equals $\\alpha$ on the left and 1 on the right."),
+        ("viz", "leaky-relu-explorer", {"alpha": 0.1, "x": -2}, "<b>Figure 1.</b> Leaky ReLU and its derivative at $\\alpha=0.1$. At $x=-2$ the value is $-0.2$ and the derivative is $0.1$. The grey dashed line is ReLU, the dotted line is $y=x$. At zero there is no derivative: it equals $\\alpha$ on the left and 1 on the right; move the point to zero and the read-out shows the subdifferential $[\\alpha,\\,1]$ and the value $\\alpha$ that PyTorch takes."),
         ("callout", "intuition", "What to notice", "On the left the graph is not flat, just very shallow: with $\\alpha=0.01$ the input $-100$ gives only $-1$. All the nonlinearity of Leaky ReLU sits at one point — the kink at zero, where the slope switches from $\\alpha$ to 1. The expressive power of a network of such neurons comes precisely from these kinks."),
     ]),
     dict(id="anatomy", title="The formula, bone by bone", blocks=[
@@ -318,7 +318,7 @@ SECTIONS = {
             "<b>Continuity and piecewise linearity</b>: two lines glued at zero. The function is differentiable everywhere except $x=0$.",
             "<b>Strict monotonicity</b> for $\\alpha&gt;0$: a larger input gives a larger output. Hence the function is invertible: $\\operatorname{LReLU}_\\alpha^{-1}(y)=y$ for $y&gt;0$ and $y/\\alpha$ for $y\\le0$, i.e. $\\operatorname{LReLU}_{1/\\alpha}$. ReLU has no inverse: all negative inputs are glued into zero.",
             "<b>Positive homogeneity</b>: $\\operatorname{LReLU}(cx)=c\\,\\operatorname{LReLU}(x)$ for $c\\ge0$. The scale of the input carries over to the output — hence the simple initialization formulas.",
-            "<b>Lipschitz continuity</b> with constant $\\max(1,\\alpha)$, i.e. 1 for $\\alpha\\le1$: $|\\operatorname{LReLU}(a)-\\operatorname{LReLU}(b)|\\le|a-b|$.",
+            "<b>Lipschitz continuity</b> with constant $\\max(1,|\\alpha|)$, i.e. 1 for $\\alpha\\le1$: $|\\operatorname{LReLU}(a)-\\operatorname{LReLU}(b)|\\le|a-b|$.",
             "<b>Unboundedness</b> above and below, though downwards the function grows $1/\\alpha$ times more slowly.",
             "<b>Special cases</b>: $\\alpha=0$ is ReLU, $\\alpha=1$ the identity, $\\alpha=-1$ the absolute value $|x|$ (no longer monotonic).",
         ]),
@@ -352,14 +352,14 @@ SECTIONS = {
         ("p", "The slope $\\alpha$ learns only from examples that land on the left branch — this is how PReLU works (section 9). The second derivative in $x$ is zero everywhere except at zero: all the curvature is concentrated in the kink, and in the sense of generalized functions $\\operatorname{LReLU}''(x)=(1-\\alpha)\\,\\delta(x)$."),
     ]),
     dict(id="dying", title="The dying ReLU and how Leaky cures it", blocks=[
-        ("p", "How a neuron dies. Suppose that after an unlucky large step (too high a learning rate, an outlier in the data, a bad initialization) the neuron’s bias $b$ has become strongly negative. Then $z=w^\\top x+b&lt;0$ on every example, ReLU outputs 0, the derivative $\\operatorname{ReLU}'(z)=0$ — and the gradients with respect to $w$, $b$ and the output weight $v$ vanish all at once. Gradient descent will never move this neuron again: it is dead. The CS231n course notes mention that with too high a learning rate as much as 40% of a network can end up dead."),
+        ("p", "How a neuron dies. Suppose that after an unlucky large step (too high a learning rate, an outlier in the data, a bad initialization) the neuron’s bias $b$ has become strongly negative. Then $z=w^\\top x+b&lt;0$ on every example, ReLU outputs 0, the derivative $\\operatorname{ReLU}'(z)=0$ — and the gradients with respect to $w$, $b$ and the output weight $v$ vanish all at once. Gradient descent will not move this neuron any more: it is dead (strictly for good for a first-layer neuron under plain SGD; in deeper layers the neuron’s input changes with the earlier layers, and neurons occasionally come back). The CS231n course notes mention that with too high a learning rate as much as 40% of a network can end up dead."),
         ("p", "Below is the cleanest possible experiment. A single neuron $f(x)=v\\cdot\\operatorname{act}(wx+b)$ has to learn the “hinge” $y=1.5\\max(0,\\,x-1)$ from 41 points on $[-3,\\,3]$. Start: $w=1$, $b=-4$, $v=1$ — the kink is at $x=4$, outside the data, so $z&lt;0$ on every example. Training is gradient descent on MSE with step $0.1$."),
         ("viz", "leaky-relu-revive", {"alpha": 0.1}, "<b>Figure 3.</b> Press “Play”. The ReLU neuron (black dashes) is frozen: all its gradients are zero, and the error stays at $1.09$ forever. The Leaky ReLU neuron with $\\alpha=0.1$ receives a weak gradient, its line tilts and shifts, and at step 24 the kink enters the data range. After 1500 steps the error is $0.0549$. With $\\alpha=0.01$ the revival takes 135 steps, but the final error is $0.00082$."),
         ("p", "Note the trade-off. A large $\\alpha$ brings the neuron back to life quickly, but the left branch stays tilted: with $\\alpha=0.1$ the final model has slope $\\alpha v w\\approx0.116$ on the left instead of zero, hence the residual error. A small $\\alpha$ barely distorts the shape of the function, but revives more slowly."),
         ("callout", "warn", "Leaky is not a guarantee", "A non-zero gradient does not mean the neuron must come back: it may stay on the left branch, working as the linear function $\\alpha(w^\\top x+b)$. What Leaky ReLU guarantees is different — the neuron never freezes solid and keeps learning. Against the cause of death itself, use a moderate learning rate, warmup, normalization and proper initialization."),
     ]),
     dict(id="space", title="A network of Leaky ReLUs: a piecewise-linear landscape", blocks=[
-        ("p", "In a network with two inputs every neuron $\\operatorname{LReLU}(w_k^\\top x+b_k)$ “folds” the plane along the line $w_k^\\top x+b_k=0$: on one side of it the slope is $1/\\alpha$ times smaller than on the other. The sum of neurons $f(x)=\\sum_k v_k\\operatorname{LReLU}(w_k^\\top x+b_k)$ is a polyhedral surface: inside every region where the set of active neurons does not change it is flat, and on the kink lines it changes slope."),
+        ("p", "In a network with two inputs every neuron $\\operatorname{LReLU}(w_k^\\top x+b_k)$ “folds” the plane along the line $w_k^\\top x+b_k=0$: on one side of it the neuron’s contribution is $1/\\alpha$ times flatter than on the other. The sum of neurons $f(x)=\\sum_k v_k\\operatorname{LReLU}(w_k^\\top x+b_k)$ is a polyhedral surface: inside every region where the set of active neurons does not change it is flat, and on the kink lines it changes slope."),
         ("viz", "leaky-relu-surface", {"alpha": 0.1}, "<b>Figure 4.</b> A network of six Leaky ReLU neurons. On the left, the surface $f(x_1,x_2)$ in 3D (you can rotate it); on the right, the view from above with the six kink lines. They cut the square $[-3,\\,3]^2$ into 19 linear regions. Drag the orange point: at the centre, at $(0.2,\\,-0.3)$, all six neurons are off, yet the gradient is not zero: $|\\nabla f|=0.100$. Set $\\alpha=0$: the central region becomes flat — that is 5% of the square where a ReLU network has a zero gradient with respect to the input. At $\\alpha=1$ the whole network turns into a single plane."),
         ("p", "The number of regions does not depend on $\\alpha$ (as long as $\\alpha\\ne1$): only the kink lines set it. What does depend on $\\alpha$ is what happens where all neurons are off. With ReLU there is a plateau with zero gradient, and examples that land on it tell the network nothing. With Leaky ReLU the plateau is tilted, and the gradient there is generally non-zero."),
         ("callout", "note", "How many regions there can be", "$n$ lines in general position cut the plane into at most $1+n+\\binom n2$ pieces: for $n=6$ that is 22. In the square of the figure 19 of them are visible. In deep networks the number of linear regions can grow exponentially with depth — one explanation of their expressive power."),
@@ -383,13 +383,13 @@ SECTIONS = {
         ("ul", [
             "<b>A fixed $\\alpha$</b> — the classic Leaky ReLU (Maas, Hannun, Ng, 2013, $\\alpha=0.01$). Today $0.1$–$0.3$ is common: in the comparison by Xu et al. (2015) a “very leaky” variant with $\\alpha=1/5.5\\approx0.18$ worked better than $0.01$.",
             "<b>A learnable $\\alpha$</b> — PReLU (Parametric ReLU, He et al., 2015). $\\alpha$ becomes a parameter — one per layer or one per channel — and is learned by gradient descent together with the weights. The initial value in PyTorch is $0.25$.",
-            "<b>A random $\\alpha$</b> — RReLU (Randomized ReLU): during training $\\alpha$ is drawn for each example from the uniform distribution $U(1/8,\\,1/3)$ (PyTorch’s default bounds); at inference the mean $\\frac{1/8+1/3}{2}=\\frac{11}{48}\\approx0.229$ is used. The noise acts as regularization.",
+            "<b>A random $\\alpha$</b> — RReLU (Randomized ReLU): during training $\\alpha$ is drawn anew for every element of the input from the uniform distribution $U(1/8,\\,1/3)$ (PyTorch’s default bounds); at inference the mean $\\frac{1/8+1/3}{2}=\\frac{11}{48}\\approx0.229$ is used. The noise acts as regularization.",
         ]),
         ("p", "For PReLU the gradient with respect to $\\alpha$ is $\\min(0,\\,z)$ from the section on the derivative: the slope learns only from negative inputs. Let us watch gradient descent find both the weight and the slope."),
         ("viz", "leaky-relu-prelu", {"w": 0.5, "a": 1.3}, "<b>Figure 6.</b> The two-parameter model $\\operatorname{PReLU}_\\alpha(wx)$ learns from 31 points generated by the “teacher” $w^*=1.5$, $\\alpha^*=0.2$ with noise. On the right, the error surface $L(w,\\alpha)$ (lighter means smaller). From the start $(0.5,\\,1.3)$ gradient descent with step $0.05$ arrives in 87 steps at $w=1.521$, $\\alpha=0.209$ with error $0.0158$ — the minimum for these noisy data (the teacher itself has error $0.0170$). Drag the start somewhere else."),
         ("p", "PReLU adds only one parameter per channel, yet in the work of He et al., together with a new initialization, it made it possible to train very deep convolutional networks and reach a top-5 error of $4.94\\%$ on ImageNet — below the estimated human error of $5.1\\%$. The authors note that weight decay should not be applied to $\\alpha$: it pulls $\\alpha$ towards zero, that is, back to ReLU."),
         ("h3", "Smooth relatives"),
-        ("p", "The kink at zero can be smoothed. ELU replaces the left line with the exponential $\\alpha(e^x-1)$, which saturates at $-\\alpha$. SELU adds a scale: $\\lambda\\approx1.0507$ and $\\alpha\\approx1.6733$ are chosen so that the activations keep zero mean and unit variance by themselves. <a href=\"../gelu/\">GELU</a> and <a href=\"../silu/\">SiLU</a> are smooth and even non-monotonic functions used in today’s transformers."),
+        ("p", "The kink at zero can be smoothed. ELU replaces the left line with the exponential $\\alpha(e^x-1)$, which saturates at $-\\alpha$ (here $\\alpha$ is ELU’s own parameter, usually 1). SELU adds a scale: $\\lambda\\approx1.0507$ and $\\alpha\\approx1.6733$ are chosen so that in a fully connected network with LeCun initialization the activations keep zero mean and unit variance by themselves. <a href=\"../gelu/\">GELU</a> and <a href=\"../silu/\">SiLU</a> are smooth and even non-monotonic functions used in today’s transformers."),
         ("viz", "leaky-relu-zoo", {"cmp": "elu", "x": -2}, "<b>Figure 7.</b> Leaky ReLU with $\\alpha=0.1$ next to its relatives. Hover the cursor: at $x=-2$ Leaky ReLU gives $-0.2$, ELU $-0.865$, SELU $-1.520$, GELU $-0.046$, SiLU $-0.238$. Switch to the derivatives: for Leaky ReLU and SELU it is a step with a jump at zero (for SELU $\\lambda\\alpha\\approx1.758$ on the left and $\\lambda\\approx1.051$ on the right), for ELU, GELU and SiLU a continuous curve."),
         ("table", ["Function", "For $x\\le0$", "Derivative on the left", "Feature"], "FAMILY", {}),
     ]),
@@ -404,7 +404,7 @@ SECTIONS = {
         ("ol", [
             "<b>Writing <code>max(alpha * x, x)</code> with $\\alpha&gt;1$.</b> The formula holds only for $\\alpha\\le1$; for larger $\\alpha$ you get a different function. The safe form is <code>where(x &gt; 0, x, alpha * x)</code>.",
             "<b>Too large an $\\alpha$.</b> As $\\alpha\\to1$ the share of nonlinearity $\\frac{1-\\alpha}{2}$ goes to zero, the function becomes almost linear, and a deep network loses expressiveness. A sensible range is from $0.01$ to $0.3$.",
-            "<b>Initializing “as for ReLU” without correcting for $\\alpha$.</b> The variance factor is $1+\\alpha^2$ per layer: at $\\alpha=0.3$ the signal grows about 8 times over 50 layers (figure 5). Pass $\\alpha$ to <code>kaiming_normal_(..., a=alpha)</code>.",
+            "<b>Initializing “as for ReLU” without correcting for $\\alpha$.</b> The variance factor is $1+\\alpha^2$ per layer: at $\\alpha=0.3$ the RMS of the signal grows about $1.09^{24.5}\\approx8.3$ times from layer 1 to layer 50 (figure 5). Pass $\\alpha$ to <code>kaiming_normal_(..., a=alpha)</code>.",
             "<b>Hoping that Leaky ReLU alone will cure unstable training.</b> It removes the zero gradient, but not the cause: too high a learning rate is still dangerous.",
             "<b>Weight decay on the $\\alpha$ of PReLU.</b> It pulls $\\alpha$ towards zero, and PReLU turns into ReLU. Exclude $\\alpha$ from the parameter group with weight decay.",
             "<b>Different defaults</b> in PyTorch ($0.01$), TensorFlow ($0.2$) and Keras ($0.3$): when a model moves between frameworks, the result silently changes.",
@@ -431,7 +431,7 @@ SECTIONS = {
             dict(q="For which $\\alpha$ does $\\operatorname{LReLU}_\\alpha(x)=\\max(\\alpha x,x)$ hold?", options=["For any $\\alpha$", "Only for $\\alpha\\le1$", "Only for $\\alpha&gt;1$", "Only for $\\alpha=0.01$"], answer=1,
                  explain="For $\\alpha\\le1$, on the right $x\\ge\\alpha x$ and on the left $\\alpha x\\ge x$. For $\\alpha&gt;1$ the maximum picks $\\alpha x$ on the right — a different function."),
             dict(q="A network with Leaky ReLU ($\\alpha=0.3$) is initialized “as for ReLU”, $g=\\sqrt2$. What is the variance factor per layer?", options=["$1$", "$1.09$", "$0.545$", "$2$"], answer=1,
-                 explain="$g^2(1+\\alpha^2)/2=2\\cdot1.09/2=1.09$. Over 50 layers the RMS grows by about $1.09^{24.5}\\approx8.3$ times."),
+                 explain="$g^2(1+\\alpha^2)/2=2\\cdot1.09/2=1.09$. From layer 1 to layer 50 the RMS grows by about $1.09^{24.5}\\approx8.3$ times."),
             dict(q="A ReLU neuron gets $z&lt;0$ on every example. What is true?", options=["The gradients with respect to its parameters are zero, and gradient descent will never change it again", "The gradient is small but not zero", "The neuron outputs negative values", "Lowering the learning rate is enough to revive it"], answer=0,
                  explain="$\\operatorname{ReLU}'(z)=0$ for $z&lt;0$, so all gradients vanish — the neuron is dead. A smaller step will not help: a step multiplied by zero is still zero."),
         ]),
@@ -443,10 +443,10 @@ SECTIONS = {
         ("p", "Leaky ReLU — eng kichik tuzatish: noldan chapda grafik gorizontal emas, biroz qiya — kichik $\\alpha$ bilan $\\alpha x$ (odatda $0{,}01$ dan $0{,}3$ gacha). Signal yopiq eshikdan «sizib o‘tadi» — nomi shundan (leaky — «oqadigan»)."),
         ("p", "U qayerda uchraydi:"),
         ("ul", [
-            "<b>GAN diskriminatorlari</b> — DCGAN’da (Redford va boshq., 2015) diskriminatorning barcha qatlamlari $\\alpha=0{,}2$ li Leaky ReLU’dan foydalanadi;",
+            "<b>GAN diskriminatorlari</b> — DCGAN’da (Radford va boshq., 2015) diskriminatorning barcha qatlamlari $\\alpha=0{,}2$ li Leaky ReLU’dan foydalanadi;",
             "<b>YOLO detektorlari</b> — YOLOv2 va YOLOv3 dagi Darknet tarmog‘i $\\alpha=0{,}1$ li Leaky ReLU asosida qurilgan;",
             "<b>graf tarmoqlari</b> — GAT’dagi e’tibor koeffitsiyentlari $\\alpha=0{,}2$ li Leaky ReLU orqali hisoblanadi;",
-            "<b>PReLU’li konvolyutsion tarmoqlar</b> — o‘rganiladigan $\\alpha$ li variant (Xe va boshq., 2015) ImageNet’da top-5 xatoni ilk bor inson darajasidan pastga tushirishga yordam berdi;",
+            "<b>PReLU’li konvolyutsion tarmoqlar</b> — o‘rganiladigan $\\alpha$ li variant (He va boshq., 2015) ImageNet’da top-5 xatoni ilk bor insonning taxminiy xatosidan pastga tushirishga yordam berdi;",
             "<b>ReLU «o‘ladigan» istalgan tarmoq</b> — almashtirish bitta qator va deyarli hech narsaga tushmaydi.",
         ]),
         ("callout", "key", "Bir daqiqada asosiysi", "$x&gt;0$ da $\\operatorname{LReLU}(x)=x$, $x\\le0$ da $\\alpha x$. Hosila — zina: o‘ngda $1$, chapda $\\alpha$, shuning uchun gradiyent hech qachon butunlay nolga aylanmaydi. Funksiya bo‘lak-chiziqli, monoton va deyarli ReLU kabi arzon bo‘lib qoladi. $\\alpha=0$ da bu ReLU, $\\alpha=1$ da ayniy funksiya, o‘rganiladigan $\\alpha$ da — PReLU."),
@@ -454,8 +454,8 @@ SECTIONS = {
     dict(id="intuition", title="Intuitsiya: oxirigacha yopilmaydigan eshik", blocks=[
         ("p", "ReLU eshikka o‘xshaydi: musbat signal to‘liq o‘tadi, manfiysi yopiq tabaqaga uriladi. Leaky ReLU tirqish qoldiradi — manfiy signal o‘tadi, lekin $1/\\alpha$ marta susaygan holda. $\\alpha=0{,}1$ da $-2$ kirish $-0{,}2$ ga aylanadi."),
         ("p", "Nuqtani grafik bo‘ylab torting. To‘q sariq «qiyalik uchburchagi» hosilani ko‘rsatadi: $x$ o‘qi bo‘ylab 1 ga qadam qiymatni noldan chapda $\\alpha$ ga, o‘ngda 1 ga o‘zgartiradi. Pastda — hosilaning o‘zi: nolda uzilishga ega ikki gorizontal zina. $\\alpha$ surgichini suring: ReLU’dan ($\\alpha=0$) «oqadigan» variant orqali $y=x$ to‘g‘ri chiziqqacha ($\\alpha=1$)."),
-        ("viz", "leaky-relu-explorer", {"alpha": 0.1, "x": -2}, "<b>1-rasm.</b> $\\alpha=0{,}1$ dagi Leaky ReLU va uning hosilasi. $x=-2$ nuqtada qiymat $-0{,}2$, hosila $0{,}1$. Kulrang punktir — ReLU, nuqtali chiziq — $y=x$. Nolda hosila aniqlanmagan: chapda u $\\alpha$ ga, o‘ngda 1 ga teng."),
-        ("callout", "intuition", "Nimaga e’tibor berish kerak", "Chapda grafik yassi emas, lekin juda qiya emas: $\\alpha=0{,}01$ da $-100$ kirish atigi $-1$ beradi. Leaky ReLU’ning butun nochiziqliligi bitta nuqtada — qiyalik $\\alpha$ dan 1 ga o‘zgaradigan noldagi sinishda jamlangan. Bunday neyronlardan iborat tarmoqning ifodalash kuchi aynan shu sinishlardan keladi."),
+        ("viz", "leaky-relu-explorer", {"alpha": 0.1, "x": -2}, "<b>1-rasm.</b> $\\alpha=0{,}1$ dagi Leaky ReLU va uning hosilasi. $x=-2$ nuqtada qiymat $-0{,}2$, hosila $0{,}1$. Kulrang punktir — ReLU, nuqtali chiziq — $y=x$. Nolda hosila yo‘q: chapda u $\\alpha$ ga, o‘ngda 1 ga teng; nuqtani nolga olib boring — ko‘rsatkichlarda $[\\alpha;\\,1]$ subdifferensial va PyTorch oladigan $\\alpha$ qiymati paydo bo‘ladi."),
+        ("callout", "intuition", "Nimaga e’tibor berish kerak", "Chapda grafik yassi emas, lekin juda yotiq: $\\alpha=0{,}01$ da $-100$ kirish atigi $-1$ beradi. Leaky ReLU’ning butun nochiziqliligi bitta nuqtada — qiyalik $\\alpha$ dan 1 ga o‘zgaradigan noldagi sinishda jamlangan. Bunday neyronlardan iborat tarmoqning ifodalash kuchi aynan shu sinishlardan keladi."),
     ]),
     dict(id="anatomy", title="Formula mayda detallarigacha", blocks=[
         ("p", "Bitta funksiyani uch xil yozishni bilish foydali — har biri o‘z joyida kerak bo‘ladi."),
@@ -483,7 +483,7 @@ SECTIONS = {
             "<b>Uzluksizlik va bo‘lak-chiziqlilik</b>: nolda yopishtirilgan ikki to‘g‘ri chiziq. Funksiya $x=0$ dan boshqa hamma joyda differensiallanuvchi.",
             "<b>Qat’iy monotonlik</b> $\\alpha&gt;0$ da: katta kirish katta chiqish beradi. Shuning uchun funksiya teskarilanuvchi: $y&gt;0$ da $\\operatorname{LReLU}_\\alpha^{-1}(y)=y$, $y\\le0$ da $y/\\alpha$, ya’ni $\\operatorname{LReLU}_{1/\\alpha}$. ReLU’ning teskarisi yo‘q: barcha manfiy kirishlar nolga yopishtirilgan.",
             "<b>Musbat bir jinslilik</b>: $c\\ge0$ da $\\operatorname{LReLU}(cx)=c\\,\\operatorname{LReLU}(x)$. Kirish masshtabi shunchaki chiqishga o‘tadi — initsializatsiyaning sodda formulalari shundan.",
-            "<b>Lipshits sharti</b> $\\max(1,\\alpha)$ konstanta bilan, ya’ni $\\alpha\\le1$ da 1: $|\\operatorname{LReLU}(a)-\\operatorname{LReLU}(b)|\\le|a-b|$.",
+            "<b>Lipshits sharti</b> $\\max(1,|\\alpha|)$ konstanta bilan, ya’ni $\\alpha\\le1$ da 1: $|\\operatorname{LReLU}(a)-\\operatorname{LReLU}(b)|\\le|a-b|$.",
             "<b>Chegaralanmaganlik</b> yuqoridan ham, pastdan ham, lekin pastga funksiya $1/\\alpha$ marta sekinroq o‘sadi.",
             "<b>Xususiy hollar</b>: $\\alpha=0$ — ReLU, $\\alpha=1$ — ayniy funksiya, $\\alpha=-1$ — $|x|$ modul (endi monoton emas).",
         ]),
@@ -517,14 +517,14 @@ SECTIONS = {
         ("p", "$\\alpha$ qiyalik faqat chap tarmoqqa tushgan misollardan o‘rganadi — PReLU shunday tuzilgan (9-bo‘lim). $x$ bo‘yicha ikkinchi hosila noldan boshqa hamma joyda nolga teng: butun egrilik sinishda jamlangan, umumlashgan funksiyalar ma’nosida $\\operatorname{LReLU}''(x)=(1-\\alpha)\\,\\delta(x)$."),
     ]),
     dict(id="dying", title="O‘layotgan ReLU va Leaky uni qanday davolaydi", blocks=[
-        ("p", "Neyron qanday o‘ladi. Muvaffaqiyatsiz katta qadamdan keyin (juda katta o‘qitish tezligi, ma’lumotlardagi chetga chiqish, yomon initsializatsiya) neyronning $b$ siljishi kuchli manfiy bo‘lib qolgan bo‘lsin. U holda barcha misollarda $z=w^\\top x+b&lt;0$, ReLU 0 chiqaradi, $\\operatorname{ReLU}'(z)=0$ — va $w$, $b$ hamda chiqish vazni $v$ bo‘yicha gradiyentlar birdaniga nolga aylanadi. Gradiyent tushish bu neyronni boshqa hech qachon siljitmaydi: u o‘lik. CS231n kursi konspektlarida o‘qitish tezligi juda katta bo‘lsa, tarmoqning 40% gachasi o‘lik bo‘lib qolishi mumkinligi qayd etilgan."),
+        ("p", "Neyron qanday o‘ladi. Muvaffaqiyatsiz katta qadamdan keyin (juda katta o‘qitish tezligi, ma’lumotlardagi chetga chiqish, yomon initsializatsiya) neyronning $b$ siljishi kuchli manfiy bo‘lib qolgan bo‘lsin. U holda barcha misollarda $z=w^\\top x+b&lt;0$, ReLU 0 chiqaradi, $\\operatorname{ReLU}'(z)=0$ — va $w$, $b$ hamda chiqish vazni $v$ bo‘yicha gradiyentlar birdaniga nolga aylanadi. Gradiyent tushish bu neyronni boshqa siljitmaydi: u o‘lik (oddiy SGD’da birinchi qatlam neyroni uchun — qat’iy umrbod; chuqurroq qatlamlarda neyron kirishi oldingi qatlamlar bilan birga o‘zgaradi va neyronlar ba’zan jonlanadi). CS231n kursi konspektlarida o‘qitish tezligi juda katta bo‘lsa, tarmoqning 40% gachasi o‘lik bo‘lib qolishi mumkinligi qayd etilgan."),
         ("p", "Quyida eng toza tajriba. Bitta $f(x)=v\\cdot\\operatorname{act}(wx+b)$ neyron $[-3;\\,3]$ kesmadagi 41 nuqta bo‘yicha $y=1{,}5\\max(0,\\,x-1)$ «sharnir»ni o‘rganishi kerak. Start: $w=1$, $b=-4$, $v=1$ — sinish $x=4$ nuqtada, ma’lumotlardan tashqarida, shuning uchun barcha misollarda $z&lt;0$. O‘qitish — $0{,}1$ qadamli MSE bo‘yicha gradiyent tushish."),
         ("viz", "leaky-relu-revive", {"alpha": 0.1}, "<b>3-rasm.</b> «Boshlash»ni bosing. ReLU neyron (qora punktir) muzlagan: uning barcha gradiyentlari nolga teng va xato abadiy $1{,}09$ bo‘lib qoladi. $\\alpha=0{,}1$ li Leaky ReLU neyron kuchsiz gradiyent oladi, uning to‘g‘ri chizig‘i qiyshayadi va suriladi, 24-qadamda sinish ma’lumotlar sohasiga kiradi. 1500 qadamdan keyin xato $0{,}0549$ ga teng. $\\alpha=0{,}01$ da jonlanish 135 qadam oladi, lekin yakuniy xato — $0{,}00082$."),
         ("p", "Murosaga e’tibor bering. Katta $\\alpha$ neyronni tez hayotga qaytaradi, lekin chap tarmoq qiya bo‘lib qoladi: $\\alpha=0{,}1$ da yakuniy model chapda nol o‘rniga $\\alpha v w\\approx0{,}116$ qiyalikka ega, qoldiq xato shundan. Kichik $\\alpha$ funksiya shaklini deyarli buzmaydi, lekin sekinroq jonlantiradi."),
         ("callout", "warn", "Leaky — kafolat emas", "Nol bo‘lmagan gradiyent neyron albatta qaytadi degani emas: u chap tarmoqda $\\alpha(w^\\top x+b)$ chiziqli funksiya sifatida ishlab qolishi mumkin. Leaky ReLU boshqa narsani kafolatlaydi — neyron hech qachon butunlay muzlamaydi va o‘rganishda davom etadi. O‘limning o‘z sababiga qarshi mo‘tadil o‘qitish tezligi, qizdirish (warmup), normallashtirish va to‘g‘ri initsializatsiya yordam beradi."),
     ]),
     dict(id="space", title="Leaky ReLU’lardan iborat tarmoq: bo‘lak-chiziqli relyef", blocks=[
-        ("p", "Ikki kirishli tarmoqda har bir $\\operatorname{LReLU}(w_k^\\top x+b_k)$ neyron tekislikni $w_k^\\top x+b_k=0$ to‘g‘ri chiziq bo‘ylab «bukadi»: uning bir tomonida qiyalik ikkinchisidagidan $1/\\alpha$ marta kichik. $f(x)=\\sum_k v_k\\operatorname{LReLU}(w_k^\\top x+b_k)$ neyronlar yig‘indisi — ko‘p yoqli sirt: faol neyronlar to‘plami o‘zgarmaydigan har bir soha ichida u tekis, sinish chiziqlarida esa qiyaligini o‘zgartiradi."),
+        ("p", "Ikki kirishli tarmoqda har bir $\\operatorname{LReLU}(w_k^\\top x+b_k)$ neyron tekislikni $w_k^\\top x+b_k=0$ to‘g‘ri chiziq bo‘ylab «bukadi»: uning bir tomonida neyron hissasining qiyaligi ikkinchisidagidan $1/\\alpha$ marta kichik. $f(x)=\\sum_k v_k\\operatorname{LReLU}(w_k^\\top x+b_k)$ neyronlar yig‘indisi — ko‘p yoqli sirt: faol neyronlar to‘plami o‘zgarmaydigan har bir soha ichida u tekis, sinish chiziqlarida esa qiyaligini o‘zgartiradi."),
         ("viz", "leaky-relu-surface", {"alpha": 0.1}, "<b>4-rasm.</b> Oltita Leaky ReLU neyrondan iborat tarmoq. Chapda — 3D’dagi $f(x_1,x_2)$ sirt (uni aylantirish mumkin), o‘ngda — oltita sinish chizig‘i bilan yuqoridan ko‘rinish. Ular $[-3;\\,3]^2$ kvadratni 19 ta chiziqli sohaga bo‘ladi. To‘q sariq nuqtani torting: markazda, $(0{,}2;\\,-0{,}3)$ nuqtada oltala neyron ham o‘chgan, lekin gradiyent nol emas: $|\\nabla f|=0{,}100$. $\\alpha=0$ qiling: markaziy soha tekis bo‘lib qoladi — bu kvadratning 5% i, u yerda ReLU tarmog‘ining kirish bo‘yicha gradiyenti nolga teng. $\\alpha=1$ da butun tarmoq bitta tekislikka aylanadi."),
         ("p", "Sohalar soni $\\alpha$ ga bog‘liq emas ($\\alpha\\ne1$ ekan): uni faqat sinish chiziqlari belgilaydi. Lekin barcha neyronlar o‘chgan joyda nima bo‘lishi $\\alpha$ ga bog‘liq. ReLU’da u yerda nol gradiyentli plato bo‘ladi va unga tushgan misollar tarmoqqa hech narsa bildirmaydi. Leaky ReLU’da plato qiya va u yerda gradiyent, odatda, nolga teng emas."),
         ("callout", "note", "Sohalar nechta bo‘lishi mumkin", "Umumiy vaziyatdagi $n$ ta to‘g‘ri chiziq tekislikni ko‘pi bilan $1+n+\\binom n2$ qismga bo‘ladi: $n=6$ uchun bu 22. Rasmdagi kvadratda ulardan 19 tasi ko‘rinadi. Chuqur tarmoqlarda chiziqli sohalar soni chuqurlik bilan eksponensial o‘sishi mumkin — bu ularning ifodalash kuchining tushuntirishlaridan biri."),
@@ -546,15 +546,15 @@ SECTIONS = {
     dict(id="family", title="PReLU, RReLU va butun oila", blocks=[
         ("p", "$\\alpha$ ni qanday tanlash kerak? Uchta javob bor."),
         ("ul", [
-            "<b>Qat’iy $\\alpha$</b> — klassik Leaky ReLU (Maas, Hannun, In, 2013, $\\alpha=0{,}01$). Bugun ko‘pincha $0{,}1$–$0{,}3$ olinadi: Syuy va boshq. (2015) taqqoslashida $\\alpha=1/5{,}5\\approx0{,}18$ li «kuchli oqadigan» variant $0{,}01$ dan yaxshiroq ishlagan.",
-            "<b>O‘rganiladigan $\\alpha$</b> — PReLU (Parametric ReLU, Xe va boshq., 2015). $\\alpha$ parametrga aylanadi — qatlamga bitta yoki har kanalga bittadan — va vaznlar bilan birga gradiyent tushish orqali o‘rganiladi. PyTorch’da boshlang‘ich qiymat — $0{,}25$.",
-            "<b>Tasodifiy $\\alpha$</b> — RReLU (Randomized ReLU): o‘qitishda $\\alpha$ har bir misol uchun $U(1/8;\\,1/3)$ tekis taqsimotdan olinadi (PyTorch’dagi standart chegaralar), xulosa chiqarishda — o‘rtacha $\\frac{1/8+1/3}{2}=\\frac{11}{48}\\approx0{,}229$. Shovqin regulyarizatsiya vazifasini bajaradi.",
+            "<b>Qat’iy $\\alpha$</b> — klassik Leaky ReLU (Maas, Hannun, Ng, 2013, $\\alpha=0{,}01$). Bugun ko‘pincha $0{,}1$–$0{,}3$ olinadi: Xu va boshq. (2015) taqqoslashida $\\alpha=1/5{,}5\\approx0{,}18$ li «kuchli oqadigan» variant $0{,}01$ dan yaxshiroq ishlagan.",
+            "<b>O‘rganiladigan $\\alpha$</b> — PReLU (Parametric ReLU, He va boshq., 2015). $\\alpha$ parametrga aylanadi — qatlamga bitta yoki har kanalga bittadan — va vaznlar bilan birga gradiyent tushish orqali o‘rganiladi. PyTorch’da boshlang‘ich qiymat — $0{,}25$.",
+            "<b>Tasodifiy $\\alpha$</b> — RReLU (Randomized ReLU): o‘qitishda $\\alpha$ kirishning har bir elementi uchun qaytadan $U(1/8;\\,1/3)$ tekis taqsimotdan olinadi (PyTorch’dagi standart chegaralar), xulosa chiqarishda — o‘rtacha $\\frac{1/8+1/3}{2}=\\frac{11}{48}\\approx0{,}229$. Shovqin regulyarizatsiya vazifasini bajaradi.",
         ]),
         ("p", "PReLU’da $\\alpha$ bo‘yicha gradiyent — hosila bo‘limidagi $\\min(0,\\,z)$: qiyalik faqat manfiy kirishlardan o‘rganadi. Gradiyent tushish vaznni ham, qiyalikni ham birdaniga qanday topishini ko‘raylik."),
         ("viz", "leaky-relu-prelu", {"w": 0.5, "a": 1.3}, "<b>6-rasm.</b> Ikki parametrli $\\operatorname{PReLU}_\\alpha(wx)$ model $w^*=1{,}5$, $\\alpha^*=0{,}2$ «o‘qituvchi» shovqin bilan yaratgan 31 nuqtadan o‘rganadi. O‘ngda — $L(w,\\alpha)$ xato sirti (qancha och bo‘lsa, shuncha kichik). $(0{,}5;\\,1{,}3)$ startdan $0{,}05$ qadamli gradiyent tushish 87 qadamda $w=1{,}521$, $\\alpha=0{,}209$ ga $0{,}0158$ xato bilan yetib keladi — bu shovqinli ma’lumotlar uchun minimum (o‘qituvchining o‘z xatosi $0{,}0170$). Startni boshqa joyga torting."),
-        ("p", "PReLU har bir kanalga atigi bitta parametr qo‘shadi, lekin Xe va boshqalarning ishida yangi initsializatsiya bilan birga u juda chuqur konvolyutsion tarmoqlarni o‘qitish va ImageNet’da $4{,}94\\%$ top-5 xatoga erishish imkonini berdi — bu insonning taxminiy $5{,}1\\%$ xatosidan past. Mualliflar $\\alpha$ ga vaznlar so‘nishini (weight decay) qo‘llamaslikni ta’kidlaydi: u $\\alpha$ ni nolga, ya’ni ReLU’ga qaytaradi."),
+        ("p", "PReLU har bir kanalga atigi bitta parametr qo‘shadi, lekin He va boshqalarning ishida yangi initsializatsiya bilan birga u juda chuqur konvolyutsion tarmoqlarni o‘qitish va ImageNet’da $4{,}94\\%$ top-5 xatoga erishish imkonini berdi — bu insonning taxminiy $5{,}1\\%$ xatosidan past. Mualliflar $\\alpha$ ga vaznlar so‘nishini (weight decay) qo‘llamaslikni ta’kidlaydi: u $\\alpha$ ni nolga, ya’ni ReLU’ga qaytaradi."),
         ("h3", "Silliq qarindoshlar"),
-        ("p", "Noldagi sinishni silliqlash mumkin. ELU chap to‘g‘ri chiziqni $-\\alpha$ darajasida to‘yinadigan $\\alpha(e^x-1)$ eksponenta bilan almashtiradi. SELU masshtab qo‘shadi: $\\lambda\\approx1{,}0507$ va $\\alpha\\approx1{,}6733$ aktivatsiyalar nol o‘rtacha va birlik dispersiyani o‘zi saqlaydigan qilib tanlangan. <a href=\"../gelu/\">GELU</a> va <a href=\"../silu/\">SiLU</a> — bugungi transformerlarda turadigan silliq va hatto nomonoton funksiyalar."),
+        ("p", "Noldagi sinishni silliqlash mumkin. ELU chap to‘g‘ri chiziqni $-\\alpha$ darajasida to‘yinadigan $\\alpha(e^x-1)$ eksponenta bilan almashtiradi (bu yerda $\\alpha$ — ELU’ning o‘z parametri, odatda 1). SELU masshtab qo‘shadi: $\\lambda\\approx1{,}0507$ va $\\alpha\\approx1{,}6733$ LeCun initsializatsiyali to‘liq bog‘langan tarmoqda aktivatsiyalar nol o‘rtacha va birlik dispersiyani o‘zi saqlaydigan qilib tanlangan. <a href=\"../gelu/\">GELU</a> va <a href=\"../silu/\">SiLU</a> — bugungi transformerlarda turadigan silliq va hatto nomonoton funksiyalar."),
         ("viz", "leaky-relu-zoo", {"cmp": "elu", "x": -2}, "<b>7-rasm.</b> $\\alpha=0{,}1$ li Leaky ReLU qarindoshlari yonida. Kursorni olib boring: $x=-2$ da Leaky ReLU $-0{,}2$, ELU — $-0{,}865$, SELU — $-1{,}520$, GELU — $-0{,}046$, SiLU — $-0{,}238$ beradi. Hosilalarga o‘ting: Leaky ReLU va SELU’da bu nolda uzilishli zina (SELU’da chapda $\\lambda\\alpha\\approx1{,}758$, o‘ngda $\\lambda\\approx1{,}051$), ELU, GELU va SiLU’da — uzluksiz egri chiziq."),
         ("table", ["Funksiya", "$x\\le0$ da", "Chapdagi hosila", "Xususiyati"], "FAMILY", {}),
     ]),
@@ -569,7 +569,7 @@ SECTIONS = {
         ("ol", [
             "<b>$\\alpha&gt;1$ da <code>max(alpha * x, x)</code> yozuvi.</b> Formula faqat $\\alpha\\le1$ da to‘g‘ri; katta $\\alpha$ larda boshqa funksiya chiqadi. Xavfsiz yozuv — <code>where(x &gt; 0, x, alpha * x)</code>.",
             "<b>Juda katta $\\alpha$.</b> $\\alpha\\to1$ da nochiziqlilik ulushi $\\frac{1-\\alpha}{2}$ nolga intiladi, funksiya deyarli chiziqli bo‘lib qoladi va chuqur tarmoq ifodalash kuchini yo‘qotadi. Oqilona oraliq — $0{,}01$ dan $0{,}3$ gacha.",
-            "<b>$\\alpha$ ga tuzatishsiz «ReLU uchun» initsializatsiya.</b> Har qatlamda dispersiya ko‘paytuvchisi $1+\\alpha^2$: $\\alpha=0{,}3$ da 50 qatlamda signal taxminan 8 marta o‘sadi (5-rasm). $\\alpha$ ni <code>kaiming_normal_(..., a=alpha)</code> ga bering.",
+            "<b>$\\alpha$ ga tuzatishsiz «ReLU uchun» initsializatsiya.</b> Har qatlamda dispersiya ko‘paytuvchisi $1+\\alpha^2$: $\\alpha=0{,}3$ da signal RMS i 1-qatlamdan 50-qatlamgacha taxminan $1{,}09^{24{,}5}\\approx8{,}3$ marta o‘sadi (5-rasm). $\\alpha$ ni <code>kaiming_normal_(..., a=alpha)</code> ga bering.",
             "<b>Leaky ReLU beqaror o‘qitishni o‘zi davolaydi degan umid.</b> U nol gradiyentni yo‘qotadi, lekin sababini emas: juda katta o‘qitish tezligi baribir xavfli.",
             "<b>PReLU’ning $\\alpha$ siga vaznlar so‘nishi.</b> U $\\alpha$ ni nolga tortadi va PReLU ReLU’ga aylanadi. $\\alpha$ ni weight decay qo‘llanadigan parametrlar guruhidan chiqaring.",
             "<b>Har xil standart qiymatlar</b> PyTorch ($0{,}01$), TensorFlow ($0{,}2$) va Keras’da ($0{,}3$): modelni freymvorklar o‘rtasida ko‘chirganda natija jimgina o‘zgaradi.",
@@ -596,7 +596,7 @@ SECTIONS = {
             dict(q="Qaysi $\\alpha$ larda $\\operatorname{LReLU}_\\alpha(x)=\\max(\\alpha x,x)$ to‘g‘ri?", options=["Istalgan $\\alpha$ da", "Faqat $\\alpha\\le1$ da", "Faqat $\\alpha&gt;1$ da", "Faqat $\\alpha=0{,}01$ da"], answer=1,
                  explain="$\\alpha\\le1$ da o‘ngda $x\\ge\\alpha x$, chapda $\\alpha x\\ge x$. $\\alpha&gt;1$ da o‘ngda maksimum $\\alpha x$ ni tanlaydi — boshqa funksiya chiqadi."),
             dict(q="Leaky ReLU’li ($\\alpha=0{,}3$) tarmoq «ReLU uchun», $g=\\sqrt2$ bilan initsializatsiya qilingan. Har qatlamdagi dispersiya ko‘paytuvchisi qancha?", options=["$1$", "$1{,}09$", "$0{,}545$", "$2$"], answer=1,
-                 explain="$g^2(1+\\alpha^2)/2=2\\cdot1{,}09/2=1{,}09$. 50 qatlamda RMS taxminan $1{,}09^{24{,}5}\\approx8{,}3$ marta o‘sadi."),
+                 explain="$g^2(1+\\alpha^2)/2=2\\cdot1{,}09/2=1{,}09$. 1-qatlamdan 50-qatlamgacha RMS taxminan $1{,}09^{24{,}5}\\approx8{,}3$ marta o‘sadi."),
             dict(q="ReLU neyron barcha misollarda $z&lt;0$ oladi. Qaysi biri to‘g‘ri?", options=["Uning parametrlari bo‘yicha gradiyentlar nolga teng va gradiyent tushish uni boshqa o‘zgartirmaydi", "Gradiyent kichik, lekin nol emas", "Neyron manfiy qiymatlar chiqaradi", "O‘qitish tezligini kamaytirish kifoya, u jonlanadi"], answer=0,
                  explain="$z&lt;0$ da $\\operatorname{ReLU}'(z)=0$, shuning uchun barcha gradiyentlar nolga aylanadi — bu o‘lik neyron. Qadamni kamaytirish yordam bermaydi: nolga ko‘paytirilgan qadam nolligicha qoladi."),
         ]),

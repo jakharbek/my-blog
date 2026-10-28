@@ -11,7 +11,7 @@
       mean: "среднее x·[ε ≤ x]", pass: "вход прошёл: y = x", block: "вход закрыт: y = 0", gateKind: "Вентиль", a: "a (ветка вентиля)", b: "b (ветка значения)",
       out: "выход", top: "Вид сверху", da: "∂/∂a =", db: "∂/∂b =", fit: "Аппроксимация", loss: "MSE (лог. шкала)", step: "шаг", data: "данные",
       neurons: "Показать нейроны", seed: "Инициализация", lossS: "MSE SiLU", lossR: "MSE ReLU", hover: "Наведите курсор на график", gelu: "GELU",
-      bilinear: "без вентиля (a·b)",
+      bilinear: "без вентиля (a·b)", gateA: "вентиль(a) =",
     },
     en: {
       x: "x", gate: "gate σ(x)", signal: "signal x", silu: "SiLU(x) = x·σ(x)", relu: "ReLU", min: "minimum", deriv: "Show the second derivative",
@@ -21,7 +21,7 @@
       mean: "mean of x·[ε ≤ x]", pass: "input passed: y = x", block: "input blocked: y = 0", gateKind: "Gate", a: "a (gate branch)", b: "b (value branch)",
       out: "output", top: "View from above", da: "∂/∂a =", db: "∂/∂b =", fit: "Approximation", loss: "MSE (log scale)", step: "step", data: "data",
       neurons: "Show the neurons", seed: "Initialization", lossS: "MSE SiLU", lossR: "MSE ReLU", hover: "Hover over the plot", gelu: "GELU",
-      bilinear: "no gate (a·b)",
+      bilinear: "no gate (a·b)", gateA: "gate(a) =",
     },
     uz: {
       x: "x", gate: "ventil σ(x)", signal: "signal x", silu: "SiLU(x) = x·σ(x)", relu: "ReLU", min: "minimum", deriv: "Ikkinchi hosilani ko‘rsatish",
@@ -31,7 +31,7 @@
       mean: "x·[ε ≤ x] o‘rtachasi", pass: "kirish o‘tdi: y = x", block: "kirish yopildi: y = 0", gateKind: "Ventil", a: "a (ventil tarmog‘i)", b: "b (qiymat tarmog‘i)",
       out: "chiqish", top: "Yuqoridan ko‘rinish", da: "∂/∂a =", db: "∂/∂b =", fit: "Approksimatsiya", loss: "MSE (log. shkala)", step: "qadam", data: "ma’lumotlar",
       neurons: "Neyronlarni ko‘rsatish", seed: "Initsializatsiya", lossS: "MSE SiLU", lossR: "MSE ReLU", hover: "Kursorni grafikka olib boring", gelu: "GELU",
-      bilinear: "ventilsiz (a·b)",
+      bilinear: "ventilsiz (a·b)", gateA: "ventil(a) =",
     },
   }[LANG] || {};
 
@@ -280,7 +280,7 @@
     const top = new FV.Plot(FV.col(w.stage), { x: [-R, R], y: [-R, R], xLabel: "a", equal: true, title: L.top });
     const gs = FV.ui.seg({ label: L.gateKind, value: cfg.gate || "silu", options: [{ value: "silu", label: "SwiGLU" }, { value: "gelu", label: "GEGLU" }, { value: "relu", label: "ReGLU" }, { value: "sigmoid", label: "GLU" }, { value: "none", label: L.bilinear }], onchange: (v) => { G = GATES[v]; s3.o.z = [-zmax(), zmax()]; if (titleEl) { titleEl.textContent = ""; titleEl.append(FV.rich(G.label)); } draw(); } });
     w.controls.append(gs.el);
-    const ro = FV.ui.readout(w.readout, [{ key: "a", label: "a =" }, { key: "b", label: "b =" }, { key: "g", label: "gate(a) =", c: "teal" }, { key: "o", label: L.out + " =", c: "blue" }, { key: "da", label: L.da, c: "orange" }, { key: "db", label: L.db, c: "orange" }]);
+    const ro = FV.ui.readout(w.readout, [{ key: "a", label: "a =" }, { key: "b", label: "b =" }, { key: "g", label: L.gateA, c: "teal" }, { key: "o", label: L.out + " =", c: "blue" }, { key: "da", label: L.da, c: "orange" }, { key: "db", label: L.db, c: "orange" }]);
     const hd = top.handle(P.a, P.b, { c: "orange", onChange: (x, y) => { P.a = x; P.b = y; draw(); } });
     function draw() {
       const zm = zmax();

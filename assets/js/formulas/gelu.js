@@ -5,7 +5,7 @@
     ru: {
       x: "x", gelu: "GELU(x)", phiKeep: "Φ(x) — доля, которую пропускаем", ident: "y = x (вход целиком)", deriv: "Показать производную",
       dgelu: "GELU′(x)", min: "минимум", kept: "пропущено", relu: "ReLU", silu: "SiLU = x·σ(x)",
-      samples: "сэмплов на точку", empir: "доля m = 1 при x₀", maxdev: "макс. отклонение", mc: "среднее x·m по сэмплам", mcTitle: "среднее по n случайным маскам", noise: "шум ε ~ N(0, 1)",
+      samples: "масок на точку", empir: "доля m = 1 при x₀", maxdev: "макс. отклонение", mc: "среднее x·m по маскам", mcTitle: "среднее по n случайным маскам", noise: "шум ε ~ N(0, 1)",
       keepArea: "m = 1, если ε ≤ x₀", x0: "Точка $x_0$", diffRelu: "ReLU − GELU", diffSilu: "ReLU − SiLU", hover: "Наведите на график",
       comp1: "Φ(x)", comp2: "x·φ(x)", stepRelu: "ReLU′(x)", second: "Показать вторую производную", d2: "GELU″(x)",
       exact: "точная x·Φ(x)", tanhA: "tanh-приближение", sigA: "x·σ(1,702x)", err: "|ошибка|", coef: "Коэффициент $c$", maxErr: "макс. ошибка tanh на [−6; 6]",

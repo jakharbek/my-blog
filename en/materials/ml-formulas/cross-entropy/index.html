@@ -4,15 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Categorical cross-entropy — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
-  <meta name="description" content="Cross-entropy in depth: −log p, the link to likelihood, entropy and KL divergence, the gradient s − y, convexity, the 3D landscape, label smoothing, CE versus MSE, perplexity, stable code.">
+  <meta name="description" content="Cross-entropy in depth: −log p, likelihood, entropy and KL, the gradient s − y, the 3D landscape, label smoothing, CE vs MSE, perplexity, stable code.">
   <meta property="og:title" content="Categorical cross-entropy — Neural network formulas: a cheat sheet — Abdulatipov J.">
-  <meta property="og:description" content="Cross-entropy in depth: −log p, the link to likelihood, entropy and KL divergence, the gradient s − y, convexity, the 3D landscape, label smoothing, CE versus MSE, perplexity, stable code.">
+  <meta property="og:description" content="Cross-entropy in depth: −log p, likelihood, entropy and KL, the gradient s − y, the 3D landscape, label smoothing, CE vs MSE, perplexity, stable code.">
   <meta property="og:type" content="article">
-  <meta property="og:image" content="../../../../assets/img/javharbek.png">
-  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/cross-entropy/">
-  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/cross-entropy/">
-  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/cross-entropy/">
-  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/cross-entropy/">
+  <meta property="og:url" content="https://javharbek.uz/en/materials/ml-formulas/cross-entropy/">
+  <meta property="og:image" content="https://javharbek.uz/assets/img/javharbek.png">
+  <meta property="og:site_name" content="Abdulatipov J.">
+  <link rel="canonical" href="https://javharbek.uz/en/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="en" href="https://javharbek.uz/en/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/materials/ml-formulas/cross-entropy/">
+  <link rel="alternate" hreflang="x-default" href="https://javharbek.uz/en/materials/ml-formulas/cross-entropy/">
   <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
   <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -90,7 +93,7 @@
 
     <h2 id="intuition">Intuition: a penalty for surprise</h2>
     <p>Suppose the model announces its probabilities in advance and then learns the correct answer. If it gave the correct class probability $p$, its “surprise” is $-\ln p$: at $p=1$ there is no surprise, at $p=0.5$ it is $\ln2\approx0.693$, and as $p\to0$ it grows to infinity. Cross-entropy is the model’s mean surprise on the data.</p>
-    <p>Why a logarithm? First, it turns the product of probabilities of independent examples into a sum. Second, it rewards honesty: among penalties that depend only on the probability the model assigned to the outcome that happened, with three or more outcomes only the logarithmic one (up to a linear transformation) is minimized on average when the model reports its true probabilities.</p>
+    <p>Why a logarithm? First, it turns the product of probabilities of independent examples into a sum. Second, it rewards honesty: among penalties that depend only on the probability the model assigned to the outcome that happened, with three or more outcomes only the logarithmic one (up to a positive factor and a constant) is minimized on average when the model reports its true probabilities.</p>
     <figure class="viz"><div class="fv" data-viz="cross-entropy-surprise" data-config="{&quot;p&quot;: 0.665}"></div><figcaption><b>Figure 1.</b> Top: the penalty $-\ln p$ (blue) and the squared error $(1-p)^2$ for comparison; bottom: their derivatives in $p$. Drag the point. At $p=0.665$ the loss is $0.408$ nats, or $0.589$ bits, and the derivative is $-1.504$. Marked are a confident right answer ($p=0.9$, penalty $0.105$) and a confident mistake ($p=0.1$, penalty $2.303$).</figcaption></figure>
     <div class="callout intuition"><b>What to notice</b><p>A confident mistake ($p=0.1$) costs 22 times more than a confident right answer ($p=0.9$). At $p=0.01$ the penalty is already $4.605$ and grows without bound, while the squared error $(1-p)^2$ stays below one ($0.980$). The derivative $-1/p$ grows without bound in magnitude as $p\to0$: the worse the answer, the harder the push.</p></div>
 
@@ -133,7 +136,7 @@
     </div></details>
     <p>This formula has three important consequences:</p>
     <ul class="flist"><li><b>the gradient is bounded</b>: every component $s_k-y_k$ lies in $(-1,\,1)$, and they sum to 0 — the correct logit is pulled up exactly as much as the others together are pulled down;</li><li><b>no saturation on mistakes</b>: if the model is confidently wrong ($s_c\to0$), the gradient on the correct logit tends to $-1$, not to zero. Compare with MSE on top of softmax, where the Jacobian factors kill the gradient precisely when the error is large (see the section <a href='#training'>on CE and MSE</a>);</li><li><b>fading on success</b>: as $s\to y$ the gradient tends to 0 — well-learned examples barely affect training.</li></ul>
-    <figure class="viz"><div class="fv" data-viz="cross-entropy-gradient" data-config="{&quot;z&quot;: [2, 1, 0], &quot;k&quot;: 0, &quot;eta&quot;: 1}"></div><figcaption><b>Figure 3.</b> One example with logits $(2,\,1,\,0)$ and the first class correct. On the right the bars are the prediction $s$, the black shelves the target $y$, the arrows and numbers $s_k-y_k$. Press “Step”: the logits are updated by $z\leftarrow z-\eta(s-y)$ with $\eta=1$, and the loss falls: $0.408\to0.258\to0.187\to0.146$, and after 10 steps $0.058$. Make class 3 the correct one — the loss becomes $2.408$ and the gradient $(0.665,\,0.245,\,-0.910)$.</figcaption></figure>
+    <figure class="viz"><div class="fv" data-viz="cross-entropy-gradient" data-config="{&quot;z&quot;: [2, 1, 0], &quot;k&quot;: 0, &quot;eta&quot;: 1}"></div><figcaption><b>Figure 3.</b> One example with logits $(2,\,1,\,0)$ and the first class correct. On the right the bars are the prediction $s$, the black shelves the target $y$; the arrows go from $s_k$ to $y_k$, and the numbers are $s_k-y_k$ (a step moves the logit $z_k$ by $-\eta(s_k-y_k)$). Press “Step”: the logits are updated by $z\leftarrow z-\eta(s-y)$ with $\eta=1$, and the loss falls: $0.408\to0.258\to0.187\to0.146$, and after 10 steps $0.058$. Make class 3 the correct one — the loss becomes $2.408$ and the gradient $(0.665,\,0.245,\,-0.910)$.</figcaption></figure>
     <details class="deep"><summary>The second derivative: CE is convex in the logits</summary><div class="deep-body">
       <p>Differentiate $s_k-y_k$ once more: the Hessian of CE in the logits equals the softmax Jacobian, $\nabla^2_z\,\mathrm{CE}=\operatorname{diag}(s)-ss^\top$. This matrix is positive semi-definite, so CE is a convex function of the logits, and for softmax regression $z=Wx+b$ the loss is convex in $(W,b)$: there are no bad local minima. In the direction $\mathbf 1$ the matrix is singular — shifting all logits does not change the loss.</p>
     </div></details>
@@ -161,9 +164,9 @@
     <div class="callout note"><b>When the squared error is still used</b><p>The squared error between probabilities and the label is called the Brier score and is useful as a calibration <i>metric</i>. For training classifiers CE is almost always the choice: it is convex in the logits and does not saturate on mistakes.</p></div>
 
     <h2 id="llm">Language models and perplexity</h2>
-    <p>At every position $t$ a language model predicts the distribution of the next token over a vocabulary of $V$ tokens (tens of thousands). This is classification into $V$ classes, and the loss is the mean cross-entropy over positions:</p>
+    <p>At every position $t$ a language model predicts the distribution of the next token over a vocabulary of $V$ tokens (tens or hundreds of thousands). This is classification into $V$ classes, and the loss is the mean cross-entropy over positions:</p>
     <div class="eqd">$$\mathcal L=-\frac1T\sum_{t=1}^{T}\ln p_\theta(x_t\mid x_{&lt;t}),\qquad\mathrm{PPL}=e^{\mathcal L}=\Bigl(\prod_{t=1}^{T}\frac{1}{p_\theta(x_t\mid x_{&lt;t})}\Bigr)^{1/T}$$</div>
-    <p><b>Perplexity</b> is the exponential of CE, i.e. the geometric mean of the values $1/p_t$. It reads as an “effective number of choices”: a model that always picks uniformly among $k$ tokens has perplexity exactly $k$. A model that knows nothing about the language (uniform over the vocabulary) has $\mathcal L=\ln V$ and $\mathrm{PPL}=V$.</p>
+    <p><b>Perplexity</b> is the exponential of CE, i.e. the geometric mean of the values $1/p_t$. It reads as an “effective number of choices”: a model that always spreads its probability uniformly over $k$ tokens, the correct one always among them, has perplexity exactly $k$. A model that knows nothing about the language (uniform over the vocabulary) has $\mathcal L=\ln V$ and $\mathrm{PPL}=V$.</p>
     <figure class="viz"><div class="fv" data-viz="cross-entropy-perplexity" data-config="{&quot;lambda&quot;: 1}"></div><figcaption><b>Figure 7.</b> The loss $-\ln p_t$ on every token of a sentence (a teaching example: the probabilities are set by hand). The orange line is the mean, i.e. CE; the dashed line is $\ln V$ for a vocabulary of $V=50{,}000$. At $\lambda=1$: $\mathrm{CE}\approx1.086$, perplexity $\approx2.963$ — on average the model hesitates between three options; the first word costs most ($p=0.05$, penalty $3.00$). The slider $\lambda$ multiplies the logits: at $\lambda=0.5$ the perplexity is already $\approx263.5$, at $\lambda=0$ the distribution is uniform, $\mathrm{CE}=\ln50{,}000\approx10.82$ and the perplexity is $50{,}000$.</figcaption></figure>
     <div class="callout note"><b>Compare perplexities with care</b><p>Perplexity depends on the tokenizer: on the same text a model with larger tokens makes fewer predictions, and each one is harder. Only models with the same vocabulary on the same data can be compared — or switch to bits per character or byte.</p></div>
 

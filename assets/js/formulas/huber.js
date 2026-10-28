@@ -11,7 +11,7 @@
       surfTitle: "L(r, δ) в 3D", mapTitle: "Вид сверху: линии уровня, по вертикали $\\delta$", kind: "Функция", hubName: "Хьюбер", pseudoName: "псевдо-Хьюбер",
       slice: "срез δ = ", at2: "L при r = 2:",
       value: "значение x", weight: "вес точки", mean: "среднее", median: "медиана", est: "оценка Хьюбера",
-      path: "Оценка $\\hat\\mu$ при разных $\\delta$", quadZone: "± δ", inZone: "точек в зоне $|x-\\hat\\mu|\\le\\delta$:",
+      path: "Оценка $\\hat\\mu$ при разных $\\delta$", quadZone: "± δ", outH: "выброс", inZone: "точек в зоне $|x-\\hat\\mu|\\le\\delta$:",
       x: "x", y: "y", step: "шаг", slope: "наклон", truth: "истинная прямая", trueSlope: "истинный наклон 0,5",
       lineMse: "MSE", lineHub: "Хьюбер", slopeTitle: "Наклон прямой по шагам", outlier: "выбросы (тяните крайний)",
       slopeMse: "наклон MSE =", slopeHub: "наклон Хьюбера =",
@@ -31,7 +31,7 @@
       surfTitle: "L(r, δ) in 3D", mapTitle: "Top view: level lines, $\\delta$ upwards", kind: "Function", hubName: "Huber", pseudoName: "pseudo-Huber",
       slice: "slice δ = ", at2: "L at r = 2:",
       value: "value x", weight: "weight of a point", mean: "mean", median: "median", est: "Huber estimate",
-      path: "The estimate $\\hat\\mu$ for different $\\delta$", quadZone: "± δ", inZone: "points with $|x-\\hat\\mu|\\le\\delta$:",
+      path: "The estimate $\\hat\\mu$ for different $\\delta$", quadZone: "± δ", outH: "outlier", inZone: "points with $|x-\\hat\\mu|\\le\\delta$:",
       x: "x", y: "y", step: "step", slope: "slope", truth: "true line", trueSlope: "true slope 0.5",
       lineMse: "MSE", lineHub: "Huber", slopeTitle: "Slope of the line, step by step", outlier: "outliers (drag the last one)",
       slopeMse: "MSE slope =", slopeHub: "Huber slope =",
@@ -51,7 +51,7 @@
       surfTitle: "L(r, δ) 3D’da", mapTitle: "Yuqoridan ko‘rinish: sath chiziqlari, tik o‘qda $\\delta$", kind: "Funksiya", hubName: "Huber", pseudoName: "psevdo-Huber",
       slice: "kesim δ = ", at2: "r = 2 da L:",
       value: "x qiymat", weight: "nuqta vazni", mean: "o‘rtacha", median: "mediana", est: "Huber bahosi",
-      path: "Turli $\\delta$ da $\\hat\\mu$ bahosi", quadZone: "± δ", inZone: "$|x-\\hat\\mu|\\le\\delta$ zonadagi nuqtalar:",
+      path: "Turli $\\delta$ da $\\hat\\mu$ bahosi", quadZone: "± δ", outH: "chetga chiquvchi", inZone: "$|x-\\hat\\mu|\\le\\delta$ zonadagi nuqtalar:",
       x: "x", y: "y", step: "qadam", slope: "qiyalik", truth: "haqiqiy to‘g‘ri chiziq", trueSlope: "haqiqiy qiyalik 0,5",
       lineMse: "MSE", lineHub: "Huber", slopeTitle: "To‘g‘ri chiziq qiyaligi qadamlar bo‘yicha", outlier: "chetga chiquvchilar (oxirgisini torting)",
       slopeMse: "MSE qiyaligi =", slopeHub: "Huber qiyaligi =",
@@ -215,7 +215,9 @@
     w.controls.append(sd.el);
     const ro = FV.ui.readout(w.readout, [{ key: "m", label: L.mean + " =" }, { key: "md", label: L.median + " =", c: "teal" }, { key: "h", label: "$\\hat\\mu$ =", c: "blue" }, { key: "z", label: L.inZone }]);
     const last = xs.length - 1;
-    const hd = a.handle(xs[last], 0.1, { c: "red", label: "outlier", onDrag: (x) => { xs[last] = x; return [x, 0.1]; }, onChange: () => draw() });
+    // the handle sits on the outlier's own weight bar, so the bar is not hidden behind it
+    const wOf = (x, mu, D) => (Math.abs(x - mu) <= D ? 1 : D / Math.abs(x - mu));
+    const hd = a.handle(xs[last], 0.1, { c: "red", label: L.outH, onDrag: (x) => { xs[last] = x; return [x, wOf(x, huberLoc(xs, sd.value), sd.value)]; }, onChange: () => draw() });
     const grid = FV.linspace(Math.log10(0.02), Math.log10(50), 140).map((v) => Math.pow(10, v));
     function draw() {
       const D = sd.value, mu = huberLoc(xs, D), mean = xs.reduce((s, v) => s + v, 0) / xs.length, med = median(xs);
@@ -231,7 +233,7 @@
         a.line(x, 0, x, wt, { c: i >= 13 ? "red" : "ink", w: 1.4, opacity: 0.7 });
         a.dot(x, wt, { c: i >= 13 ? "red" : "ink", r: 4 });
       });
-      hd.set(xs[last], 0.1);
+      hd.set(xs[last], wOf(xs[last], mu, D));
       a.legend([{ label: L.mean, c: "guide", dash: true }, { label: L.median, c: "teal", dash: true }, { label: L.est, c: "blue" }, { label: L.quadZone, c: "blue", box: true }]);
       const path = grid.map((d) => [d, huberLoc(xs, d)]);
       const ys = path.map((q) => q[1]).concat([mean, med]);

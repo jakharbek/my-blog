@@ -16,10 +16,15 @@
   }[LANG] || { gap: "gap", inflection: "inflection point (0, 0.5)", down: "convex", up: "concave" };
   const fmtSmall = (v) => (v < 1e-3 ? v.toExponential(1).replace("e-", " × 10⁻") : v.toFixed(4));
 
+  // Figures are laid out on a 1600-px canvas and scaled down by CSS. On a phone that shrinks
+  // text and lines about five times, so S enlarges them back (S = 1 on wide screens).
+  let S = 1;
+
   function setupCanvas(el) {
     // Render at device pixel ratio for crisp lines; CSS keeps it responsive.
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = el.width, h = el.height;
+    S = Math.min(1.6, Math.max(1, w / ((el.clientWidth || w) * 2.2)));
     el.width = w * dpr; el.height = h * dpr;
     el.style.aspectRatio = `${w} / ${h}`;
     const ctx = el.getContext("2d");
@@ -39,33 +44,33 @@
     rangeOut.value = "±" + R;
 
     const fg = token("--fg"), fg2 = token("--fg3"), rule = token("--line"), accent = token("--accent"), bg = token("--bg");
-    const L = 110, RR = 40, T = 80, B = 96;
+    const L = 110 * S, RR = 40, T = 80 * S, B = 96 * S;
     const px = (x) => L + ((x + R) / (2 * R)) * (W - L - RR);
     const py = (y) => H - B - y * (H - T - B);
 
     ctx.clearRect(0, 0, W, H);
 
     // quiet grid
-    ctx.strokeStyle = rule; ctx.lineWidth = 1;
+    ctx.strokeStyle = rule; ctx.lineWidth = 1 * S;
     [0.25, 0.5, 0.75].forEach((v) => { ctx.beginPath(); ctx.moveTo(L, py(v)); ctx.lineTo(W - RR, py(v)); ctx.stroke(); });
 
-    ctx.fillStyle = fg2; ctx.font = `400 28px ${FONT}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    ctx.fillStyle = fg2; ctx.font = `400 ${Math.round(28 * S)}px ${FONT}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
     [0.25, 0.5, 0.75].forEach((v) => ctx.fillText(v.toFixed(2), L - 22, py(v)));
     ctx.textAlign = "center"; ctx.textBaseline = "top";
     const step = R <= 8 ? 2 : R <= 20 ? 5 : 10;
-    for (let x = -R; x <= R; x += step) ctx.fillText(String(x), px(x), H - B + 22);
+    for (let x = -R; x <= R; x += step) ctx.fillText(String(x), px(x), H - B + 22 * S);
 
     // asymptotes: the only red on the page
-    ctx.strokeStyle = accent; ctx.lineWidth = 2;
+    ctx.strokeStyle = accent; ctx.lineWidth = 2 * S;
     [0, 1].forEach((v) => { ctx.beginPath(); ctx.moveTo(L, py(v)); ctx.lineTo(W - RR, py(v)); ctx.stroke(); });
-    ctx.fillStyle = accent; ctx.font = `500 28px ${FONT}`; ctx.textAlign = "left";
+    ctx.fillStyle = accent; ctx.font = `500 ${Math.round(28 * S)}px ${FONT}`; ctx.textAlign = "left";
     ctx.textBaseline = "bottom"; ctx.fillText("y = 1", L, py(1) - 10);
     ctx.textBaseline = "top"; ctx.fillText("y = 0", L, py(0) + 10);
     ctx.textAlign = "right"; ctx.textBaseline = "middle";
     ctx.fillText("1", L - 22, py(1)); ctx.fillText("0", L - 22, py(0));
 
     // the curve
-    ctx.strokeStyle = fg; ctx.lineWidth = 4; ctx.lineJoin = "round"; ctx.beginPath();
+    ctx.strokeStyle = fg; ctx.lineWidth = 4 * S; ctx.lineJoin = "round"; ctx.beginPath();
     const N = 600;
     for (let i = 0; i <= N; i++) {
       const x = -R + (2 * R * i) / N;
@@ -77,13 +82,13 @@
     // gap markers at the edges
     const xr = R * 0.9, xl = -R * 0.9;
     const gapR = 1 - sig(xr), gapL = sig(xl);
-    ctx.strokeStyle = fg2; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+    ctx.strokeStyle = fg2; ctx.lineWidth = 1 * S; ctx.setLineDash([3 * S, 4 * S]);
     ctx.beginPath(); ctx.moveTo(px(xr), py(1)); ctx.lineTo(px(xr), py(sig(xr))); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(px(xl), py(0)); ctx.lineTo(px(xl), py(sig(xl))); ctx.stroke();
     ctx.setLineDash([]);
 
     const label = (text, x, y, align) => {
-      ctx.font = `400 26px ${FONT}`; ctx.textAlign = align; ctx.textBaseline = "middle";
+      ctx.font = `400 ${Math.round(26 * S)}px ${FONT}`; ctx.textAlign = align; ctx.textBaseline = "middle";
       const w = ctx.measureText(text).width + 20;
       const bx = align === "right" ? x - w : x;
       ctx.fillStyle = bg; ctx.fillRect(bx, y - 18, w, 36);
@@ -109,8 +114,8 @@
     slopeOut.textContent = d.toFixed(4);
 
     const fg = token("--fg"), fg2 = token("--fg3"), rule = token("--line"), accent = token("--accent"), soft = token("--curve"), bg = token("--bg");
-    const R = 6, L = 110, RR = 40;
-    const top = { y0: 48, y1: 520 }, bot = { y0: 600, y1: 840 };
+    const R = 6, L = 110 * S, RR = 40;
+    const top = { y0: 48 * S, y1: 520 }, bot = { y0: 600, y1: 840 - 40 * (S - 1) };
     const px = (v) => L + ((v + R) / (2 * R)) * (W - L - RR);
     const pyT = (y) => top.y1 - y * (top.y1 - top.y0);
     const pyB = (v) => bot.y1 - (v / 0.25) * (bot.y1 - bot.y0);
@@ -118,22 +123,22 @@
     ctx.clearRect(0, 0, W, H);
 
     // top panel: asymptotes, thin
-    ctx.strokeStyle = accent; ctx.lineWidth = 1.5;
+    ctx.strokeStyle = accent; ctx.lineWidth = 1.5 * S;
     [0, 1].forEach((v) => { ctx.beginPath(); ctx.moveTo(L, pyT(v)); ctx.lineTo(W - RR, pyT(v)); ctx.stroke(); });
-    ctx.strokeStyle = rule; ctx.lineWidth = 1;
+    ctx.strokeStyle = rule; ctx.lineWidth = 1 * S;
     ctx.beginPath(); ctx.moveTo(L, pyT(0.5)); ctx.lineTo(W - RR, pyT(0.5)); ctx.stroke();
 
-    ctx.fillStyle = fg2; ctx.font = `400 28px ${FONT}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    ctx.fillStyle = fg2; ctx.font = `400 ${Math.round(28 * S)}px ${FONT}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
     ctx.fillText("1", L - 22, pyT(1)); ctx.fillText("0.5", L - 22, pyT(0.5)); ctx.fillText("0", L - 22, pyT(0));
     ctx.fillText("0.25", L - 22, pyB(0.25)); ctx.fillText("0", L - 22, pyB(0));
     ctx.textAlign = "center"; ctx.textBaseline = "top";
-    for (let v = -R; v <= R; v += 1) ctx.fillText(String(v), px(v), bot.y1 + 22);
+    for (let v = -R; v <= R; v += 1) ctx.fillText(String(v), px(v), bot.y1 + 18 * S);
 
     // convexity regions, barely there
     ctx.fillStyle = fg; ctx.globalAlpha = 0.035;
     ctx.fillRect(px(0), top.y0, W - RR - px(0), top.y1 - top.y0);
     ctx.globalAlpha = 1;
-    ctx.fillStyle = fg2; ctx.font = `400 26px ${FONT}`; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillStyle = fg2; ctx.font = `400 ${Math.round(26 * S)}px ${FONT}`; ctx.textAlign = "center"; ctx.textBaseline = "top";
     ctx.fillText(TXT.down, (L + px(0)) / 2, top.y0 + 4);
     ctx.fillText(TXT.up, (px(0) + W - RR) / 2, top.y0 + 4);
 
@@ -147,19 +152,19 @@
     }
     ctx.lineTo(px(R), bot.y1); ctx.lineTo(px(-R), bot.y1); ctx.closePath();
     ctx.fillStyle = soft; ctx.globalAlpha = 0.45; ctx.fill(); ctx.globalAlpha = 1;
-    ctx.strokeStyle = fg2; ctx.lineWidth = 1.5; ctx.beginPath();
+    ctx.strokeStyle = fg2; ctx.lineWidth = 1.5 * S; ctx.beginPath();
     for (let i = 0; i <= N; i++) {
       const v = -R + (2 * R * i) / N;
       const X = px(v), Y = pyB(dsig(v));
       i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
     }
     ctx.stroke();
-    ctx.fillStyle = fg2; ctx.font = `500 28px ${FONT}`; ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+    ctx.fillStyle = fg2; ctx.font = `500 ${Math.round(28 * S)}px ${FONT}`; ctx.textAlign = "left"; ctx.textBaseline = "bottom";
     ctx.fillText("σ′(x)", L, bot.y0 - 8);
     ctx.fillText("σ(x)", L, top.y0 - 8);
 
     // main curve
-    ctx.strokeStyle = fg; ctx.lineWidth = 4; ctx.lineJoin = "round"; ctx.beginPath();
+    ctx.strokeStyle = fg; ctx.lineWidth = 4 * S; ctx.lineJoin = "round"; ctx.beginPath();
     for (let i = 0; i <= N; i++) {
       const v = -R + (2 * R * i) / N;
       const X = px(v), Y = pyT(sig(v));
@@ -168,26 +173,26 @@
     ctx.stroke();
 
     // inflection point: dashed vertical through both panels, hollow dot
-    ctx.strokeStyle = fg2; ctx.lineWidth = 1; ctx.setLineDash([3, 5]);
+    ctx.strokeStyle = fg2; ctx.lineWidth = 1 * S; ctx.setLineDash([3 * S, 5 * S]);
     ctx.beginPath(); ctx.moveTo(px(0), top.y0); ctx.lineTo(px(0), bot.y1); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = bg; ctx.strokeStyle = fg; ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.arc(px(0), pyT(0.5), 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = fg; ctx.font = `400 26px ${FONT}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillStyle = bg; ctx.strokeStyle = fg; ctx.lineWidth = 2.5 * S;
+    ctx.beginPath(); ctx.arc(px(0), pyT(0.5), 8 * S, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = fg; ctx.font = `400 ${Math.round(26 * S)}px ${FONT}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
     ctx.fillText(TXT.inflection, px(0) + 26, pyT(0.5) + 44);
 
     // tangent at the chosen point
     const span = 1.5;
-    ctx.strokeStyle = fg; ctx.lineWidth = 1.5; ctx.beginPath();
+    ctx.strokeStyle = fg; ctx.lineWidth = 1.5 * S; ctx.beginPath();
     ctx.moveTo(px(x - span), pyT(s - d * span)); ctx.lineTo(px(x + span), pyT(s + d * span)); ctx.stroke();
 
     // link to derivative panel + dots
-    ctx.strokeStyle = fg2; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+    ctx.strokeStyle = fg2; ctx.lineWidth = 1 * S; ctx.setLineDash([2 * S, 4 * S]);
     ctx.beginPath(); ctx.moveTo(px(x), pyT(s)); ctx.lineTo(px(x), pyB(d)); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = fg;
-    ctx.beginPath(); ctx.arc(px(x), pyT(s), 7, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(px(x), pyB(d), 5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(px(x), pyT(s), 7 * S, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(px(x), pyB(d), 5 * S, 0, Math.PI * 2); ctx.fill();
   }
 
   /* ---------- wiring ---------- */

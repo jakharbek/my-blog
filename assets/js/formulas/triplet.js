@@ -16,7 +16,7 @@
       hardP: "самый далёкий свой", hardN: "самый близкий чужой", activeN: "чужие, нарушающие зазор",
       input: "входное пространство", emb: "пространство эмбеддингов f(x)", step: "шаг", lossT: "L (batch-hard)", order: "верно упорядоченных троек", actA: "активных якорей",
       lossCurve: "потеря по шагам обучения", nuis: "x₁ — помеха (ракурс, свет)", idf: "x₂ — признак личности",
-      ang: "угол", zone: "здесь n нарушал бы зазор", bound: "радиус границы R =", circle: "единичная окружность", dsq: "d² = 2 − 2 cos θ", need: "нужно θ(a, n) ≥", thAP: "θ(a, p) =", thAN: "θ(a, n) =",
+      ang: "угол", zone: "здесь n нарушал бы зазор", bound: "радиус границы R =", circle: "единичная окружность", dsq: "d² = 2 − 2 cos θ", need: "нужно θ(a, n) ≥", thAP: "θ(a, p) =", thAN: "θ(a, n) =", never: "недостижимо",
     },
     en: {
       x1: "z₁", x2: "z₂", m: "Margin $m$", sq: "Squared distances $d^2$", anchor: "anchor a", pos: "positive p", neg: "negative n",
@@ -32,7 +32,7 @@
       hardP: "farthest positive", hardN: "closest negative", activeN: "negatives violating the margin",
       input: "input space", emb: "embedding space f(x)", step: "step", lossT: "L (batch-hard)", order: "correctly ordered triplets", actA: "active anchors",
       lossCurve: "loss over training steps", nuis: "x₁ — nuisance (pose, light)", idf: "x₂ — identity feature",
-      ang: "angle", zone: "n here would violate the margin", bound: "boundary radius R =", circle: "unit circle", dsq: "d² = 2 − 2 cos θ", need: "need θ(a, n) ≥", thAP: "θ(a, p) =", thAN: "θ(a, n) =",
+      ang: "angle", zone: "n here would violate the margin", bound: "boundary radius R =", circle: "unit circle", dsq: "d² = 2 − 2 cos θ", need: "need θ(a, n) ≥", thAP: "θ(a, p) =", thAN: "θ(a, n) =", never: "unreachable",
     },
     uz: {
       x1: "z₁", x2: "z₂", m: "$m$ oraliq", sq: "Masofalar kvadratlari $d^2$", anchor: "langar a", pos: "o‘ziniki p", neg: "begona n",
@@ -48,7 +48,7 @@
       hardP: "eng uzoq o‘ziniki", hardN: "eng yaqin begona", activeN: "oraliqni buzayotgan begonalar",
       input: "kirish fazosi", emb: "f(x) embedding fazosi", step: "qadam", lossT: "L (batch-hard)", order: "to‘g‘ri tartiblangan uchliklar", actA: "faol langarlar",
       lossCurve: "o‘qitish qadamlari bo‘yicha yo‘qotish", nuis: "x₁ — xalaqit (rakurs, yorug‘lik)", idf: "x₂ — shaxs belgisi",
-      ang: "burchak", zone: "bu yerda n oraliqni buzardi", bound: "chegara radiusi R =", circle: "birlik aylana", dsq: "d² = 2 − 2 cos θ", need: "kerak θ(a, n) ≥", thAP: "θ(a, p) =", thAN: "θ(a, n) =",
+      ang: "burchak", zone: "bu yerda n oraliqni buzardi", bound: "chegara radiusi R =", circle: "birlik aylana", dsq: "d² = 2 − 2 cos θ", need: "kerak θ(a, n) ≥", thAP: "θ(a, p) =", thAN: "θ(a, n) =", never: "erishib bo‘lmaydi",
     },
   }[FV.lang] || {};
   const dec = (s) => (FV.lang === "en" ? s : s.replace(/(\d)\.(\d)/g, "$1,$2"));
@@ -192,9 +192,11 @@
       p.line(a[0], a[1], n[0], n[1], { c: "red", w: 2 });
       if (l > 0) {
         const k = 0.35;
-        // −∇L for each point (the direction gradient descent moves it)
-        const gp = s2 ? [2 * (a[0] - pp[0]), 2 * (a[1] - pp[1])] : [(a[0] - pp[0]) / dap, (a[1] - pp[1]) / dap];
-        const gn = s2 ? [2 * (n[0] - a[0]), 2 * (n[1] - a[1])] : [(n[0] - a[0]) / dan, (n[1] - a[1]) / dan];
+        // −∇L for each point (the direction gradient descent moves it). At a zero distance ‖u − v‖ has no
+        // gradient; we take the subgradient 0 (the unit ball contains it), so coincident points get no arrow.
+        const unit = (u, v, d) => (d > 1e-9 ? [(u[0] - v[0]) / d, (u[1] - v[1]) / d] : [0, 0]);
+        const gp = s2 ? [2 * (a[0] - pp[0]), 2 * (a[1] - pp[1])] : unit(a, pp, dap);
+        const gn = s2 ? [2 * (n[0] - a[0]), 2 * (n[1] - a[1])] : unit(n, a, dan);
         const ga = [-(gp[0] + gn[0]), -(gp[1] + gn[1])];
         [[pp, gp], [n, gn], [a, ga]].forEach(([q, g]) => p.arrow(q[0], q[1], q[0] + k * g[0], q[1] + k * g[1], { c: "orange", w: 2 }));
       }
@@ -291,7 +293,8 @@
       if (who === "neg") { const dp = dist(A, PF); return sqr ? Math.max(0, dp * dp - r * r + m) : Math.max(0, dp - r + m); }
       const dn = dist(A, NF); return sqr ? Math.max(0, r * r - dn * dn + m) : Math.max(0, r - dn + m);
     };
-    const zr = () => (who === "neg" ? [0, 1.2] : sqr ? [0, 7.5] : [0, 2.5]);
+    // z ranges cover the largest loss at m = 1 (corner of the square for the positive), so nothing is clipped
+  const zr = () => (who === "neg" ? [0, 1.6] : sqr ? [0, 7.6] : [0, 2.7]);
     const s3 = new FV.Surface(FV.col(w.stage), { f: lossAt, x: [-2, 2], y: [-2, 2], z: zr(), n: 44, labels: { x: "x", y: "y", z: "L" }, azimuth: -0.6, elevation: 0.55, aspect: 0.85, cmap: "viridis", title: "L(x, y)" });
     const p = new FV.Plot(FV.col(w.stage), { x: [0, 2.8], y: [0, 2.6], xLabel: L.r, yLabel: "L, |∇L|", aspect: 0.85, title: L.ray });
     const sw = FV.ui.seg({ label: L.who, value: who, options: [{ value: "neg", label: L.negMode }, { value: "pos", label: L.posMode }], onchange: (v) => { who = v; refresh(); } });
@@ -417,10 +420,12 @@
     function draw() {
       const m = sm.value, tp = between(ang.a, ang.p), tn = between(ang.a, ang.n);
       const dp = 2 - 2 * Math.cos(tp), dn = 2 - 2 * Math.cos(tn), l = Math.max(0, dp - dn + m);
-      const cosNeed = Math.cos(tp) - m / 2, need = cosNeed <= -1 ? NaN : deg(Math.acos(Math.min(1, cosNeed)));
+      // need = the smallest angle θ(a, n) that satisfies the margin; if cos θ would have to drop below −1, no angle does
+      const cosNeed = Math.cos(tp) - m / 2, need = cosNeed < -1 ? NaN : deg(Math.acos(Math.min(1, cosNeed)));
       p.clear();
       circle(p, 0, 0, 1, { c: "guide", w: 1.4 });
-      if (Number.isFinite(need)) {
+      if (!Number.isFinite(need)) circle(p, 0, 0, 1, { c: "orange", w: 6, opacity: 0.35 });   // the whole circle violates
+      else {
         const arc = [];
         for (let i = 0; i <= 60; i++) { const t = -rad(need) + (2 * rad(need) * i) / 60; arc.push([Math.cos(ang.a + t), Math.sin(ang.a + t)]); }
         p.path(arc, { c: "orange", w: 6, opacity: 0.35 });
@@ -440,7 +445,7 @@
       q.legend([{ label: "d²(θ)", c: "ink" }, { label: "d²(a, p) + m", c: "orange", dash: true }]);
       ro.set("ap", FV.fmt(deg(tp), 1) + "°"); ro.set("an", FV.fmt(deg(tn), 1) + "°");
       ro.set("d", FV.fmt(dp, 3) + " / " + FV.fmt(dn, 3)); ro.set("l", FV.fmt(l, 3));
-      ro.set("need", Number.isFinite(need) ? FV.fmt(need, 1) + "°" : "—");
+      ro.set("need", Number.isFinite(need) ? FV.fmt(need, 1) + "°" : L.never);
     }
     p.onresize = draw; q.onresize = draw; draw();
   });

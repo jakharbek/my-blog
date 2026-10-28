@@ -12,9 +12,9 @@ META = dict(
         "uz": "Regressiyaning asosiy yo‘qotish funksiyasi va eng kichik kvadratlar usulining poydevori. MSE’ni mayda detallarigacha tahlil qilamiz: xatolar ustidagi tom ma’nodagi kvadratlar, nega uni o‘rtacha minimallashtiradi, 2e hosila va model parametrlari ustidagi kosa, gradiyent tushishning kritik qadami, siljish va tarqoqlikka yoyilma, normal shovqin bilan bog‘liqlik va chetga chiquvchi qiymatlarga sezgirlik.",
     },
     description={
-        "ru": "MSE подробно: формула, свойства, среднее как оптимальная константа, производная, чаша потерь в 3D и метод наименьших квадратов, градиентный спуск и число обусловленности, смещение и разброс, гауссово правдоподобие, выбросы, код на NumPy, PyTorch и scikit-learn.",
-        "en": "MSE in depth: formula, properties, the mean as the optimal constant, the derivative, the loss bowl in 3D and least squares, gradient descent and the condition number, bias and variance, Gaussian likelihood, outliers, code in NumPy, PyTorch and scikit-learn.",
-        "uz": "MSE batafsil: formula, xossalar, optimal o‘zgarmas sifatida o‘rtacha, hosila, 3D’dagi yo‘qotish kosasi va eng kichik kvadratlar usuli, gradiyent tushish va shartlanganlik soni, siljish va tarqoqlik, Gauss o‘xshashligi, chetga chiquvchi qiymatlar, NumPy, PyTorch va scikit-learn’da kod.",
+        "ru": "MSE по косточкам: формула, среднее как лучшая константа, производная, МНК и чаша потерь, шаг градиентного спуска, смещение и разброс, выбросы и код.",
+        "en": "MSE explained: the formula, the mean as the best constant, the gradient, least squares, the gradient-descent step limit, bias–variance, outliers and code.",
+        "uz": "MSE batafsil: formula, eng yaxshi o‘zgarmas — o‘rtacha, hosila, EKK va yo‘qotish kosasi, gradiyent tushish qadami, siljish va tarqoqlik, kod.",
     },
 )
 
@@ -128,13 +128,13 @@ def _code(src, lang):
 SECTIONS = {
 "ru": [
     dict(id="why", title="Зачем она нужна", blocks=[
-        ("p", "Если модель предсказывает число, почти наверняка её учили, уменьшая MSE (mean squared error) — <b>средний квадрат ошибки</b>. Это потеря «по умолчанию» для регрессии: у неё есть точное решение для линейных моделей, гладкий градиент для нейросетей и ясный статистический смысл. Метод наименьших квадратов, с которого Лежандр и Гаусс начали анализ данных в начале XIX века, — это и есть минимизация MSE."),
+        ("p", "Если модель предсказывает число, почти наверняка её учили, уменьшая MSE (mean squared error) — <b>средний квадрат ошибки</b>. Это потеря «по умолчанию» для регрессии: у неё есть точное решение для линейных моделей, гладкий градиент для нейросетей и ясный статистический смысл. Метод наименьших квадратов, который Лежандр опубликовал в 1805 году, а Гаусс в 1809-м связал с нормальным законом ошибок, — это и есть минимизация MSE."),
         ("p", "Где она встречается:"),
         ("ul", [
             "<b>линейная регрессия</b> — метод наименьших квадратов (МНК, ordinary least squares) с решением в одну формулу;",
             "<b>нейросети для регрессии</b> — <code>MSELoss</code> в PyTorch, <code>\"mse\"</code> в Keras; автоэнкодеры, восстанавливающие вход;",
             "<b>диффузионные модели</b> — сеть учится предсказывать добавленный шум, и потеря — MSE между настоящим и предсказанным шумом;",
-            "<b>обучение с подкреплением</b> — функция ценности обучается на квадрате TD-ошибки;",
+            "<b>обучение с подкреплением</b> — функцию ценности часто обучают на квадрате TD-ошибки;",
             "<b>градиентный бустинг</b> — <code>loss=\"squared_error\"</code>: антиградиент MSE равен остатку, поэтому каждое дерево подгоняется к остаткам;",
             "<b>обработка сигналов и изображений</b> — PSNR вычисляется через MSE, фильтр Калмана минимизирует ожидаемый квадрат ошибки.",
         ]),
@@ -167,7 +167,7 @@ SECTIONS = {
         ("ul", [
             "<b>Неотрицательность</b>: $\\mathrm{MSE}\\ge0$, равенство — только при точных прогнозах.",
             "<b>Квадратичный масштаб</b>: если $y$ и $\\hat y$ умножить на $k$, MSE умножится на $k^2$. Перевод рублей в тысячи рублей уменьшает MSE в миллион раз.",
-            "<b>Гладкость и выпуклость</b>: MSE — квадратичная функция прогнозов; для линейной модели — квадратичная функция параметров. Если признаки линейно независимы, она строго выпукла, и минимум единственный.",
+            "<b>Гладкость и выпуклость</b>: MSE — квадратичная функция прогнозов; для линейной модели — квадратичная функция параметров. Если столбцы матрицы признаков (вместе со столбцом единиц для сдвига) линейно независимы, она строго выпукла, и минимум единственный.",
             "<b>Разложение ошибок</b>: $\\mathrm{MSE}=\\bar e^{\\,2}+\\operatorname{Var}(e)$ — квадрат среднего смещения плюс разброс ошибок. В примере $\\bar e=-0{,}5$: $1{,}417=0{,}25+1{,}167$.",
             "<b>Сравнение с MAE</b>: $\\mathrm{MSE}\\ge\\mathrm{MAE}^2$ (неравенство между средним квадратов и квадратом среднего). В примере: $1{,}417\\ge0{,}833^2\\approx0{,}694$.",
         ]),
@@ -212,7 +212,7 @@ SECTIONS = {
             ("eq", r"\theta_{t+1}-\theta^*=(I-\eta H)(\theta_t-\theta^*)\quad\Longrightarrow\quad\theta_t-\theta^*=(I-\eta H)^t(\theta_0-\theta^*)"),
             ("p", "В базисе собственных векторов $H$ каждая координата умножается на $1-\\eta\\lambda_k$ на каждом шаге. Спуск сходится, если $|1-\\eta\\lambda_k|&lt;1$ для всех $k$, то есть $0&lt;\\eta&lt;2/\\lambda_{\\max}$. При $1/\\lambda_{\\max}&lt;\\eta&lt;2/\\lambda_{\\max}$ множитель отрицателен — отсюда зигзаг поперёк оврага. Медленнее всего сходится направление $\\lambda_{\\min}$: даже при лучшем постоянном шаге $\\eta=2/(\\lambda_{\\max}+\\lambda_{\\min})$ ошибка убывает в $(\\kappa-1)/(\\kappa+1)$ раз за шаг, где $\\kappa=\\lambda_{\\max}/\\lambda_{\\min}$. При $\\kappa=70$ это $0{,}97$ — сотни шагов; при $\\kappa=2$ — $1/3$."),
         ]),
-        ("callout", "key", "Практический вывод", "Стандартизируйте признаки (вычесть среднее, поделить на стандартное отклонение) — это округляет чашу и позволяет брать больший шаг. Адаптивные оптимизаторы (<a href=\"../adam/\">Adam</a>, RMSProp) делают похожее масштабирование по каждой координате автоматически."),
+        ("callout", "key", "Практический вывод", "Стандартизируйте признаки (вычесть среднее, поделить на стандартное отклонение) — это округляет чашу и позволяет брать больший шаг. Адаптивные оптимизаторы (<a href=\"../adam/\">Adam</a>, RMSProp) делают похожее масштабирование автоматически, но только по каждой координате отдельно: овраг, повёрнутый относительно осей, как у нас, они выпрямляют лишь частично."),
     ]),
     dict(id="biasvar", title="Смещение и разброс", blocks=[
         ("p", "MSE на новых данных складывается из трёх частей, и это, пожалуй, самая важная формула о переобучении. Пусть $y=f(x)+\\varepsilon$, шум имеет среднее $0$ и дисперсию $\\sigma^2$, а модель $\\hat f$ обучена на случайной выборке. Тогда ожидаемая ошибка в точке $x$:"),
@@ -234,14 +234,14 @@ SECTIONS = {
         ("callout", "note", "Смещённая оценка может быть лучше", "Минимизировать нужно сумму, а не одно смещение. Регуляризация (гребневая регрессия, ранняя остановка, усреднение моделей) сознательно вносит смещение, чтобы сильнее уменьшить разброс, и часто снижает тестовую MSE."),
     ]),
     dict(id="probability", title="Вероятностный смысл: нормальный шум", blocks=[
-        ("p", "Почему именно квадрат? Самый глубокий ответ дал Гаусс. Пусть $y_i=\\hat y_i+\\varepsilon_i$, где шум $\\varepsilon_i$ независим и распределён нормально, $N(0,\\sigma^2)$. Плотность одного наблюдения — колокол вокруг прогноза, а правдоподобие выборки — произведение высот колоколов в точках данных. Отрицательный логарифм правдоподобия:"),
+        ("p", "Почему именно квадрат? Классический ответ дал Гаусс (1809). Пусть $y_i=\\hat y_i+\\varepsilon_i$, где шум $\\varepsilon_i$ независим и распределён нормально, $N(0,\\sigma^2)$. Плотность одного наблюдения — колокол вокруг прогноза, а правдоподобие выборки — произведение высот колоколов в точках данных. Отрицательный логарифм правдоподобия:"),
         ("eq", r"-\ln L=\frac n2\ln(2\pi\sigma^2)+\frac{1}{2\sigma^2}\sum_{i=1}^{n}\bigl(y_i-\hat y_i\bigr)^2=\frac n2\ln(2\pi\sigma^2)+\frac{n}{2\sigma^2}\,\mathrm{MSE}"),
-        ("p", "При любом фиксированном $\\sigma$ это возрастающая линейная функция MSE. Значит, <b>минимизация MSE — это метод максимального правдоподобия при нормальном шуме</b>. Минимум по $\\sigma$ даёт ещё одну связь: $\\hat\\sigma^2=\\mathrm{MSE}$."),
+        ("p", "При любом фиксированном $\\sigma$ это возрастающая линейная функция MSE. Значит, <b>минимизация MSE — это метод максимального правдоподобия при нормальном шуме</b>. Минимум по $\\sigma$ даёт ещё одну связь: $\\hat\\sigma^2=\\mathrm{MSE}$. Позже (1821–1823) Гаусс дал и второе обоснование, уже без нормальности: если ошибки несмещены, некоррелированы и имеют одинаковую дисперсию, МНК-оценка имеет наименьшую дисперсию среди всех линейных несмещённых оценок (теорема Гаусса — Маркова)."),
         ("viz", "mse-gauss", {"w": 1, "b": 0.5, "s": 0.6}, "<b>Рисунок 6.</b> Слева — прямая и нормальные колокола $N(\\hat y_i,\\sigma^2)$ вокруг неё; оранжевые отрезки — высоты колоколов в точках данных, то есть вклад каждой точки в правдоподобие. Справа — $-\\ln L$ как функция MSE при текущем $\\sigma$: это прямая. Для $w=1$, $b=0{,}5$, $\\sigma=0{,}6$: $\\mathrm{MSE}=0{,}540$, $-\\ln L=5{,}791$; МНК-прямая (красная точка) с $\\mathrm{MSE}=0{,}229$ даёт $-\\ln L=3{,}634$. Лучшая $\\sigma$ для текущей прямой — $\\sqrt{0{,}54}\\approx0{,}735$."),
         ("p", "Ещё одна формулировка того же факта: среди всех функций $g(x)$ ожидаемый квадрат ошибки $\\mathbb E(y-g(x))^2$ минимален при $g(x)=\\mathbb E[y\\mid x]$. Модель, обученная на MSE, оценивает <b>условное среднее</b>. Если шум несимметричен или с тяжёлыми хвостами, условное среднее может плохо описывать «типичный» исход — тогда смотрят на медиану (<a href=\"../mae/\">MAE</a>) или квантили."),
     ]),
     dict(id="outliers", title="Выбросы: неограниченное влияние", blocks=[
-        ("p", "Обратная сторона квадрата — чувствительность к аномальным точкам. Градиент от объекта пропорционален его ошибке, поэтому далёкий выброс тянет модель тем сильнее, чем он дальше. В робастной статистике говорят, что у МНК <b>неограниченная функция влияния</b> и нулевая точка излома: одной точки достаточно, чтобы увести прямую сколь угодно далеко."),
+        ("p", "Обратная сторона квадрата — чувствительность к аномальным точкам. Градиент от объекта пропорционален его ошибке, поэтому далёкий выброс тянет модель тем сильнее, чем он дальше. В робастной статистике говорят, что у МНК <b>неограниченная функция влияния</b> и нулевая пороговая точка (breakdown point): одной точки достаточно, чтобы увести прямую сколь угодно далеко."),
         ("viz", "mse-outlier", {"y": 0}, "<b>Рисунок 7.</b> Десять точек вокруг $y=1+0{,}5x$ и выброс в $x=9$. При выбросе в $y=0$ наклон прямой MSE падает до $0{,}291$, а сам выброс даёт $74\\%$ суммы квадратов. Справа — наклон как функция высоты выброса: у MSE это прямая (каждая единица высоты меняет наклон на $0{,}0375$, от $0{,}104$ при $y=-5$ до $0{,}779$ при $y=13$), у MAE наклон остаётся между $0{,}438$ и $0{,}514$."),
         ("p", "Что делать с выбросами, если MSE нужна:"),
         ("ul", [
@@ -254,9 +254,9 @@ SECTIONS = {
     dict(id="code", title="В коде", blocks=[
         ("p", "MSE и её градиент в NumPy, точное решение МНК и проверка того, что лучшая константа — среднее:"),
         ("code", "python", "CODE_NUMPY"),
-        ("p", "В PyTorch — <code>MSELoss</code>. Градиент по прогнозам — $2(\\hat y-y)/n$; спуск с шагом $0{,}05$ по сырому признаку из рисунка 4 приходит к тому же решению МНК, но за тысячи шагов:"),
+        ("p", "В PyTorch — <code>MSELoss</code>. Градиент по прогнозам — $2(\\hat y-y)/n$; спуск с шагом $0{,}05$ по сырому признаку из рисунка 4 приходит к тому же решению МНК, но медленно: до двух знаков — примерно за 300 шагов (в листинге их 2000 с запасом):"),
         ("code", "python", "CODE_TORCH"),
-        ("p", "В scikit-learn MSE — метрика по умолчанию для регрессии, <code>LinearRegression</code> минимизирует её точно, а бустинг использует её как потерю по умолчанию:"),
+        ("p", "В scikit-learn есть метрики MSE и RMSE (метод <code>score</code> регрессоров при этом возвращает $R^2$), <code>LinearRegression</code> минимизирует MSE точно, а бустинг использует её как потерю по умолчанию:"),
         ("code", "python", "CODE_SKLEARN"),
         ("callout", "key", "Правило", "Учите на MSE, а в отчётах показывайте <a href=\"../rmse/\">RMSE</a> (те же единицы, что у $y$) рядом с <a href=\"../mae/\">MAE</a>. Большой разрыв между ними — сигнал, что в ошибках есть тяжёлый хвост или выбросы."),
     ]),
@@ -274,7 +274,7 @@ SECTIONS = {
         ("ul", [
             "<a href=\"../mae/\">MAE</a>: модуль вместо квадрата — медиана вместо среднего, устойчивость к выбросам, но излом в нуле.",
             "<a href=\"../rmse/\">RMSE</a>: $\\sqrt{\\mathrm{MSE}}$ — та же оптимальная модель, но ошибка в единицах $y$.",
-            "<a href=\"../huber/\">Huber</a>: MSE около нуля и MAE на хвостах.",
+            "<a href=\"../huber/\">Функция Хьюбера</a>: MSE около нуля и MAE на хвостах.",
             "<a href=\"../bce/\">BCE</a>: аналог MSE для вероятностей — тоже метод максимального правдоподобия, но для распределения Бернулли.",
             "<a href=\"../sgd/\">SGD</a> и <a href=\"../adam/\">Adam</a>: на MSE хорошо видно, как шаг и обусловленность задачи определяют сходимость.",
         ]),
@@ -290,7 +290,7 @@ SECTIONS = {
                  explain="Минимум MSE — в среднем: $(1+2+3+10+50)/5=13{,}2$. Медиана $3$ минимизирует MAE."),
             dict(q="Чему равна $\\partial\\,\\mathrm{MSE}/\\partial\\hat y_i$?", options=["$-\\frac2n(y_i-\\hat y_i)$", "$-\\frac1n\\operatorname{sign}(y_i-\\hat y_i)$", "$(y_i-\\hat y_i)^2$", "$\\frac2n$"], answer=0,
                  explain="$\\frac{\\partial}{\\partial\\hat y_i}\\frac1n(y_i-\\hat y_i)^2=\\frac1n\\cdot2(y_i-\\hat y_i)\\cdot(-1)$. Вариант со знаком — производная MAE, $\\frac2n$ — вторая производная."),
-            dict(q="Собственные числа гессиана MSE равны $4$ и $2$. При каком наибольшем постоянном шаге градиентный спуск ещё сходится?", options=["$\\eta&lt;0{,}25$", "$\\eta&lt;0{,}5$", "$\\eta&lt;1$", "$\\eta&lt;2$"], answer=1,
+            dict(q="Собственные числа гессиана MSE равны $4$ и $2$. При каких постоянных шагах $\\eta&gt;0$ градиентный спуск сходится?", options=["$\\eta&lt;0{,}25$", "$\\eta&lt;0{,}5$", "$\\eta&lt;1$", "$\\eta&lt;2$"], answer=1,
                  explain="Условие $|1-\\eta\\lambda|&lt;1$ для всех собственных чисел даёт $\\eta&lt;2/\\lambda_{\\max}=2/4=0{,}5$. Это как раз центрированный случай рисунка 4."),
             dict(q="Минимизация MSE совпадает с методом максимального правдоподобия, если шум распределён…", options=["по Лапласу", "нормально", "равномерно", "по Пуассону"], answer=1,
                  explain="При нормальном шуме $-\\ln L=\\frac n2\\ln(2\\pi\\sigma^2)+\\frac{n}{2\\sigma^2}\\mathrm{MSE}$ — возрастающая функция MSE. Шум Лапласа соответствует MAE."),
@@ -299,13 +299,13 @@ SECTIONS = {
 ],
 "en": [
     dict(id="why", title="Why we need it", blocks=[
-        ("p", "If a model predicts a number, it was almost certainly trained by reducing MSE, the <b>mean squared error</b>. It is the “default” loss for regression: it has an exact solution for linear models, a smooth gradient for neural networks and a clear statistical meaning. The method of least squares, with which Legendre and Gauss started data analysis at the beginning of the 19th century, is exactly the minimization of MSE."),
+        ("p", "If a model predicts a number, it was almost certainly trained by reducing MSE, the <b>mean squared error</b>. It is the “default” loss for regression: it has an exact solution for linear models, a smooth gradient for neural networks and a clear statistical meaning. The method of least squares, published by Legendre in 1805 and tied to the normal law of errors by Gauss in 1809, is exactly the minimization of MSE."),
         ("p", "Where it appears:"),
         ("ul", [
             "<b>linear regression</b> — ordinary least squares (OLS) with a one-formula solution;",
             "<b>neural networks for regression</b> — <code>MSELoss</code> in PyTorch, <code>\"mse\"</code> in Keras; autoencoders that reconstruct their input;",
             "<b>diffusion models</b> — the network learns to predict the added noise, and the loss is the MSE between the true and the predicted noise;",
-            "<b>reinforcement learning</b> — the value function is trained on the squared TD error;",
+            "<b>reinforcement learning</b> — the value function is often trained on the squared TD error;",
             "<b>gradient boosting</b> — <code>loss=\"squared_error\"</code>: the negative gradient of MSE is the residual, so every tree is fitted to the residuals;",
             "<b>signal and image processing</b> — PSNR is computed from MSE, and the Kalman filter minimizes the expected squared error.",
         ]),
@@ -338,7 +338,7 @@ SECTIONS = {
         ("ul", [
             "<b>Non-negativity</b>: $\\mathrm{MSE}\\ge0$, with equality only for exact predictions.",
             "<b>Quadratic scaling</b>: multiply $y$ and $\\hat y$ by $k$ and MSE is multiplied by $k^2$. Converting roubles to thousands of roubles shrinks MSE a million times.",
-            "<b>Smoothness and convexity</b>: MSE is a quadratic function of the predictions; for a linear model, a quadratic function of the parameters. If the features are linearly independent, it is strictly convex and the minimum is unique.",
+            "<b>Smoothness and convexity</b>: MSE is a quadratic function of the predictions; for a linear model, a quadratic function of the parameters. If the columns of the feature matrix (together with the column of ones for the intercept) are linearly independent, it is strictly convex and the minimum is unique.",
             "<b>Error decomposition</b>: $\\mathrm{MSE}=\\bar e^{\\,2}+\\operatorname{Var}(e)$ — the squared mean bias plus the spread of the errors. In the example $\\bar e=-0.5$: $1.417=0.25+1.167$.",
             "<b>Comparison with MAE</b>: $\\mathrm{MSE}\\ge\\mathrm{MAE}^2$ (the mean of squares is at least the square of the mean). In the example: $1.417\\ge0.833^2\\approx0.694$.",
         ]),
@@ -383,7 +383,7 @@ SECTIONS = {
             ("eq", r"\theta_{t+1}-\theta^*=(I-\eta H)(\theta_t-\theta^*)\quad\Longrightarrow\quad\theta_t-\theta^*=(I-\eta H)^t(\theta_0-\theta^*)"),
             ("p", "In the eigenbasis of $H$ each coordinate is multiplied by $1-\\eta\\lambda_k$ at every step. The descent converges if $|1-\\eta\\lambda_k|&lt;1$ for all $k$, i.e. $0&lt;\\eta&lt;2/\\lambda_{\\max}$. For $1/\\lambda_{\\max}&lt;\\eta&lt;2/\\lambda_{\\max}$ the factor is negative — hence the zigzag across the ravine. The slowest direction is $\\lambda_{\\min}$: even with the best constant step $\\eta=2/(\\lambda_{\\max}+\\lambda_{\\min})$ the error shrinks by a factor $(\\kappa-1)/(\\kappa+1)$ per step, where $\\kappa=\\lambda_{\\max}/\\lambda_{\\min}$. At $\\kappa=70$ that is $0.97$ — hundreds of steps; at $\\kappa=2$ it is $1/3$."),
         ]),
-        ("callout", "key", "The practical takeaway", "Standardize the features (subtract the mean, divide by the standard deviation): this rounds the bowl and allows a larger step. Adaptive optimizers (<a href=\"../adam/\">Adam</a>, RMSProp) do a similar per-coordinate rescaling automatically."),
+        ("callout", "key", "The practical takeaway", "Standardize the features (subtract the mean, divide by the standard deviation): this rounds the bowl and allows a larger step. Adaptive optimizers (<a href=\"../adam/\">Adam</a>, RMSProp) do a similar rescaling automatically, but only coordinate by coordinate: a ravine tilted relative to the axes, like ours, is straightened only partly."),
     ]),
     dict(id="biasvar", title="Bias and variance", blocks=[
         ("p", "MSE on new data splits into three parts, and this is perhaps the most important formula about overfitting. Let $y=f(x)+\\varepsilon$, where the noise has mean $0$ and variance $\\sigma^2$, and let the model $\\hat f$ be trained on a random sample. Then the expected error at a point $x$ is:"),
@@ -405,9 +405,9 @@ SECTIONS = {
         ("callout", "note", "A biased estimate can be better", "What has to be minimized is the sum, not the bias alone. Regularization (ridge regression, early stopping, model averaging) deliberately introduces bias to reduce variance even more, and often lowers the test MSE."),
     ]),
     dict(id="probability", title="The probabilistic meaning: Gaussian noise", blocks=[
-        ("p", "Why the square of all things? The deepest answer was given by Gauss. Let $y_i=\\hat y_i+\\varepsilon_i$, where the noise $\\varepsilon_i$ is independent and normally distributed, $N(0,\\sigma^2)$. The density of one observation is a bell around the prediction, and the likelihood of the sample is the product of the heights of the bells at the data points. The negative log-likelihood is:"),
+        ("p", "Why the square of all things? The classical answer was given by Gauss (1809). Let $y_i=\\hat y_i+\\varepsilon_i$, where the noise $\\varepsilon_i$ is independent and normally distributed, $N(0,\\sigma^2)$. The density of one observation is a bell around the prediction, and the likelihood of the sample is the product of the heights of the bells at the data points. The negative log-likelihood is:"),
         ("eq", r"-\ln L=\frac n2\ln(2\pi\sigma^2)+\frac{1}{2\sigma^2}\sum_{i=1}^{n}\bigl(y_i-\hat y_i\bigr)^2=\frac n2\ln(2\pi\sigma^2)+\frac{n}{2\sigma^2}\,\mathrm{MSE}"),
-        ("p", "For any fixed $\\sigma$ this is an increasing linear function of MSE. Hence <b>minimizing MSE is maximum likelihood under Gaussian noise</b>. Minimizing over $\\sigma$ gives one more link: $\\hat\\sigma^2=\\mathrm{MSE}$."),
+        ("p", "For any fixed $\\sigma$ this is an increasing linear function of MSE. Hence <b>minimizing MSE is maximum likelihood under Gaussian noise</b>. Minimizing over $\\sigma$ gives one more link: $\\hat\\sigma^2=\\mathrm{MSE}$. Later (1821–1823) Gauss gave a second justification that needs no normality: if the errors are unbiased, uncorrelated and have equal variance, the least-squares estimate has the smallest variance among all linear unbiased estimates (the Gauss–Markov theorem)."),
         ("viz", "mse-gauss", {"w": 1, "b": 0.5, "s": 0.6}, "<b>Figure 6.</b> On the left, a line and the normal bells $N(\\hat y_i,\\sigma^2)$ around it; the orange segments are the heights of the bells at the data points, i.e. each point’s contribution to the likelihood. On the right, $-\\ln L$ as a function of MSE at the current $\\sigma$: a straight line. For $w=1$, $b=0.5$, $\\sigma=0.6$: $\\mathrm{MSE}=0.540$ and $-\\ln L=5.791$; the least-squares line (red point) with $\\mathrm{MSE}=0.229$ gives $-\\ln L=3.634$. The best $\\sigma$ for the current line is $\\sqrt{0.54}\\approx0.735$."),
         ("p", "One more statement of the same fact: among all functions $g(x)$ the expected squared error $\\mathbb E(y-g(x))^2$ is smallest for $g(x)=\\mathbb E[y\\mid x]$. A model trained on MSE estimates the <b>conditional mean</b>. If the noise is asymmetric or heavy-tailed, the conditional mean can describe the “typical” outcome poorly — then one looks at the median (<a href=\"../mae/\">MAE</a>) or at quantiles."),
     ]),
@@ -425,9 +425,9 @@ SECTIONS = {
     dict(id="code", title="In code", blocks=[
         ("p", "MSE and its gradient in NumPy, the exact least-squares solution, and a check that the best constant is the mean:"),
         ("code", "python", "CODE_NUMPY"),
-        ("p", "In PyTorch it is <code>MSELoss</code>. The gradient with respect to the predictions is $2(\\hat y-y)/n$; descent with step $0.05$ on the raw feature from Figure 4 reaches the same least-squares solution, but in thousands of steps:"),
+        ("p", "In PyTorch it is <code>MSELoss</code>. The gradient with respect to the predictions is $2(\\hat y-y)/n$; descent with step $0.05$ on the raw feature from Figure 4 reaches the same least-squares solution, but slowly: to two decimals it takes about 300 steps (the listing runs 2000 to be safe):"),
         ("code", "python", "CODE_TORCH"),
-        ("p", "In scikit-learn MSE is the default regression metric, <code>LinearRegression</code> minimizes it exactly, and boosting uses it as the default loss:"),
+        ("p", "scikit-learn has MSE and RMSE metrics (the regressors’ <code>score</code> method returns $R^2$, though), <code>LinearRegression</code> minimizes MSE exactly, and boosting uses it as the default loss:"),
         ("code", "python", "CODE_SKLEARN"),
         ("callout", "key", "The rule", "Train on MSE, but in reports show <a href=\"../rmse/\">RMSE</a> (same units as $y$) next to <a href=\"../mae/\">MAE</a>. A large gap between them signals a heavy tail or outliers in the errors."),
     ]),
@@ -461,7 +461,7 @@ SECTIONS = {
                  explain="The minimum of MSE is at the mean: $(1+2+3+10+50)/5=13.2$. The median $3$ minimizes MAE."),
             dict(q="What is $\\partial\\,\\mathrm{MSE}/\\partial\\hat y_i$?", options=["$-\\frac2n(y_i-\\hat y_i)$", "$-\\frac1n\\operatorname{sign}(y_i-\\hat y_i)$", "$(y_i-\\hat y_i)^2$", "$\\frac2n$"], answer=0,
                  explain="$\\frac{\\partial}{\\partial\\hat y_i}\\frac1n(y_i-\\hat y_i)^2=\\frac1n\\cdot2(y_i-\\hat y_i)\\cdot(-1)$. The option with the sign is the derivative of MAE, and $\\frac2n$ is the second derivative."),
-            dict(q="The eigenvalues of the MSE Hessian are $4$ and $2$. Up to what constant step does gradient descent still converge?", options=["$\\eta&lt;0.25$", "$\\eta&lt;0.5$", "$\\eta&lt;1$", "$\\eta&lt;2$"], answer=1,
+            dict(q="The eigenvalues of the MSE Hessian are $4$ and $2$. For which constant steps $\\eta&gt;0$ does gradient descent converge?", options=["$\\eta&lt;0.25$", "$\\eta&lt;0.5$", "$\\eta&lt;1$", "$\\eta&lt;2$"], answer=1,
                  explain="The condition $|1-\\eta\\lambda|&lt;1$ for all eigenvalues gives $\\eta&lt;2/\\lambda_{\\max}=2/4=0.5$. That is exactly the centred case of Figure 4."),
             dict(q="Minimizing MSE coincides with maximum likelihood if the noise is…", options=["Laplace", "normal", "uniform", "Poisson"], answer=1,
                  explain="With normal noise $-\\ln L=\\frac n2\\ln(2\\pi\\sigma^2)+\\frac{n}{2\\sigma^2}\\mathrm{MSE}$, an increasing function of MSE. Laplace noise corresponds to MAE."),
@@ -470,13 +470,13 @@ SECTIONS = {
 ],
 "uz": [
     dict(id="why", title="U nima uchun kerak", blocks=[
-        ("p", "Agar model son bashorat qilsa, deyarli aniq uni MSE (mean squared error) — <b>xatoning o‘rtacha kvadratini</b> kamaytirib o‘qitishgan. Bu regressiya uchun «standart» yo‘qotish: chiziqli modellar uchun uning aniq yechimi, neyron tarmoqlar uchun silliq gradiyenti va aniq statistik ma’nosi bor. XIX asr boshida Lejandr va Gauss ma’lumotlar tahlilini boshlagan eng kichik kvadratlar usuli — aynan MSE’ni minimallashtirishdir."),
+        ("p", "Agar model son bashorat qilsa, deyarli aniq uni MSE (mean squared error) — <b>xatoning o‘rtacha kvadratini</b> kamaytirib o‘qitishgan. Bu regressiya uchun «standart» yo‘qotish: chiziqli modellar uchun uning aniq yechimi, neyron tarmoqlar uchun silliq gradiyenti va aniq statistik ma’nosi bor. Lejandr 1805 yilda e’lon qilgan, Gauss esa 1809 yilda xatolarning normal qonuni bilan bog‘lagan eng kichik kvadratlar usuli — aynan MSE’ni minimallashtirishdir."),
         ("p", "U qayerda uchraydi:"),
         ("ul", [
             "<b>chiziqli regressiya</b> — bitta formulali yechimga ega eng kichik kvadratlar usuli (EKK, ordinary least squares);",
             "<b>regressiya uchun neyron tarmoqlar</b> — PyTorch’da <code>MSELoss</code>, Keras’da <code>\"mse\"</code>; kirishni tiklaydigan avtoenkoderlar;",
             "<b>diffuziya modellari</b> — tarmoq qo‘shilgan shovqinni bashorat qilishni o‘rganadi va yo‘qotish — haqiqiy va bashorat qilingan shovqin orasidagi MSE;",
-            "<b>mustahkamlab o‘qitish</b> — qiymat funksiyasi TD-xato kvadratida o‘qitiladi;",
+            "<b>mustahkamlab o‘qitish</b> — qiymat funksiyasi ko‘pincha TD-xato kvadratida o‘qitiladi;",
             "<b>gradiyent busting</b> — <code>loss=\"squared_error\"</code>: MSE antigradiyenti qoldiqqa teng, shuning uchun har bir daraxt qoldiqlarga moslashtiriladi;",
             "<b>signal va tasvirlarga ishlov berish</b> — PSNR MSE orqali hisoblanadi, Kalman filtri xato kvadratining kutilmasini minimallashtiradi.",
         ]),
@@ -509,7 +509,7 @@ SECTIONS = {
         ("ul", [
             "<b>Manfiy emaslik</b>: $\\mathrm{MSE}\\ge0$, tenglik — faqat aniq bashoratlarda.",
             "<b>Kvadratik masshtab</b>: $y$ va $\\hat y$ ni $k$ ga ko‘paytirsak, MSE $k^2$ ga ko‘payadi. So‘mni ming so‘mga o‘tkazish MSE’ni million marta kamaytiradi.",
-            "<b>Silliqlik va qavariqlik</b>: MSE — bashoratlarning kvadratik funksiyasi; chiziqli model uchun — parametrlarning kvadratik funksiyasi. Belgilar chiziqli erkli bo‘lsa, u qat’iy qavariq va minimum yagona.",
+            "<b>Silliqlik va qavariqlik</b>: MSE — bashoratlarning kvadratik funksiyasi; chiziqli model uchun — parametrlarning kvadratik funksiyasi. Belgilar matritsasining ustunlari (siljish uchun birlar ustuni bilan birga) chiziqli erkli bo‘lsa, u qat’iy qavariq va minimum yagona.",
             "<b>Xatolar yoyilmasi</b>: $\\mathrm{MSE}=\\bar e^{\\,2}+\\operatorname{Var}(e)$ — o‘rtacha siljish kvadrati plyus xatolar tarqoqligi. Misolda $\\bar e=-0{,}5$: $1{,}417=0{,}25+1{,}167$.",
             "<b>MAE bilan solishtirish</b>: $\\mathrm{MSE}\\ge\\mathrm{MAE}^2$ (kvadratlar o‘rtachasi o‘rtachaning kvadratidan kam emas). Misolda: $1{,}417\\ge0{,}833^2\\approx0{,}694$.",
         ]),
@@ -554,10 +554,10 @@ SECTIONS = {
             ("eq", r"\theta_{t+1}-\theta^*=(I-\eta H)(\theta_t-\theta^*)\quad\Longrightarrow\quad\theta_t-\theta^*=(I-\eta H)^t(\theta_0-\theta^*)"),
             ("p", "$H$ ning xos vektorlari bazisida har bir koordinata har qadamda $1-\\eta\\lambda_k$ ga ko‘payadi. Barcha $k$ uchun $|1-\\eta\\lambda_k|&lt;1$ bo‘lsa, ya’ni $0&lt;\\eta&lt;2/\\lambda_{\\max}$ da tushish yaqinlashadi. $1/\\lambda_{\\max}&lt;\\eta&lt;2/\\lambda_{\\max}$ da ko‘paytuvchi manfiy — jarlik bo‘ylab zigzag shundan. Eng sekin $\\lambda_{\\min}$ yo‘nalishi yaqinlashadi: hatto eng yaxshi o‘zgarmas $\\eta=2/(\\lambda_{\\max}+\\lambda_{\\min})$ qadamda ham xato har qadamda $(\\kappa-1)/(\\kappa+1)$ marta kamayadi, bu yerda $\\kappa=\\lambda_{\\max}/\\lambda_{\\min}$. $\\kappa=70$ da bu $0{,}97$ — yuzlab qadamlar; $\\kappa=2$ da — $1/3$."),
         ]),
-        ("callout", "key", "Amaliy xulosa", "Belgilarni standartlashtiring (o‘rtachani ayiring, standart chetlanishga bo‘ling) — bu kosani yumaloqlaydi va kattaroq qadam olishga imkon beradi. Moslashuvchan optimizatorlar (<a href=\"../adam/\">Adam</a>, RMSProp) har bir koordinata bo‘yicha shunga o‘xshash masshtablashni avtomatik bajaradi."),
+        ("callout", "key", "Amaliy xulosa", "Belgilarni standartlashtiring (o‘rtachani ayiring, standart chetlanishga bo‘ling) — bu kosani yumaloqlaydi va kattaroq qadam olishga imkon beradi. Moslashuvchan optimizatorlar (<a href=\"../adam/\">Adam</a>, RMSProp) shunga o‘xshash masshtablashni avtomatik bajaradi, lekin faqat har bir koordinata bo‘yicha alohida: biznikidek o‘qlarga nisbatan burilgan jarlikni ular faqat qisman to‘g‘rilaydi."),
     ]),
     dict(id="biasvar", title="Siljish va tarqoqlik", blocks=[
-        ("p", "Yangi ma’lumotlardagi MSE uch qismdan iborat va bu, ehtimol, qayta o‘qitish haqidagi eng muhim formula. $y=f(x)+\\varepsilon$ bo‘lsin, shovqinning o‘rtachasi $0$ va dispersiyasi $\\sigma^2$, $\\hat f$ model esa tasodifiy tanlanmada o‘qitilgan. U holda $x$ nuqtadagi kutilgan xato:"),
+        ("p", "Yangi ma’lumotlardagi MSE uch qismdan iborat va bu, ehtimol, ortiqcha moslashish (overfitting) haqidagi eng muhim formula. $y=f(x)+\\varepsilon$ bo‘lsin, shovqinning o‘rtachasi $0$ va dispersiyasi $\\sigma^2$, $\\hat f$ model esa tasodifiy tanlanmada o‘qitilgan. U holda $x$ nuqtadagi kutilgan xato:"),
         ("eq", r"\mathbb E\bigl[(y-\hat f(x))^2\bigr]=\underbrace{\bigl(f(x)-\mathbb E\hat f(x)\bigr)^2}_{\text{siljish}^2}+\underbrace{\mathbb E\bigl[(\hat f(x)-\mathbb E\hat f(x))^2\bigr]}_{\text{tarqoqlik}}+\underbrace{\sigma^2}_{\text{shovqin}}"),
         ("symbols", [
             (r"\mathbb E\hat f(x)", "barcha mumkin bo‘lgan o‘qitish tanlanmalari bo‘yicha o‘rtacha bashorat;"),
@@ -576,14 +576,14 @@ SECTIONS = {
         ("callout", "note", "Siljigan baho yaxshiroq bo‘lishi mumkin", "Faqat siljishni emas, yig‘indini minimallashtirish kerak. Regulyarizatsiya (ridge regressiya, erta to‘xtatish, modellarni o‘rtachalash) tarqoqlikni ko‘proq kamaytirish uchun ataylab siljish kiritadi va ko‘pincha test MSE’ni pasaytiradi."),
     ]),
     dict(id="probability", title="Ehtimoliy ma’no: normal shovqin", blocks=[
-        ("p", "Nega aynan kvadrat? Eng chuqur javobni Gauss bergan. $y_i=\\hat y_i+\\varepsilon_i$ bo‘lsin, bu yerda $\\varepsilon_i$ shovqin erkli va normal taqsimlangan, $N(0,\\sigma^2)$. Bitta kuzatuv zichligi — bashorat atrofidagi qo‘ng‘iroq, tanlanma o‘xshashligi esa — ma’lumot nuqtalaridagi qo‘ng‘iroqlar balandliklarining ko‘paytmasi. O‘xshashlikning manfiy logarifmi:"),
+        ("p", "Nega aynan kvadrat? Klassik javobni Gauss (1809) bergan. $y_i=\\hat y_i+\\varepsilon_i$ bo‘lsin, bu yerda $\\varepsilon_i$ shovqin erkli va normal taqsimlangan, $N(0,\\sigma^2)$. Bitta kuzatuv zichligi — bashorat atrofidagi qo‘ng‘iroq, tanlanma o‘xshashligi esa — ma’lumot nuqtalaridagi qo‘ng‘iroqlar balandliklarining ko‘paytmasi. O‘xshashlikning manfiy logarifmi:"),
         ("eq", r"-\ln L=\frac n2\ln(2\pi\sigma^2)+\frac{1}{2\sigma^2}\sum_{i=1}^{n}\bigl(y_i-\hat y_i\bigr)^2=\frac n2\ln(2\pi\sigma^2)+\frac{n}{2\sigma^2}\,\mathrm{MSE}"),
-        ("p", "Istalgan belgilangan $\\sigma$ da bu MSE’ning o‘suvchi chiziqli funksiyasi. Demak, <b>MSE’ni minimallashtirish — normal shovqindagi maksimal o‘xshashlik usuli</b>. $\\sigma$ bo‘yicha minimum yana bir bog‘liqlikni beradi: $\\hat\\sigma^2=\\mathrm{MSE}$."),
+        ("p", "Istalgan belgilangan $\\sigma$ da bu MSE’ning o‘suvchi chiziqli funksiyasi. Demak, <b>MSE’ni minimallashtirish — normal shovqindagi maksimal o‘xshashlik usuli</b>. $\\sigma$ bo‘yicha minimum yana bir bog‘liqlikni beradi: $\\hat\\sigma^2=\\mathrm{MSE}$. Keyinroq (1821–1823) Gauss normallikni talab qilmaydigan ikkinchi asosni ham bergan: agar xatolar siljimagan, korrelyatsiyalanmagan va bir xil dispersiyali bo‘lsa, EKK bahosi barcha chiziqli siljimagan baholar orasida eng kichik dispersiyaga ega (Gauss — Markov teoremasi)."),
         ("viz", "mse-gauss", {"w": 1, "b": 0.5, "s": 0.6}, "<b>6-rasm.</b> Chapda — to‘g‘ri chiziq va uning atrofidagi $N(\\hat y_i,\\sigma^2)$ normal qo‘ng‘iroqlar; to‘q sariq kesmalar — ma’lumot nuqtalaridagi qo‘ng‘iroqlar balandligi, ya’ni har bir nuqtaning o‘xshashlikka hissasi. O‘ngda — joriy $\\sigma$ da MSE funksiyasi sifatida $-\\ln L$: bu to‘g‘ri chiziq. $w=1$, $b=0{,}5$, $\\sigma=0{,}6$ uchun: $\\mathrm{MSE}=0{,}540$, $-\\ln L=5{,}791$; $\\mathrm{MSE}=0{,}229$ bo‘lgan EKK chizig‘i (qizil nuqta) $-\\ln L=3{,}634$ beradi. Joriy chiziq uchun eng yaxshi $\\sigma$ — $\\sqrt{0{,}54}\\approx0{,}735$."),
         ("p", "Xuddi shu faktning yana bir ifodasi: barcha $g(x)$ funksiyalar orasida $\\mathbb E(y-g(x))^2$ kutilgan xato kvadrati $g(x)=\\mathbb E[y\\mid x]$ da minimal. MSE’da o‘qitilgan model <b>shartli o‘rtachani</b> baholaydi. Agar shovqin nosimmetrik yoki og‘ir dumli bo‘lsa, shartli o‘rtacha «tipik» natijani yomon tasvirlashi mumkin — u holda medianaga (<a href=\"../mae/\">MAE</a>) yoki kvantillarga qarashadi."),
     ]),
     dict(id="outliers", title="Chetga chiquvchi qiymatlar: cheklanmagan ta’sir", blocks=[
-        ("p", "Kvadratning teskari tomoni — anomal nuqtalarga sezgirlik. Obyektdan keladigan gradiyent uning xatosiga proporsional, shuning uchun uzoqdagi chetga chiquvchi nuqta qancha uzoq bo‘lsa, modelni shuncha kuchli tortadi. Robast statistikada EKK’ning <b>ta’sir funksiyasi cheklanmagan</b> va sinish nuqtasi nol deyiladi: to‘g‘ri chiziqni istalgancha uzoqqa olib ketish uchun bitta nuqta yetarli."),
+        ("p", "Kvadratning teskari tomoni — anomal nuqtalarga sezgirlik. Obyektdan keladigan gradiyent uning xatosiga proporsional, shuning uchun uzoqdagi chetga chiquvchi nuqta qancha uzoq bo‘lsa, modelni shuncha kuchli tortadi. Robast statistikada EKK’ning <b>ta’sir funksiyasi cheklanmagan</b> va buzilish nuqtasi (breakdown point) nolga teng deyiladi: to‘g‘ri chiziqni istalgancha uzoqqa olib ketish uchun bitta nuqta yetarli."),
         ("viz", "mse-outlier", {"y": 0}, "<b>7-rasm.</b> $y=1+0{,}5x$ atrofidagi o‘nta nuqta va $x=9$ dagi chetga chiquvchi nuqta. U $y=0$ da bo‘lganda MSE chizig‘ining qiyaligi $0{,}291$ gacha tushadi, chetga chiquvchi nuqtaning o‘zi esa kvadratlar yig‘indisining $74\\%$ ini beradi. O‘ngda — chetga chiquvchi nuqta balandligi funksiyasi sifatida qiyalik: MSE’da bu to‘g‘ri chiziq (balandlikning har bir birligi qiyalikni $0{,}0375$ ga o‘zgartiradi, $y=-5$ da $0{,}104$ dan $y=13$ da $0{,}779$ gacha), MAE’da qiyalik $0{,}438$ va $0{,}514$ orasida qoladi."),
         ("p", "MSE kerak bo‘lsa, chetga chiquvchi qiymatlar bilan nima qilish kerak:"),
         ("ul", [
@@ -596,9 +596,9 @@ SECTIONS = {
     dict(id="code", title="Kodda", blocks=[
         ("p", "NumPy’da MSE va uning gradiyenti, EKK’ning aniq yechimi va eng yaxshi o‘zgarmas o‘rtacha ekanini tekshirish:"),
         ("code", "python", "CODE_NUMPY"),
-        ("p", "PyTorch’da — <code>MSELoss</code>. Bashoratlar bo‘yicha gradiyent — $2(\\hat y-y)/n$; 4-rasmdagi xom belgi bo‘yicha $0{,}05$ qadamli tushish o‘sha EKK yechimiga keladi, lekin minglab qadamlarda:"),
+        ("p", "PyTorch’da — <code>MSELoss</code>. Bashoratlar bo‘yicha gradiyent — $2(\\hat y-y)/n$; 4-rasmdagi xom belgi bo‘yicha $0{,}05$ qadamli tushish o‘sha EKK yechimiga keladi, lekin sekin: ikki xona aniqlikkacha taxminan 300 qadamda (listingda zaxira bilan 2000 qadam):"),
         ("code", "python", "CODE_TORCH"),
-        ("p", "scikit-learn’da MSE — regressiya uchun standart metrika, <code>LinearRegression</code> uni aniq minimallashtiradi, busting esa undan standart yo‘qotish sifatida foydalanadi:"),
+        ("p", "scikit-learn’da MSE va RMSE metrikalari bor (regressorlarning <code>score</code> metodi esa $R^2$ qaytaradi), <code>LinearRegression</code> MSE’ni aniq minimallashtiradi, busting esa undan standart yo‘qotish sifatida foydalanadi:"),
         ("code", "python", "CODE_SKLEARN"),
         ("callout", "key", "Qoida", "MSE’da o‘qiting, hisobotlarda esa <a href=\"../mae/\">MAE</a> yonida <a href=\"../rmse/\">RMSE</a>’ni ($y$ bilan bir xil birliklarda) ko‘rsating. Ular orasidagi katta farq — xatolarda og‘ir dum yoki chetga chiquvchilar borligi haqida signal."),
     ]),
@@ -616,7 +616,7 @@ SECTIONS = {
         ("ul", [
             "<a href=\"../mae/\">MAE</a>: kvadrat o‘rniga modul — o‘rtacha o‘rniga mediana, chetga chiquvchilarga bardoshlilik, lekin nolda sinish.",
             "<a href=\"../rmse/\">RMSE</a>: $\\sqrt{\\mathrm{MSE}}$ — o‘sha optimal model, lekin xato $y$ birliklarida.",
-            "<a href=\"../huber/\">Huber</a>: nol yonida MSE va dumlarda MAE.",
+            "<a href=\"../huber/\">Xyuber funksiyasi</a>: nol yonida MSE va dumlarda MAE.",
             "<a href=\"../bce/\">BCE</a>: ehtimolliklar uchun MSE analogi — u ham maksimal o‘xshashlik usuli, lekin Bernulli taqsimoti uchun.",
             "<a href=\"../sgd/\">SGD</a> va <a href=\"../adam/\">Adam</a>: MSE’da qadam va masalaning shartlanganligi yaqinlashishni qanday belgilashi yaxshi ko‘rinadi.",
         ]),
@@ -632,7 +632,7 @@ SECTIONS = {
                  explain="MSE minimumi o‘rtachada: $(1+2+3+10+50)/5=13{,}2$. Mediana $3$ MAE’ni minimallashtiradi."),
             dict(q="$\\partial\\,\\mathrm{MSE}/\\partial\\hat y_i$ nimaga teng?", options=["$-\\frac2n(y_i-\\hat y_i)$", "$-\\frac1n\\operatorname{sign}(y_i-\\hat y_i)$", "$(y_i-\\hat y_i)^2$", "$\\frac2n$"], answer=0,
                  explain="$\\frac{\\partial}{\\partial\\hat y_i}\\frac1n(y_i-\\hat y_i)^2=\\frac1n\\cdot2(y_i-\\hat y_i)\\cdot(-1)$. Ishorali variant — MAE hosilasi, $\\frac2n$ — ikkinchi hosila."),
-            dict(q="MSE gessianining xos sonlari $4$ va $2$. Qanday eng katta o‘zgarmas qadamda gradiyent tushish hali yaqinlashadi?", options=["$\\eta&lt;0{,}25$", "$\\eta&lt;0{,}5$", "$\\eta&lt;1$", "$\\eta&lt;2$"], answer=1,
+            dict(q="MSE gessianining xos sonlari $4$ va $2$. Qanday o‘zgarmas $\\eta&gt;0$ qadamlarda gradiyent tushish yaqinlashadi?", options=["$\\eta&lt;0{,}25$", "$\\eta&lt;0{,}5$", "$\\eta&lt;1$", "$\\eta&lt;2$"], answer=1,
                  explain="Barcha xos sonlar uchun $|1-\\eta\\lambda|&lt;1$ sharti $\\eta&lt;2/\\lambda_{\\max}=2/4=0{,}5$ ni beradi. Bu aynan 4-rasmdagi markazlashgan holat."),
             dict(q="Agar shovqin … taqsimlangan bo‘lsa, MSE’ni minimallashtirish maksimal o‘xshashlik usuli bilan mos keladi", options=["Laplas bo‘yicha", "normal", "tekis", "Puasson bo‘yicha"], answer=1,
                  explain="Normal shovqinda $-\\ln L=\\frac n2\\ln(2\\pi\\sigma^2)+\\frac{n}{2\\sigma^2}\\mathrm{MSE}$ — MSE’ning o‘suvchi funksiyasi. Laplas shovqini MAE’ga mos keladi."),

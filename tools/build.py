@@ -28,6 +28,8 @@ THEME_BOOT = (
     '  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>\n'
 )
 LANG_NAME = {"ru": "RU", "en": "EN", "uz": "UZ"}
+# Absolute addresses are needed for canonical, hreflang and social previews (og:image).
+SITE_URL = "https://javharbek.uz/"
 
 SITE = {
     "ru": dict(
@@ -231,9 +233,9 @@ EMAIL = "javhar_work@mail.ru"
 PHONE = "+998 90 929-44-63"
 
 
-def hreflang(path_fn):
-    out = [f'  <link rel="alternate" hreflang="{l}" href="{path_fn(l)}">' for l in LANGS]
-    out.append(f'  <link rel="alternate" hreflang="x-default" href="{path_fn("en")}">')
+def hreflang(page):
+    out = [f'  <link rel="alternate" hreflang="{l}" href="{SITE_URL}{l}/{page}">' for l in LANGS]
+    out.append(f'  <link rel="alternate" hreflang="x-default" href="{SITE_URL}en/{page}">')
     return "\n".join(out)
 
 
@@ -248,8 +250,11 @@ def head(lang, title, desc, rel, page, og_type="website", extra=""):
   <meta property="og:title" content="{title}">
   <meta property="og:description" content="{desc}">
   <meta property="og:type" content="{og_type}">
-  <meta property="og:image" content="{rel}assets/img/javharbek.png">
-{hreflang(lambda l: f"{rel}{l}/{page}")}
+  <meta property="og:url" content="{SITE_URL}{lang}/{page}">
+  <meta property="og:image" content="{SITE_URL}assets/img/javharbek.png">
+  <meta property="og:site_name" content="{SITE[lang]['brand']}">
+  <link rel="canonical" href="{SITE_URL}{lang}/{page}">
+{hreflang(page)}
   <link rel="icon" href="{rel}assets/favicon.svg" type="image/svg+xml">
 {THEME_BOOT}{FONTS}  <link rel="stylesheet" href="{rel}assets/css/site.css">
 {extra}</head>
@@ -953,6 +958,18 @@ ROOT_INDEX = """<!doctype html>
 """
 
 
+def write_sitemap(subs):
+    """sitemap.xml with every page in three languages, plus robots.txt pointing to it."""
+    urls = []
+    for sub in subs:
+        page = f"{sub}/" if sub else ""
+        alts = "".join(f'\n    <xhtml:link rel="alternate" hreflang="{l}" href="{SITE_URL}{l}/{page}"/>' for l in LANGS)
+        urls += [f"  <url>\n    <loc>{SITE_URL}{lang}/{page}</loc>{alts}\n  </url>" for lang in LANGS]
+    (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+        + "\n".join(urls) + "\n</urlset>\n", encoding="utf-8")
+    (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n", encoding="utf-8")
+
 def main():
     # python3 tools/build.py --only <id>  builds just one formula page (all three languages)
     if "--only" in sys.argv:
@@ -968,6 +985,7 @@ def main():
             (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)
             (ROOT / lang / sub / "index.html").write_text(render(lang), encoding="utf-8")
     (ROOT / "index.html").write_text(ROOT_INDEX, encoding="utf-8")
+    write_sitemap(list(pages) + [f"materials/ml-formulas/{fid}" for fid in FORMULA_IDS])
     print("built:", ", ".join(f"{l}/" + "{" + ", ".join(pages) + "}" for l in LANGS), "+ index.html,", len(FORMULA_IDS), "formula pages")
 
 

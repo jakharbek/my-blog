@@ -32,7 +32,7 @@
       arch: "Tarmoq", n4: "4 neyron", n8: "8 neyron", deep: "2 qatlam × 4", reseed: "Boshqa tarmoq", surf: "f(x₁, x₂)", top: "chiziqli sohalar (yuqoridan)",
       regions: "oynadagi chiziqli sohalar", maxr: "to‘g‘ri chiziqlar uchun maksimum", lines: "1-qatlam neyronlari chegaralari", levels: "f ning sath chiziqlari",
       units: "Neyronlar", data: "ma’lumotlar", truth: "haqiqiy funksiya", model: "tarmoq", unit: "bitta neyron hissasi", deadU: "o‘lik neyron", loss: "MSE", lossT: "qadamlar bo‘yicha MSE", it: "qadam", dead: "o‘lik",
-      lr: "O‘qitish qadami $\\eta$", deadPct: "o‘lik neyronlar, %", alive: "tirik (yorqinlik — faol bo‘lgan nuqtalar ulushi)", deadN: "o‘lik: barcha ma’lumotlarda 0",
+      lr: "O‘qitish tezligi $\\eta$", deadPct: "o‘lik neyronlar, %", alive: "tirik (yorqinlik — faol bo‘lgan nuqtalar ulushi)", deadN: "o‘lik: barcha ma’lumotlarda 0",
       init: "Initsializatsiya", layer: "qatlam", q: "aktivatsiyalarning o‘rtacha kvadrati", theory: "nazariya q₀(c/2)ˡ", ratio: "q₃₀ / q₀", active: "oxirgi qatlamda faollar",
     },
   }[FV.lang] || {};
@@ -56,8 +56,6 @@
       if (x0 === 0) p.line(-1.6, -0.8, 4, 2, { c: "orange", w: 2 });
       else { const k = x0 > 0 ? 1 : 0; p.line(x0 - 1.5, relu(x0) - 1.5 * k, x0 + 1.5, relu(x0) + 1.5 * k, { c: "orange", w: 2 }); }
       p.fn(relu, { c: "ink", w: 2.6 });
-      if (x0 > 0) p.line(x0 - 1.5, x0 - 1.5, x0 + 1.5, x0 + 1.5, { c: "orange", w: 2.2 });
-      else if (x0 < 0) p.line(x0 - 1.5, 0, x0 + 1.5, 0, { c: "orange", w: 2.2 });
       h.set(x0, relu(x0));
       d.clear(); d.hline(0, { c: "guide", dash: false, opacity: 0.6 }); d.hline(1, { c: "guide", opacity: 0.6 });
       d.line(-4, 0, 0, 0, { c: "orange", w: 2.4 }); d.line(0, 1, 4, 1, { c: "orange", w: 2.4 });
@@ -65,7 +63,7 @@
       d.dot(0, 1, { c: "orange", hollow: true, r: 4.5 }); d.dot(0, 0, { c: "orange", r: 4.5 });
       const dv = x0 > 0 ? 1 : 0;
       if (x0 !== 0) d.dot(x0, dv, { c: "blue", r: 4.5 });
-      d.text(0.15, 0.5, dec(L.sub), { c: "orange" });
+      d.text(0.15, 0.5, d.narrow ? "∂ReLU(0) = " + (EN ? "[0, 1]" : "[0; 1]") : dec(L.sub), { c: "orange" });
       ro.set("x", FV.fmt(x0, 2)); ro.set("r", FV.fmt(relu(x0), 2));
       ro.set("d", x0 === 0 ? (EN ? "∂ = [0, 1]; PyTorch: 0" : "∂ = [0; 1]; PyTorch: 0") : String(dv));
       p.legend([{ label: L.relu, c: "ink" }, { label: L.tangent, c: "orange" }, { label: L.fan, c: "orange", dash: true }, { label: L.ident, c: "guide", dash: true }]);
@@ -329,7 +327,7 @@
       p.path(R.dead.slice(0, t + 1).map((v, s) => [s, 100 * v]), { c: "red", w: 2.6 });
       p.vline(t, { c: "ink", opacity: 0.5 });
       p.dot(t, 100 * R.dead[t], { c: "red", r: 4.5 });
-      p.legend([{ label: "η = " + dec(String(LRS[sel])), c: "red" }, { label: dec("η = 0.03, 0.1, 0.2, 0.3"), c: "guide", dash: true }]);
+      p.legend([{ label: "η = " + dec(String(LRS[sel])), c: "red" }, { label: "η = " + LRS.filter((v, i) => i !== sel).map((v) => dec(String(v))).join(EN ? ", " : "; "), c: "guide", dash: true }]);
       g.clear();
       R.act[t].forEach((a, k) => {
         const cx = k % 8, cy = 7 - Math.floor(k / 8);

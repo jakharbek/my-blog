@@ -4,15 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>The sigmoid: the logistic function — Neural network formulas: a cheat sheet — Abdulatipov J.</title>
-  <meta name="description" content="The sigmoid in depth: formula, properties, derivation of the derivative, Taylor series, logit and odds, logistic regression in 3D, saturation and vanishing gradients, stable code.">
+  <meta name="description" content="The sigmoid in depth: formula, properties, the derivative σ(1 − σ), Taylor series, logit and odds, logistic regression, vanishing gradients, stable code.">
   <meta property="og:title" content="The sigmoid: the logistic function — Neural network formulas: a cheat sheet — Abdulatipov J.">
-  <meta property="og:description" content="The sigmoid in depth: formula, properties, derivation of the derivative, Taylor series, logit and odds, logistic regression in 3D, saturation and vanishing gradients, stable code.">
+  <meta property="og:description" content="The sigmoid in depth: formula, properties, the derivative σ(1 − σ), Taylor series, logit and odds, logistic regression, vanishing gradients, stable code.">
   <meta property="og:type" content="article">
-  <meta property="og:image" content="../../../../assets/img/javharbek.png">
-  <link rel="alternate" hreflang="ru" href="../../../../ru/materials/ml-formulas/sigmoid/">
-  <link rel="alternate" hreflang="en" href="../../../../en/materials/ml-formulas/sigmoid/">
-  <link rel="alternate" hreflang="uz" href="../../../../uz/materials/ml-formulas/sigmoid/">
-  <link rel="alternate" hreflang="x-default" href="../../../../en/materials/ml-formulas/sigmoid/">
+  <meta property="og:url" content="https://javharbek.uz/en/materials/ml-formulas/sigmoid/">
+  <meta property="og:image" content="https://javharbek.uz/assets/img/javharbek.png">
+  <meta property="og:site_name" content="Abdulatipov J.">
+  <link rel="canonical" href="https://javharbek.uz/en/materials/ml-formulas/sigmoid/">
+  <link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/materials/ml-formulas/sigmoid/">
+  <link rel="alternate" hreflang="en" href="https://javharbek.uz/en/materials/ml-formulas/sigmoid/">
+  <link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/materials/ml-formulas/sigmoid/">
+  <link rel="alternate" hreflang="x-default" href="https://javharbek.uz/en/materials/ml-formulas/sigmoid/">
   <link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
   <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -84,7 +87,7 @@
     <h2 id="why">Why we need it</h2>
     <p>A neural network, logistic regression, gradient boosting — inside all of them you end up with a plain number: $3.7$, $-12$, $0.2$. But the question is often different: <i>how likely</i> is the email spam, will the client repay the loan, is there a person in the frame. A probability must lie between 0 and 1. The sigmoid is the most natural bridge from “any number” to “a probability”.</p>
     <p>Where it appears:</p>
-    <ul class="flist"><li><b>the output of a binary classifier</b> — logistic regression, the last neuron of a network, $p=\sigma(z)$;</li><li><b>gates in LSTM and GRU</b> — a number between 0 and 1 decides what share of the information to let through and what to forget;</li><li><b>gradient boosting for classification</b> — XGBoost, LightGBM and CatBoost add trees into a raw score, and the sigmoid turns it into a probability;</li><li><b>modern activations</b> — SiLU (Swish) in LLaMA and Qwen is $x\cdot\sigma(x)$;</li><li><b>statistics</b> — the cumulative distribution function of the logistic law and the link between probability and log-odds (logit).</li></ul>
+    <ul class="flist"><li><b>the output of a binary classifier</b> — logistic regression, the last neuron of a network, $p=\sigma(z)$;</li><li><b>gates in LSTM and GRU</b> — a number between 0 and 1 decides what share of the information to let through and what to forget;</li><li><b>gradient boosting for classification</b> — XGBoost, LightGBM and CatBoost add trees into a raw score, and the sigmoid turns it into a probability;</li><li><b>modern activations</b> — SiLU (Swish) is $x\cdot\sigma(x)$; the SwiGLU block of LLaMA and Qwen is built on it;</li><li><b>statistics</b> — the cumulative distribution function of the logistic law and the link between probability and log-odds (logit).</li></ul>
     <div class="callout key"><b>The essentials in a minute</b><p>$\sigma$ squeezes the whole real line into $(0,\,1)$, passes through $(0,\,0.5)$ and is symmetric: $\sigma(-x)=1-\sigma(x)$. Its derivative $\sigma'=\sigma(1-\sigma)$ never exceeds $0.25$ — the source of both convenience (cheap backprop) and trouble (vanishing gradients).</p></div>
 
     <h2 id="intuition">Intuition: squeezing infinity</h2>
@@ -99,7 +102,7 @@
     <dl class="symbols"><dt>$e^{-x}$</dt><dd>the exponential is always positive: as $x\to+\infty$ it tends to 0, as $x\to-\infty$ to infinity;</dd><dt>$1+e^{-x}$</dt><dd>the denominator is always greater than 1 — so the fraction is always less than 1;</dd><dt>$\frac{1}{1+e^{-x}}$</dt><dd>the reciprocal of a positive number greater than 1 lies strictly between 0 and 1.</dd></dl>
     <p>It pays to recognise the same function in other forms:</p>
     <div class="eqd">$$\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{1+e^{x}}=\frac{1}{2}\Bigl(1+\tanh\frac{x}{2}\Bigr)$$</div>
-    <p>The second form comes from multiplying the numerator and the denominator by $e^x$; it is convenient for negative $x$ (see the section on code). The third links the sigmoid to the hyperbolic tangent: tanh is the same S-curve, stretched twice as tall and shifted down.</p>
+    <p>The second form comes from multiplying the numerator and the denominator by $e^x$; it is convenient for negative $x$ (see the section on code). The third links the sigmoid to the hyperbolic tangent: $\tanh x=2\sigma(2x)-1$ is the same S-curve, squeezed horizontally by 2, stretched twice as tall and shifted down by 1.</p>
     <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x$</th><th class=num>$\sigma(x)$</th><th class=num>$\sigma'(x)$</th></tr></thead><tbody><tr><td class=num>−6</td><td class=num>0.0025</td><td class=num>0.0025</td></tr><tr><td class=num>−4</td><td class=num>0.0180</td><td class=num>0.0177</td></tr><tr><td class=num>−2</td><td class=num>0.1192</td><td class=num>0.1050</td></tr><tr><td class=num>−1</td><td class=num>0.2689</td><td class=num>0.1966</td></tr><tr><td class=num>0</td><td class=num>0.5000</td><td class=num>0.2500</td></tr><tr><td class=num>1</td><td class=num>0.7311</td><td class=num>0.1966</td></tr><tr><td class=num>2</td><td class=num>0.8808</td><td class=num>0.1050</td></tr><tr><td class=num>4</td><td class=num>0.9820</td><td class=num>0.0177</td></tr><tr><td class=num>6</td><td class=num>0.9975</td><td class=num>0.0025</td></tr></tbody></table></div>
     <p>The table shows two symmetries: the sigmoid values at $\pm x$ add up to one, and the derivative is an even function.</p>
 
@@ -111,12 +114,12 @@
     </div></details>
     <h3>Weight and bias: how a neuron reshapes the sigmoid</h3>
     <p>In a neuron the sigmoid receives not $x$ but $z=wx+b$. The weight $w$ stretches the curve horizontally, the bias $b$ shifts it. The centre, where the output equals $0.5$, lands at $x_0=-b/w$, and the slope at the centre is $w/4$.</p>
-    <figure class="viz"><div class="fv" data-viz="sigmoid-shape" data-config="{&quot;w&quot;: 2, &quot;b&quot;: -2}"></div><figcaption><b>Figure 2.</b> $\sigma(wx+b)$. For large $|w|$ the curve becomes almost a step; for $w&lt;0$ it flips. The pale curves are the same function with weights $w/4$ and $w/2$.</figcaption></figure>
-    <div class="callout note"><b>A step as the limit</b><p>As $w\to+\infty$, $\sigma(w x)$ tends to the Heaviside step: 0 to the left of zero, 1 to the right. That is how the sigmoid historically entered neural networks — as a smooth, differentiable replacement for the McCulloch–Pitts threshold neuron.</p></div>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-shape" data-config="{&quot;w&quot;: 2, &quot;b&quot;: -2}"></div><figcaption><b>Figure 2.</b> $\sigma(wx+b)$. For large $|w|$ the curve becomes almost a step; for $w&lt;0$ it flips. The pale curves are $\sigma\bigl((wx+b)/4\bigr)$ and $\sigma\bigl((wx+b)/2\bigr)$: the same centre, but a slope 4 and 2 times smaller.</figcaption></figure>
+    <div class="callout note"><b>A step as the limit</b><p>As $w\to+\infty$, $\sigma(w x)$ tends to the Heaviside step: 0 to the left of zero, 1 to the right (at $x=0$ itself the value is always $0.5$). That is how the sigmoid historically entered neural networks — as a smooth, differentiable replacement for the McCulloch–Pitts threshold neuron.</p></div>
 
     <h2 id="derivative">The derivative: σ′ = σ(1 − σ)</h2>
     <p>This is the key formula of the page. Let us derive it in two ways — head-on and elegantly.</p>
-    <details class="deep"><summary>Method 1. The quotient, step by step</summary><div class="deep-body">
+    <details class="deep"><summary>Method 1. The chain rule, step by step</summary><div class="deep-body">
       <p>Write $\sigma(x)=(1+e^{-x})^{-1}$ and apply the chain rule:</p>
       <div class="eqd">$$\sigma'(x)=-(1+e^{-x})^{-2}\cdot\bigl(1+e^{-x}\bigr)'=-(1+e^{-x})^{-2}\cdot(-e^{-x})=\frac{e^{-x}}{(1+e^{-x})^{2}}$$</div>
       <p>Split the fraction into a product of two factors:</p>
@@ -147,7 +150,7 @@
     <div class="callout note"><b>Another interpretation</b><p>The sigmoid is the cumulative distribution function of the logistic law: if the noise $\varepsilon$ is logistic, then $P(\varepsilon\le x)=\sigma(x)$. The similar model with normal noise, $\Phi(x)$, is called probit regression; its curve nearly coincides with $\sigma(1.7x)$.</p></div>
 
     <h2 id="space">The sigmoid in many dimensions</h2>
-    <p>A neuron has many inputs: $z=w_1x_1+w_2x_2+\dots+b$. The sigmoid of a hyperplane is a “fold” that rises from 0 to 1 across the boundary $w^\top x+b=0$ and stays constant along it. The weight vector $w$ points in the direction of the steepest ascent, and its length sets how steep the fold is.</p>
+    <p>A neuron has many inputs: $z=w_1x_1+w_2x_2+\dots+b$. The sigmoid of such a linear function is a “fold” that rises from 0 to 1 across the boundary $w^\top x+b=0$ and stays constant along it. The weight vector $w$ points in the direction of the steepest ascent, and its length sets how steep the fold is.</p>
     <figure class="viz"><div class="fv" data-viz="sigmoid-logreg" data-config="{&quot;w1&quot;: -0.5, &quot;w2&quot;: 1.5, &quot;b&quot;: 1.5}"></div><figcaption><b>Figure 5.</b> Logistic regression on two features. On the left, the probability surface in 3D (you can rotate it); the points sit at the height of their class. On the right, the view from above: the solid line is the boundary $p=0.5$, the dashed lines are $p=0.1$ and $p=0.9$, the arrow is the direction of $w$. Press “Play”: gradient descent on BCE with step $0.5$ finds the weights by itself.</figcaption></figure>
     <p>Training uses the same derivative. For the BCE loss the gradient with respect to the logit is $\sigma(z)-y$ (derived on the <a href="../bce/">BCE</a> page), so a gradient-descent step on the weights is:</p>
     <div class="eqd">$$w\leftarrow w-\eta\,\frac1n\sum_{i=1}^{n}\bigl(\sigma(w^\top x_i+b)-y_i\bigr)\,x_i$$</div>
@@ -155,13 +158,14 @@
 
     <h2 id="training">The sigmoid in training: saturation and vanishing gradients</h2>
     <p>If a neuron’s inputs $z$ are large in magnitude, the sigmoid works on its flat tails, where $\sigma'(z)\approx0$. Hardly any gradient flows through such a neuron — it is <b>saturated</b>. Saturation, $\sigma'&lt;0.01$, starts at $|z|&gt;4.6$.</p>
-    <figure class="viz"><div class="fv" data-viz="sigmoid-saturation" data-config="{&quot;s&quot;: 1}"></div><figcaption><b>Figure 6.</b> The blue area is the distribution of the inputs $z\sim N(\mu,\,s^2)$, the orange one is the derivative. At $s=1$ the mean derivative is $0.207$ and there are almost no saturated inputs; at $s=4$ the mean derivative drops to $0.091$, and a quarter of the inputs ($25\%$) are already saturated.</figcaption></figure>
-    <p>This gives the initialization rule: weights are chosen so that the variance of $z$ is of order one (Xavier–Glorot initialization, $\operatorname{Var}w=1/n_{\text{in}}$), and the data are normalized.</p>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-saturation" data-config="{&quot;s&quot;: 1}"></div><figcaption><b>Figure 6.</b> The blue area is the distribution of the inputs $z\sim N(\mu,\,s^2)$, the orange one is the derivative (the blue curve’s height is in arbitrary units). At $s=1$ the mean derivative is $0.207$ and there are almost no saturated inputs; at $s=4$ the mean derivative drops to $0.091$, and a quarter of the inputs ($25\%$) are already saturated.</figcaption></figure>
+    <p>This gives the initialization rule: weights are chosen so that the variance of $z$ is of order one (LeCun initialization, $\operatorname{Var}w=1/n_{\text{in}}$, or Glorot (Xavier) initialization, $\operatorname{Var}w=2/(n_{\text{in}}+n_{\text{out}})$), and the data are normalized.</p>
     <h3>Vanishing gradients in a deep network</h3>
-    <p>By the chain rule the gradient at layer $l$ is a product of the derivatives of all layers above it. For the sigmoid each derivative is at most $\tfrac14$, so after 10 layers the factor is at most $0.25^{10}\approx9.5\cdot10^{-7}$.</p>
-    <div class="eqd">$$\frac{\partial L}{\partial h_l}=\frac{\partial L}{\partial h_L}\prod_{k=l+1}^{L}W_k^{\top}\operatorname{diag}\bigl(\sigma'(z_k)\bigr)$$</div>
-    <figure class="viz"><div class="fv" data-viz="sigmoid-vanishing" data-config="{&quot;depth&quot;: 10}"></div><figcaption><b>Figure 7.</b> The gradient norm at every layer of a random network of width 64 (Xavier initialization for sigmoid and tanh, He for ReLU). The vertical scale is logarithmic. With the sigmoid the gradient at the input is several orders of magnitude smaller than at the output; with tanh and ReLU it barely fades.</figcaption></figure>
-    <div class="callout history"><b>Why the sigmoid left the hidden layers</b><p>Before 2010 deep networks with sigmoids trained poorly. Glorot and Bengio (2010) showed the role of saturation and proposed an initialization, and ReLU (Nair and Hinton, 2010; Glorot et al., 2011) all but removed the problem. Today the sigmoid lives where a share between 0 and 1 is exactly what is needed: at the output of a binary classifier and in gates.</p></div>
+    <p>Let $h_k=\sigma(z_k)$, $z_k=W_kh_{k-1}$. By the chain rule the gradient of the loss $\mathcal L$ with respect to the output of layer $l$ is a product of the Jacobians of all layers above it, and each of them contains $\operatorname{diag}\bigl(\sigma'(z_k)\bigr)$:</p>
+    <div class="eqd">$$\frac{\partial \mathcal L}{\partial h_l}=\frac{\partial \mathcal L}{\partial h_L}\,\frac{\partial h_L}{\partial h_{L-1}}\cdots\frac{\partial h_{l+1}}{\partial h_l},\qquad \frac{\partial h_k}{\partial h_{k-1}}=\operatorname{diag}\bigl(\sigma'(z_k)\bigr)\,W_k$$</div>
+    <p>For the sigmoid every $\sigma'\le\tfrac14$, so after 10 layers the factor from the derivatives alone is at most $0.25^{10}\approx9.5\cdot10^{-7}$. With Glorot initialization the weights $W_k$ do not compensate for it: they keep the norm of the signal at roughly one.</p>
+    <figure class="viz"><div class="fv" data-viz="sigmoid-vanishing" data-config="{&quot;depth&quot;: 10}"></div><figcaption><b>Figure 7.</b> The gradient norm at every layer of a random network of width 64 (Glorot initialization for sigmoid and tanh, He for ReLU). The vertical scale is logarithmic; the dashed line is the estimate $0.25^{L-l}$. At depth 10 the sigmoid’s gradient at the input is $2.4\cdot10^{-6}$ times its value at the output; for tanh the ratio is about $0.2$, for ReLU about $2.4$ (the gradient even grows a little).</figcaption></figure>
+    <div class="callout history"><b>Why the sigmoid left the hidden layers</b><p>Before 2010 deep networks with sigmoids trained poorly unless one resorted to layer-wise pre-training (Hinton et al., 2006). Glorot and Bengio (2010) showed the role of saturation and proposed an initialization, and ReLU (Nair and Hinton, 2010; Glorot et al., 2011) all but removed the problem. Today the sigmoid lives where a share between 0 and 1 is exactly what is needed: at the output of a binary classifier and in gates.</p></div>
 
     <h2 id="code">In code: stable and without surprises</h2>
     <p>The naive formula $1/(1+e^{-x})$ at $x=-1000$ computes $e^{1000}$ — an overflow. The result still comes out as 0, but with a warning, and $\log\sigma(x)$ already yields $-\infty$. The second problem is loss of precision: $1-\sigma(40)$ in float64 is exactly 0, while the true value $\sigma(-40)\approx4.25\cdot10^{-18}$.</p>
@@ -185,8 +189,9 @@ def log_sigmoid(x):
     # log σ(x) = −softplus(−x) = −log(1 + e^(−x)), without log(0)
     return -np.logaddexp(0.0, -x)
 
-print(sigmoid([-40.0, 0.0, 40.0]))   # [4.248e-18 0.5 1.0]
-print(1 - sigmoid(40.0), sigmoid(-40.0))  # 0.0 versus 4.248e-18</code></pre>
+print(sigmoid([-40.0, 0.0, 40.0]))        # [4.24835426e-18 5.00000000e-01 1.00000000e+00]
+print(1 - sigmoid(40.0), sigmoid(-40.0))  # 0.0 4.248354255291589e-18 — the subtraction ate everything
+print(log_sigmoid(-1000.0))               # -1000.0 (a naive np.log(sigmoid) would give -inf)</code></pre>
     <pre class="code"><span class="lang">python</span><code>import torch
 import torch.nn as nn
 
@@ -201,10 +206,10 @@ loss = loss_fn(z, torch.tensor([0.0, 1.0, 1.0]))</code></pre>
     <div class="callout key"><b>The rule</b><p>If a logarithm follows, do not compute $\sigma$ separately. Use $\log\sigma(x)=-\operatorname{softplus}(-x)$ or ready-made losses on logits: <code>BCEWithLogitsLoss</code> in PyTorch, <code>from_logits=True</code> in Keras.</p></div>
 
     <h2 id="mistakes">Common mistakes</h2>
-    <ol class="flist"><li><b>Sigmoids in the hidden layers of a deep network</b> — vanishing gradients and shifted (non-centred) activations. Use ReLU, GELU, SiLU; keep the sigmoid for the output or for gates.</li><li><b>Sigmoid instead of softmax on one output.</b> For $K&gt;2$ mutually exclusive classes you need <a href="../softmax/">softmax</a>; a sigmoid on every output means multi-label, where the classes are independent.</li><li><b>A double sigmoid</b>: the model already returns a probability and the loss applies σ again (for example, <code>BCEWithLogitsLoss</code> on top of <code>sigmoid</code>). Training runs, but the gradients are distorted.</li><li><b>The “default” 0.5 threshold.</b> It is optimal only for equal error costs and balanced classes. Tune the threshold for your metric on validation data.</li><li><b>Reading “σ(z) = 0.9 means the model is 90% sure”</b> without calibration. The sigmoid gives a number in $(0,1)$, but calibration is a property of training (BCE encourages it, overfitting spoils it).</li></ol>
+    <ol class="flist"><li><b>Sigmoids in the hidden layers of a deep network</b> — vanishing gradients and shifted (non-centred) activations. Use ReLU, GELU, SiLU; keep the sigmoid for the output or for gates.</li><li><b>Sigmoids instead of softmax for mutually exclusive classes.</b> For $K&gt;2$ mutually exclusive classes you need <a href="../softmax/">softmax</a>; a sigmoid on every output means multi-label, where the classes are independent.</li><li><b>A double sigmoid</b>: the model already returns a probability and the loss applies σ again (for example, <code>BCEWithLogitsLoss</code> on top of <code>sigmoid</code>). Training runs, but the “probabilities” are squeezed into $(0.5,\,0.73)$, the loss cannot get small, and the gradients are distorted.</li><li><b>The “default” 0.5 threshold.</b> For calibrated probabilities it minimizes the error rate, but only when both kinds of error cost the same. With unequal costs, or for F1 or recall on imbalanced classes, the best threshold is different — tune it for your metric on validation data.</li><li><b>Reading “σ(z) = 0.9 means the model is 90% sure”</b> without calibration. The sigmoid gives a number in $(0,1)$, but calibration is a property of training (BCE encourages it, overfitting spoils it).</li></ol>
 
     <h2 id="links">Links to other formulas</h2>
-    <ul class="flist"><li><a href="../tanh/">tanh</a>: $\tanh x=2\sigma(2x)-1$ — a centred sigmoid with maximum slope 1.</li><li><a href="../softmax/">Softmax</a>: for two classes $\operatorname{softmax}(z_1,z_2)_1=\sigma(z_1-z_2)$.</li><li><a href="../bce/">BCE</a>: paired with the sigmoid it gives the gradient $\hat y-y$ — without the factor $\sigma'$, so no saturation while the model is wrong.</li><li><a href="../silu/">SiLU / Swish</a>: $x\,\sigma(x)$ — the sigmoid as a “soft gate” for the input itself.</li><li><a href="../focal/">Focal Loss</a>: usually computed from $p_t=\sigma(z)$ for the correct class.</li></ul>
+    <ul class="flist"><li><a href="../tanh/">tanh</a>: $\tanh x=2\sigma(2x)-1$ — a centred sigmoid with maximum slope 1.</li><li><a href="../softmax/">Softmax</a>: for two classes $\operatorname{softmax}(z_1,z_2)_1=\sigma(z_1-z_2)$.</li><li><a href="../bce/">BCE</a>: paired with the sigmoid it gives the gradient $\hat y-y$ with respect to the logit — without the factor $\sigma'$, so no saturation while the model is wrong.</li><li><a href="../silu/">SiLU / Swish</a>: $x\,\sigma(x)$ — the sigmoid as a “soft gate” for the input itself.</li><li><a href="../focal/">Focal Loss</a>: usually computed from the probability of the correct class $p_t$: $\sigma(z)$ for $y=1$ and $1-\sigma(z)=\sigma(-z)$ for $y=0$.</li></ul>
 
     <h2 id="summary">Summary</h2>
     <div class="callout key"><p>1) $\sigma(x)=1/(1+e^{-x})$ maps $\mathbb R$ to $(0,1)$, passes through $(0,\,0.5)$ and is symmetric: $\sigma(-x)=1-\sigma(x)$. 2) $\sigma'=\sigma(1-\sigma)\le\tfrac14$: backprop is cheap, but the gradient dies on the tails. 3) The sigmoid is the inverse of the logit: logistic regression models the log-odds with a linear function. 4) In many dimensions it is a fold along the hyperplane $w^\top x+b=0$. 5) In code — stable forms and losses on logits.</p></div>
