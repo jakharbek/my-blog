@@ -3,7 +3,8 @@
 
 Run from the repository root:  python3 tools/build.py
 The output is committed, so GitHub Pages needs no build step.
-Article texts live in tools/content_sigmoid.py, materials in tools/content_formulas.py.
+Article texts live in tools/content_sigmoid.py, materials in tools/content_formulas.py
+and tools/content_mae_mse.py (MAE and MSE by example).
 """
 import html
 import importlib.util
@@ -12,6 +13,7 @@ import sys
 from pathlib import Path
 
 import content_formulas as formulas
+import content_mae_mse as mm
 from content_sigmoid import ARTICLE, TABLE_ROWS
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -143,6 +145,12 @@ POSTS = [
                 "en": "New material: a cheat sheet of neural network formulas",
                 "uz": "Yangi material: neyron tarmoq formulalari qo‘llanmasi"},
          excerpt={l: formulas.PAGE[l]["excerpt"] for l in LANGS}),
+    dict(slug="mae-mse-examples-news", topic="ml", date=mm.DATE,
+         url=f"materials/{mm.SLUG}/",
+         title={"ru": "Новый материал: MAE и MSE на 20 простых примерах",
+                "en": "New material: MAE and MSE in 20 simple examples",
+                "uz": "Yangi material: MAE va MSE 20 ta oddiy misolda"},
+         excerpt={l: mm.PAGE[l]["excerpt"] for l in LANGS}),
     dict(slug="boosting-workbook-generator", topic="ml", date="2026-11-01",
          url=COURSE_URL + "extra/04_trainer/index.html",
          title={"ru": "В курсе — генератор рабочих тетрадей по бустингу",
@@ -157,6 +165,7 @@ POST = {p["slug"]: p for p in POSTS}
 # Materials: long-lived reference pages under <lang>/materials/<slug>/, newest first.
 MATERIALS = [
     dict(slug="ml-formulas", topic="ml", date="2026-10-28", module=formulas),
+    dict(slug=mm.SLUG, topic="ml", date=mm.DATE, module=mm),
 ]
 
 # Research cards: [kicker, title, text] and an optional link as a fourth item.
@@ -658,6 +667,13 @@ def materials_nav(lang, rel, current):
     return [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navMaterials"], f"{rel}{lang}/materials/", current), (s["navAbout"], f"{rel}{lang}/about/", False)]
 
 
+def material_count(m, lang):
+    mod = m["module"]
+    if hasattr(mod, "count_label"):
+        return mod.count_label(lang)
+    return f"{sum(1 for g in mod.GROUPS for c in g['cards'] if c['tex'])} {mod.PAGE[lang]['count']}"
+
+
 def materials_index(lang):
     s = SITE[lang]
     rel = "../../"
@@ -665,7 +681,7 @@ def materials_index(lang):
     rows = "\n".join(
         f"""      <a class="row" href="{m['slug']}/">
         <span class="l"><span class="kicker">{topic_name[m['topic']]}</span><span class="rt">{m['module'].PAGE[lang]['title']}</span><span class="ex">{m['module'].PAGE[lang]['excerpt']}</span></span>
-        <span class="r"><time datetime="{m['date']}">{fmt_date(m['date'], lang)}</time><span>{sum(1 for g in m['module'].GROUPS for c in g['cards'] if c['tex'])} {m['module'].PAGE[lang]['count']}</span></span>
+        <span class="r"><time datetime="{m['date']}">{fmt_date(m['date'], lang)}</time><span>{material_count(m, lang)}</span></span>
       </a>""" for m in sorted(MATERIALS, key=lambda m: m["date"], reverse=True))
     return head(lang, f"{s['navMaterials']} — {s['brand']}", s["materialsDek"], rel, "materials/") + header(lang, rel, "materials/", materials_nav(lang, rel, True)) + f"""
 <main>
@@ -773,6 +789,208 @@ def material_formulas(lang):
 </main>
 
 """ + footer(lang, rel) + f'<script src="{rel}assets/js/materials.js" defer></script>\n</body>\n</html>\n'
+
+
+
+# ---------- material: MAE and MSE by example (tools/content_mae_mse.py) ----------
+def mm_vec(vals, lang):
+    """(3;\\ 5;\\ 8) in ru/uz, (3,\\ 5,\\ 8) in en."""
+    sep = ",\\ " if lang == "en" else ";\\ "
+    return "(" + sep.join(mm.fmt(mm.F(v), lang) for v in vals) + ")"
+
+
+def mm_num(x, lang):
+    return mm.fmt(x, lang)
+
+
+def mm_paren(x, lang):
+    """A number inside an expression: negatives go in parentheses."""
+    t = mm.fmt(x, lang)
+    return f"({t})" if x < 0 else t
+
+
+def mm_solution(sol, lang, label=""):
+    """Steps 1–6 for one model: per-object lines, sums, MAE and MSE, and a summary table."""
+    pg = mm.PAGE[lang]
+    n = sol["n"]
+    sub = (lambda i: f"_{{{i}}}")
+    abs_lines, sq_lines = [], []
+    for i in range(n):
+        y, p, e = sol["y"][i], sol["p"][i], sol["e"][i]
+        diff = f"{mm.fmt(y, lang)}-{mm_paren(p, lang)}"
+        abs_lines.append(f"\\lvert e{sub(i + 1)}\\rvert &= \\lvert {diff}\\rvert = \\lvert {mm.fmt(e, lang)}\\rvert = {mm.fmt(abs(e), lang)}")
+        sq_lines.append(f"e{sub(i + 1)}^2 &= ({diff})^2 = {mm_paren(e, lang)}^2 = {mm.fmt(e * e, lang)}")
+    def mean_line(name, total):
+        rel, v = mm.value(total / n, lang)
+        if n == 1:
+            return f"\\mathrm{{{name}}} = \\frac{{1}}{{1}}\\cdot {mm.fmt(total, lang)} = {v}"
+        return f"\\mathrm{{{name}}} = \\frac{{1}}{{{n}}}\\cdot {mm.fmt(total, lang)} = \\frac{{{mm.fmt(total, lang)}}}{{{n}}} {rel} {v}"
+    sum_abs = " + ".join(mm.fmt(a, lang) for a in sol["abs"]) + (f" = {mm.fmt(sol['sum_abs'], lang)}" if n > 1 else "")
+    sum_sq = " + ".join(mm.fmt(q, lang) for q in sol["sq"]) + (f" = {mm.fmt(sol['sum_sq'], lang)}" if n > 1 else "")
+    al = lambda lines: tex("\\begin{aligned}" + "\\\\".join(lines) + "\\end{aligned}")
+    cell = lambda x: mm.fmt(x, lang, "html")
+    rows = "".join(f"<tr><td class=num>{i + 1}</td><td class=num>{cell(sol['y'][i])}</td><td class=num>{cell(sol['p'][i])}</td>"
+                   f"<td class=num>{cell(sol['e'][i])}</td><td class=num>{cell(sol['abs'][i])}</td><td class=num>{cell(sol['sq'][i])}</td></tr>" for i in range(n))
+    mae_rel, mae_v = mm.value(sol["mae"], lang, "html")
+    mse_rel, mse_v = mm.value(sol["mse"], lang, "html")
+    rows += (f'<tr class="tot"><td colspan=4>{pg["sum"]}</td><td class=num>{cell(sol["sum_abs"])}</td><td class=num>{cell(sol["sum_sq"])}</td></tr>'
+             f'<tr class="tot"><td colspan=4>{pg["mean"]} (÷ {n})</td><td class=num>{"" if mae_rel == "=" else "≈ "}{mae_v}</td><td class=num>{"" if mse_rel == "=" else "≈ "}{mse_v}</td></tr>')
+    th = "".join(f"<th class=num>{h}</th>" for h in pg["table_h"])
+    st = lambda key: pg[key].replace("{n}", str(n))
+    return (f'<p class="ex-step"><b>1.</b> {st("step1")}</p><div class="eqd">{al(abs_lines)}</div>'
+            f'<p class="ex-step"><b>2.</b> {st("step2")}</p><div class="eqd">{tex(chr(92) + "sum_{i=1}^{" + str(n) + "}" + chr(92) + "lvert e_i" + chr(92) + "rvert = " + sum_abs)}</div>'
+            f'<p class="ex-step"><b>3.</b> {st("step3")}</p><div class="eqd">{tex(mean_line("MAE", sol["sum_abs"]))}</div>'
+            f'<p class="ex-step"><b>4.</b> {st("step4")}</p><div class="eqd">{al(sq_lines)}</div>'
+            f'<p class="ex-step"><b>5.</b> {st("step5")}</p><div class="eqd">{tex(chr(92) + "sum_{i=1}^{" + str(n) + "}e_i^2 = " + sum_sq)}</div>'
+            f'<p class="ex-step"><b>6.</b> {st("step6")}</p><div class="eqd">{tex(mean_line("MSE", sol["sum_sq"]))}</div>'
+            f'<div class="table-wrap"><table class="data ex-table"><thead><tr>{th}</tr></thead><tbody>{rows}</tbody></table></div>')
+
+
+def mm_answer(sol, lang):
+    r1, v1 = mm.value(sol["mae"], lang)
+    r2, v2 = mm.value(sol["mse"], lang)
+    return f"$\\mathrm{{MAE}} {r1} {v1}$, &nbsp; $\\mathrm{{MSE}} {r2} {v2}$"
+
+
+def rv_aligned(lines):
+    return "\\begin{aligned}" + "\\\\".join(lines) + "\\end{aligned}"
+
+
+def mm_example(k, ex, lang):
+    pg = mm.PAGE[lang]
+    stars = "★" * ex["stars"] + "☆" * (3 - ex["stars"])
+    head = (f'<header class="ex-head"><span class="ex-n">{pg["example"]} {k}</span>'
+            f'<span class="ex-stars" title="{pg["stars"].format(k=ex["stars"])}" aria-label="{pg["stars"].format(k=ex["stars"])}">{stars}</span></header>'
+            f'<h3>{ex["title"][lang]}</h3>')
+    if ex.get("kind") == "reverse":
+        rt = mm.REVERSE_TEXT[lang]
+        a = mm.reverse_answers()
+        y1, y2, p1 = (mm.F(v) for v in (*mm.REVERSE["y"], mm.REVERSE["p1"]))
+        task = f'<p class="ex-task">{rt["task"]}</p>'
+        d1 = abs(y1 - p1)
+        rest = mm.F(mm.REVERSE["mae"]) * 2 - d1
+        body = (f'<p class="ex-step"><b>1.</b> {rt["s1"]}</p><div class="eqd">{tex(f"{chr(92)}frac{{1}}{{2}}{chr(92)}bigl(|{mm_num(y1, lang)}-{mm_num(p1, lang)}| + |{mm_num(y2, lang)}-{chr(92)}hat y_2|{chr(92)}bigr) = 1")}</div>'
+                f'<p class="ex-step"><b>2.</b> {rt["s2"]}</p><div class="eqd">{tex(rv_aligned([f"{mm_num(d1, lang)} + |{mm_num(y2, lang)}-{chr(92)}hat y_2| &= 2", f"|{mm_num(y2, lang)}-{chr(92)}hat y_2| &= {mm_num(rest, lang)}"]))}</div>'
+                f'<p class="ex-step"><b>3.</b> {rt["s3"]}</p><div class="eqd">{tex(rv_aligned([f"{mm_num(y2, lang)}-{chr(92)}hat y_2 = {mm_num(rest, lang)} &{chr(92)}Rightarrow {chr(92)}hat y_2 = {mm_num(a[0], lang)}", f"{mm_num(y2, lang)}-{chr(92)}hat y_2 = -{mm_num(rest, lang)} &{chr(92)}Rightarrow {chr(92)}hat y_2 = {mm_num(a[1], lang)}"]))}</div>')
+        mses = []
+        for v in a:
+            sol = mm.solve(mm.REVERSE["y"], [mm.REVERSE["p1"], str(v)])
+            assert sol["mae"] == mm.F(mm.REVERSE["mae"])
+            mses.append((v, sol))
+        assert mses[0][1]["mse"] == mses[1][1]["mse"]
+        lines = [f"{chr(92)}hat y_2 = {mm_num(v, lang)}:{chr(92)}quad {chr(92)}mathrm{{MSE}} = {chr(92)}frac{{{mm_num(sol['sq'][0], lang)} + {mm_num(sol['sq'][1], lang)}}}{{2}} = {mm.value(sol['mse'], lang)[1]}" for v, sol in mses]
+        body += f'<p class="ex-step"><b>4.</b> {rt["s4"]}</p><div class="eqd">{tex(chr(92) + "begin{aligned}" + (chr(92) * 2).join(lines) + chr(92) + "end{aligned}")}</div>'
+        answer = rt["ans"]
+    else:
+        sols = [(label, mm.solve(ex["y"], p)) for label, p in ex["preds"]]
+        if len(sols) == 1:
+            task = f'<p class="ex-task">$y = {mm_vec(ex["y"], lang)}$, &nbsp; $\\hat y = {mm_vec(ex["preds"][0][1], lang)}$. {pg["task"]}</p>'
+            body = mm_solution(sols[0][1], lang)
+            answer = mm_answer(sols[0][1], lang)
+        else:
+            preds = "; ".join(f'{pg["model"]} {label}: $\\hat y = {mm_vec(p, lang)}$' for label, p in ex["preds"])
+            task = f'<p class="ex-task">$y = {mm_vec(ex["y"], lang)}$. {preds}. {pg["task"]}</p>'
+            parts = [f'<h4 class="ex-model">{pg["model"]} {label}</h4>' + mm_solution(sol, lang) for label, sol in sols]
+            best_mae = min(s["mae"] for _, s in sols)
+            best_mse = min(s["mse"] for _, s in sols)
+            cmp_rows = ""
+            for label, sol in sols:
+                r1, v1 = mm.value(sol["mae"], lang, "html")
+                r2, v2 = mm.value(sol["mse"], lang, "html")
+                c1 = ("≈ " if r1 != "=" else "") + v1
+                c2 = ("≈ " if r2 != "=" else "") + v2
+                cmp_rows += (f"<tr><td>{pg['model']} {label}</td><td class=num>{f'<b>{c1}</b>' if sol['mae'] == best_mae else c1}</td>"
+                             f"<td class=num>{f'<b>{c2}</b>' if sol['mse'] == best_mse else c2}</td></tr>")
+            parts.append(f'<h4 class="ex-model">{pg["compare"]}</h4><div class="table-wrap"><table class="data ex-cmp"><thead><tr><th></th><th class=num>MAE</th><th class=num>MSE</th></tr></thead><tbody>{cmp_rows}</tbody></table></div>')
+            body = "".join(parts)
+            answer = "; ".join(f'{pg["model"]} {label}: {mm_answer(sol, lang)}' for label, sol in sols)
+    hint = "" if ex.get("open") else f'<p class="ex-hint">{pg["try_first"]}</p>'
+    return (f'<article class="ex" id="ex-{k}">{head}{task}{hint}'
+            f'<details class="ex-sol"{" open" if ex.get("open") else ""}><summary>{pg["solution"]}</summary><div class="ex-body">'
+            f'{body}<p class="ex-answer"><b>{pg["answer"]}:</b> {answer}</p>'
+            f'<div class="callout key"><b>{pg["idea"]}</b><p>{ex["idea"][lang]}</p></div></div></details></article>')
+
+
+def mm_calc(lang):
+    c, pg = mm.CALC[lang], mm.PAGE[lang]
+    i18n = {k: pg[k] for k in ("step1", "step2", "step3", "step4", "step5", "step6", "sum", "mean", "answer", "table_h")}
+    i18n.update({k: c[k] for k in ("err_count", "err_num", "err_empty", "err_many")})
+    # наборы чисел — из тех же примеров 1, 12 и 9; запись чисел — как принято в языке страницы
+    sep = ", " if lang == "en" else "; "
+    vec = lambda vals: sep.join(mm.fmt(mm.F(v), lang, "html") for v in vals)
+    picks = [(c["board"], mm.EXAMPLES[0]), (c["outlier"], mm.EXAMPLES[11]), (c["decimals"], mm.EXAMPLES[8])]
+    presets = [(name, vec(ex["y"]), vec(ex["preds"][0][1])) for name, ex in picks]
+    btns = "".join(f'<button type="button" class="chip" data-y="{html.escape(y)}" data-p="{html.escape(p)}">{name}</button>' for name, y, p in presets)
+    return (f'<p>{c["lead"]}</p>'
+            f'<div class="calc" data-lang="{lang}" data-i18n="{attr_json(i18n)}">'
+            f'<label class="calc-row"><span>{c["y"]}</span><input type="text" inputmode="decimal" id="calc-y" value="{html.escape(presets[0][1])}" autocomplete="off" spellcheck="false"></label>'
+            f'<label class="calc-row"><span>{c["p"]}</span><input type="text" inputmode="decimal" id="calc-p" value="{html.escape(presets[0][2])}" autocomplete="off" spellcheck="false"></label>'
+            f'<div class="calc-bar"><button type="button" class="b1" id="calc-go">{c["go"]}</button><span class="calc-presets"><span>{c["presets"]}</span>{btns}</span></div>'
+            f'<div class="calc-err" role="alert" hidden></div><div class="calc-out" aria-live="polite"></div>'
+            f'<noscript><p>{c["noscript"]}</p></noscript></div>')
+
+
+def material_mae_mse(lang):
+    s, pg, tt = SITE[lang], mm.PAGE[lang], mm.SECTION_TITLES[lang]
+    rel = "../../../"
+    page = f"materials/{mm.SLUG}/"
+    sections = [("intro", tt["intro"], render_blocks(mm.INTRO[lang], lang))]
+    k = 0
+    for pid, title, lead in mm.PARTS:
+        items = []
+        for ex in mm.EXAMPLES:
+            if ex["part"] == pid:
+                k += 1
+                items.append(mm_example(k, ex, lang))
+        sections.append((pid, title[lang], f"    <p>{lead[lang]}</p>\n    " + "\n    ".join(items)))
+    assert k == 20
+    sections.append(("calc", tt["calc"], "    " + mm_calc(lang)))
+    sections.append(("mistakes", tt["mistakes"], render_blocks(mm.MISTAKES[lang], lang)))
+    sm = mm.SUMMARY[lang]
+    sections.append(("summary", tt["summary"], render_blocks([("table", sm["heads"], sm["rows"]), ("ul", sm["bullets"])], lang)))
+    sections.append(("quiz", tt["quiz"], render_blocks([("quiz", mm.QUIZ[lang])], lang)))
+    toc = "\n".join(f'      <a href="#{sid}"><span class="n">{i + 1}</span>{title}</a>' for i, (sid, title, _) in enumerate(sections))
+    body = "\n\n".join(f'    <h2 id="{sid}">{title}</h2>\n{content}' for sid, title, content in sections)
+    nav = materials_nav(lang, rel, False)
+    extra = (f'  <link rel="stylesheet" href="{KATEX}/katex.min.css">\n'
+             f'  <script defer src="{KATEX}/katex.min.js"></script>\n'
+             f'  <script defer src="{KATEX}/contrib/auto-render.min.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/materials.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/practice.js"></script>\n')
+    minutes = 35
+    return head(lang, f"{pg['title']} — {s['brand']}", html.escape(pg["description"], quote=True), rel, page, "article", extra) + header(lang, rel, page, nav) + f"""<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page practice">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">{s['navMaterials']}</a> · {pg['kicker']}</span>
+  <h1>{pg['title']}</h1>
+  <p class="dek">{pg['dek']}</p>
+  <div class="author">
+    <img src="{rel}assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="{mm.DATE}">{fmt_date(mm.DATE, lang)}</time> · {minutes} {FX_UI[lang]['min']}</span></span>
+  </div>
+  <div class="mat-stats"><span><b>20</b> {pg['count']}</span><span><b>{sum(1 for e in mm.EXAMPLES if e['stars'] == 1)}</b> ★☆☆</span><span><b>{sum(1 for e in mm.EXAMPLES if e['stars'] == 2)}</b> ★★☆</span><span><b>{sum(1 for e in mm.EXAMPLES if e['stars'] == 3)}</b> ★★★</span></div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="{FX_UI[lang]['toc']}">
+    <span>{FX_UI[lang]['toc']}</span>
+    <nav>
+{toc}
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">{tex(mm.HERO)}</div>
+    <div class="ex-tools"><button type="button" class="b2" data-ex-expand="1">{pg['expand']}</button><button type="button" class="b2" data-ex-expand="0">{pg['collapse']}</button></div>
+
+{body}
+    <p class="mat-back"><a class="ul" href="../">← {s['navMaterials']}</a></p>
+  </article>
+</div>
+</main>
+
+""" + footer(lang, rel) + "</body>\n</html>\n"
 
 
 
@@ -988,7 +1206,8 @@ def main():
     for fid in FORMULA_IDS:
         build_formula(fid)
     for lang in LANGS:
-        pages = {"": home, "sigmoid": article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas}
+        pages = {"": home, "sigmoid": article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
+                 f"materials/{mm.SLUG}": material_mae_mse}
         for sub, render in pages.items():
             (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)
             (ROOT / lang / sub / "index.html").write_text(render(lang), encoding="utf-8")
