@@ -143,6 +143,14 @@ POSTS = [
                 "en": "New material: a cheat sheet of neural network formulas",
                 "uz": "Yangi material: neyron tarmoq formulalari qo‘llanmasi"},
          excerpt={l: formulas.PAGE[l]["excerpt"] for l in LANGS}),
+    dict(slug="boosting-workbook-generator", topic="ml", date="2026-11-01",
+         url=COURSE_URL + "extra/04_trainer/index.html",
+         title={"ru": "В курсе — генератор рабочих тетрадей по бустингу",
+                "en": "New in the course: a workbook generator for gradient boosting",
+                "uz": "Kursda yangilik: busting bo‘yicha ishchi daftarlar generatori"},
+         excerpt={"ru": "Excel-тренажёр «бустинг своими руками»: ученик сам считает каждый шаг, а рядом с каждым числом появляется ✓ или ✗. Данные — случайные по уровню сложности, по сюжету от ИИ-ассистента или свои; любое число шагов и learning rate.",
+                  "en": "An Excel trainer for «boosting by hand»: the student computes every step, and a ✓ or ✗ appears next to each number. Random data by difficulty level, a scenario from the AI assistant or your own data; any number of steps and any learning rate.",
+                  "uz": "«Bustingni qo‘lda hisoblash» Excel-trenajyori: o‘quvchi har bir qadamni o‘zi hisoblaydi, har bir son yonida ✓ yoki ✗ paydo bo‘ladi. Ma’lumotlar — qiyinlik darajasi bo‘yicha tasodifiy, AI-yordamchi taklif qilgan syujet asosida yoki o‘zingizniki; qadamlar soni va learning rate istalgancha."}),
 ]
 POST = {p["slug"]: p for p in POSTS}
 
