@@ -145,6 +145,9 @@ POSTS = [
                 "en": "New material: a cheat sheet of neural network formulas",
                 "uz": "Yangi material: neyron tarmoq formulalari qo‘llanmasi"},
          excerpt={l: formulas.PAGE[l]["excerpt"] for l in LANGS}),
+    dict(slug="mae-mse-examples-update", topic="ml", date=mm.UPDATED,
+         url=f"materials/{mm.SLUG}/#backprop",
+         title=mm.UPDATE_NEWS["title"], excerpt=mm.UPDATE_NEWS["excerpt"]),
     dict(slug="mae-mse-examples-news", topic="ml", date=mm.DATE,
          url=f"materials/{mm.SLUG}/",
          title={"ru": "Новый материал: MAE и MSE на 20 простых примерах",
@@ -809,8 +812,8 @@ def mm_paren(x, lang):
     return f"({t})" if x < 0 else t
 
 
-def mm_solution(sol, lang, label=""):
-    """Steps 1–6 for one model: per-object lines, sums, MAE and MSE, and a summary table."""
+def mm_solution(sol, lang, k=None, grad_open=False):
+    """Steps 1–6 for one model: per-object lines, sums, MAE and MSE, a summary table, then the derivatives."""
     pg = mm.PAGE[lang]
     n = sol["n"]
     sub = (lambda i: f"_{{{i}}}")
@@ -843,7 +846,110 @@ def mm_solution(sol, lang, label=""):
             f'<p class="ex-step"><b>4.</b> {st("step4")}</p><div class="eqd">{al(sq_lines)}</div>'
             f'<p class="ex-step"><b>5.</b> {st("step5")}</p><div class="eqd">{tex(chr(92) + "sum_{i=1}^{" + str(n) + "}e_i^2 = " + sum_sq)}</div>'
             f'<p class="ex-step"><b>6.</b> {st("step6")}</p><div class="eqd">{tex(mean_line("MSE", sol["sum_sq"]))}</div>'
-            f'<div class="table-wrap"><table class="data ex-table"><thead><tr>{th}</tr></thead><tbody>{rows}</tbody></table></div>')
+            f'<div class="table-wrap"><table class="data ex-table"><thead><tr>{th}</tr></thead><tbody>{rows}</tbody></table></div>'
+            + (mm_grad(sol, lang, k, grad_open) if k is not None else ""))
+
+
+def mm_grad_lines(sol, lang, kind):
+    """Строки g_i для MAE (kind="mae") или MSE (kind="mse")."""
+    n, lines = sol["n"], []
+    for i in range(n):
+        y, p = sol["y"][i], sol["p"][i]
+        diff = f"{mm.fmt(p, lang)}-{mm_paren(y, lang)}"
+        g = sol["g_" + kind][i]
+        top = f"\\operatorname{{sign}}({diff})" if kind == "mae" else f"2\\cdot({diff})"
+        rel, val = mm.value(g, lang)
+        lines.append(f"g_{{{i + 1}}} &= \\frac{{{top}}}{{{n}}} {rel} {val}")
+    return "\\begin{aligned}" + "\\\\".join(lines) + "\\end{aligned}"
+
+
+def mm_grad(sol, lang, k, open_=False):
+    """Блок «Производные для обратного распространения»: шаги 7–8, векторы градиентов и вывод.
+    k > 0 — номер примера (последняя модель примера получает пояснение GRAD_IDEA), k < 0 — без пояснения."""
+    pg = mm.PAGE[lang]
+    r1, v1 = mm.vec(sol["g_mae"], lang)
+    r2, v2 = mm.vec(sol["g_mse"], lang)
+    if sol["n"] <= 3:
+        vec_tex = tex(f"\\begin{{gathered}}\\nabla\\mathrm{{MAE}} {r1} {v1}\\\\[4pt]\\nabla\\mathrm{{MSE}} {r2} {v2}\\end{{gathered}}")
+    else:  # длинные векторы — столбцами, чтобы помещались на телефоне
+        col = lambda g: "\\begin{pmatrix}" + "\\\\".join(mm.fmt(v, lang) for v in g) + "\\end{pmatrix}"
+        vec_tex = tex(f"\\begin{{gathered}}\\nabla\\mathrm{{MAE}} {r1} {col(sol['g_mae'])}\\\\[8pt]\\nabla\\mathrm{{MSE}} {r2} {col(sol['g_mse'])}\\end{{gathered}}")
+    idea = mm.GRAD_IDEA.get(k) if k and k > 0 else None
+    extra = f'<div class="callout intuition"><b>{pg["grad_idea"]}</b><p>{idea[lang]}</p></div>' if idea else ""
+    return (f'<details class="deep ex-grad"{" open" if open_ else ""}><summary>{pg["grad"]}</summary><div class="deep-body">'
+            f'<p class="ex-step"><b>7.</b> {pg["step7"]}</p><div class="eqd">{tex(mm_grad_lines(sol, lang, "mae"))}</div>'
+            f'<p class="ex-step"><b>8.</b> {pg["step8"]}</p><div class="eqd">{tex(mm_grad_lines(sol, lang, "mse"))}</div>'
+            f'<p class="ex-step">{pg["grad_vec"]}</p><div class="eqd">{vec_tex}</div>'
+            f'<p class="ex-step">{mm.grad_auto(sol, lang)}</p>{extra}</div></details>')
+
+
+def mm_backprop(lang):
+    """Раздел «Производные для обратного распространения» — числа из примера с доски."""
+    t = mm.BACKPROP_TEXT[lang]
+    bp = mm.backprop_numbers()
+    sol = bp["sol"]
+    ex = mm.EXAMPLES[0]
+    eta = mm.fmt(mm.ETA_PRED, lang)
+    gcell = lambda g: ("" if mm.exact_decimal(g) is not None else "≈ ") + mm.fmt(g, lang, "html")
+    rows = [[str(i + 1), mm.fmt(sol["y"][i], lang, "html"), mm.fmt(sol["p"][i], lang, "html"),
+             gcell(sol["g_mae"][i]), gcell(sol["g_mse"][i])] for i in range(sol["n"])]
+    step = lambda name, newp, g: "\\begin{aligned}" + "\\\\".join(
+        f"\\hat y_{{{i + 1}}} &\\leftarrow {mm.fmt(sol['p'][i], lang)} - {eta}\\cdot {mm_paren(g[i], lang) if mm.exact_decimal(g[i]) is not None else ('(' + mm.frac_tex(g[i], lang).split(chr(92) + 'approx')[0].strip().replace(chr(92) + 'frac', chr(92) + 'tfrac') + ')')} = {mm.fmt(newp[i], lang)}"
+        for i in range(sol["n"])) + "\\end{aligned}"
+    fmtv = lambda x: ("" if mm.exact_decimal(x) is not None else "≈ ") + mm.fmt(x, lang, "html")
+    blocks = [
+        ("p", t["lead"]),
+        ("symbols", [("g_i", t["g_sym"].split(" — ", 1)[1] if " — " in t["g_sym"] else t["g_sym"])]),
+        ("h3", t["mse_h"]),
+        ("eq", r"\begin{aligned}\frac{\partial\,\mathrm{MSE}}{\partial \hat y_i} &= \frac{1}{n}\cdot 2\,(y_i-\hat y_i)\cdot(-1)\\ &= \frac{2}{n}\,(\hat y_i - y_i)\end{aligned}"),
+        ("p", t["mse_p"]),
+        ("h3", t["mae_h"]),
+        ("eq", r"\frac{\partial\,\mathrm{MAE}}{\partial \hat y_i} = \frac{1}{n}\operatorname{sign}(\hat y_i - y_i)"),
+        ("eq", r"\operatorname{sign}(x)=\begin{cases}\phantom{-}1, & x>0\\\phantom{-}0, & x=0\\-1, & x<0\end{cases}"),
+        ("p", t["mae_p"]),
+        ("callout", "key", t["sign_h"], t["sign_p"]),
+        ("h3", t["board_h"]),
+        ("p", mm.fill(t["board_p"], y=mm_vec(ex["y"], lang), p=mm_vec(ex["preds"][0][1], lang))),
+        ("table", t["heads"], rows, {"num": [0, 1, 2, 3, 4]}),
+        ("p", mm.fill(t["step_p"], eta=eta)),
+        ("eq", "\\text{MSE:}\\quad " + step("MSE", bp["p_mse"], sol["g_mse"])),
+        ("eq", "\\text{MAE:}\\quad " + step("MAE", bp["p_mae"], sol["g_mae"])),
+        ("p", mm.fill(t["step_after"], mse0=fmtv(sol["mse"]), mse1=fmtv(bp["mse_after"]), mae0=fmtv(sol["mae"]), mae1=fmtv(bp["mae_after"]))),
+        ("callout", "note", None, t["note"]),
+    ]
+    return render_blocks(blocks, lang)
+
+
+def mm_chain(lang):
+    """Раздел «От прогноза к весам»: нейрон ŷ = w·x + b, градиенты по w и b и шаг спуска."""
+    t = mm.CHAIN_TEXT[lang]
+    nn = mm.neuron_numbers()
+    v = lambda vals: mm.vec(vals, lang)[1]
+    f = lambda x: mm.frac_tex(x, lang)
+    eta = mm.fmt(nn["eta"], lang)
+    tf = lambda src: src.replace(chr(92) + "frac", chr(92) + "tfrac")  # компактные дроби в длинных строках
+    # длинная сумма: последнее слагаемое — на новой строке выравнивания
+    wrap2 = lambda terms: " + ".join(terms.split(" + ")[:-1]) + chr(92) * 2 + " &" + chr(92) + "quad + " + terms.split(" + ")[-1]
+    blocks = [("p", mm.fill(t["lead"], x=v(nn["x"]), y=v(nn["y"]), w=mm.fmt(nn["w"], lang), b=mm.fmt(nn["b"], lang), p=v(nn["p"]))),
+              ("p", t["rule"]),
+              ("eq", r"\begin{aligned}\frac{\partial L}{\partial w} &= \sum_{i=1}^{n} \frac{\partial L}{\partial \hat y_i}\cdot\frac{\partial \hat y_i}{\partial w} = \sum_{i=1}^{n} g_i\,x_i\\ \frac{\partial L}{\partial b} &= \sum_{i=1}^{n} g_i\end{aligned}")]
+    for loss, name in (("mse", "MSE"), ("mae", "MAE")):
+        d = nn[loss]
+        terms_w = " + ".join(f"{mm_paren(gi, lang) if mm.exact_decimal(gi) is not None else '(' + f(gi).split(chr(92) + 'approx')[0].strip() + ')'}\\cdot {mm.fmt(xi, lang)}" for gi, xi in zip(d["g"], nn["x"]))
+        terms_b = " + ".join(mm_paren(gi, lang) if mm.exact_decimal(gi) is not None else '(' + f(gi).split(chr(92) + 'approx')[0].strip() + ')' for gi in d["g"])
+        rv = lambda x: ("" if mm.exact_decimal(x) is not None else "≈ ") + mm.fmt(x, lang, "html")
+        blocks += [("h3", t[loss + "_h"]),
+                   ("p", t["g_line"]),
+                   ("eq", f"\\nabla_{{\\hat y}}\\mathrm{{{name}}} {mm.vec(d['g'], lang)[0]} {v(d['g'])}"),
+                   ("p", t["w_line"]),
+                   ("eq", f"\\begin{{aligned}}\\frac{{\\partial\\,\\mathrm{{{name}}}}}{{\\partial w}} &= {tf(wrap2(terms_w))} = {f(d['dw'])}\\\\[6pt]"
+                          f"\\frac{{\\partial\\,\\mathrm{{{name}}}}}{{\\partial b}} &= {tf(terms_b)}\\\\ &= {f(d['db'])}\\end{{aligned}}"),
+                   ("p", mm.fill(t["step_line"], eta=eta)),
+                   ("eq", f"\\begin{{aligned}}w &\\leftarrow {mm.fmt(nn['w'], lang)} - {eta}\\cdot {mm_paren(d['dw'], lang)} = {f(d['w2'])}\\\\"
+                          f"b &\\leftarrow {mm.fmt(nn['b'], lang)} - {eta}\\cdot ({tf(f(d['db']).split(chr(92) + 'approx')[0].strip())}) = {tf(f(d['b2']))}\\end{{aligned}}"),
+                   ("p", mm.fill(t["after"], name=name, before=rv(d["before"]), after=rv(d["after"])))]
+    blocks.append(("callout", "key", None, mm.fill(t["compare"], dw_mse=mm.fmt(nn["mse"]["dw"], lang, "html"), dw_mae=mm.fmt(nn["mae"]["dw"], lang, "html"))))
+    return render_blocks(blocks, lang)
 
 
 def mm_answer(sol, lang):
@@ -885,12 +991,13 @@ def mm_example(k, ex, lang):
         sols = [(label, mm.solve(ex["y"], p)) for label, p in ex["preds"]]
         if len(sols) == 1:
             task = f'<p class="ex-task">$y = {mm_vec(ex["y"], lang)}$, &nbsp; $\\hat y = {mm_vec(ex["preds"][0][1], lang)}$. {pg["task"]}</p>'
-            body = mm_solution(sols[0][1], lang)
+            body = mm_solution(sols[0][1], lang, k, grad_open=k == 1)
             answer = mm_answer(sols[0][1], lang)
         else:
             preds = "; ".join(f'{pg["model"]} {label}: $\\hat y = {mm_vec(p, lang)}$' for label, p in ex["preds"])
             task = f'<p class="ex-task">$y = {mm_vec(ex["y"], lang)}$. {preds}. {pg["task"]}</p>'
-            parts = [f'<h4 class="ex-model">{pg["model"]} {label}</h4>' + mm_solution(sol, lang) for label, sol in sols]
+            parts = [f'<h4 class="ex-model">{pg["model"]} {label}</h4>' + mm_solution(sol, lang, k if i == len(sols) - 1 else -k)
+                     for i, (label, sol) in enumerate(sols)]
             best_mae = min(s["mae"] for _, s in sols)
             best_mse = min(s["mse"] for _, s in sols)
             cmp_rows = ""
@@ -913,8 +1020,10 @@ def mm_example(k, ex, lang):
 
 def mm_calc(lang):
     c, pg = mm.CALC[lang], mm.PAGE[lang]
-    i18n = {k: pg[k] for k in ("step1", "step2", "step3", "step4", "step5", "step6", "sum", "mean", "answer", "table_h")}
+    i18n = {k: pg[k] for k in ("step1", "step2", "step3", "step4", "step5", "step6", "step7", "step8", "grad", "grad_vec",
+                                "sum", "mean", "answer", "table_h")}
     i18n.update({k: c[k] for k in ("err_count", "err_num", "err_empty", "err_many")})
+    i18n["auto"] = mm.GRAD_AUTO[lang]
     # наборы чисел — из тех же примеров 1, 12 и 9; запись чисел — как принято в языке страницы
     sep = ", " if lang == "en" else "; "
     vec = lambda vals: sep.join(mm.fmt(mm.F(v), lang, "html") for v in vals)
@@ -934,7 +1043,8 @@ def material_mae_mse(lang):
     s, pg, tt = SITE[lang], mm.PAGE[lang], mm.SECTION_TITLES[lang]
     rel = "../../../"
     page = f"materials/{mm.SLUG}/"
-    sections = [("intro", tt["intro"], render_blocks(mm.INTRO[lang], lang))]
+    sections = [("intro", tt["intro"], render_blocks(mm.INTRO[lang], lang)),
+                ("backprop", mm.BACKPROP_TEXT[lang]["title"], mm_backprop(lang))]
     k = 0
     for pid, title, lead in mm.PARTS:
         items = []
@@ -944,11 +1054,14 @@ def material_mae_mse(lang):
                 items.append(mm_example(k, ex, lang))
         sections.append((pid, title[lang], f"    <p>{lead[lang]}</p>\n    " + "\n    ".join(items)))
     assert k == 20
+    sections.append(("chain", mm.CHAIN_TEXT[lang]["title"], mm_chain(lang)))
     sections.append(("calc", tt["calc"], "    " + mm_calc(lang)))
-    sections.append(("mistakes", tt["mistakes"], render_blocks(mm.MISTAKES[lang], lang)))
-    sm = mm.SUMMARY[lang]
-    sections.append(("summary", tt["summary"], render_blocks([("table", sm["heads"], sm["rows"]), ("ul", sm["bullets"])], lang)))
-    sections.append(("quiz", tt["quiz"], render_blocks([("quiz", mm.QUIZ[lang])], lang)))
+    mistakes = [("ul", mm.MISTAKES[lang][0][1] + mm.MISTAKES_GRAD[lang])]
+    sections.append(("mistakes", tt["mistakes"], render_blocks(mistakes, lang)))
+    sm, sg = mm.SUMMARY[lang], mm.SUMMARY_GRAD[lang]
+    bullets = sm["bullets"][:-1] + [sg["bullet"], sm["bullets"][-1]]  # ссылки на шпаргалку — последними
+    sections.append(("summary", tt["summary"], render_blocks([("table", sm["heads"], sm["rows"] + sg["rows"]), ("ul", bullets)], lang)))
+    sections.append(("quiz", tt["quiz"], render_blocks([("quiz", mm.QUIZ[lang] + mm.QUIZ_GRAD[lang])], lang)))
     toc = "\n".join(f'      <a href="#{sid}"><span class="n">{i + 1}</span>{title}</a>' for i, (sid, title, _) in enumerate(sections))
     body = "\n\n".join(f'    <h2 id="{sid}">{title}</h2>\n{content}' for sid, title, content in sections)
     nav = materials_nav(lang, rel, False)
@@ -957,7 +1070,7 @@ def material_mae_mse(lang):
              f'  <script defer src="{KATEX}/contrib/auto-render.min.js"></script>\n'
              f'  <script defer src="{rel}assets/js/materials.js"></script>\n'
              f'  <script defer src="{rel}assets/js/practice.js"></script>\n')
-    minutes = 35
+    minutes = 50
     return head(lang, f"{pg['title']} — {s['brand']}", html.escape(pg["description"], quote=True), rel, page, "article", extra) + header(lang, rel, page, nav) + f"""<div class="progress" aria-hidden="true"><div id="progress"></div></div>
 
 <main class="material fx-page practice">

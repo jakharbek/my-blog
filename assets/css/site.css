@@ -510,6 +510,7 @@ details.ex-sol[open] > summary::after { content: "−"; }
 .article .data tr.tot td { font-weight: 600; color: var(--fg); }
 .article table.ex-table td, .article table.ex-cmp td { min-width: 0; }
 .practice .article table.data { min-width: 0; }
+.practice .article table.data td { min-width: 0; }
 .article table.ex-table, .article table.ex-cmp { width: 100%; }
 .article .ex-table th, .article .ex-table td { padding-left: 10px; padding-right: 0; }
 .article .ex-table th:first-child, .article .ex-table td:first-child { padding-left: 0; }
@@ -524,4 +525,4 @@ details.ex-sol[open] > summary::after { content: "−"; }
 .calc-err { padding: 12px 16px; border-left: 2px solid var(--err); border-radius: 0 4px 4px 0; background: var(--card); font-size: 15px; color: var(--err); }
 .calc-out { display: flex; flex-direction: column; gap: 12px; }
 .calc-out:empty { display: none; }
-@media (max-width: 520px) { .article .ex-table { font-size: 14px; } .article .ex-table th, .article .ex-table td { padding: 10px 0 10px 8px; } .ex { padding: 18px 14px; } .ex-body { padding: 0 12px 14px; } .calc { padding: 16px; } .ex-body .eqd, .calc-out .eqd { padding: 2px 10px; font-size: .9em; } }
+@media (max-width: 520px) { .article .ex-table { font-size: 14px; } .article .ex-table th, .article .ex-table td { padding: 10px 0 10px 8px; } .ex { padding: 18px 14px; } .ex-body { padding: 0 12px 14px; } .calc { padding: 16px; } .ex-body .eqd, .calc-out .eqd { padding: 2px 10px; font-size: .9em; } .ex-body details.deep > summary, .calc-out details.deep > summary { padding: 12px; } .ex-body details.deep > .deep-body, .calc-out details.deep > .deep-body { padding: 0 6px 12px; } }
