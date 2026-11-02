@@ -18,6 +18,9 @@ assets/js/site.js          тема, память языка, поиск и фи
 assets/js/sigmoid.js       интерактивные графики записи о сигмоиде
 assets/js/materials.js     страница материала: формулы KaTeX, фильтр по группам, «раскрыть всё»
 assets/js/practice.js      практикум «MAE и MSE на простых примерах»: раскрыть разборы, калькулятор с пошаговым решением
+assets/js/assistant.js     ИИ-ассистент на каждой странице (ru/en/uz): выделение → «Спросить ИИ», Alt+I, панель чата
+assets/js/markdown.js      безопасный Markdown ответов ассистента (перенесён из курса бустинга)
+assets/css/assistant.css   стили панели ассистента + «мост» токенов к палитре блога
 assets/img/javharbek.png   фото автора
 tools/build.py             генератор страниц; тексты интерфейса, разделы, список записей, «Обо мне»
 tools/content_sigmoid.py   тексты статьи о сигмоиде
@@ -39,6 +42,23 @@ python3 tools/build.py
 ## Новый материал
 
 Материал — долгоживущая справочная страница в разделе «Материалы». Положите тексты в `tools/content_<slug>.py` по образцу `content_formulas.py`, добавьте его в список `MATERIALS` и функцию рендера в `tools/build.py`. Подпись со счётчиком в списке материалов модуль может задать функцией `count_label(lang)` (образец — `content_mae_mse.py`, «20 примеров»). Чтобы о материале узнали с главной, добавьте в `POSTS` новость с относительным `url` (`materials/<slug>/`): такая строка показывает «Открыть материал →».
+
+## ИИ-ассистент
+
+На каждой странице, которую собирает `tools/build.py` (функция `head()` подключает `assistant.css`, `markdown.js`
+и `assistant.js`), есть ИИ-ассистент: выделите фрагмент → кнопка «Спросить ИИ» (или `Alt+I`, или значок чата в шапке)
+→ панель справа. Ассистент видит страницу (заголовок, разделы), раздел и выделенный фрагмент; формулы уходят в TeX.
+Интерфейс — на языке страницы.
+
+* **Бэкенд** — `claude-server` из курсов (`https://jakharbek.github.io/ml_gradient_boosting/claude-server.zip`): Claude Code
+  на компьютере читателя, ключ API не нужен. Локально (`http://localhost:8000`) работает сразу после `npm start`.
+* **С сайта javharbek.uz** серверу нужно разрешить этот адрес: `CLAUDE_SERVER_ALLOWED_ORIGINS=https://javharbek.uz npm start`
+  (PowerShell: `$env:CLAUDE_SERVER_ALLOWED_ORIGINS="https://javharbek.uz"; npm start`) — панель показывает эту команду сама.
+  Chrome при первом запросе спросит разрешение «доступ к локальной сети» (Local Network Access) — его нужно дать.
+* **Безопасность:** ответ модели собирается в DOM через `textContent` (`markdown.js`), ссылки — только http/https;
+  запрос не включает `allow_tools`, `permission_mode`, `cwd`. Настройки и диалоги — в `localStorage` этого браузера
+  (`assistant:settings`, `assistant:chat:<путь страницы>`), скриншоты не сохраняются.
+* Лимит запроса — 22 000 символов (как в курсе: командная строка Windows).
 
 ## Дизайн
 
