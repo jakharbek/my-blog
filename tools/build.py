@@ -4,7 +4,8 @@
 Run from the repository root:  python3 tools/build.py
 The output is committed, so GitHub Pages needs no build step.
 Article texts live in tools/content_sigmoid.py, materials in tools/content_formulas.py
-and tools/content_mae_mse.py (MAE and MSE by example).
+tools/content_mae_mse.py (MAE and MSE by example) and tools/content_ce_workbook.py (cross-entropy
+in Excel; the downloadable workbooks are built by tools/workbook_ce.py).
 """
 import html
 import importlib.util
@@ -12,8 +13,10 @@ import json
 import sys
 from pathlib import Path
 
+import content_ce_workbook as cw
 import content_formulas as formulas
 import content_mae_mse as mm
+import workbook_ce
 from content_sigmoid import ARTICLE, TABLE_ROWS
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -154,6 +157,9 @@ POSTS = [
                 "en": "New material: MAE and MSE in 20 simple examples",
                 "uz": "Yangi material: MAE va MSE 20 ta oddiy misolda"},
          excerpt={l: mm.PAGE[l]["excerpt"] for l in LANGS}),
+    dict(slug="cross-entropy-excel-news", topic="ml", date=cw.DATE,
+         url=f"materials/{cw.SLUG}/",
+         title=cw.NEWS["title"], excerpt={l: cw.PAGE[l]["excerpt"] for l in LANGS}),
     dict(slug="boosting-workbook-generator", topic="ml", date="2026-11-01",
          url=COURSE_URL + "extra/04_trainer/index.html",
          title={"ru": "В курсе — генератор рабочих тетрадей по бустингу",
@@ -169,6 +175,7 @@ POST = {p["slug"]: p for p in POSTS}
 MATERIALS = [
     dict(slug="ml-formulas", topic="ml", date="2026-10-28", module=formulas),
     dict(slug=mm.SLUG, topic="ml", date=mm.DATE, module=mm),
+    dict(slug=cw.SLUG, topic="ml", date=cw.DATE, module=cw),
 ]
 
 # Research cards: [kicker, title, text] and an optional link as a fourth item.
@@ -1114,6 +1121,162 @@ def material_mae_mse(lang):
 
 
 
+# ---------- material: cross-entropy in Excel (tools/content_ce_workbook.py) ----------
+def cw_fill(x, lang):
+    """Fill {key} numbers in every string of a block list (tuples and lists are walked)."""
+    if isinstance(x, str):
+        return cw.fill(x, lang)
+    if isinstance(x, (list, tuple)):
+        return type(x)(cw_fill(v, lang) for v in x)
+    return x
+
+
+def cw_lines(lines):
+    return "\\begin{gathered}" + "\\\\".join(lines) + "\\end{gathered}"
+
+
+def cw_download(lang, rel):
+    pg = cw.PAGE[lang]
+    href = lambda l: f"{rel}assets/files/{workbook_ce.NAME.format(lang=l)}"
+    kb = round((workbook_ce.OUT_DIR / workbook_ce.NAME.format(lang=lang)).stat().st_size / 1024)
+    others = " · ".join(f'<a class="ul" href="{href(l)}" download hreflang="{l}" lang="{l}">{cw.LANG_LABEL[l]}</a>' for l in LANGS if l != lang)
+    icon = ('<svg viewBox="0 0 40 48" aria-hidden="true"><path d="M4 2h22l10 10v32a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="2"/>'
+            '<path d="M26 2v10h10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 22h20M10 29h20M10 36h20M17 18v22M24 18v22" stroke="currentColor" stroke-width="1.5" opacity=".55"/></svg>')
+    return (f'<div class="cew-dl"><span class="cew-dl-icon">{icon}<b>XLSX</b></span><div class="cew-dl-text"><b>{pg["dl_title"]}</b><p>{pg["dl_text"]}</p>'
+            f'<div class="cew-dl-actions"><a class="b1" href="{href(lang)}" download>{pg["dl_btn"]} · {kb} {pg["dl_kb"]}</a>'
+            f'<span class="cew-dl-other">{pg["dl_other"]} {others}</span></div></div></div>')
+
+
+def material_ce_workbook(lang):
+    s, pg, tt = SITE[lang], cw.PAGE[lang], cw.TITLES[lang]
+    rel = "../../../"
+    page = f"materials/{cw.SLUG}/"
+    F = lambda x: cw_fill(x, lang)
+    W = cw.WIDGET[lang]
+    live = lambda name, cfg: [("h3", pg["live"]), ("p", pg["live_note"]), ("viz", name, dict(cfg, L=W))]
+    sections = [("map", tt["map"], [("html", cw_download(lang, rel))] + F(cw.MAP[lang]))]
+
+    bt = cw.BCE_TEXT[lang]
+    steps = [("p", F(bt["steps_lead"]))]
+    for n, l1, l2 in cw.bce_row_steps(lang):
+        steps += [("p", f"<b>{bt['row']} {n}</b>"), ("eq", cw_lines([l1] + l2.split(",\\quad ")))]
+    sections.append(("bce", tt["bce"], [
+        ("p", F(bt["intro"])),
+        ("eq", r"\hat y_i=\sigma(z_i)=\frac{1}{1+e^{-z_i}},\qquad \mathrm{BCE}=-\frac1n\sum_{i=1}^{n}\bigl[y_i\ln\hat y_i+(1-y_i)\ln(1-\hat y_i)\bigr]"),
+        ("symbols", [(t, F(d)) for t, d in bt["legend"]]),
+        cw.bce_table(lang),
+        ("deep", bt["steps_title"], steps),
+        ("p", F(bt["after"])),
+        ("callout", "key", bt["alive_t"], F(bt["alive"])),
+        ("h3", bt["try_t"]), ("ul", F(bt["try_"]))]))
+
+    rt = cw.RAW_TEXT[lang]
+    sections.append(("raw", tt["raw"], [
+        ("p", F(rt["intro"])), cw.raw_bce_table(lang), ("p", rt["rows"]), ("ul", F(rt["items"])),
+        ("callout", "warn", rt["nan_t"], F(rt["nan"])), ("p", F(rt["dead"])), ("p", F(rt["fix"]))]
+        + live("cew-bce-sheet", {"y": cw.BCE_Y, "z": cw.BCE_Z})))
+
+    zt = cw.ZONES_TEXT[lang]
+    sections.append(("zones", tt["zones"], [
+        ("p", F(zt["intro"])), cw.zone_table(lang), ("p", F(zt["walls"])), ("p", F(zt["outside"])),
+        ("viz", "cew-zones", {"mode": "bce", "L": W}, F(zt["fig"]))]))
+
+    qt = cw.SQUASH_TEXT[lang]
+    sections.append(("squash", tt["squash"], [
+        ("p", F(qt["intro"])), cw.squash_table(lang), ("p", F(qt["why"])),
+        ("viz", "cew-sigmoid", {"L": W}, F(qt["fig"])),
+        ("deep", qt["deep_t"], [("p", F(x)) for x in qt["deep"]])]))
+
+    sections.append(("bce-summary", tt["bce_sum"], [("ul", F(cw.BCE_SUM[lang])), ("code", "Python", cw.code(cw.CODE_BCE, lang))]))
+
+    ct = cw.CE_TEXT[lang]
+    l1, l2, l3, l4 = cw.ce_steps(lang)
+    sections.append(("ce", tt["ce"], [
+        ("p", F(ct["intro"])),
+        ("eq", r"\hat y_k=\mathrm{softmax}(z)_k=\frac{e^{z_k}}{\sum_{j=1}^{K}e^{z_j}},\qquad \mathrm{CE}=-\sum_{k=1}^{K}y_k\ln\hat y_k"),
+        ("symbols", [(t, F(d)) for t, d in ct["legend"]]),
+        cw.ce_table(lang),
+        ("p", ct["steps"]),
+        ("p", "1. " + F(ct["s1"])), ("eq", cw_lines(l1.split(",\\quad ") if "\\qquad" not in l1 else [x for part in l1.split("\\qquad ") for x in part.split(",\\quad ")])),
+        ("p", "2. " + F(ct["s2"])), ("eq", cw_lines(l2.split(",\\quad "))),
+        ("p", "3. " + F(ct["s3"])), ("eq", cw_lines(l3.split(",\\quad "))),
+        ("p", "4. " + F(ct["s4"])), ("eq", l4),
+        ("callout", "key", "", F(ct["note"])),
+        ("h3", ct["try_t"]), ("ul", F(ct["try_"]))]))
+
+    crt = cw.CE_RAW_TEXT[lang]
+    sections.append(("ce-raw", tt["ce_raw"], [
+        ("p", F(crt["intro"])), cw.raw_ce_table(lang), ("callout", "note", "", F(crt["why"])), ("ul", F(crt["items"]))]
+        + live("cew-ce-sheet", {"y": cw.CE_Y, "z": cw.CE_Z})))
+
+    czt = cw.CE_ZONE_TEXT[lang]
+    sections.append(("ce-zone", tt["ce_zone"], [
+        ("p", F(czt["intro"])), cw.ce_zone_table(lang), ("viz", "cew-zones", {"mode": "ce", "L": W}, F(czt["fig"]))]))
+
+    k2t, k2 = cw.K2_DEEP[lang]
+    sections.append(("ce-summary", tt["ce_sum"], [("ul", F(cw.CE_SUM[lang])), ("code", "Python", cw.code(cw.CODE_CE, lang)),
+                                                  ("deep", k2t, [("p", x) for x in k2])]))
+
+    ptx = cw.PRACTICE_TEXT[lang]
+    a1, a2, a3 = cw.practice_answers(lang)
+    sections.append(("practice", tt["practice"], [
+        ("p", F(ptx["intro"])),
+        ("viz", "cew-train", dict(cw.train_config(lang), L=cw.TRAIN_UI[lang])),
+        ("p", ptx["tips"]),
+        ("deep", ptx["answers"], [("p", F(ptx["a1"])), ("eq", cw_lines(a1[0].split(",\\quad ")) ), ("eq", a1[1]),
+                                  ("p", F(ptx["a2"])), ("eq", cw_lines(a2[0].split(",\\quad "))), ("eq", a2[1]),
+                                  ("p", F(ptx["a3"])), ("eq", cw_lines(a3[0].split("\\qquad ")[0].split(",\\quad ") + [a3[0].split("\\qquad ")[1]])),
+                                  ("eq", a3[1]), ("eq", a3[2]), ("p", F(ptx["a3b"]))])]))
+
+    sections.append(("mistakes", tt["mistakes"], [("ul", cw.MISTAKES[lang])]))
+    sm = cw.SUMMARY[lang]
+    sections.append(("summary", tt["summary"], [("table", sm["heads"], sm["rows"]), ("ul", F(sm["bullets"]))]))
+    sections.append(("quiz", tt["quiz"], [("quiz", cw.QUIZ[lang])]))
+
+    toc = "\n".join(f'      <a href="#{sid}"><span class="n">{i + 1}</span>{title}</a>' for i, (sid, title, _) in enumerate(sections))
+    body = "\n\n".join(f'    <h2 id="{sid}">{title}</h2>\n{render_blocks(blocks, lang)}' for sid, title, blocks in sections)
+    nav = materials_nav(lang, rel, False)
+    extra = (f'  <link rel="stylesheet" href="{KATEX}/katex.min.css">\n'
+             f'  <script defer src="{KATEX}/katex.min.js"></script>\n'
+             f'  <script defer src="{KATEX}/contrib/auto-render.min.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/viz.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/ce-workbook.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/materials.js"></script>\n')
+    minutes = 35
+    return head(lang, f"{pg['title']} — {s['brand']}", html.escape(pg["description"], quote=True), rel, page, "article", extra) + header(lang, rel, page, nav) + f"""<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page cew-page">
+<section class="art-head wrap-xs">
+  <span class="kicker"><a class="ul" href="../">{s['navMaterials']}</a> · {pg['kicker']}</span>
+  <h1>{pg['title']}</h1>
+  <p class="dek">{pg['dek']}</p>
+  <div class="author">
+    <img src="{rel}assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="{cw.DATE}">{fmt_date(cw.DATE, lang)}</time> · {minutes} {FX_UI[lang]['min']}</span></span>
+  </div>
+  <div class="mat-stats"><span><b>4</b> {pg['count']}</span><span><b>2</b> {pg['charts']}</span><span><b>3</b> {pg['tasks']}</span></div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="{FX_UI[lang]['toc']}">
+    <span>{FX_UI[lang]['toc']}</span>
+    <nav>
+{toc}
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">{tex(cw.HERO)}</div>
+
+{body}
+    <p class="mat-back"><a class="ul" href="../">← {s['navMaterials']}</a></p>
+  </article>
+</div>
+</main>
+
+""" + footer(lang, rel) + "</body>\n</html>\n"
+
+
 # ---------- formula pages: materials/ml-formulas/<id>/ ----------
 # Each page is a module tools/formulas/<id>.py with META and SECTIONS (see tools/formulas/README.md).
 FORMULA_DIR = ROOT / "tools" / "formulas"
@@ -1147,6 +1310,8 @@ def render_blocks(blocks, lang, ind="    "):
             out.append(f"<p>{b[1]}</p>")
         elif kind == "h3":
             out.append(f"<h3>{b[1]}</h3>")
+        elif kind == "html":
+            out.append(b[1])
         elif kind == "eq":
             out.append(f'<div class="eqd">{tex(b[1])}</div>')
         elif kind == "symbols":
@@ -1325,9 +1490,10 @@ def main():
         return
     for fid in FORMULA_IDS:
         build_formula(fid)
+    workbook_ce.build()  # assets/files/cross-entropy-practice-<lang>.xlsx (before the page: it shows their sizes)
     for lang in LANGS:
         pages = {"": home, "sigmoid": article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
-                 f"materials/{mm.SLUG}": material_mae_mse}
+                 f"materials/{mm.SLUG}": material_mae_mse, f"materials/{cw.SLUG}": material_ce_workbook}
         for sub, render in pages.items():
             (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)
             (ROOT / lang / sub / "index.html").write_text(render(lang), encoding="utf-8")
