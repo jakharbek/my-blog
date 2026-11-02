@@ -160,7 +160,7 @@ EXAMPLES = [
          title=T("Пример с доски", "The example from the board", "Doskadagi misol"),
          idea=T("Две из трёх ошибок небольшие, а одна равна 2. MAE ≈ 0,83 — «в среднем ошибаемся меньше чем на единицу». "
                 "MSE ≈ 1,42 больше MAE: квадрат ошибки 2 равен 4 и перетягивает среднее на себя.",
-                "Two of the three errors are small and one equals 2. MAE ≈ 0.83: «on average we are off by less than one». "
+                "Two of the three errors are small and one equals 2. MAE ≈ 0.83: “on average we are off by less than one”. "
                 "MSE ≈ 1.42 is larger than MAE: the square of the error 2 is 4, and it pulls the average up.",
                 "Uchta xatodan ikkitasi kichik, bittasi 2 ga teng. MAE ≈ 0,83 — «o‘rtacha birdan kamroqqa adashamiz». "
                 "MSE ≈ 1,42 MAE dan katta: 2 xatoning kvadrati 4 ga teng va o‘rtachani o‘ziga tortadi.")),
@@ -215,7 +215,7 @@ EXAMPLES = [
     dict(part="diff", stars=2, y=["3", "5", "7", "9"], preds=[("A", ["4", "6", "6", "8"]), ("B", ["3", "5", "7", "5"])],
          title=T("Одинаковая MAE — разная MSE", "Same MAE, different MSE", "Bir xil MAE — har xil MSE"),
          idea=T("У обеих моделей MAE = 1. Но A ошибается понемногу везде, а B точна в трёх точках и сильно промахивается в одной. MSE это различает: 1 у A против 4 у B. MSE «наказывает» крупные промахи.",
-                "Both models have MAE = 1. But A is slightly off everywhere, while B is exact at three points and misses one badly. MSE tells them apart: 1 for A versus 4 for B. MSE «punishes» large misses.",
+                "Both models have MAE = 1. But A is slightly off everywhere, while B is exact at three points and misses one badly. MSE tells them apart: 1 for A versus 4 for B. MSE “punishes” large misses.",
                 "Ikkala modelda ham MAE = 1. Lekin A hamma joyda ozgina adashadi, B esa uchta nuqtada aniq va bittasida qattiq adashadi. MSE buni farqlaydi: A da 1, B da 4. MSE katta adashishlarni «jazolaydi».")),
     dict(part="diff", stars=2, y=["2", "3", "4", "20"], preds=[(None, ["3", "3", "3", "4"])],
          title=T("Выброс", "An outlier", "Chetga chiquvchi qiymat"),
@@ -235,13 +235,13 @@ EXAMPLES = [
     dict(part="diff", stars=2, y=["10", "10", "10", "10"], preds=[(None, ["15", "5", "15", "5"])],
          title=T("Средняя ошибка со знаком обманывает", "The signed mean error is misleading", "Ishorali o‘rtacha xato aldaydi"),
          idea=T("Ошибки −5, +5, −5, +5 в сумме дают 0 — «в среднем модель не ошибается»? Нет: каждый прогноз мимо на 5. Поэтому в метриках берут модуль или квадрат: MAE = 5, MSE = 25.",
-                "The errors −5, +5, −5, +5 add up to 0. «On average the model is right»? No: every prediction is off by 5. That is why metrics take the absolute value or the square: MAE = 5, MSE = 25.",
+                "The errors −5, +5, −5, +5 add up to 0. “On average the model is right”? No: every prediction is off by 5. That is why metrics take the absolute value or the square: MAE = 5, MSE = 25.",
                 "−5, +5, −5, +5 xatolar yig‘indisi 0 — «o‘rtacha model adashmaydi»mi? Yo‘q: har bir bashorat 5 ga xato. Shuning uchun metrikalarda modul yoki kvadrat olinadi: MAE = 5, MSE = 25.")),
     # --- часть 5: как в жизни
     dict(part="life", stars=2, y=["100", "150", "200"], preds=[(None, ["110", "140", "230"])],
          title=T("Цены в тысячах: единицы измерения", "Prices in thousands: units", "Mingliklardagi narxlar: o‘lchov birliklari"),
          idea=T("Цены в тысячах долларов. MAE ≈ 16,67 — тоже в тысячах: «в среднем ошибаемся на 16,7 тыс.». MSE ≈ 366,67 измеряется в «тысячах в квадрате» — такую величину трудно объяснить заказчику. Поэтому рядом часто считают RMSE = √MSE ≈ 19,15 тыс.",
-                "The prices are in thousands of dollars. MAE ≈ 16.67 is in thousands too: «on average we are off by 16.7 thousand». MSE ≈ 366.67 is measured in «thousands squared», which is hard to explain to a client. That is why RMSE = √MSE ≈ 19.15 thousand is often reported next to it.",
+                "The prices are in thousands of dollars. MAE ≈ 16.67 is in thousands too: “on average we are off by 16.7 thousand”. MSE ≈ 366.67 is measured in “thousands squared”, which is hard to explain to a client. That is why RMSE = √MSE ≈ 19.15 thousand is often reported next to it.",
                 "Narxlar ming dollarda. MAE ≈ 16,67 ham mingda: «o‘rtacha 16,7 mingga adashamiz». MSE ≈ 366,67 esa «mingning kvadrati»da o‘lchanadi — buni buyurtmachiga tushuntirish qiyin. Shuning uchun yonida ko‘pincha RMSE = √MSE ≈ 19,15 ming hisoblanadi.")),
     dict(part="life", stars=2, y=["5", "4", "3", "5", "4", "2"], preds=[(None, ["4", "4", "4", "4", "4", "4"])],
          title=T("Оценки шести учеников", "The grades of six students", "Olti o‘quvchining baholari"),
@@ -251,7 +251,7 @@ EXAMPLES = [
     dict(part="life", stars=2, y=["30", "45", "60"], preds=[(None, ["35", "45", "50"])],
          title=T("Время доставки в минутах", "Delivery time in minutes", "Yetkazib berish vaqti daqiqalarda"),
          idea=T("MAE = 5 минут — понятный ответ для клиента: «в среднем курьер опаздывает или приезжает раньше на 5 минут». MSE ≈ 41,67 «минут в квадрате» удобна для обучения модели, но не для объяснения.",
-                "MAE = 5 minutes is a clear answer for a customer: «on average the courier is 5 minutes early or late». MSE ≈ 41.67 «minutes squared» is convenient for training a model but not for explaining it.",
+                "MAE = 5 minutes is a clear answer for a customer: “on average the courier is 5 minutes early or late”. MSE ≈ 41.67 “minutes squared” is convenient for training a model but not for explaining it.",
                 "MAE = 5 daqiqa — mijoz uchun tushunarli javob: «o‘rtacha kuryer 5 daqiqa kechikadi yoki erta keladi». MSE ≈ 41,67 «daqiqa kvadrati» modelni o‘qitish uchun qulay, lekin tushuntirish uchun emas.")),
     dict(part="life", stars=3, kind="reverse", y=["4", "6"], preds=[(None, ["5", "?"])],
          title=T("Задача наоборот: найдите прогноз", "The reverse problem: find the prediction", "Teskari masala: bashoratni toping"),
@@ -314,7 +314,7 @@ PARTS = [
        "Xuddi shu retsept, lekin sonlar murakkabroq: minuslar, kasrlar va obyekt bittagina bo‘lgan hol.")),
     ("diff", T("Чем MAE отличается от MSE", "How MAE differs from MSE", "MAE MSE dan nimasi bilan farq qiladi"),
      T("Здесь примеры подобраны так, чтобы метрики «спорили»: одинаковая MAE и разная MSE, выброс, удвоение ошибок, среднее против медианы.",
-       "Here the examples are chosen so that the metrics «argue»: the same MAE with different MSE, an outlier, doubled errors, the mean versus the median.",
+       "Here the examples are chosen so that the metrics “argue”: the same MAE with different MSE, an outlier, doubled errors, the mean versus the median.",
        "Bu yerda misollar metrikalar «bahslashadigan» qilib tanlangan: bir xil MAE va har xil MSE, chetga chiquvchi qiymat, ikki baravar xatolar, o‘rtacha va mediana.")),
     ("life", T("Как в жизни", "Real-life cases", "Hayotdagidek"),
      T("Единицы измерения, оценки, время доставки, задача «наоборот» и главный практический вопрос — какую модель выбрать.",
@@ -337,7 +337,7 @@ INTRO = {
         ("callout", "key", "Как читать ответ", "MAE — средний размер промаха в тех же единицах, что и $y$: «в среднем ошибаемся на 0,83». MSE — средний квадрат промаха, в единицах «в квадрате»; она сильнее реагирует на большие ошибки. Обе метрики: чем меньше, тем лучше, ноль — идеал."),
     ],
     "en": [
-        ("p", "Both metrics answer the question «how wrong is the model?». There are $n$ objects; for each we know the correct answer $y_i$ and the model's prediction $\\hat y_i$ (read «y hat»). The difference $e_i = y_i - \\hat y_i$ is the error on object $i$."),
+        ("p", "Both metrics answer the question “how wrong is the model?”. There are $n$ objects; for each we know the correct answer $y_i$ and the model's prediction $\\hat y_i$ (read “y hat”). The difference $e_i = y_i - \\hat y_i$ is the error on object $i$."),
         ("symbols", [("y_i", "the correct answer (ground truth) for object $i$"), ("\\hat y_i", "the model's prediction for object $i$"),
                      ("e_i = y_i - \\hat y_i", "the error: plus means the model undershot, minus means it overshot"),
                      ("n", "the number of objects"), ("\\sum_{i=1}^{n}", "the sum over all objects from $1$ to $n$")]),
@@ -346,7 +346,7 @@ INTRO = {
                 "For MAE take the absolute value of each error $|e_i|$; for MSE take the square $e_i^2$.",
                 "Add up all the absolute values (or all the squares).",
                 "Divide the sum by $n$: that is the MAE (or the MSE)."]),
-        ("callout", "key", "How to read the answer", "MAE is the average size of a miss in the same units as $y$: «on average we are off by 0.83». MSE is the average squared miss, in «squared» units; it reacts more strongly to large errors. For both metrics, smaller is better and zero is perfect."),
+        ("callout", "key", "How to read the answer", "MAE is the average size of a miss in the same units as $y$: “on average we are off by 0.83”. MSE is the average squared miss, in “squared” units; it reacts more strongly to large errors. For both metrics, smaller is better and zero is perfect."),
     ],
     "uz": [
         ("p", "Ikkala metrika ham «model qanchalik adashadi?» degan savolga javob beradi. $n$ ta obyekt bor; har biri uchun to‘g‘ri javob $y_i$ va model bashorati $\\hat y_i$ («igrek qalpoqcha» deb o‘qiladi) ma’lum. $e_i = y_i - \\hat y_i$ ayirma — $i$-obyektdagi xato."),
@@ -372,11 +372,11 @@ MISTAKES = {
                 "<b>Перепутали порядок вычитания.</b> Не страшно: $|y - \\hat y| = |\\hat y - y|$ и $(y - \\hat y)^2 = (\\hat y - y)^2$. Но ошибку со знаком принято считать как $y_i - \\hat y_i$."]),
     ],
     "en": [
-        ("ul", ["<b>Forgot the absolute value.</b> The errors −2 and +2 «cancel» to zero, yet the model was wrong both times (examples 5 and 15).",
+        ("ul", ["<b>Forgot the absolute value.</b> The errors −2 and +2 “cancel” to zero, yet the model was wrong both times (examples 5 and 15).",
                 "<b>Squared a negative number incorrectly.</b> $(-3)^2 = 9$, not $-9$: the square of any number is non-negative (example 8).",
                 "<b>Divided by the wrong $n$.</b> Divide by the number of objects, not by the number of nonzero errors (example 7).",
-                "<b>Averaged first and squared afterwards.</b> MSE is the mean of the squares, not the square of the mean: for the errors −5 and +5, MSE = 25, while the «square of the mean error» would be 0.",
-                "<b>Compared MAE and MSE «by size».</b> They have different units: with errors below 1, MSE is smaller than MAE; with large errors it is larger (examples 6 and 3).",
+                "<b>Averaged first and squared afterwards.</b> MSE is the mean of the squares, not the square of the mean: for the errors −5 and +5, MSE = 25, while the “square of the mean error” would be 0.",
+                "<b>Compared MAE and MSE “by size”.</b> They have different units: with errors below 1, MSE is smaller than MAE; with large errors it is larger (examples 6 and 3).",
                 "<b>Swapped the order of subtraction.</b> That is harmless: $|y - \\hat y| = |\\hat y - y|$ and $(y - \\hat y)^2 = (\\hat y - y)^2$. Still, the signed error is conventionally $y_i - \\hat y_i$."]),
     ],
     "uz": [
@@ -412,7 +412,7 @@ SUMMARY = {
               ["When to choose", "the typical error matters, there are outliers", "large misses are especially dangerous"]],
         bullets=["One recipe: errors → absolute values or squares → sum → divide by $n$.",
                  "The absolute value and the square remove the sign, so misses up and down do not cancel out.",
-                 "MSE «punishes» large errors and MAE does not; the same model can be better by one metric and worse by the other.",
+                 "MSE “punishes” large errors and MAE does not; the same model can be better by one metric and worse by the other.",
                  "The full theory is on the <a class=\"ul\" href=\"../ml-formulas/mae/\">MAE</a>, <a class=\"ul\" href=\"../ml-formulas/mse/\">MSE</a> and <a class=\"ul\" href=\"../ml-formulas/rmse/\">RMSE</a> pages of the cheat sheet."]),
     "uz": dict(
         heads=["", "MAE", "MSE"],
@@ -475,7 +475,7 @@ CALC = {
                noscript="Калькулятору нужен JavaScript; все 20 примеров выше работают и без него."),
     "en": dict(title="Compute your own example", lead="Enter the correct answers $y$ and the predictions $\\hat y$, and the calculator will write out the solution in the same steps, including the derivatives for backpropagation. Separate the numbers with commas, spaces or semicolons; use a point for decimals.",
                y="Correct answers $y$", p="Predictions $\\hat y$", go="Compute", presets="Try:", board="the board example", outlier="an outlier", decimals="decimals",
-               err_count="$y$ and $\\hat y$ must have the same number of values: now {a} and {b}.", err_num="«{t}» is not a number. Separate the numbers with commas, spaces or semicolons: 3, 5, 8.",
+               err_count="$y$ and $\\hat y$ must have the same number of values: now {a} and {b}.", err_num="“{t}” is not a number. Separate the numbers with commas, spaces or semicolons: 3, 5, 8.",
                err_empty="Enter at least one number in both lines.", err_many="At most {m} numbers, otherwise the solution gets too long.",
                noscript="The calculator needs JavaScript; all 20 examples above work without it."),
     "uz": dict(title="O‘z misolingizni hisoblang", lead="To‘g‘ri javoblar $y$ va bashoratlar $\\hat y$ ni kiriting — kalkulyator yechimni xuddi shu qadamlar bo‘yicha — teskari tarqatish uchun hosilalar bilan birga — yozib beradi. Sonlarni nuqtali vergul yoki bo‘sh joy bilan ajrating; kasr qismini vergul yoki nuqta bilan yozing.",
@@ -570,7 +570,7 @@ GRAD_AUTO = {
 # check_grad_ideas() ниже — при каждой сборке.
 GRAD_IDEA = {
     1: T("Объект 3 (ошибка 2) получает от MSE сигнал 1,33 — в четыре раза сильнее, чем объект 1 (0,33) с ошибкой 0,5. У MAE оба сигнала одинаковы по модулю — 0,33: модуль не различает «чуть-чуть» и «сильно».",
-         "Object 3 (error 2) gets a signal of 1.33 from MSE, four times stronger than object 1 (0.33) with an error of 0.5. With MAE both signals have the same absolute value, 0.33: the absolute value does not tell «a little» from «a lot».",
+         "Object 3 (error 2) gets a signal of 1.33 from MSE, four times stronger than object 1 (0.33) with an error of 0.5. With MAE both signals have the same absolute value, 0.33: the absolute value does not tell “a little” from “a lot”.",
          "3-obyekt (xato 2) MSE dan 1,33 signal oladi — 0,5 xatoli 1-obyektdan (0,33) to‘rt baravar kuchli. MAE da ikkala signal modul bo‘yicha bir xil — 0,33: modul «ozgina» va «ko‘p»ni farqlamaydi."),
     11: T("Градиенты MSE показывают ту же разницу: у модели A все четыре сигнала по 0,5, у модели B весь сигнал −2 приходится на одну точку. У MAE сигнал этой точки всего −0,25 — как у любой другой ошибки.",
           "The MSE gradients show the same difference: model A has four signals of 0.5 each, while model B puts its whole signal of −2 on a single point. With MAE that point's signal is only −0.25, like any other error.",
@@ -643,7 +643,7 @@ BACKPROP_TEXT = {
         lead="A neural network learns like this: it computes the loss (say, MSE), then walks backwards, from the loss to the weights, multiplying derivatives layer by layer with the chain rule. This pass is called backpropagation. The very first link of the chain is the derivative of the loss with respect to the prediction $\\hat y_i$: it says in which direction and how strongly to move each prediction. If you are just getting to know MAE and MSE, you can skip this section and come back to it later.",
         g_sym="$g_i$ is the derivative of the loss with respect to the prediction $\\hat y_i$, a component of the gradient $\\nabla_{\\hat y} L = (g_1, \\dots, g_n)$",
         mse_h="The derivative of MSE",
-        mse_p="Of the whole sum, only one term depends on $\\hat y_i$: $(y_i - \\hat y_i)^2$. The derivative of a square is «two times the expression», and the derivative of $y_i - \\hat y_i$ with respect to $\\hat y_i$ is $-1$ (the chain rule). Hence the sign: $(\\hat y_i - y_i)$, not $(y_i - \\hat y_i)$.",
+        mse_p="Of the whole sum, only one term depends on $\\hat y_i$: $(y_i - \\hat y_i)^2$. The derivative of a square is “two times the expression”, and the derivative of $y_i - \\hat y_i$ with respect to $\\hat y_i$ is $-1$ (the chain rule). Hence the sign: $(\\hat y_i - y_i)$, not $(y_i - \\hat y_i)$.",
         mae_h="The derivative of MAE",
         mae_p="The derivative of $|x|$ is $1$ to the right of zero and $-1$ to the left. At $x = 0$ itself the absolute value has a kink and no derivative; in practice we take $0$, one of the admissible values (a subgradient), as PyTorch and NumPy do.",
         sign_h="How to read the sign",
@@ -653,7 +653,7 @@ BACKPROP_TEXT = {
         heads=["$i$", "$y_i$", "$\\hat y_i$", "$g_i$ for MAE", "$g_i$ for MSE"],
         step_p="Let us take one descent step directly on the predictions with $\\eta = {eta}$, first along the MSE gradient, then along the MAE gradient:",
         step_after="Both metrics went down: MSE {mse0} → {mse1}, MAE {mae0} → {mae1}. MSE moved the third prediction the most, the one with the largest error.",
-        note="In a real network the predictions are not moved directly; the weights are. The gradient with respect to the predictions is the signal that travels back to the weights; how exactly is shown in the section «From the prediction to the weights». In every example below the derivatives are written out in the «Derivatives for backpropagation» block.",
+        note="In a real network the predictions are not moved directly; the weights are. The gradient with respect to the predictions is the signal that travels back to the weights; how exactly is shown in the section “From the prediction to the weights”. In every example below the derivatives are written out in the “Derivatives for backpropagation” block.",
     ),
     "uz": dict(
         title="Teskari tarqatish uchun hosilalar",
@@ -691,7 +691,7 @@ CHAIN_TEXT = {
         mse_h="With MSE", mae_h="With MAE",
         g_line="The gradient with respect to the predictions:", w_line="The gradient with respect to the weights:", step_line="A descent step with $\\eta = {eta}$:",
         after="The loss after the step: {name} {before} → {after}.",
-        compare="With MSE the derivative with respect to $w$ is {dw_mse}, with MAE it is {dw_mae}: the third object is off by 2, and MSE «shouts» louder, so the step is larger. This is how one and the same error signal travels back from the loss to the weights; in a deep network the chain is simply longer: the signal is multiplied by the derivative of every layer.",
+        compare="With MSE the derivative with respect to $w$ is {dw_mse}, with MAE it is {dw_mae}: the third object is off by 2, and MSE “shouts” louder, so the step is larger. This is how one and the same error signal travels back from the loss to the weights; in a deep network the chain is simply longer: the signal is multiplied by the derivative of every layer.",
     ),
     "uz": dict(
         title="Bashoratdan vaznlarga: zanjir qoidasi",

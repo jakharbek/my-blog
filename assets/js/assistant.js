@@ -34,7 +34,7 @@
   /* --------------------------------- тексты --------------------------------------- */
   const I18N = {
     ru: {
-      lang: 'русском',
+      quotes: ['«', '»'],
       system: [
         'Ты — ИИ-помощник блога javharbek.uz. Автор блога — Javharbek Abdulatipov, инженер-программист и математик; в блоге — статьи и материалы о машинном обучении, математике и программировании: формулы с разборами, интерактивные рисунки, практикумы. Читатель открыл страницу блога и задаёт вопрос — часто по выделенному фрагменту.',
         '',
@@ -89,7 +89,7 @@
       shotPick: 'Приложить картинку', hint: 'Enter — отправить, Shift+Enter — новая строка. Картинку можно вставить из буфера (Ctrl+V). ИИ может ошибаться — сверяйтесь со страницей.',
     },
     en: {
-      lang: 'English',
+      quotes: ['“', '”'],
       system: [
         'You are the AI assistant of the blog javharbek.uz. The author is Javharbek Abdulatipov, a software engineer and mathematician; the blog has articles and materials on machine learning, mathematics and programming: formulas explained step by step, interactive figures, practice problems. The reader has a blog page open and asks a question, often about a selected fragment.',
         '',
@@ -107,18 +107,18 @@
       page: 'Page', about: 'Summary', outline: 'Page sections', addr: 'Address',
       quoteHead: 'Selected fragment of the page', section: 'section', reading: 'The reader is in the section', sectionText: 'Section text for context',
       shotNow: 'A screenshot of the page is attached.', shotGone: '(The reader attached a screenshot to this question; it is no longer available.)', question: 'Reader’s question',
-      widget: 'interactive figure', quiz: 'quiz «Check yourself»', calc: 'calculator', start: 'Top of the page',
+      widget: 'interactive figure', quiz: 'quiz “Check yourself”', calc: 'calculator', start: 'Top of the page',
       ask: 'Ask AI', askTitle: 'Ask the AI assistant about the selected fragment (Alt+I)', toggle: 'AI assistant (Alt+I)',
       title: 'AI assistant', newChat: 'New chat', settings: 'Settings', close: 'Close (Esc)',
       checking: 'checking the server…', online: (m) => 'Claude · ' + m + ' · local', offlineSt: 'server is not running',
-      emptyTitle: 'Ask about the page', emptyText: 'Select any part of the page (a word, a formula, a paragraph) and press «Ask AI». The assistant sees the fragment and its section. You can also just ask a question.',
-      emptyPage: (t) => 'The page «' + t + '» is open.',
+      emptyTitle: 'Ask about the page', emptyText: 'Select any part of the page (a word, a formula, a paragraph) and press “Ask AI”. The assistant sees the fragment and its section. You can also just ask a question.',
+      emptyPage: (t) => 'The page “' + t + '” is open.',
       placeholder: 'Your question…', inputLabel: 'Question for the assistant', send: 'Send (Enter)', stop: 'Stop',
       chipsQuote: ['Explain it more simply', 'Give an example with numbers', 'Why is this needed?', 'What does it look like in code?'],
       chipsEmpty: ['Summarize the main idea of this section', 'Quiz me: ask 3 questions', 'What are the common mistakes here?'],
       fromPage: 'From the page', removeQuote: 'Remove the fragment', thinking: 'Thinking…', sec: 's', tokens: 'reasoning tokens',
       stopped: 'The answer was stopped.', copy: 'Copy the answer', copied: 'Answer copied', copyFail: 'Could not copy', retry: 'Answer again',
-      noAnswer: 'Could not get an answer.', noLink: 'No connection to claude-server. Start it and press «Answer again».',
+      noAnswer: 'Could not get an answer.', noLink: 'No connection to claude-server. Start it and press “Answer again”.',
       badUrl: 'The server address in the settings is invalid.', noServer: 'Could not reach claude-server.', srvErr: (c) => 'The server returned error ' + c + '.',
       needToken: 'The server requires a token: enter it in the assistant settings.', empty: 'The model returned an empty answer. Try again.', genErr: 'Generation error.',
       sUrl: 'claude-server address', sUrlHint: 'A local server on your computer. Requests go only to this address.', sModel: 'Model', sEffort: 'Answer depth',
@@ -130,7 +130,7 @@
       offText: 'The assistant works through Claude Code on your computer: no API key is needed, and questions go nowhere except to Claude. Once:',
       step1: ['Install ', 'Node.js 18+', ' and Claude Code, then sign in: '],
       step2: 'Download claude-server and unzip it.',
-      step3: 'In the server folder, run:', step4: 'Press «Check again».',
+      step3: 'In the server folder, run:', step4: 'Press “Check again”.',
       forbidden: ['The server is running but answers 403: it does not allow the address of this page ', '. Restart it with the command above, which allows this address.'],
       download: 'Download claude-server (zip)', check: 'Check again', serverOk: 'The server is up', cmdCopy: 'Copy', cmdCopied: 'Command copied',
       shotBtn: 'Attach a screenshot of the page', shotDefault: 'Explain what the screenshot shows.', shotAlt: 'Screenshot attached to the question',
@@ -139,12 +139,12 @@
       shotFail: 'Could not take the screenshot: ', shotType: 'Use a PNG, JPEG, WebP or GIF image', shotRead: 'Could not read the image',
       shotOld: 'The running claude-server does not accept images; restart it',
       remoteNote: (o) => 'Already running? If it was started without this setting, stop it (Ctrl+C) and start it with the command above, which allows requests from ' + o + '.',
-      lnaPrompt: 'The browser will ask whether this site may access devices on your local network: choose «Allow» so the page can reach the server on your computer.',
-      lnaDenied: 'The browser has blocked this site from the local network, so the page cannot see the server on your computer. Allow access in the site settings (the icon to the left of the address → «Local network access») and press «Check again».',
+      lnaPrompt: 'The browser will ask whether this site may access devices on your local network: choose “Allow” so the page can reach the server on your computer.',
+      lnaDenied: 'The browser has blocked this site from the local network, so the page cannot see the server on your computer. Allow access in the site settings (the icon to the left of the address → “Local network access”) and press “Check again”.',
       shotPick: 'Attach an image', hint: 'Enter to send, Shift+Enter for a new line. You can paste an image from the clipboard (Ctrl+V). AI can make mistakes; check against the page.',
     },
     uz: {
-      lang: 'o‘zbek',
+      quotes: ['«', '»'],
       system: [
         'Sen javharbek.uz blogining sun’iy intellekt yordamchisisan. Blog muallifi — Javharbek Abdulatipov, dasturiy ta’minot muhandisi va matematik; blogda mashinali o‘qitish, matematika va dasturlash bo‘yicha maqolalar va materiallar bor: tahlilli formulalar, interaktiv rasmlar, amaliy mashqlar. O‘quvchi blog sahifasini ochgan va savol beradi — ko‘pincha belgilangan parcha bo‘yicha.',
         '',
@@ -201,6 +201,7 @@
   };
   const LANG = I18N[(doc.documentElement.lang || '').slice(0, 2)] ? (doc.documentElement.lang || '').slice(0, 2) : 'ru';
   const T = I18N[LANG];
+  const qt = (s) => T.quotes[0] + s + T.quotes[1];
 
   /* --------------------------------- мини-хелперы --------------------------------- */
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -345,7 +346,7 @@
   }
   const tidy = (text) =>
     String(text || '')
-      .replace(/ /g, ' ')
+      .replace(/\u00a0/g, ' ')
       .replace(/[ \t]+/g, ' ')
       .replace(/ *\n */g, '\n')
       .replace(/\n{3,}/g, '\n\n')
@@ -353,7 +354,7 @@
 
   function pageBlock(p) {
     if (!p) return '';
-    const lines = [T.page + ': «' + p.title + '»' + (p.kicker ? ' (' + p.kicker + ')' : '')];
+    const lines = [T.page + ': ' + qt(p.title) + (p.kicker ? ' (' + p.kicker + ')' : '')];
     if (p.dek) lines.push(T.about + ': ' + p.dek);
     if ((p.outline || []).length) lines.push(T.outline + ': ' + p.outline.join(' → '));
     if (p.url) lines.push(T.addr + ': ' + p.url);
@@ -362,9 +363,9 @@
 
   function userContent(turn, full) {
     const parts = [];
-    const where = turn.section ? ' (' + T.section + ' «' + turn.section + '»)' : '';
-    if (turn.quote) parts.push(T.quoteHead + where + ':\n«' + clip(turn.quote, LIMITS.selection) + '»');
-    else if (turn.section && full) parts.push(T.reading + ' «' + turn.section + '».');
+    const where = turn.section ? ' (' + T.section + ' ' + qt(turn.section) + ')' : '';
+    if (turn.quote) parts.push(T.quoteHead + where + ':\n' + qt(clip(turn.quote, LIMITS.selection)));
+    else if (turn.section && full) parts.push(T.reading + ' ' + qt(turn.section) + '.');
     if (full && turn.context) parts.push(T.sectionText + ':\n"""\n' + clip(turn.context, LIMITS.section, turn.quote) + '\n"""');
     if (turn.image && full) parts.push(T.shotNow);
     else if (turn.image || turn.hadImage) parts.push(T.shotGone);
@@ -515,18 +516,22 @@
   }
   const headingText = (h) => (h ? tidy(textOf(h)) : '');
 
-  /** В статье разделы «плоские»: h2 и следующие за ним блоки до следующего h2. */
+  const fragOf = (nodes) => {
+    const frag = doc.createDocumentFragment();
+    nodes.forEach((n) => frag.appendChild(n.cloneNode(true)));
+    return frag;
+  };
+
+  /** В статье разделы «плоские»: h2 и следующие за ним блоки до следующего h2; до первого h2 — вступление. */
   function flatGroup(article, child) {
     const kids = Array.from(article.children);
     let i = kids.indexOf(child);
-    while (i > 0 && kids[i].tagName !== 'H2') i--;
-    if (i < 0 || kids[i].tagName !== 'H2') return null;
-    const frag = doc.createDocumentFragment();
+    if (i < 0) return null;
+    while (i >= 0 && kids[i].tagName !== 'H2') i--;
     let j = i + 1;
     const parts = [];
     while (j < kids.length && kids[j].tagName !== 'H2') parts.push(kids[j++]);
-    parts.forEach((p) => frag.appendChild(p.cloneNode(true)));
-    return { title: headingText(kids[i]), node: frag };
+    return { title: i >= 0 ? headingText(kids[i]) : T.start, node: fragOf(parts) };
   }
 
   /** Раздел страницы, к которому относится узел: {title, node}. */
@@ -555,7 +560,10 @@
     const sec = start.closest('main section');
     if (sec) {
       const h = sec.querySelector('h1, h2, h3');
-      return { title: h && h.tagName === 'H1' ? T.start : headingText(h), node: sec };
+      if (!h || h.tagName !== 'H1') return { title: headingText(h), node: sec };
+      // шапка страницы (заголовок и подзаголовок) мала — добавим то, что идёт сразу за ней: вступление статьи, список
+      const next = sec.nextElementSibling;
+      return { title: T.start, node: next && !next.matches(SKIP) ? fragOf([sec, next]) : sec };
     }
     return { title: '', node: state.main };
   }
