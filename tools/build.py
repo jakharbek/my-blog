@@ -259,6 +259,12 @@ def hreflang(page):
     return "\n".join(out)
 
 
+# ИИ-ассистент на каждой странице: markdown.js (безопасный Markdown ответов) и assistant.js
+# (панель, выделение текста, Alt+I). Работает через claude-server на компьютере читателя.
+ASSISTANT = ('  <script defer src="{rel}assets/js/markdown.js"></script>\n'
+             '  <script defer src="{rel}assets/js/assistant.js"></script>\n')
+
+
 def head(lang, title, desc, rel, page, og_type="website", extra=""):
     return f"""<!doctype html>
 <html lang="{lang}">
@@ -277,7 +283,8 @@ def head(lang, title, desc, rel, page, og_type="website", extra=""):
 {hreflang(page)}
   <link rel="icon" href="{rel}assets/favicon.svg" type="image/svg+xml">
 {THEME_BOOT}{FONTS}  <link rel="stylesheet" href="{rel}assets/css/site.css">
-{extra}</head>
+  <link rel="stylesheet" href="{rel}assets/css/assistant.css">
+{extra}{ASSISTANT.format(rel=rel)}</head>
 <body>
 """
 
