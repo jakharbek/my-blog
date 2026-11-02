@@ -109,6 +109,24 @@
     <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/materials/mae-mse-examples/"/>
   </url>
   <url>
+    <loc>https://javharbek.uz/ru/materials/cross-entropy-excel/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/materials/cross-entropy-excel/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/materials/cross-entropy-excel/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/materials/cross-entropy-excel/"/>
+  </url>
+  <url>
+    <loc>https://javharbek.uz/en/materials/cross-entropy-excel/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/materials/cross-entropy-excel/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/materials/cross-entropy-excel/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/materials/cross-entropy-excel/"/>
+  </url>
+  <url>
+    <loc>https://javharbek.uz/uz/materials/cross-entropy-excel/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/materials/cross-entropy-excel/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/materials/cross-entropy-excel/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/materials/cross-entropy-excel/"/>
+  </url>
+  <url>
     <loc>https://javharbek.uz/ru/materials/ml-formulas/adam/</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/materials/ml-formulas/adam/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/materials/ml-formulas/adam/"/>

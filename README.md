@@ -18,6 +18,8 @@ assets/js/site.js          тема, память языка, поиск и фи
 assets/js/sigmoid.js       интерактивные графики записи о сигмоиде
 assets/js/materials.js     страница материала: формулы KaTeX, фильтр по группам, «раскрыть всё»
 assets/js/practice.js      практикум «MAE и MSE на простых примерах»: раскрыть разборы, калькулятор с пошаговым решением
+assets/js/ce-workbook.js   «Перекрёстная энтропия в Excel»: листы тетради в браузере (BCE, CE), зоны логарифма, sigmoid, тренировка ✓/✗
+assets/files/              тетради для скачивания: cross-entropy-practice-<ru|en|uz>.xlsx (собирает tools/workbook_ce.py)
 assets/js/assistant.js     ИИ-ассистент на каждой странице (ru/en/uz): выделение → «Спросить ИИ», Alt+I, панель чата
 assets/js/markdown.js      безопасный Markdown ответов ассистента (перенесён из курса бустинга)
 assets/css/assistant.css   стили панели ассистента + «мост» токенов к палитре блога
@@ -26,6 +28,10 @@ tools/build.py             генератор страниц; тексты ин�
 tools/content_sigmoid.py   тексты статьи о сигмоиде
 tools/content_formulas.py  тексты шпаргалки формул (три языка)
 tools/content_mae_mse.py   практикум MAE и MSE: 20 примеров, тексты на трёх языках; числа разборов считаются точными дробями
+tools/content_ce_workbook.py  разбор Excel-тетради по перекрёстной энтропии: тексты на трёх языках, числа считаются из входов тетради
+tools/workbook_ce.py       тетрадь для скачивания: оригинал (ru) и переводы (en, uz) из tools/workbooks/cross_entropy_practice.xlsx;
+                           переводятся только тексты, формулы и графики остаются; сборка детерминирована
+tools/workbooks/           исходные .xlsx автора (выгрузка из Google Таблиц без изменений)
 .github/workflows/pages.yml деплой на GitHub Pages при пуше в main
 ```
 
