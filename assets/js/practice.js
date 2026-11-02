@@ -46,6 +46,22 @@
   }
 
   const pow10 = (k) => 10n ** BigInt(k);
+  const fill = (t, kw) => Object.keys(kw).reduce((s1, k) => s1.split("{" + k + "}").join(kw[k]), t);
+  /** Вывод по градиентам — те же правила, что grad_auto() в tools/content_mae_mse.py. */
+  function gradAuto(gMse, e, n, D) {
+    const A = L.auto;
+    const mags = gMse.map(([num]) => absB(num)); // общий знаменатель — сравниваем числители
+    if (mags.every((m) => m === 0n)) return A.zero;
+    const out = [fill(A.mae, { v: ht(decimal(1n, BigInt(n)).s) })];
+    const top = mags.reduce((m, v) => (v > m ? v : m), 0n);
+    const nonzero = new Set(mags.filter((m) => m !== 0n).map(String));
+    if (nonzero.size === 1) out.push(A.mse_equal);
+    else if (mags.filter((m) => m === top).length === 1) {
+      const k = mags.indexOf(top);
+      out.push(fill(A.mse_top, { k: k + 1, v: ht(decimal(top, gMse[k][1]).s), e: ht(fx(absB(e[k]), D)) }));
+    } else out.push(A.mse_many);
+    return out.join(" ");
+  }
   const absB = (x) => (x < 0n ? -x : x);
 
   /** Десятичная строка дроби num / den (как exact_decimal / rounded в Python). */
@@ -151,6 +167,38 @@
     tot(L.sum, ht(fx(sumAb, D)), ht(fx(sumSq, 2 * D)));
     tot(L.mean + " (÷ " + n + ")", (mae.exact ? "" : "≈ ") + ht(mae.s), (mse.exact ? "" : "≈ ") + ht(mse.s));
     table.appendChild(tb); wrap.appendChild(table); push(wrap);
+
+    // производные для обратного распространения: g_i = sign(ŷ_i − y_i)/n и 2(ŷ_i − y_i)/n
+    const sgn = p.map((v, i) => (v > y[i] ? 1n : v < y[i] ? -1n : 0n));
+    const gMae = sgn.map((s1) => [s1, N]);                                     // [числитель, знаменатель]
+    const gMse = p.map((v, i) => [2n * (v - y[i]), N * pow10(D)]);
+    const gLines = (arr, mae) => aligned(arr.map((g, i) => {
+      const diff = tx(fx(p[i], D)) + "-" + paren(fx(y[i], D));
+      const top = mae ? `\\operatorname{sign}(${diff})` : `2\\cdot(${diff})`;
+      const r = decimal(g[0], g[1]);
+      return `g_{${i + 1}} &= \\frac{${top}}{${n}} ${r.exact ? "=" : "\\approx"} ${tx(r.s)}`;
+    }));
+    const vecTex = (arr) => {
+      const rs = arr.map(([num, den]) => decimal(num, den));
+      const sep = lang === "en" ? ",\\ " : ";\\ ";
+      return (rs.every((r) => r.exact) ? "=" : "\\approx") + " (" + rs.map((r) => tx(r.s)).join(sep) + ")";
+    };
+    const det = el("details", "deep ex-grad");
+    det.open = true;
+    det.appendChild(el("summary", null, L.grad));
+    const db = el("div", "deep-body");
+    db.appendChild(stepP(7, L.step7)); db.appendChild(eqd(gLines(gMae, true)));
+    db.appendChild(stepP(8, L.step8)); db.appendChild(eqd(gLines(gMse, false)));
+    const pv = el("p", "ex-step", L.grad_vec); db.appendChild(pv);
+    if (n <= 3) db.appendChild(eqd(`\\begin{gathered}\\nabla\\mathrm{MAE} ${vecTex(gMae)}\\\\[4pt]\\nabla\\mathrm{MSE} ${vecTex(gMse)}\\end{gathered}`));
+    else { // длинные векторы — столбцами (как в примерах страницы)
+      const col = (arr) => "\\begin{pmatrix}" + arr.map(([num, den]) => tx(decimal(num, den).s)).join("\\\\") + "\\end{pmatrix}";
+      const relOf = (arr) => (arr.every(([num, den]) => decimal(num, den).exact) ? "=" : "\\approx");
+      db.appendChild(eqd(`\\begin{gathered}\\nabla\\mathrm{MAE} ${relOf(gMae)} ${col(gMae)}\\\\[8pt]\\nabla\\mathrm{MSE} ${relOf(gMse)} ${col(gMse)}\\end{gathered}`));
+    }
+    db.appendChild(el("p", "ex-step", gradAuto(gMse, e, n, D)));
+    det.appendChild(db);
+    push(det);
 
     const ans = el("p", "ex-answer");
     ans.appendChild(el("b", null, L.answer + ": "));

@@ -14,6 +14,7 @@ from fractions import Fraction
 
 SLUG = "mae-mse-examples"
 DATE = "2026-11-01"
+UPDATED = "2026-11-01"  # дополнено: производные для обратного распространения
 LANGS = ("ru", "en", "uz")
 
 # ----------------------------------------------------------------------------------------------
@@ -74,8 +75,10 @@ def solve(y: list[str], yhat: list[str]) -> dict:
     ab = [abs(v) for v in e]
     sq = [v * v for v in e]
     n = len(ys)
+    sign = [(p > y) - (p < y) for y, p in zip(ys, ps)]  # sign(ŷ − y); в нуле — 0 (субградиент)
     return dict(y=ys, p=ps, e=e, abs=ab, sq=sq, n=n, sum_abs=sum(ab, Fraction(0)), sum_sq=sum(sq, Fraction(0)),
-                mae=sum(ab, Fraction(0)) / n, mse=sum(sq, Fraction(0)) / n, bias=sum(e, Fraction(0)) / n)
+                mae=sum(ab, Fraction(0)) / n, mse=sum(sq, Fraction(0)) / n, bias=sum(e, Fraction(0)) / n,
+                sign=sign, g_mae=[Fraction(sg, n) for sg in sign], g_mse=[2 * (p - y) / n for y, p in zip(ys, ps)])
 
 
 # ----------------------------------------------------------------------------------------------
@@ -86,15 +89,18 @@ PAGE = {
     "ru": dict(
         kicker="Практикум · ML / AI",
         title="MAE и MSE на простых примерах",
-        dek="20 задач с подробным разбором — от примера с доски до выбросов и выбора модели. Каждый шаг расписан так же, как на уроке: пары $y_i$ и $\\hat y_i$, ошибки, модули и квадраты, сумма, деление на $n$. Числа простые: всё считается в уме или на бумаге.",
-        description="MAE и MSE на 20 простых примерах: пошаговые разборы, сравнение метрик, выбросы, медиана и среднее, калькулятор и тест.",
-        excerpt="20 простых задач на MAE и MSE с подробным разбором каждого шага — от примера с доски до выбросов и выбора модели. Плюс калькулятор, который расписывает решение для ваших чисел.",
+        dek="20 задач с подробным разбором — от примера с доски до выбросов и выбора модели. Каждый шаг расписан так же, как на уроке: пары $y_i$ и $\\hat y_i$, ошибки, модули и квадраты, сумма, деление на $n$. Числа простые: всё считается в уме или на бумаге. А для обратного распространения ошибки — производные обеих метрик по каждому прогнозу, шаг градиентного спуска и цепное правило до весов нейрона.",
+        description="MAE и MSE на 20 простых примерах: пошаговые разборы, производные для обратного распространения, сравнение метрик, выбросы, медиана и среднее, калькулятор и тест.",
+        excerpt="20 простых задач на MAE и MSE с подробным разбором каждого шага — от примера с доски до выбросов и выбора модели. В каждом примере — производные MAE и MSE для обратного распространения ошибки. Плюс калькулятор, который расписывает решение для ваших чисел.",
         count="примеров", min="мин", expand="Раскрыть все разборы", collapse="Свернуть",
         example="Пример", solution="Разбор и ответ", try_first="Попробуйте сначала решить сами — потом откройте разбор.",
         task="Найдите MAE и MSE.", answer="Ответ", idea="Что видно из примера", model="Модель",
         step1="Ошибка каждого объекта $e_i = y_i - \\hat y_i$ и её модуль:",
         step2="Сумма модулей:", step3="MAE — делим сумму на $n = {n}$:",
         step4="Квадрат каждой ошибки:", step5="Сумма квадратов:", step6="MSE — делим сумму на $n = {n}$:",
+        step7="Производная MAE по каждому прогнозу: $g_i = \\frac{1}{n}\\operatorname{sign}(\\hat y_i - y_i)$:",
+        step8="Производная MSE по каждому прогнозу: $g_i = \\frac{2}{n}(\\hat y_i - y_i)$:",
+        grad="Производные для обратного распространения", grad_idea="Что говорят производные", grad_vec="Векторы градиентов по прогнозам ($\\nabla = \\nabla_{\\hat y}$):",
         table_h=["$i$", "$y_i$", "$\\hat y_i$", "$e_i$", "$|e_i|$", "$e_i^2$"],
         sum="Сумма", mean="Среднее",
         compare="Сравнение", stars="сложность {k} из 3",
@@ -102,15 +108,18 @@ PAGE = {
     "en": dict(
         kicker="Practice · ML / AI",
         title="MAE and MSE by example",
-        dek="20 problems solved step by step, from the example on the board to outliers and choosing a model. Every step is written out as in class: the pairs $y_i$ and $\\hat y_i$, the errors, their absolute values and squares, the sum, the division by $n$. The numbers are simple enough for mental arithmetic or pen and paper.",
-        description="MAE and MSE on 20 simple examples: step-by-step solutions, comparing the metrics, outliers, median versus mean, a calculator and a quiz.",
-        excerpt="20 simple MAE and MSE problems with every step explained, from the example on the board to outliers and model choice. Plus a calculator that writes out the solution for your own numbers.",
+        dek="20 problems solved step by step, from the example on the board to outliers and choosing a model. Every step is written out as in class: the pairs $y_i$ and $\\hat y_i$, the errors, their absolute values and squares, the sum, the division by $n$. The numbers are simple enough for mental arithmetic or pen and paper. And for backpropagation: the derivatives of both metrics with respect to every prediction, a gradient descent step and the chain rule down to the weights of a neuron.",
+        description="MAE and MSE on 20 simple examples: step-by-step solutions, derivatives for backpropagation, comparing the metrics, outliers, median versus mean, a calculator and a quiz.",
+        excerpt="20 simple MAE and MSE problems with every step explained, from the example on the board to outliers and model choice. Every example includes the derivatives of MAE and MSE for backpropagation. Plus a calculator that writes out the solution for your own numbers.",
         count="examples", min="min", expand="Expand all solutions", collapse="Collapse",
         example="Example", solution="Solution and answer", try_first="Try to solve it yourself first, then open the solution.",
         task="Find MAE and MSE.", answer="Answer", idea="What the example shows", model="Model",
         step1="The error of each object $e_i = y_i - \\hat y_i$ and its absolute value:",
         step2="Sum of the absolute values:", step3="MAE: divide the sum by $n = {n}$:",
         step4="The square of each error:", step5="Sum of the squares:", step6="MSE: divide the sum by $n = {n}$:",
+        step7="The derivative of MAE with respect to each prediction: $g_i = \\frac{1}{n}\\operatorname{sign}(\\hat y_i - y_i)$:",
+        step8="The derivative of MSE with respect to each prediction: $g_i = \\frac{2}{n}(\\hat y_i - y_i)$:",
+        grad="Derivatives for backpropagation", grad_idea="What the derivatives show", grad_vec="The gradient vectors with respect to the predictions ($\\nabla = \\nabla_{\\hat y}$):",
         table_h=["$i$", "$y_i$", "$\\hat y_i$", "$e_i$", "$|e_i|$", "$e_i^2$"],
         sum="Sum", mean="Mean",
         compare="Comparison", stars="difficulty {k} of 3",
@@ -118,15 +127,18 @@ PAGE = {
     "uz": dict(
         kicker="Amaliyot · ML / AI",
         title="MAE va MSE oddiy misollarda",
-        dek="Batafsil yechilgan 20 ta masala — doskadagi misoldan chetga chiquvchi qiymatlar va model tanlashgacha. Har bir qadam darsdagidek yozilgan: $y_i$ va $\\hat y_i$ juftlari, xatolar, ularning modullari va kvadratlari, yig‘indi, $n$ ga bo‘lish. Sonlar oddiy: hammasi og‘zaki yoki qog‘ozda hisoblanadi.",
-        description="MAE va MSE 20 ta oddiy misolda: qadamma-qadam yechimlar, metrikalarni solishtirish, chetga chiquvchi qiymatlar, mediana va o‘rtacha, kalkulyator va test.",
-        excerpt="MAE va MSE bo‘yicha 20 ta oddiy masala, har bir qadami batafsil tushuntirilgan — doskadagi misoldan chetga chiquvchi qiymatlar va model tanlashgacha. Yana o‘z sonlaringiz uchun yechimni yozib beradigan kalkulyator.",
+        dek="Batafsil yechilgan 20 ta masala — doskadagi misoldan chetga chiquvchi qiymatlar va model tanlashgacha. Har bir qadam darsdagidek yozilgan: $y_i$ va $\\hat y_i$ juftlari, xatolar, ularning modullari va kvadratlari, yig‘indi, $n$ ga bo‘lish. Sonlar oddiy: hammasi og‘zaki yoki qog‘ozda hisoblanadi. Xatoni teskari tarqatish uchun esa — ikkala metrikaning har bir bashorat bo‘yicha hosilalari, gradiyent tushish qadami va neyron vaznlarigacha zanjir qoidasi.",
+        description="MAE va MSE 20 ta oddiy misolda: qadamma-qadam yechimlar, teskari tarqatish uchun hosilalar, metrikalarni solishtirish, chetga chiquvchi qiymatlar, mediana va o‘rtacha, kalkulyator va test.",
+        excerpt="MAE va MSE bo‘yicha 20 ta oddiy masala, har bir qadami batafsil tushuntirilgan — doskadagi misoldan chetga chiquvchi qiymatlar va model tanlashgacha. Har bir misolda — xatoni teskari tarqatish uchun MAE va MSE hosilalari. Yana o‘z sonlaringiz uchun yechimni yozib beradigan kalkulyator.",
         count="ta misol", min="daq", expand="Barcha yechimlarni ochish", collapse="Yopish",
         example="Misol", solution="Yechim va javob", try_first="Avval o‘zingiz yechib ko‘ring, keyin yechimni oching.",
         task="MAE va MSE ni toping.", answer="Javob", idea="Misol nimani ko‘rsatadi", model="Model",
         step1="Har bir obyektning xatosi $e_i = y_i - \\hat y_i$ va uning moduli:",
         step2="Modullar yig‘indisi:", step3="MAE — yig‘indini $n = {n}$ ga bo‘lamiz:",
         step4="Har bir xatoning kvadrati:", step5="Kvadratlar yig‘indisi:", step6="MSE — yig‘indini $n = {n}$ ga bo‘lamiz:",
+        step7="MAE ning har bir bashorat bo‘yicha hosilasi: $g_i = \\frac{1}{n}\\operatorname{sign}(\\hat y_i - y_i)$:",
+        step8="MSE ning har bir bashorat bo‘yicha hosilasi: $g_i = \\frac{2}{n}(\\hat y_i - y_i)$:",
+        grad="Teskari tarqatish uchun hosilalar", grad_idea="Hosilalar nimani ko‘rsatadi", grad_vec="Bashoratlar bo‘yicha gradiyent vektorlari ($\\nabla = \\nabla_{\\hat y}$):",
         table_h=["$i$", "$y_i$", "$\\hat y_i$", "$e_i$", "$|e_i|$", "$e_i^2$"],
         sum="Yig‘indi", mean="O‘rtacha",
         compare="Solishtirish", stars="qiyinlik {k} / 3",
@@ -456,17 +468,17 @@ QUIZ = {
 }
 
 CALC = {
-    "ru": dict(title="Посчитайте свой пример", lead="Введите правильные ответы $y$ и прогнозы $\\hat y$ — калькулятор распишет решение по тем же четырём шагам. Числа разделяйте точкой с запятой или пробелом; дробную часть — запятой или точкой.",
+    "ru": dict(title="Посчитайте свой пример", lead="Введите правильные ответы $y$ и прогнозы $\\hat y$ — калькулятор распишет решение по тем же шагам — вместе с производными для обратного распространения. Числа разделяйте точкой с запятой или пробелом; дробную часть — запятой или точкой.",
                y="Правильные ответы $y$", p="Прогнозы $\\hat y$", go="Посчитать", presets="Подставить:", board="пример с доски", outlier="выброс", decimals="дроби",
                err_count="Количество чисел в $y$ и $\\hat y$ должно совпадать: сейчас {a} и {b}.", err_num="«{t}» — не число. Разделяйте числа точкой с запятой или пробелом: 3; 5; 8.",
                err_empty="Введите хотя бы по одному числу в обе строки.", err_many="Не больше {m} чисел — иначе разбор станет слишком длинным.",
                noscript="Калькулятору нужен JavaScript; все 20 примеров выше работают и без него."),
-    "en": dict(title="Compute your own example", lead="Enter the correct answers $y$ and the predictions $\\hat y$, and the calculator will write out the solution in the same four steps. Separate the numbers with commas, spaces or semicolons; use a point for decimals.",
+    "en": dict(title="Compute your own example", lead="Enter the correct answers $y$ and the predictions $\\hat y$, and the calculator will write out the solution in the same steps, including the derivatives for backpropagation. Separate the numbers with commas, spaces or semicolons; use a point for decimals.",
                y="Correct answers $y$", p="Predictions $\\hat y$", go="Compute", presets="Try:", board="the board example", outlier="an outlier", decimals="decimals",
                err_count="$y$ and $\\hat y$ must have the same number of values: now {a} and {b}.", err_num="«{t}» is not a number. Separate the numbers with commas, spaces or semicolons: 3, 5, 8.",
                err_empty="Enter at least one number in both lines.", err_many="At most {m} numbers, otherwise the solution gets too long.",
                noscript="The calculator needs JavaScript; all 20 examples above work without it."),
-    "uz": dict(title="O‘z misolingizni hisoblang", lead="To‘g‘ri javoblar $y$ va bashoratlar $\\hat y$ ni kiriting — kalkulyator yechimni xuddi shu to‘rt qadam bo‘yicha yozib beradi. Sonlarni nuqtali vergul yoki bo‘sh joy bilan ajrating; kasr qismini vergul yoki nuqta bilan yozing.",
+    "uz": dict(title="O‘z misolingizni hisoblang", lead="To‘g‘ri javoblar $y$ va bashoratlar $\\hat y$ ni kiriting — kalkulyator yechimni xuddi shu qadamlar bo‘yicha — teskari tarqatish uchun hosilalar bilan birga — yozib beradi. Sonlarni nuqtali vergul yoki bo‘sh joy bilan ajrating; kasr qismini vergul yoki nuqta bilan yozing.",
                y="To‘g‘ri javoblar $y$", p="Bashoratlar $\\hat y$", go="Hisoblash", presets="Qo‘yish:", board="doskadagi misol", outlier="chetga chiquvchi", decimals="kasrlar",
                err_count="$y$ va $\\hat y$ dagi sonlar soni bir xil bo‘lishi kerak: hozir {a} va {b}.", err_num="«{t}» — son emas. Sonlarni nuqtali vergul yoki bo‘sh joy bilan ajrating: 3; 5; 8.",
                err_empty="Ikkala qatorga kamida bittadan son kiriting.", err_many="{m} tadan ko‘p emas — aks holda yechim juda uzun bo‘lib ketadi.",
@@ -484,3 +496,300 @@ HERO = r"\begin{gathered}\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}\bigl|y_i-\hat{y}
 
 def count_label(lang: str) -> str:
     return f"{len(EXAMPLES)} {PAGE[lang]['count']}"
+
+
+# ==============================================================================================
+# Производные для обратного распространения ошибки
+# ==============================================================================================
+# g_i = ∂L/∂ŷ_i:  MAE → sign(ŷ_i − y_i) / n (в нуле — 0, субградиент),  MSE → 2 (ŷ_i − y_i) / n.
+
+ETA_PRED = Fraction(3, 10)  # шаг спуска по прогнозам в примере с доски
+NEURON = dict(x=["1", "2", "3"], y=["3", "5", "8"], w="2", b="0", eta="0.1")  # ŷ = w·x + b
+
+
+def vec(vals: list[Fraction], lang: str) -> tuple[str, str]:
+    """('=' или '\\approx', '(a;\\ b;\\ c)') для вектора из дробей."""
+    sep = ",\\ " if lang == "en" else ";\\ "
+    exact = all(exact_decimal(v) is not None for v in vals)
+    return ("=" if exact else r"\approx"), "(" + sep.join(fmt(v, lang) for v in vals) + ")"
+
+
+def frac_tex(x: Fraction, lang: str) -> str:
+    """Точное значение дроби: 0{,}5 / -\\frac{1}{3}\\approx -0{,}33."""
+    if exact_decimal(x) is not None:
+        return fmt(x, lang)
+    sign = "-" if x < 0 else ""
+    return f"{sign}\\frac{{{abs(x.numerator)}}}{{{x.denominator}}} \\approx {fmt(x, lang)}"
+
+
+def fill(text: str, **kw) -> str:
+    """Подстановка {name} без str.format — в текстах есть фигурные скобки TeX."""
+    for k, v in kw.items():
+        text = text.replace("{" + k + "}", str(v))
+    return text
+
+
+def grad_auto(sol: dict, lang: str) -> str:
+    """Короткий вывод по градиентам — строится из чисел, поэтому верен для любого примера."""
+    n = sol["n"]
+    if all(g == 0 for g in sol["g_mse"]):
+        return GRAD_AUTO[lang]["zero"]
+    out = [fill(GRAD_AUTO[lang]["mae"], v=fmt(Fraction(1, n), lang, "html"))]
+    mags = [abs(g) for g in sol["g_mse"]]
+    top = max(mags)
+    nonzero = [m for m in mags if m]
+    if len(set(nonzero)) == 1:
+        out.append(GRAD_AUTO[lang]["mse_equal"])
+    elif mags.count(top) == 1:
+        k = mags.index(top) + 1
+        out.append(fill(GRAD_AUTO[lang]["mse_top"], k=k, v=fmt(top, lang, "html"), e=fmt(abs(sol["e"][k - 1]), lang, "html")))
+    else:
+        out.append(GRAD_AUTO[lang]["mse_many"])
+    return " ".join(out)
+
+
+GRAD_AUTO = {
+    "ru": dict(zero="Все производные равны нулю: прогноз уже идеален, обратному распространению нечего исправлять.",
+               mae="MAE даёт каждому промаху сигнал одной силы $\\pm\\tfrac{1}{n}$ = ±{v}: важно только направление ошибки.",
+               mse_top="MSE сильнее всего тянет объект {k}: его сигнал {v} по модулю — у него самая большая ошибка ({e}).",
+               mse_equal="У MSE все ненулевые сигналы одинаковы по модулю: ошибки одного размера.",
+               mse_many="У MSE сильнее всего тянут объекты с самыми большими ошибками — сила сигнала пропорциональна ошибке."),
+    "en": dict(zero="All derivatives are zero: the prediction is already perfect, and backpropagation has nothing to fix.",
+               mae="MAE sends every miss a signal of the same strength $\\pm\\tfrac{1}{n}$ = ±{v}: only the direction of the error matters.",
+               mse_top="MSE pulls object {k} the hardest: its signal is {v} in absolute value because it has the largest error ({e}).",
+               mse_equal="With MSE all nonzero signals have the same absolute value: the errors are the same size.",
+               mse_many="With MSE the objects with the largest errors pull the hardest: the strength of the signal is proportional to the error."),
+    "uz": dict(zero="Barcha hosilalar nolga teng: bashorat allaqachon mukammal, teskari tarqatishda tuzatadigan narsa yo‘q.",
+               mae="MAE har bir adashishga bir xil kuchli $\\pm\\tfrac{1}{n}$ = ±{v} signal beradi: faqat xatoning yo‘nalishi muhim.",
+               mse_top="MSE {k}-obyektni eng kuchli tortadi: uning signali modul bo‘yicha {v} — unda eng katta xato ({e}).",
+               mse_equal="MSE da noldan farqli barcha signallar modul bo‘yicha bir xil: xatolar bir xil kattalikda.",
+               mse_many="MSE da eng katta xatoli obyektlar eng kuchli tortadi — signal kuchi xatoga mutanosib."),
+}
+
+# Пояснения к производным в ключевых примерах (номер примера → текст). Числа в них проверяет
+# check_grad_ideas() ниже — при каждой сборке.
+GRAD_IDEA = {
+    1: T("Объект 3 (ошибка 2) получает от MSE сигнал 1,33 — в четыре раза сильнее, чем объект 1 (0,33) с ошибкой 0,5. У MAE оба сигнала одинаковы по модулю — 0,33: модуль не различает «чуть-чуть» и «сильно».",
+         "Object 3 (error 2) gets a signal of 1.33 from MSE, four times stronger than object 1 (0.33) with an error of 0.5. With MAE both signals have the same absolute value, 0.33: the absolute value does not tell «a little» from «a lot».",
+         "3-obyekt (xato 2) MSE dan 1,33 signal oladi — 0,5 xatoli 1-obyektdan (0,33) to‘rt baravar kuchli. MAE da ikkala signal modul bo‘yicha bir xil — 0,33: modul «ozgina» va «ko‘p»ni farqlamaydi."),
+    11: T("Градиенты MSE показывают ту же разницу: у модели A все четыре сигнала по 0,5, у модели B весь сигнал −2 приходится на одну точку. У MAE сигнал этой точки всего −0,25 — как у любой другой ошибки.",
+          "The MSE gradients show the same difference: model A has four signals of 0.5 each, while model B puts its whole signal of −2 on a single point. With MAE that point's signal is only −0.25, like any other error.",
+          "MSE gradiyentlari xuddi shu farqni ko‘rsatadi: A modelda to‘rtala signal 0,5 dan, B modelda butun −2 signal bitta nuqtaga to‘g‘ri keladi. MAE da bu nuqtaning signali bor-yo‘g‘i −0,25 — boshqa har qanday xato kabi."),
+    12: T("При обучении по MSE выброс получает сигнал −8 — в 16 раз сильнее, чем остальные точки (±0,5), и тянет модель на себя. По MAE его сигнал −0,25 — такой же, как у обычной ошибки. Поэтому при выбросах в данных обучают по MAE или по её гладкому родственнику — Huber.",
+          "When training with MSE, the outlier gets a signal of −8, 16 times stronger than the other points (±0.5), and drags the model towards itself. With MAE its signal is −0.25, the same as an ordinary error. That is why, with outliers in the data, models are trained with MAE or its smooth relative, Huber.",
+          "MSE bo‘yicha o‘qitishda chetga chiquvchi qiymat −8 signal oladi — boshqa nuqtalardan (±0,5) 16 baravar kuchli — va modelni o‘ziga tortadi. MAE bo‘yicha uning signali −0,25 — oddiy xatoniki bilan bir xil. Shuning uchun ma’lumotlarda chetga chiquvchilar bo‘lsa, MAE yoki uning silliq qarindoshi — Huber bo‘yicha o‘qitiladi."),
+    13: T("Удвоение ошибок удваивает и градиент MSE (0,67 → 1,33), а градиент MAE не меняется (0,33): он зависит только от знака ошибки.",
+          "Doubling the errors doubles the MSE gradient as well (0.67 → 1.33), while the MAE gradient stays the same (0.33): it depends only on the sign of the error.",
+          "Xatolarni ikki baravar oshirish MSE gradiyentini ham ikki baravar oshiradi (0,67 → 1,33), MAE gradiyenti esa o‘zgarmaydi (0,33): u faqat xatoning ishorasiga bog‘liq."),
+    14: T("Если модель — одно число $c$, производная по нему равна сумме компонент градиента. У MSE она равна нулю при $c = 5$ (среднее): $2 + 0{,}67 - 2{,}67 = 0$; у MAE — при $c = 4$ (медиана): $0{,}33 + 0 - 0{,}33 = 0$. Ноль производной — это минимум: вот почему лучшие константы — среднее и медиана.",
+          "If the model is a single number $c$, the derivative with respect to it is the sum of the gradient components. For MSE it is zero at $c = 5$ (the mean): $2 + 0.67 - 2.67 = 0$; for MAE at $c = 4$ (the median): $0.33 + 0 - 0.33 = 0$. A zero derivative is the minimum: that is why the best constants are the mean and the median.",
+          "Agar model bitta $c$ son bo‘lsa, u bo‘yicha hosila gradiyent komponentlari yig‘indisiga teng. MSE da u $c = 5$ da (o‘rtacha) nolga teng: $2 + 0{,}67 - 2{,}67 = 0$; MAE da — $c = 4$ da (mediana): $0{,}33 + 0 - 0{,}33 = 0$. Hosilaning nolga tengligi — minimum: shuning uchun eng yaxshi o‘zgarmaslar — o‘rtacha va mediana."),
+}
+
+
+def backprop_numbers() -> dict:
+    """Пример с доски: градиенты и один шаг спуска по прогнозам (η = 0,3)."""
+    ex = EXAMPLES[0]
+    sol = solve(ex["y"], ex["preds"][0][1])
+    new_mse_p = [p - ETA_PRED * g for p, g in zip(sol["p"], sol["g_mse"])]
+    new_mae_p = [p - ETA_PRED * g for p, g in zip(sol["p"], sol["g_mae"])]
+    after_mse = solve([str(v) for v in sol["y"]], [str(float(v)) if exact_decimal(v) else str(v) for v in new_mse_p])
+    after_mae = solve([str(v) for v in sol["y"]], [str(float(v)) if exact_decimal(v) else str(v) for v in new_mae_p])
+    assert after_mse["mse"] < sol["mse"] and after_mae["mae"] < sol["mae"]
+    return dict(sol=sol, p_mse=new_mse_p, p_mae=new_mae_p, mse_after=after_mse["mse"], mae_after=after_mae["mae"])
+
+
+def neuron_numbers() -> dict:
+    """Нейрон ŷ = w·x + b: градиенты по w и b и один шаг для MSE и для MAE."""
+    x = [F(v) for v in NEURON["x"]]
+    y = [F(v) for v in NEURON["y"]]
+    w, b, eta = F(NEURON["w"]), F(NEURON["b"]), F(NEURON["eta"])
+    out = {"x": x, "y": y, "w": w, "b": b, "eta": eta, "p": [w * xi + b for xi in x]}
+    for loss in ("mse", "mae"):
+        sol = solve([str(v) for v in y], [str(v) for v in out["p"]])
+        g = sol["g_" + loss]
+        dw = sum((gi * xi for gi, xi in zip(g, x)), Fraction(0))
+        db = sum(g, Fraction(0))
+        w2, b2 = w - eta * dw, b - eta * db
+        p2 = [w2 * xi + b2 for xi in x]
+        e2 = [yi - pi for yi, pi in zip(y, p2)]
+        before = sol[loss]
+        after = sum((v * v if loss == "mse" else abs(v) for v in e2), Fraction(0)) / len(x)
+        assert after < before
+        out[loss] = dict(g=g, dw=dw, db=db, w2=w2, b2=b2, p2=p2, before=before, after=after)
+    return out
+
+
+BACKPROP_TEXT = {
+    "ru": dict(
+        title="Производные для обратного распространения",
+        lead="Нейросеть учится так: считает потерю (например, MSE), а затем идёт назад — от потери к весам — и в каждом слое перемножает производные по цепному правилу. Этот проход называется обратным распространением ошибки (backpropagation). Самое первое звено цепочки — производная потери по прогнозу $\\hat y_i$: она говорит, в какую сторону и насколько сильно сдвинуть каждый прогноз. Если вы только знакомитесь с MAE и MSE, этот раздел можно пропустить и вернуться к нему позже.",
+        g_sym="$g_i$ — производная потери по прогнозу $\\hat y_i$, компонента градиента $\\nabla_{\\hat y} L = (g_1, \\dots, g_n)$",
+        mse_h="Производная MSE",
+        mse_p="Из всей суммы от $\\hat y_i$ зависит только одно слагаемое $(y_i - \\hat y_i)^2$. Производная квадрата — «два на выражение», а производная выражения $y_i - \\hat y_i$ по $\\hat y_i$ равна $-1$ (цепное правило). Отсюда знак: $(\\hat y_i - y_i)$, а не $(y_i - \\hat y_i)$.",
+        mae_h="Производная MAE",
+        mae_p="Производная модуля $|x|$ равна $1$ справа от нуля и $-1$ слева. В самой точке $x = 0$ у модуля излом, и производной нет; на практике берут $0$ — это одно из допустимых значений (субградиент), так делают PyTorch и NumPy.",
+        sign_h="Как читать знак",
+        sign_p="Плюс — прогноз завышен, и спуск его уменьшит; минус — занижен, и спуск его увеличит; ноль — объект на месте. Шаг градиентного спуска: $\\hat y_i \\leftarrow \\hat y_i - \\eta\\, g_i$, где $\\eta$ — темп обучения (learning rate). Главное различие метрик: у MSE сила сигнала пропорциональна ошибке, у MAE она всегда $\\tfrac{1}{n}$.",
+        board_h="Пример с доски: градиент и один шаг спуска",
+        board_p="Для $y = {y}$ и $\\hat y = {p}$ производные по каждому прогнозу такие:",
+        heads=["$i$", "$y_i$", "$\\hat y_i$", "$g_i$ для MAE", "$g_i$ для MSE"],
+        step_p="Сделаем один шаг спуска прямо по прогнозам с $\\eta = {eta}$ — сначала по градиенту MSE, потом по градиенту MAE:",
+        step_after="Обе метрики уменьшились: MSE {mse0} → {mse1}, MAE {mae0} → {mae1}. Сильнее всего MSE сдвинула третий прогноз — тот, где ошибка больше всего.",
+        note="В настоящей сети прогнозы не двигают напрямую — двигают веса. Градиент по прогнозам — это сигнал, который уходит назад к весам; как именно, показано в разделе «От прогноза к весам». В каждом примере ниже производные расписаны в блоке «Производные для обратного распространения».",
+    ),
+    "en": dict(
+        title="Derivatives for backpropagation",
+        lead="A neural network learns like this: it computes the loss (say, MSE), then walks backwards, from the loss to the weights, multiplying derivatives layer by layer with the chain rule. This pass is called backpropagation. The very first link of the chain is the derivative of the loss with respect to the prediction $\\hat y_i$: it says in which direction and how strongly to move each prediction. If you are just getting to know MAE and MSE, you can skip this section and come back to it later.",
+        g_sym="$g_i$ is the derivative of the loss with respect to the prediction $\\hat y_i$, a component of the gradient $\\nabla_{\\hat y} L = (g_1, \\dots, g_n)$",
+        mse_h="The derivative of MSE",
+        mse_p="Of the whole sum, only one term depends on $\\hat y_i$: $(y_i - \\hat y_i)^2$. The derivative of a square is «two times the expression», and the derivative of $y_i - \\hat y_i$ with respect to $\\hat y_i$ is $-1$ (the chain rule). Hence the sign: $(\\hat y_i - y_i)$, not $(y_i - \\hat y_i)$.",
+        mae_h="The derivative of MAE",
+        mae_p="The derivative of $|x|$ is $1$ to the right of zero and $-1$ to the left. At $x = 0$ itself the absolute value has a kink and no derivative; in practice we take $0$, one of the admissible values (a subgradient), as PyTorch and NumPy do.",
+        sign_h="How to read the sign",
+        sign_p="Plus means the prediction is too high and descent will lower it; minus means it is too low and descent will raise it; zero means the object stays put. A gradient descent step: $\\hat y_i \\leftarrow \\hat y_i - \\eta\\, g_i$, where $\\eta$ is the learning rate. The key difference between the metrics: with MSE the strength of the signal is proportional to the error, with MAE it is always $\\tfrac{1}{n}$.",
+        board_h="The board example: the gradient and one descent step",
+        board_p="For $y = {y}$ and $\\hat y = {p}$ the derivatives with respect to each prediction are:",
+        heads=["$i$", "$y_i$", "$\\hat y_i$", "$g_i$ for MAE", "$g_i$ for MSE"],
+        step_p="Let us take one descent step directly on the predictions with $\\eta = {eta}$, first along the MSE gradient, then along the MAE gradient:",
+        step_after="Both metrics went down: MSE {mse0} → {mse1}, MAE {mae0} → {mae1}. MSE moved the third prediction the most, the one with the largest error.",
+        note="In a real network the predictions are not moved directly; the weights are. The gradient with respect to the predictions is the signal that travels back to the weights; how exactly is shown in the section «From the prediction to the weights». In every example below the derivatives are written out in the «Derivatives for backpropagation» block.",
+    ),
+    "uz": dict(
+        title="Teskari tarqatish uchun hosilalar",
+        lead="Neyron tarmoq shunday o‘rganadi: yo‘qotishni (masalan, MSE ni) hisoblaydi, keyin orqaga — yo‘qotishdan vaznlarga qarab — yuradi va har bir qatlamda hosilalarni zanjir qoidasi bo‘yicha ko‘paytiradi. Bu o‘tish xatoni teskari tarqatish (backpropagation) deb ataladi. Zanjirning eng birinchi bo‘g‘ini — yo‘qotishning $\\hat y_i$ bashorat bo‘yicha hosilasi: u har bir bashoratni qaysi tomonga va qanchalik kuchli siljitishni aytadi. Agar MAE va MSE bilan endigina tanishayotgan bo‘lsangiz, bu bo‘limni o‘tkazib yuborib, keyinroq qaytishingiz mumkin.",
+        g_sym="$g_i$ — yo‘qotishning $\\hat y_i$ bashorat bo‘yicha hosilasi, $\\nabla_{\\hat y} L = (g_1, \\dots, g_n)$ gradiyentning komponenti",
+        mse_h="MSE ning hosilasi",
+        mse_p="Butun yig‘indidan $\\hat y_i$ ga faqat bitta qo‘shiluvchi bog‘liq: $(y_i - \\hat y_i)^2$. Kvadratning hosilasi — «ikki karra ifoda», $y_i - \\hat y_i$ ifodaning $\\hat y_i$ bo‘yicha hosilasi esa $-1$ (zanjir qoidasi). Shuning uchun ishora: $(\\hat y_i - y_i)$, $(y_i - \\hat y_i)$ emas.",
+        mae_h="MAE ning hosilasi",
+        mae_p="$|x|$ modulning hosilasi noldan o‘ngda $1$ ga, chapda $-1$ ga teng. $x = 0$ nuqtaning o‘zida modul sinadi va hosila yo‘q; amalda $0$ olinadi — bu joiz qiymatlardan biri (subgradiyent), PyTorch va NumPy shunday qiladi.",
+        sign_h="Ishorani qanday o‘qish kerak",
+        sign_p="Plyus — bashorat oshirilgan, tushish uni kamaytiradi; minus — kam ko‘rsatilgan, tushish uni oshiradi; nol — obyekt joyida qoladi. Gradiyent tushish qadami: $\\hat y_i \\leftarrow \\hat y_i - \\eta\\, g_i$, bu yerda $\\eta$ — o‘rganish tezligi (learning rate). Metrikalarning asosiy farqi: MSE da signal kuchi xatoga mutanosib, MAE da esa har doim $\\tfrac{1}{n}$.",
+        board_h="Doskadagi misol: gradiyent va bitta tushish qadami",
+        board_p="$y = {y}$ va $\\hat y = {p}$ uchun har bir bashorat bo‘yicha hosilalar:",
+        heads=["$i$", "$y_i$", "$\\hat y_i$", "MAE uchun $g_i$", "MSE uchun $g_i$"],
+        step_p="To‘g‘ridan-to‘g‘ri bashoratlar bo‘yicha $\\eta = {eta}$ bilan bitta tushish qadamini qo‘yamiz — avval MSE gradiyenti, keyin MAE gradiyenti bo‘yicha:",
+        step_after="Ikkala metrika kamaydi: MSE {mse0} → {mse1}, MAE {mae0} → {mae1}. MSE uchinchi bashoratni eng ko‘p siljitdi — xato eng katta bo‘lgan joyni.",
+        note="Haqiqiy tarmoqda bashoratlar to‘g‘ridan-to‘g‘ri siljitilmaydi — vaznlar siljitiladi. Bashoratlar bo‘yicha gradiyent — vaznlarga qaytib boradigan signal; qanday qilib — «Bashoratdan vaznlarga» bo‘limida ko‘rsatilgan. Quyidagi har bir misolda hosilalar «Teskari tarqatish uchun hosilalar» blokida yozilgan.",
+    ),
+}
+
+CHAIN_TEXT = {
+    "ru": dict(
+        title="От прогноза к весам: цепное правило",
+        lead="Возьмём самый простой нейрон без функции активации: $\\hat y_i = w\\,x_i + b$. Входы $x = {x}$, правильные ответы $y = {y}$, текущие веса $w = {w}$, $b = {b}$ — значит, прогнозы $\\hat y = {p}$. Как градиент по прогнозам превращается в градиент по весам?",
+        rule="Каждый прогноз зависит от $w$ через множитель $x_i$, а от $b$ — с множителем $1$: $\\frac{\\partial \\hat y_i}{\\partial w} = x_i$, $\\frac{\\partial \\hat y_i}{\\partial b} = 1$. По цепному правилу:",
+        mse_h="По MSE", mae_h="По MAE",
+        g_line="Градиент по прогнозам:", w_line="Градиент по весам:", step_line="Шаг спуска с $\\eta = {eta}$:",
+        after="Потеря после шага: {name} {before} → {after}.",
+        compare="У MSE производная по $w$ равна {dw_mse}, у MAE — {dw_mae}: третий объект ошибается на 2, и MSE «кричит» громче — шаг получается больше. Так один и тот же сигнал ошибки от потери уходит назад к весам; в глубокой сети цепочка просто длиннее: сигнал умножается на производные каждого слоя.",
+    ),
+    "en": dict(
+        title="From the prediction to the weights: the chain rule",
+        lead="Take the simplest neuron with no activation function: $\\hat y_i = w\\,x_i + b$. The inputs are $x = {x}$, the correct answers $y = {y}$, the current weights $w = {w}$, $b = {b}$, so the predictions are $\\hat y = {p}$. How does the gradient with respect to the predictions turn into a gradient with respect to the weights?",
+        rule="Each prediction depends on $w$ through the factor $x_i$ and on $b$ with the factor $1$: $\\frac{\\partial \\hat y_i}{\\partial w} = x_i$, $\\frac{\\partial \\hat y_i}{\\partial b} = 1$. By the chain rule:",
+        mse_h="With MSE", mae_h="With MAE",
+        g_line="The gradient with respect to the predictions:", w_line="The gradient with respect to the weights:", step_line="A descent step with $\\eta = {eta}$:",
+        after="The loss after the step: {name} {before} → {after}.",
+        compare="With MSE the derivative with respect to $w$ is {dw_mse}, with MAE it is {dw_mae}: the third object is off by 2, and MSE «shouts» louder, so the step is larger. This is how one and the same error signal travels back from the loss to the weights; in a deep network the chain is simply longer: the signal is multiplied by the derivative of every layer.",
+    ),
+    "uz": dict(
+        title="Bashoratdan vaznlarga: zanjir qoidasi",
+        lead="Aktivatsiya funksiyasiz eng oddiy neyronni olamiz: $\\hat y_i = w\\,x_i + b$. Kirishlar $x = {x}$, to‘g‘ri javoblar $y = {y}$, joriy vaznlar $w = {w}$, $b = {b}$ — demak, bashoratlar $\\hat y = {p}$. Bashoratlar bo‘yicha gradiyent qanday qilib vaznlar bo‘yicha gradiyentga aylanadi?",
+        rule="Har bir bashorat $w$ ga $x_i$ ko‘paytuvchi orqali, $b$ ga esa $1$ ko‘paytuvchi bilan bog‘liq: $\\frac{\\partial \\hat y_i}{\\partial w} = x_i$, $\\frac{\\partial \\hat y_i}{\\partial b} = 1$. Zanjir qoidasi bo‘yicha:",
+        mse_h="MSE bo‘yicha", mae_h="MAE bo‘yicha",
+        g_line="Bashoratlar bo‘yicha gradiyent:", w_line="Vaznlar bo‘yicha gradiyent:", step_line="$\\eta = {eta}$ bilan tushish qadami:",
+        after="Qadamdan keyingi yo‘qotish: {name} {before} → {after}.",
+        compare="MSE da $w$ bo‘yicha hosila {dw_mse} ga, MAE da — {dw_mae} ga teng: uchinchi obyekt 2 ga adashadi va MSE balandroq «qichqiradi» — qadam kattaroq chiqadi. Bir xil xato signali yo‘qotishdan vaznlarga shunday qaytadi; chuqur tarmoqda zanjir shunchaki uzunroq: signal har bir qatlamning hosilasiga ko‘paytiriladi.",
+    ),
+}
+
+QUIZ_GRAD = {
+    "ru": [
+        dict(q="$y = (2;\\ 4)$, $\\hat y = (3;\\ 1)$. Чему равен градиент MSE по прогнозам?", options=["$(1;\\ -3)$", "$(-1;\\ 3)$", "$(0{,}5;\\ -1{,}5)$", "$(2;\\ -6)$"], answer=0,
+             explain="$g_i = \\tfrac{2}{n}(\\hat y_i - y_i)$: $\\tfrac{2}{2}(3 - 2) = 1$ и $\\tfrac{2}{2}(1 - 4) = -3$."),
+        dict(q="Для тех же чисел чему равен градиент MAE?", options=["$(0{,}5;\\ -0{,}5)$", "$(1;\\ -3)$", "$(-0{,}5;\\ 0{,}5)$", "$(1;\\ -1)$"], answer=0,
+             explain="$g_i = \\tfrac{1}{n}\\operatorname{sign}(\\hat y_i - y_i)$: $\\tfrac{1}{2}\\cdot 1 = 0{,}5$ и $\\tfrac{1}{2}\\cdot(-1) = -0{,}5$."),
+        dict(q="Ошибка одного объекта выросла с 1 до 10. Как изменится его компонента градиента MAE?", options=["вырастет в 10 раз", "не изменится", "вырастет в 100 раз", "станет нулём"], answer=1,
+             explain="У MAE компонента градиента — это $\\pm\\tfrac{1}{n}$, она зависит только от знака ошибки. У MSE она выросла бы в 10 раз."),
+    ],
+    "en": [
+        dict(q="$y = (2,\\ 4)$, $\\hat y = (3,\\ 1)$. What is the MSE gradient with respect to the predictions?", options=["$(1,\\ -3)$", "$(-1,\\ 3)$", "$(0.5,\\ -1.5)$", "$(2,\\ -6)$"], answer=0,
+             explain="$g_i = \\tfrac{2}{n}(\\hat y_i - y_i)$: $\\tfrac{2}{2}(3 - 2) = 1$ and $\\tfrac{2}{2}(1 - 4) = -3$."),
+        dict(q="For the same numbers, what is the MAE gradient?", options=["$(0.5,\\ -0.5)$", "$(1,\\ -3)$", "$(-0.5,\\ 0.5)$", "$(1,\\ -1)$"], answer=0,
+             explain="$g_i = \\tfrac{1}{n}\\operatorname{sign}(\\hat y_i - y_i)$: $\\tfrac{1}{2}\\cdot 1 = 0.5$ and $\\tfrac{1}{2}\\cdot(-1) = -0.5$."),
+        dict(q="The error of one object grew from 1 to 10. How does its MAE gradient component change?", options=["it grows 10 times", "it does not change", "it grows 100 times", "it becomes zero"], answer=1,
+             explain="With MAE the gradient component is $\\pm\\tfrac{1}{n}$ and depends only on the sign of the error. With MSE it would grow 10 times."),
+    ],
+    "uz": [
+        dict(q="$y = (2;\\ 4)$, $\\hat y = (3;\\ 1)$. Bashoratlar bo‘yicha MSE gradiyenti nimaga teng?", options=["$(1;\\ -3)$", "$(-1;\\ 3)$", "$(0{,}5;\\ -1{,}5)$", "$(2;\\ -6)$"], answer=0,
+             explain="$g_i = \\tfrac{2}{n}(\\hat y_i - y_i)$: $\\tfrac{2}{2}(3 - 2) = 1$ va $\\tfrac{2}{2}(1 - 4) = -3$."),
+        dict(q="Xuddi shu sonlar uchun MAE gradiyenti nimaga teng?", options=["$(0{,}5;\\ -0{,}5)$", "$(1;\\ -3)$", "$(-0{,}5;\\ 0{,}5)$", "$(1;\\ -1)$"], answer=0,
+             explain="$g_i = \\tfrac{1}{n}\\operatorname{sign}(\\hat y_i - y_i)$: $\\tfrac{1}{2}\\cdot 1 = 0{,}5$ va $\\tfrac{1}{2}\\cdot(-1) = -0{,}5$."),
+        dict(q="Bitta obyektning xatosi 1 dan 10 gacha oshdi. Uning MAE gradiyenti komponenti qanday o‘zgaradi?", options=["10 baravar oshadi", "o‘zgarmaydi", "100 baravar oshadi", "nolga aylanadi"], answer=1,
+             explain="MAE da gradiyent komponenti $\\pm\\tfrac{1}{n}$ ga teng va faqat xato ishorasiga bog‘liq. MSE da u 10 baravar oshgan bo‘lardi."),
+    ],
+}
+
+MISTAKES_GRAD = {
+    "ru": ["<b>Перепутали знак производной.</b> $\\frac{\\partial}{\\partial \\hat y_i}(y_i - \\hat y_i)^2 = 2(y_i - \\hat y_i)\\cdot(-1) = 2(\\hat y_i - y_i)$: внутренняя производная даёт минус. С неверным знаком спуск пойдёт вверх, и потеря будет расти.",
+           "<b>Забыли множитель $\\tfrac{2}{n}$ или $\\tfrac{1}{n}$.</b> Направление от этого не меняется, но шаг выйдет в $n$ (или $2n$) раз больше — а с ним меняется и подходящий темп обучения.",
+           "<b>Ищут производную MAE в нуле.</b> Её там нет: у модуля излом. Берут субградиент — обычно $0$, как в PyTorch."],
+    "en": ["<b>Got the sign of the derivative wrong.</b> $\\frac{\\partial}{\\partial \\hat y_i}(y_i - \\hat y_i)^2 = 2(y_i - \\hat y_i)\\cdot(-1) = 2(\\hat y_i - y_i)$: the inner derivative brings a minus. With the wrong sign, descent goes uphill and the loss grows.",
+           "<b>Forgot the factor $\\tfrac{2}{n}$ or $\\tfrac{1}{n}$.</b> The direction does not change, but the step becomes $n$ (or $2n$) times larger, and so does the suitable learning rate.",
+           "<b>Looking for the derivative of MAE at zero.</b> There is none: the absolute value has a kink. A subgradient is used instead, usually $0$, as in PyTorch."],
+    "uz": ["<b>Hosila ishorasini adashtirish.</b> $\\frac{\\partial}{\\partial \\hat y_i}(y_i - \\hat y_i)^2 = 2(y_i - \\hat y_i)\\cdot(-1) = 2(\\hat y_i - y_i)$: ichki hosila minus beradi. Noto‘g‘ri ishora bilan tushish yuqoriga ketadi va yo‘qotish o‘sadi.",
+           "<b>$\\tfrac{2}{n}$ yoki $\\tfrac{1}{n}$ ko‘paytuvchini unutish.</b> Yo‘nalish o‘zgarmaydi, lekin qadam $n$ (yoki $2n$) baravar katta chiqadi — u bilan birga mos o‘rganish tezligi ham o‘zgaradi.",
+           "<b>MAE hosilasini nolda izlash.</b> U yerda hosila yo‘q: modul sinadi. Subgradiyent olinadi — odatda $0$, PyTorch dagi kabi."],
+}
+
+SUMMARY_GRAD = {
+    "ru": dict(rows=[["Производная по $\\hat y_i$", "$-\\tfrac{1}{n}\\operatorname{sign} e_i$", "$-\\tfrac{2}{n}\\,e_i$"],
+                     ["Сила сигнала", "одинакова: $\\pm\\tfrac{1}{n}$", "растёт вместе с ошибкой"]],
+               bullet="Для обратного распространения нужна производная потери по прогнозу: у MSE $\\tfrac{2}{n}(\\hat y_i - y_i)$, у MAE $\\tfrac{1}{n}\\operatorname{sign}(\\hat y_i - y_i)$. Дальше её умножают на производные слоёв по цепному правилу."),
+    "en": dict(rows=[["Derivative w.r.t. $\\hat y_i$", "$-\\tfrac{1}{n}\\operatorname{sign} e_i$", "$-\\tfrac{2}{n}\\,e_i$"],
+                     ["Signal strength", "the same: $\\pm\\tfrac{1}{n}$", "proportional to the error"]],
+               bullet="Backpropagation needs the derivative of the loss with respect to the prediction: $\\tfrac{2}{n}(\\hat y_i - y_i)$ for MSE and $\\tfrac{1}{n}\\operatorname{sign}(\\hat y_i - y_i)$ for MAE. Then it is multiplied by the derivatives of the layers with the chain rule."),
+    "uz": dict(rows=[["$\\hat y_i$ bo‘yicha hosila", "$-\\tfrac{1}{n}\\operatorname{sign} e_i$", "$-\\tfrac{2}{n}\\,e_i$"],
+                     ["Signal kuchi", "bir xil: $\\pm\\tfrac{1}{n}$", "xatoga mutanosib"]],
+               bullet="Teskari tarqatish uchun yo‘qotishning bashorat bo‘yicha hosilasi kerak: MSE da $\\tfrac{2}{n}(\\hat y_i - y_i)$, MAE da $\\tfrac{1}{n}\\operatorname{sign}(\\hat y_i - y_i)$. Keyin u zanjir qoidasi bo‘yicha qatlamlar hosilalariga ko‘paytiriladi."),
+}
+
+UPDATE_NEWS = dict(
+    title={"ru": "Материал дополнен: производные MAE и MSE для обратного распространения",
+           "en": "Material updated: derivatives of MAE and MSE for backpropagation",
+           "uz": "Material to‘ldirildi: teskari tarqatish uchun MAE va MSE hosilalari"},
+    excerpt={"ru": "В каждом из 20 примеров теперь расписаны производные MAE и MSE по каждому прогнозу — сигнал, с которого начинается обратное распространение ошибки. Новые разделы: шаг градиентного спуска и цепное правило до весов нейрона; калькулятор тоже считает производные.",
+             "en": "Each of the 20 examples now writes out the derivatives of MAE and MSE with respect to every prediction, the signal that starts backpropagation. New sections: a gradient descent step and the chain rule down to the weights of a neuron; the calculator computes the derivatives too.",
+             "uz": "20 ta misolning har birida endi MAE va MSE ning har bir bashorat bo‘yicha hosilalari yozilgan — xatoni teskari tarqatish shu signaldan boshlanadi. Yangi bo‘limlar: gradiyent tushish qadami va neyron vaznlarigacha zanjir qoidasi; kalkulyator ham hosilalarni hisoblaydi."},
+)
+
+
+def check_grad_ideas() -> None:
+    """Числа из GRAD_IDEA и текстов разделов — те же, что даёт расчёт (иначе сборка падает)."""
+    def g(k, model=0):
+        ex = EXAMPLES[k - 1]
+        return solve(ex["y"], ex["preds"][model][1])
+    s1 = g(1)
+    assert s1["g_mse"] == [Fraction(-1, 3), 0, Fraction(4, 3)] and s1["g_mae"] == [Fraction(-1, 3), 0, Fraction(1, 3)]
+    assert s1["g_mse"][2] / -s1["g_mse"][0] == 4  # «в четыре раза сильнее»
+    a, b = g(11, 0), g(11, 1)
+    assert all(abs(v) == Fraction(1, 2) for v in a["g_mse"]) and b["g_mse"] == [0, 0, 0, -2] and b["g_mae"][3] == Fraction(-1, 4)
+    s12 = g(12)
+    assert s12["g_mse"][3] == -8 and {abs(v) for v in s12["g_mse"][:3]} == {0, Fraction(1, 2)} and s12["g_mae"][3] == Fraction(-1, 4)
+    assert -s12["g_mse"][3] / Fraction(1, 2) == 16  # «в 16 раз сильнее»
+    a, b = g(13, 0), g(13, 1)
+    assert set(a["g_mse"]) == {Fraction(2, 3)} and set(b["g_mse"]) == {Fraction(4, 3)} and a["g_mae"] == b["g_mae"] == [Fraction(1, 3)] * 3
+    a, b = g(14, 0), g(14, 1)
+    assert a["g_mse"] == [2, Fraction(2, 3), Fraction(-8, 3)] and sum(a["g_mse"]) == 0  # минимум MSE — среднее
+    assert b["g_mae"] == [Fraction(1, 3), 0, Fraction(-1, 3)] and sum(b["g_mae"]) == 0  # минимум MAE — медиана
+    bp = backprop_numbers()
+    assert (rounded(bp["sol"]["mse"]), rounded(bp["mse_after"]), rounded(bp["sol"]["mae"]), rounded(bp["mae_after"])) == ("1.42", "0.91", "0.83", "0.77")
+    nn = neuron_numbers()
+    assert (nn["mse"]["dw"], nn["mae"]["dw"]) == (-6, -2) and nn["mse"]["dw"] / nn["mae"]["dw"] == 3  # «втрое»
+    # тест: y = (2; 4), ŷ = (3; 1)
+    q = solve(["2", "4"], ["3", "1"])
+    assert q["g_mse"] == [1, -3] and q["g_mae"] == [Fraction(1, 2), Fraction(-1, 2)]
+
+
+check_grad_ideas()
