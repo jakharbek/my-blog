@@ -127,7 +127,18 @@ def fmt_date(iso, lang):
 # An absolute url opens another site; a relative one opens a page of this blog (a material).
 FEATURED = "sigmoid"
 COURSE_URL = "https://jakharbek.github.io/ml_gradient_boosting/"
+# Курс «Математика по косточкам» на трёх языках: русская версия в корне, английская и узбекская — в en/ и uz/.
+MATH_COURSE_URL = "https://jakharbek.github.io/math_lessons/"
+MATH_COURSE = {"ru": MATH_COURSE_URL, "en": MATH_COURSE_URL + "en/", "uz": MATH_COURSE_URL + "uz/"}
 POSTS = [
+    dict(slug="math-lessons-course", topic="math", date="2026-11-16",
+         url=MATH_COURSE,
+         title={"ru": "Открыт курс «Математика по косточкам»",
+                "en": "Course launched: “Math, bone by bone”",
+                "uz": "«Matematika: mayda detallarigacha» kursi ochildi"},
+         excerpt={"ru": "Интерактивный курс математики для машинного обучения на трёх языках: производная, матрицы, градиентный спуск и алгебра по Куликову. Живые рисунки, задачи с решениями и ИИ-наставник рядом с каждым абзацем.",
+                  "en": "An interactive mathematics course for machine learning in three languages: the derivative, matrices, gradient descent and algebra after Kulikov. Live figures, problems with solutions and an AI tutor next to every paragraph.",
+                  "uz": "Mashinaviy o‘qitish uchun uch tildagi interaktiv matematika kursi: hosila, matritsalar, gradiyent tushish va Kulikov bo‘yicha algebra. Jonli rasmlar, yechimli masalalar va har bir xatboshi yonida AI-ustoz."}),
     dict(slug="sigmoid", topic="ml", date=DATE_ISO, mins=9,
          title={"ru": "Анатомия сигмоиды", "en": "Anatomy of the sigmoid", "uz": "Sigmoidaning anatomiyasi"},
          excerpt={"ru": "Две горизонтальные асимптоты и одна точка перегиба: что они значат для нейросети и почему 0.5 стал порогом решения.",
@@ -366,12 +377,14 @@ def home(lang):
     for tid, _, _, names in TOPICS:
         chips.append(f'<button type="button" class="chip" data-topic="{tid}" aria-pressed="false"><span>{names[lang][0]}</span><small>{sum(1 for p in POSTS if p["topic"] == tid)}</small></button>')
     topic_name = {tid: names[lang][0] for tid, _, _, names in TOPICS}
+    # url записи — строка или словарь по языкам (курс на трёх языках ведёт на версию на языке страницы)
+    url_of = lambda p: p["url"][lang] if isinstance(p.get("url"), dict) else p.get("url")
     def cta(p):
         if "url" not in p:
             return f"{p['mins']} {s['min']}"
-        return s["openSite"] if p["url"].startswith("http") else s["openMaterial"]
+        return s["openSite"] if url_of(p).startswith("http") else s["openMaterial"]
     rows = "\n".join(
-        f"""      <a class="row" href="{p.get('url') or p['slug'] + '/'}" data-topic="{p['topic']}">
+        f"""      <a class="row" href="{url_of(p) or p['slug'] + '/'}" data-topic="{p['topic']}">
         <span class="l"><span class="kicker">{s['news'] + ' · ' if 'url' in p else ''}{topic_name[p['topic']]}</span><span class="rt">{p['title'][lang]}</span><span class="ex">{p['excerpt'][lang]}</span></span>
         <span class="r"><time datetime="{p['date']}">{fmt_date(p['date'], lang)}</time><span>{cta(p)}</span></span>
       </a>""" for p in sorted(POSTS, key=lambda p: p["date"], reverse=True))

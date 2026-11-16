@@ -139,7 +139,9 @@ h2.sec { margin: 0; font-size: clamp(30px, 3.2vw, 40px); font-weight: 500; line-
 .row .l { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .row .rt { font-size: clamp(19px, 1.8vw, 22px); font-weight: 500; line-height: 1.35; text-wrap: balance; transition: color .33s ease; }
 .row:hover .rt { color: var(--fg3); }
-.row .ex { font-size: 15px; color: var(--fg3); }
+.row[hidden] { display: none; }
+/* .ex ниже — карточка примера в материалах; описание записи в списке ею не является */
+.row .ex { display: block; padding: 0; border: 0; border-radius: 0; font-size: 15px; color: var(--fg3); }
 .row .r { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 13px; color: var(--fg3); white-space: nowrap; }
 .empty { margin: 0; padding: 56px 0; text-align: center; font-size: 16px; color: var(--fg3); }
 
