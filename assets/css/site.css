@@ -692,8 +692,6 @@ details.ex-sol[open] > summary::after { content: "−"; }
 .nr-mat tr { cursor: pointer; }
 .nr-mat tr.hi td { background: var(--bg3); box-shadow: inset 0 -2px 0 var(--v-orange); font-weight: 600; }
 .nr-mat tr.hi th { color: var(--v-orange); }
-.fv.nr-fs { overflow-y: auto; padding: 18px 22px; background: var(--bg2); }
-.fv.nr-fs .nr-net-panel { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 @media (max-width: 640px) { .nr-net-panel { grid-template-columns: minmax(0, 1fr); } }
 /* flying inside a neuron: breadcrumb, exit, hint */
 .nr-net-crumb, .nr-net-exit { position: absolute; top: 10px; opacity: 0; pointer-events: none; transition: opacity .25s; }
@@ -706,3 +704,52 @@ details.ex-sol[open] > summary::after { content: "−"; }
 .nr-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .nr-in-tab tr:first-child th { font-weight: 500; color: var(--fg4); font-size: 12px; padding-bottom: 2px; }
 @media (max-width: 520px) { .nr-net-hint { font-size: 11px; } .nr-net-crumb { font-size: 12px; } .nr-net-exit { font-size: 12px; padding: 0 10px; } }
+
+/* full-screen 3D network: the scene fills the screen, controls and the panel float above it */
+.nr-fs-bar, .nr-fs-help { display: none; }
+.nr-net-canvas.is-panning { cursor: move; }
+html.nr-noscroll, html.nr-noscroll body { overflow: hidden; }
+.fv.nr-fs { position: relative; display: block; width: 100vw; height: 100vh; height: 100dvh; max-width: none; margin: 0; padding: 0; border-radius: 0; background: var(--card); overflow: hidden; }
+.fv.nr-fs-fake { position: fixed; inset: 0; z-index: 2000; }
+.fv.nr-fs .fv-stage { position: absolute; inset: 0; display: block; }
+.fv.nr-fs .nr-net-stage { position: absolute; inset: 0; }
+.fv.nr-fs .nr-net-canvas { border-radius: 0; touch-action: none; cursor: grab; }
+.fv.nr-fs .nr-net-canvas:active { cursor: grabbing; }
+.fv.nr-fs .nr-net-canvas.is-panning { cursor: move; }
+.fv.nr-fs .nr-net-canvas:focus-visible { box-shadow: none; }
+.fv.nr-fs .nr-net-hint { display: none; }
+.nr-float { background: color-mix(in srgb, var(--card) 92%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, .16); }
+.fv.nr-fs .fv-controls { position: absolute; left: 14px; bottom: 74px; z-index: 3; width: min(560px, calc(100vw - 28px)); max-height: calc(100vh - 200px); overflow: auto; padding: 14px 16px;
+  background: color-mix(in srgb, var(--card) 92%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, .16); }
+.fv.nr-fs .fv-readout { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 3; padding: 7px 12px; border-top: 0; white-space: nowrap;
+  background: color-mix(in srgb, var(--card) 92%, transparent); border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
+.fv.nr-fs .fv-note:empty { display: none; }
+.fv.nr-fs .nr-net-panel { position: absolute; top: 56px; right: 14px; z-index: 3; width: min(430px, calc(100vw - 28px)); max-height: calc(100vh - 190px); overflow: auto; grid-template-columns: minmax(0, 1fr); gap: 0;
+  background: color-mix(in srgb, var(--card) 92%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, .16); }
+.fv.nr-fs .nr-net-panel > div { background: transparent; }
+.fv.nr-fs .nr-net-panel > div + div { border-top: 1px solid var(--line); }
+.fv.nr-fs.nr-dock-off .fv-controls, .fv.nr-fs.nr-info-off .nr-net-panel { display: none; }
+.fv.nr-fs .nr-fs-bar { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 4; display: flex; align-items: center; gap: 4px; padding: 5px; max-width: calc(100vw - 20px);
+  background: color-mix(in srgb, var(--card) 94%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); }
+.nr-fs-btn { display: inline-flex; align-items: center; gap: 6px; min-width: 36px; height: 36px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--fg2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; justify-content: center; }
+.nr-fs-btn:hover { background: var(--bg3); color: var(--fg); }
+.nr-fs-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.nr-fs-btn.nr-fs-z { font-size: 20px; font-weight: 500; padding: 0; width: 36px; }
+.nr-fs-btn.nr-fs-zoom { min-width: 58px; font-variant-numeric: tabular-nums; color: var(--fg); }
+.nr-fs-btn.nr-fs-tg[aria-pressed="true"] { background: var(--bg3); color: var(--fg); }
+.nr-fs-btn.nr-fs-close { background: var(--pb); color: var(--pf); }
+.nr-fs-btn.nr-fs-close:hover { background: var(--ph); color: var(--pf); }
+.nr-fs-btn .i { font-size: 15px; line-height: 1; }
+.nr-fs-sep { width: 1px; height: 22px; margin: 0 4px; background: var(--line); }
+.fv.nr-fs .nr-fs-help { position: absolute; right: 14px; bottom: 74px; z-index: 2; display: block; opacity: 0; transition: opacity .4s; max-width: min(520px, calc(100vw - 600px)); font-size: 12px; line-height: 1.55; color: var(--fg4); text-align: right; pointer-events: none; text-shadow: 0 0 6px var(--card); }
+.fv.nr-fs:not(.nr-dock-off) .nr-fs-help { max-width: min(420px, calc(100vw - 620px)); }
+.fv.nr-fs .nr-net-crumb, .fv.nr-fs .nr-net-exit { top: 12px; }
+@media (max-width: 900px) {
+  .fv.nr-fs .nr-fs-help { display: none; }
+  .nr-fs-btn .t { display: none; }
+  .fv.nr-fs .nr-net-panel { top: auto; bottom: 74px; max-height: 46vh; }
+}
+@media (max-width: 520px) { .fv.nr-fs .fv-readout { top: 52px; font-size: 12px; } .nr-fs-btn { min-width: 32px; height: 32px; padding: 0 6px; } .nr-fs-btn.nr-fs-z { width: 32px; } .nr-fs-sep { margin: 0 1px; } }
+.fv.nr-fs.nr-help-on .nr-fs-help { opacity: 1; }
+.nr-fs-btn.nr-fs-q { width: 36px; padding: 0; font-size: 15px; }
+@media (max-width: 900px) { .fv.nr-fs.nr-help-on .nr-fs-help { display: block; left: 14px; right: 14px; max-width: none; text-align: center; bottom: 66px; } .fv.nr-fs .fv-readout { top: 52px; } }
