@@ -7,7 +7,7 @@
 
 :root {
   --bg: #FFFFFF; --bg2: #F4F4F4; --bg3: #EAEAEA; --card: #FFFFFF; --line: #EEEEEE;
-  --fg: #171A20; --fg2: #393C41; --fg3: #5C5E62; --fg4: #7A7C80;
+  --fg: #171A20; --fg2: #393C41; --fg3: #5C5E62; --fg4: #65686D;
   --curve: #C9CBCE; --pb: #171A20; --pf: #FFFFFF; --ph: #000000;
   --sh: rgba(23,26,32,.07); --accent: #3E6AE1; --err: #B42318;
   --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -694,8 +694,8 @@ details.ex-sol[open] > summary::after { content: "−"; }
 .nr-mat tr.hi th { color: var(--v-orange); }
 @media (max-width: 640px) { .nr-net-panel { grid-template-columns: minmax(0, 1fr); } }
 /* flying inside a neuron: breadcrumb, exit, hint */
-.nr-net-crumb, .nr-net-exit { position: absolute; top: 10px; opacity: 0; pointer-events: none; transition: opacity .25s; }
-.nr-net-stage.is-in .nr-net-crumb, .nr-net-stage.is-in .nr-net-exit { opacity: 1; pointer-events: auto; }
+.nr-net-crumb, .nr-net-exit { position: absolute; top: 10px; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .25s, visibility 0s linear .25s; }
+.nr-net-stage.is-in .nr-net-crumb, .nr-net-stage.is-in .nr-net-exit { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .25s, visibility 0s; }
 .nr-net-crumb { left: 12px; display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: var(--bg2); font-size: 13px; color: var(--fg3); }
 .nr-crumb-link { padding: 0; border: 0; background: none; font: inherit; font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: .2em; }
 .nr-crumb-cur { font-weight: 600; color: var(--fg); }
@@ -716,7 +716,7 @@ html.nr-noscroll, html.nr-noscroll body { overflow: hidden; }
 .fv.nr-fs .nr-net-canvas { border-radius: 0; touch-action: none; cursor: grab; }
 .fv.nr-fs .nr-net-canvas:active { cursor: grabbing; }
 .fv.nr-fs .nr-net-canvas.is-panning { cursor: move; }
-.fv.nr-fs .nr-net-canvas:focus-visible { box-shadow: none; }
+.fv.nr-fs .nr-net-canvas:focus-visible { box-shadow: inset 0 0 0 3px var(--accent); }
 .fv.nr-fs .nr-net-hint { display: none; }
 .nr-float { background: color-mix(in srgb, var(--card) 92%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, .16); }
 .fv.nr-fs .fv-controls { position: absolute; left: 14px; bottom: 74px; z-index: 3; width: min(560px, calc(100vw - 28px)); max-height: calc(100vh - 200px); overflow: auto; padding: 14px 16px;
@@ -763,3 +763,23 @@ html.nr-noscroll, html.nr-noscroll body { overflow: hidden; }
 .nr-act-sel:disabled { opacity: .5; cursor: not-allowed; }
 .nr-act-note { flex-basis: 100%; font-size: 13px; line-height: 1.5; color: var(--v-orange); }
 .nr-act-note:empty { display: none; }
+
+/* text versions of the series colours: in the light theme they are darker, so small coloured text keeps a 4.5:1 contrast
+   on white and on the grey panels (lines and fills keep the brighter --v-* colours) */
+:root { --tx-blue: #2C56C9; --tx-red: #A8263E; --tx-orange: #A84D08; --tx-teal: #0B6F67; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --tx-blue: var(--v-blue); --tx-red: var(--v-red); --tx-orange: var(--v-orange); --tx-teal: var(--v-teal); } }
+:root[data-theme="dark"] { --tx-blue: var(--v-blue); --tx-red: var(--v-red); --tx-orange: var(--v-orange); --tx-teal: var(--v-teal); }
+.fv-ro b.t-blue, .fv-svg .fv-text.t-blue { color: var(--tx-blue); fill: var(--tx-blue); }
+.fv-ro b.t-red, .fv-svg .fv-text.t-red { color: var(--tx-red); fill: var(--tx-red); }
+.fv-ro b.t-orange, .fv-svg .fv-text.t-orange { color: var(--tx-orange); fill: var(--tx-orange); }
+.fv-ro b.t-teal, .fv-svg .fv-text.t-teal { color: var(--tx-teal); fill: var(--tx-teal); }
+.nr-mat td.pos { color: var(--tx-blue); } .nr-mat td.neg { color: var(--tx-red); }
+.nr-tt td.ok { color: var(--tx-teal); } .nr-tt td.bad { color: var(--tx-red); }
+.nr-px-out b.on, .nr-act-note { color: var(--tx-orange); }
+.nr-crumb-link { color: var(--tx-blue); }
+.nr-svg .nr-t.t-blue { fill: var(--tx-blue); } .nr-svg .nr-t.t-red { fill: var(--tx-red); }
+.nr-mat tr.hi th { color: var(--tx-orange); }
+@media (min-width: 900px) {
+  .fv.nr-fs .fv-controls { width: min(560px, calc(50vw - 21px)); }
+  .fv.nr-fs .nr-net-panel { width: min(430px, calc(50vw - 21px)); }
+}

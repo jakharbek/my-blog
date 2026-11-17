@@ -27,9 +27,9 @@
   FV.lang = LANG;
 
   const T = {
-    ru: { drag: "Потяните, чтобы повернуть", reset: "Сбросить вид", play: "Пуск", pause: "Пауза", restart: "Сначала", step: "Шаг", error: "Не удалось построить рисунок" },
-    en: { drag: "Drag to rotate", reset: "Reset view", play: "Play", pause: "Pause", restart: "Restart", step: "Step", error: "The figure could not be drawn" },
-    uz: { drag: "Aylantirish uchun torting", reset: "Ko‘rinishni tiklash", play: "Boshlash", pause: "To‘xtatish", restart: "Boshidan", step: "Qadam", error: "Rasmni chizib bo‘lmadi" },
+    ru: { point: "точка", drag: "Потяните, чтобы повернуть", reset: "Сбросить вид", play: "Пуск", pause: "Пауза", restart: "Сначала", step: "Шаг", error: "Не удалось построить рисунок" },
+    en: { point: "point", drag: "Drag to rotate", reset: "Reset view", play: "Play", pause: "Pause", restart: "Restart", step: "Step", error: "The figure could not be drawn" },
+    uz: { point: "nuqta", drag: "Aylantirish uchun torting", reset: "Ko‘rinishni tiklash", play: "Boshlash", pause: "To‘xtatish", restart: "Boshidan", step: "Qadam", error: "Rasmni chizib bo‘lmadi" },
   };
   FV.t = (k) => (T[LANG] || T.en)[k] || T.en[k];
 
@@ -129,6 +129,20 @@
       } else if (p) el.append(doc.createTextNode(p));
     });
     return el;
+  };
+  // "Вес $w_1$" → "Вес w₁": a readable text name for controls whose visible label is a formula
+  const SUBS = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉" };
+  const SUPS = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹", "-": "⁻" };
+  const GREEK = { alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", eta: "η", theta: "θ", lambda: "λ", mu: "μ", sigma: "σ", tau: "τ", phi: "φ", Phi: "Φ", Sigma: "Σ", pi: "π", nabla: "∇", partial: "∂", infty: "∞", cdot: "·", times: "×", top: "ᵀ", ge: "≥", le: "≤", approx: "≈", lVert: "‖", rVert: "‖" };
+  FV.plain = function (str) {
+    return String(str).replace(/\$([^$]+)\$/g, (_, t) => t
+      .replace(/\\(?:mathrm|mathbf|operatorname|text|boldsymbol)\{([^{}]*)\}/g, "{$1}")
+      .replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, "$1/$2")
+      .replace(/\\hat\s*\{?y\}?/g, "ŷ")
+      .replace(/\\([A-Za-z]+)/g, (m, w) => (GREEK[w] != null ? GREEK[w] : w + " "))
+      .replace(/_\{?([0-9])\}?/g, (m, d) => SUBS[d])
+      .replace(/\^\{?(-?[0-9])\}?/g, (m, d) => d.split("").map((c) => SUPS[c]).join(""))
+      .replace(/[{}\\]/g, "").replace(/\s+/g, " ").trim());
   };
   FV.tex = function (src, display = false) {
     const el = doc.createElement(display ? "div" : "span");
@@ -467,12 +481,13 @@
     // Draggable point. onDrag(x, y) may return [x, y] to constrain the position.
     handle(x, y, o = {}) {
       const plot = this;
-      const g = S("g", { class: "fv-handle s-" + (o.c || "blue"), tabindex: 0, role: "slider", "aria-label": o.label || "" }, this.gHandles);
+      const g = S("g", { class: "fv-handle s-" + (o.c || "blue"), tabindex: 0, role: "slider", "aria-roledescription": FV.t("point"), "aria-label": o.label || FV.t("point"), "aria-valuemin": Math.min(...this.o.x), "aria-valuemax": Math.max(...this.o.x) }, this.gHandles);
+      this.svg.setAttribute("role", "group");
       const hit = S("circle", { r: 18, class: "hit" }, g);
       const c = S("circle", { r: o.r || 7, class: "knob fill-" + (o.c || "blue") }, g);
       const h = {
         x, y, g,
-        _place() { g.setAttribute("transform", `translate(${plot.X(h.x)} ${plot.Y(h.y)})`); },
+        _place() { g.setAttribute("transform", `translate(${plot.X(h.x)} ${plot.Y(h.y)})`); g.setAttribute("aria-valuenow", +h.x.toFixed(4)); g.setAttribute("aria-valuetext", `(${FV.num(h.x, 3)}; ${FV.num(h.y, 3)})`); },
         set(nx, ny) { h.x = nx; h.y = ny; h._place(); },
       };
       let drag = false;
@@ -519,7 +534,7 @@
       this.az = this.o.azimuth; this.el = this.o.elevation;
       this.wrap = FV.h("div", { class: "fv-3d" });
       if (o.title) this.wrap.append(FV.rich(o.title, "div")), (this.wrap.firstChild.className = "fv-plot-title");
-      this.canvas = FV.h("canvas", { role: "img", "aria-label": o.ariaLabel || "" });
+      this.canvas = FV.h("canvas", { role: "img", "aria-label": o.ariaLabel || (o.title ? FV.plain(o.title) : null) });
       this.hint = FV.h("div", { class: "fv-3d-hint" }, FV.h("span", { text: "⟲ " + FV.t("drag") }), FV.h("button", { type: "button", class: "fv-link", text: FV.t("reset"), onclick: () => { this.az = this.o.azimuth; this.el = this.o.elevation; this.draw(); } }));
       this.wrap.append(this.canvas, this.hint);
       parent.append(this.wrap);
@@ -722,7 +737,7 @@
     slider(o) {
       const id = "fvs" + Math.random().toString(36).slice(2, 8);
       const out = FV.h("output", { for: id });
-      const input = FV.h("input", { type: "range", id, min: o.min, max: o.max, step: o.step || "any", value: o.value });
+      const input = FV.h("input", { type: "range", id, min: o.min, max: o.max, step: o.step || "any", value: o.value, "aria-label": FV.plain(o.label) });
       const fmt = o.fmt || ((v) => FV.num(v, 3));
       const api = {
         el: FV.h("label", { class: "fv-slider" + (o.wide ? " wide" : "") }, FV.rich(o.label, "span"), input, out),
@@ -737,20 +752,20 @@
     seg(o) {
       let value = o.value;
       const btns = o.options.map((op) => {
-        const b = FV.h("button", { type: "button", "aria-pressed": op.value === value ? "true" : "false" }, FV.rich(op.label));
+        const b = FV.h("button", { type: "button", "aria-pressed": op.value === value ? "true" : "false", "aria-label": /\$/.test(op.label) ? FV.plain(op.label) : null }, FV.rich(op.label));
         b.addEventListener("click", () => { api.set(op.value); o.onchange && o.onchange(value); });
         b._v = op.value;
         return b;
       });
       const api = {
-        el: FV.h("div", { class: "fv-seg", role: "group" }, o.label ? FV.rich(o.label, "span") : null, FV.h("div", { class: "fv-seg-btns" }, btns)),
+        el: FV.h("div", { class: "fv-seg", role: "group", "aria-label": o.label ? FV.plain(o.label) : null }, o.label ? FV.rich(o.label, "span") : null, FV.h("div", { class: "fv-seg-btns" }, btns)),
         get value() { return value; },
         set(v) { value = v; btns.forEach((b) => b.setAttribute("aria-pressed", b._v === v ? "true" : "false")); },
       };
       return api;
     },
     check(o) {
-      const input = FV.h("input", { type: "checkbox" });
+      const input = FV.h("input", { type: "checkbox", "aria-label": FV.plain(o.label) });
       input.checked = !!o.checked;
       input.addEventListener("change", () => o.onchange && o.onchange(input.checked));
       return { el: FV.h("label", { class: "fv-check" }, input, FV.rich(o.label)), get value() { return input.checked; }, set(v) { input.checked = v; } };
@@ -796,7 +811,10 @@
     try { cfg = JSON.parse(el.getAttribute("data-config") || "{}"); } catch (e) { console.error("FV config", name, e); }
     const fn = registry[name];
     if (!fn) { console.error("FV: unknown widget " + name); el.textContent = FV.t("error"); return; }
-    try { fn(el, cfg); } catch (e) { console.error("FV " + name, e); el.textContent = FV.t("error"); }
+    try { fn(el, cfg); } catch (e) { console.error("FV " + name, e); el.textContent = FV.t("error"); return; }
+    const fig = el.closest("figure"), cap = fig && fig.querySelector("figcaption");
+    const alt = cap ? FV.plain(cap.textContent).slice(0, 220) : FV.plain(name);
+    el.querySelectorAll('svg[role="img"], canvas[role="img"], svg[role="group"]').forEach((g) => { if (!g.getAttribute("aria-label")) g.setAttribute("aria-label", alt); });
   }
   FV.boot = function () {
     const els = Array.from(doc.querySelectorAll("[data-viz]"));

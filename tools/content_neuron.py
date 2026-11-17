@@ -373,7 +373,7 @@ PRACTICE_RU = dict(id="practice", title="Практикум: 17 примеров
                 ["2", "4", "0,9820", "−2", "лояльный нейрон: «да» почти всегда"],
             ], {"num": [0, 1, 2, 3]}),
         ],
-        take=r"Шаг $b$ на $+2$ сдвигает порог на $-2/w$ и меняет ответ при том же входе с 12% до 98%. Смещение — это «планка», которую входам нужно преодолеть.")),
+        take=r"Каждый шаг $b$ на $+2$ сдвигает порог на $-2/w$; при том же входе ответ растёт от 12% при $b = -4$ до 98% при $b = 2$. Смещение — это «планка», которую входам нужно преодолеть.")),
 
     # 9 ---------------------------------------------------------------
     ("example", dict(n=9, title="Один порог — разная резкость", kinds=["таблица", "рисунок"],
@@ -652,7 +652,7 @@ PRACTICE_EN = dict(id="practice", title="Practice: 17 examples from simple to ad
                 ["2", "4", "0.9820", "−2", "a lenient neuron: “yes” almost always"],
             ], {"num": [0, 1, 2, 3]}),
         ],
-        take=r"A step of $+2$ in $b$ shifts the threshold by $-2/w$ and, for the same input, changes the answer from 12% to 98%. The bias is the “bar” that the inputs have to clear.")),
+        take=r"Each step of $+2$ in $b$ shifts the threshold by $-2/w$; for the same input the answer grows from 12% at $b = -4$ to 98% at $b = 2$. The bias is the “bar” that the inputs have to clear.")),
 
     # 9 ---------------------------------------------------------------
     ("example", dict(n=9, title="One threshold, different sharpness", kinds=["table", "figure"],
@@ -931,7 +931,7 @@ PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta mi
                 ["2", "4", "0,9820", "−2", "xayrixoh neyron: deyarli doim «ha»"],
             ], {"num": [0, 1, 2, 3]}),
         ],
-        take=r"$b$ ni $+2$ ga o‘zgartirish bo‘sag‘ani $-2/w$ ga suradi va o‘sha kirishdagi javobni 12% dan 98% gacha o‘zgartiradi. Siljish — kirishlar oshib o‘tishi kerak bo‘lgan «planka».")),
+        take=r"$b$ ning har bir $+2$ qadami bo‘sag‘ani $-2/w$ ga suradi; o‘sha kirishda javob $b = -4$ da 12% dan $b = 2$ da 98% gacha o‘sadi. Siljish — kirishlar oshib o‘tishi kerak bo‘lgan «planka».")),
 
     # 9 ---------------------------------------------------------------
     ("example", dict(n=9, title=r"Bitta bo‘sag‘a — turli keskinlik", kinds=["jadval", "rasm"],
@@ -1367,7 +1367,7 @@ RU = [
         ("p", r"Добавим фиктивный вход $x_0 = 1$, который всегда равен единице, и назовём смещение весом $w_0 = b$. Тогда смещение прячется внутрь суммы, а сумма начинается с нуля:"),
         ("eq", r"z = \sum_{i=1}^{n} w_ix_i + b = \sum_{i=0}^{n} w_ix_i = \tilde{\mathbf{w}}^{\top}\tilde{\mathbf{x}}, \qquad \tilde{\mathbf{x}} = \begin{pmatrix}1\\x_1\\\vdots\\x_n\end{pmatrix}, \quad \tilde{\mathbf{w}} = \begin{pmatrix}b\\w_1\\\vdots\\w_n\end{pmatrix}"),
         ("p", r"На наших числах: $\tilde{\mathbf{w}} = (-0{,}75;\ 0{,}5;\ -1;\ 0{,}25)$, $\tilde{\mathbf{x}} = (1;\ 2;\ -1;\ 3)$, $\tilde{\mathbf{w}}^{\top}\tilde{\mathbf{x}} = -0{,}75 + 2{,}75 = 2$. Так пишут в статистике (столбец единиц в матрице признаков) и в классических текстах о перцептроне. Удобно для выкладок, но в коде смещение обычно хранят отдельно."),
-        ("callout", "intuition", "Смещение как порог", r"Со ступенчатой активацией нейрон срабатывает, когда $\mathbf{w}^{\top}\mathbf{x} + b \ge 0$, то есть когда $\mathbf{w}^{\top}\mathbf{x} \ge -b$. Значит $\theta = -b$ — порог срабатывания. Комитет с $b = -2$ скептичен: чтобы сказать «да», доводам нужно набрать больше двух баллов. Комитет с $b = +1$ лоялен: он скажет «да», даже если доводов нет."),
+        ("callout", "intuition", "Смещение как порог", r"Со ступенчатой активацией нейрон срабатывает, когда $\mathbf{w}^{\top}\mathbf{x} + b \ge 0$, то есть когда $\mathbf{w}^{\top}\mathbf{x} \ge -b$. Значит $\theta = -b$ — порог срабатывания. Комитет с $b = -2$ скептичен: чтобы сказать «да», доводам нужно набрать не меньше двух баллов. Комитет с $b = +1$ лоялен: он скажет «да», даже если доводов нет."),
     ]),
 
     dict(id="activation", title="Функция активации f", blocks=[
@@ -1711,7 +1711,7 @@ EN = [
         ("p", r"Add a dummy input $x_0 = 1$ that always equals one, and call the bias the weight $w_0 = b$. Then the bias hides inside the sum, and the sum starts from zero:"),
         ("eq", r"z = \sum_{i=1}^{n} w_ix_i + b = \sum_{i=0}^{n} w_ix_i = \tilde{\mathbf{w}}^{\top}\tilde{\mathbf{x}}, \qquad \tilde{\mathbf{x}} = \begin{pmatrix}1\\x_1\\\vdots\\x_n\end{pmatrix}, \quad \tilde{\mathbf{w}} = \begin{pmatrix}b\\w_1\\\vdots\\w_n\end{pmatrix}"),
         ("p", r"With our numbers: $\tilde{\mathbf{w}} = (-0.75,\ 0.5,\ -1,\ 0.25)$, $\tilde{\mathbf{x}} = (1,\ 2,\ -1,\ 3)$, $\tilde{\mathbf{w}}^{\top}\tilde{\mathbf{x}} = -0.75 + 2.75 = 2$. This is how it is written in statistics (a column of ones in the feature matrix) and in classic texts on the perceptron. It is convenient for derivations, but in code the bias is usually stored separately."),
-        ("callout", "intuition", "The bias as a threshold", r"With a step activation the neuron fires when $\mathbf{w}^{\top}\mathbf{x} + b \ge 0$, that is, when $\mathbf{w}^{\top}\mathbf{x} \ge -b$. So $\theta = -b$ is the firing threshold. A committee with $b = -2$ is sceptical: to say “yes”, the arguments must score more than two points. A committee with $b = +1$ is lenient: it will say “yes” even if there are no arguments at all."),
+        ("callout", "intuition", "The bias as a threshold", r"With a step activation the neuron fires when $\mathbf{w}^{\top}\mathbf{x} + b \ge 0$, that is, when $\mathbf{w}^{\top}\mathbf{x} \ge -b$. So $\theta = -b$ is the firing threshold. A committee with $b = -2$ is sceptical: to say “yes”, the arguments must score at least two points. A committee with $b = +1$ is lenient: it will say “yes” even if there are no arguments at all."),
     ]),
 
     dict(id="activation", title="The activation function f", blocks=[
@@ -2055,7 +2055,7 @@ UZ = [
         ("p", r"Doim birga teng bo‘lgan $x_0 = 1$ soxta kirishni qo‘shamiz va siljishni $w_0 = b$ vazn deb ataymiz. Shunda siljish yig‘indi ichiga yashirinadi, yig‘indi esa noldan boshlanadi:"),
         ("eq", r"z = \sum_{i=1}^{n} w_ix_i + b = \sum_{i=0}^{n} w_ix_i = \tilde{\mathbf{w}}^{\top}\tilde{\mathbf{x}}, \qquad \tilde{\mathbf{x}} = \begin{pmatrix}1\\x_1\\\vdots\\x_n\end{pmatrix}, \quad \tilde{\mathbf{w}} = \begin{pmatrix}b\\w_1\\\vdots\\w_n\end{pmatrix}"),
         ("p", r"Bizning sonlarda: $\tilde{\mathbf{w}} = (-0{,}75;\ 0{,}5;\ -1;\ 0{,}25)$, $\tilde{\mathbf{x}} = (1;\ 2;\ -1;\ 3)$, $\tilde{\mathbf{w}}^{\top}\tilde{\mathbf{x}} = -0{,}75 + 2{,}75 = 2$. Statistikada (belgilar matritsasidagi birlar ustuni) va perseptron haqidagi klassik matnlarda shunday yozishadi. Bu hisob-kitoblar uchun qulay, lekin kodda siljish odatda alohida saqlanadi."),
-        ("callout", "intuition", "Siljish bo‘sag‘a sifatida", r"Zinali aktivatsiyada neyron $\mathbf{w}^{\top}\mathbf{x} + b \ge 0$ bo‘lganda, ya’ni $\mathbf{w}^{\top}\mathbf{x} \ge -b$ bo‘lganda ishga tushadi. Demak, $\theta = -b$ — ishga tushish bo‘sag‘asi. $b = -2$ bo‘lgan qo‘mita skeptik: «ha» deyishi uchun dalillar ikki balldan ko‘proq to‘plashi kerak. $b = +1$ bo‘lgan qo‘mita xayrixoh: dalillar bo‘lmasa ham, u «ha» deydi."),
+        ("callout", "intuition", "Siljish bo‘sag‘a sifatida", r"Zinali aktivatsiyada neyron $\mathbf{w}^{\top}\mathbf{x} + b \ge 0$ bo‘lganda, ya’ni $\mathbf{w}^{\top}\mathbf{x} \ge -b$ bo‘lganda ishga tushadi. Demak, $\theta = -b$ — ishga tushish bo‘sag‘asi. $b = -2$ bo‘lgan qo‘mita skeptik: «ha» deyishi uchun dalillar kamida ikki ball to‘plashi kerak. $b = +1$ bo‘lgan qo‘mita xayrixoh: dalillar bo‘lmasa ham, u «ha» deydi."),
     ]),
 
     dict(id="activation", title="Aktivatsiya funksiyasi f", blocks=[

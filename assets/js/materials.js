@@ -15,6 +15,16 @@
     } catch (e) {}
   }
 
+  // ----- a formula or a table wider than the column scrolls sideways; make it reachable from the keyboard
+  const focusable = () => main.querySelectorAll(".eqd, .table-wrap, .fx-hero, pre.code").forEach((el) => {
+    if (el.scrollWidth > el.clientWidth + 1) { el.setAttribute("tabindex", "0"); if (!el.getAttribute("role")) el.setAttribute("role", "group"); }
+    else if (el.getAttribute("tabindex") === "0") el.removeAttribute("tabindex");
+  });
+  focusable();
+  window.addEventListener("resize", () => { clearTimeout(focusable.t); focusable.t = setTimeout(focusable, 200); });
+  main.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", focusable));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(focusable);
+
   // ----- group filter
   const chips = Array.from(main.querySelectorAll(".chip[data-group]"));
   const groups = Array.from(main.querySelectorAll(".fgroup"));

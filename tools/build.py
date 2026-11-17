@@ -10,6 +10,7 @@ in Excel; the downloadable workbooks are built by tools/workbook_ce.py).
 import html
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -1317,6 +1318,31 @@ def attr_json(data):
     return html.escape(json.dumps(data, ensure_ascii=False), quote=True)
 
 
+GREEK = {"alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "eta": "η", "theta": "θ", "lambda": "λ", "mu": "μ", "sigma": "σ", "phi": "φ",
+         "Sigma": "Σ", "pi": "π", "nabla": "∇", "partial": "∂", "cdot": "·", "top": "ᵀ", "lVert": "‖", "rVert": "‖", "approx": "≈", "ge": "≥", "le": "≤"}
+SUBSCRIPT = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
+
+
+def tex_plain(src):
+    """A readable text form of $…$ fragments, for aria-label: "$w_i$" → "wᵢ", "$\\sigma(z)$" → "σ(z)"."""
+    def one(m):
+        t = m.group(1)
+        t = re.sub(r"\\(?:mathrm|mathbf|operatorname|text)\{([^{}]*)\}", r"{\1}", t)
+        t = re.sub(r"\\frac\{([^{}]*)\}\{([^{}]*)\}", r"\1/\2", t)
+        t = re.sub(r"\\hat\s*\{?y\}?", "ŷ", t)
+        t = re.sub(r"\\tilde\s*\{?([A-Za-z])\}?", "\\1\u0303", t)
+        t = re.sub(r"\\([A-Za-z]+)", lambda k: GREEK.get(k.group(1), k.group(1) + " "), t)
+        t = re.sub(r"_\{?([0-9])\}?", lambda k: k.group(1).translate(SUBSCRIPT), t)
+        t = re.sub(r"_\{?i\}?", "ᵢ", t).replace("^2", "²").replace("^{2}", "²")
+        return re.sub(r"\s+", " ", re.sub(r"[{}\\]", "", t)).strip()
+    return re.sub(r"<[^>]+>", "", re.sub(r"\$([^$]+)\$", one, src)).strip()
+
+
+def th_name(h):
+    # KaTeX shows the formula visually and as MathML; an aria-label gives every reader a plain name as well
+    return f' aria-label="{html.escape(tex_plain(h), quote=True)}"' if "$" in h else ""
+
+
 def render_blocks(blocks, lang, ind="    "):
     out = []
     for b in blocks:
@@ -1344,7 +1370,7 @@ def render_blocks(blocks, lang, ind="    "):
         elif kind == "table":
             heads, rows = b[1], b[2]
             num = set((b[3] or {}).get("num", [])) if len(b) > 3 else set()
-            th = "".join(f'<th{" class=num" if i in num else ""}>{h}</th>' for i, h in enumerate(heads))
+            th = "".join(f'<th{" class=num" if i in num else ""}{th_name(h)}>{h}</th>' for i, h in enumerate(heads))
             trs = "".join("<tr>" + "".join(f'<td{" class=num" if i in num else ""}>{c}</td>' for i, c in enumerate(r)) + "</tr>" for r in rows)
             out.append(f'<div class="table-wrap"><table class="data"><thead><tr>{th}</tr></thead><tbody>{trs}</tbody></table></div>')
         elif kind in ("ul", "ol"):
@@ -1363,7 +1389,7 @@ def render_blocks(blocks, lang, ind="    "):
             qs = []
             for i, q in enumerate(b[1]):
                 ans = q["answer"]
-                opts = "".join(f'<button type="button" data-ok="{1 if j == ans else 0}">{o}</button>' for j, o in enumerate(q["options"]))
+                opts = "".join(f'<button type="button" data-ok="{1 if j == ans else 0}"{th_name(o)}>{o}</button>' for j, o in enumerate(q["options"]))
                 qs.append(f'<fieldset class="q"><legend>{i + 1}. {q["q"]}</legend><div class="opts">{opts}</div><div class="explain" hidden>{q["explain"]}</div></fieldset>')
             ui = FX_UI[lang]
             out.append(f'<div class="quiz" data-right="{ui["quiz_right"]}" data-wrong="{ui["quiz_wrong"]}">' + "".join(qs) + "</div>")
