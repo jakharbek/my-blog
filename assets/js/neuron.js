@@ -27,6 +27,12 @@
       fired: "нейрон сработал", silent: "нейрон молчит",
       exam1: "балл по математике", exam2: "балл по языку", target: "Функция", neurons: "Нейронов ReLU", parts: "Показать отдельные нейроны", params: "параметров:", maxErr: "макс. ошибка:", sumRelu: "сумма нейронов", oneRelu: "вклад одного нейрона",
       morph: "Вход → скрытый слой", morph0: "Входное пространство: никакая прямая не отделяет закрашенные точки от пустых. Бирюзовая прямая — граница нейрона OR, фиолетовая — NAND.", morph1: "Скрытое пространство $(h_1;\\ h_2)$: точки $(0;\\ 1)$ и $(1;\\ 0)$ слились в $(1;\\ 1)$, и теперь одна прямая AND их отделяет.", morphMid: "Скрытый слой переносит каждую точку в новые координаты $(h_1;\\ h_2)$.",
+      netAria: "Трёхмерная модель нейросети 3–3–1: входы, скрытый слой, выход", netMode: "Проход", netFwd: "прямой", netBwd: "обратный", netNeuron: "Нейрон", netPlay: "Пустить сигнал",
+      netSpin: "Вращать", netBias: "Смещения как вход «1»", netFull: "На весь экран", netExit: "Выйти", netTarget: "Верный ответ", netLoss: "BCE:", netParams: "параметров:",
+      netIn: "входной слой", netHidden: "скрытый слой", netOut: "выходной слой", netOurs: "наш нейрон", netW1: "Скрытый слой: $W^{(1)}$ | $\\mathbf{b}^{(1)}$", netW2: "Выход: $\\mathbf{w}^{(2)\\top}$ | $b^{(2)}$",
+      netInText: "Вход {i} — это не нейрон, а число из данных. Он ничего не считает, а раздаёт своё значение всем трём нейронам скрытого слоя.",
+      netHidText: "Нейрон скрытого слоя считает ту же формулу $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; его веса — одна строка матрицы $W^{(1)}$ справа.",
+      netHidNext: "Его выход становится одним из входов выходного нейрона, с весом {w}.", netOutText: "Выходной нейрон — та же формула, но его входы — выходы скрытого слоя $h_1, h_2, h_3$.",
       eta: "Шаг обучения $\\eta$", loss: "BCE", acc: "точность", epochN: "шаг", class0: "класс 0", class1: "класс 1", lossTitle: "Потери по шагам",
     },
     en: {
@@ -51,6 +57,12 @@
       fired: "the neuron fires", silent: "the neuron is silent",
       exam1: "maths score", exam2: "language score", target: "Function", neurons: "ReLU neurons", parts: "Show individual neurons", params: "parameters:", maxErr: "max error:", sumRelu: "sum of neurons", oneRelu: "one neuron's contribution",
       morph: "Input → hidden layer", morph0: "Input space: no line separates the filled points from the hollow ones. The teal line is the boundary of the OR neuron, the violet one of NAND.", morph1: "Hidden space $(h_1,\\ h_2)$: the points $(0,\\ 1)$ and $(1,\\ 0)$ have merged into $(1,\\ 1)$, and now a single AND line separates them.", morphMid: "The hidden layer moves every point to new coordinates $(h_1,\\ h_2)$.",
+      netAria: "A 3D model of the 3–3–1 network: inputs, hidden layer, output", netMode: "Pass", netFwd: "forward", netBwd: "backward", netNeuron: "Neuron", netPlay: "Send a signal",
+      netSpin: "Rotate", netBias: "Biases as input “1”", netFull: "Full screen", netExit: "Exit", netTarget: "Correct answer", netLoss: "BCE:", netParams: "parameters:",
+      netIn: "input layer", netHidden: "hidden layer", netOut: "output layer", netOurs: "our neuron", netW1: "Hidden layer: $W^{(1)}$ | $\\mathbf{b}^{(1)}$", netW2: "Output: $\\mathbf{w}^{(2)\\top}$ | $b^{(2)}$",
+      netInText: "Input {i} is not a neuron but a number from the data. It computes nothing; it hands its value to all three neurons of the hidden layer.",
+      netHidText: "A hidden neuron computes the same formula $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; its weights are one row of the matrix $W^{(1)}$ on the right.",
+      netHidNext: "Its output becomes one of the inputs of the output neuron, with weight {w}.", netOutText: "The output neuron is the same formula, but its inputs are the outputs of the hidden layer $h_1, h_2, h_3$.",
       eta: "Learning rate $\\eta$", loss: "BCE", acc: "accuracy", epochN: "step", class0: "class 0", class1: "class 1", lossTitle: "Loss by step",
     },
     uz: {
@@ -75,6 +87,12 @@
       fired: "neyron ishga tushdi", silent: "neyron jim",
       exam1: "matematika bali", exam2: "til bali", target: "Funksiya", neurons: "ReLU neyronlari", parts: "Alohida neyronlarni ko‘rsatish", params: "parametrlar:", maxErr: "maks. xato:", sumRelu: "neyronlar yig‘indisi", oneRelu: "bitta neyron hissasi",
       morph: "Kirish → yashirin qatlam", morph0: "Kirish fazosi: hech bir to‘g‘ri chiziq bo‘yalgan nuqtalarni bo‘sh nuqtalardan ajratmaydi. Firuza chiziq — OR neyronining chegarasi, binafsha — NAND.", morph1: "Yashirin fazo $(h_1;\\ h_2)$: $(0;\\ 1)$ va $(1;\\ 0)$ nuqtalar $(1;\\ 1)$ ga birlashdi, endi ularni bitta AND chizig‘i ajratadi.", morphMid: "Yashirin qatlam har bir nuqtani yangi $(h_1;\\ h_2)$ koordinatalarga ko‘chiradi.",
+      netAria: "3–3–1 tarmog‘ining uch o‘lchamli modeli: kirishlar, yashirin qatlam, chiqish", netMode: "O‘tish", netFwd: "to‘g‘ri", netBwd: "teskari", netNeuron: "Neyron", netPlay: "Signal yuborish",
+      netSpin: "Aylantirish", netBias: "Siljishlar «1» kirish sifatida", netFull: "To‘liq ekran", netExit: "Chiqish", netTarget: "To‘g‘ri javob", netLoss: "BCE:", netParams: "parametrlar:",
+      netIn: "kirish qatlami", netHidden: "yashirin qatlam", netOut: "chiqish qatlami", netOurs: "bizning neyron", netW1: "Yashirin qatlam: $W^{(1)}$ | $\\mathbf{b}^{(1)}$", netW2: "Chiqish: $\\mathbf{w}^{(2)\\top}$ | $b^{(2)}$",
+      netInText: "{i}-kirish neyron emas, ma’lumotlardagi son. U hech narsa hisoblamaydi, o‘z qiymatini yashirin qatlamning uchala neyroniga tarqatadi.",
+      netHidText: "Yashirin qatlam neyroni xuddi shu $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$ formulani hisoblaydi; uning vaznlari — o‘ngdagi $W^{(1)}$ matritsasining bitta satri.",
+      netHidNext: "Uning chiqishi chiqish neyronining kirishlaridan biriga aylanadi, vazni {w}.", netOutText: "Chiqish neyroni — o‘sha formula, faqat uning kirishlari yashirin qatlam chiqishlari $h_1, h_2, h_3$.",
       eta: "O‘qitish qadami $\\eta$", loss: "BCE", acc: "aniqlik", epochN: "qadam", class0: "0-sinf", class1: "1-sinf", lossTitle: "Qadamlar bo‘yicha yo‘qotish",
     },
   }[FV.lang] || {};
@@ -866,5 +884,272 @@
       w.note.append(FV.rich(t < 0.02 ? L.morph0 : t > 0.98 ? L.morph1 : L.morphMid));
     }
     draw();
+  });
+
+  // ======================================================================
+  // 14. The neuron inside a tiny network 3–3–1, in 3D: forward and backward pass
+  // ======================================================================
+  FV.widget("neuron-network3d", (el, cfg) => {
+    const w = FV.shell(el, {});
+    w.root.classList.add("nr-net");
+    // ----- the network: our neuron is h₁
+    let X = (cfg.x || [2, -1, 3]).slice(), target = cfg.y != null ? cfg.y : 1;
+    const W1 = cfg.W1 || [[0.5, -1, 0.25], [-1, 0.5, 1], [0.3, 0.8, -0.5]], B1 = cfg.b1 || [-0.75, 0.5, 0.2];
+    const W2 = cfg.w2 || [1.5, -1, 2], B2 = cfg.b2 != null ? cfg.b2 : -0.5;
+    function run() {
+      const z1 = W1.map((row, j) => row.reduce((s, v, i) => s + v * X[i], 0) + B1[j]), h = z1.map(sig);
+      const z2 = W2.reduce((s, v, j) => s + v * h[j], 0) + B2, y = sig(z2);
+      const loss = target ? -Math.log(y) : -Math.log(1 - y);
+      const d2 = y - target, d1 = h.map((a, j) => a * (1 - a) * W2[j] * d2);
+      const dx = X.map((_, i) => W1.reduce((s, row, j) => s + row[i] * d1[j], 0));
+      return { z1, h, z2, y, loss, d2, d1, dx };
+    }
+    // ----- scene: layers along x, the neurons of a layer on a ring in the y–z plane
+    const ring = (x, k, R, ph) => { const t = ph + (2 * Math.PI * k) / 3; return [x, R * Math.sin(t) - 0.12, R * Math.cos(t)]; };
+    const N = [];
+    for (let i = 0; i < 3; i++) N.push({ id: "x" + i, layer: 0, i, name: "x" + SUB[i + 1], pos: ring(-1.75, i, 0.95, Math.PI / 2) });
+    for (let j = 0; j < 3; j++) N.push({ id: "h" + j, layer: 1, i: j, name: "h" + SUB[j + 1], pos: ring(0, j, 1.1, Math.PI / 6) });
+    N.push({ id: "y", layer: 2, i: 0, name: "ŷ", pos: [1.75, -0.12, 0] });
+    const BN = [{ id: "b1", layer: 0.5, name: "1", pos: [-0.9, -1.45, 0], bias: true }, { id: "b2", layer: 1.5, name: "1", pos: [0.9, -1.45, 0], bias: true }];
+    const byId = {}; N.concat(BN).forEach((n) => (byId[n.id] = n));
+    const E = [];
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) E.push({ a: "x" + i, b: "h" + j, w: () => W1[j][i], stage: 0 });
+    for (let j = 0; j < 3; j++) E.push({ a: "h" + j, b: "y", w: () => W2[j], stage: 1 });
+    for (let j = 0; j < 3; j++) E.push({ a: "b1", b: "h" + j, w: () => B1[j], stage: 0, bias: true });
+    E.push({ a: "b2", b: "y", w: () => B2, stage: 1, bias: true });
+
+    // ----- state and controls
+    let sel = cfg.select || "h0", mode = "fwd", showBias = false, spin = !reduced(), playing = false;
+    let az = -0.62, elv = 0.22, t = -1, t0 = 0, raf = 0, visible = true, lastSpin = 0;
+    const cv = FV.h("canvas", { class: "nr-net-canvas", role: "img", "aria-label": L.netAria, tabindex: 0 });
+    const tip = FV.h("div", { class: "nr-net-tip", hidden: true });
+    const stageBox = FV.h("div", { class: "nr-net-stage" }, cv, tip);
+    const panel = FV.h("div", { class: "nr-net-panel" });
+    const pL = FV.h("div", { class: "nr-net-sel" }), pR = FV.h("div", { class: "nr-net-mat" });
+    panel.append(pL, pR);
+    w.stage.append(stageBox, panel);
+    const segMode = FV.ui.seg({ label: L.netMode, value: mode, options: [{ value: "fwd", label: L.netFwd }, { value: "bwd", label: L.netBwd }], onchange: (v) => { mode = v; start(); } });
+    const segSel = FV.ui.seg({ label: L.netNeuron, value: sel, options: N.map((n) => ({ value: n.id, label: n.name })), onchange: (v) => { sel = v; draw(); } });
+    const play = FV.ui.button({ label: "▶ " + L.netPlay, primary: true, onclick: () => (playing ? stopPlay() : start()) });
+    const ckSpin = FV.ui.check({ label: L.netSpin, checked: spin, onchange: (v) => { spin = v; kick(); } });
+    const ckBias = FV.ui.check({ label: L.netBias, checked: false, onchange: (v) => { showBias = v; draw(); } });
+    const full = FV.ui.button({ label: "⛶ " + L.netFull, onclick: () => {
+      const d = document;
+      if (d.fullscreenElement) d.exitFullscreen && d.exitFullscreen();
+      else if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    } });
+    const resetV = FV.ui.button({ label: "↺ " + FV.t("reset"), onclick: () => { az = -0.62; elv = 0.22; draw(); } });
+    const xs = X.map((v, i) => FV.ui.slider({ label: `$x_${i + 1}$`, min: -3, max: 3, step: 0.25, value: v, fmt: (u) => FV.fmt(u, 2), oninput: (u) => { X[i] = u; draw(); } }));
+    const segY = FV.ui.seg({ label: L.netTarget, value: target, options: [{ value: 0, label: "$y=0$" }, { value: 1, label: "$y=1$" }], onchange: (v) => { target = v; draw(); } });
+    w.controls.append(
+      FV.h("div", { class: "nr-row" }, play.el, segMode.el, segY.el),
+      FV.h("div", { class: "nr-row" }, segSel.el),
+      FV.h("div", { class: "nr-sliders" }, xs.map((s) => s.el)),
+      FV.h("div", { class: "nr-row" }, ckSpin.el, ckBias.el, resetV.el, full.el));
+    const ro = FV.ui.readout(w.readout, [{ key: "y", label: "$\\hat y$ =", c: "orange" }, { key: "l", label: L.netLoss }, { key: "p", label: L.netParams }]);
+
+    // ----- projection
+    let Wd = 640, Hd = 420, dpr = 1, F = 600;
+    const CAM = 6.5;
+    function resize() {
+      Wd = Math.max(280, stageBox.clientWidth || 640);
+      const fs = document.fullscreenElement === el;
+      Hd = fs ? Math.max(320, window.innerHeight - 330) : FV.clamp(Math.round(Wd * 0.62), 300, 560);
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      cv.width = Math.round(Wd * dpr); cv.height = Math.round(Hd * dpr);
+      cv.style.width = Wd + "px"; cv.style.height = Hd + "px";
+      F = CAM * Math.min((0.46 * Wd) / 2.05, (0.42 * Hd) / 1.3);
+      draw();
+    }
+    function proj(p) {
+      const ca = Math.cos(az), sa = Math.sin(az), ce = Math.cos(elv), se = Math.sin(elv);
+      const x1 = p[0] * ca + p[2] * sa, z1 = -p[0] * sa + p[2] * ca;
+      const y2 = p[1] * ce - z1 * se, z2 = p[1] * se + z1 * ce;
+      const k = F / (CAM - z2);
+      return { X: Wd / 2 + x1 * k, Y: Hd / 2 - y2 * k, d: z2, k };
+    }
+    const mixC = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+    const hex = (c) => { c = (c || "#888").trim(); if (c[0] !== "#") return [128, 128, 128]; const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+
+    // value shown in a node and its colour
+    function nodeVal(n, r) {
+      if (n.bias) return { v: 1, t: 0 };
+      if (mode === "fwd") {
+        const v = n.layer === 0 ? X[n.i] : n.layer === 1 ? r.h[n.i] : r.y;
+        return { v, t: n.layer === 0 ? FV.clamp(v / 3, -1, 1) : v };
+      }
+      const v = n.layer === 0 ? r.dx[n.i] : n.layer === 1 ? r.d1[n.i] : r.d2;
+      return { v, t: FV.clamp(v / 0.4, -1, 1) };
+    }
+    const related = (e) => e.a === sel || e.b === sel;
+
+    function draw() {
+      if (!cv.width) return;
+      const ctx = cv.getContext("2d"), r = run();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, Wd, Hd);
+      const C = { card: hex(FV.css("card")), blue: hex(FV.color("blue")), red: hex(FV.color("red")), orange: hex(FV.color("orange")), ink: hex(FV.color("ink")), faint: FV.color("faint"), grid: FV.color("grid") };
+      const sans = FV.css("sans") || "sans-serif";
+      const P = {}; N.concat(BN).forEach((n) => (P[n.id] = proj(n.pos)));
+      // layer captions on the floor
+      [[-1.75, L.netIn], [0, L.netHidden], [1.75, L.netOut]].forEach(([x, s]) => {
+        const q = proj([x, 1.32, 0]); ctx.fillStyle = C.faint; ctx.font = `600 ${Math.round(12 * FV.clamp(q.k / (F / CAM), 0.8, 1.2))}px ${sans}`; ctx.textAlign = "center"; ctx.fillText(s, q.X, q.Y);
+      });
+      // edges, far to near
+      const edges = E.filter((e) => showBias || !e.bias).map((e) => ({ e, A: P[e.a], B: P[e.b], d: (P[e.a].d + P[e.b].d) / 2 })).sort((u, v) => u.d - v.d);
+      edges.forEach(({ e, A, B }) => {
+        const wv = e.w(), hl = related(e);
+        const base = wv >= 0 ? C.blue : C.red;
+        ctx.strokeStyle = FV.rgb(base, hl ? 0.95 : 0.22);
+        ctx.lineWidth = (0.6 + 2.4 * Math.min(1, Math.abs(wv) / 1.5)) * ((A.k + B.k) / 2) / (F / CAM) * (hl ? 1.25 : 1);
+        ctx.setLineDash(e.bias ? [5, 4] : []);
+        ctx.beginPath(); ctx.moveTo(A.X, A.Y); ctx.lineTo(B.X, B.Y); ctx.stroke();
+      });
+      ctx.setLineDash([]);
+      // pulses travelling along the edges
+      if (t >= 0) {
+        edges.forEach(({ e, A, B }) => {
+          const st = mode === "fwd" ? e.stage : 1 - e.stage;
+          const u = FV.clamp((t - st * 0.5) / 0.42, 0, 1);
+          if (t < st * 0.5 || t > st * 0.5 + 0.45) return;
+          let mag;
+          if (mode === "fwd") { const src = e.bias ? 1 : e.stage === 0 ? X[byId[e.a].i] : r.h[byId[e.a].i]; mag = Math.abs(e.w() * src); }
+          else { const dst = byId[e.b]; mag = Math.abs(e.w() * (dst.layer === 2 ? r.d2 : r.d1[dst.i])) * 4; }
+          const f = mode === "fwd" ? u : 1 - u;
+          const x = A.X + (B.X - A.X) * f, y = A.Y + (B.Y - A.Y) * f;
+          ctx.beginPath(); ctx.arc(x, y, 2.5 + Math.min(6, mag * 2.2), 0, Math.PI * 2);
+          ctx.fillStyle = FV.rgb(mode === "fwd" ? (e.w() >= 0 ? C.blue : C.red) : C.orange, related(e) ? 1 : 0.55); ctx.fill();
+        });
+      }
+      // weight labels on the edges of the selected neuron
+      ctx.font = `600 12px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
+      edges.filter(({ e }) => related(e)).forEach(({ e, A, B }) => {
+        const s = (e.bias ? "b=" : "") + n4(e.w()), x = A.X + (B.X - A.X) * 0.42, y = A.Y + (B.Y - A.Y) * 0.42;
+        ctx.lineWidth = 4; ctx.strokeStyle = FV.rgb(C.card); ctx.strokeText(s, x, y);
+        ctx.fillStyle = FV.rgb(e.w() >= 0 ? C.blue : C.red); ctx.fillText(s, x, y);
+      });
+      // nodes, far to near, shaded as spheres
+      const flash = (layer) => { if (t < 0) return 0; const at = mode === "fwd" ? layer * 0.5 : (2 - layer) * 0.5; return Math.max(0, 1 - Math.abs(t - at) / 0.08); };
+      N.concat(showBias ? BN : []).map((n) => ({ n, q: P[n.id] })).sort((a, b) => a.q.d - b.q.d).forEach(({ n, q }) => {
+        const R = (n.bias ? 0.11 : n.layer === 2 ? 0.25 : 0.21) * q.k * (1 + 0.25 * flash(n.layer));
+        const { v, t: tt } = nodeVal(n, r);
+        const tone = mode === "fwd" ? (tt >= 0 ? C.blue : C.red) : (tt >= 0 ? C.red : C.blue);
+        const fill = n.bias ? C.card : mixC(C.card, tone, Math.min(0.85, Math.abs(tt) * 0.85));
+        const g = ctx.createRadialGradient(q.X - R * 0.35, q.Y - R * 0.4, R * 0.1, q.X, q.Y, R);
+        g.addColorStop(0, FV.rgb(mixC(fill, [255, 255, 255], 0.55))); g.addColorStop(1, FV.rgb(fill));
+        ctx.beginPath(); ctx.arc(q.X, q.Y, R, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+        ctx.lineWidth = n.id === sel ? 3.5 : 1.4; ctx.strokeStyle = n.id === sel ? FV.rgb(C.orange) : FV.rgb(C.ink, 0.75); ctx.stroke();
+        if (n.id === "h0") { ctx.setLineDash([3, 3]); ctx.lineWidth = 1.2; ctx.strokeStyle = FV.rgb(C.orange); ctx.beginPath(); ctx.arc(q.X, q.Y, R + 6, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
+        const dark = (fill[0] * 0.3 + fill[1] * 0.59 + fill[2] * 0.11) < 120;
+        ctx.fillStyle = dark ? "#fff" : "#171A20"; ctx.font = `600 ${Math.round(FV.clamp(R * 0.62, 9, 15))}px ${sans}`;
+        ctx.fillText(n.bias ? "1" : (mode === "bwd" && n.layer > 0 ? FV.num(v, 2) : FV.fmt(v, 2)), q.X, q.Y + 1);
+        if (!n.bias) {
+          ctx.font = `600 12px ${sans}`; ctx.lineWidth = 4; ctx.strokeStyle = FV.rgb(C.card);
+          const ly = q.Y + R + 12, txt = n.name + (n.id === "h0" ? " · " + L.netOurs : "");
+          ctx.strokeText(txt, q.X, ly); ctx.fillStyle = n.id === "h0" ? FV.rgb(C.orange) : FV.rgb(C.ink); ctx.fillText(txt, q.X, ly);
+        }
+      });
+      // read-outs and the panel
+      ro.set("y", n4(r.y)); ro.set("l", n4(r.loss)); ro.set("p", "3·(3+1) + 1·(3+1) = 16");
+      segSel.set(sel);
+      renderPanel(r);
+    }
+
+    function renderPanel(r) {
+      const n = byId[sel];
+      pL.textContent = ""; pR.textContent = "";
+      const head = FV.h("div", { class: "nr-net-h" }, FV.h("b", { text: n.name + (sel === "h0" ? " — " + L.netOurs : "") }), FV.h("span", { text: [L.netIn, L.netHidden, L.netOut][n.layer] }));
+      pL.append(head);
+      const add = (src, disp = true) => { const e = FV.tex(src, disp); e.classList.add("nr-net-eq"); pL.append(e); };
+      const txt = (s) => pL.append(FV.rich(s, "p"));
+      if (n.layer === 0) {
+        txt(L.netInText.replace("{i}", n.i + 1));
+        add(`x_${n.i + 1} = ${tn(X[n.i])}`);
+        if (mode === "bwd") add(`\\frac{\\partial L}{\\partial x_${n.i + 1}} = \\sum_j W_{j${n.i + 1}}\\,\\delta_{h_j} \\approx ${tn(Number(r.dx[n.i].toFixed(4)))}`);
+      } else if (n.layer === 1) {
+        const j = n.i, row = W1[j];
+        txt(L.netHidText);
+        add(`z_${j + 1} = ${row.map((v, i) => `${tn(v, true)}\\cdot${tn(X[i], true)}`).join(" + ")} + ${tn(B1[j], true)} = ${tn(Number(r.z1[j].toFixed(4)))}`);
+        add(`h_${j + 1} = \\sigma(z_${j + 1}) \\approx ${tn(Number(r.h[j].toFixed(4)))}`);
+        if (mode === "fwd") txt(L.netHidNext.replace("{w}", n4(W2[j])));
+        else {
+          add(`\\begin{aligned}\\delta_{h_${j + 1}} &= \\sigma'(z_${j + 1})\\cdot w^{(2)}_${j + 1}\\cdot\\delta_{\\hat y}\\\\ &\\approx ${tn(Number((r.h[j] * (1 - r.h[j])).toFixed(4)))}\\cdot${tn(W2[j], true)}\\cdot${tn(Number(r.d2.toFixed(4)), true)} \\approx ${tn(Number(r.d1[j].toFixed(4)))}\\end{aligned}`);
+          add(`\\nabla_{\\mathbf{w}_${j + 1}}L = \\delta_{h_${j + 1}}\\,\\mathbf{x} \\approx (${X.map((x) => tn(Number((r.d1[j] * x).toFixed(4)))).join(FV.lang === "en" ? ",\\ " : ";\\ ")})`);
+        }
+      } else {
+        txt(L.netOutText);
+        add(`z = ${W2.map((v, j) => `${tn(v, true)}\\cdot${tn(Number(r.h[j].toFixed(4)))}`).join(" + ")} + ${tn(B2, true)} \\approx ${tn(Number(r.z2.toFixed(4)))}`);
+        add(`\\hat y = \\sigma(z) \\approx ${tn(Number(r.y.toFixed(4)))}`);
+        if (mode === "bwd") add(`\\delta_{\\hat y} = \\hat y - y \\approx ${tn(Number(r.y.toFixed(4)))} - ${target} = ${tn(Number(r.d2.toFixed(4)))}`);
+      }
+      // the matrices: the selected neuron is one row
+      const mat = (title, rows, bias, hiRow, names) => {
+        const tb = FV.h("table", { class: "nr-mat" });
+        rows.forEach((rw, j) => {
+          const tr = FV.h("tr", { class: hiRow === j ? "hi" : null, onclick: () => { sel = names[j]; draw(); } });
+          tr.append(FV.h("th", { text: byId[names[j]].name }));
+          rw.forEach((v) => tr.append(FV.h("td", { class: v >= 0 ? "pos" : "neg", text: n4(v) })));
+          tr.append(FV.h("td", { class: "b " + (bias[j] >= 0 ? "pos" : "neg"), text: n4(bias[j]) }));
+          tb.append(tr);
+        });
+        return FV.h("div", { class: "nr-mat-box" }, FV.rich(title, "span"), tb);
+      };
+      pR.append(mat(L.netW1, W1, B1, n.layer === 1 ? n.i : -1, ["h0", "h1", "h2"]), mat(L.netW2, [W2], [B2], n.layer === 2 ? 0 : -1, ["y"]));
+    }
+
+    // ----- animation loop: pulses and the slow spin
+    function frame(now) {
+      raf = 0;
+      if (!visible) return;
+      let again = false;
+      if (spin) { if (lastSpin) az -= Math.min(50, now - lastSpin) * 0.00018; lastSpin = now; again = true; } else lastSpin = 0;
+      if (playing) { t = ((now - t0) % 2600) / 2600; again = true; }
+      draw();
+      if (again) raf = requestAnimationFrame(frame);
+    }
+    const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
+    function start() { playing = true; t0 = performance.now(); play.setLabel("❚❚ " + FV.t("pause")); kick(); }
+    function stopPlay() { playing = false; t = -1; play.setLabel("▶ " + L.netPlay); draw(); }
+
+    // ----- pointer: drag to rotate, click to select, hover for a hint
+    let down = null, moved = 0;
+    const at = (e) => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+    const hit = (px, py) => {
+      let best = null, bd = 1e9;
+      N.forEach((n) => { const q = proj(n.pos), R = 0.25 * q.k + 6, d = Math.hypot(q.X - px, q.Y - py); if (d < R && d < bd) { bd = d; best = n; } });
+      return best;
+    };
+    cv.addEventListener("pointerdown", (e) => { down = [e.clientX, e.clientY]; moved = 0; cv.setPointerCapture(e.pointerId); });
+    cv.addEventListener("pointermove", (e) => {
+      if (down) {
+        const dx = e.clientX - down[0], dy = e.clientY - down[1]; moved += Math.abs(dx) + Math.abs(dy);
+        az += dx * 0.009; if (e.pointerType !== "touch") elv = FV.clamp(elv + dy * 0.006, -0.9, 1.2);
+        down = [e.clientX, e.clientY]; if (!raf) draw();
+        return;
+      }
+      const [px, py] = at(e), n = hit(px, py);
+      cv.style.cursor = n ? "pointer" : "grab";
+      if (n) { const r = run(), v = nodeVal(n, r).v; tip.hidden = false; tip.textContent = `${n.name}: ${mode === "fwd" ? (n.layer ? "a" : "x") : "δ"} = ${n4(v)}`; tip.style.left = px + 12 + "px"; tip.style.top = py + 12 + "px"; }
+      else tip.hidden = true;
+    });
+    const up = (e) => {
+      if (down && moved < 6) { const [px, py] = at(e), n = hit(px, py); if (n) { sel = n.id; draw(); } }
+      down = null;
+    };
+    cv.addEventListener("pointerup", up);
+    cv.addEventListener("pointercancel", () => { down = null; });
+    cv.addEventListener("pointerleave", () => { tip.hidden = true; });
+    cv.addEventListener("keydown", (e) => {
+      const k = { ArrowLeft: [0.12, 0], ArrowRight: [-0.12, 0], ArrowUp: [0, -0.08], ArrowDown: [0, 0.08] }[e.key];
+      if (k) { e.preventDefault(); az += k[0]; elv = FV.clamp(elv + k[1], -0.9, 1.2); draw(); }
+    });
+    if ("ResizeObserver" in window) { let last = 0; new ResizeObserver(() => { const x = stageBox.clientWidth; if (Math.abs(x - last) > 1) { last = x; resize(); } }).observe(stageBox); }
+    if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { visible = e.isIntersecting; if (visible) kick(); })).observe(el);
+    document.addEventListener("fullscreenchange", () => { el.classList.toggle("nr-fs", document.fullscreenElement === el); full.setLabel((document.fullscreenElement === el ? "✕ " : "⛶ ") + (document.fullscreenElement === el ? L.netExit : L.netFull)); resize(); });
+    const redraw = () => draw();
+    document.addEventListener("themechange", () => setTimeout(redraw, 320));
+    new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    resize();
+    kick();
   });
 })();

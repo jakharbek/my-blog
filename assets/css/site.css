@@ -668,3 +668,30 @@ details.ex-sol[open] > summary::after { content: "−"; }
 .article .nr-ex .data { min-width: 0; }
 .article .nr-ex .data td, .article .nr-ex .data th { min-width: 0; padding-right: 14px; }
 .fv[data-viz="neuron-xor-morph"] .fv-plot, .fv[data-viz="neuron-dot"] .fv-plot { max-width: 520px; margin: 0 auto; }
+/* the 3D network (neuron-network3d) */
+.nr-net-stage { position: relative; width: 100%; min-width: 0; }
+.nr-net-canvas { display: block; max-width: 100%; border-radius: 4px; background: var(--card); cursor: grab; touch-action: pan-y; outline: none; }
+.nr-net-canvas:active { cursor: grabbing; }
+.nr-net-canvas:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+.nr-net-tip { position: absolute; pointer-events: none; padding: 4px 8px; border-radius: 4px; background: var(--fg); color: var(--bg); font-size: 12px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.nr-net-panel { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; }
+.nr-net-sel, .nr-net-mat { min-width: 0; padding: 14px 16px; border-radius: 4px; background: var(--card); display: flex; flex-direction: column; gap: 8px; }
+.nr-net-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.nr-net-h b { font-size: 15px; color: var(--fg); }
+.nr-net-h span { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--fg4); }
+.nr-net-sel p { margin: 0; font-size: 14px; line-height: 1.6; }
+.nr-net-eq { overflow-x: auto; overflow-y: hidden; }
+.nr-net-eq .katex-display { margin: .35em 0; text-align: left; }
+.nr-net-eq .katex-display > .katex { text-align: left; }
+.nr-mat-box { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--fg3); }
+.nr-mat { border-collapse: separate; border-spacing: 2px; font-variant-numeric: tabular-nums; }
+.nr-mat th { padding: 4px 8px 4px 0; font-weight: 600; color: var(--fg3); text-align: left; }
+.nr-mat td { padding: 5px 8px; border-radius: 3px; background: var(--bg2); text-align: right; font-size: 13px; color: var(--fg2); }
+.nr-mat td.pos { color: var(--v-blue); } .nr-mat td.neg { color: var(--v-red); }
+.nr-mat td.b { border-left: 2px solid var(--line); }
+.nr-mat tr { cursor: pointer; }
+.nr-mat tr.hi td { background: var(--bg3); box-shadow: inset 0 -2px 0 var(--v-orange); font-weight: 600; }
+.nr-mat tr.hi th { color: var(--v-orange); }
+.fv.nr-fs { overflow-y: auto; padding: 18px 22px; background: var(--bg2); }
+.fv.nr-fs .nr-net-panel { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+@media (max-width: 640px) { .nr-net-panel { grid-template-columns: minmax(0, 1fr); } }

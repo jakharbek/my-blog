@@ -66,6 +66,7 @@ VIZ = {
     "ex_steep": dict(w=4, b=-8, f="sigmoid", fs=["sigmoid", "step"], marks=[1.5, 2.5]),
     "ex_xor": dict(),
     "ex_relu": dict(target="sq", k=4),
+    "net": dict(x=X, y=1, select="h0"),
 }
 
 CODE_LOOP = {
@@ -264,7 +265,7 @@ PRACTICE_RU = dict(id="practice", title="Практикум: 17 примеров
                 ["2", "3", "2", "+1,5"],
             ], {"num": [0, 1, 2, 3]}),
             ("p", r"Каждый шаг по $x$ на единицу меняет выход ровно на $w = 1{,}5$ — это и есть наклон. При $x = 0$ выход равен $b = -1$. Ноль выхода — в точке $x_0 = -b/w = 1/1{,}5 \approx 0{,}667$."),
-            ("viz", "neuron-bias", VIZ["ex_line"], r"<b>Рисунок 11.</b> Тот же нейрон на графике; оранжевые точки — строки таблицы. Подвигайте $w$ и $b$: меняются наклон и сдвиг прямой. Переключите функцию на сигмоиду, чтобы увидеть, как та же прямая «сворачивается» в S-кривую."),
+            ("viz", "neuron-bias", VIZ["ex_line"], r"<b>Рисунок 12.</b> Тот же нейрон на графике; оранжевые точки — строки таблицы. Подвигайте $w$ и $b$: меняются наклон и сдвиг прямой. Переключите функцию на сигмоиду, чтобы увидеть, как та же прямая «сворачивается» в S-кривую."),
         ],
         take=r"Вес — это скорость изменения выхода на единицу входа, смещение — выход при нулевом входе. Всё остальное в формуле нейрона — обобщение этой прямой на много входов и нелинейную $f$.")),
 
@@ -293,7 +294,7 @@ PRACTICE_RU = dict(id="practice", title="Практикум: 17 примеров
                 ["<b>итого $z$</b>", "", "", "<b>0,2</b>", ""],
             ], {"num": [1, 2, 3]}),
             ("eq", r"a = \sigma(0{,}2) = \frac{1}{1 + e^{-0{,}2}} \approx 0{,}5498"),
-            ("viz", "neuron-steps", VIZ["ex_student"], r"<b>Рисунок 12.</b> Каскад вкладов для студента: два столбика «за», один «против» и смещение. Итоговое $z = 0{,}2$ чуть выше нуля — ответ на грани."),
+            ("viz", "neuron-steps", VIZ["ex_student"], r"<b>Рисунок 13.</b> Каскад вкладов для студента: два столбика «за», один «против» и смещение. Итоговое $z = 0{,}2$ чуть выше нуля — ответ на грани."),
             ("p", r"Шанс сдать — около 55%: модель почти не уверена. Таблица сразу подсказывает, что изменит ответ сильнее всего. Ещё один час подготовки добавит $0{,}8$ к $z$: $\sigma(1{,}0) \approx 0{,}7311$. А если бы студент не пропускал занятий, исчез бы вклад $-2{,}7$: $\sigma(2{,}9) \approx 0{,}9478$."),
         ],
         take=r"Для одного нейрона объяснение ответа точное и бесплатное: $z$ раскладывается на слагаемые $w_ix_i$. Именно поэтому линейные модели любят в банках и медицине — каждое решение можно расписать по строчкам.")),
@@ -356,7 +357,7 @@ PRACTICE_RU = dict(id="practice", title="Практикум: 17 примеров
                 ["D", "(9; 2)", "1", "0,7311", "0,8944", "принят"],
             ], {"num": [2, 3, 4]}),
             ("p", r"Здесь $\lVert\mathbf{w}\rVert = \sqrt{1 + 0{,}25} \approx 1{,}1180$. Абитуриенты A и D получили одинаковую вероятность, хотя баллы у них разные: обе точки лежат на прямой $z = 1$, параллельной границе. Для нейрона важно только расстояние до границы, а не положение вдоль неё."),
-            ("viz", "neuron-points", VIZ["ex_exam"], r"<b>Рисунок 13.</b> Четыре абитуриента на плоскости баллов. Сплошная линия — граница $a = 0{,}5$, пунктир — уровни $z = \pm 2$, стрелка — нормаль $\mathbf{w}$. Таблица справа пересчитывается при движении ползунков: попробуйте сделать язык важнее математики."),
+            ("viz", "neuron-points", VIZ["ex_exam"], r"<b>Рисунок 14.</b> Четыре абитуриента на плоскости баллов. Сплошная линия — граница $a = 0{,}5$, пунктир — уровни $z = \pm 2$, стрелка — нормаль $\mathbf{w}$. Таблица справа пересчитывается при движении ползунков: попробуйте сделать язык важнее математики."),
         ],
         take=r"Нейрон с двумя входами «видит» только одно направление — вдоль $\mathbf{w}$. Компромисс между признаками задаётся отношением весов: здесь один балл математики стоит двух баллов языка.")),
 
@@ -385,7 +386,7 @@ PRACTICE_RU = dict(id="practice", title="Практикум: 17 примеров
                 ["4", "4", "−8", "0,8808", "0,1192", "1"],
                 ["10", "10", "−20", "0,9933", "0,0067", "2,5"],
             ], {"num": [0, 1, 2, 3, 4, 5]}),
-            ("viz", "neuron-bias", VIZ["ex_steep"], r"<b>Рисунок 14.</b> Нейрон с $w = 4$, $b = -8$; оранжевые точки — значения в $x = 1{,}5$ и $x = 2{,}5$ из таблицы. Двигайте $w$ и $b$ так, чтобы $-b/w$ оставалось равным 2: порог стоит, а резкость меняется."),
+            ("viz", "neuron-bias", VIZ["ex_steep"], r"<b>Рисунок 15.</b> Нейрон с $w = 4$, $b = -8$; оранжевые точки — значения в $x = 1{,}5$ и $x = 2{,}5$ из таблицы. Двигайте $w$ и $b$ так, чтобы $-b/w$ оставалось равным 2: порог стоит, а резкость меняется."),
         ],
         take=r"Граница определяется направлением $\mathbf{w}$ и отношением $b/\lVert\mathbf{w}\rVert$, а длина $\lVert\mathbf{w}\rVert$ — это уверенность. Поэтому L2-регуляризация, которая штрафует большие веса, делает вероятности модели менее категоричными, не обязательно сдвигая саму границу.")),
 
@@ -449,7 +450,7 @@ PRACTICE_RU = dict(id="practice", title="Практикум: 17 примеров
                 ["(1; 0)", "0,5", "1", "0,5", "1", "0,5", "1", "1"],
                 ["(1; 1)", "1,5", "1", "−0,5", "0", "−0,5", "0", "0"],
             ], {"num": [1, 2, 3, 4, 5, 6, 7]}),
-            ("viz", "neuron-xor-morph", VIZ["ex_xor"], r"<b>Рисунок 15.</b> Анимация перехода из входного пространства $(x_1;\ x_2)$ в скрытое $(h_1;\ h_2)$. Слева направо по ползунку точки едут в свои новые координаты: две точки класса 1 сливаются в $(1;\ 1)$, и прямая AND отделяет их от остальных."),
+            ("viz", "neuron-xor-morph", VIZ["ex_xor"], r"<b>Рисунок 16.</b> Анимация перехода из входного пространства $(x_1;\ x_2)$ в скрытое $(h_1;\ h_2)$. Слева направо по ползунку точки едут в свои новые координаты: две точки класса 1 сливаются в $(1;\ 1)$, и прямая AND отделяет их от остальных."),
         ],
         take=r"Скрытый слой не «решает» задачу сам — он меняет систему координат. Каждый нейрон по-прежнему линеен, но композиция нейронов с нелинейной активацией делает неразделимое разделимым. В этом вся суть глубоких сетей.")),
 
@@ -462,7 +463,7 @@ PRACTICE_RU = dict(id="practice", title="Практикум: 17 примеров
             ("table", [r"$x$", r"$\mathrm{ReLU}(x)$", r"$\mathrm{ReLU}(-x)$", "Сумма"], [
                 ["−2", "0", "2", "2"], ["−1", "0", "1", "1"], ["0", "0", "0", "0"], ["1", "1", "0", "1"], ["2", "2", "0", "2"],
             ], {"num": [0, 1, 2, 3]}),
-            ("viz", "neuron-relu-sum", VIZ["ex_relu"], r"<b>Рисунок 16.</b> Приближение $x^2$ и $\sin\frac{\pi x}{2}$ на отрезке $[-2;\ 2]$ суммой нейронов ReLU с равномерно расставленными изломами. Тонкие линии — вклады отдельных нейронов, оранжевая — их сумма. Увеличивайте число нейронов и следите за максимальной ошибкой: для $x^2$ она падает в четыре раза при каждом удвоении."),
+            ("viz", "neuron-relu-sum", VIZ["ex_relu"], r"<b>Рисунок 17.</b> Приближение $x^2$ и $\sin\frac{\pi x}{2}$ на отрезке $[-2;\ 2]$ суммой нейронов ReLU с равномерно расставленными изломами. Тонкие линии — вклады отдельных нейронов, оранжевая — их сумма. Увеличивайте число нейронов и следите за максимальной ошибкой: для $x^2$ она падает в четыре раза при каждом удвоении."),
         ],
         take=r"Один нейрон ReLU — это «излом». Достаточно много изломов складываются в кривую любой формы. Нелинейность $f$ — не украшение, а источник выразительной силы сети.")),
 
@@ -543,7 +544,7 @@ PRACTICE_EN = dict(id="practice", title="Practice: 17 examples from simple to ad
                 ["2", "3", "2", "+1.5"],
             ], {"num": [0, 1, 2, 3]}),
             ("p", r"Each unit step in $x$ changes the output by exactly $w = 1.5$: this is the slope. At $x = 0$ the output equals $b = -1$. The output is zero at the point $x_0 = -b/w = 1/1.5 \approx 0.667$."),
-            ("viz", "neuron-bias", VIZ["ex_line"], r"<b>Figure 11.</b> The same neuron on a graph; the orange dots are the rows of the table. Move $w$ and $b$: the slope and the offset of the line change. Switch the function to the sigmoid to see how the same line “folds” into an S-curve."),
+            ("viz", "neuron-bias", VIZ["ex_line"], r"<b>Figure 12.</b> The same neuron on a graph; the orange dots are the rows of the table. Move $w$ and $b$: the slope and the offset of the line change. Switch the function to the sigmoid to see how the same line “folds” into an S-curve."),
         ],
         take=r"A weight is the rate at which the output changes per unit of input; the bias is the output when the input is zero. Everything else in the neuron’s formula generalises this line to many inputs and a non-linear $f$.")),
 
@@ -572,7 +573,7 @@ PRACTICE_EN = dict(id="practice", title="Practice: 17 examples from simple to ad
                 ["<b>total $z$</b>", "", "", "<b>0.2</b>", ""],
             ], {"num": [1, 2, 3]}),
             ("eq", r"a = \sigma(0.2) = \frac{1}{1 + e^{-0.2}} \approx 0.5498"),
-            ("viz", "neuron-steps", VIZ["ex_student"], r"<b>Figure 12.</b> The cascade of contributions for the student: two bars “for”, one “against”, and the bias. The final $z = 0.2$ is just above zero: the answer is borderline."),
+            ("viz", "neuron-steps", VIZ["ex_student"], r"<b>Figure 13.</b> The cascade of contributions for the student: two bars “for”, one “against”, and the bias. The final $z = 0.2$ is just above zero: the answer is borderline."),
             ("p", r"The chance of passing is about 55%: the model is far from sure. The table shows at once what would change the answer the most. One more hour of preparation adds $0.8$ to $z$: $\sigma(1.0) \approx 0.7311$. And had the student missed no classes, the contribution $-2.7$ would disappear: $\sigma(2.9) \approx 0.9478$."),
         ],
         take=r"For a single neuron the explanation of an answer is exact and comes for free: $z$ decomposes into the terms $w_ix_i$. This is precisely why linear models are popular in banking and medicine: every decision can be laid out line by line.")),
@@ -635,7 +636,7 @@ PRACTICE_EN = dict(id="practice", title="Practice: 17 examples from simple to ad
                 ["D", "(9, 2)", "1", "0.7311", "0.8944", "admitted"],
             ], {"num": [2, 3, 4]}),
             ("p", r"Here $\lVert\mathbf{w}\rVert = \sqrt{1 + 0.25} \approx 1.1180$. Applicants A and D received the same probability even though their scores differ: both points lie on the line $z = 1$, parallel to the boundary. For the neuron only the distance to the boundary matters, not the position along it."),
-            ("viz", "neuron-points", VIZ["ex_exam"], r"<b>Figure 13.</b> Four applicants in the plane of scores. The solid line is the boundary $a = 0.5$, the dashed lines are the levels $z = \pm 2$, the arrow is the normal $\mathbf{w}$. The table on the right is recomputed as you move the sliders: try making language more important than mathematics."),
+            ("viz", "neuron-points", VIZ["ex_exam"], r"<b>Figure 14.</b> Four applicants in the plane of scores. The solid line is the boundary $a = 0.5$, the dashed lines are the levels $z = \pm 2$, the arrow is the normal $\mathbf{w}$. The table on the right is recomputed as you move the sliders: try making language more important than mathematics."),
         ],
         take=r"A neuron with two inputs “sees” only one direction, the one along $\mathbf{w}$. The trade-off between the features is set by the ratio of the weights: here one point in mathematics is worth two points in language.")),
 
@@ -664,7 +665,7 @@ PRACTICE_EN = dict(id="practice", title="Practice: 17 examples from simple to ad
                 ["4", "4", "−8", "0.8808", "0.1192", "1"],
                 ["10", "10", "−20", "0.9933", "0.0067", "2.5"],
             ], {"num": [0, 1, 2, 3, 4, 5]}),
-            ("viz", "neuron-bias", VIZ["ex_steep"], r"<b>Figure 14.</b> A neuron with $w = 4$, $b = -8$; the orange dots are the values at $x = 1.5$ and $x = 2.5$ from the table. Move $w$ and $b$ so that $-b/w$ stays equal to 2: the threshold stays put, while the sharpness changes."),
+            ("viz", "neuron-bias", VIZ["ex_steep"], r"<b>Figure 15.</b> A neuron with $w = 4$, $b = -8$; the orange dots are the values at $x = 1.5$ and $x = 2.5$ from the table. Move $w$ and $b$ so that $-b/w$ stays equal to 2: the threshold stays put, while the sharpness changes."),
         ],
         take=r"The boundary is determined by the direction of $\mathbf{w}$ and the ratio $b/\lVert\mathbf{w}\rVert$, while the length $\lVert\mathbf{w}\rVert$ is the confidence. That is why L2 regularisation, which penalises large weights, makes the model’s probabilities less categorical without necessarily shifting the boundary itself.")),
 
@@ -728,7 +729,7 @@ PRACTICE_EN = dict(id="practice", title="Practice: 17 examples from simple to ad
                 ["(1, 0)", "0.5", "1", "0.5", "1", "0.5", "1", "1"],
                 ["(1, 1)", "1.5", "1", "−0.5", "0", "−0.5", "0", "0"],
             ], {"num": [1, 2, 3, 4, 5, 6, 7]}),
-            ("viz", "neuron-xor-morph", VIZ["ex_xor"], r"<b>Figure 15.</b> An animation of the transition from the input space $(x_1,\ x_2)$ to the hidden space $(h_1,\ h_2)$. As the slider moves from left to right, the points travel to their new coordinates: the two points of class 1 merge into $(1,\ 1)$, and the AND line separates them from the rest."),
+            ("viz", "neuron-xor-morph", VIZ["ex_xor"], r"<b>Figure 16.</b> An animation of the transition from the input space $(x_1,\ x_2)$ to the hidden space $(h_1,\ h_2)$. As the slider moves from left to right, the points travel to their new coordinates: the two points of class 1 merge into $(1,\ 1)$, and the AND line separates them from the rest."),
         ],
         take=r"The hidden layer does not “solve” the problem by itself: it changes the coordinate system. Each neuron is still linear, but a composition of neurons with a non-linear activation makes the inseparable separable. This is the whole essence of deep networks.")),
 
@@ -741,7 +742,7 @@ PRACTICE_EN = dict(id="practice", title="Practice: 17 examples from simple to ad
             ("table", [r"$x$", r"$\mathrm{ReLU}(x)$", r"$\mathrm{ReLU}(-x)$", "Sum"], [
                 ["−2", "0", "2", "2"], ["−1", "0", "1", "1"], ["0", "0", "0", "0"], ["1", "1", "0", "1"], ["2", "2", "0", "2"],
             ], {"num": [0, 1, 2, 3]}),
-            ("viz", "neuron-relu-sum", VIZ["ex_relu"], r"<b>Figure 16.</b> Approximating $x^2$ and $\sin\frac{\pi x}{2}$ on the interval $[-2,\ 2]$ by a sum of ReLU neurons with evenly spaced kinks. The thin lines are the contributions of individual neurons, the orange line is their sum. Increase the number of neurons and watch the maximum error: for $x^2$ it drops fourfold with every doubling."),
+            ("viz", "neuron-relu-sum", VIZ["ex_relu"], r"<b>Figure 17.</b> Approximating $x^2$ and $\sin\frac{\pi x}{2}$ on the interval $[-2,\ 2]$ by a sum of ReLU neurons with evenly spaced kinks. The thin lines are the contributions of individual neurons, the orange line is their sum. Increase the number of neurons and watch the maximum error: for $x^2$ it drops fourfold with every doubling."),
         ],
         take=r"A single ReLU neuron is a “kink”. Enough kinks add up to a curve of any shape. The non-linearity $f$ is not a decoration but the source of the network’s expressive power.")),
 
@@ -822,7 +823,7 @@ PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta mi
                 ["2", "3", "2", "+1,5"],
             ], {"num": [0, 1, 2, 3]}),
             ("p", r"$x$ bo‘yicha har bir birlik qadam chiqishni aynan $w = 1{,}5$ ga o‘zgartiradi — qiyalik aynan shu. $x = 0$ da chiqish $b = -1$ ga teng. Chiqish $x_0 = -b/w = 1/1{,}5 \approx 0{,}667$ nuqtada nolga aylanadi."),
-            ("viz", "neuron-bias", VIZ["ex_line"], r"<b>11-rasm.</b> O‘sha neyron grafikda; to‘q sariq nuqtalar — jadval satrlari. $w$ va $b$ ni suring: to‘g‘ri chiziqning qiyaligi va siljishi o‘zgaradi. O‘sha to‘g‘ri chiziq S-egri chiziqqa qanday «o‘ralishini» ko‘rish uchun funksiyani sigmoidaga almashtiring."),
+            ("viz", "neuron-bias", VIZ["ex_line"], r"<b>12-rasm.</b> O‘sha neyron grafikda; to‘q sariq nuqtalar — jadval satrlari. $w$ va $b$ ni suring: to‘g‘ri chiziqning qiyaligi va siljishi o‘zgaradi. O‘sha to‘g‘ri chiziq S-egri chiziqqa qanday «o‘ralishini» ko‘rish uchun funksiyani sigmoidaga almashtiring."),
         ],
         take=r"Vazn — kirish bir birlikka o‘zgarganda chiqishning o‘zgarish tezligi, siljish — nol kirishdagi chiqish. Neyron formulasidagi qolgan hamma narsa — shu to‘g‘ri chiziqning ko‘p kirishlar va nochiziqli $f$ uchun umumlashmasi.")),
 
@@ -851,7 +852,7 @@ PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta mi
                 [r"<b>jami $z$</b>", "", "", "<b>0,2</b>", ""],
             ], {"num": [1, 2, 3]}),
             ("eq", r"a = \sigma(0{,}2) = \frac{1}{1 + e^{-0{,}2}} \approx 0{,}5498"),
-            ("viz", "neuron-steps", VIZ["ex_student"], r"<b>12-rasm.</b> Talaba uchun hissalar kaskadi: ikkita «yoqlab» ustun, bitta «qarshi» ustun va siljish. Yakuniy $z = 0{,}2$ noldan sal yuqori — javob chegarada turibdi."),
+            ("viz", "neuron-steps", VIZ["ex_student"], r"<b>13-rasm.</b> Talaba uchun hissalar kaskadi: ikkita «yoqlab» ustun, bitta «qarshi» ustun va siljish. Yakuniy $z = 0{,}2$ noldan sal yuqori — javob chegarada turibdi."),
             ("p", r"O‘tish imkoniyati — taxminan 55%: model deyarli ishonmaydi. Jadval javobni nima eng kuchli o‘zgartirishini darhol ko‘rsatadi. Yana bir soat tayyorgarlik $z$ ga $0{,}8$ qo‘shadi: $\sigma(1{,}0) \approx 0{,}7311$. Agar talaba darslarni qoldirmaganida edi, $-2{,}7$ hissa yo‘qolardi: $\sigma(2{,}9) \approx 0{,}9478$."),
         ],
         take=r"Bitta neyron uchun javobni tushuntirish aniq va tekin: $z$ $w_ix_i$ qo‘shiluvchilarga ajraladi. Aynan shuning uchun chiziqli modellarni banklar va tibbiyotda yaxshi ko‘rishadi — har bir qarorni satrma-satr yozib berish mumkin.")),
@@ -914,7 +915,7 @@ PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta mi
                 ["D", "(9; 2)", "1", "0,7311", "0,8944", "qabul qilindi"],
             ], {"num": [2, 3, 4]}),
             ("p", r"Bu yerda $\lVert\mathbf{w}\rVert = \sqrt{1 + 0{,}25} \approx 1{,}1180$. A va D abituriyentlar bir xil ehtimollik oldi, garchi ularning ballari turlicha bo‘lsa ham: ikkala nuqta ham chegaraga parallel bo‘lgan $z = 1$ to‘g‘ri chiziqda yotadi. Neyron uchun faqat chegaragacha bo‘lgan masofa muhim, uning bo‘ylab joylashuv emas."),
-            ("viz", "neuron-points", VIZ["ex_exam"], r"<b>13-rasm.</b> Ballar tekisligidagi to‘rtta abituriyent. Yaxlit chiziq — $a = 0{,}5$ chegara, punktir — $z = \pm 2$ sathlar, strelka — $\mathbf{w}$ normal. O‘ngdagi jadval slayderlar surilganda qayta hisoblanadi: tilni matematikadan muhimroq qilib ko‘ring."),
+            ("viz", "neuron-points", VIZ["ex_exam"], r"<b>14-rasm.</b> Ballar tekisligidagi to‘rtta abituriyent. Yaxlit chiziq — $a = 0{,}5$ chegara, punktir — $z = \pm 2$ sathlar, strelka — $\mathbf{w}$ normal. O‘ngdagi jadval slayderlar surilganda qayta hisoblanadi: tilni matematikadan muhimroq qilib ko‘ring."),
         ],
         take=r"Ikki kirishli neyron faqat bitta yo‘nalishni — $\mathbf{w}$ bo‘ylab yo‘nalishni «ko‘radi». Belgilar orasidagi murosa vaznlar nisbati bilan beriladi: bu yerda matematikadan bitta ball tildan ikki ballga teng.")),
 
@@ -943,7 +944,7 @@ PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta mi
                 ["4", "4", "−8", "0,8808", "0,1192", "1"],
                 ["10", "10", "−20", "0,9933", "0,0067", "2,5"],
             ], {"num": [0, 1, 2, 3, 4, 5]}),
-            ("viz", "neuron-bias", VIZ["ex_steep"], r"<b>14-rasm.</b> $w = 4$, $b = -8$ bo‘lgan neyron; to‘q sariq nuqtalar — jadvaldagi $x = 1{,}5$ va $x = 2{,}5$ dagi qiymatlar. $w$ va $b$ ni $-b/w$ nisbat 2 ga tengligicha qoladigan qilib suring: bo‘sag‘a joyida turadi, keskinlik esa o‘zgaradi."),
+            ("viz", "neuron-bias", VIZ["ex_steep"], r"<b>15-rasm.</b> $w = 4$, $b = -8$ bo‘lgan neyron; to‘q sariq nuqtalar — jadvaldagi $x = 1{,}5$ va $x = 2{,}5$ dagi qiymatlar. $w$ va $b$ ni $-b/w$ nisbat 2 ga tengligicha qoladigan qilib suring: bo‘sag‘a joyida turadi, keskinlik esa o‘zgaradi."),
         ],
         take=r"Chegara $\mathbf{w}$ yo‘nalishi va $b/\lVert\mathbf{w}\rVert$ nisbat bilan aniqlanadi, $\lVert\mathbf{w}\rVert$ uzunlik esa — bu ishonch. Shuning uchun katta vaznlarni jarimalaydigan L2-regulyarizatsiya model ehtimolliklarini kamroq qat’iy qiladi va bunda chegaraning o‘zini surishi shart emas.")),
 
@@ -1007,7 +1008,7 @@ PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta mi
                 ["(1; 0)", "0,5", "1", "0,5", "1", "0,5", "1", "1"],
                 ["(1; 1)", "1,5", "1", "−0,5", "0", "−0,5", "0", "0"],
             ], {"num": [1, 2, 3, 4, 5, 6, 7]}),
-            ("viz", "neuron-xor-morph", VIZ["ex_xor"], r"<b>15-rasm.</b> $(x_1;\ x_2)$ kirish fazosidan $(h_1;\ h_2)$ yashirin fazoga o‘tish animatsiyasi. Slayder chapdan o‘ngga surilganda nuqtalar o‘zlarining yangi koordinatalariga ko‘chadi: 1-sinfning ikkita nuqtasi $(1;\ 1)$ da qo‘shilib ketadi va AND to‘g‘ri chizig‘i ularni qolganlaridan ajratadi."),
+            ("viz", "neuron-xor-morph", VIZ["ex_xor"], r"<b>16-rasm.</b> $(x_1;\ x_2)$ kirish fazosidan $(h_1;\ h_2)$ yashirin fazoga o‘tish animatsiyasi. Slayder chapdan o‘ngga surilganda nuqtalar o‘zlarining yangi koordinatalariga ko‘chadi: 1-sinfning ikkita nuqtasi $(1;\ 1)$ da qo‘shilib ketadi va AND to‘g‘ri chizig‘i ularni qolganlaridan ajratadi."),
         ],
         take=r"Yashirin qatlam masalani o‘zi «yechmaydi» — u koordinatalar tizimini o‘zgartiradi. Har bir neyron avvalgidek chiziqli, lekin nochiziqli aktivatsiyali neyronlar kompozitsiyasi ajratib bo‘lmaydiganni ajratiladigan qiladi. Chuqur tarmoqlarning butun mohiyati shunda.")),
 
@@ -1020,7 +1021,7 @@ PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta mi
             ("table", [r"$x$", r"$\mathrm{ReLU}(x)$", r"$\mathrm{ReLU}(-x)$", r"Yig‘indi"], [
                 ["−2", "0", "2", "2"], ["−1", "0", "1", "1"], ["0", "0", "0", "0"], ["1", "1", "0", "1"], ["2", "2", "0", "2"],
             ], {"num": [0, 1, 2, 3]}),
-            ("viz", "neuron-relu-sum", VIZ["ex_relu"], r"<b>16-rasm.</b> $[-2;\ 2]$ kesmada $x^2$ va $\sin\frac{\pi x}{2}$ ni sinish nuqtalari tekis joylashtirilgan ReLU neyronlari yig‘indisi bilan yaqinlashtirish. Ingichka chiziqlar — alohida neyronlarning hissalari, to‘q sariq chiziq — ularning yig‘indisi. Neyronlar sonini oshiring va maksimal xatoni kuzating: $x^2$ uchun u har safar ikki baravar oshirilganda to‘rt marta kamayadi."),
+            ("viz", "neuron-relu-sum", VIZ["ex_relu"], r"<b>17-rasm.</b> $[-2;\ 2]$ kesmada $x^2$ va $\sin\frac{\pi x}{2}$ ni sinish nuqtalari tekis joylashtirilgan ReLU neyronlari yig‘indisi bilan yaqinlashtirish. Ingichka chiziqlar — alohida neyronlarning hissalari, to‘q sariq chiziq — ularning yig‘indisi. Neyronlar sonini oshiring va maksimal xatoni kuzating: $x^2$ uchun u har safar ikki baravar oshirilganda to‘rt marta kamayadi."),
         ],
         take=r"Bitta ReLU neyroni — bu «sinish». Yetarlicha ko‘p sinishlar qo‘shilib, istalgan shakldagi egri chiziqni hosil qiladi. $f$ ning nochiziqliligi — bezak emas, balki tarmoq ifoda kuchining manbai.")),
 
@@ -1066,6 +1067,103 @@ PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta mi
 ])
 
 
+NETWORK_RU = dict(id="network", title="Нейрон внутри сети: 3D-модель", blocks=[
+    ("p", r"До сих пор нейрон стоял один. Посмотрим, где его место в настоящей, пусть и самой маленькой, нейросети. Возьмём сеть 3–3–1: три входа, скрытый слой из трёх нейронов и один выходной нейрон. Наш нейрон из раздела 3 — с весами $\mathbf{w} = (0{,}5;\ -1;\ 0{,}25)$ и смещением $b = -0{,}75$ — станет первым нейроном скрытого слоя $h_1$. Вход тот же: $\mathbf{x} = (2;\ -1;\ 3)$, активация везде — сигмоида."),
+    ("viz", "neuron-network3d", VIZ["net"], r"<b>Рисунок 10.</b> Сеть 3–3–1 в трёх измерениях. Вращайте модель мышью, пальцем или стрелками; щёлкните по любому нейрону — справа появится его формула на живых числах, а в матрице весов подсветится его строка. «Пустить сигнал» запускает прямой проход (синие и красные импульсы, размер — величина вклада $w\cdot a$). В режиме «обратный» оранжевые импульсы несут ошибку от выхода назад, а в каждом кружке показана его ошибка $\delta$. Наш нейрон — $h_1$, обведён пунктиром. Кнопка «На весь экран» разворачивает модель."),
+    ("h3", "Что видно на модели"),
+    ("ul", [
+        r"<b>Каждый кружок скрытого и выходного слоя — тот же нейрон</b> с формулой $a = \sigma(\mathbf{w}^{\top}\mathbf{x} + b)$. Отличаются только числа: веса и смещение.",
+        r"<b>Входы — не нейроны.</b> Это просто числа из данных: они ничего не считают, а раздают своё значение всем нейронам следующего слоя.",
+        r"<b>Линии — веса.</b> Толщина — модуль веса, цвет — знак. У каждого нейрона скрытого слоя три входящие линии (его $w_1, w_2, w_3$), у выходного — три линии от скрытых нейронов.",
+        r"<b>Выход одного нейрона — вход другого.</b> Число $0{,}8808$, которое считает наш нейрон, дальше никуда не «выходит»: оно становится входом $h_1$ выходного нейрона с весом $1{,}5$.",
+        r"<b>Слой — строка матрицы.</b> Веса трёх скрытых нейронов — это три строки матрицы $W^{(1)}$; наш нейрон — её первая строка (раздел 9).",
+    ]),
+    ("h3", "Прямой проход на числах"),
+    ("eq", r"\mathbf{h} = \sigma\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big) = \sigma\!\left(\begin{pmatrix} 0{,}5 & -1 & 0{,}25\\ -1 & 0{,}5 & 1\\ 0{,}3 & 0{,}8 & -0{,}5 \end{pmatrix}\begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0{,}75\\ 0{,}5\\ 0{,}2 \end{pmatrix}\right) = \sigma\!\begin{pmatrix} 2\\ 1\\ -1{,}5 \end{pmatrix} \approx \begin{pmatrix} 0{,}8808\\ 0{,}7311\\ 0{,}1824 \end{pmatrix}"),
+    ("eq", r"\hat y = \sigma\big(\mathbf{w}^{(2)\top}\mathbf{h} + b^{(2)}\big) = \sigma(1{,}5\cdot 0{,}8808 - 1\cdot 0{,}7311 + 2\cdot 0{,}1824 - 0{,}5) = \sigma(0{,}455) \approx 0{,}6118"),
+    ("p", r"Первая строка первой формулы — ровно наш расчёт из раздела 3: $z_1 = 2$, $h_1 = \sigma(2) \approx 0{,}8808$. Вся сеть — это четыре нейрона, каждый из которых считает одну и ту же формулу."),
+    ("table", ["Слой", "Нейронов", "Входов у нейрона", "Параметров"], [
+        ["скрытый", "3", "3", "3·(3 + 1) = 12"],
+        ["выходной", "1", "3", "1·(3 + 1) = 4"],
+        ["<b>вся сеть</b>", "4", "", "<b>16</b>"],
+    ], {"num": [1, 2]}),
+    ("h3", "Обратный проход: как ошибка доходит до нашего нейрона"),
+    ("p", r"Пусть верный ответ $y = 1$. Сеть ответила $\hat y \approx 0{,}6118$, потеря $L = -\ln \hat y \approx 0{,}4913$, ошибка выходного нейрона $\delta_{\hat y} = \hat y - y \approx -0{,}3882$ (раздел 11). Наш нейрон не видит ответа $y$ напрямую: его ошибка приходит от выходного нейрона по тому же весу $1{,}5$, по которому шёл его сигнал, и умножается на производную его сигмоиды:"),
+    ("eq", r"\delta_{h_1} = \sigma'(z_1)\cdot w^{(2)}_1\cdot\delta_{\hat y} \approx 0{,}1050\cdot 1{,}5\cdot(-0{,}3882) \approx -0{,}0611, \qquad \sigma'(2) = 0{,}8808\cdot 0{,}1192 \approx 0{,}1050"),
+    ("p", r"Дальше — ровно формула одного нейрона из раздела 11: градиент по его весам равен ошибке, умноженной на его входы:"),
+    ("eq", r"\nabla_{\mathbf{w}_1}L = \delta_{h_1}\,\mathbf{x} \approx -0{,}0611\cdot(2;\ -1;\ 3) \approx (-0{,}1223;\ 0{,}0611;\ -0{,}1834)"),
+    ("p", r"Знак минус у $\delta_{h_1}$ читается так: чтобы $\hat y$ приблизился к 1, нашему нейрону выгодно стать ещё активнее — его выход идёт в ответ с положительным весом $1{,}5$. Шаг спуска увеличит $w_1$ и $w_3$ (их входы положительные) и уменьшит $w_2$ (его вход отрицательный)."),
+    ("callout", "key", "Главное", r"Формула одного нейрона — общая для всех кружков сети. Сеть добавляет только две вещи: выход одного нейрона становится входом другого (прямой проход), а ошибка возвращается по тем же весам в обратную сторону (обратное распространение). Сети с миллиардами параметров устроены так же — просто кружков и слоёв больше."),
+])
+
+NETWORK_EN = dict(id="network", title="The neuron inside a network: a 3D model", blocks=[
+    ("p", r"So far the neuron has stood alone. Let us see where it sits in a real, if tiny, neural network. Take the 3–3–1 network: three inputs, a hidden layer of three neurons and one output neuron. Our neuron from section 3, with weights $\mathbf{w} = (0.5,\ -1,\ 0.25)$ and bias $b = -0.75$, becomes the first neuron of the hidden layer, $h_1$. The input is the same, $\mathbf{x} = (2,\ -1,\ 3)$, and the activation is the sigmoid everywhere."),
+    ("viz", "neuron-network3d", VIZ["net"], r"<b>Figure 10.</b> The 3–3–1 network in three dimensions. Rotate the model with the mouse, a finger or the arrow keys; click any neuron to see its formula with live numbers on the right, with its row highlighted in the weight matrix. “Send a signal” runs the forward pass (blue and red pulses; the size is the contribution $w\cdot a$). In the “backward” mode orange pulses carry the error from the output back, and every circle shows its error $\delta$. Our neuron is $h_1$, circled with a dashed line. “Full screen” expands the model."),
+    ("h3", "What the model shows"),
+    ("ul", [
+        r"<b>Every circle in the hidden and output layers is the same neuron</b> with the formula $a = \sigma(\mathbf{w}^{\top}\mathbf{x} + b)$. Only the numbers differ: the weights and the bias.",
+        r"<b>Inputs are not neurons.</b> They are just numbers from the data: they compute nothing and hand their values to every neuron of the next layer.",
+        r"<b>Lines are weights.</b> Thickness is the absolute value of the weight, colour is its sign. Every hidden neuron has three incoming lines (its $w_1, w_2, w_3$); the output neuron has three lines from the hidden neurons.",
+        r"<b>The output of one neuron is the input of another.</b> The number $0.8808$ that our neuron computes does not “leave” the network: it becomes the input $h_1$ of the output neuron, with weight $1.5$.",
+        r"<b>A layer is a row of a matrix.</b> The weights of the three hidden neurons are the three rows of the matrix $W^{(1)}$; our neuron is its first row (section 9).",
+    ]),
+    ("h3", "The forward pass in numbers"),
+    ("eq", r"\mathbf{h} = \sigma\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big) = \sigma\!\left(\begin{pmatrix} 0.5 & -1 & 0.25\\ -1 & 0.5 & 1\\ 0.3 & 0.8 & -0.5 \end{pmatrix}\begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0.75\\ 0.5\\ 0.2 \end{pmatrix}\right) = \sigma\!\begin{pmatrix} 2\\ 1\\ -1.5 \end{pmatrix} \approx \begin{pmatrix} 0.8808\\ 0.7311\\ 0.1824 \end{pmatrix}"),
+    ("eq", r"\hat y = \sigma\big(\mathbf{w}^{(2)\top}\mathbf{h} + b^{(2)}\big) = \sigma(1.5\cdot 0.8808 - 1\cdot 0.7311 + 2\cdot 0.1824 - 0.5) = \sigma(0.455) \approx 0.6118"),
+    ("p", r"The first row of the first formula is exactly our calculation from section 3: $z_1 = 2$, $h_1 = \sigma(2) \approx 0.8808$. The whole network is four neurons, each computing one and the same formula."),
+    ("table", ["Layer", "Neurons", "Inputs per neuron", "Parameters"], [
+        ["hidden", "3", "3", "3·(3 + 1) = 12"],
+        ["output", "1", "3", "1·(3 + 1) = 4"],
+        ["<b>whole network</b>", "4", "", "<b>16</b>"],
+    ], {"num": [1, 2]}),
+    ("h3", "The backward pass: how the error reaches our neuron"),
+    ("p", r"Let the correct answer be $y = 1$. The network answered $\hat y \approx 0.6118$, the loss is $L = -\ln \hat y \approx 0.4913$, and the error of the output neuron is $\delta_{\hat y} = \hat y - y \approx -0.3882$ (section 11). Our neuron never sees the answer $y$ directly: its error comes from the output neuron along the same weight $1.5$ its signal travelled along, multiplied by the derivative of its sigmoid:"),
+    ("eq", r"\delta_{h_1} = \sigma'(z_1)\cdot w^{(2)}_1\cdot\delta_{\hat y} \approx 0.1050\cdot 1.5\cdot(-0.3882) \approx -0.0611, \qquad \sigma'(2) = 0.8808\cdot 0.1192 \approx 0.1050"),
+    ("p", r"From here it is exactly the single-neuron formula of section 11: the gradient with respect to its weights is the error times its inputs:"),
+    ("eq", r"\nabla_{\mathbf{w}_1}L = \delta_{h_1}\,\mathbf{x} \approx -0.0611\cdot(2,\ -1,\ 3) \approx (-0.1223,\ 0.0611,\ -0.1834)"),
+    ("p", r"The minus sign of $\delta_{h_1}$ reads like this: to bring $\hat y$ closer to 1, our neuron should become even more active, because its output enters the answer with the positive weight $1.5$. A descent step will increase $w_1$ and $w_3$ (their inputs are positive) and decrease $w_2$ (its input is negative)."),
+    ("callout", "key", "The point", r"The formula of a single neuron is shared by every circle of the network. The network adds only two things: the output of one neuron becomes the input of another (the forward pass), and the error comes back along the same weights in the opposite direction (backpropagation). Networks with billions of parameters work the same way, with more circles and more layers."),
+])
+
+NETWORK_UZ = dict(id="network", title="Tarmoq ichidagi neyron: 3D-model", blocks=[
+    ("p", r"Hozirgacha neyron yolg‘iz turdi. Endi uning haqiqiy, garchi eng kichik bo‘lsa ham, neyron tarmoqdagi o‘rnini ko‘raylik. 3–3–1 tarmoqni olamiz: uchta kirish, uchta neyronli yashirin qatlam va bitta chiqish neyroni. 3-bo‘limdagi neyronimiz — vaznlari $\mathbf{w} = (0{,}5;\ -1;\ 0{,}25)$ va siljishi $b = -0{,}75$ — yashirin qatlamning birinchi neyroni $h_1$ bo‘ladi. Kirish o‘sha: $\mathbf{x} = (2;\ -1;\ 3)$, aktivatsiya hamma joyda — sigmoida."),
+    ("viz", "neuron-network3d", VIZ["net"], r"<b>10-rasm.</b> 3–3–1 tarmog‘i uch o‘lchamda. Modelni sichqoncha, barmoq yoki strelka tugmalari bilan aylantiring; istalgan neyronni bosing — o‘ngda uning formulasi jonli sonlar bilan chiqadi, vaznlar matritsasida esa uning satri ajralib turadi. «Signal yuborish» to‘g‘ri o‘tishni boshlaydi (ko‘k va qizil impulslar, o‘lchami — $w\cdot a$ hissasi kattaligi). «Teskari» rejimda to‘q sariq impulslar xatoni chiqishdan orqaga olib boradi, har bir doirada esa uning xatosi $\delta$ ko‘rsatiladi. Bizning neyron — $h_1$, punktir bilan o‘ralgan. «To‘liq ekran» tugmasi modelni kattalashtiradi."),
+    ("h3", "Modelda nima ko‘rinadi"),
+    ("ul", [
+        r"<b>Yashirin va chiqish qatlamlaridagi har bir doira — o‘sha neyron</b>, formulasi $a = \sigma(\mathbf{w}^{\top}\mathbf{x} + b)$. Faqat sonlar farq qiladi: vaznlar va siljish.",
+        r"<b>Kirishlar — neyron emas.</b> Ular shunchaki ma’lumotlardagi sonlar: hech narsa hisoblamaydi, o‘z qiymatini keyingi qatlamning barcha neyronlariga tarqatadi.",
+        r"<b>Chiziqlar — vaznlar.</b> Qalinligi — vazn moduli, rangi — ishorasi. Yashirin qatlamning har bir neyronida uchta kiruvchi chiziq bor (uning $w_1, w_2, w_3$), chiqish neyronida — yashirin neyronlardan kelgan uchta chiziq.",
+        r"<b>Bir neyronning chiqishi — boshqasining kirishi.</b> Bizning neyron hisoblagan $0{,}8808$ soni hech qayerga «chiqib ketmaydi»: u chiqish neyronining $h_1$ kirishiga aylanadi, vazni $1{,}5$.",
+        r"<b>Qatlam — matritsaning satri.</b> Uchta yashirin neyronning vaznlari — $W^{(1)}$ matritsasining uchta satri; bizning neyron — uning birinchi satri (9-bo‘lim).",
+    ]),
+    ("h3", "To‘g‘ri o‘tish sonlarda"),
+    ("eq", r"\mathbf{h} = \sigma\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big) = \sigma\!\left(\begin{pmatrix} 0{,}5 & -1 & 0{,}25\\ -1 & 0{,}5 & 1\\ 0{,}3 & 0{,}8 & -0{,}5 \end{pmatrix}\begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0{,}75\\ 0{,}5\\ 0{,}2 \end{pmatrix}\right) = \sigma\!\begin{pmatrix} 2\\ 1\\ -1{,}5 \end{pmatrix} \approx \begin{pmatrix} 0{,}8808\\ 0{,}7311\\ 0{,}1824 \end{pmatrix}"),
+    ("eq", r"\hat y = \sigma\big(\mathbf{w}^{(2)\top}\mathbf{h} + b^{(2)}\big) = \sigma(1{,}5\cdot 0{,}8808 - 1\cdot 0{,}7311 + 2\cdot 0{,}1824 - 0{,}5) = \sigma(0{,}455) \approx 0{,}6118"),
+    ("p", r"Birinchi formulaning birinchi satri — aynan 3-bo‘limdagi hisobimiz: $z_1 = 2$, $h_1 = \sigma(2) \approx 0{,}8808$. Butun tarmoq — to‘rtta neyron, ularning har biri bitta formulani hisoblaydi."),
+    ("table", ["Qatlam", "Neyronlar", "Neyron kirishlari", "Parametrlar"], [
+        ["yashirin", "3", "3", "3·(3 + 1) = 12"],
+        ["chiqish", "1", "3", "1·(3 + 1) = 4"],
+        ["<b>butun tarmoq</b>", "4", "", "<b>16</b>"],
+    ], {"num": [1, 2]}),
+    ("h3", "Teskari o‘tish: xato bizning neyronga qanday yetib keladi"),
+    ("p", r"To‘g‘ri javob $y = 1$ bo‘lsin. Tarmoq $\hat y \approx 0{,}6118$ deb javob berdi, yo‘qotish $L = -\ln \hat y \approx 0{,}4913$, chiqish neyronining xatosi $\delta_{\hat y} = \hat y - y \approx -0{,}3882$ (11-bo‘lim). Bizning neyron $y$ javobini to‘g‘ridan-to‘g‘ri ko‘rmaydi: uning xatosi chiqish neyronidan, signali borgan o‘sha $1{,}5$ vazn orqali qaytib keladi va sigmoidasining hosilasiga ko‘paytiriladi:"),
+    ("eq", r"\delta_{h_1} = \sigma'(z_1)\cdot w^{(2)}_1\cdot\delta_{\hat y} \approx 0{,}1050\cdot 1{,}5\cdot(-0{,}3882) \approx -0{,}0611, \qquad \sigma'(2) = 0{,}8808\cdot 0{,}1192 \approx 0{,}1050"),
+    ("p", r"Bundan keyin — aynan 11-bo‘limdagi bitta neyron formulasi: uning vaznlari bo‘yicha gradiyent xatoning kirishlariga ko‘paytmasiga teng:"),
+    ("eq", r"\nabla_{\mathbf{w}_1}L = \delta_{h_1}\,\mathbf{x} \approx -0{,}0611\cdot(2;\ -1;\ 3) \approx (-0{,}1223;\ 0{,}0611;\ -0{,}1834)"),
+    ("p", r"$\delta_{h_1}$ dagi minus ishorasi shunday o‘qiladi: $\hat y$ ni 1 ga yaqinlashtirish uchun bizning neyron yanada faolroq bo‘lgani ma’qul — uning chiqishi javobga musbat $1{,}5$ vazn bilan kiradi. Tushish qadami $w_1$ va $w_3$ ni oshiradi (ularning kirishlari musbat), $w_2$ ni esa kamaytiradi (uning kirishi manfiy)."),
+    ("callout", "key", "Asosiysi", r"Bitta neyron formulasi tarmoqning barcha doiralari uchun umumiy. Tarmoq faqat ikki narsa qo‘shadi: bir neyronning chiqishi boshqasining kirishiga aylanadi (to‘g‘ri o‘tish), xato esa o‘sha vaznlar bo‘ylab teskari yo‘nalishda qaytadi (teskari tarqalish). Milliardlab parametrli tarmoqlar ham xuddi shunday tuzilgan — faqat doiralar va qatlamlar ko‘proq."),
+])
+
+QUIZ_NET = {
+    "ru": dict(q=r"Сколько обучаемых параметров у сети 3–3–1 (три входа, три скрытых нейрона, один выход)?", options=["7", "12", "13", "16"], answer=3,
+               explain=r"Скрытый слой: $3\cdot(3 + 1) = 12$, выходной: $1\cdot(3 + 1) = 4$, всего 16."),
+    "en": dict(q=r"How many trainable parameters does the 3–3–1 network have (three inputs, three hidden neurons, one output)?", options=["7", "12", "13", "16"], answer=3,
+               explain=r"Hidden layer: $3\cdot(3 + 1) = 12$, output: $1\cdot(3 + 1) = 4$, 16 in total."),
+    "uz": dict(q=r"3–3–1 tarmog‘ida (uchta kirish, uchta yashirin neyron, bitta chiqish) nechta o‘qitiladigan parametr bor?", options=["7", "12", "13", "16"], answer=3,
+               explain=r"Yashirin qatlam: $3\cdot(3 + 1) = 12$, chiqish: $1\cdot(3 + 1) = 4$, jami 16."),
+}
+
+
 RU = [
     dict(id="idea", title="Что делает один нейрон", blocks=[
         ("p", r"Любая нейросеть — от логистической регрессии до GPT — собрана из одной и той же детали. Эта деталь называется искусственным нейроном, и вся его работа укладывается в одну строку:"),
@@ -1080,7 +1178,7 @@ RU = [
         ]),
         ("viz", "neuron-anatomy", VIZ["anatomy"], r"<b>Рисунок 1.</b> Нейрон в работе: три входа, три веса, смещение и сигмоида. Толщина связи — модуль веса, цвет — знак вклада $w_ix_i$ (синий — вклад «за», красный — «против»). Импульсы бегут от входов к сумматору $\Sigma$, затем к функции активации и на выход. Двигайте ползунки: каждое число на схеме пересчитывается сразу."),
         ("callout", "intuition", "Аналогия", r"Кредитный комитет банка решает, выдать ли кредит. Каждый эксперт приносит своё мнение — это входы $x_i$. У каждого эксперта свой авторитет и своя позиция — это веса $w_i$: большой положительный вес — уважаемый сторонник, отрицательный — скептик, нулевой — тот, кого не слушают. Смещение $b$ — настроение комитета до начала обсуждения: строгий комитет начинает с минуса. Функция $f$ — регламент, который превращает итоговый балл в решение: «да/нет» или «вероятность дефолта 33%»."),
-        ("callout", "history", "Откуда взялась формула", r"В 1943 году Уоррен Мак-Каллок и Уолтер Питтс описали «логический нейрон»: он суммирует двоичные входы и срабатывает, если сумма превысила порог. В 1958 году Фрэнк Розенблатт построил перцептрон — нейрон, веса которого подбираются по примерам. Образ взят из биологии: дендриты принимают сигналы (входы), синапсы усиливают или ослабляют их (веса), тело клетки суммирует, а аксон выдаёт импульс, если суммарное возбуждение выше порога (активация). Аналогия вольная: живой нейрон намного сложнее, но идея «взвесить, сложить, решить» осталась."),
+        ("callout", "history", "Откуда взялась формула", r"В 1943 году Уоррен Мак-Каллок и Уолтер Питтс описали «логический нейрон»: он суммирует двоичные входы и срабатывает, если сумма превысила порог. В 1958 году Фрэнк Розенблатт предложил перцептрон — нейрон, веса которого подбираются по примерам (аппаратная машина Mark I появилась вскоре после этого). Образ взят из биологии: дендриты принимают сигналы (входы), синапсы усиливают или ослабляют их (веса), тело клетки суммирует, а аксон выдаёт импульс, если суммарное возбуждение выше порога (активация). Аналогия вольная: живой нейрон намного сложнее, но идея «взвесить, сложить, решить» осталась."),
     ]),
 
     dict(id="anatomy", title="Формула по косточкам: каждая буква", blocks=[
@@ -1243,7 +1341,7 @@ RU = [
             ["ступенька", r"$f(z) = 1$ при $z \ge 0$, иначе $0$", r"$\{0;\ 1\}$", "перцептрон Розенблатта, логические схемы"],
             ["сигмоида", r"$\sigma(z) = \dfrac{1}{1+e^{-z}}$", r"$(0;\ 1)$", "логистическая регрессия, выход бинарного классификатора"],
             ["tanh", r"$\tanh z = \dfrac{e^{z}-e^{-z}}{e^{z}+e^{-z}}$", r"$(-1;\ 1)$", "рекуррентные сети (RNN, LSTM)"],
-            ["ReLU", r"$\max(0,\ z)$", r"$[0;\ +\infty)$", "скрытые слои почти всех современных сетей"],
+            ["ReLU", r"$\max(0,\ z)$", r"$[0;\ +\infty)$", "скрытые слои большинства сетей; в трансформерах — её гладкие родственники GELU и SiLU"],
         ], {"num": []}),
         ("viz", "neuron-activations", VIZ["acts"], r"<b>Рисунок 7.</b> Одна и та же предактивация $z$ — пять разных выходов. Двигайте $z$ и выбирайте функцию; остальные показаны тонкими линиями. Флажок добавляет производную $f'(z)$ — она понадобится в разделе об обучении. При $z = 2$ из нашего примера выходы равны $2$, $1$, $0{,}8808$, $0{,}9640$ и $2$."),
         ("h3", "Зачем вообще нужна нелинейность"),
@@ -1253,8 +1351,8 @@ RU = [
             ("eq", r"\mathbf{y} = W_2(W_1\mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2 = \underbrace{(W_2W_1)}_{W}\,\mathbf{x} + \underbrace{(W_2\mathbf{b}_1 + \mathbf{b}_2)}_{\mathbf{b}}"),
             ("p", r"Получился один линейный слой с матрицей $W = W_2W_1$ и смещением $\mathbf{b} = W_2\mathbf{b}_1 + \mathbf{b}_2$. По индукции то же верно для любого числа слоёв."),
         ]),
-        ("p", r"Нелинейная $f$ «ломает» прямую. Из множества таких изломанных кусков сеть складывает функцию практически любой формы — это утверждает теорема об универсальной аппроксимации: сети с одним скрытым слоем и нелинейной активацией достаточно, чтобы сколь угодно точно приблизить любую непрерывную функцию на ограниченной области (при достаточном числе нейронов)."),
-        ("callout", "warn", "Ловушки активаций", r"Сигмоида и tanh насыщаются: при $|z| &gt; 5$ их производная почти ноль, и градиент через такой нейрон почти не проходит (подробно — в статье <a href=\"../sigmoid/\">«Анатомия сигмоиды»</a>). ReLU при $z &lt; 0$ выдаёт ноль с нулевой производной: нейрон, который на всех данных получает отрицательное $z$, перестаёт обучаться — «умирает» (см. <a href=\"../materials/ml-formulas/relu/\">ReLU</a> и <a href=\"../materials/ml-formulas/leaky-relu/\">Leaky ReLU</a>)."),
+        ("p", r"Нелинейная $f$ «ломает» прямую. Из множества таких изломанных кусков сеть складывает функцию практически любой формы — это утверждает теорема об универсальной аппроксимации: сети с одним скрытым слоем и нелинейной (точнее, неполиномиальной, как сигмоида или ReLU) активацией достаточно, чтобы сколь угодно точно приблизить любую непрерывную функцию на ограниченной области (при достаточном числе нейронов)."),
+        ("callout", "warn", "Ловушки активаций", r"Сигмоида и tanh насыщаются: при $|z| &gt; 5$ их производная почти ноль, и градиент через такой нейрон почти не проходит (подробно — в статье <a href='../sigmoid/'>«Анатомия сигмоиды»</a>). ReLU при $z &lt; 0$ выдаёт ноль с нулевой производной: нейрон, который на всех данных получает отрицательное $z$, перестаёт обучаться — «умирает» (см. <a href='../materials/ml-formulas/relu/'>ReLU</a> и <a href='../materials/ml-formulas/leaky-relu/'>Leaky ReLU</a>)."),
     ]),
 
     dict(id="cases", title="Кейсы: одна формула — четыре профессии", blocks=[
@@ -1269,12 +1367,12 @@ RU = [
             r"$b = 10$: базовая надбавка. Это не «цена квартиры нулевой площади» — такой квартиры нет в данных, — а поправка, с которой прямая лучше всего проходит через реальные примеры.",
         ]),
         ("eq", r"a = 1{,}2\cdot 60 + 5\cdot 2 + (-2)\cdot 5 + 10 = 72 + 10 - 10 + 10 = 82"),
-        ("p", r"Квартира 60 м², две комнаты, 5 км от центра — модель оценивает её в 82 тысячи долларов. Один нейрон без активации — это в точности линейная регрессия. Её обучают, минимизируя среднеквадратичную ошибку (см. <a href=\"../materials/mae-mse-examples/\">MAE и MSE на простых примерах</a>)."),
+        ("p", r"Квартира 60 м², две комнаты, 5 км от центра — модель оценивает её в 82 тысячи долларов. Один нейрон без активации — это в точности линейная регрессия. Её обучают, минимизируя среднеквадратичную ошибку (см. <a href='../materials/mae-mse-examples/'>MAE и MSE на простых примерах</a>)."),
 
         ("h3", r"Кейс 2. Классификация: вероятность дефолта ($f$ — сигмоида)"),
         ("p", r"Скоринговая модель банка. Входы: $x_1 = 0{,}4$ — долговая нагрузка (доля дохода, которая уходит на платежи); $x_2 = 2$ — число просрочек за год; $x_3 = 5$ — длина кредитной истории, лет. Веса: $\mathbf{w} = (3;\ 0{,}8;\ -0{,}3)$, $b = -2$."),
         ("eq", r"\begin{aligned} z &= 3\cdot 0{,}4 + 0{,}8\cdot 2 + (-0{,}3)\cdot 5 + (-2) = 1{,}2 + 1{,}6 - 1{,}5 - 2 = -0{,}7\\ a &= \sigma(-0{,}7) = \frac{1}{1 + e^{0{,}7}} \approx 0{,}3318 \end{aligned}"),
-        ("p", r"Вероятность дефолта около 33%. При пороге $0{,}5$ кредит одобрят, при более строгом пороге $0{,}3$ — нет: порог выбирает бизнес, а не формула. Знаки весов читаются как правила: нагрузка и просрочки повышают риск, длинная история его снижает. Это логистическая регрессия; её обучают через <a href=\"../materials/ml-formulas/bce/\">бинарную кросс-энтропию</a>."),
+        ("p", r"Вероятность дефолта около 33%. При пороге $0{,}5$ кредит одобрят, при более строгом пороге $0{,}3$ — нет: порог выбирает бизнес, а не формула. Знаки весов читаются как правила: нагрузка и просрочки повышают риск, длинная история его снижает. Это логистическая регрессия; её обучают через <a href='../materials/ml-formulas/bce/'>бинарную кросс-энтропию</a>."),
         ("callout", "note", None, r"Числа в кейсах условные. В настоящем скоринге признаки стандартизируют, а веса проверяют на здравый смысл: например, рост просрочек не должен снижать риск. Возможность прочитать каждый вес — главная причина, почему банки до сих пор любят логистическую регрессию."),
 
         ("h3", r"Кейс 3. Логика: нейрон-вентиль ($f$ — ступенька)"),
@@ -1320,6 +1418,8 @@ RU = [
         ("callout", "key", None, r"Матричная формула — это три вложенных цикла «для каждого объекта, для каждого нейрона, для каждого входа», упакованные в одну операцию. Внутри каждой клетки $A_{kj}$ по-прежнему наша формула одного нейрона."),
     ]),
 
+    NETWORK_RU,
+
     dict(id="learning", title="Как нейрон учится", blocks=[
         ("p", r"Откуда берутся веса? Их подбирают по данным. Задают функцию потерь $L$ — число, которое показывает, насколько выход $a$ далёк от правильного ответа $y$, — и много раз сдвигают каждый параметр против её градиента:"),
         ("eq", r"w_i \leftarrow w_i - \eta\,\frac{\partial L}{\partial w_i}, \qquad b \leftarrow b - \eta\,\frac{\partial L}{\partial b}"),
@@ -1337,7 +1437,7 @@ RU = [
         ("p", r"Пусть правильный ответ $y = 0$, а нейрон выдал $a \approx 0{,}8808$ — сильная ошибка. Ошибка нейрона $\delta = a - y \approx 0{,}8808$, шаг $\eta = 0{,}1$:"),
         ("eq", r"\begin{aligned} \nabla_{\mathbf{w}}L &= \delta\,\mathbf{x} \approx 0{,}8808\cdot(2;\ -1;\ 3) = (1{,}7616;\ -0{,}8808;\ 2{,}6424)\\ \mathbf{w} &\leftarrow (0{,}5;\ -1;\ 0{,}25) - 0{,}1\cdot(1{,}7616;\ -0{,}8808;\ 2{,}6424) \approx (0{,}3238;\ -0{,}9119;\ -0{,}0142)\\ b &\leftarrow -0{,}75 - 0{,}1\cdot 0{,}8808 \approx -0{,}8381 \end{aligned}"),
         ("p", r"С новыми параметрами $z \approx 0{,}6788$ и $a \approx 0{,}6635$, а потеря упала с $2{,}1269$ до $1{,}0891$ — за один шаг. Каждый вес сдвинулся пропорционально своему входу: сильнее всех изменился $w_3$ (вход $x_3 = 3$ самый большой), а $w_2$ даже вырос, потому что вход $x_2$ отрицательный."),
-        ("viz", "neuron-train", VIZ["train"], r"<b>Рисунок 10.</b> Нейрон учится разделять два класса. Один шаг — градиентный спуск по средней BCE на всех точках: граница поворачивается и сдвигается, потери на правом графике падают. Попробуйте маленький и большой шаг обучения $\eta$ и начните сначала."),
+        ("viz", "neuron-train", VIZ["train"], r"<b>Рисунок 11.</b> Нейрон учится разделять два класса. Один шаг — градиентный спуск по средней BCE на всех точках: граница поворачивается и сдвигается, потери на правом графике падают. Попробуйте маленький и большой шаг обучения $\eta$ и начните сначала."),
         ("callout", "warn", "Инициализация", r"Один нейрон можно начинать учить с нулевых весов — так и делают в логистической регрессии. Но в слое из многих нейронов одинаковые начальные веса — ловушка: все нейроны получат одинаковые градиенты и навсегда останутся копиями друг друга. Поэтому веса слоёв инициализируют случайно (схемы Ксавье и Хе)."),
     ]),
 
@@ -1349,7 +1449,7 @@ RU = [
         ("code", "python", CODE_NUMPY["ru"]),
         ("h3", "PyTorch: слой и градиенты"),
         ("code", "python", CODE_TORCH["ru"]),
-        ("p", r"Градиенты, которые насчитал PyTorch, совпадают с нашими ручными $\delta\,\mathbf{x}$ и $\delta$ из раздела 10. Скорость тоже важна: на векторе из миллиона элементов <code>w @ x</code> в NumPy работает в сотни раз быстрее цикла на чистом Python, потому что считается в скомпилированном коде и использует векторные инструкции процессора."),
+        ("p", r"Градиенты, которые насчитал PyTorch, совпадают с нашими ручными $\delta\,\mathbf{x}$ и $\delta$ из раздела 11. Скорость тоже важна: на векторе из миллиона элементов <code>w @ x</code> в NumPy работает в сотни раз быстрее цикла на чистом Python, потому что считается в скомпилированном коде и использует векторные инструкции процессора."),
     ]),
 
     PRACTICE_RU,
@@ -1376,6 +1476,7 @@ RU = [
             r"Выбор $f$ определяет профессию: тождественная — регрессия, сигмоида — вероятность, ступенька — логика, ReLU — детектор признаков.",
             r"Слой — матрица весов: $\mathbf{a} = f(W\mathbf{x} + \mathbf{b})$; пакет — $A = f(XW^{\top} + \mathbf{1}\mathbf{b}^{\top})$.",
             r"Обучение опирается на простую производную: $\partial L/\partial w_i = \delta\,x_i$, $\partial L/\partial b = \delta$.",
+            r"В сети каждый кружок — тот же нейрон: выход одного становится входом другого, а ошибка возвращается по тем же весам обратно. Сеть 3–3–1 — это 4 нейрона и 16 параметров.",
         ]),
     ]),
 
@@ -1421,7 +1522,7 @@ EN = [
         ]),
         ("viz", "neuron-anatomy", VIZ["anatomy"], r"<b>Figure 1.</b> A neuron at work: three inputs, three weights, a bias and a sigmoid. The thickness of a connection is the absolute value of the weight, its colour is the sign of the contribution $w_ix_i$ (blue for a contribution “for”, red for “against”). Pulses run from the inputs to the summer $\Sigma$, then to the activation function and on to the output. Move the sliders: every number in the diagram is recomputed at once."),
         ("callout", "intuition", "An analogy", r"A bank’s credit committee decides whether to grant a loan. Each expert brings their own opinion: these are the inputs $x_i$. Each expert has their own authority and their own stance: these are the weights $w_i$. A large positive weight is a respected supporter, a negative one is a sceptic, a zero weight is someone nobody listens to. The bias $b$ is the committee’s mood before the discussion begins: a strict committee starts in the minus. The function $f$ is the procedure that turns the final score into a decision: “yes/no” or “probability of default 33%”."),
-        ("callout", "history", "Where the formula came from", r"In 1943 Warren McCulloch and Walter Pitts described a “logical neuron”: it sums binary inputs and fires if the sum exceeds a threshold. In 1958 Frank Rosenblatt built the perceptron, a neuron whose weights are fitted from examples. The image is borrowed from biology: dendrites receive signals (inputs), synapses amplify or attenuate them (weights), the cell body sums them, and the axon emits a pulse if the total excitation is above a threshold (activation). The analogy is loose: a living neuron is far more complex, but the idea “weigh, add up, decide” has survived."),
+        ("callout", "history", "Where the formula came from", r"In 1943 Warren McCulloch and Walter Pitts described a “logical neuron”: it sums binary inputs and fires if the sum exceeds a threshold. In 1958 Frank Rosenblatt proposed the perceptron, a neuron whose weights are fitted from examples (the Mark I hardware machine followed soon after). The image is borrowed from biology: dendrites receive signals (inputs), synapses amplify or attenuate them (weights), the cell body sums them, and the axon emits a pulse if the total excitation is above a threshold (activation). The analogy is loose: a living neuron is far more complex, but the idea “weigh, add up, decide” has survived."),
     ]),
 
     dict(id="anatomy", title="The formula bone by bone: every symbol", blocks=[
@@ -1584,7 +1685,7 @@ EN = [
             ["step", r"$f(z) = 1$ for $z \ge 0$, otherwise $0$", r"$\{0,\ 1\}$", "Rosenblatt’s perceptron, logic circuits"],
             ["sigmoid", r"$\sigma(z) = \dfrac{1}{1+e^{-z}}$", r"$(0,\ 1)$", "logistic regression, the output of a binary classifier"],
             ["tanh", r"$\tanh z = \dfrac{e^{z}-e^{-z}}{e^{z}+e^{-z}}$", r"$(-1,\ 1)$", "recurrent networks (RNN, LSTM)"],
-            ["ReLU", r"$\max(0,\ z)$", r"$[0,\ +\infty)$", "hidden layers of almost all modern networks"],
+            ["ReLU", r"$\max(0,\ z)$", r"$[0,\ +\infty)$", "hidden layers of most networks; transformers use its smooth relatives GELU and SiLU"],
         ], {"num": []}),
         ("viz", "neuron-activations", VIZ["acts"], r"<b>Figure 7.</b> One and the same pre-activation $z$, five different outputs. Move $z$ and choose a function; the others are shown as thin lines. The checkbox adds the derivative $f'(z)$, which we will need in the section on learning. At $z = 2$ from our example the outputs are $2$, $1$, $0.8808$, $0.9640$ and $2$."),
         ("h3", "Why non-linearity is needed at all"),
@@ -1594,8 +1695,8 @@ EN = [
             ("eq", r"\mathbf{y} = W_2(W_1\mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2 = \underbrace{(W_2W_1)}_{W}\,\mathbf{x} + \underbrace{(W_2\mathbf{b}_1 + \mathbf{b}_2)}_{\mathbf{b}}"),
             ("p", r"We get a single linear layer with the matrix $W = W_2W_1$ and the bias $\mathbf{b} = W_2\mathbf{b}_1 + \mathbf{b}_2$. By induction the same holds for any number of layers."),
         ]),
-        ("p", r"A non-linear $f$ “breaks” the straight line. From many such broken pieces a network assembles a function of practically any shape. This is what the universal approximation theorem states: a network with one hidden layer and a non-linear activation is enough to approximate any continuous function on a bounded domain to arbitrary accuracy (given enough neurons)."),
-        ("callout", "warn", "Activation pitfalls", r"The sigmoid and tanh saturate: for $|z| &gt; 5$ their derivative is almost zero, and the gradient barely passes through such a neuron (see the article <a href=\"../sigmoid/\">Anatomy of the sigmoid</a> for details). ReLU outputs zero with a zero derivative for $z &lt; 0$: a neuron that receives a negative $z$ on all the data stops learning, it “dies” (see <a href=\"../materials/ml-formulas/relu/\">ReLU</a> and <a href=\"../materials/ml-formulas/leaky-relu/\">Leaky ReLU</a>)."),
+        ("p", r"A non-linear $f$ “breaks” the straight line. From many such broken pieces a network assembles a function of practically any shape. This is what the universal approximation theorem states: a network with one hidden layer and a non-linear (more precisely, non-polynomial, like the sigmoid or ReLU) activation is enough to approximate any continuous function on a bounded domain to arbitrary accuracy (given enough neurons)."),
+        ("callout", "warn", "Activation pitfalls", r"The sigmoid and tanh saturate: for $|z| &gt; 5$ their derivative is almost zero, and the gradient barely passes through such a neuron (see the article <a href='../sigmoid/'>Anatomy of the sigmoid</a> for details). ReLU outputs zero with a zero derivative for $z &lt; 0$: a neuron that receives a negative $z$ on all the data stops learning, it “dies” (see <a href='../materials/ml-formulas/relu/'>ReLU</a> and <a href='../materials/ml-formulas/leaky-relu/'>Leaky ReLU</a>)."),
     ]),
 
     dict(id="cases", title="Cases: one formula, four professions", blocks=[
@@ -1610,12 +1711,12 @@ EN = [
             r"$b = 10$: a base premium. It is not “the price of a flat with zero floor area” (there is no such flat in the data) but a correction with which the line best fits the real examples.",
         ]),
         ("eq", r"a = 1.2\cdot 60 + 5\cdot 2 + (-2)\cdot 5 + 10 = 72 + 10 - 10 + 10 = 82"),
-        ("p", r"A 60 m² flat with two rooms, 5 km from the centre: the model values it at 82 thousand dollars. A single neuron without an activation is exactly linear regression. It is trained by minimising the mean squared error (see <a href=\"../materials/mae-mse-examples/\">MAE and MSE by example</a>)."),
+        ("p", r"A 60 m² flat with two rooms, 5 km from the centre: the model values it at 82 thousand dollars. A single neuron without an activation is exactly linear regression. It is trained by minimising the mean squared error (see <a href='../materials/mae-mse-examples/'>MAE and MSE by example</a>)."),
 
         ("h3", r"Case 2. Classification: the probability of default ($f$ is the sigmoid)"),
         ("p", r"A bank’s scoring model. Inputs: $x_1 = 0.4$ is the debt-to-income ratio (the share of income that goes to loan payments); $x_2 = 2$ is the number of late payments in the past year; $x_3 = 5$ is the length of the credit history, in years. Weights: $\mathbf{w} = (3,\ 0.8,\ -0.3)$, $b = -2$."),
         ("eq", r"\begin{aligned} z &= 3\cdot 0.4 + 0.8\cdot 2 + (-0.3)\cdot 5 + (-2) = 1.2 + 1.6 - 1.5 - 2 = -0.7\\ a &= \sigma(-0.7) = \frac{1}{1 + e^{0.7}} \approx 0.3318 \end{aligned}"),
-        ("p", r"The probability of default is about 33%. With a threshold of $0.5$ the loan will be approved; with a stricter threshold of $0.3$ it will not: the threshold is chosen by the business, not by the formula. The signs of the weights read as rules: the debt load and late payments increase the risk, a long credit history reduces it. This is logistic regression; it is trained with <a href=\"../materials/ml-formulas/bce/\">binary cross-entropy</a>."),
+        ("p", r"The probability of default is about 33%. With a threshold of $0.5$ the loan will be approved; with a stricter threshold of $0.3$ it will not: the threshold is chosen by the business, not by the formula. The signs of the weights read as rules: the debt load and late payments increase the risk, a long credit history reduces it. This is logistic regression; it is trained with <a href='../materials/ml-formulas/bce/'>binary cross-entropy</a>."),
         ("callout", "note", None, r"The numbers in the cases are illustrative. In real credit scoring the features are standardised and the weights are checked for common sense: for example, more late payments must not lower the risk. The ability to read every weight is the main reason why banks still love logistic regression."),
 
         ("h3", r"Case 3. Logic: a neuron as a gate ($f$ is the step)"),
@@ -1661,6 +1762,8 @@ EN = [
         ("callout", "key", None, r"The matrix formula is three nested loops, “for each object, for each neuron, for each input”, packed into a single operation. Inside every cell $A_{kj}$ there is still our formula of a single neuron."),
     ]),
 
+    NETWORK_EN,
+
     dict(id="learning", title="How a neuron learns", blocks=[
         ("p", r"Where do the weights come from? They are fitted to the data. You define a loss function $L$, a number that shows how far the output $a$ is from the correct answer $y$, and shift each parameter against its gradient many times:"),
         ("eq", r"w_i \leftarrow w_i - \eta\,\frac{\partial L}{\partial w_i}, \qquad b \leftarrow b - \eta\,\frac{\partial L}{\partial b}"),
@@ -1678,7 +1781,7 @@ EN = [
         ("p", r"Let the correct answer be $y = 0$, while the neuron output $a \approx 0.8808$, a large error. The neuron’s error is $\delta = a - y \approx 0.8808$, and the learning rate is $\eta = 0.1$:"),
         ("eq", r"\begin{aligned} \nabla_{\mathbf{w}}L &= \delta\,\mathbf{x} \approx 0.8808\cdot(2,\ -1,\ 3) = (1.7616,\ -0.8808,\ 2.6424)\\ \mathbf{w} &\leftarrow (0.5,\ -1,\ 0.25) - 0.1\cdot(1.7616,\ -0.8808,\ 2.6424) \approx (0.3238,\ -0.9119,\ -0.0142)\\ b &\leftarrow -0.75 - 0.1\cdot 0.8808 \approx -0.8381 \end{aligned}"),
         ("p", r"With the new parameters $z \approx 0.6788$ and $a \approx 0.6635$, and the loss fell from $2.1269$ to $1.0891$ in a single step. Each weight moved in proportion to its input: $w_3$ changed the most (the input $x_3 = 3$ is the largest), while $w_2$ even grew, because the input $x_2$ is negative."),
-        ("viz", "neuron-train", VIZ["train"], r"<b>Figure 10.</b> A neuron learns to separate two classes. One step is a gradient descent step on the mean BCE over all points: the boundary rotates and shifts, and the loss on the right-hand plot goes down. Try a small and a large learning rate $\eta$ and start over."),
+        ("viz", "neuron-train", VIZ["train"], r"<b>Figure 11.</b> A neuron learns to separate two classes. One step is a gradient descent step on the mean BCE over all points: the boundary rotates and shifts, and the loss on the right-hand plot goes down. Try a small and a large learning rate $\eta$ and start over."),
         ("callout", "warn", "Initialisation", r"A single neuron can be trained starting from zero weights; that is exactly what is done in logistic regression. But in a layer of many neurons identical initial weights are a trap: all neurons receive identical gradients and remain copies of each other forever. That is why layer weights are initialised randomly (Xavier and He initialisation)."),
     ]),
 
@@ -1690,7 +1793,7 @@ EN = [
         ("code", "python", CODE_NUMPY["en"]),
         ("h3", "PyTorch: a layer and gradients"),
         ("code", "python", CODE_TORCH["en"]),
-        ("p", r"The gradients PyTorch computed match our hand-computed $\delta\,\mathbf{x}$ and $\delta$ from section 10. Speed matters too: on a vector of a million elements, <code>w @ x</code> in NumPy runs hundreds of times faster than a pure-Python loop, because it is computed in compiled code and uses the processor’s vector instructions."),
+        ("p", r"The gradients PyTorch computed match our hand-computed $\delta\,\mathbf{x}$ and $\delta$ from section 11. Speed matters too: on a vector of a million elements, <code>w @ x</code> in NumPy runs hundreds of times faster than a pure-Python loop, because it is computed in compiled code and uses the processor’s vector instructions."),
     ]),
 
     PRACTICE_EN,
@@ -1717,6 +1820,7 @@ EN = [
             r"The choice of $f$ determines the profession: identity means regression, sigmoid means probability, step means logic, ReLU means a feature detector.",
             r"A layer is a weight matrix: $\mathbf{a} = f(W\mathbf{x} + \mathbf{b})$; a batch is $A = f(XW^{\top} + \mathbf{1}\mathbf{b}^{\top})$.",
             r"Learning rests on a simple derivative: $\partial L/\partial w_i = \delta\,x_i$, $\partial L/\partial b = \delta$.",
+            r"In a network every circle is the same neuron: the output of one becomes the input of another, and the error comes back along the same weights. The 3–3–1 network is 4 neurons and 16 parameters.",
         ]),
     ]),
 
@@ -1762,7 +1866,7 @@ UZ = [
         ]),
         ("viz", "neuron-anatomy", VIZ["anatomy"], r"<b>1-rasm.</b> Neyron ish jarayonida: uchta kirish, uchta vazn, siljish va sigmoida. Bog‘lanish qalinligi — vazn moduli, rangi — $w_ix_i$ hissasining ishorasi (ko‘k — «yoqlab» hissa, qizil — «qarshi»). Impulslar kirishlardan $\Sigma$ yig‘uvchiga, so‘ng aktivatsiya funksiyasiga va chiqishga yuguradi. Slayderlarni suring: sxemadagi har bir son darhol qayta hisoblanadi."),
         ("callout", "intuition", "O‘xshatish", r"Bankning kredit qo‘mitasi kredit berish-bermaslikni hal qilmoqda. Har bir ekspert o‘z fikrini olib keladi — bular $x_i$ kirishlar. Har bir ekspertning o‘z obro‘si va o‘z pozitsiyasi bor — bular $w_i$ vaznlar: katta musbat vazn — hurmatli tarafdor, manfiy vazn — skeptik, nol vazn — gapiga hech kim quloq solmaydigan kishi. $b$ siljish — muhokama boshlanishidan oldingi qo‘mita kayfiyati: qattiqqo‘l qo‘mita minusdan boshlaydi. $f$ funksiya — yakuniy ballni qarorga aylantiradigan reglament: «ha/yo‘q» yoki «defolt ehtimolligi 33%»."),
-        ("callout", "history", "Formula qayerdan paydo bo‘lgan", r"1943-yilda Uorren Makkalok va Uolter Pitts «mantiqiy neyron»ni tavsifladi: u ikkilik kirishlarni qo‘shadi va yig‘indi bo‘sag‘adan oshsa, ishga tushadi. 1958-yilda Frenk Rozenblatt perseptronni qurdi — vaznlari misollar bo‘yicha tanlanadigan neyronni. Obraz biologiyadan olingan: dendritlar signallarni qabul qiladi (kirishlar), sinapslar ularni kuchaytiradi yoki susaytiradi (vaznlar), hujayra tanasi ularni jamlaydi, akson esa umumiy qo‘zg‘alish bo‘sag‘adan yuqori bo‘lsa, impuls chiqaradi (aktivatsiya). O‘xshatish erkin: tirik neyron ancha murakkab, lekin «vaznlash, qo‘shish, qaror qilish» g‘oyasi saqlanib qoldi."),
+        ("callout", "history", "Formula qayerdan paydo bo‘lgan", r"1943-yilda Uorren Makkalok va Uolter Pitts «mantiqiy neyron»ni tavsifladi: u ikkilik kirishlarni qo‘shadi va yig‘indi bo‘sag‘adan oshsa, ishga tushadi. 1958-yilda Frenk Rozenblatt perseptronni taklif qildi — vaznlari misollar bo‘yicha tanlanadigan neyronni (apparat ko‘rinishidagi Mark I mashinasi oradan ko‘p o‘tmay paydo bo‘ldi). Obraz biologiyadan olingan: dendritlar signallarni qabul qiladi (kirishlar), sinapslar ularni kuchaytiradi yoki susaytiradi (vaznlar), hujayra tanasi ularni jamlaydi, akson esa umumiy qo‘zg‘alish bo‘sag‘adan yuqori bo‘lsa, impuls chiqaradi (aktivatsiya). O‘xshatish erkin: tirik neyron ancha murakkab, lekin «vaznlash, qo‘shish, qaror qilish» g‘oyasi saqlanib qoldi."),
     ]),
 
     dict(id="anatomy", title="Formula mayda detallarigacha: har bir harf", blocks=[
@@ -1925,7 +2029,7 @@ UZ = [
             ["zina", r"$z \ge 0$ da $f(z) = 1$, aks holda $0$", r"$\{0;\ 1\}$", "Rozenblatt perseptroni, mantiqiy sxemalar"],
             ["sigmoida", r"$\sigma(z) = \dfrac{1}{1+e^{-z}}$", r"$(0;\ 1)$", "logistik regressiya, binar klassifikator chiqishi"],
             ["tanh", r"$\tanh z = \dfrac{e^{z}-e^{-z}}{e^{z}+e^{-z}}$", r"$(-1;\ 1)$", "rekurrent tarmoqlar (RNN, LSTM)"],
-            ["ReLU", r"$\max(0,\ z)$", r"$[0;\ +\infty)$", "deyarli barcha zamonaviy tarmoqlarning yashirin qatlamlari"],
+            ["ReLU", r"$\max(0,\ z)$", r"$[0;\ +\infty)$", "ko‘pchilik tarmoqlarning yashirin qatlamlari; transformerlarda — uning silliq qarindoshlari GELU va SiLU"],
         ], {"num": []}),
         ("viz", "neuron-activations", VIZ["acts"], r"<b>7-rasm.</b> Bitta $z$ predaktivatsiya — beshta turli chiqish. $z$ ni suring va funksiyani tanlang; qolganlari ingichka chiziqlar bilan ko‘rsatilgan. Belgilash katakchasi $f'(z)$ hosilani qo‘shadi — u o‘qitish haqidagi bo‘limda kerak bo‘ladi. Misolimizdagi $z = 2$ da chiqishlar $2$, $1$, $0{,}8808$, $0{,}9640$ va $2$ ga teng."),
         ("h3", r"Nochiziqlilik umuman nima uchun kerak"),
@@ -1935,8 +2039,8 @@ UZ = [
             ("eq", r"\mathbf{y} = W_2(W_1\mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2 = \underbrace{(W_2W_1)}_{W}\,\mathbf{x} + \underbrace{(W_2\mathbf{b}_1 + \mathbf{b}_2)}_{\mathbf{b}}"),
             ("p", r"$W = W_2W_1$ matritsali va $\mathbf{b} = W_2\mathbf{b}_1 + \mathbf{b}_2$ siljishli bitta chiziqli qatlam hosil bo‘ldi. Induksiya bo‘yicha xuddi shu istalgan sondagi qatlamlar uchun ham to‘g‘ri."),
         ]),
-        ("p", r"Nochiziqli $f$ to‘g‘ri chiziqni «sindiradi». Ana shunday siniq bo‘laklar to‘plamidan tarmoq deyarli istalgan shakldagi funksiyani yig‘adi — buni universal approksimatsiya teoremasi tasdiqlaydi: bitta yashirin qatlamli va nochiziqli aktivatsiyali tarmoq chegaralangan sohadagi istalgan uzluksiz funksiyani istalgancha aniq yaqinlashtirish uchun yetarli (neyronlar soni yetarlicha bo‘lsa)."),
-        ("callout", "warn", "Aktivatsiyalar tuzoqlari", r"Sigmoida va tanh to‘yinadi: $|z| &gt; 5$ da ularning hosilasi deyarli nol va bunday neyron orqali gradiyent deyarli o‘tmaydi (batafsil — <a href=\"../sigmoid/\">«Sigmoidaning anatomiyasi»</a> maqolasida). ReLU $z &lt; 0$ da nol hosilali nol chiqaradi: barcha ma’lumotlarda manfiy $z$ oladigan neyron o‘qitilishdan to‘xtaydi — «o‘ladi» (qarang: <a href=\"../materials/ml-formulas/relu/\">ReLU</a> va <a href=\"../materials/ml-formulas/leaky-relu/\">Leaky ReLU</a>)."),
+        ("p", r"Nochiziqli $f$ to‘g‘ri chiziqni «sindiradi». Ana shunday siniq bo‘laklar to‘plamidan tarmoq deyarli istalgan shakldagi funksiyani yig‘adi — buni universal approksimatsiya teoremasi tasdiqlaydi: bitta yashirin qatlamli va nochiziqli (aniqrog‘i, sigmoida yoki ReLU kabi ko‘phad bo‘lmagan) aktivatsiyali tarmoq chegaralangan sohadagi istalgan uzluksiz funksiyani istalgancha aniq yaqinlashtirish uchun yetarli (neyronlar soni yetarlicha bo‘lsa)."),
+        ("callout", "warn", "Aktivatsiyalar tuzoqlari", r"Sigmoida va tanh to‘yinadi: $|z| &gt; 5$ da ularning hosilasi deyarli nol va bunday neyron orqali gradiyent deyarli o‘tmaydi (batafsil — <a href='../sigmoid/'>«Sigmoidaning anatomiyasi»</a> maqolasida). ReLU $z &lt; 0$ da nol hosilali nol chiqaradi: barcha ma’lumotlarda manfiy $z$ oladigan neyron o‘qitilishdan to‘xtaydi — «o‘ladi» (qarang: <a href='../materials/ml-formulas/relu/'>ReLU</a> va <a href='../materials/ml-formulas/leaky-relu/'>Leaky ReLU</a>)."),
     ]),
 
     dict(id="cases", title="Keyslar: bitta formula — to‘rtta kasb", blocks=[
@@ -1951,12 +2055,12 @@ UZ = [
             r"$b = 10$: bazaviy ustama. Bu «nol maydonli kvartira narxi» emas — bunday kvartira ma’lumotlarda yo‘q, — balki to‘g‘ri chiziq real misollar orasidan eng yaxshi o‘tishini ta’minlaydigan tuzatma.",
         ]),
         ("eq", r"a = 1{,}2\cdot 60 + 5\cdot 2 + (-2)\cdot 5 + 10 = 72 + 10 - 10 + 10 = 82"),
-        ("p", r"60 m², ikki xonali, markazdan 5 km uzoqlikdagi kvartira — model uni 82 ming dollarga baholaydi. Aktivatsiyasiz bitta neyron — aynan chiziqli regressiyaning o‘zi. U o‘rtacha kvadratik xatoni minimallashtirish orqali o‘qitiladi (qarang: <a href=\"../materials/mae-mse-examples/\">MAE va MSE oddiy misollarda</a>)."),
+        ("p", r"60 m², ikki xonali, markazdan 5 km uzoqlikdagi kvartira — model uni 82 ming dollarga baholaydi. Aktivatsiyasiz bitta neyron — aynan chiziqli regressiyaning o‘zi. U o‘rtacha kvadratik xatoni minimallashtirish orqali o‘qitiladi (qarang: <a href='../materials/mae-mse-examples/'>MAE va MSE oddiy misollarda</a>)."),
 
         ("h3", r"2-keys. Klassifikatsiya: defolt ehtimolligi ($f$ — sigmoida)"),
         ("p", r"Bankning skoring modeli. Kirishlar: $x_1 = 0{,}4$ — qarz yuklamasi (daromadning to‘lovlarga ketadigan ulushi); $x_2 = 2$ — bir yildagi muddati o‘tkazib yuborilgan to‘lovlar soni; $x_3 = 5$ — kredit tarixining uzunligi, yil. Vaznlar: $\mathbf{w} = (3;\ 0{,}8;\ -0{,}3)$, $b = -2$."),
         ("eq", r"\begin{aligned} z &= 3\cdot 0{,}4 + 0{,}8\cdot 2 + (-0{,}3)\cdot 5 + (-2) = 1{,}2 + 1{,}6 - 1{,}5 - 2 = -0{,}7\\ a &= \sigma(-0{,}7) = \frac{1}{1 + e^{0{,}7}} \approx 0{,}3318 \end{aligned}"),
-        ("p", r"Defolt ehtimolligi taxminan 33%. $0{,}5$ bo‘sag‘ada kredit ma’qullanadi, qat’iyroq $0{,}3$ bo‘sag‘ada esa — yo‘q: bo‘sag‘ani formula emas, biznes tanlaydi. Vaznlarning ishoralari qoidalar kabi o‘qiladi: yuklama va muddati o‘tgan to‘lovlar xavfni oshiradi, uzun tarix esa uni kamaytiradi. Bu logistik regressiya; u <a href=\"../materials/ml-formulas/bce/\">binar kross-entropiya</a> orqali o‘qitiladi."),
+        ("p", r"Defolt ehtimolligi taxminan 33%. $0{,}5$ bo‘sag‘ada kredit ma’qullanadi, qat’iyroq $0{,}3$ bo‘sag‘ada esa — yo‘q: bo‘sag‘ani formula emas, biznes tanlaydi. Vaznlarning ishoralari qoidalar kabi o‘qiladi: yuklama va muddati o‘tgan to‘lovlar xavfni oshiradi, uzun tarix esa uni kamaytiradi. Bu logistik regressiya; u <a href='../materials/ml-formulas/bce/'>binar kross-entropiya</a> orqali o‘qitiladi."),
         ("callout", "note", None, r"Keyslardagi sonlar shartli. Haqiqiy skoringda belgilar standartlashtiriladi, vaznlar esa sog‘lom fikrga mosligi tekshiriladi: masalan, muddati o‘tgan to‘lovlarning ko‘payishi xavfni kamaytirmasligi kerak. Har bir vaznni o‘qiy olish imkoniyati — banklar hanuzgacha logistik regressiyani yaxshi ko‘rishining asosiy sababi."),
 
         ("h3", r"3-keys. Mantiq: neyron-ventil ($f$ — zina)"),
@@ -2002,6 +2106,8 @@ UZ = [
         ("callout", "key", None, r"Matritsa formulasi — bu «har bir obyekt uchun, har bir neyron uchun, har bir kirish uchun» degan uchta ichma-ich siklning bitta amalga joylangan ko‘rinishi. Har bir $A_{kj}$ katak ichida hamon bizning bitta neyron formulamiz turibdi."),
     ]),
 
+    NETWORK_UZ,
+
     dict(id="learning", title="Neyron qanday o‘rganadi", blocks=[
         ("p", r"Vaznlar qayerdan olinadi? Ular ma’lumotlar asosida tanlanadi. $L$ yo‘qotish funksiyasi beriladi — $a$ chiqish to‘g‘ri $y$ javobdan qanchalik uzoqligini ko‘rsatadigan son, — va har bir parametr ko‘p marta uning gradiyentiga qarshi suriladi:"),
         ("eq", r"w_i \leftarrow w_i - \eta\,\frac{\partial L}{\partial w_i}, \qquad b \leftarrow b - \eta\,\frac{\partial L}{\partial b}"),
@@ -2019,7 +2125,7 @@ UZ = [
         ("p", r"To‘g‘ri javob $y = 0$ bo‘lsin, neyron esa $a \approx 0{,}8808$ ni chiqardi — bu kuchli xato. Neyron xatosi $\delta = a - y \approx 0{,}8808$, qadam $\eta = 0{,}1$:"),
         ("eq", r"\begin{aligned} \nabla_{\mathbf{w}}L &= \delta\,\mathbf{x} \approx 0{,}8808\cdot(2;\ -1;\ 3) = (1{,}7616;\ -0{,}8808;\ 2{,}6424)\\ \mathbf{w} &\leftarrow (0{,}5;\ -1;\ 0{,}25) - 0{,}1\cdot(1{,}7616;\ -0{,}8808;\ 2{,}6424) \approx (0{,}3238;\ -0{,}9119;\ -0{,}0142)\\ b &\leftarrow -0{,}75 - 0{,}1\cdot 0{,}8808 \approx -0{,}8381 \end{aligned}"),
         ("p", r"Yangi parametrlar bilan $z \approx 0{,}6788$ va $a \approx 0{,}6635$, yo‘qotish esa $2{,}1269$ dan $1{,}0891$ gacha tushdi — bor-yo‘g‘i bitta qadamda. Har bir vazn o‘z kirishiga proporsional ravishda surildi: eng ko‘p $w_3$ o‘zgardi ($x_3 = 3$ kirish eng katta), $w_2$ esa hatto o‘sdi, chunki $x_2$ kirish manfiy."),
-        ("viz", "neuron-train", VIZ["train"], r"<b>10-rasm.</b> Neyron ikki sinfni ajratishni o‘rganmoqda. Bir qadam — barcha nuqtalar bo‘yicha o‘rtacha BCE bo‘yicha gradiyent tushish: chegara buriladi va suriladi, o‘ngdagi grafikda yo‘qotishlar kamayadi. Kichik va katta $\eta$ o‘qitish qadamini sinab ko‘ring va boshidan boshlang."),
+        ("viz", "neuron-train", VIZ["train"], r"<b>11-rasm.</b> Neyron ikki sinfni ajratishni o‘rganmoqda. Bir qadam — barcha nuqtalar bo‘yicha o‘rtacha BCE bo‘yicha gradiyent tushish: chegara buriladi va suriladi, o‘ngdagi grafikda yo‘qotishlar kamayadi. Kichik va katta $\eta$ o‘qitish qadamini sinab ko‘ring va boshidan boshlang."),
         ("callout", "warn", "Initsializatsiya", r"Bitta neyronni nol vaznlardan o‘qitishni boshlash mumkin — logistik regressiyada aynan shunday qilinadi. Lekin ko‘p neyronli qatlamda bir xil boshlang‘ich vaznlar — tuzoq: barcha neyronlar bir xil gradiyent oladi va abadiy bir-birining nusxasi bo‘lib qoladi. Shuning uchun qatlamlar vaznlari tasodifiy initsializatsiya qilinadi (Ksavye va He initsializatsiyasi sxemalari)."),
     ]),
 
@@ -2031,7 +2137,7 @@ UZ = [
         ("code", "python", CODE_NUMPY["uz"]),
         ("h3", r"PyTorch: qatlam va gradiyentlar"),
         ("code", "python", CODE_TORCH["uz"]),
-        ("p", r"PyTorch hisoblagan gradiyentlar 10-bo‘limda qo‘lda hisoblangan $\delta\,\mathbf{x}$ va $\delta$ bilan mos keladi. Tezlik ham muhim: million elementli vektorda NumPy’dagi <code>w @ x</code> sof Python’dagi sikldan yuzlab marta tez ishlaydi, chunki u kompilyatsiya qilingan kodda hisoblanadi va protsessorning vektor buyruqlaridan foydalanadi."),
+        ("p", r"PyTorch hisoblagan gradiyentlar 11-bo‘limda qo‘lda hisoblangan $\delta\,\mathbf{x}$ va $\delta$ bilan mos keladi. Tezlik ham muhim: million elementli vektorda NumPy’dagi <code>w @ x</code> sof Python’dagi sikldan yuzlab marta tez ishlaydi, chunki u kompilyatsiya qilingan kodda hisoblanadi va protsessorning vektor buyruqlaridan foydalanadi."),
     ]),
 
     PRACTICE_UZ,
@@ -2058,6 +2164,7 @@ UZ = [
             r"$f$ ning tanlovi kasbni belgilaydi: ayniy — regressiya, sigmoida — ehtimollik, zina — mantiq, ReLU — belgilar detektori.",
             r"Qatlam — vaznlar matritsasi: $\mathbf{a} = f(W\mathbf{x} + \mathbf{b})$; paket — $A = f(XW^{\top} + \mathbf{1}\mathbf{b}^{\top})$.",
             r"O‘qitish sodda hosilaga tayanadi: $\partial L/\partial w_i = \delta\,x_i$, $\partial L/\partial b = \delta$.",
+            r"Tarmoqda har bir doira — o‘sha neyron: birining chiqishi boshqasining kirishiga aylanadi, xato esa o‘sha vaznlar bo‘ylab orqaga qaytadi. 3–3–1 tarmog‘i — 4 ta neyron va 16 ta parametr.",
         ]),
     ]),
 
@@ -2090,6 +2197,9 @@ UZ = [
 
 
 SECTIONS = {"ru": RU, "en": EN, "uz": UZ}
+# the question about the 3–3–1 network goes last in the quiz
+for _l, _secs in SECTIONS.items():
+    next(x for x in _secs if x["id"] == "quiz")["blocks"][0][1].append(QUIZ_NET[_l])
 
 
 def check_numbers():
