@@ -34,10 +34,13 @@
       netHidText: "Нейрон скрытого слоя считает ту же формулу $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; его веса — одна строка матрицы $W^{(1)}$ на соседней панели.",
       netHidNext: "Его выход становится одним из входов выходного нейрона, с весом {w}.", netOutText: "Выходной нейрон — та же формула, но его входы — выходы скрытого слоя $h_1, h_2, h_3$.",
       netEnter: "Войти в нейрон", netLeave: "Выйти из нейрона", netCrumb: "Сеть", netCrumbAria: "Где вы находитесь", netClickIn: "щёлкните, чтобы войти внутрь",
-      netHintNet: "Щёлкните по нейрону, чтобы войти внутрь · тяните, чтобы вращать", netHintIn: "Щёлкните по входу или выходу, чтобы перейти в соседний нейрон · Esc — выйти", netHintFan: "Щёлкните по нейрону справа, чтобы войти в него · Esc — выйти",
+      netHintNet: "Щёлкните по нейрону, чтобы войти внутрь · тяните — вращать, правой кнопкой — перемещать · Ctrl + колёсико — масштаб", netHintIn: "Щёлкните по входу или выходу, чтобы перейти в соседний нейрон · Esc — выйти", netHintFan: "Щёлкните по нейрону справа, чтобы войти в него · Esc — выйти",
       netEntered: "Вы внутри нейрона {n}", netLeft: "Вы вернулись к сети целиком",
       inFan: "Вход не вычисляет: он раздаёт одно и то же число всем нейронам слоя, каждый умножает его на свой вес", inFanBwd: "Ошибки трёх нейронов возвращаются ко входу и складываются: ∂L/∂x = Σ δⱼ·wⱼ",
       inMembrane: "нейрон", inAnswer: "ответ сети", inCol: "вход", inVal: "значение", inW: "вес $w$", inProd: "вклад $w\\cdot a$", inGrad: "$\\partial L/\\partial w = \\delta\\cdot a$", inTable: "Внутри {n}: входы, веса и вклады",
+      fsHelpBtn: "Подсказка по управлению", fsZoomIn: "Приблизить", fsZoomOut: "Отдалить", fsFit: "Вписать", fsControls: "Управление", fsPanel: "Панель", fsBar: "Инструменты полноэкранного режима",
+      fsHelp: "Колёсико — масштаб к курсору · левая кнопка — вращать · правая кнопка или Shift — перемещать · двойной щелчок — приблизить · щелчок по нейрону — войти · Backspace — выйти из нейрона · W A S D — сдвиг, 0 — сброс",
+      fsHelpTouch: "Щипок — масштаб · два пальца — перемещать · один палец — вращать · касание нейрона — войти",
       eta: "Шаг обучения $\\eta$", loss: "BCE", acc: "точность", epochN: "шаг", class0: "класс 0", class1: "класс 1", lossTitle: "Потери по шагам",
     },
     en: {
@@ -69,10 +72,13 @@
       netHidText: "A hidden neuron computes the same formula $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; its weights are one row of the matrix $W^{(1)}$ in the neighbouring panel.",
       netHidNext: "Its output becomes one of the inputs of the output neuron, with weight {w}.", netOutText: "The output neuron is the same formula, but its inputs are the outputs of the hidden layer $h_1, h_2, h_3$.",
       netEnter: "Enter the neuron", netLeave: "Leave the neuron", netCrumb: "Network", netCrumbAria: "Where you are", netClickIn: "click to go inside",
-      netHintNet: "Click a neuron to go inside · drag to rotate", netHintIn: "Click an input or the output to move to the neighbouring neuron · Esc to leave", netHintFan: "Click a neuron on the right to enter it · Esc to leave",
+      netHintNet: "Click a neuron to go inside · drag to rotate, right-drag to pan · Ctrl + wheel to zoom", netHintIn: "Click an input or the output to move to the neighbouring neuron · Esc to leave", netHintFan: "Click a neuron on the right to enter it · Esc to leave",
       netEntered: "You are inside neuron {n}", netLeft: "You are back to the whole network",
       inFan: "An input computes nothing: it hands the same number to every neuron of the layer, and each multiplies it by its own weight", inFanBwd: "The errors of the three neurons come back to the input and add up: ∂L/∂x = Σ δⱼ·wⱼ",
       inMembrane: "neuron", inAnswer: "network answer", inCol: "input", inVal: "value", inW: "weight $w$", inProd: "contribution $w\\cdot a$", inGrad: "$\\partial L/\\partial w = \\delta\\cdot a$", inTable: "Inside {n}: inputs, weights and contributions",
+      fsHelpBtn: "Controls help", fsZoomIn: "Zoom in", fsZoomOut: "Zoom out", fsFit: "Fit", fsControls: "Controls", fsPanel: "Panel", fsBar: "Full-screen tools",
+      fsHelp: "Wheel — zoom to the cursor · left button — rotate · right button or Shift — pan · double click — zoom in · click a neuron — go inside · Backspace — leave the neuron · W A S D — pan, 0 — reset",
+      fsHelpTouch: "Pinch — zoom · two fingers — pan · one finger — rotate · tap a neuron — go inside",
       eta: "Learning rate $\\eta$", loss: "BCE", acc: "accuracy", epochN: "step", class0: "class 0", class1: "class 1", lossTitle: "Loss by step",
     },
     uz: {
@@ -104,10 +110,13 @@
       netHidText: "Yashirin qatlam neyroni xuddi shu $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$ formulani hisoblaydi; uning vaznlari — qo‘shni paneldagi $W^{(1)}$ matritsasining bitta satri.",
       netHidNext: "Uning chiqishi chiqish neyronining kirishlaridan biriga aylanadi, vazni {w}.", netOutText: "Chiqish neyroni — o‘sha formula, faqat uning kirishlari yashirin qatlam chiqishlari $h_1, h_2, h_3$.",
       netEnter: "Neyron ichiga kirish", netLeave: "Neyrondan chiqish", netCrumb: "Tarmoq", netCrumbAria: "Siz qayerdasiz", netClickIn: "ichiga kirish uchun bosing",
-      netHintNet: "Ichiga kirish uchun neyronni bosing · aylantirish uchun torting", netHintIn: "Qo‘shni neyronga o‘tish uchun kirish yoki chiqishni bosing · Esc — chiqish", netHintFan: "Kirish uchun o‘ngdagi neyronni bosing · Esc — chiqish",
+      netHintNet: "Ichiga kirish uchun neyronni bosing · aylantirish uchun torting, o‘ng tugma bilan — surish · Ctrl + g‘ildirak — masshtab", netHintIn: "Qo‘shni neyronga o‘tish uchun kirish yoki chiqishni bosing · Esc — chiqish", netHintFan: "Kirish uchun o‘ngdagi neyronni bosing · Esc — chiqish",
       netEntered: "Siz {n} neyronining ichidasiz", netLeft: "Siz butun tarmoqqa qaytdingiz",
       inFan: "Kirish hisoblamaydi: u bir xil sonni qatlamning barcha neyronlariga tarqatadi, har biri uni o‘z vazniga ko‘paytiradi", inFanBwd: "Uchta neyronning xatolari kirishga qaytib, qo‘shiladi: ∂L/∂x = Σ δⱼ·wⱼ",
       inMembrane: "neyron", inAnswer: "tarmoq javobi", inCol: "kirish", inVal: "qiymat", inW: "vazn $w$", inProd: "hissa $w\\cdot a$", inGrad: "$\\partial L/\\partial w = \\delta\\cdot a$", inTable: "{n} ichida: kirishlar, vaznlar va hissalar",
+      fsHelpBtn: "Boshqaruv bo‘yicha yordam", fsZoomIn: "Yaqinlashtirish", fsZoomOut: "Uzoqlashtirish", fsFit: "Sig‘dirish", fsControls: "Boshqaruv", fsPanel: "Panel", fsBar: "To‘liq ekran asboblari",
+      fsHelp: "G‘ildirak — kursorga masshtab · chap tugma — aylantirish · o‘ng tugma yoki Shift — surish · ikki marta bosish — yaqinlashtirish · neyronni bosish — ichiga kirish · Backspace — neyrondan chiqish · W A S D — surish, 0 — tiklash",
+      fsHelpTouch: "Chimchilash — masshtab · ikki barmoq — surish · bitta barmoq — aylantirish · neyronga tegish — ichiga kirish",
       eta: "O‘qitish qadami $\\eta$", loss: "BCE", acc: "aniqlik", epochN: "qadam", class0: "0-sinf", class1: "1-sinf", lossTitle: "Qadamlar bo‘yicha yo‘qotish",
     },
   }[FV.lang] || {};
@@ -940,6 +949,8 @@
     let az = -0.62, elv = 0.22, t = -1, t0 = 0, raf = 0, visible = true, lastSpin = 0, panelKey = "";
     let focus = 0, inside = null, anim = null;     // focus: 0 = the whole network, 1 = inside the neuron `inside`
     let hot = [];                                  // clickable / hoverable spots of the current frame
+    // free camera: zoom `uz` follows `uzT` smoothly towards the cursor; pan in pixels; rotation keeps some inertia
+    let uz = 1, uzT = 1, zAnchor = null, panX = 0, panY = 0, vAz = 0, vEl = 0, camTw = null, isFs = false;
 
     // ----- DOM
     const cv = FV.h("canvas", { class: "nr-net-canvas", role: "img", "aria-label": L.netAria, tabindex: 0 });
@@ -949,7 +960,24 @@
       FV.h("button", { type: "button", class: "nr-crumb-link", onclick: () => exitN() }, L.netCrumb), FV.h("span", { class: "nr-crumb-sep", text: "›" }), crumbCur);
     const exitBtn = FV.h("button", { type: "button", class: "nr-net-exit", "aria-label": L.netLeave, title: L.netLeave, onclick: () => exitN() }, "← " + L.netLeave);
     const hint = FV.h("div", { class: "nr-net-hint" });
-    const stageBox = FV.h("div", { class: "nr-net-stage" }, cv, tip, crumb, exitBtn, hint);
+    const fsBtn = (cls, title, text, onclick) => FV.h("button", { type: "button", class: "nr-fs-btn " + cls, title, "aria-label": title, onclick }, text);
+    const zoomLbl = fsBtn("nr-fs-zoom", L.fsFit, "100%", () => fitView());
+    // on narrow screens the two floating windows take turns, so they never cover each other
+    const toggleWin = (cls, other) => { const on = el.classList.toggle(cls) === false; if (on && window.innerWidth < 900) el.classList.add(other); syncFsBar(); };
+    const dockB = fsBtn("nr-fs-tg", L.fsControls, "", () => toggleWin("nr-dock-off", "nr-info-off"));
+    const infoB = fsBtn("nr-fs-tg", L.fsPanel, "", () => toggleWin("nr-info-off", "nr-dock-off"));
+    dockB.append(FV.h("span", { class: "i", text: "⚙" }), FV.h("span", { class: "t", text: L.fsControls }));
+    infoB.append(FV.h("span", { class: "i", text: "ℹ" }), FV.h("span", { class: "t", text: L.fsPanel }));
+    let helpTimer = 0;
+    const showHelp = (on) => { clearTimeout(helpTimer); el.classList.toggle("nr-help-on", on); helpB.setAttribute("aria-pressed", on ? "true" : "false"); if (on) helpTimer = setTimeout(() => showHelp(false), 9000); };
+    const helpB = fsBtn("nr-fs-tg nr-fs-q", L.fsHelpBtn, "?", () => showHelp(!el.classList.contains("nr-help-on")));
+    const fitB = fsBtn("", L.fsFit, "", () => fitView(true)); fitB.append(FV.h("span", { class: "i", text: "⤢" }), FV.h("span", { class: "t", text: L.fsFit }));
+    const fsClose = fsBtn("nr-fs-close", L.netExit, "", () => toggleFs()); fsClose.append(FV.h("span", { class: "i", text: "✕" }), FV.h("span", { class: "t", text: L.netExit }));
+    const fsBar = FV.h("div", { class: "nr-fs-bar", role: "toolbar", "aria-label": L.fsBar },
+      fsBtn("nr-fs-z", L.fsZoomOut, "−", () => zoomBy(1 / 1.4)), zoomLbl, fsBtn("nr-fs-z", L.fsZoomIn, "+", () => zoomBy(1.4)),
+      FV.h("span", { class: "nr-fs-sep" }), fitB, dockB, infoB, helpB, FV.h("span", { class: "nr-fs-sep" }), fsClose);
+    const fsHelp = FV.h("div", { class: "nr-fs-help" });
+    const stageBox = FV.h("div", { class: "nr-net-stage" }, cv, tip, crumb, exitBtn, hint, fsBar, fsHelp);
     const live = FV.h("div", { class: "nr-sr", "aria-live": "polite" });
     const panel = FV.h("div", { class: "nr-net-panel" });
     const pL = FV.h("div", { class: "nr-net-sel" }), pR = FV.h("div", { class: "nr-net-mat" });
@@ -961,12 +989,8 @@
     const go = FV.ui.button({ label: "⤵ " + L.netEnter, onclick: () => (focus > 0.5 ? exitN() : enterN(sel)) });
     const ckSpin = FV.ui.check({ label: L.netSpin, checked: spin, onchange: (v) => { spin = v; kick(); } });
     const ckBias = FV.ui.check({ label: L.netBias, checked: false, onchange: (v) => { showBias = v; draw(); } });
-    const full = FV.ui.button({ label: "⛶ " + L.netFull, onclick: () => {
-      const d = document;
-      if (d.fullscreenElement) d.exitFullscreen && d.exitFullscreen();
-      else if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-    } });
-    const resetV = FV.ui.button({ label: "↺ " + FV.t("reset"), onclick: () => { az = -0.62; elv = 0.22; draw(); } });
+    const full = FV.ui.button({ label: "⛶ " + L.netFull, onclick: () => toggleFs() });
+    const resetV = FV.ui.button({ label: "↺ " + FV.t("reset"), onclick: () => fitView(true) });
     const xs = X.map((v, i) => FV.ui.slider({ label: `$x_${i + 1}$`, min: -3, max: 3, step: 0.25, value: v, fmt: (u) => FV.fmt(u, 2), oninput: (u) => { X[i] = u; draw(); } }));
     const segY = FV.ui.seg({ label: L.netTarget, value: target, options: [{ value: 0, label: "$y=0$" }, { value: 1, label: "$y=1$" }], onchange: (v) => { target = v; draw(); } });
     w.controls.append(
@@ -980,13 +1004,12 @@
     let Wd = 640, Hd = 420, dpr = 1, F = 600;
     const CAM = 6.5;
     function resize() {
-      Wd = Math.max(280, stageBox.clientWidth || 640);
-      const fs = document.fullscreenElement === el;
-      Hd = fs ? Math.max(320, window.innerHeight - 330) : Wd < 520 ? Math.round(Wd * 0.95) : FV.clamp(Math.round(Wd * 0.62), 300, 580);
+      Wd = Math.max(280, isFs ? window.innerWidth : stageBox.clientWidth || 640);
+      Hd = isFs ? Math.max(300, window.innerHeight) : Wd < 520 ? Math.round(Wd * 0.95) : FV.clamp(Math.round(Wd * 0.62), 300, 580);
       dpr = Math.min(2, window.devicePixelRatio || 1);
       cv.width = Math.round(Wd * dpr); cv.height = Math.round(Hd * dpr);
       cv.style.width = Wd + "px"; cv.style.height = Hd + "px";
-      F = CAM * Math.min((0.47 * Wd) / (Wd < 520 ? 1.95 : 2.05), (0.42 * Hd) / 1.3);
+      F = CAM * Math.min((0.47 * Wd) / (Wd < 520 ? 1.95 : 2.05), ((isFs ? 0.32 : 0.42) * Hd) / 1.3);
       exitBtn.textContent = Wd < 520 ? "✕" : "← " + L.netLeave;
       draw();
     }
@@ -994,8 +1017,8 @@
       const ca = Math.cos(az), sa = Math.sin(az), ce = Math.cos(elv), se = Math.sin(elv);
       const x1 = p[0] * ca + p[2] * sa, z1 = -p[0] * sa + p[2] * ca;
       const y2 = p[1] * ce - z1 * se, z2 = p[1] * se + z1 * ce;
-      const dd = CAM - z2, k = dd > 0.35 ? F / dd : NaN;
-      return { X: Wd / 2 + x1 * k, Y: Hd / 2 - y2 * k, d: z2, k, ok: dd > 0.35 };
+      const dd = CAM - z2, k = dd > 0.35 ? (F / dd) * uz : NaN;
+      return { X: Wd / 2 + panX + x1 * k, Y: Hd / 2 + panY - y2 * k, d: z2, k, ok: dd > 0.35 };
     }
     const unit = () => F / CAM;   // pixels per scene unit at the centre
     const mixC = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
@@ -1103,7 +1126,7 @@
       const sans = FV.css("sans") || "sans-serif";
       const fg = FV.rgb(C.ink), faint = C.faint;
       const signC = (v) => FV.rgb(v >= 0 ? C.blue : C.red);
-      const line = (a, b, col, wdt, dash) => { const A = P3(a), B = P3(b); if (!A.ok || !B.ok) return; ctx.strokeStyle = col; ctx.lineWidth = wdt * ((A.k + B.k) / 2) / unit(); ctx.setLineDash(dash || []); ctx.beginPath(); ctx.moveTo(A.X, A.Y); ctx.lineTo(B.X, B.Y); ctx.stroke(); ctx.setLineDash([]); };
+      const line = (a, b, col, wdt, dash) => { const A = P3(a), B = P3(b); if (!A.ok || !B.ok) return; ctx.strokeStyle = col; ctx.lineWidth = Math.min(16, wdt * ((A.k + B.k) / 2) / unit()); ctx.setLineDash(dash || []); ctx.beginPath(); ctx.moveTo(A.X, A.Y); ctx.lineTo(B.X, B.Y); ctx.stroke(); ctx.setLineDash([]); };
       const along = (pts, u) => { // a point at fraction u of a polyline
         const L0 = []; let tot = 0;
         for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1], pts[i][2] - pts[i - 1][2]); L0.push(d); tot += d; }
@@ -1250,6 +1273,7 @@
       crumbCur.textContent = inside ? nameOf(inside) : "";
       hint.textContent = isIn ? (byId[inside].layer === 0 ? (mode === "fwd" ? L.inFan : L.inFanBwd) + ". " + L.netHintFan : L.netHintIn) : L.netHintNet;
       go.setLabel(isIn ? "⤴ " + L.netLeave : "⤵ " + L.netEnter);
+      zoomLbl.textContent = Math.round(uz * 100) + "%";
       ro.set("y", n4(r.y)); ro.set("l", n4(r.loss)); ro.set("p", "3·(3+1) + 1·(3+1) = 16");
       segSel.set(sel);
       // the panel (KaTeX) changes only with the data, not with the rotation or the pulses
@@ -1318,21 +1342,62 @@
     function enterN(id) {
       sel = id; tip.hidden = true;
       live.textContent = L.netEntered.replace("{n}", byId[id].name);
-      if (reduced()) { if (!inside) { az = -0.62; elv = 0.3; } inside = id; focus = 1; anim = null; draw(); return; }
+      if (reduced()) { if (!inside) { az = -0.62; elv = 0.3; } inside = id; focus = 1; anim = null; camTw = null; uz = uzT = 1; panX = panY = 0; draw(); return; }
+      camTo(1, 0, 0, 600);
       if (inside && inside !== id && focus > 0.3) animateTo(0.3, 360, () => { inside = id; animateTo(1, 620); });
       else { inside = id; animateTo(1, 950, null, [-0.62, 0.3]); }
     }
     function exitN() {
       if (!inside) return;
       tip.hidden = true; live.textContent = L.netLeft;
-      if (reduced()) { focus = 0; inside = null; anim = null; draw(); return; }
+      if (reduced()) { focus = 0; inside = null; anim = null; camTw = null; uz = uzT = 1; panX = panY = 0; draw(); return; }
+      camTo(1, 0, 0, 600);
       animateTo(0, 750, () => { inside = null; draw(); });
+    }
+
+    // ----- the free camera: zoom to a point, pan, fit; full screen
+    function zoomBy(f, ax, ay) { if (camTw) { camTw = null; uzT = uz; } uzT = FV.clamp(uzT * f, 0.35, 8); zAnchor = [ax != null ? ax : Wd / 2, ay != null ? ay : Hd / 2]; kick(); }
+    function zoomNow(r, ax, ay) {   // immediate zoom by the ratio r around the screen point (ax, ay)
+      const nu = FV.clamp(uz * r, 0.35, 8); r = nu / uz;
+      const cx = ax - Wd / 2, cy = ay - Hd / 2;
+      panX = cx - (cx - panX) * r; panY = cy - (cy - panY) * r; uz = uzT = nu;
+    }
+    function camTo(u1, x1, y1, dur) { camTw = { u0: uz, x0: panX, y0: panY, u1, x1, y1, start: performance.now(), dur }; kick(); }
+    function fitView(rot) { if (rot) { vAz = vEl = 0; if (!inside) { az = -0.62; elv = 0.22; } } camTo(1, 0, 0, 450); }
+    function toggleFs() {
+      if (document.fullscreenElement === el) { document.exitFullscreen && document.exitFullscreen(); return; }
+      if (isFs) { setFs(false); return; }
+      if (el.requestFullscreen && document.fullscreenEnabled !== false) el.requestFullscreen().catch(() => setFs(true, true));
+      else setFs(true, true);
+    }
+    function setFs(on, fake) {
+      if (on === isFs && !fake) return;
+      isFs = on; if (on) visible = true;
+      el.classList.toggle("nr-fs", on); el.classList.toggle("nr-fs-fake", !!(on && fake));
+      document.documentElement.classList.toggle("nr-noscroll", !!(on && fake));
+      // In full screen the wheel is heard on the document. Headless Chromium delivered no wheel events to the
+      // full-screen element until some passive wheel listener existed on the window, so one is kept for the
+      // duration (a passive listener never blocks scrolling).
+      if (on) { document.addEventListener("wheel", onWheel, { passive: false, capture: true }); window.addEventListener("wheel", noop, { passive: true }); }
+      else { document.removeEventListener("wheel", onWheel, { capture: true }); window.removeEventListener("wheel", noop); }
+      if (on) { const wide = window.innerWidth >= 900; el.classList.toggle("nr-dock-off", !wide); el.classList.toggle("nr-info-off", !wide); }
+      full.setLabel((on ? "✕ " : "⛶ ") + (on ? L.netExit : L.netFull));
+      fsHelp.textContent = window.matchMedia && window.matchMedia("(pointer: coarse)").matches ? L.fsHelpTouch : L.fsHelp;
+      syncFsBar();
+      camTo(1, 0, 0, 1);
+      resize();
+      showHelp(on);
+      if (on) cv.focus({ preventScroll: true });
+    }
+    function syncFsBar() {
+      dockB.setAttribute("aria-pressed", el.classList.contains("nr-dock-off") ? "false" : "true");
+      infoB.setAttribute("aria-pressed", el.classList.contains("nr-info-off") ? "false" : "true");
     }
 
     // ----- animation loop: the flight, the pulses and the slow spin
     function frame(now) {
       raf = 0;
-      if (!visible) return;
+      if (!visible && !isFs) return;   // in full screen the element is always visible, whatever the observer says
       let again = false;
       if (anim) {
         const u = FV.clamp((now - anim.start) / anim.dur, 0, 1);
@@ -1341,47 +1406,121 @@
         if (u >= 1) { const d = anim.done; anim = null; d && d(); }
         again = true;
       }
+      if (camTw) {
+        const u = FV.clamp((now - camTw.start) / camTw.dur, 0, 1), e = ease(u);
+        uz = camTw.u0 + (camTw.u1 - camTw.u0) * e; panX = camTw.x0 + (camTw.x1 - camTw.x0) * e; panY = camTw.y0 + (camTw.y1 - camTw.y0) * e;
+        if (u >= 1) { camTw = null; uzT = uz; }
+        again = true;
+      } else if (Math.abs(uzT - uz) > 1e-4) {
+        const a = zAnchor || [Wd / 2, Hd / 2];
+        const tg = uzT; zoomNow((uz + (uzT - uz) * 0.22) / uz, a[0], a[1]); uzT = tg; again = true;
+        if (Math.abs(uzT - uz) <= 1e-4) uz = uzT;
+      }
+      if (!down && (Math.abs(vAz) > 1e-4 || Math.abs(vEl) > 1e-4)) {
+        az += vAz; elv = FV.clamp(elv + vEl, -0.9, 1.2); vAz *= 0.92; vEl *= 0.92; again = true;
+      }
       if (spin) { if (lastSpin) az -= Math.min(50, now - lastSpin) * (focus > 0.5 ? 0.00012 : 0.00018); lastSpin = now; again = true; } else lastSpin = 0;
       if (playing) { t = ((now - t0) % 2600) / 2600; again = true; }
       draw();
-      if (again || anim) raf = requestAnimationFrame(frame);
+      if (again || anim) { raf = requestAnimationFrame(frame); rafAt = now; }
     }
-    const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
+    // a frame that was requested but never delivered (a hidden tab, a screenshot) must not stall the loop
+    let rafAt = 0;
+    const kick = () => {
+      const now = performance.now();
+      if (raf && now - rafAt < 250) return;
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(frame); rafAt = now;
+    };
     function start() { playing = true; t0 = performance.now(); play.setLabel("❚❚ " + FV.t("pause")); kick(); }
     function stopPlay() { playing = false; t = -1; play.setLabel("▶ " + L.netPlay); draw(); }
 
-    // ----- pointer: drag to rotate, click a neuron to fly inside it, hover for a hint
-    let down = null, moved = 0;
+    // ----- pointer: left drag rotates (with inertia), right / middle / Shift drag pans, the wheel zooms to the cursor
+    //       (always in full screen, with Ctrl elsewhere), two fingers pinch and pan; a click on a neuron flies inside it
+    const pts = new Map();
+    let down = null, moved = 0, dragMode = "rot", pinch = null, lastMove = 0;
     const at = (e) => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
     const hit = (px, py) => { let best = null, bd = 1e9; hot.forEach((h) => { const d = Math.hypot(h.x - px, h.y - py); if (d < h.r && d < bd) { bd = d; best = h; } }); return best; };
-    cv.addEventListener("pointerdown", (e) => { down = [e.clientX, e.clientY]; moved = 0; cv.setPointerCapture(e.pointerId); });
+    const two = () => { const [a, b] = [...pts.values()]; const r = cv.getBoundingClientRect(); return { d: Math.hypot(a[0] - b[0], a[1] - b[1]), m: [(a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top] }; };
+    cv.addEventListener("contextmenu", (e) => e.preventDefault());
+    cv.addEventListener("pointerdown", (e) => {
+      pts.set(e.pointerId, [e.clientX, e.clientY]);
+      cv.setPointerCapture(e.pointerId);
+      if (isFs && el.classList.contains("nr-help-on")) showHelp(false);
+      tip.hidden = true;
+      if (pts.size === 2 && (isFs || e.pointerType === "touch")) { pinch = two(); down = null; camTw = null; return; }
+      if (e.button === 1) e.preventDefault();
+      down = [e.clientX, e.clientY]; moved = 0; vAz = vEl = 0; camTw = null;
+      dragMode = e.button === 2 || e.button === 1 || e.shiftKey ? "pan" : "rot";
+      cv.classList.toggle("is-panning", dragMode === "pan");
+    });
     cv.addEventListener("pointermove", (e) => {
+      if (pts.has(e.pointerId)) pts.set(e.pointerId, [e.clientX, e.clientY]);
+      if (pinch && pts.size === 2) {
+        const q = two();
+        zoomNow(q.d / (pinch.d || 1), q.m[0], q.m[1]);
+        panX += q.m[0] - pinch.m[0]; panY += q.m[1] - pinch.m[1];
+        pinch = q; moved += 10;
+        if (!raf) draw();
+        return;
+      }
       if (down) {
         const dx = e.clientX - down[0], dy = e.clientY - down[1]; moved += Math.abs(dx) + Math.abs(dy);
-        az += dx * 0.009; if (e.pointerType !== "touch") elv = FV.clamp(elv + dy * 0.006, -0.9, 1.2);
-        down = [e.clientX, e.clientY]; if (!raf) draw();
+        if (dragMode === "pan") { panX += dx; panY += dy; uzT = uz; }
+        else {
+          const ra = dx * 0.009; az += ra; vAz = ra;
+          if (e.pointerType !== "touch" || isFs) { const re = dy * 0.006; elv = FV.clamp(elv + re, -0.9, 1.2); vEl = re; }
+        }
+        down = [e.clientX, e.clientY]; lastMove = performance.now();
+        if (!raf) draw();
         return;
       }
       const [px, py] = at(e), h = hit(px, py);
-      cv.style.cursor = h && h.id ? "pointer" : "grab";
-      if (h) { tip.hidden = false; tip.textContent = h.tip(); tip.style.left = Math.min(px + 12, Wd - 180) + "px"; tip.style.top = py + 14 + "px"; }
+      cv.style.cursor = h && h.id ? "pointer" : "";
+      if (h) { tip.hidden = false; tip.textContent = h.tip(); tip.style.left = Math.min(px + 12, Wd - 200) + "px"; tip.style.top = py + 14 + "px"; }
       else tip.hidden = true;
     });
-    cv.addEventListener("pointerup", (e) => {
-      if (down && moved < 6) { const [px, py] = at(e), h = hit(px, py); if (h && h.id) enterN(h.id); }
-      down = null;
-    });
-    cv.addEventListener("pointercancel", () => { down = null; });
+    const release = (e, click) => {
+      pts.delete(e.pointerId);
+      if (pinch) { if (pts.size < 2) pinch = null; down = null; vAz = vEl = 0; return; }
+      if (click && down && moved < 6 && dragMode === "rot") { const [px, py] = at(e), h = hit(px, py); if (h && h.id) enterN(h.id); }
+      if (dragMode !== "rot" || performance.now() - lastMove > 90) vAz = vEl = 0;
+      down = null; cv.classList.remove("is-panning");
+      if (Math.abs(vAz) > 1e-4 || Math.abs(vEl) > 1e-4) kick();
+    };
+    cv.addEventListener("pointerup", (e) => release(e, true));
+    cv.addEventListener("pointercancel", (e) => release(e, false));
     cv.addEventListener("pointerleave", () => { tip.hidden = true; });
+    // The wheel zooms to the cursor. On the page it needs Ctrl (or a trackpad pinch), so the page keeps scrolling.
+    // In full screen it is heard on the document: right after the switch Chromium may not route the wheel to a
+    // listener on the canvas or on the element itself, and the page cannot scroll there anyway.
+    const noop = () => {};
+    function onWheel(e) {
+      if (e._nr || (e.target !== cv)) return;
+      if (!isFs && !e.ctrlKey && !e.metaKey) return;
+      e._nr = true; e.preventDefault();
+      const [px, py] = at(e), dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * 400 : e.deltaY;
+      zoomBy(Math.exp(-FV.clamp(dy, -240, 240) * 0.0018), px, py);
+    }
+    el.addEventListener("wheel", onWheel, { passive: false });
+    cv.addEventListener("dblclick", (e) => { if (!hit(...at(e))) { const [px, py] = at(e); zoomBy(1.8, px, py); } });
     cv.addEventListener("keydown", (e) => {
       if (e.key === "Enter") { e.preventDefault(); enterN(sel); return; }
-      if (e.key === "Escape" && inside) { e.preventDefault(); exitN(); return; }
+      if ((e.key === "Escape" || e.key === "Backspace") && inside) { e.preventDefault(); exitN(); return; }
+      if (e.key === "Escape" && isFs) { e.preventDefault(); toggleFs(); return; }
+      if (e.key === "+" || e.key === "=") { e.preventDefault(); zoomBy(1.25); return; }
+      if (e.key === "-" || e.key === "_") { e.preventDefault(); zoomBy(0.8); return; }
+      if (e.key === "0") { e.preventDefault(); fitView(true); return; }
+      const pan = { w: [0, 40], s: [0, -40], a: [40, 0], d: [-40, 0], W: [0, 40], S: [0, -40], A: [40, 0], D: [-40, 0], "ц": [0, 40], "ы": [0, -40], "ф": [40, 0], "в": [-40, 0] }[e.key];
+      if (pan) { e.preventDefault(); camTw = null; panX += pan[0]; panY += pan[1]; draw(); return; }
       const k = { ArrowLeft: [0.12, 0], ArrowRight: [-0.12, 0], ArrowUp: [0, -0.08], ArrowDown: [0, 0.08] }[e.key];
+      if (k && e.shiftKey) { e.preventDefault(); camTw = null; panX += k[0] * -330; panY += k[1] * -500; draw(); return; }
       if (k) { e.preventDefault(); az += k[0]; elv = FV.clamp(elv + k[1], -0.9, 1.2); draw(); }
     });
+    window.addEventListener("resize", () => { if (isFs) resize(); });
     if ("ResizeObserver" in window) { let last = 0; new ResizeObserver(() => { const x = stageBox.clientWidth; if (Math.abs(x - last) > 1) { last = x; resize(); } }).observe(stageBox); }
     if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { visible = e.isIntersecting; if (visible) kick(); })).observe(el);
-    document.addEventListener("fullscreenchange", () => { const fs = document.fullscreenElement === el; el.classList.toggle("nr-fs", fs); full.setLabel((fs ? "✕ " : "⛶ ") + (fs ? L.netExit : L.netFull)); resize(); });
+    document.addEventListener("fullscreenchange", () => setFs(document.fullscreenElement === el, false));
     const redraw = () => { panelKey = ""; draw(); };
     document.addEventListener("themechange", () => setTimeout(redraw, 320));
     new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
