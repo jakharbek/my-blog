@@ -1089,6 +1089,7 @@ NETWORK_RU = dict(id="network", title="Нейрон внутри сети: 3D-м
         r"В режиме «обратный» те же места подписаны производными: у синапсов $\partial L/\partial w_i = \delta\cdot x_i$, у смещения $\partial L/\partial b = \delta$, у ядра — ошибка нейрона $\delta$, у панели — $\sigma'(z) = a(1 - a)$.",
     ]),
     ("p", r"Если войти во вход $x_i$, видно, что он не нейрон: он ничего не считает, а раздаёт одно и то же число трём нейронам, и каждый умножает его на свой вес. В обратном режиме там же видно, как три ошибки возвращаются ко входу и складываются."),
+    ("p", r"Функцию активации любого нейрона (или сразу всего слоя) можно поменять в панели управления: сигмоида, tanh, ReLU, Leaky ReLU, ELU, GELU, SiLU, Softplus, тождественная и ступенька. Модель сразу пересчитывает прямой и обратный проход: внутри нейрона рисуется график выбранной $f$, а в обратном режиме — её производная $f'(z)$. Попробуйте поставить ReLU нашему $h_1$: $z_1 = 2 &gt; 0$, поэтому $h_1 = 2$ вместо $0{,}8808$, и ответ сети вырастет до $\hat y \approx 0{,}8941$. Если на выходе не сигмоида, ответ уже не вероятность: модель переключает потери на MSE $\tfrac12(\hat y - y)^2$, и тогда $\delta_{\hat y} = (\hat y - y)\cdot f'(z)$ (раздел 11, пример 16)."),
     ("h3", "Прямой проход на числах"),
     ("eq", r"\mathbf{h} = \sigma\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big) = \sigma\!\left(\begin{pmatrix} 0{,}5 & -1 & 0{,}25\\ -1 & 0{,}5 & 1\\ 0{,}3 & 0{,}8 & -0{,}5 \end{pmatrix}\begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0{,}75\\ 0{,}5\\ 0{,}2 \end{pmatrix}\right) = \sigma\!\begin{pmatrix} 2\\ 1\\ -1{,}5 \end{pmatrix} \approx \begin{pmatrix} 0{,}8808\\ 0{,}7311\\ 0{,}1824 \end{pmatrix}"),
     ("eq", r"\hat y = \sigma\big(\mathbf{w}^{(2)\top}\mathbf{h} + b^{(2)}\big) = \sigma(1{,}5\cdot 0{,}8808 - 1\cdot 0{,}7311 + 2\cdot 0{,}1824 - 0{,}5) = \sigma(0{,}455) \approx 0{,}6118"),
@@ -1129,6 +1130,7 @@ NETWORK_EN = dict(id="network", title="The neuron inside a network: a 3D model",
         r"In the “backward” mode the same places are labelled with derivatives: $\partial L/\partial w_i = \delta\cdot x_i$ at the synapses, $\partial L/\partial b = \delta$ at the bias, the neuron’s error $\delta$ at the core and $\sigma'(z) = a(1 - a)$ at the panel.",
     ]),
     ("p", r"If you enter an input $x_i$, you see that it is not a neuron: it computes nothing and hands one and the same number to three neurons, each of which multiplies it by its own weight. In the backward mode you see there how the three errors come back to the input and add up."),
+    ("p", r"The activation function of any neuron (or of a whole layer at once) can be changed in the controls: sigmoid, tanh, ReLU, Leaky ReLU, ELU, GELU, SiLU, Softplus, identity and step. The model recomputes the forward and backward pass at once: inside the neuron it draws the graph of the chosen $f$, and in the backward mode its derivative $f'(z)$. Try giving our $h_1$ a ReLU: $z_1 = 2 &gt; 0$, so $h_1 = 2$ instead of $0.8808$, and the network’s answer grows to $\hat y \approx 0.8941$. If the output is not a sigmoid, the answer is no longer a probability: the model switches the loss to MSE $\tfrac12(\hat y - y)^2$, and then $\delta_{\hat y} = (\hat y - y)\cdot f'(z)$ (section 11, example 16)."),
     ("h3", "The forward pass in numbers"),
     ("eq", r"\mathbf{h} = \sigma\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big) = \sigma\!\left(\begin{pmatrix} 0.5 & -1 & 0.25\\ -1 & 0.5 & 1\\ 0.3 & 0.8 & -0.5 \end{pmatrix}\begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0.75\\ 0.5\\ 0.2 \end{pmatrix}\right) = \sigma\!\begin{pmatrix} 2\\ 1\\ -1.5 \end{pmatrix} \approx \begin{pmatrix} 0.8808\\ 0.7311\\ 0.1824 \end{pmatrix}"),
     ("eq", r"\hat y = \sigma\big(\mathbf{w}^{(2)\top}\mathbf{h} + b^{(2)}\big) = \sigma(1.5\cdot 0.8808 - 1\cdot 0.7311 + 2\cdot 0.1824 - 0.5) = \sigma(0.455) \approx 0.6118"),
@@ -1169,6 +1171,7 @@ NETWORK_UZ = dict(id="network", title="Tarmoq ichidagi neyron: 3D-model", blocks
         r"«Teskari» rejimda o‘sha joylar hosilalar bilan belgilanadi: sinapslar yonida $\partial L/\partial w_i = \delta\cdot x_i$, siljish yonida $\partial L/\partial b = \delta$, yadroda — neyron xatosi $\delta$, panelda — $\sigma'(z) = a(1 - a)$.",
     ]),
     ("p", r"$x_i$ kirishiga kirsangiz, u neyron emasligi ko‘rinadi: u hech narsa hisoblamaydi, bir xil sonni uchta neyronga tarqatadi, har biri uni o‘z vazniga ko‘paytiradi. Teskari rejimda o‘sha yerda uchta xato kirishga qaytib, qo‘shilishi ko‘rinadi."),
+    ("p", r"Istalgan neyronning (yoki butun qatlamning) aktivatsiya funksiyasini boshqaruv panelida almashtirish mumkin: sigmoida, tanh, ReLU, Leaky ReLU, ELU, GELU, SiLU, Softplus, ayniy va zina. Model to‘g‘ri va teskari o‘tishni darhol qayta hisoblaydi: neyron ichida tanlangan $f$ grafigi, teskari rejimda esa uning hosilasi $f'(z)$ chiziladi. Bizning $h_1$ ga ReLU qo‘yib ko‘ring: $z_1 = 2 &gt; 0$, shuning uchun $0{,}8808$ o‘rniga $h_1 = 2$, tarmoq javobi esa $\hat y \approx 0{,}8941$ gacha o‘sadi. Chiqishda sigmoida bo‘lmasa, javob endi ehtimollik emas: model yo‘qotishni MSE $\tfrac12(\hat y - y)^2$ ga almashtiradi, u holda $\delta_{\hat y} = (\hat y - y)\cdot f'(z)$ (11-bo‘lim, 16-misol)."),
     ("h3", "To‘g‘ri o‘tish sonlarda"),
     ("eq", r"\mathbf{h} = \sigma\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big) = \sigma\!\left(\begin{pmatrix} 0{,}5 & -1 & 0{,}25\\ -1 & 0{,}5 & 1\\ 0{,}3 & 0{,}8 & -0{,}5 \end{pmatrix}\begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0{,}75\\ 0{,}5\\ 0{,}2 \end{pmatrix}\right) = \sigma\!\begin{pmatrix} 2\\ 1\\ -1{,}5 \end{pmatrix} \approx \begin{pmatrix} 0{,}8808\\ 0{,}7311\\ 0{,}1824 \end{pmatrix}"),
     ("eq", r"\hat y = \sigma\big(\mathbf{w}^{(2)\top}\mathbf{h} + b^{(2)}\big) = \sigma(1{,}5\cdot 0{,}8808 - 1\cdot 0{,}7311 + 2\cdot 0{,}1824 - 0{,}5) = \sigma(0{,}455) \approx 0{,}6118"),
@@ -2262,6 +2265,9 @@ def check_numbers():
     z2 = sum(p * q for p, q in zip(w2, X)) + b2
     assert close(z2, 0.6788) and close(sig(z2), 0.6635)
     assert close(-math.log(1 - a), 2.1269) and close(-math.log(1 - sig(z2)), 1.0891)
+    # section 10: ReLU in h1 of the 3-3-1 network gives h1 = 2 and ŷ ≈ 0.8941
+    h = [max(0.0, 2.0), sig(1.0), sig(-1.5)]
+    assert close(sig(1.5 * h[0] - 1 * h[1] + 2 * h[2] - 0.5), 0.8941)
     return True
 
 

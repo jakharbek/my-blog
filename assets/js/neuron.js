@@ -28,10 +28,10 @@
       exam1: "балл по математике", exam2: "балл по языку", target: "Функция", neurons: "Нейронов ReLU", parts: "Показать отдельные нейроны", params: "параметров:", maxErr: "макс. ошибка:", sumRelu: "сумма нейронов", oneRelu: "вклад одного нейрона",
       morph: "Вход → скрытый слой", morph0: "Входное пространство: никакая прямая не отделяет закрашенные точки от пустых. Бирюзовая прямая — граница нейрона OR, фиолетовая — NAND.", morph1: "Скрытое пространство $(h_1;\\ h_2)$: точки $(0;\\ 1)$ и $(1;\\ 0)$ слились в $(1;\\ 1)$, и теперь одна прямая AND их отделяет.", morphMid: "Скрытый слой переносит каждую точку в новые координаты $(h_1;\\ h_2)$.",
       netAria: "Трёхмерная модель нейросети 3–3–1: входы, скрытый слой, выход", netMode: "Проход", netFwd: "прямой", netBwd: "обратный", netNeuron: "Нейрон", netPlay: "Пустить сигнал",
-      netSpin: "Вращать", netBias: "Смещения как вход «1»", netFull: "На весь экран", netExit: "Выйти", netTarget: "Верный ответ", netLoss: "BCE:", netParams: "параметров:",
+      netSpin: "Вращать", netBias: "Смещения как вход «1»", netFull: "На весь экран", netExit: "Выйти", netTarget: "Верный ответ", netLoss: "Потери:", netParams: "параметров:",
       netIn: "входной слой", netHidden: "скрытый слой", netOut: "выходной слой", netOurs: "наш нейрон", netW1: "Скрытый слой: $W^{(1)}$ | $\\mathbf{b}^{(1)}$", netW2: "Выход: $\\mathbf{w}^{(2)\\top}$ | $b^{(2)}$",
       netInText: "Вход {i} — это не нейрон, а число из данных. Он ничего не считает, а раздаёт своё значение всем трём нейронам скрытого слоя.",
-      netHidText: "Нейрон скрытого слоя считает ту же формулу $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; его веса — одна строка матрицы $W^{(1)}$ на соседней панели.",
+      netHidText: "Нейрон скрытого слоя считает ту же формулу $a = f(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; его веса — одна строка матрицы $W^{(1)}$ на соседней панели.",
       netHidNext: "Его выход становится одним из входов выходного нейрона, с весом {w}.", netOutText: "Выходной нейрон — та же формула, но его входы — выходы скрытого слоя $h_1, h_2, h_3$.",
       netEnter: "Войти в нейрон", netLeave: "Выйти из нейрона", netCrumb: "Сеть", netCrumbAria: "Где вы находитесь", netClickIn: "щёлкните, чтобы войти внутрь",
       netHintNet: "Щёлкните по нейрону, чтобы войти внутрь · тяните — вращать, правой кнопкой — перемещать · Ctrl + колёсико — масштаб", netHintIn: "Щёлкните по входу или выходу, чтобы перейти в соседний нейрон · Esc — выйти", netHintFan: "Щёлкните по нейрону справа, чтобы войти в него · Esc — выйти",
@@ -41,6 +41,8 @@
       fsHelpBtn: "Подсказка по управлению", fsZoomIn: "Приблизить", fsZoomOut: "Отдалить", fsFit: "Вписать", fsControls: "Управление", fsPanel: "Панель", fsBar: "Инструменты полноэкранного режима",
       fsHelp: "Колёсико — масштаб к курсору · левая кнопка — вращать · правая кнопка или Shift — перемещать · двойной щелчок — приблизить · щелчок по нейрону — войти · Backspace — выйти из нейрона · W A S D — сдвиг, 0 — сброс",
       fsHelpTouch: "Щипок — масштаб · два пальца — перемещать · один палец — вращать · касание нейрона — войти",
+      netAct: "Функция активации", netActFor: "Активация нейрона {n}:", netActNone: "{n} — вход, у него нет активации", netActLayer: "для всего слоя", netActReset: "все — сигмоида",
+      netActSet: "Активация {n}: {f}", netActAll: "Все нейроны снова с сигмоидой", netMse: "Выход не сигмоида: ответ уже не вероятность, поэтому потери — MSE ½(ŷ − y)², а δ = (ŷ − y)·f′(z).",
       eta: "Шаг обучения $\\eta$", loss: "BCE", acc: "точность", epochN: "шаг", class0: "класс 0", class1: "класс 1", lossTitle: "Потери по шагам",
     },
     en: {
@@ -66,10 +68,10 @@
       exam1: "maths score", exam2: "language score", target: "Function", neurons: "ReLU neurons", parts: "Show individual neurons", params: "parameters:", maxErr: "max error:", sumRelu: "sum of neurons", oneRelu: "one neuron's contribution",
       morph: "Input → hidden layer", morph0: "Input space: no line separates the filled points from the hollow ones. The teal line is the boundary of the OR neuron, the violet one of NAND.", morph1: "Hidden space $(h_1,\\ h_2)$: the points $(0,\\ 1)$ and $(1,\\ 0)$ have merged into $(1,\\ 1)$, and now a single AND line separates them.", morphMid: "The hidden layer moves every point to new coordinates $(h_1,\\ h_2)$.",
       netAria: "A 3D model of the 3–3–1 network: inputs, hidden layer, output", netMode: "Pass", netFwd: "forward", netBwd: "backward", netNeuron: "Neuron", netPlay: "Send a signal",
-      netSpin: "Rotate", netBias: "Biases as input “1”", netFull: "Full screen", netExit: "Exit", netTarget: "Correct answer", netLoss: "BCE:", netParams: "parameters:",
+      netSpin: "Rotate", netBias: "Biases as input “1”", netFull: "Full screen", netExit: "Exit", netTarget: "Correct answer", netLoss: "Loss:", netParams: "parameters:",
       netIn: "input layer", netHidden: "hidden layer", netOut: "output layer", netOurs: "our neuron", netW1: "Hidden layer: $W^{(1)}$ | $\\mathbf{b}^{(1)}$", netW2: "Output: $\\mathbf{w}^{(2)\\top}$ | $b^{(2)}$",
       netInText: "Input {i} is not a neuron but a number from the data. It computes nothing; it hands its value to all three neurons of the hidden layer.",
-      netHidText: "A hidden neuron computes the same formula $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; its weights are one row of the matrix $W^{(1)}$ in the neighbouring panel.",
+      netHidText: "A hidden neuron computes the same formula $a = f(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; its weights are one row of the matrix $W^{(1)}$ in the neighbouring panel.",
       netHidNext: "Its output becomes one of the inputs of the output neuron, with weight {w}.", netOutText: "The output neuron is the same formula, but its inputs are the outputs of the hidden layer $h_1, h_2, h_3$.",
       netEnter: "Enter the neuron", netLeave: "Leave the neuron", netCrumb: "Network", netCrumbAria: "Where you are", netClickIn: "click to go inside",
       netHintNet: "Click a neuron to go inside · drag to rotate, right-drag to pan · Ctrl + wheel to zoom", netHintIn: "Click an input or the output to move to the neighbouring neuron · Esc to leave", netHintFan: "Click a neuron on the right to enter it · Esc to leave",
@@ -79,6 +81,8 @@
       fsHelpBtn: "Controls help", fsZoomIn: "Zoom in", fsZoomOut: "Zoom out", fsFit: "Fit", fsControls: "Controls", fsPanel: "Panel", fsBar: "Full-screen tools",
       fsHelp: "Wheel — zoom to the cursor · left button — rotate · right button or Shift — pan · double click — zoom in · click a neuron — go inside · Backspace — leave the neuron · W A S D — pan, 0 — reset",
       fsHelpTouch: "Pinch — zoom · two fingers — pan · one finger — rotate · tap a neuron — go inside",
+      netAct: "Activation function", netActFor: "Activation of neuron {n}:", netActNone: "{n} is an input, it has no activation", netActLayer: "for the whole layer", netActReset: "all sigmoid",
+      netActSet: "Activation of {n}: {f}", netActAll: "All neurons use the sigmoid again", netMse: "The output is not a sigmoid: the answer is no longer a probability, so the loss is MSE ½(ŷ − y)² and δ = (ŷ − y)·f′(z).",
       eta: "Learning rate $\\eta$", loss: "BCE", acc: "accuracy", epochN: "step", class0: "class 0", class1: "class 1", lossTitle: "Loss by step",
     },
     uz: {
@@ -104,10 +108,10 @@
       exam1: "matematika bali", exam2: "til bali", target: "Funksiya", neurons: "ReLU neyronlari", parts: "Alohida neyronlarni ko‘rsatish", params: "parametrlar:", maxErr: "maks. xato:", sumRelu: "neyronlar yig‘indisi", oneRelu: "bitta neyron hissasi",
       morph: "Kirish → yashirin qatlam", morph0: "Kirish fazosi: hech bir to‘g‘ri chiziq bo‘yalgan nuqtalarni bo‘sh nuqtalardan ajratmaydi. Firuza chiziq — OR neyronining chegarasi, binafsha — NAND.", morph1: "Yashirin fazo $(h_1;\\ h_2)$: $(0;\\ 1)$ va $(1;\\ 0)$ nuqtalar $(1;\\ 1)$ ga birlashdi, endi ularni bitta AND chizig‘i ajratadi.", morphMid: "Yashirin qatlam har bir nuqtani yangi $(h_1;\\ h_2)$ koordinatalarga ko‘chiradi.",
       netAria: "3–3–1 tarmog‘ining uch o‘lchamli modeli: kirishlar, yashirin qatlam, chiqish", netMode: "O‘tish", netFwd: "to‘g‘ri", netBwd: "teskari", netNeuron: "Neyron", netPlay: "Signal yuborish",
-      netSpin: "Aylantirish", netBias: "Siljishlar «1» kirish sifatida", netFull: "To‘liq ekran", netExit: "Chiqish", netTarget: "To‘g‘ri javob", netLoss: "BCE:", netParams: "parametrlar:",
+      netSpin: "Aylantirish", netBias: "Siljishlar «1» kirish sifatida", netFull: "To‘liq ekran", netExit: "Chiqish", netTarget: "To‘g‘ri javob", netLoss: "Yo‘qotish:", netParams: "parametrlar:",
       netIn: "kirish qatlami", netHidden: "yashirin qatlam", netOut: "chiqish qatlami", netOurs: "bizning neyron", netW1: "Yashirin qatlam: $W^{(1)}$ | $\\mathbf{b}^{(1)}$", netW2: "Chiqish: $\\mathbf{w}^{(2)\\top}$ | $b^{(2)}$",
       netInText: "{i}-kirish neyron emas, ma’lumotlardagi son. U hech narsa hisoblamaydi, o‘z qiymatini yashirin qatlamning uchala neyroniga tarqatadi.",
-      netHidText: "Yashirin qatlam neyroni xuddi shu $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$ formulani hisoblaydi; uning vaznlari — qo‘shni paneldagi $W^{(1)}$ matritsasining bitta satri.",
+      netHidText: "Yashirin qatlam neyroni xuddi shu $a = f(\\mathbf{w}^{\\top}\\mathbf{x} + b)$ formulani hisoblaydi; uning vaznlari — qo‘shni paneldagi $W^{(1)}$ matritsasining bitta satri.",
       netHidNext: "Uning chiqishi chiqish neyronining kirishlaridan biriga aylanadi, vazni {w}.", netOutText: "Chiqish neyroni — o‘sha formula, faqat uning kirishlari yashirin qatlam chiqishlari $h_1, h_2, h_3$.",
       netEnter: "Neyron ichiga kirish", netLeave: "Neyrondan chiqish", netCrumb: "Tarmoq", netCrumbAria: "Siz qayerdasiz", netClickIn: "ichiga kirish uchun bosing",
       netHintNet: "Ichiga kirish uchun neyronni bosing · aylantirish uchun torting, o‘ng tugma bilan — surish · Ctrl + g‘ildirak — masshtab", netHintIn: "Qo‘shni neyronga o‘tish uchun kirish yoki chiqishni bosing · Esc — chiqish", netHintFan: "Kirish uchun o‘ngdagi neyronni bosing · Esc — chiqish",
@@ -117,6 +121,8 @@
       fsHelpBtn: "Boshqaruv bo‘yicha yordam", fsZoomIn: "Yaqinlashtirish", fsZoomOut: "Uzoqlashtirish", fsFit: "Sig‘dirish", fsControls: "Boshqaruv", fsPanel: "Panel", fsBar: "To‘liq ekran asboblari",
       fsHelp: "G‘ildirak — kursorga masshtab · chap tugma — aylantirish · o‘ng tugma yoki Shift — surish · ikki marta bosish — yaqinlashtirish · neyronni bosish — ichiga kirish · Backspace — neyrondan chiqish · W A S D — surish, 0 — tiklash",
       fsHelpTouch: "Chimchilash — masshtab · ikki barmoq — surish · bitta barmoq — aylantirish · neyronga tegish — ichiga kirish",
+      netAct: "Aktivatsiya funksiyasi", netActFor: "{n} neyronining aktivatsiyasi:", netActNone: "{n} — kirish, uning aktivatsiyasi yo‘q", netActLayer: "butun qatlam uchun", netActReset: "hammasi — sigmoida",
+      netActSet: "{n} aktivatsiyasi: {f}", netActAll: "Barcha neyronlar yana sigmoida bilan", netMse: "Chiqish sigmoida emas: javob endi ehtimollik emas, shuning uchun yo‘qotish — MSE ½(ŷ − y)², δ = (ŷ − y)·f′(z).",
       eta: "O‘qitish qadami $\\eta$", loss: "BCE", acc: "aniqlik", epochN: "qadam", class0: "0-sinf", class1: "1-sinf", lossTitle: "Qadamlar bo‘yicha yo‘qotish",
     },
   }[FV.lang] || {};
@@ -921,13 +927,31 @@
     let X = (cfg.x || [2, -1, 3]).slice(), target = cfg.y != null ? cfg.y : 1;
     const W1 = cfg.W1 || [[0.5, -1, 0.25], [-1, 0.5, 1], [0.3, 0.8, -0.5]], B1 = cfg.b1 || [-0.75, 0.5, 0.2];
     const W2 = cfg.w2 || [1.5, -1, 2], B2 = cfg.b2 != null ? cfg.b2 : -0.5;
+    // standard activations with their derivatives; every neuron can have its own
+    const NACT = {
+      sigmoid: { f: sig, d: (z) => { const s = sig(z); return s * (1 - s); }, tex: "\\sigma", name: "σ", label: L.sigmoid + " σ" },
+      tanh: { f: Math.tanh, d: (z) => 1 - Math.tanh(z) ** 2, tex: "\\tanh", name: "tanh", label: "tanh" },
+      relu: { f: (z) => Math.max(0, z), d: (z) => (z > 0 ? 1 : 0), tex: "\\mathrm{ReLU}", name: "ReLU", label: "ReLU" },
+      leaky: { f: (z) => (z > 0 ? z : 0.1 * z), d: (z) => (z > 0 ? 1 : 0.1), tex: "\\mathrm{LReLU}", name: "LReLU", label: "Leaky ReLU (α = " + FV.fmt(0.1, 1) + ")" },
+      elu: { f: (z) => (z > 0 ? z : Math.expm1(z)), d: (z) => (z > 0 ? 1 : Math.exp(z)), tex: "\\mathrm{ELU}", name: "ELU", label: "ELU (α = 1)" },
+      gelu: { f: (z) => z * FV.Phi(z), d: (z) => FV.Phi(z) + z * FV.phi(z), tex: "\\mathrm{GELU}", name: "GELU", label: "GELU" },
+      silu: { f: (z) => z * sig(z), d: (z) => { const s = sig(z); return s * (1 + z * (1 - s)); }, tex: "\\mathrm{SiLU}", name: "SiLU", label: "SiLU / Swish" },
+      softplus: { f: (z) => Math.max(z, 0) + Math.log1p(Math.exp(-Math.abs(z))), d: sig, tex: "\\mathrm{softplus}", name: "softplus", label: "Softplus" },
+      identity: { f: (z) => z, d: () => 1, tex: "\\mathrm{id}", name: "id", label: L.identity + " (id)" },
+      step: { f: (z) => (z >= 0 ? 1 : 0), d: () => 0, tex: "H", name: "H", label: L.step + " H" },
+    };
+    const ACT_ORDER = ["sigmoid", "tanh", "relu", "leaky", "elu", "gelu", "silu", "softplus", "identity", "step"];
+    const acts = Object.assign({ h0: "sigmoid", h1: "sigmoid", h2: "sigmoid", y: "sigmoid" }, cfg.acts || {});
+    const Af = (id) => NACT[acts[id]] || NACT.sigmoid;
     function run() {
-      const z1 = W1.map((row, j) => row.reduce((s, v, i) => s + v * X[i], 0) + B1[j]), h = z1.map(sig);
-      const z2 = W2.reduce((s, v, j) => s + v * h[j], 0) + B2, y = sig(z2);
-      const loss = target ? -Math.log(y) : -Math.log(1 - y);
-      const d2 = y - target, d1 = h.map((a, j) => a * (1 - a) * W2[j] * d2);
+      const z1 = W1.map((row, j) => row.reduce((s, v, i) => s + v * X[i], 0) + B1[j]), h = z1.map((z, j) => Af("h" + j).f(z));
+      const AY = Af("y"), z2 = W2.reduce((s, v, j) => s + v * h[j], 0) + B2, y = AY.f(z2);
+      // with a sigmoid output the loss is BCE and δ = ŷ − y; any other output cannot be a probability, so MSE
+      const bce = acts.y === "sigmoid";
+      const loss = bce ? -Math.log(Math.max(1e-12, target ? y : 1 - y)) : 0.5 * (y - target) ** 2;
+      const d2 = bce ? y - target : (y - target) * AY.d(z2), d1 = h.map((a, j) => Af("h" + j).d(z1[j]) * W2[j] * d2);
       const dx = X.map((_, i) => W1.reduce((s, row, j) => s + row[i] * d1[j], 0));
-      return { z1, h, z2, y, loss, d2, d1, dx };
+      return { z1, h, z2, y, loss, d2, d1, dx, bce };
     }
     // ----- scene of the network: layers along x, the neurons of a layer on a ring in the y–z plane
     const ring = (x, k, R, ph) => { const t = ph + (2 * Math.PI * k) / 3; return [x, R * Math.sin(t) - 0.12, R * Math.cos(t)]; };
@@ -942,7 +966,7 @@
     for (let j = 0; j < 3; j++) E.push({ a: "h" + j, b: "y", w: () => W2[j], stage: 1 });
     for (let j = 0; j < 3; j++) E.push({ a: "b1", b: "h" + j, w: () => B1[j], stage: 0, bias: true });
     E.push({ a: "b2", b: "y", w: () => B2, stage: 1, bias: true });
-    const nameOf = (id) => byId[id].name + (id === "h0" ? " · " + L.netOurs : "");
+    const nameOf = (id) => byId[id].name + (id === "h0" ? " · " + L.netOurs : "") + (byId[id].layer > 0 && acts[id] !== "sigmoid" ? " · " + Af(id).name : "");
 
     // ----- state
     let sel = cfg.select || "h0", mode = "fwd", showBias = false, spin = !reduced(), playing = false;
@@ -991,11 +1015,25 @@
     const ckBias = FV.ui.check({ label: L.netBias, checked: false, onchange: (v) => { showBias = v; draw(); } });
     const full = FV.ui.button({ label: "⛶ " + L.netFull, onclick: () => toggleFs() });
     const resetV = FV.ui.button({ label: "↺ " + FV.t("reset"), onclick: () => fitView(true) });
+    const actSel = FV.h("select", { class: "nr-act-sel", "aria-label": L.netAct, onchange: () => setAct(actSel.value) }, ACT_ORDER.map((k) => FV.h("option", { value: k, text: NACT[k].label })));
+    const actLbl = FV.h("span", { class: "nr-act-lbl" });
+    const ckLayer = FV.ui.check({ label: L.netActLayer, checked: false });
+    const actReset = FV.h("button", { type: "button", class: "fv-btn", onclick: () => { Object.keys(acts).forEach((k) => (acts[k] = "sigmoid")); live.textContent = L.netActAll; draw(); } }, "↺ " + L.netActReset);
+    const actNote = FV.h("div", { class: "nr-act-note", "aria-live": "polite" });
+    function setAct(k) {
+      const n = byId[sel];
+      if (!n || n.layer === 0) return;
+      const ids = ckLayer.value ? (n.layer === 1 ? ["h0", "h1", "h2"] : ["y"]) : [sel];
+      ids.forEach((id) => (acts[id] = k));
+      live.textContent = L.netActSet.replace("{n}", ids.map((id) => byId[id].name).join(", ")).replace("{f}", NACT[k].label);
+      draw();
+    }
     const xs = X.map((v, i) => FV.ui.slider({ label: `$x_${i + 1}$`, min: -3, max: 3, step: 0.25, value: v, fmt: (u) => FV.fmt(u, 2), oninput: (u) => { X[i] = u; draw(); } }));
     const segY = FV.ui.seg({ label: L.netTarget, value: target, options: [{ value: 0, label: "$y=0$" }, { value: 1, label: "$y=1$" }], onchange: (v) => { target = v; draw(); } });
     w.controls.append(
       FV.h("div", { class: "nr-row" }, play.el, go.el, segMode.el, segY.el),
       FV.h("div", { class: "nr-row" }, segSel.el),
+      FV.h("div", { class: "nr-row nr-act" }, actLbl, actSel, ckLayer.el, actReset, actNote),
       FV.h("div", { class: "nr-sliders" }, xs.map((s) => s.el)),
       FV.h("div", { class: "nr-row" }, ckSpin.el, ckBias.el, resetV.el, full.el));
     const ro = FV.ui.readout(w.readout, [{ key: "y", label: "$\\hat y$ =", c: "orange" }, { key: "l", label: L.netLoss }, { key: "p", label: L.netParams }]);
@@ -1031,7 +1069,7 @@
       if (n.bias) return { v: 1, t: 0 };
       if (mode === "fwd") {
         const v = n.layer === 0 ? X[n.i] : n.layer === 1 ? r.h[n.i] : r.y;
-        return { v, t: n.layer === 0 ? FV.clamp(v / 3, -1, 1) : v };
+        return { v, t: n.layer === 0 ? FV.clamp(v / 3, -1, 1) : FV.clamp(v, -1, 1) };
       }
       const v = n.layer === 0 ? r.dx[n.i] : n.layer === 1 ? r.d1[n.i] : r.d2;
       return { v, t: FV.clamp(v / 0.4, -1, 1) };
@@ -1111,8 +1149,8 @@
         outs: W1.map((row, j) => ({ id: "h" + j, name: "h" + SUB[j + 1], w: row[n.i], v: r.h[j], d: r.d1[j] })) };
       const hidden = n.layer === 1, j = n.i;
       const ins = hidden ? X.map((v, i) => ({ id: "x" + i, name: "x" + SUB[i + 1], v, w: W1[j][i] })) : r.h.map((v, k) => ({ id: "h" + k, name: "h" + SUB[k + 1], v, w: W2[k] }));
-      const b = hidden ? B1[j] : B2, z = hidden ? r.z1[j] : r.z2, a = sig(z), delta = hidden ? r.d1[j] : r.d2;
-      return { n, ins, b, z, a, delta, sum: z - b, out: hidden ? { id: "y", name: "ŷ", w: W2[j] } : null };
+      const A = Af(id), b = hidden ? B1[j] : B2, z = hidden ? r.z1[j] : r.z2, a = A.f(z), delta = hidden ? r.d1[j] : r.d2;
+      return { n, A, ins, b, z, a, delta, sum: z - b, out: hidden ? { id: "y", name: "ŷ", w: W2[j] } : null };
     }
     const RM = 1.2;                                     // membrane radius
     const CORE = [-0.32, 0, 0];
@@ -1164,7 +1202,10 @@
       const src = I.ins.map((_, k) => srcPos(k, m)), syn = src.map(onMembrane);
       const bSrc = [CORE[0], -1.85, 0], bSyn = onMembrane([CORE[0], -1, 0.0001]);
       const fz = (zv) => FV.clamp(zv, -4, 4);
-      const gx = (zv) => GX0 + ((fz(zv) + 4) / 8) * (GX1 - GX0), gy = (av) => (av - 0.5) * 2 * (GY * 0.85);
+      let lo = 0, hi = 0;
+      for (let i = 0; i <= 80; i++) { const v = I.A.f(-4 + (8 * i) / 80); lo = Math.min(lo, v); hi = Math.max(hi, v); }
+      if (hi - lo < 1e-6) hi = lo + 1;
+      const gx = (zv) => GX0 + ((fz(zv) + 4) / 8) * (GX1 - GX0), gy = (av) => ((FV.clamp(av, lo, hi) - lo) / (hi - lo) - 0.5) * 2 * (GY * 0.85);
       const gPt = [gx(I.z), gy(I.a), 0];
       const axonA = [GX1, gy(I.a), 0], axonB = [RM, 0, 0], dest = [2.55, 0, 0];
 
@@ -1190,12 +1231,12 @@
       const corners = [[GX0, -GY, 0], [GX1, -GY, 0], [GX1, GY, 0], [GX0, GY, 0]].map(P3);
       ctx.beginPath(); corners.forEach((q, i) => (i ? ctx.lineTo(q.X, q.Y) : ctx.moveTo(q.X, q.Y))); ctx.closePath();
       ctx.fillStyle = FV.rgb(C.card, 0.92); ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = FV.rgb(C.ink, 0.35); ctx.stroke();
-      line([GX0, gy(0.5), 0], [GX1, gy(0.5), 0], FV.rgb(C.ink, 0.2), 0.8, [2, 3]);
+      line([GX0, gy(0), 0], [GX1, gy(0), 0], FV.rgb(C.ink, 0.25), 0.8, [2, 3]);
       line([gx(0), -GY, 0], [gx(0), GY, 0], FV.rgb(C.ink, 0.2), 0.8, [2, 3]);
       ctx.beginPath();
-      for (let i = 0; i <= 60; i++) { const zv = -4 + (8 * i) / 60, q = P3([gx(zv), gy(sig(zv)), 0]); i ? ctx.lineTo(q.X, q.Y) : ctx.moveTo(q.X, q.Y); }
+      for (let i = 0; i <= 80; i++) { const zv = -4 + (8 * i) / 80, q = P3([gx(zv), gy(I.A.f(zv)), 0]); i ? ctx.lineTo(q.X, q.Y) : ctx.moveTo(q.X, q.Y); }
       ctx.strokeStyle = FV.rgb(C.blue); ctx.lineWidth = 2.2; ctx.stroke();
-      line([gx(I.z), gy(0.5) - GY * 0.85, 0], gPt, FV.rgb(C.orange, 0.6), 1, [2, 3]);
+      line([gx(I.z), gy(lo), 0], gPt, FV.rgb(C.orange, 0.6), 1, [2, 3]);
       line(axonA, axonB, FV.rgb(C.orange, 0.95), 2.4);
       line(axonB, dest, FV.rgb(I.out ? (I.out.w >= 0 ? C.blue : C.red) : C.orange, 0.95), I.out ? 1 + 2.8 * Math.min(1, Math.abs(I.out.w) / 1.5) : 2.4);
 
@@ -1248,9 +1289,9 @@
       if (mode === "fwd") label(ctx, `Σ = ${n4(I.sum)}`, cq2.X, cq2.Y - 0.2 * cq2.k - 22, fg, C, 12);
       label(ctx, mode === "fwd" ? `z = Σ + b = ${n4(I.z)}` : `δ = ${n4(I.delta)}`, cq2.X, cq2.Y - 0.2 * cq2.k - 8, mode === "fwd" ? FV.rgb(C.orange) : FV.rgb(C.orange), C, 13);
       const gq = at([(GX0 + GX1) / 2, -GY, 0]);
-      label(ctx, mode === "fwd" ? `f = σ:  a = σ(${n4(I.z)}) = ${n4(I.a)}` : `σ′(z) = a(1 − a) = ${n4(I.a * (1 - I.a))}`, gq.X, gq.Y + 14, fg, C, 12);
+      label(ctx, mode === "fwd" ? `f = ${I.A.name}:  a = ${I.A.name}(${n4(I.z)}) = ${n4(I.a)}` : `f′(z) = ${I.A.name}′(${n4(I.z)}) = ${n4(I.A.d(I.z))}`, gq.X, gq.Y + 14, fg, C, 12);
       const aq = at(along([axonB, dest], 0.45));
-      label(ctx, I.out ? (mode === "fwd" ? `a = ${n4(I.a)} → ŷ,  w = ${n4(I.out.w)}` : `δ(ŷ)·w = ${n4(r.d2 * I.out.w)}`) : (mode === "fwd" ? `ŷ = ${n4(I.a)}` : `δ = ŷ − y = ${n4(r.d2)}`), aq.X, aq.Y - 14, FV.rgb(C.orange), C, 12);
+      label(ctx, I.out ? (mode === "fwd" ? `a = ${n4(I.a)} → ŷ,  w = ${n4(I.out.w)}` : `δ(ŷ)·w = ${n4(r.d2 * I.out.w)}`) : (mode === "fwd" ? `ŷ = ${n4(I.a)}` : r.bce ? `δ = ŷ − y = ${n4(r.d2)}` : `δ = (ŷ − y)·f′(z) = ${n4(r.d2)}`), aq.X, aq.Y - 14, FV.rgb(C.orange), C, 12);
       // caption of the parts, small, near the membrane
       const mq = at([0, RM, 0]);
       label(ctx, L.inMembrane, mq.X, mq.Y - 10, faint, C, 11, "center", 500);
@@ -1274,10 +1315,14 @@
       hint.textContent = isIn ? (byId[inside].layer === 0 ? (mode === "fwd" ? L.inFan : L.inFanBwd) + ". " + L.netHintFan : L.netHintIn) : L.netHintNet;
       go.setLabel(isIn ? "⤴ " + L.netLeave : "⤵ " + L.netEnter);
       zoomLbl.textContent = Math.round(uz * 100) + "%";
-      ro.set("y", n4(r.y)); ro.set("l", n4(r.loss)); ro.set("p", "3·(3+1) + 1·(3+1) = 16");
+      const sn = byId[sel], noAct = sn.layer === 0;
+      actLbl.textContent = noAct ? L.netActNone.replace("{n}", sn.name) : L.netActFor.replace("{n}", sn.name);
+      actSel.disabled = noAct; if (!noAct && actSel.value !== acts[sel]) actSel.value = acts[sel];
+      actNote.textContent = r.bce ? "" : L.netMse;
+      ro.set("y", n4(r.y)); ro.set("l", n4(r.loss) + (r.bce ? " (BCE)" : " (MSE)")); ro.set("p", "3·(3+1) + 1·(3+1) = 16");
       segSel.set(sel);
       // the panel (KaTeX) changes only with the data, not with the rotation or the pulses
-      const key = [sel, mode, target, X.join(","), isIn ? inside : ""].join("|");
+      const key = [sel, mode, target, X.join(","), isIn ? inside : "", ACT_ORDER.indexOf(acts.h0), ACT_ORDER.indexOf(acts.h1), ACT_ORDER.indexOf(acts.h2), ACT_ORDER.indexOf(acts.y)].join("|");
       if (key !== panelKey) { panelKey = key; renderPanel(r, isIn); }
     }
 
@@ -1296,17 +1341,22 @@
         const j = n.i, row = W1[j];
         txt(L.netHidText);
         add(`z_${j + 1} = ${row.map((v, i) => `${tn(v, true)}\\cdot${tn(X[i], true)}`).join(" + ")} + ${tn(B1[j], true)} = ${tn(Number(r.z1[j].toFixed(4)))}`);
-        add(`h_${j + 1} = \\sigma(z_${j + 1}) \\approx ${tn(Number(r.h[j].toFixed(4)))}`);
+        const AJ = Af("h" + j);
+        add(`h_${j + 1} = ${AJ.tex}(z_${j + 1}) \\approx ${tn(Number(r.h[j].toFixed(4)))}`);
         if (mode === "fwd") txt(L.netHidNext.replace("{w}", n4(W2[j])));
         else {
-          add(`\\begin{aligned}\\delta_{h_${j + 1}} &= \\sigma'(z_${j + 1})\\cdot w^{(2)}_${j + 1}\\cdot\\delta_{\\hat y}\\\\ &\\approx ${tn(Number((r.h[j] * (1 - r.h[j])).toFixed(4)))}\\cdot${tn(W2[j], true)}\\cdot${tn(Number(r.d2.toFixed(4)), true)} \\approx ${tn(Number(r.d1[j].toFixed(4)))}\\end{aligned}`);
+          add(`\\begin{aligned}\\delta_{h_${j + 1}} &= ${AJ.tex}'(z_${j + 1})\\cdot w^{(2)}_${j + 1}\\cdot\\delta_{\\hat y}\\\\ &\\approx ${tn(Number(AJ.d(r.z1[j]).toFixed(4)))}\\cdot${tn(W2[j], true)}\\cdot${tn(Number(r.d2.toFixed(4)), true)} \\approx ${tn(Number(r.d1[j].toFixed(4)))}\\end{aligned}`);
           add(`\\nabla_{\\mathbf{w}_${j + 1}}L = \\delta_{h_${j + 1}}\\,\\mathbf{x} \\approx (${X.map((x) => tn(Number((r.d1[j] * x).toFixed(4)))).join(FV.lang === "en" ? ",\\ " : ";\\ ")})`);
         }
       } else {
         txt(L.netOutText);
         add(`z = ${W2.map((v, j) => `${tn(v, true)}\\cdot${tn(Number(r.h[j].toFixed(4)))}`).join(" + ")} + ${tn(B2, true)} \\approx ${tn(Number(r.z2.toFixed(4)))}`);
-        add(`\\hat y = \\sigma(z) \\approx ${tn(Number(r.y.toFixed(4)))}`);
-        if (mode === "bwd") add(`\\delta_{\\hat y} = \\hat y - y \\approx ${tn(Number(r.y.toFixed(4)))} - ${target} = ${tn(Number(r.d2.toFixed(4)))}`);
+        const AO = Af("y");
+        add(`\\hat y = ${AO.tex}(z) \\approx ${tn(Number(r.y.toFixed(4)))}`);
+        if (mode === "bwd") {
+          if (r.bce) add(`\\delta_{\\hat y} = \\hat y - y \\approx ${tn(Number(r.y.toFixed(4)))} - ${target} = ${tn(Number(r.d2.toFixed(4)))}`);
+          else add(`\\delta_{\\hat y} = (\\hat y - y)\\cdot ${AO.tex}'(z) \\approx ${tn(Number((r.y - target).toFixed(4)), true)}\\cdot ${tn(Number(AO.d(r.z2).toFixed(4)), true)} = ${tn(Number(r.d2.toFixed(4)))}`);
+        }
       }
       if (isIn && n.layer > 0) {
         // inside a neuron: its own table of inputs, weights and contributions (or gradients)
@@ -1319,7 +1369,7 @@
           tb.append(FV.h("tr", { onclick: () => enterN(it.id) }, FV.h("th", { text: it.name }), FV.h("td", { text: n4(it.v) }), FV.h("td", { class: it.w >= 0 ? "pos" : "neg", text: n4(it.w) }), FV.h("td", { class: v4 >= 0 ? "pos" : "neg", text: n4(v4) })));
         });
         tb.append(FV.h("tr", {}, FV.h("th", { text: "b" }), FV.h("td", { text: "1" }), FV.h("td", { class: I.b >= 0 ? "pos" : "neg", text: n4(I.b) }), FV.h("td", { class: "b", text: n4(mode === "fwd" ? I.b : I.delta) })));
-        const foot = mode === "fwd" ? `$z = ${tn(Number(I.z.toFixed(4)))}$, $a = \\sigma(z) \\approx ${tn(Number(I.a.toFixed(4)))}$` : `$\\delta \\approx ${tn(Number(I.delta.toFixed(4)))}$`;
+        const foot = mode === "fwd" ? `$z = ${tn(Number(I.z.toFixed(4)))}$, $a = ${I.A.tex}(z) \\approx ${tn(Number(I.a.toFixed(4)))}$` : `$\\delta \\approx ${tn(Number(I.delta.toFixed(4)))}$`;
         pR.append(FV.h("div", { class: "nr-mat-box" }, FV.rich(L.inTable.replace("{n}", n.name), "span"), tb, FV.rich(foot, "span")));
         return;
       }

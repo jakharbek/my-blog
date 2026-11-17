@@ -753,3 +753,13 @@ html.nr-noscroll, html.nr-noscroll body { overflow: hidden; }
 .fv.nr-fs.nr-help-on .nr-fs-help { opacity: 1; }
 .nr-fs-btn.nr-fs-q { width: 36px; padding: 0; font-size: 15px; }
 @media (max-width: 900px) { .fv.nr-fs.nr-help-on .nr-fs-help { display: block; left: 14px; right: 14px; max-width: none; text-align: center; bottom: 66px; } .fv.nr-fs .fv-readout { top: 52px; } }
+/* the activation selector of the 3D network */
+.nr-act { gap: 8px 14px; }
+.nr-act-lbl { font-size: 14px; color: var(--fg3); }
+.nr-act-sel { min-height: 34px; padding: 0 30px 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--fg); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+  appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--fg3) 50%), linear-gradient(135deg, var(--fg3) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
+.nr-act-sel:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.nr-act-sel:disabled { opacity: .5; cursor: not-allowed; }
+.nr-act-note { flex-basis: 100%; font-size: 13px; line-height: 1.5; color: var(--v-orange); }
+.nr-act-note:empty { display: none; }
