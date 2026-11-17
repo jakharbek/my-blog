@@ -695,3 +695,14 @@ details.ex-sol[open] > summary::after { content: "−"; }
 .fv.nr-fs { overflow-y: auto; padding: 18px 22px; background: var(--bg2); }
 .fv.nr-fs .nr-net-panel { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 @media (max-width: 640px) { .nr-net-panel { grid-template-columns: minmax(0, 1fr); } }
+/* flying inside a neuron: breadcrumb, exit, hint */
+.nr-net-crumb, .nr-net-exit { position: absolute; top: 10px; opacity: 0; pointer-events: none; transition: opacity .25s; }
+.nr-net-stage.is-in .nr-net-crumb, .nr-net-stage.is-in .nr-net-exit { opacity: 1; pointer-events: auto; }
+.nr-net-crumb { left: 12px; display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: var(--bg2); font-size: 13px; color: var(--fg3); }
+.nr-crumb-link { padding: 0; border: 0; background: none; font: inherit; font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: .2em; }
+.nr-crumb-cur { font-weight: 600; color: var(--fg); }
+.nr-net-exit { right: 12px; min-height: 32px; padding: 0 12px; border: 0; border-radius: 4px; background: var(--pb); color: var(--pf); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.nr-net-hint { position: absolute; left: 12px; bottom: 8px; right: 12px; font-size: 12px; color: var(--fg4); pointer-events: none; text-shadow: 0 0 4px var(--card); }
+.nr-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.nr-in-tab tr:first-child th { font-weight: 500; color: var(--fg4); font-size: 12px; padding-bottom: 2px; }
+@media (max-width: 520px) { .nr-net-hint { font-size: 11px; } .nr-net-crumb { font-size: 12px; } .nr-net-exit { font-size: 12px; padding: 0 10px; } }

@@ -1069,7 +1069,7 @@ PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta mi
 
 NETWORK_RU = dict(id="network", title="Нейрон внутри сети: 3D-модель", blocks=[
     ("p", r"До сих пор нейрон стоял один. Посмотрим, где его место в настоящей, пусть и самой маленькой, нейросети. Возьмём сеть 3–3–1: три входа, скрытый слой из трёх нейронов и один выходной нейрон. Наш нейрон из раздела 3 — с весами $\mathbf{w} = (0{,}5;\ -1;\ 0{,}25)$ и смещением $b = -0{,}75$ — станет первым нейроном скрытого слоя $h_1$. Вход тот же: $\mathbf{x} = (2;\ -1;\ 3)$, активация везде — сигмоида."),
-    ("viz", "neuron-network3d", VIZ["net"], r"<b>Рисунок 10.</b> Сеть 3–3–1 в трёх измерениях. Вращайте модель мышью, пальцем или стрелками; щёлкните по любому нейрону — под моделью появится его формула на живых числах, а в матрице весов подсветится его строка. «Пустить сигнал» запускает прямой проход (синие и красные импульсы, размер — величина вклада $w\cdot a$). В режиме «обратный» оранжевые импульсы несут ошибку от выхода назад, а в каждом кружке показана его ошибка $\delta$. Наш нейрон — $h_1$, обведён пунктиром. Кнопка «На весь экран» разворачивает модель."),
+    ("viz", "neuron-network3d", VIZ["net"], r"<b>Рисунок 10.</b> Сеть 3–3–1 в трёх измерениях. Вращайте модель мышью, пальцем или стрелками; щёлкните по любому нейрону — камера влетит внутрь него и покажет его устройство в 3D: входы, веса, вклады, ядро $\Sigma$ со смещением, функцию активации и выход; под моделью — его формула на живых числах и таблица вкладов. Изнутри можно перейти в соседний нейрон, щёлкнув по входу или выходу; выйти — кнопкой, по строке «Сеть ›» или клавишей Esc. «Пустить сигнал» запускает прямой проход (синие и красные импульсы, размер — величина вклада $w\cdot a$). В режиме «обратный» оранжевые импульсы несут ошибку от выхода назад, а в каждом кружке показана его ошибка $\delta$. Наш нейрон — $h_1$, обведён пунктиром. Кнопка «На весь экран» разворачивает модель."),
     ("h3", "Что видно на модели"),
     ("ul", [
         r"<b>Каждый кружок скрытого и выходного слоя — тот же нейрон</b> с формулой $a = \sigma(\mathbf{w}^{\top}\mathbf{x} + b)$. Отличаются только числа: веса и смещение.",
@@ -1078,6 +1078,17 @@ NETWORK_RU = dict(id="network", title="Нейрон внутри сети: 3D-м
         r"<b>Выход одного нейрона — вход другого.</b> Число $0{,}8808$, которое считает наш нейрон, дальше никуда не «выходит»: оно становится входом $h_1$ выходного нейрона с весом $1{,}5$.",
         r"<b>Слой — строка матрицы.</b> Веса трёх скрытых нейронов — это три строки матрицы $W^{(1)}$; наш нейрон — её первая строка (раздел 9).",
     ]),
+    ("h3", "Вход внутрь нейрона: формула, разобранная в пространстве"),
+    ("p", r"Щёлкните по нейрону на модели — например, по нашему $h_1$. Внутри каждая часть формулы $a = \sigma\big(\sum w_ix_i + b\big)$ занимает своё место:"),
+    ("ul", [
+        r"<b>Входы-«дендриты»</b> приходят слева: шары со значениями $x_1, x_2, x_3$ (у выходного нейрона — $h_1, h_2, h_3$).",
+        r"<b>Синапсы</b> — точки, где дендрит пересекает оболочку нейрона. Возле них подписаны веса $w_i$; внутри по линии идёт уже вклад $w_ix_i$ — толщина и цвет показывают его величину и знак.",
+        r"<b>Ядро $\Sigma$</b> складывает вклады; снизу в него входит смещение $b$ — как вход «1» с весом $b$ (раздел 6). Над ядром — $\Sigma$ и $z = \Sigma + b$.",
+        r"<b>Панель активации</b> внутри клетки — график сигмоиды; оранжевая точка стоит в $z$, её высота — выход $a = \sigma(z)$.",
+        r"<b>Аксон</b> уходит вправо: к выходному нейрону с весом $w^{(2)}$ или, у выходного нейрона, к ответу сети.",
+        r"В режиме «обратный» те же места подписаны производными: у синапсов $\partial L/\partial w_i = \delta\cdot x_i$, у смещения $\partial L/\partial b = \delta$, у ядра — ошибка нейрона $\delta$, у панели — $\sigma'(z) = a(1 - a)$.",
+    ]),
+    ("p", r"Если войти во вход $x_i$, видно, что он не нейрон: он ничего не считает, а раздаёт одно и то же число трём нейронам, и каждый умножает его на свой вес. В обратном режиме там же видно, как три ошибки возвращаются ко входу и складываются."),
     ("h3", "Прямой проход на числах"),
     ("eq", r"\mathbf{h} = \sigma\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big) = \sigma\!\left(\begin{pmatrix} 0{,}5 & -1 & 0{,}25\\ -1 & 0{,}5 & 1\\ 0{,}3 & 0{,}8 & -0{,}5 \end{pmatrix}\begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0{,}75\\ 0{,}5\\ 0{,}2 \end{pmatrix}\right) = \sigma\!\begin{pmatrix} 2\\ 1\\ -1{,}5 \end{pmatrix} \approx \begin{pmatrix} 0{,}8808\\ 0{,}7311\\ 0{,}1824 \end{pmatrix}"),
     ("eq", r"\hat y = \sigma\big(\mathbf{w}^{(2)\top}\mathbf{h} + b^{(2)}\big) = \sigma(1{,}5\cdot 0{,}8808 - 1\cdot 0{,}7311 + 2\cdot 0{,}1824 - 0{,}5) = \sigma(0{,}455) \approx 0{,}6118"),
@@ -1098,7 +1109,7 @@ NETWORK_RU = dict(id="network", title="Нейрон внутри сети: 3D-м
 
 NETWORK_EN = dict(id="network", title="The neuron inside a network: a 3D model", blocks=[
     ("p", r"So far the neuron has stood alone. Let us see where it sits in a real, if tiny, neural network. Take the 3–3–1 network: three inputs, a hidden layer of three neurons and one output neuron. Our neuron from section 3, with weights $\mathbf{w} = (0.5,\ -1,\ 0.25)$ and bias $b = -0.75$, becomes the first neuron of the hidden layer, $h_1$. The input is the same, $\mathbf{x} = (2,\ -1,\ 3)$, and the activation is the sigmoid everywhere."),
-    ("viz", "neuron-network3d", VIZ["net"], r"<b>Figure 10.</b> The 3–3–1 network in three dimensions. Rotate the model with the mouse, a finger or the arrow keys; click any neuron to see its formula with live numbers below the model, with its row highlighted in the weight matrix. “Send a signal” runs the forward pass (blue and red pulses; the size is the contribution $w\cdot a$). In the “backward” mode orange pulses carry the error from the output back, and every circle shows its error $\delta$. Our neuron is $h_1$, circled with a dashed line. “Full screen” expands the model."),
+    ("viz", "neuron-network3d", VIZ["net"], r"<b>Figure 10.</b> The 3–3–1 network in three dimensions. Rotate the model with the mouse, a finger or the arrow keys; click any neuron and the camera flies inside it to show its parts in 3D: inputs, weights, contributions, the core $\Sigma$ with the bias, the activation function and the output; below the model you see its formula with live numbers and a table of contributions. From inside you can move to a neighbouring neuron by clicking an input or the output; leave with the button, the “Network ›” link or the Esc key. “Send a signal” runs the forward pass (blue and red pulses; the size is the contribution $w\cdot a$). In the “backward” mode orange pulses carry the error from the output back, and every circle shows its error $\delta$. Our neuron is $h_1$, circled with a dashed line. “Full screen” expands the model."),
     ("h3", "What the model shows"),
     ("ul", [
         r"<b>Every circle in the hidden and output layers is the same neuron</b> with the formula $a = \sigma(\mathbf{w}^{\top}\mathbf{x} + b)$. Only the numbers differ: the weights and the bias.",
@@ -1107,6 +1118,17 @@ NETWORK_EN = dict(id="network", title="The neuron inside a network: a 3D model",
         r"<b>The output of one neuron is the input of another.</b> The number $0.8808$ that our neuron computes does not “leave” the network: it becomes the input $h_1$ of the output neuron, with weight $1.5$.",
         r"<b>A layer is a row of a matrix.</b> The weights of the three hidden neurons are the three rows of the matrix $W^{(1)}$; our neuron is its first row (section 9).",
     ]),
+    ("h3", "Inside the neuron: the formula laid out in space"),
+    ("p", r"Click a neuron in the model, for instance our $h_1$. Inside, every part of the formula $a = \sigma\big(\sum w_ix_i + b\big)$ has its own place:"),
+    ("ul", [
+        r"<b>Input “dendrites”</b> come in from the left: spheres with the values $x_1, x_2, x_3$ (for the output neuron, $h_1, h_2, h_3$).",
+        r"<b>Synapses</b> are the points where a dendrite crosses the neuron’s membrane. The weights $w_i$ are written next to them; inside, the line already carries the contribution $w_ix_i$, whose size and sign are shown by thickness and colour.",
+        r"<b>The core $\Sigma$</b> adds up the contributions; the bias $b$ enters it from below, as an input “1” with weight $b$ (section 6). Above the core you see $\Sigma$ and $z = \Sigma + b$.",
+        r"<b>The activation panel</b> inside the cell is the graph of the sigmoid; the orange point sits at $z$, and its height is the output $a = \sigma(z)$.",
+        r"<b>The axon</b> leaves to the right: to the output neuron with weight $w^{(2)}$, or, for the output neuron, to the network’s answer.",
+        r"In the “backward” mode the same places are labelled with derivatives: $\partial L/\partial w_i = \delta\cdot x_i$ at the synapses, $\partial L/\partial b = \delta$ at the bias, the neuron’s error $\delta$ at the core and $\sigma'(z) = a(1 - a)$ at the panel.",
+    ]),
+    ("p", r"If you enter an input $x_i$, you see that it is not a neuron: it computes nothing and hands one and the same number to three neurons, each of which multiplies it by its own weight. In the backward mode you see there how the three errors come back to the input and add up."),
     ("h3", "The forward pass in numbers"),
     ("eq", r"\mathbf{h} = \sigma\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big) = \sigma\!\left(\begin{pmatrix} 0.5 & -1 & 0.25\\ -1 & 0.5 & 1\\ 0.3 & 0.8 & -0.5 \end{pmatrix}\begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0.75\\ 0.5\\ 0.2 \end{pmatrix}\right) = \sigma\!\begin{pmatrix} 2\\ 1\\ -1.5 \end{pmatrix} \approx \begin{pmatrix} 0.8808\\ 0.7311\\ 0.1824 \end{pmatrix}"),
     ("eq", r"\hat y = \sigma\big(\mathbf{w}^{(2)\top}\mathbf{h} + b^{(2)}\big) = \sigma(1.5\cdot 0.8808 - 1\cdot 0.7311 + 2\cdot 0.1824 - 0.5) = \sigma(0.455) \approx 0.6118"),
@@ -1127,7 +1149,7 @@ NETWORK_EN = dict(id="network", title="The neuron inside a network: a 3D model",
 
 NETWORK_UZ = dict(id="network", title="Tarmoq ichidagi neyron: 3D-model", blocks=[
     ("p", r"Hozirgacha neyron yolg‘iz turdi. Endi uning haqiqiy, garchi eng kichik bo‘lsa ham, neyron tarmoqdagi o‘rnini ko‘raylik. 3–3–1 tarmoqni olamiz: uchta kirish, uchta neyronli yashirin qatlam va bitta chiqish neyroni. 3-bo‘limdagi neyronimiz — vaznlari $\mathbf{w} = (0{,}5;\ -1;\ 0{,}25)$ va siljishi $b = -0{,}75$ — yashirin qatlamning birinchi neyroni $h_1$ bo‘ladi. Kirish o‘sha: $\mathbf{x} = (2;\ -1;\ 3)$, aktivatsiya hamma joyda — sigmoida."),
-    ("viz", "neuron-network3d", VIZ["net"], r"<b>10-rasm.</b> 3–3–1 tarmog‘i uch o‘lchamda. Modelni sichqoncha, barmoq yoki strelka tugmalari bilan aylantiring; istalgan neyronni bosing — model ostida uning formulasi jonli sonlar bilan chiqadi, vaznlar matritsasida esa uning satri ajralib turadi. «Signal yuborish» to‘g‘ri o‘tishni boshlaydi (ko‘k va qizil impulslar, o‘lchami — $w\cdot a$ hissasi kattaligi). «Teskari» rejimda to‘q sariq impulslar xatoni chiqishdan orqaga olib boradi, har bir doirada esa uning xatosi $\delta$ ko‘rsatiladi. Bizning neyron — $h_1$, punktir bilan o‘ralgan. «To‘liq ekran» tugmasi modelni kattalashtiradi."),
+    ("viz", "neuron-network3d", VIZ["net"], r"<b>10-rasm.</b> 3–3–1 tarmog‘i uch o‘lchamda. Modelni sichqoncha, barmoq yoki strelka tugmalari bilan aylantiring; istalgan neyronni bosing — kamera uning ichiga uchib kirib, tuzilishini 3D da ko‘rsatadi: kirishlar, vaznlar, hissalar, siljishli $\Sigma$ yadrosi, aktivatsiya funksiyasi va chiqish; model ostida uning jonli sonlardagi formulasi va hissalar jadvali chiqadi. Ichkaridan kirish yoki chiqishni bosib qo‘shni neyronga o‘tish mumkin; chiqish — tugma, «Tarmoq ›» havolasi yoki Esc tugmasi bilan. «Signal yuborish» to‘g‘ri o‘tishni boshlaydi (ko‘k va qizil impulslar, o‘lchami — $w\cdot a$ hissasi kattaligi). «Teskari» rejimda to‘q sariq impulslar xatoni chiqishdan orqaga olib boradi, har bir doirada esa uning xatosi $\delta$ ko‘rsatiladi. Bizning neyron — $h_1$, punktir bilan o‘ralgan. «To‘liq ekran» tugmasi modelni kattalashtiradi."),
     ("h3", "Modelda nima ko‘rinadi"),
     ("ul", [
         r"<b>Yashirin va chiqish qatlamlaridagi har bir doira — o‘sha neyron</b>, formulasi $a = \sigma(\mathbf{w}^{\top}\mathbf{x} + b)$. Faqat sonlar farq qiladi: vaznlar va siljish.",
@@ -1136,6 +1158,17 @@ NETWORK_UZ = dict(id="network", title="Tarmoq ichidagi neyron: 3D-model", blocks
         r"<b>Bir neyronning chiqishi — boshqasining kirishi.</b> Bizning neyron hisoblagan $0{,}8808$ soni hech qayerga «chiqib ketmaydi»: u chiqish neyronining $h_1$ kirishiga aylanadi, vazni $1{,}5$.",
         r"<b>Qatlam — matritsaning satri.</b> Uchta yashirin neyronning vaznlari — $W^{(1)}$ matritsasining uchta satri; bizning neyron — uning birinchi satri (9-bo‘lim).",
     ]),
+    ("h3", "Neyron ichiga kirish: fazoda tahlil qilingan formula"),
+    ("p", r"Modeldagi neyronni bosing — masalan, bizning $h_1$ ni. Ichkarida $a = \sigma\big(\sum w_ix_i + b\big)$ formulasining har bir qismi o‘z joyida turadi:"),
+    ("ul", [
+        r"<b>Kirish «dendritlari»</b> chapdan keladi: $x_1, x_2, x_3$ qiymatli sharlar (chiqish neyronida — $h_1, h_2, h_3$).",
+        r"<b>Sinapslar</b> — dendrit neyron qobig‘ini kesib o‘tadigan nuqtalar. Ularning yonida $w_i$ vaznlar yozilgan; ichkarida chiziq bo‘ylab endi $w_ix_i$ hissa boradi — qalinligi va rangi uning kattaligi va ishorasini ko‘rsatadi.",
+        r"<b>$\Sigma$ yadrosi</b> hissalarni qo‘shadi; unga pastdan $b$ siljish kiradi — $b$ vaznli «1» kirish sifatida (6-bo‘lim). Yadro ustida — $\Sigma$ va $z = \Sigma + b$.",
+        r"<b>Aktivatsiya paneli</b> hujayra ichida — sigmoida grafigi; to‘q sariq nuqta $z$ da turadi, uning balandligi — $a = \sigma(z)$ chiqish.",
+        r"<b>Akson</b> o‘ngga ketadi: $w^{(2)}$ vazn bilan chiqish neyroniga yoki, chiqish neyronida, tarmoq javobiga.",
+        r"«Teskari» rejimda o‘sha joylar hosilalar bilan belgilanadi: sinapslar yonida $\partial L/\partial w_i = \delta\cdot x_i$, siljish yonida $\partial L/\partial b = \delta$, yadroda — neyron xatosi $\delta$, panelda — $\sigma'(z) = a(1 - a)$.",
+    ]),
+    ("p", r"$x_i$ kirishiga kirsangiz, u neyron emasligi ko‘rinadi: u hech narsa hisoblamaydi, bir xil sonni uchta neyronga tarqatadi, har biri uni o‘z vazniga ko‘paytiradi. Teskari rejimda o‘sha yerda uchta xato kirishga qaytib, qo‘shilishi ko‘rinadi."),
     ("h3", "To‘g‘ri o‘tish sonlarda"),
     ("eq", r"\mathbf{h} = \sigma\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big) = \sigma\!\left(\begin{pmatrix} 0{,}5 & -1 & 0{,}25\\ -1 & 0{,}5 & 1\\ 0{,}3 & 0{,}8 & -0{,}5 \end{pmatrix}\begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0{,}75\\ 0{,}5\\ 0{,}2 \end{pmatrix}\right) = \sigma\!\begin{pmatrix} 2\\ 1\\ -1{,}5 \end{pmatrix} \approx \begin{pmatrix} 0{,}8808\\ 0{,}7311\\ 0{,}1824 \end{pmatrix}"),
     ("eq", r"\hat y = \sigma\big(\mathbf{w}^{(2)\top}\mathbf{h} + b^{(2)}\big) = \sigma(1{,}5\cdot 0{,}8808 - 1\cdot 0{,}7311 + 2\cdot 0{,}1824 - 0{,}5) = \sigma(0{,}455) \approx 0{,}6118"),

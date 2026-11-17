@@ -33,6 +33,11 @@
       netInText: "Вход {i} — это не нейрон, а число из данных. Он ничего не считает, а раздаёт своё значение всем трём нейронам скрытого слоя.",
       netHidText: "Нейрон скрытого слоя считает ту же формулу $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; его веса — одна строка матрицы $W^{(1)}$ на соседней панели.",
       netHidNext: "Его выход становится одним из входов выходного нейрона, с весом {w}.", netOutText: "Выходной нейрон — та же формула, но его входы — выходы скрытого слоя $h_1, h_2, h_3$.",
+      netEnter: "Войти в нейрон", netLeave: "Выйти из нейрона", netCrumb: "Сеть", netCrumbAria: "Где вы находитесь", netClickIn: "щёлкните, чтобы войти внутрь",
+      netHintNet: "Щёлкните по нейрону, чтобы войти внутрь · тяните, чтобы вращать", netHintIn: "Щёлкните по входу или выходу, чтобы перейти в соседний нейрон · Esc — выйти", netHintFan: "Щёлкните по нейрону справа, чтобы войти в него · Esc — выйти",
+      netEntered: "Вы внутри нейрона {n}", netLeft: "Вы вернулись к сети целиком",
+      inFan: "Вход не вычисляет: он раздаёт одно и то же число всем нейронам слоя, каждый умножает его на свой вес", inFanBwd: "Ошибки трёх нейронов возвращаются ко входу и складываются: ∂L/∂x = Σ δⱼ·wⱼ",
+      inMembrane: "нейрон", inAnswer: "ответ сети", inCol: "вход", inVal: "значение", inW: "вес $w$", inProd: "вклад $w\\cdot a$", inGrad: "$\\partial L/\\partial w = \\delta\\cdot a$", inTable: "Внутри {n}: входы, веса и вклады",
       eta: "Шаг обучения $\\eta$", loss: "BCE", acc: "точность", epochN: "шаг", class0: "класс 0", class1: "класс 1", lossTitle: "Потери по шагам",
     },
     en: {
@@ -63,6 +68,11 @@
       netInText: "Input {i} is not a neuron but a number from the data. It computes nothing; it hands its value to all three neurons of the hidden layer.",
       netHidText: "A hidden neuron computes the same formula $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; its weights are one row of the matrix $W^{(1)}$ in the neighbouring panel.",
       netHidNext: "Its output becomes one of the inputs of the output neuron, with weight {w}.", netOutText: "The output neuron is the same formula, but its inputs are the outputs of the hidden layer $h_1, h_2, h_3$.",
+      netEnter: "Enter the neuron", netLeave: "Leave the neuron", netCrumb: "Network", netCrumbAria: "Where you are", netClickIn: "click to go inside",
+      netHintNet: "Click a neuron to go inside · drag to rotate", netHintIn: "Click an input or the output to move to the neighbouring neuron · Esc to leave", netHintFan: "Click a neuron on the right to enter it · Esc to leave",
+      netEntered: "You are inside neuron {n}", netLeft: "You are back to the whole network",
+      inFan: "An input computes nothing: it hands the same number to every neuron of the layer, and each multiplies it by its own weight", inFanBwd: "The errors of the three neurons come back to the input and add up: ∂L/∂x = Σ δⱼ·wⱼ",
+      inMembrane: "neuron", inAnswer: "network answer", inCol: "input", inVal: "value", inW: "weight $w$", inProd: "contribution $w\\cdot a$", inGrad: "$\\partial L/\\partial w = \\delta\\cdot a$", inTable: "Inside {n}: inputs, weights and contributions",
       eta: "Learning rate $\\eta$", loss: "BCE", acc: "accuracy", epochN: "step", class0: "class 0", class1: "class 1", lossTitle: "Loss by step",
     },
     uz: {
@@ -93,6 +103,11 @@
       netInText: "{i}-kirish neyron emas, ma’lumotlardagi son. U hech narsa hisoblamaydi, o‘z qiymatini yashirin qatlamning uchala neyroniga tarqatadi.",
       netHidText: "Yashirin qatlam neyroni xuddi shu $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$ formulani hisoblaydi; uning vaznlari — qo‘shni paneldagi $W^{(1)}$ matritsasining bitta satri.",
       netHidNext: "Uning chiqishi chiqish neyronining kirishlaridan biriga aylanadi, vazni {w}.", netOutText: "Chiqish neyroni — o‘sha formula, faqat uning kirishlari yashirin qatlam chiqishlari $h_1, h_2, h_3$.",
+      netEnter: "Neyron ichiga kirish", netLeave: "Neyrondan chiqish", netCrumb: "Tarmoq", netCrumbAria: "Siz qayerdasiz", netClickIn: "ichiga kirish uchun bosing",
+      netHintNet: "Ichiga kirish uchun neyronni bosing · aylantirish uchun torting", netHintIn: "Qo‘shni neyronga o‘tish uchun kirish yoki chiqishni bosing · Esc — chiqish", netHintFan: "Kirish uchun o‘ngdagi neyronni bosing · Esc — chiqish",
+      netEntered: "Siz {n} neyronining ichidasiz", netLeft: "Siz butun tarmoqqa qaytdingiz",
+      inFan: "Kirish hisoblamaydi: u bir xil sonni qatlamning barcha neyronlariga tarqatadi, har biri uni o‘z vazniga ko‘paytiradi", inFanBwd: "Uchta neyronning xatolari kirishga qaytib, qo‘shiladi: ∂L/∂x = Σ δⱼ·wⱼ",
+      inMembrane: "neyron", inAnswer: "tarmoq javobi", inCol: "kirish", inVal: "qiymat", inW: "vazn $w$", inProd: "hissa $w\\cdot a$", inGrad: "$\\partial L/\\partial w = \\delta\\cdot a$", inTable: "{n} ichida: kirishlar, vaznlar va hissalar",
       eta: "O‘qitish qadami $\\eta$", loss: "BCE", acc: "aniqlik", epochN: "qadam", class0: "0-sinf", class1: "1-sinf", lossTitle: "Qadamlar bo‘yicha yo‘qotish",
     },
   }[FV.lang] || {};
@@ -887,7 +902,8 @@
   });
 
   // ======================================================================
-  // 14. The neuron inside a tiny network 3–3–1, in 3D: forward and backward pass
+  // 14. The neuron inside a tiny network 3–3–1, in 3D: forward and backward pass,
+  //     and a flight inside any neuron to see its parts (inputs, weights, Σ, b, f, output)
   // ======================================================================
   FV.widget("neuron-network3d", (el, cfg) => {
     const w = FV.shell(el, {});
@@ -904,7 +920,7 @@
       const dx = X.map((_, i) => W1.reduce((s, row, j) => s + row[i] * d1[j], 0));
       return { z1, h, z2, y, loss, d2, d1, dx };
     }
-    // ----- scene: layers along x, the neurons of a layer on a ring in the y–z plane
+    // ----- scene of the network: layers along x, the neurons of a layer on a ring in the y–z plane
     const ring = (x, k, R, ph) => { const t = ph + (2 * Math.PI * k) / 3; return [x, R * Math.sin(t) - 0.12, R * Math.cos(t)]; };
     const N = [];
     for (let i = 0; i < 3; i++) N.push({ id: "x" + i, layer: 0, i, name: "x" + SUB[i + 1], pos: ring(-1.75, i, 0.95, Math.PI / 2) });
@@ -917,21 +933,32 @@
     for (let j = 0; j < 3; j++) E.push({ a: "h" + j, b: "y", w: () => W2[j], stage: 1 });
     for (let j = 0; j < 3; j++) E.push({ a: "b1", b: "h" + j, w: () => B1[j], stage: 0, bias: true });
     E.push({ a: "b2", b: "y", w: () => B2, stage: 1, bias: true });
+    const nameOf = (id) => byId[id].name + (id === "h0" ? " · " + L.netOurs : "");
 
-    // ----- state and controls
+    // ----- state
     let sel = cfg.select || "h0", mode = "fwd", showBias = false, spin = !reduced(), playing = false;
-    let az = -0.62, elv = 0.22, t = -1, t0 = 0, raf = 0, visible = true, lastSpin = 0;
-    let panelKey = "";
+    let az = -0.62, elv = 0.22, t = -1, t0 = 0, raf = 0, visible = true, lastSpin = 0, panelKey = "";
+    let focus = 0, inside = null, anim = null;     // focus: 0 = the whole network, 1 = inside the neuron `inside`
+    let hot = [];                                  // clickable / hoverable spots of the current frame
+
+    // ----- DOM
     const cv = FV.h("canvas", { class: "nr-net-canvas", role: "img", "aria-label": L.netAria, tabindex: 0 });
     const tip = FV.h("div", { class: "nr-net-tip", hidden: true });
-    const stageBox = FV.h("div", { class: "nr-net-stage" }, cv, tip);
+    const crumbCur = FV.h("span", { class: "nr-crumb-cur" });
+    const crumb = FV.h("nav", { class: "nr-net-crumb", "aria-label": L.netCrumbAria },
+      FV.h("button", { type: "button", class: "nr-crumb-link", onclick: () => exitN() }, L.netCrumb), FV.h("span", { class: "nr-crumb-sep", text: "›" }), crumbCur);
+    const exitBtn = FV.h("button", { type: "button", class: "nr-net-exit", "aria-label": L.netLeave, title: L.netLeave, onclick: () => exitN() }, "← " + L.netLeave);
+    const hint = FV.h("div", { class: "nr-net-hint" });
+    const stageBox = FV.h("div", { class: "nr-net-stage" }, cv, tip, crumb, exitBtn, hint);
+    const live = FV.h("div", { class: "nr-sr", "aria-live": "polite" });
     const panel = FV.h("div", { class: "nr-net-panel" });
     const pL = FV.h("div", { class: "nr-net-sel" }), pR = FV.h("div", { class: "nr-net-mat" });
     panel.append(pL, pR);
-    w.stage.append(stageBox, panel);
+    w.stage.append(stageBox, live, panel);
     const segMode = FV.ui.seg({ label: L.netMode, value: mode, options: [{ value: "fwd", label: L.netFwd }, { value: "bwd", label: L.netBwd }], onchange: (v) => { mode = v; start(); } });
-    const segSel = FV.ui.seg({ label: L.netNeuron, value: sel, options: N.map((n) => ({ value: n.id, label: n.name })), onchange: (v) => { sel = v; draw(); } });
+    const segSel = FV.ui.seg({ label: L.netNeuron, value: sel, options: N.map((n) => ({ value: n.id, label: n.name })), onchange: (v) => { if (focus > 0.5 || anim) enterN(v); else { sel = v; draw(); } } });
     const play = FV.ui.button({ label: "▶ " + L.netPlay, primary: true, onclick: () => (playing ? stopPlay() : start()) });
+    const go = FV.ui.button({ label: "⤵ " + L.netEnter, onclick: () => (focus > 0.5 ? exitN() : enterN(sel)) });
     const ckSpin = FV.ui.check({ label: L.netSpin, checked: spin, onchange: (v) => { spin = v; kick(); } });
     const ckBias = FV.ui.check({ label: L.netBias, checked: false, onchange: (v) => { showBias = v; draw(); } });
     const full = FV.ui.button({ label: "⛶ " + L.netFull, onclick: () => {
@@ -943,36 +970,40 @@
     const xs = X.map((v, i) => FV.ui.slider({ label: `$x_${i + 1}$`, min: -3, max: 3, step: 0.25, value: v, fmt: (u) => FV.fmt(u, 2), oninput: (u) => { X[i] = u; draw(); } }));
     const segY = FV.ui.seg({ label: L.netTarget, value: target, options: [{ value: 0, label: "$y=0$" }, { value: 1, label: "$y=1$" }], onchange: (v) => { target = v; draw(); } });
     w.controls.append(
-      FV.h("div", { class: "nr-row" }, play.el, segMode.el, segY.el),
+      FV.h("div", { class: "nr-row" }, play.el, go.el, segMode.el, segY.el),
       FV.h("div", { class: "nr-row" }, segSel.el),
       FV.h("div", { class: "nr-sliders" }, xs.map((s) => s.el)),
       FV.h("div", { class: "nr-row" }, ckSpin.el, ckBias.el, resetV.el, full.el));
     const ro = FV.ui.readout(w.readout, [{ key: "y", label: "$\\hat y$ =", c: "orange" }, { key: "l", label: L.netLoss }, { key: "p", label: L.netParams }]);
 
-    // ----- projection
+    // ----- projection; `zoom` flies the camera to the node `zt` of the network
     let Wd = 640, Hd = 420, dpr = 1, F = 600;
     const CAM = 6.5;
     function resize() {
       Wd = Math.max(280, stageBox.clientWidth || 640);
       const fs = document.fullscreenElement === el;
-      Hd = fs ? Math.max(320, window.innerHeight - 330) : Wd < 520 ? Math.round(Wd * 0.9) : FV.clamp(Math.round(Wd * 0.62), 300, 560);
+      Hd = fs ? Math.max(320, window.innerHeight - 330) : Wd < 520 ? Math.round(Wd * 0.95) : FV.clamp(Math.round(Wd * 0.62), 300, 580);
       dpr = Math.min(2, window.devicePixelRatio || 1);
       cv.width = Math.round(Wd * dpr); cv.height = Math.round(Hd * dpr);
       cv.style.width = Wd + "px"; cv.style.height = Hd + "px";
       F = CAM * Math.min((0.47 * Wd) / (Wd < 520 ? 1.95 : 2.05), (0.42 * Hd) / 1.3);
+      exitBtn.textContent = Wd < 520 ? "✕" : "← " + L.netLeave;
       draw();
     }
     function proj(p) {
       const ca = Math.cos(az), sa = Math.sin(az), ce = Math.cos(elv), se = Math.sin(elv);
       const x1 = p[0] * ca + p[2] * sa, z1 = -p[0] * sa + p[2] * ca;
       const y2 = p[1] * ce - z1 * se, z2 = p[1] * se + z1 * ce;
-      const k = F / (CAM - z2);
-      return { X: Wd / 2 + x1 * k, Y: Hd / 2 - y2 * k, d: z2, k };
+      const dd = CAM - z2, k = dd > 0.35 ? F / dd : NaN;
+      return { X: Wd / 2 + x1 * k, Y: Hd / 2 - y2 * k, d: z2, k, ok: dd > 0.35 };
     }
+    const unit = () => F / CAM;   // pixels per scene unit at the centre
     const mixC = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
     const hex = (c) => { c = (c || "#888").trim(); if (c[0] !== "#") return [128, 128, 128]; const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+    const ease = (u) => (u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2);
+    const smooth = (a, b, x) => { const u = FV.clamp((x - a) / (b - a), 0, 1); return u * u * (3 - 2 * u); };
 
-    // value shown in a node and its colour
+    // value shown in a network node and its colour
     function nodeVal(n, r) {
       if (n.bias) return { v: 1, t: 0 };
       if (mode === "fwd") {
@@ -983,83 +1014,250 @@
       return { v, t: FV.clamp(v / 0.4, -1, 1) };
     }
     const related = (e) => e.a === sel || e.b === sel;
+    // text with a halo, so it stays readable over lines
+    function label(ctx, s, x, y, col, C, size = 12, align = "center", weight = 600) {
+      ctx.font = `${weight} ${size}px ${FV.css("sans") || "sans-serif"}`; ctx.textAlign = align; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
+      ctx.lineWidth = 4; ctx.strokeStyle = FV.rgb(C.card); ctx.strokeText(s, x, y);
+      ctx.fillStyle = col; ctx.fillText(s, x, y);
+    }
+    function sphere(ctx, x, y, R, fill, C, ring, ringW) {
+      const g = ctx.createRadialGradient(x - R * 0.35, y - R * 0.4, R * 0.1, x, y, R);
+      g.addColorStop(0, FV.rgb(mixC(fill, [255, 255, 255], 0.55))); g.addColorStop(1, FV.rgb(fill));
+      ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+      ctx.lineWidth = ringW || 1.4; ctx.strokeStyle = ring || FV.rgb(C.ink, 0.75); ctx.stroke();
+    }
+    const valueFill = (tt, C) => { const tone = mode === "fwd" ? (tt >= 0 ? C.blue : C.red) : (tt >= 0 ? C.red : C.blue); return mixC(C.card, tone, Math.min(0.85, Math.abs(tt) * 0.85)); };
+
+    // ======================= the network view =======================
+    function drawNet(ctx, r, C, zoom, alpha) {
+      const tgt = byId[inside || sel].pos, s = 1 + 5.5 * zoom;
+      const P = {};
+      N.concat(BN).forEach((n) => { P[n.id] = proj([(n.pos[0] - tgt[0] * zoom) * s, (n.pos[1] - tgt[1] * zoom) * s, (n.pos[2] - tgt[2] * zoom) * s]); });
+      ctx.save(); ctx.globalAlpha = alpha;
+      if (zoom < 0.05) [[-1.75, L.netIn], [0, L.netHidden], [1.75, L.netOut]].forEach(([x, s0]) => {
+        const q = proj([x, 1.32, 0]);
+        ctx.font = `600 ${Math.round((Wd < 520 ? 10 : 12) * FV.clamp(q.k / unit(), 0.8, 1.2))}px ${FV.css("sans") || "sans-serif"}`;
+        const hw = ctx.measureText(s0).width / 2 + 6;
+        ctx.fillStyle = C.faint; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillText(s0, FV.clamp(q.X, hw, Wd - hw), Math.max(14, q.Y));
+      });
+      const edges = E.filter((e) => showBias || !e.bias).map((e) => ({ e, A: P[e.a], B: P[e.b], d: (P[e.a].d + P[e.b].d) / 2 })).filter((o) => o.A.ok && o.B.ok).sort((u, v) => u.d - v.d);
+      edges.forEach(({ e, A, B }) => {
+        const wv = e.w(), hl = related(e);
+        ctx.strokeStyle = FV.rgb(wv >= 0 ? C.blue : C.red, hl ? 0.95 : 0.22);
+        ctx.lineWidth = Math.min(14, (0.6 + 2.4 * Math.min(1, Math.abs(wv) / 1.5)) * ((A.k + B.k) / 2) / unit() * (hl ? 1.25 : 1));
+        ctx.setLineDash(e.bias ? [5, 4] : []);
+        ctx.beginPath(); ctx.moveTo(A.X, A.Y); ctx.lineTo(B.X, B.Y); ctx.stroke();
+      });
+      ctx.setLineDash([]);
+      if (t >= 0 && zoom < 0.05) edges.forEach(({ e, A, B }) => {
+        const st = mode === "fwd" ? e.stage : 1 - e.stage;
+        if (t < st * 0.5 || t > st * 0.5 + 0.45) return;
+        const u = FV.clamp((t - st * 0.5) / 0.42, 0, 1);
+        let mag;
+        if (mode === "fwd") { const src = e.bias ? 1 : e.stage === 0 ? X[byId[e.a].i] : r.h[byId[e.a].i]; mag = Math.abs(e.w() * src); }
+        else { const dst = byId[e.b]; mag = Math.abs(e.w() * (dst.layer === 2 ? r.d2 : r.d1[dst.i])) * 4; }
+        const f = mode === "fwd" ? u : 1 - u;
+        ctx.beginPath(); ctx.arc(A.X + (B.X - A.X) * f, A.Y + (B.Y - A.Y) * f, 2.5 + Math.min(6, mag * 2.2), 0, Math.PI * 2);
+        ctx.fillStyle = FV.rgb(mode === "fwd" ? (e.w() >= 0 ? C.blue : C.red) : C.orange, related(e) ? 1 : 0.55); ctx.fill();
+      });
+      if (zoom < 0.05) edges.filter(({ e }) => related(e)).forEach(({ e, A, B }) => label(ctx, (e.bias ? "b=" : "") + n4(e.w()), A.X + (B.X - A.X) * 0.42, A.Y + (B.Y - A.Y) * 0.42, FV.rgb(e.w() >= 0 ? C.blue : C.red), C));
+      const flash = (layer) => { if (t < 0) return 0; const at = mode === "fwd" ? layer * 0.5 : (2 - layer) * 0.5; return Math.max(0, 1 - Math.abs(t - at) / 0.08); };
+      N.concat(showBias ? BN : []).map((n) => ({ n, q: P[n.id] })).filter((o) => o.q.ok).sort((a, b) => a.q.d - b.q.d).forEach(({ n, q }) => {
+        const R = Math.min(Wd, (n.bias ? 0.11 : n.layer === 2 ? 0.25 : 0.21) * q.k * (1 + 0.25 * flash(n.layer)));
+        const { v, t: tt } = nodeVal(n, r);
+        const fill = n.bias ? C.card : valueFill(tt, C);
+        sphere(ctx, q.X, q.Y, R, fill, C, n.id === sel ? FV.rgb(C.orange) : null, n.id === sel ? 3.5 : 1.4);
+        if (n.id === "h0") { ctx.setLineDash([3, 3]); ctx.lineWidth = 1.2; ctx.strokeStyle = FV.rgb(C.orange); ctx.beginPath(); ctx.arc(q.X, q.Y, R + 6, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
+        if (zoom < 0.4) {
+          const dark = (fill[0] * 0.3 + fill[1] * 0.59 + fill[2] * 0.11) < 120;
+          ctx.fillStyle = dark ? "#fff" : "#171A20"; ctx.font = `600 ${Math.round(FV.clamp(R * 0.62, 9, 15))}px ${FV.css("sans") || "sans-serif"}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(n.bias ? "1" : (mode === "bwd" && n.layer > 0 ? FV.num(v, 2) : FV.fmt(v, 2)), q.X, q.Y + 1);
+          if (!n.bias) label(ctx, nameOf(n.id), q.X, q.Y + R + 12, n.id === "h0" ? FV.rgb(C.orange) : FV.rgb(C.ink), C);
+        }
+        if (!n.bias && zoom < 0.05) hot.push({ x: q.X, y: q.Y, r: R + 6, id: n.id, tip: () => `${n.name}: ${mode === "fwd" ? (n.layer ? "a" : "x") : "δ"} = ${n4(nodeVal(n, run()).v)} · ${L.netClickIn}` });
+      });
+      ctx.restore();
+    }
+
+    // ======================= the inside of one neuron =======================
+    // Its parts, in the neuron's own coordinates: inputs on the left (dendrites), synapses with weights on
+    // the membrane, the summation core Σ with the bias, the activation f, and the output (axon) on the right.
+    function interior(id, r) {
+      const n = byId[id];
+      if (n.layer === 0) return { n, fan: true, val: X[n.i], grad: r.dx[n.i],
+        outs: W1.map((row, j) => ({ id: "h" + j, name: "h" + SUB[j + 1], w: row[n.i], v: r.h[j], d: r.d1[j] })) };
+      const hidden = n.layer === 1, j = n.i;
+      const ins = hidden ? X.map((v, i) => ({ id: "x" + i, name: "x" + SUB[i + 1], v, w: W1[j][i] })) : r.h.map((v, k) => ({ id: "h" + k, name: "h" + SUB[k + 1], v, w: W2[k] }));
+      const b = hidden ? B1[j] : B2, z = hidden ? r.z1[j] : r.z2, a = sig(z), delta = hidden ? r.d1[j] : r.d2;
+      return { n, ins, b, z, a, delta, sum: z - b, out: hidden ? { id: "y", name: "ŷ", w: W2[j] } : null };
+    }
+    const RM = 1.2;                                     // membrane radius
+    const CORE = [-0.32, 0, 0];
+    const GX0 = 0.08, GX1 = 0.86, GY = 0.4;            // the activation graph: a panel inside the cell
+    const srcPos = (k, m) => { const t = Math.PI / 2 + (2 * Math.PI * k) / m; return [-2.45, 1.3 * Math.sin(t), 1.3 * Math.cos(t)]; };
+    const onMembrane = (p) => { const l = Math.hypot(...p); return p.map((v) => (v / l) * RM); };
+    function drawInside(ctx, r, C, alpha, scl) {
+      const I = interior(inside, r);
+      const P3 = (p) => proj([p[0] * scl, p[1] * scl, p[2] * scl]);
+      ctx.save(); ctx.globalAlpha = alpha;
+      const sans = FV.css("sans") || "sans-serif";
+      const fg = FV.rgb(C.ink), faint = C.faint;
+      const signC = (v) => FV.rgb(v >= 0 ? C.blue : C.red);
+      const line = (a, b, col, wdt, dash) => { const A = P3(a), B = P3(b); if (!A.ok || !B.ok) return; ctx.strokeStyle = col; ctx.lineWidth = wdt * ((A.k + B.k) / 2) / unit(); ctx.setLineDash(dash || []); ctx.beginPath(); ctx.moveTo(A.X, A.Y); ctx.lineTo(B.X, B.Y); ctx.stroke(); ctx.setLineDash([]); };
+      const along = (pts, u) => { // a point at fraction u of a polyline
+        const L0 = []; let tot = 0;
+        for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1], pts[i][2] - pts[i - 1][2]); L0.push(d); tot += d; }
+        let s = u * tot;
+        for (let i = 1; i < pts.length; i++) { if (s <= L0[i - 1] || i === pts.length - 1) { const f = L0[i - 1] ? Math.min(1, s / L0[i - 1]) : 0; return pts[i - 1].map((v, k) => v + (pts[i][k] - v) * f); } s -= L0[i - 1]; }
+        return pts[pts.length - 1];
+      };
+      const pulse = (p, rad, col) => { const q = P3(p); if (!q.ok) return; ctx.beginPath(); ctx.arc(q.X, q.Y, rad * q.k / unit(), 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill(); };
+      const ringPath = (fn, col, wdt, dash) => { ctx.beginPath(); for (let i = 0; i <= 64; i++) { const q = P3(fn((2 * Math.PI * i) / 64)); i ? ctx.lineTo(q.X, q.Y) : ctx.moveTo(q.X, q.Y); } ctx.strokeStyle = col; ctx.lineWidth = wdt; ctx.setLineDash(dash || []); ctx.stroke(); ctx.setLineDash([]); };
+
+      if (I.fan) {
+        // an input: one number handed to three neurons
+        const c = [-1.1, 0, 0], q = P3(c);
+        const outs = I.outs.map((o, j) => ({ ...o, p: [1.75, 1.35 * Math.sin(Math.PI / 2 + (2 * Math.PI * j) / 3), 1.35 * Math.cos(Math.PI / 2 + (2 * Math.PI * j) / 3)] }));
+        outs.forEach((o) => line(c, o.p, FV.rgb(o.w >= 0 ? C.blue : C.red, 0.9), 1 + 2.6 * Math.min(1, Math.abs(o.w) / 1.5)));
+        if (t >= 0) outs.forEach((o) => { const u = mode === "fwd" ? FV.clamp(t / 0.8, 0, 1) : 1 - FV.clamp(t / 0.8, 0, 1); pulse(along([c, o.p], u), 5 + 4 * Math.min(1, Math.abs(o.w * I.val) / 2), FV.rgb(mode === "fwd" ? (o.w * I.val >= 0 ? C.blue : C.red) : C.orange)); });
+        outs.slice().sort((a, b) => P3(a.p).d - P3(b.p).d).forEach((o) => {
+          const qo = P3(o.p), R = 0.26 * qo.k;
+          sphere(ctx, qo.X, qo.Y, R, valueFill(mode === "fwd" ? o.v : FV.clamp(o.d / 0.4, -1, 1), C), C);
+          label(ctx, o.name, qo.X, qo.Y + R + 12, fg, C);
+          hot.push({ x: qo.X, y: qo.Y, r: R + 6, id: o.id, tip: () => `${o.name} · ${L.netClickIn}` });
+          const m = P3(along([c, o.p], 0.62));
+          label(ctx, mode === "fwd" ? `w = ${n4(o.w)} · ${n4(I.val)} = ${n4(o.w * I.val)}` : `δ(${o.name})·w = ${n4(o.d * o.w)}`, m.X, m.Y - 12, signC(mode === "fwd" ? o.w * I.val : -o.d * o.w), C);
+        });
+        const R = 0.42 * q.k;
+        sphere(ctx, q.X, q.Y, R, valueFill(mode === "fwd" ? FV.clamp(I.val / 3, -1, 1) : FV.clamp(I.grad / 0.4, -1, 1), C), FV.rgb(C.orange), 3);
+        ctx.fillStyle = fg; ctx.font = `600 ${Math.round(FV.clamp(R * 0.45, 11, 20))}px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(mode === "fwd" ? FV.fmt(I.val, 2) : FV.num(I.grad, 3), q.X, q.Y);
+        label(ctx, I.n.name, q.X, q.Y + R + 14, FV.rgb(C.orange), C, 14);
+        ctx.restore();
+        return;
+      }
+
+      const m = I.ins.length;
+      const src = I.ins.map((_, k) => srcPos(k, m)), syn = src.map(onMembrane);
+      const bSrc = [CORE[0], -1.85, 0], bSyn = onMembrane([CORE[0], -1, 0.0001]);
+      const fz = (zv) => FV.clamp(zv, -4, 4);
+      const gx = (zv) => GX0 + ((fz(zv) + 4) / 8) * (GX1 - GX0), gy = (av) => (av - 0.5) * 2 * (GY * 0.85);
+      const gPt = [gx(I.z), gy(I.a), 0];
+      const axonA = [GX1, gy(I.a), 0], axonB = [RM, 0, 0], dest = [2.55, 0, 0];
+
+      // membrane: a translucent sphere with three great circles
+      const cq = P3([0, 0, 0]), Rp = RM * scl * cq.k;
+      const g = ctx.createRadialGradient(cq.X - Rp * 0.3, cq.Y - Rp * 0.35, Rp * 0.1, cq.X, cq.Y, Rp);
+      g.addColorStop(0, FV.rgb(mixC(C.card, C.blue, 0.06), 0.9)); g.addColorStop(1, FV.rgb(mixC(C.card, C.blue, 0.22), 0.9));
+      ctx.beginPath(); ctx.arc(cq.X, cq.Y, Rp, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+      ctx.lineWidth = 1.6; ctx.strokeStyle = FV.rgb(C.blue, 0.55); ctx.stroke();
+      ringPath((a) => [RM * Math.cos(a), 0, RM * Math.sin(a)], FV.rgb(C.blue, 0.28), 1, [3, 4]);
+      ringPath((a) => [RM * Math.cos(a), RM * Math.sin(a), 0], FV.rgb(C.blue, 0.28), 1, [3, 4]);
+      ringPath((a) => [0, RM * Math.cos(a), RM * Math.sin(a)], FV.rgb(C.blue, 0.2), 1, [3, 4]);
+
+      // dendrites (outside: the weight, inside: the product w·a), the bias, core → f → axon
+      I.ins.forEach((it, k) => {
+        line(src[k], syn[k], FV.rgb(it.w >= 0 ? C.blue : C.red, 0.95), 1 + 2.8 * Math.min(1, Math.abs(it.w) / 1.5));
+        line(syn[k], CORE, FV.rgb(it.w * it.v >= 0 ? C.blue : C.red, 0.75), 0.8 + 2.2 * Math.min(1, Math.abs(it.w * it.v) / 2));
+      });
+      line(bSrc, bSyn, FV.rgb(I.b >= 0 ? C.blue : C.red, 0.9), 1.6, [5, 4]);
+      line(bSyn, CORE, FV.rgb(I.b >= 0 ? C.blue : C.red, 0.7), 1.2, [5, 4]);
+      line(CORE, [GX0, 0, 0], fg, 1.4);
+      // the activation panel, standing inside the cell
+      const corners = [[GX0, -GY, 0], [GX1, -GY, 0], [GX1, GY, 0], [GX0, GY, 0]].map(P3);
+      ctx.beginPath(); corners.forEach((q, i) => (i ? ctx.lineTo(q.X, q.Y) : ctx.moveTo(q.X, q.Y))); ctx.closePath();
+      ctx.fillStyle = FV.rgb(C.card, 0.92); ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = FV.rgb(C.ink, 0.35); ctx.stroke();
+      line([GX0, gy(0.5), 0], [GX1, gy(0.5), 0], FV.rgb(C.ink, 0.2), 0.8, [2, 3]);
+      line([gx(0), -GY, 0], [gx(0), GY, 0], FV.rgb(C.ink, 0.2), 0.8, [2, 3]);
+      ctx.beginPath();
+      for (let i = 0; i <= 60; i++) { const zv = -4 + (8 * i) / 60, q = P3([gx(zv), gy(sig(zv)), 0]); i ? ctx.lineTo(q.X, q.Y) : ctx.moveTo(q.X, q.Y); }
+      ctx.strokeStyle = FV.rgb(C.blue); ctx.lineWidth = 2.2; ctx.stroke();
+      line([gx(I.z), gy(0.5) - GY * 0.85, 0], gPt, FV.rgb(C.orange, 0.6), 1, [2, 3]);
+      line(axonA, axonB, FV.rgb(C.orange, 0.95), 2.4);
+      line(axonB, dest, FV.rgb(I.out ? (I.out.w >= 0 ? C.blue : C.red) : C.orange, 0.95), I.out ? 1 + 2.8 * Math.min(1, Math.abs(I.out.w) / 1.5) : 2.4);
+
+      // pulses: forward — inputs → Σ → f → output; backward — the same path in reverse, carrying δ
+      if (t >= 0) {
+        const fw = mode === "fwd", T = fw ? t : 1 - t, col = (v) => (fw ? FV.rgb(v >= 0 ? C.blue : C.red) : FV.rgb(C.orange));
+        if (T < 0.42) {
+          const u = T / 0.42;
+          I.ins.forEach((it, k) => pulse(along([src[k], syn[k], CORE], u), 4 + 4 * Math.min(1, Math.abs(it.w * it.v) / 2), col(it.w * it.v)));
+          pulse(along([bSrc, bSyn, CORE], u), 4, col(I.b));
+        } else if (T < 0.62) pulse(along([CORE, [GX0, 0, 0], gPt], (T - 0.42) / 0.2), 6, col(I.z));
+        else if (T < 0.96) pulse(along([gPt, axonA, axonB, dest], (T - 0.62) / 0.34), 6, fw ? FV.rgb(C.orange) : FV.rgb(C.orange));
+      }
+      const flashCore = t >= 0 ? Math.max(0, 1 - Math.abs((mode === "fwd" ? t : 1 - t) - 0.44) / 0.07) : 0;
+
+      // nodes: sources, core, the point on f, destination
+      const things = [];
+      I.ins.forEach((it, k) => things.push({ p: src[k], draw: (q) => {
+        const R = 0.24 * q.k; sphere(ctx, q.X, q.Y, R, valueFill(mode === "fwd" ? (it.id[0] === "x" ? FV.clamp(it.v / 3, -1, 1) : it.v) : 0, C), C);
+        ctx.fillStyle = "#171A20"; ctx.font = `600 ${Math.round(FV.clamp(R * 0.6, 9, 14))}px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(FV.fmt(it.v, 2), q.X, q.Y + 1);
+        label(ctx, it.name, q.X, q.Y + R + 12, fg, C);
+        hot.push({ x: q.X, y: q.Y, r: R + 6, id: it.id, tip: () => `${it.name} = ${n4(it.v)} · ${L.netClickIn}` });
+      } }));
+      things.push({ p: bSrc, draw: (q) => { const R = 0.13 * q.k; sphere(ctx, q.X, q.Y, R, C.card, C); ctx.fillStyle = fg; ctx.font = `600 11px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("1", q.X, q.Y + 1); } });
+      things.push({ p: CORE, draw: (q) => { const R = 0.2 * q.k * (1 + 0.3 * flashCore); sphere(ctx, q.X, q.Y, R, mixC(C.card, C.orange, 0.55), C, FV.rgb(C.orange), 2.4); ctx.fillStyle = "#171A20"; ctx.font = `600 ${Math.round(FV.clamp(R * 0.9, 12, 22))}px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("Σ", q.X, q.Y + 1);
+        hot.push({ x: q.X, y: q.Y, r: R + 6, id: null, tip: () => `Σ wᵢaᵢ = ${n4(I.sum)}, z = ${n4(I.z)}` }); } });
+      things.push({ p: gPt, draw: (q) => { ctx.beginPath(); ctx.arc(q.X, q.Y, 5, 0, Math.PI * 2); ctx.fillStyle = FV.rgb(C.orange); ctx.fill(); } });
+      things.push({ p: dest, draw: (q) => {
+        const R = 0.27 * q.k;
+        if (I.out) { const tt = mode === "fwd" ? r.y : FV.clamp(r.d2 / 0.4, -1, 1); sphere(ctx, q.X, q.Y, R, valueFill(tt, C), C); ctx.fillStyle = "#171A20"; ctx.font = `600 ${Math.round(FV.clamp(R * 0.6, 9, 14))}px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(FV.fmt(mode === "fwd" ? r.y : r.d2, 2), q.X, q.Y + 1);
+          label(ctx, I.out.name, q.X, q.Y + R + 12, fg, C); hot.push({ x: q.X, y: q.Y, r: R + 6, id: "y", tip: () => `ŷ = ${n4(r.y)} · ${L.netClickIn}` }); }
+        else { ctx.beginPath(); ctx.rect(q.X - R, q.Y - R * 0.75, 2 * R, 1.5 * R); ctx.fillStyle = FV.rgb(mixC(C.card, C.orange, 0.25)); ctx.fill(); ctx.strokeStyle = FV.rgb(C.orange); ctx.lineWidth = 2; ctx.stroke();
+          ctx.fillStyle = fg; ctx.font = `600 ${Math.round(FV.clamp(R * 0.42, 9, 13))}px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(L.inAnswer, q.X, q.Y); }
+      } });
+      things.map((o) => ({ o, q: P3(o.p) })).filter((o) => o.q.ok).sort((a, b) => a.q.d - b.q.d).forEach(({ o, q }) => o.draw(q));
+
+      // labels: the parts of the formula where they live
+      const at = (p) => P3(p);
+      I.ins.forEach((it, k) => {
+        const s = at(syn[k]), wl = at(along([src[k], syn[k]], 0.5));
+        if (mode === "fwd") {
+          label(ctx, `w${SUB[k + 1]} = ${n4(it.w)}`, wl.X, wl.Y - 13, signC(it.w), C, 13);
+          if (Wd >= 520) label(ctx, `w${SUB[k + 1]}·${it.name} = ${n4(it.w * it.v)}`, wl.X, wl.Y + 13, signC(it.w * it.v), C, 11, "center", 500);
+        } else label(ctx, `∂L/∂w${SUB[k + 1]} = δ·${it.name} = ${n4(I.delta * it.v)}`, wl.X, wl.Y - 13, FV.rgb(C.orange), C, 12);
+        hot.push({ x: s.X, y: s.Y, r: 14, id: null, tip: () => `w${SUB[k + 1]} = ${n4(it.w)}, ${it.name} = ${n4(it.v)}, w·${it.name} = ${n4(it.w * it.v)}, ∂L/∂w = ${n4(I.delta * it.v)}` });
+      });
+      const bq = at(bSyn);
+      label(ctx, mode === "fwd" ? `b = ${n4(I.b)}` : `∂L/∂b = δ = ${n4(I.delta)}`, bq.X + 10, bq.Y + 16, mode === "fwd" ? signC(I.b) : FV.rgb(C.orange), C, 12, "left");
+      const cq2 = at(CORE);
+      if (mode === "fwd") label(ctx, `Σ = ${n4(I.sum)}`, cq2.X, cq2.Y - 0.2 * cq2.k - 22, fg, C, 12);
+      label(ctx, mode === "fwd" ? `z = Σ + b = ${n4(I.z)}` : `δ = ${n4(I.delta)}`, cq2.X, cq2.Y - 0.2 * cq2.k - 8, mode === "fwd" ? FV.rgb(C.orange) : FV.rgb(C.orange), C, 13);
+      const gq = at([(GX0 + GX1) / 2, -GY, 0]);
+      label(ctx, mode === "fwd" ? `f = σ:  a = σ(${n4(I.z)}) = ${n4(I.a)}` : `σ′(z) = a(1 − a) = ${n4(I.a * (1 - I.a))}`, gq.X, gq.Y + 14, fg, C, 12);
+      const aq = at(along([axonB, dest], 0.45));
+      label(ctx, I.out ? (mode === "fwd" ? `a = ${n4(I.a)} → ŷ,  w = ${n4(I.out.w)}` : `δ(ŷ)·w = ${n4(r.d2 * I.out.w)}`) : (mode === "fwd" ? `ŷ = ${n4(I.a)}` : `δ = ŷ − y = ${n4(r.d2)}`), aq.X, aq.Y - 14, FV.rgb(C.orange), C, 12);
+      // caption of the parts, small, near the membrane
+      const mq = at([0, RM, 0]);
+      label(ctx, L.inMembrane, mq.X, mq.Y - 10, faint, C, 11, "center", 500);
+      ctx.restore();
+    }
 
     function draw() {
       if (!cv.width) return;
       const ctx = cv.getContext("2d"), r = run();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, Wd, Hd);
-      const C = { card: hex(FV.css("card")), blue: hex(FV.color("blue")), red: hex(FV.color("red")), orange: hex(FV.color("orange")), ink: hex(FV.color("ink")), faint: FV.color("faint"), grid: FV.color("grid") };
-      const sans = FV.css("sans") || "sans-serif";
-      const P = {}; N.concat(BN).forEach((n) => (P[n.id] = proj(n.pos)));
-      // layer captions on the floor
-      [[-1.75, L.netIn], [0, L.netHidden], [1.75, L.netOut]].forEach(([x, s]) => {
-        const q = proj([x, 1.32, 0]); ctx.fillStyle = C.faint; ctx.font = `600 ${Math.round((Wd < 520 ? 10 : 12) * FV.clamp(q.k / (F / CAM), 0.8, 1.2))}px ${sans}`; ctx.textAlign = "center";
-        const hw = ctx.measureText(s).width / 2 + 6; ctx.fillText(s, FV.clamp(q.X, hw, Wd - hw), Math.max(14, q.Y));
-      });
-      // edges, far to near
-      const edges = E.filter((e) => showBias || !e.bias).map((e) => ({ e, A: P[e.a], B: P[e.b], d: (P[e.a].d + P[e.b].d) / 2 })).sort((u, v) => u.d - v.d);
-      edges.forEach(({ e, A, B }) => {
-        const wv = e.w(), hl = related(e);
-        const base = wv >= 0 ? C.blue : C.red;
-        ctx.strokeStyle = FV.rgb(base, hl ? 0.95 : 0.22);
-        ctx.lineWidth = (0.6 + 2.4 * Math.min(1, Math.abs(wv) / 1.5)) * ((A.k + B.k) / 2) / (F / CAM) * (hl ? 1.25 : 1);
-        ctx.setLineDash(e.bias ? [5, 4] : []);
-        ctx.beginPath(); ctx.moveTo(A.X, A.Y); ctx.lineTo(B.X, B.Y); ctx.stroke();
-      });
-      ctx.setLineDash([]);
-      // pulses travelling along the edges
-      if (t >= 0) {
-        edges.forEach(({ e, A, B }) => {
-          const st = mode === "fwd" ? e.stage : 1 - e.stage;
-          const u = FV.clamp((t - st * 0.5) / 0.42, 0, 1);
-          if (t < st * 0.5 || t > st * 0.5 + 0.45) return;
-          let mag;
-          if (mode === "fwd") { const src = e.bias ? 1 : e.stage === 0 ? X[byId[e.a].i] : r.h[byId[e.a].i]; mag = Math.abs(e.w() * src); }
-          else { const dst = byId[e.b]; mag = Math.abs(e.w() * (dst.layer === 2 ? r.d2 : r.d1[dst.i])) * 4; }
-          const f = mode === "fwd" ? u : 1 - u;
-          const x = A.X + (B.X - A.X) * f, y = A.Y + (B.Y - A.Y) * f;
-          ctx.beginPath(); ctx.arc(x, y, 2.5 + Math.min(6, mag * 2.2), 0, Math.PI * 2);
-          ctx.fillStyle = FV.rgb(mode === "fwd" ? (e.w() >= 0 ? C.blue : C.red) : C.orange, related(e) ? 1 : 0.55); ctx.fill();
-        });
-      }
-      // weight labels on the edges of the selected neuron
-      ctx.font = `600 12px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
-      edges.filter(({ e }) => related(e)).forEach(({ e, A, B }) => {
-        const s = (e.bias ? "b=" : "") + n4(e.w()), x = A.X + (B.X - A.X) * 0.42, y = A.Y + (B.Y - A.Y) * 0.42;
-        ctx.lineWidth = 4; ctx.strokeStyle = FV.rgb(C.card); ctx.strokeText(s, x, y);
-        ctx.fillStyle = FV.rgb(e.w() >= 0 ? C.blue : C.red); ctx.fillText(s, x, y);
-      });
-      // nodes, far to near, shaded as spheres
-      const flash = (layer) => { if (t < 0) return 0; const at = mode === "fwd" ? layer * 0.5 : (2 - layer) * 0.5; return Math.max(0, 1 - Math.abs(t - at) / 0.08); };
-      N.concat(showBias ? BN : []).map((n) => ({ n, q: P[n.id] })).sort((a, b) => a.q.d - b.q.d).forEach(({ n, q }) => {
-        const R = (n.bias ? 0.11 : n.layer === 2 ? 0.25 : 0.21) * q.k * (1 + 0.25 * flash(n.layer));
-        const { v, t: tt } = nodeVal(n, r);
-        const tone = mode === "fwd" ? (tt >= 0 ? C.blue : C.red) : (tt >= 0 ? C.red : C.blue);
-        const fill = n.bias ? C.card : mixC(C.card, tone, Math.min(0.85, Math.abs(tt) * 0.85));
-        const g = ctx.createRadialGradient(q.X - R * 0.35, q.Y - R * 0.4, R * 0.1, q.X, q.Y, R);
-        g.addColorStop(0, FV.rgb(mixC(fill, [255, 255, 255], 0.55))); g.addColorStop(1, FV.rgb(fill));
-        ctx.beginPath(); ctx.arc(q.X, q.Y, R, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
-        ctx.lineWidth = n.id === sel ? 3.5 : 1.4; ctx.strokeStyle = n.id === sel ? FV.rgb(C.orange) : FV.rgb(C.ink, 0.75); ctx.stroke();
-        if (n.id === "h0") { ctx.setLineDash([3, 3]); ctx.lineWidth = 1.2; ctx.strokeStyle = FV.rgb(C.orange); ctx.beginPath(); ctx.arc(q.X, q.Y, R + 6, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
-        const dark = (fill[0] * 0.3 + fill[1] * 0.59 + fill[2] * 0.11) < 120;
-        ctx.fillStyle = dark ? "#fff" : "#171A20"; ctx.font = `600 ${Math.round(FV.clamp(R * 0.62, 9, 15))}px ${sans}`;
-        ctx.fillText(n.bias ? "1" : (mode === "bwd" && n.layer > 0 ? FV.num(v, 2) : FV.fmt(v, 2)), q.X, q.Y + 1);
-        if (!n.bias) {
-          ctx.font = `600 12px ${sans}`; ctx.lineWidth = 4; ctx.strokeStyle = FV.rgb(C.card);
-          const ly = q.Y + R + 12, txt = n.name + (n.id === "h0" ? " · " + L.netOurs : "");
-          ctx.strokeText(txt, q.X, ly); ctx.fillStyle = n.id === "h0" ? FV.rgb(C.orange) : FV.rgb(C.ink); ctx.fillText(txt, q.X, ly);
-        }
-      });
-      // read-outs and the panel
+      hot = [];
+      const C = { card: hex(FV.css("card")), blue: hex(FV.color("blue")), red: hex(FV.color("red")), orange: hex(FV.color("orange")), ink: hex(FV.color("ink")), faint: FV.color("faint") };
+      const zoom = ease(FV.clamp(focus / 0.7, 0, 1)), netA = 1 - smooth(0.4, 0.8, focus), inA = smooth(0.45, 0.9, focus);
+      if (netA > 0.01) drawNet(ctx, r, C, zoom, netA);
+      if (inA > 0.01 && inside) drawInside(ctx, r, C, inA, (Wd < 520 ? 0.62 : 0.7) * (0.6 + 0.4 * smooth(0.45, 1, focus)));
+      // overlay: breadcrumb, exit, hint
+      const isIn = focus > 0.5 && inside;
+      stageBox.classList.toggle("is-in", !!isIn);
+      crumbCur.textContent = inside ? nameOf(inside) : "";
+      hint.textContent = isIn ? (byId[inside].layer === 0 ? (mode === "fwd" ? L.inFan : L.inFanBwd) + ". " + L.netHintFan : L.netHintIn) : L.netHintNet;
+      go.setLabel(isIn ? "⤴ " + L.netLeave : "⤵ " + L.netEnter);
       ro.set("y", n4(r.y)); ro.set("l", n4(r.loss)); ro.set("p", "3·(3+1) + 1·(3+1) = 16");
       segSel.set(sel);
       // the panel (KaTeX) changes only with the data, not with the rotation or the pulses
-      const key = [sel, mode, target, X.join(",")].join("|");
-      if (key !== panelKey) { panelKey = key; renderPanel(r); }
+      const key = [sel, mode, target, X.join(","), isIn ? inside : ""].join("|");
+      if (key !== panelKey) { panelKey = key; renderPanel(r, isIn); }
     }
 
-    function renderPanel(r) {
+    function renderPanel(r, isIn) {
       const n = byId[sel];
       pL.textContent = ""; pR.textContent = "";
       const head = FV.h("div", { class: "nr-net-h" }, FV.h("b", { text: n.name + (sel === "h0" ? " — " + L.netOurs : "") }), FV.h("span", { text: [L.netIn, L.netHidden, L.netOut][n.layer] }));
@@ -1086,11 +1284,25 @@
         add(`\\hat y = \\sigma(z) \\approx ${tn(Number(r.y.toFixed(4)))}`);
         if (mode === "bwd") add(`\\delta_{\\hat y} = \\hat y - y \\approx ${tn(Number(r.y.toFixed(4)))} - ${target} = ${tn(Number(r.d2.toFixed(4)))}`);
       }
-      // the matrices: the selected neuron is one row
+      if (isIn && n.layer > 0) {
+        // inside a neuron: its own table of inputs, weights and contributions (or gradients)
+        const I = interior(sel, r);
+        const tb = FV.h("table", { class: "nr-mat nr-in-tab" });
+        const th = mode === "fwd" ? [L.inCol, L.inVal, L.inW, L.inProd] : [L.inCol, L.inVal, L.inW, L.inGrad];
+        tb.append(FV.h("tr", {}, th.map((s) => FV.h("th", {}, FV.rich(s)))));
+        I.ins.forEach((it) => {
+          const v4 = mode === "fwd" ? it.w * it.v : I.delta * it.v;
+          tb.append(FV.h("tr", { onclick: () => enterN(it.id) }, FV.h("th", { text: it.name }), FV.h("td", { text: n4(it.v) }), FV.h("td", { class: it.w >= 0 ? "pos" : "neg", text: n4(it.w) }), FV.h("td", { class: v4 >= 0 ? "pos" : "neg", text: n4(v4) })));
+        });
+        tb.append(FV.h("tr", {}, FV.h("th", { text: "b" }), FV.h("td", { text: "1" }), FV.h("td", { class: I.b >= 0 ? "pos" : "neg", text: n4(I.b) }), FV.h("td", { class: "b", text: n4(mode === "fwd" ? I.b : I.delta) })));
+        const foot = mode === "fwd" ? `$z = ${tn(Number(I.z.toFixed(4)))}$, $a = \\sigma(z) \\approx ${tn(Number(I.a.toFixed(4)))}$` : `$\\delta \\approx ${tn(Number(I.delta.toFixed(4)))}$`;
+        pR.append(FV.h("div", { class: "nr-mat-box" }, FV.rich(L.inTable.replace("{n}", n.name), "span"), tb, FV.rich(foot, "span")));
+        return;
+      }
       const mat = (title, rows, bias, hiRow, names) => {
         const tb = FV.h("table", { class: "nr-mat" });
         rows.forEach((rw, j) => {
-          const tr = FV.h("tr", { class: hiRow === j ? "hi" : null, onclick: () => { sel = names[j]; draw(); } });
+          const tr = FV.h("tr", { class: hiRow === j ? "hi" : null, onclick: () => { sel = names[j]; if (focus > 0.5) enterN(sel); else draw(); } });
           tr.append(FV.h("th", { text: byId[names[j]].name }));
           rw.forEach((v) => tr.append(FV.h("td", { class: v >= 0 ? "pos" : "neg", text: n4(v) })));
           tr.append(FV.h("td", { class: "b " + (bias[j] >= 0 ? "pos" : "neg"), text: n4(bias[j]) }));
@@ -1101,28 +1313,47 @@
       pR.append(mat(L.netW1, W1, B1, n.layer === 1 ? n.i : -1, ["h0", "h1", "h2"]), mat(L.netW2, [W2], [B2], n.layer === 2 ? 0 : -1, ["y"]));
     }
 
-    // ----- animation loop: pulses and the slow spin
+    // ----- entering and leaving a neuron
+    function animateTo(to, dur, done, view) { anim = { from: focus, to, start: performance.now(), dur, done, az0: az, el0: elv, view }; kick(); }
+    function enterN(id) {
+      sel = id; tip.hidden = true;
+      live.textContent = L.netEntered.replace("{n}", byId[id].name);
+      if (reduced()) { if (!inside) { az = -0.62; elv = 0.3; } inside = id; focus = 1; anim = null; draw(); return; }
+      if (inside && inside !== id && focus > 0.3) animateTo(0.3, 360, () => { inside = id; animateTo(1, 620); });
+      else { inside = id; animateTo(1, 950, null, [-0.62, 0.3]); }
+    }
+    function exitN() {
+      if (!inside) return;
+      tip.hidden = true; live.textContent = L.netLeft;
+      if (reduced()) { focus = 0; inside = null; anim = null; draw(); return; }
+      animateTo(0, 750, () => { inside = null; draw(); });
+    }
+
+    // ----- animation loop: the flight, the pulses and the slow spin
     function frame(now) {
       raf = 0;
       if (!visible) return;
       let again = false;
-      if (spin) { if (lastSpin) az -= Math.min(50, now - lastSpin) * 0.00018; lastSpin = now; again = true; } else lastSpin = 0;
+      if (anim) {
+        const u = FV.clamp((now - anim.start) / anim.dur, 0, 1);
+        focus = anim.from + (anim.to - anim.from) * ease(u);
+        if (anim.view) { az = anim.az0 + (anim.view[0] - anim.az0) * ease(u); elv = anim.el0 + (anim.view[1] - anim.el0) * ease(u); }
+        if (u >= 1) { const d = anim.done; anim = null; d && d(); }
+        again = true;
+      }
+      if (spin) { if (lastSpin) az -= Math.min(50, now - lastSpin) * (focus > 0.5 ? 0.00012 : 0.00018); lastSpin = now; again = true; } else lastSpin = 0;
       if (playing) { t = ((now - t0) % 2600) / 2600; again = true; }
       draw();
-      if (again) raf = requestAnimationFrame(frame);
+      if (again || anim) raf = requestAnimationFrame(frame);
     }
     const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
     function start() { playing = true; t0 = performance.now(); play.setLabel("❚❚ " + FV.t("pause")); kick(); }
     function stopPlay() { playing = false; t = -1; play.setLabel("▶ " + L.netPlay); draw(); }
 
-    // ----- pointer: drag to rotate, click to select, hover for a hint
+    // ----- pointer: drag to rotate, click a neuron to fly inside it, hover for a hint
     let down = null, moved = 0;
     const at = (e) => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
-    const hit = (px, py) => {
-      let best = null, bd = 1e9;
-      N.forEach((n) => { const q = proj(n.pos), R = 0.25 * q.k + 6, d = Math.hypot(q.X - px, q.Y - py); if (d < R && d < bd) { bd = d; best = n; } });
-      return best;
-    };
+    const hit = (px, py) => { let best = null, bd = 1e9; hot.forEach((h) => { const d = Math.hypot(h.x - px, h.y - py); if (d < h.r && d < bd) { bd = d; best = h; } }); return best; };
     cv.addEventListener("pointerdown", (e) => { down = [e.clientX, e.clientY]; moved = 0; cv.setPointerCapture(e.pointerId); });
     cv.addEventListener("pointermove", (e) => {
       if (down) {
@@ -1131,28 +1362,30 @@
         down = [e.clientX, e.clientY]; if (!raf) draw();
         return;
       }
-      const [px, py] = at(e), n = hit(px, py);
-      cv.style.cursor = n ? "pointer" : "grab";
-      if (n) { const r = run(), v = nodeVal(n, r).v; tip.hidden = false; tip.textContent = `${n.name}: ${mode === "fwd" ? (n.layer ? "a" : "x") : "δ"} = ${n4(v)}`; tip.style.left = px + 12 + "px"; tip.style.top = py + 12 + "px"; }
+      const [px, py] = at(e), h = hit(px, py);
+      cv.style.cursor = h && h.id ? "pointer" : "grab";
+      if (h) { tip.hidden = false; tip.textContent = h.tip(); tip.style.left = Math.min(px + 12, Wd - 180) + "px"; tip.style.top = py + 14 + "px"; }
       else tip.hidden = true;
     });
-    const up = (e) => {
-      if (down && moved < 6) { const [px, py] = at(e), n = hit(px, py); if (n) { sel = n.id; draw(); } }
+    cv.addEventListener("pointerup", (e) => {
+      if (down && moved < 6) { const [px, py] = at(e), h = hit(px, py); if (h && h.id) enterN(h.id); }
       down = null;
-    };
-    cv.addEventListener("pointerup", up);
+    });
     cv.addEventListener("pointercancel", () => { down = null; });
     cv.addEventListener("pointerleave", () => { tip.hidden = true; });
     cv.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); enterN(sel); return; }
+      if (e.key === "Escape" && inside) { e.preventDefault(); exitN(); return; }
       const k = { ArrowLeft: [0.12, 0], ArrowRight: [-0.12, 0], ArrowUp: [0, -0.08], ArrowDown: [0, 0.08] }[e.key];
       if (k) { e.preventDefault(); az += k[0]; elv = FV.clamp(elv + k[1], -0.9, 1.2); draw(); }
     });
     if ("ResizeObserver" in window) { let last = 0; new ResizeObserver(() => { const x = stageBox.clientWidth; if (Math.abs(x - last) > 1) { last = x; resize(); } }).observe(stageBox); }
     if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { visible = e.isIntersecting; if (visible) kick(); })).observe(el);
-    document.addEventListener("fullscreenchange", () => { el.classList.toggle("nr-fs", document.fullscreenElement === el); full.setLabel((document.fullscreenElement === el ? "✕ " : "⛶ ") + (document.fullscreenElement === el ? L.netExit : L.netFull)); resize(); });
-    const redraw = () => draw();
+    document.addEventListener("fullscreenchange", () => { const fs = document.fullscreenElement === el; el.classList.toggle("nr-fs", fs); full.setLabel((fs ? "✕ " : "⛶ ") + (fs ? L.netExit : L.netFull)); resize(); });
+    const redraw = () => { panelKey = ""; draw(); };
     document.addEventListener("themechange", () => setTimeout(redraw, 320));
     new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    if (cfg.enter) { inside = cfg.enter; sel = cfg.enter; focus = 1; }
     resize();
     kick();
   });
