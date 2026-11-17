@@ -7,7 +7,7 @@ Every number in the texts is checked by check_numbers() below: python3 tools/con
 
 SLUG = "neuron"
 DATE = "2026-11-17"
-MINUTES = 35
+MINUTES = 55
 
 HERO = r"a=f\Big(\sum_{i=1}^{n} w_i x_i+b\Big)=f\big(\mathbf{w}^{\top}\mathbf{x}+b\big)"
 
@@ -17,9 +17,9 @@ TITLE = {
     "uz": "Bitta neyron formulasi: mayda detallarigacha",
 }
 EXCERPT = {
-    "ru": "a = f(Σ wᵢxᵢ + b) и a = f(wᵀx + b): каждая буква формулы, векторная и покоординатная запись, геометрия, четыре кейса и обучение — с анимациями и примерами на числах.",
-    "en": "a = f(Σ wᵢxᵢ + b) and a = f(wᵀx + b): every symbol of the formula, the vector and the per-coordinate form, the geometry, four cases and learning, with animations and worked numbers.",
-    "uz": "a = f(Σ wᵢxᵢ + b) va a = f(wᵀx + b): formulaning har bir harfi, vektor va koordinatali yozuv, geometriya, to‘rtta keys va o‘qitish — animatsiyalar va sonli misollar bilan.",
+    "ru": "a = f(Σ wᵢxᵢ + b) и a = f(wᵀx + b): каждая буква формулы, векторная и покоординатная запись, геометрия, кейсы, обучение и практикум из 17 разобранных примеров — с анимациями, таблицами и расчётами.",
+    "en": "a = f(Σ wᵢxᵢ + b) and a = f(wᵀx + b): every symbol of the formula, the vector and the per-coordinate form, the geometry, cases, learning and a practice section of 17 worked examples, with animations, tables and calculations.",
+    "uz": "a = f(Σ wᵢxᵢ + b) va a = f(wᵀx + b): formulaning har bir harfi, vektor va koordinatali yozuv, geometriya, keyslar, o‘qitish va 17 ta yechilgan misoldan iborat amaliyot — animatsiyalar, jadvallar va hisoblar bilan.",
 }
 DEK = {
     "ru": "Вся нейросеть, от логистической регрессии до больших языковых моделей, собрана из одной детали. Разбираем её формулу до последнего символа: что такое каждый x, w, b, z, f и a, почему сумма и скалярное произведение — одно и то же, что нейрон «видит» в пространстве, как он решает задачи из разных областей и как учится.",
@@ -27,9 +27,9 @@ DEK = {
     "uz": "Logistik regressiyadan katta til modellarigacha bo‘lgan har qanday neyron tarmoq bitta detaldan yig‘ilgan. Uning formulasini oxirgi belgisigacha tahlil qilamiz: har bir x, w, b, z, f va a nima, nega yig‘indi va skalyar ko‘paytma bir narsa, neyron fazoda nimani «ko‘radi», turli sohalardagi masalalarni qanday yechadi va qanday o‘rganadi.",
 }
 DESCRIPTION = {
-    "ru": "Формула искусственного нейрона a = f(Σ wᵢxᵢ + b) = f(wᵀx + b) по косточкам: входы, веса, смещение, активация, векторная форма, геометрия, кейсы, обучение и код. С интерактивными рисунками.",
-    "en": "The artificial neuron a = f(Σ wᵢxᵢ + b) = f(wᵀx + b) in depth: inputs, weights, bias, activation, the vector form, geometry, cases, learning and code. With interactive figures.",
-    "uz": "Sun’iy neyron formulasi a = f(Σ wᵢxᵢ + b) = f(wᵀx + b) batafsil: kirishlar, vaznlar, siljish, aktivatsiya, vektor shakli, geometriya, keyslar, o‘qitish va kod. Interaktiv rasmlar bilan.",
+    "ru": "Формула искусственного нейрона a = f(Σ wᵢxᵢ + b) = f(wᵀx + b) по косточкам: входы, веса, смещение, активация, векторная форма, геометрия, кейсы, обучение, код и 17 разобранных примеров. С интерактивными рисунками.",
+    "en": "The artificial neuron a = f(Σ wᵢxᵢ + b) = f(wᵀx + b) in depth: inputs, weights, bias, activation, the vector form, geometry, cases, learning, code and 17 worked examples. With interactive figures.",
+    "uz": "Sun’iy neyron formulasi a = f(Σ wᵢxᵢ + b) = f(wᵀx + b) batafsil: kirishlar, vaznlar, siljish, aktivatsiya, vektor shakli, geometriya, keyslar, o‘qitish, kod va 17 ta yechilgan misol. Interaktiv rasmlar bilan.",
 }
 TAGS = {
     "ru": ["Нейросети", "Линейная алгебра", "Основы ML"],
@@ -505,6 +505,564 @@ PRACTICE_RU = dict(id="practice", title="Практикум: 17 примеров
             ("p", r"Стартовая потеря $\ln 2 \approx 0{,}6931$ — как у монетки: при нулевых весах $a = 0{,}5$ для всех. Через 100 эпох потеря выходит на плато около $0{,}226$, точность 90%: классы перекрываются, и никакая прямая не разделит их без ошибок. Веса $w_1 \approx 1{,}94$, $w_2 \approx 1{,}71$ почти равны — данные симметричны относительно диагонали, и граница легла поперёк неё."),
         ],
         take=r"Вся «нейросеть» здесь — одна строка <code>z = X @ w + b</code> и две строки градиента. Всё, что сверху (слои, оптимизаторы, фреймворки), — масштабирование этой же формулы.")),
+])
+
+
+PRACTICE_EN = dict(id="practice", title="Practice: 17 examples from simple to advanced", blocks=[
+    ("p", r"Reading the formula is not enough: you have to get a feel for it with your own hands. Below are 17 examples. Each one addresses a single aspect of understanding: it has a goal, a solution (a table, a calculation, geometry, a figure or code) and a takeaway. The examples progress from a single input and a straight line to training a neuron from scratch. Every number has been verified by computation."),
+    ("table", ["No.", "Example", "What it teaches", "Format"], [
+        [r'<a href="#ex-1">1</a>', "One input is a straight line", "the meaning of $w$ and $b$ on a graph", "table, figure"],
+        [r'<a href="#ex-2">2</a>', "Four sign combinations", "the sign of the contribution $w_ix_i$", "2×2 table"],
+        [r'<a href="#ex-3">3</a>', "Will the student pass the exam", "reading feature contributions", "waterfall, table"],
+        [r'<a href="#ex-4">4</a>', "Income in soums and age in years", "why inputs should be scaled", "calculation, table"],
+        [r'<a href="#ex-5">5</a>', "Four inputs: sum = vector", r"$\mathbf{w}^{\top}\mathbf{x}$ versus $\mathbf{w}\mathbf{x}^{\top}$", "matrices"],
+        [r'<a href="#ex-6">6</a>', "Film recommendations", "a neuron as a similarity measure", "ranking table"],
+        [r'<a href="#ex-7">7</a>', "University admission", "the boundary and level lines", "geometry, figure"],
+        [r'<a href="#ex-8">8</a>', "The bias moves the threshold", "the role of $b$", "table"],
+        [r'<a href="#ex-9">9</a>', "One threshold, different sharpness", r"the role of $\lVert\mathbf{w}\rVert$", "table, figure"],
+        [r'<a href="#ex-10">10</a>', "A burglar alarm", "weighted voting", "truth table"],
+        [r'<a href="#ex-11">11</a>', "Six gates, one formula", "weights as a program", "table"],
+        [r'<a href="#ex-12">12</a>', "A spam filter", "sparse inputs", "table"],
+        [r'<a href="#ex-13">13</a>', "XOR through a hidden layer", "a change of space", "table, animation"],
+        [r'<a href="#ex-14">14</a>', "A polyline made of ReLU neurons", "universal approximation", "figure"],
+        [r'<a href="#ex-15">15</a>', "A training epoch by hand", "a gradient step on every example", "table"],
+        [r'<a href="#ex-16">16</a>', "Confident and wrong", "saturation: MSE versus BCE", "table"],
+        [r'<a href="#ex-17">17</a>', "A neuron from scratch in NumPy", "everything together", "code"],
+    ], {"num": [0]}),
+
+    # 1 ---------------------------------------------------------------
+    ("example", dict(n=1, title="One input is the equation of a straight line", kinds=["table", "figure"],
+        goal=r"See that a neuron with one input and the identity activation is the straight line $y = kx + c$ familiar from school, where the weight $w$ is the slope and the bias $b$ is the point where the line crosses the $y$ axis.",
+        blocks=[
+            ("p", r"Take $w = 1.5$, $b = -1$, $f(z) = z$. Then $a = 1.5x - 1$. Let us compute the output for five inputs:"),
+            ("table", [r"$x$", r"$wx$", r"$a = wx + b$", "Change in $a$"], [
+                ["−2", "−3", "−4", "—"],
+                ["−1", "−1.5", "−2.5", "+1.5"],
+                ["0", "0", "−1", "+1.5"],
+                ["1", "1.5", "0.5", "+1.5"],
+                ["2", "3", "2", "+1.5"],
+            ], {"num": [0, 1, 2, 3]}),
+            ("p", r"Each unit step in $x$ changes the output by exactly $w = 1.5$: this is the slope. At $x = 0$ the output equals $b = -1$. The output is zero at the point $x_0 = -b/w = 1/1.5 \approx 0.667$."),
+            ("viz", "neuron-bias", VIZ["ex_line"], r"<b>Figure 11.</b> The same neuron on a graph; the orange dots are the rows of the table. Move $w$ and $b$: the slope and the offset of the line change. Switch the function to the sigmoid to see how the same line “folds” into an S-curve."),
+        ],
+        take=r"A weight is the rate at which the output changes per unit of input; the bias is the output when the input is zero. Everything else in the neuron’s formula generalises this line to many inputs and a non-linear $f$.")),
+
+    # 2 ---------------------------------------------------------------
+    ("example", dict(n=2, title="Four sign combinations", kinds=["2×2 table"],
+        goal=r"Reinforce the rule: the direction of the influence is determined neither by the sign of the weight nor by the sign of the input on its own, but by the sign of their product.",
+        blocks=[
+            ("table", ["", r"$x = +3$", r"$x = -3$"], [
+                [r"$w = +2$", "+6: “for”", "−6: “against”"],
+                [r"$w = -2$", "−6: “against”", "+6: “for”"],
+            ], {"num": []}),
+            ("p", r"Let the feature be the deviation of the temperature from the norm, and let the neuron estimate the demand for ice cream. The weight is positive: heat ($x = +3$) raises the demand, cold ($x = -3$) lowers it. A neuron that estimates the demand for heaters has a negative weight: for it, cold ($x = -3$, $w = -2$) gives a contribution of $+6$."),
+        ],
+        take=r"A negative weight does not mark a “bad” input but an input with an inverse relationship: “the less, the better”. That is why it is convenient to centre features around zero: then the sign of the input by itself carries the meaning “more or less than usual”.")),
+
+    # 3 ---------------------------------------------------------------
+    ("example", dict(n=3, title="Will the student pass the exam: reading the contributions", kinds=["waterfall", "table", "calculation"],
+        goal=r"Learn to break a neuron’s answer down into the contributions of individual features and to answer the question “why did the model decide this way?”.",
+        blocks=[
+            ("p", r"Inputs: $x_1 = 6$ is the number of hours of preparation, $x_2 = 7$ the hours of sleep before the exam, $x_3 = 3$ the number of missed classes. Weights: $\mathbf{w} = (0.8,\ 0.3,\ -0.9)$, $b = -4$, $f = \sigma$."),
+            ("table", ["Feature", r"$x_i$", r"$w_i$", r"Contribution $w_ix_i$", "Role"], [
+                ["hours of preparation", "6", "0.8", "+4.8", "the main argument “for”"],
+                ["hours of sleep", "7", "0.3", "+2.1", "an argument “for”"],
+                ["missed classes", "3", "−0.9", "−2.7", "an argument “against”"],
+                ["bias", "—", "—", "−4", "the strictness of the exam"],
+                ["<b>total $z$</b>", "", "", "<b>0.2</b>", ""],
+            ], {"num": [1, 2, 3]}),
+            ("eq", r"a = \sigma(0.2) = \frac{1}{1 + e^{-0.2}} \approx 0.5498"),
+            ("viz", "neuron-steps", VIZ["ex_student"], r"<b>Figure 12.</b> The cascade of contributions for the student: two bars “for”, one “against”, and the bias. The final $z = 0.2$ is just above zero: the answer is borderline."),
+            ("p", r"The chance of passing is about 55%: the model is far from sure. The table shows at once what would change the answer the most. One more hour of preparation adds $0.8$ to $z$: $\sigma(1.0) \approx 0.7311$. And had the student missed no classes, the contribution $-2.7$ would disappear: $\sigma(2.9) \approx 0.9478$."),
+        ],
+        take=r"For a single neuron the explanation of an answer is exact and comes for free: $z$ decomposes into the terms $w_ix_i$. This is precisely why linear models are popular in banking and medicine: every decision can be laid out line by line.")),
+
+    # 4 ---------------------------------------------------------------
+    ("example", dict(n=4, title="Income in soums and age in years: why inputs should be scaled", kinds=["calculation", "table"],
+        goal=r"Show with numbers that features on different scales break a neuron even before training, and how standardisation cures this.",
+        blocks=[
+            ("p", r"Two clients: both have an income of 5,000,000 soums, and their ages are 35 and 60. Take equal weights $w_1 = w_2 = 0.01$ and $b = 0$:"),
+            ("eq", r"\begin{aligned} z_A &= 0.01\cdot 5{,}000{,}000 + 0.01\cdot 35 = 50{,}000.35\\ z_B &= 0.01\cdot 5{,}000{,}000 + 0.01\cdot 60 = 50{,}000.6 \end{aligned}"),
+            ("p", r"Age changed $z$ by $0.25$ out of $50{,}000$: it is practically invisible, and $\sigma(z)$ equals 1 for both clients to within machine precision. Worse still, the gradient with respect to $w_1$ is proportional to the input $x_1 = 5{,}000{,}000$, and the one with respect to $w_2$ to the input $x_2 \approx 50$: the training steps for the two weights differ by a factor of a hundred thousand, and no single learning rate $\eta$ can suit both."),
+            ("p", r"Let us standardise: subtract the mean and divide by the standard deviation (suppose that in the sample the mean income is 4,000,000 with a standard deviation of 1,000,000, and the mean age is 40 with a standard deviation of 10):"),
+            ("table", ["Client", "Income", "Age", r"$\tilde x_1$", r"$\tilde x_2$", r"$z = \tilde x_1 + \tilde x_2$", r"$a = \sigma(z)$"], [
+                ["A", "5,000,000", "35", "1", "−0.5", "0.5", "0.6225"],
+                ["B", "5,000,000", "60", "1", "2", "3", "0.9526"],
+            ], {"num": [1, 2, 3, 4, 5, 6]}),
+        ],
+        take=r"A neuron compares features only through their numbers, so the units of measurement “leak” into the weights. After standardisation all inputs live on the same scale, the weights become comparable, and gradient descent becomes stable.")),
+
+    # 5 ---------------------------------------------------------------
+    ("example", dict(n=5, title="Four inputs: the sum, the vector and one common mistake", kinds=["matrices", "calculation"],
+        goal=r"Check for $n = 4$ that the per-coordinate and the vector notations give the same number, and see what happens when the transposition is put in the wrong place.",
+        blocks=[
+            ("eq", r"\mathbf{x} = (1,\ 0,\ -2,\ 4), \qquad \mathbf{w} = (3,\ 5,\ 0.5,\ -1), \qquad b = 2"),
+            ("p", r"Per coordinate:"),
+            ("eq", r"\begin{aligned} \sum_{i=1}^{4} w_ix_i &= 3\cdot1 + 5\cdot0 + 0.5\cdot(-2) + (-1)\cdot4 = 3 + 0 - 1 - 4 = -2\\ z &= -2 + 2 = 0 \end{aligned}"),
+            ("p", r"In vector form, row times column, with the same four products:"),
+            ("eq", r"\mathbf{w}^{\top}\mathbf{x} = \begin{pmatrix}3 & 5 & 0.5 & -1\end{pmatrix}\begin{pmatrix}1\\0\\-2\\4\end{pmatrix} = -2 = \mathbf{x}^{\top}\mathbf{w}"),
+            ("p", r"$z = 0$, so $a = \sigma(0) = 0.5$: the object lies exactly on the decision boundary. Now the mistake: move the transposition. $\mathbf{w}\mathbf{x}^{\top}$ is a $4\times1$ column times a $1\times4$ row, that is, the $4\times4$ matrix of all pairwise products $w_ix_j$:"),
+            ("eq", r"\mathbf{w}\mathbf{x}^{\top} = \begin{pmatrix} \mathbf{3} & 0 & -6 & 12\\ 5 & \mathbf{0} & -10 & 20\\ 0.5 & 0 & \mathbf{-1} & 2\\ -1 & 0 & 2 & \mathbf{-4} \end{pmatrix}, \qquad \operatorname{tr}(\mathbf{w}\mathbf{x}^{\top}) = 3 + 0 - 1 - 4 = -2"),
+        ],
+        take=r"The dot product is the sum of the diagonal (the trace) of the outer product: the neuron needs only the pairs with the same index, $w_ix_i$. If your code produces an $n\times n$ matrix instead of a number, the transposition is in the wrong place.")),
+
+    # 6 ---------------------------------------------------------------
+    ("example", dict(n=6, title="Film recommendations: a neuron as a similarity measure", kinds=["ranking table", "geometry"],
+        goal=r"See the geometric meaning of $\mathbf{w}^{\top}\mathbf{x}$ at work: the weights are the user’s “taste”, the inputs describe a film, and the output shows how well the film matches that taste.",
+        blocks=[
+            ("p", r"The features of a film are its shares of action, comedy and drama. The user’s taste is $\mathbf{w} = (0.9,\ 0.1,\ 0.4)$: they love action, like a little drama and are indifferent to comedy. No bias is needed: $b = 0$."),
+            ("table", ["Film", r"$\mathbf{x}$ (action, comedy, drama)", r"$\mathbf{w}^{\top}\mathbf{x}$", r"$\cos\theta$", "Rank"], [
+                ["A", "(1, 0, 0.2)", "0.98", "0.9707", "1"],
+                ["C", "(0.6, 0.2, 0.8)", "0.88", "0.8717", "2"],
+                ["D", "(0.1, 0.9, 0.9)", "0.54", "0.4273", "3"],
+                ["B", "(0, 1, 0.3)", "0.22", "0.2129", "4"],
+            ], {"num": [2, 3, 4]}),
+            ("p", r"For example, for film C: $0.9\cdot0.6 + 0.1\cdot0.2 + 0.4\cdot0.8 = 0.54 + 0.02 + 0.32 = 0.88$. Here the ranking by the dot product coincides with the ranking by the cosine of the angle: the smaller the angle between the film vector and the taste vector, the higher the film is on the list."),
+            ("p", r"The bias does not affect the ranking: add any $b$ to all four scores, and the ranks do not change. $b$ is needed when an absolute threshold matters (“should it be shown at all?”), not a comparison."),
+        ],
+        take=r"The dot product measures “how similar the input is to the weight template”. Recommender systems, embedding search and the attention mechanism in transformers are built on this: all of them compute $\mathbf{q}^{\top}\mathbf{k}$.")),
+
+    # 7 ---------------------------------------------------------------
+    ("example", dict(n=7, title="University admission: the decision boundary and level lines", kinds=["geometry", "figure", "table"],
+        goal=r"Find the decision boundary explicitly, check specific points against it, and understand that all points on a line parallel to the boundary receive the same answer.",
+        blocks=[
+            ("p", r"Scores in mathematics $x_1$ and in language $x_2$ (from 0 to 10), $\mathbf{w} = (1,\ 0.5)$, $b = -9$, $f = \sigma$. The boundary $a = 0.5$ is $z = 0$:"),
+            ("eq", r"x_1 + 0.5x_2 - 9 = 0 \quad\Longleftrightarrow\quad x_2 = 18 - 2x_1"),
+            ("table", ["Applicant", r"$(x_1,\ x_2)$", r"$z$", r"$a$", r"$d = z/\lVert\mathbf{w}\rVert$", "Decision"], [
+                ["A", "(8, 4)", "1", "0.7311", "0.8944", "admitted"],
+                ["B", "(6, 6)", "0", "0.5", "0", "on the boundary"],
+                ["C", "(5, 4)", "−2", "0.1192", "−1.7889", "rejected"],
+                ["D", "(9, 2)", "1", "0.7311", "0.8944", "admitted"],
+            ], {"num": [2, 3, 4]}),
+            ("p", r"Here $\lVert\mathbf{w}\rVert = \sqrt{1 + 0.25} \approx 1.1180$. Applicants A and D received the same probability even though their scores differ: both points lie on the line $z = 1$, parallel to the boundary. For the neuron only the distance to the boundary matters, not the position along it."),
+            ("viz", "neuron-points", VIZ["ex_exam"], r"<b>Figure 13.</b> Four applicants in the plane of scores. The solid line is the boundary $a = 0.5$, the dashed lines are the levels $z = \pm 2$, the arrow is the normal $\mathbf{w}$. The table on the right is recomputed as you move the sliders: try making language more important than mathematics."),
+        ],
+        take=r"A neuron with two inputs “sees” only one direction, the one along $\mathbf{w}$. The trade-off between the features is set by the ratio of the weights: here one point in mathematics is worth two points in language.")),
+
+    # 8 ---------------------------------------------------------------
+    ("example", dict(n=8, title="The bias moves the threshold", kinds=["table"],
+        goal=r"Isolate the role of $b$: the input and the weight are fixed, and only the bias changes.",
+        blocks=[
+            ("p", r"One input $x = 2$, weight $w = 1$, $f = \sigma$. We vary $b$:"),
+            ("table", [r"$b$", r"$z = 2 + b$", r"$a = \sigma(z)$", r"Threshold $x_0 = -b/w$", "How to read it"], [
+                ["−4", "−2", "0.1192", "4", "a strict neuron: the input must exceed 4"],
+                ["−2", "0", "0.5", "2", "the input is exactly at the threshold"],
+                ["0", "2", "0.8808", "0", "the threshold is at zero"],
+                ["2", "4", "0.9820", "−2", "a lenient neuron: “yes” almost always"],
+            ], {"num": [0, 1, 2, 3]}),
+        ],
+        take=r"A step of $+2$ in $b$ shifts the threshold by $-2/w$ and, for the same input, changes the answer from 12% to 98%. The bias is the “bar” that the inputs have to clear.")),
+
+    # 9 ---------------------------------------------------------------
+    ("example", dict(n=9, title="One threshold, different sharpness", kinds=["table", "figure"],
+        goal=r"Show that multiplying both $w$ and $b$ by a number $k$ does not move the boundary but makes the neuron more confident, and connect this with regularisation.",
+        blocks=[
+            ("p", r"The neurons $\sigma(k(x - 2))$, that is, $w = k$, $b = -2k$: all of them have the threshold $x_0 = 2$. Let us compare the output at a distance of $0.5$ from the threshold:"),
+            ("table", [r"$k$", r"$w$", r"$b$", r"$a(2.5)$", r"$a(1.5)$", "Slope at the threshold $w/4$"], [
+                ["1", "1", "−2", "0.6225", "0.3775", "0.25"],
+                ["2", "2", "−4", "0.7311", "0.2689", "0.5"],
+                ["4", "4", "−8", "0.8808", "0.1192", "1"],
+                ["10", "10", "−20", "0.9933", "0.0067", "2.5"],
+            ], {"num": [0, 1, 2, 3, 4, 5]}),
+            ("viz", "neuron-bias", VIZ["ex_steep"], r"<b>Figure 14.</b> A neuron with $w = 4$, $b = -8$; the orange dots are the values at $x = 1.5$ and $x = 2.5$ from the table. Move $w$ and $b$ so that $-b/w$ stays equal to 2: the threshold stays put, while the sharpness changes."),
+        ],
+        take=r"The boundary is determined by the direction of $\mathbf{w}$ and the ratio $b/\lVert\mathbf{w}\rVert$, while the length $\lVert\mathbf{w}\rVert$ is the confidence. That is why L2 regularisation, which penalises large weights, makes the model’s probabilities less categorical without necessarily shifting the boundary itself.")),
+
+    # 10 --------------------------------------------------------------
+    ("example", dict(n=10, title="A burglar alarm: weighted voting", kinds=["truth table"],
+        goal=r"See how a single neuron with a step activation implements a non-trivial rule made of several conditions, without a single “if”.",
+        blocks=[
+            ("p", r"Sensors: $m$ is motion, $d$ is an open door, $n$ is night-time (each is 0 or 1). The neuron: $z = 2m + 2d + n - 3$, with the alarm raised when $z \ge 0$."),
+            ("table", [r"$m$", r"$d$", r"$n$", r"$z$", "Alarm"], [
+                ["0", "0", "0", "−3", "0"],
+                ["0", "0", "1", "−2", "0"],
+                ["0", "1", "0", "−1", "0"],
+                ["0", "1", "1", "0", "1"],
+                ["1", "0", "0", "−1", "0"],
+                ["1", "0", "1", "0", "1"],
+                ["1", "1", "0", "1", "1"],
+                ["1", "1", "1", "2", "1"],
+            ], {"num": [0, 1, 2, 3, 4]}),
+            ("p", r"Let us read the rule off the table: the alarm goes off if both motion and the door are triggered (at any time), or if at least one of them is triggered at night. The threshold of 3 is “collected” from votes: motion and the door are worth 2 each, night is worth 1."),
+        ],
+        take=r"The weights and the bias are a compact program: “each condition brings so many points, and the decision is made when the total reaches the threshold”. Eight rows of the truth table fit into four numbers.")),
+
+    # 11 --------------------------------------------------------------
+    ("example", dict(n=11, title="Six logic gates with one formula", kinds=["table"],
+        goal=r"Show that the neuron’s formula stays the same while the “program” is written entirely in the weights: by changing only $\mathbf{w}$ and $b$, we get different functions.",
+        blocks=[
+            ("table", ["Gate", r"$\mathbf{w}$", r"$b$", "(0, 0)", "(0, 1)", "(1, 0)", "(1, 1)"], [
+                ["AND", "(1, 1)", "−1.5", "0", "0", "0", "1"],
+                ["OR", "(1, 1)", "−0.5", "0", "1", "1", "1"],
+                ["NAND", "(−1, −1)", "1.5", "1", "1", "1", "0"],
+                ["NOR", "(−1, −1)", "0.5", "1", "0", "0", "0"],
+                [r"$x_1$ AND NOT $x_2$", "(1, −1)", "−0.5", "0", "0", "1", "0"],
+                ["XOR", "—", "—", "0", "1", "1", "0"],
+            ], {"num": [2, 3, 4, 5, 6]}),
+            ("p", r"Let us check the row “$x_1$ AND NOT $x_2$” at the point $(1,\ 0)$: $z = 1 - 0 - 0.5 = 0.5 \ge 0$, so the output is 1. At the point $(1,\ 1)$: $z = 1 - 1 - 0.5 = -0.5$, so the output is 0. For three inputs, the “majority vote” is given by $\mathbf{w} = (1,\ 1,\ 1)$, $b = -1.5$."),
+        ],
+        take=r"Five of the six gates are one and the same formula with different numbers. The sixth, XOR, cannot be obtained with any weights (the proof is in case 3), and this is a direct consequence of the boundary being linear.")),
+
+    # 12 --------------------------------------------------------------
+    ("example", dict(n=12, title="A spam filter: thousands of inputs, of which only a handful are active", kinds=["table", "calculation"],
+        goal=r"Show a neuron working on text and understand sparsity: there are as many inputs as there are words in the vocabulary, but in each email only a handful of them are non-zero.",
+        blocks=[
+            ("p", r"The input $x_i$ is the number of times word $i$ occurs in the email. Suppose the vocabulary contains 50,000 words, so $n = 50{,}000$. The weights of four words are: “free” $1.5$, “prize” $2$, “meeting” $-1$, “report” $-1.5$; the weights of all the other words are close to zero; $b = -2$."),
+            ("table", ["Email", "Words", r"$z$", r"$a = \sigma(z)$", "Verdict"], [
+                ["1", "“free” ×2, “prize” ×1", "1.5·2 + 2·1 − 2 = 3", "0.9526", "spam"],
+                ["2", "“meeting” ×1, “report” ×2, “free” ×1", "−1 − 3 + 1.5 − 2 = −4.5", "0.0110", "not spam"],
+            ], {"num": [3]}),
+            ("p", r"Of the 50,000 terms $w_ix_i$, two are non-zero in the first email and three in the second: all the other inputs are zero and add nothing. That is why such a neuron is computed over the list of words in the email rather than over the whole vocabulary."),
+        ],
+        take=r"The formula does not change when there are tens of thousands of inputs; all that changes is how to compute it efficiently. And during training the gradient $\delta\,x_i$ touches only the weights of the words that occurred in the email.")),
+
+    # 13 --------------------------------------------------------------
+    ("example", dict(n=13, title="XOR through a hidden layer: a change of space", kinds=["table", "animation", "matrices"],
+        goal=r"Follow step by step how two hidden neurons carry the XOR points into a new space where they can be separated by a single straight line.",
+        blocks=[
+            ("p", r"The hidden layer: $h_1 = H(x_1 + x_2 - 0.5)$ (OR) and $h_2 = H(-x_1 - x_2 + 1.5)$ (NAND). The output: $y = H(h_1 + h_2 - 1.5)$ (AND). In matrix form:"),
+            ("eq", r"\mathbf{h} = H\!\left(\begin{pmatrix}1 & 1\\-1 & -1\end{pmatrix}\mathbf{x} + \begin{pmatrix}-0.5\\1.5\end{pmatrix}\right), \qquad y = H\big((1\ \ 1)\,\mathbf{h} - 1.5\big)"),
+            ("table", [r"$(x_1,\ x_2)$", r"$z_{h_1}$", r"$h_1$", r"$z_{h_2}$", r"$h_2$", r"$z_y$", r"$y$", "XOR"], [
+                ["(0, 0)", "−0.5", "0", "1.5", "1", "−0.5", "0", "0"],
+                ["(0, 1)", "0.5", "1", "0.5", "1", "0.5", "1", "1"],
+                ["(1, 0)", "0.5", "1", "0.5", "1", "0.5", "1", "1"],
+                ["(1, 1)", "1.5", "1", "−0.5", "0", "−0.5", "0", "0"],
+            ], {"num": [1, 2, 3, 4, 5, 6, 7]}),
+            ("viz", "neuron-xor-morph", VIZ["ex_xor"], r"<b>Figure 15.</b> An animation of the transition from the input space $(x_1,\ x_2)$ to the hidden space $(h_1,\ h_2)$. As the slider moves from left to right, the points travel to their new coordinates: the two points of class 1 merge into $(1,\ 1)$, and the AND line separates them from the rest."),
+        ],
+        take=r"The hidden layer does not “solve” the problem by itself: it changes the coordinate system. Each neuron is still linear, but a composition of neurons with a non-linear activation makes the inseparable separable. This is the whole essence of deep networks.")),
+
+    # 14 --------------------------------------------------------------
+    ("example", dict(n=14, title="A polyline made of ReLU neurons: how a network draws any curve", kinds=["figure", "calculation"],
+        goal=r"See the universal approximation theorem with your own eyes: a sum of simple neurons $c_k\,\mathrm{ReLU}(x - x_k)$ builds a polyline that, as the number of neurons grows, approaches any continuous function.",
+        blocks=[
+            ("p", r"Each neuron is $\mathrm{ReLU}(x - x_k)$, that is, $w = 1$, $b = -x_k$: before the point $x_k$ it is silent, after it, it grows with slope 1. The output neuron adds them up with the weights $c_k$, and at each point $x_k$ the slope of the sum changes by $c_k$. The simplest case is the absolute value built from two neurons:"),
+            ("eq", r"|x| = \mathrm{ReLU}(x) + \mathrm{ReLU}(-x)"),
+            ("table", [r"$x$", r"$\mathrm{ReLU}(x)$", r"$\mathrm{ReLU}(-x)$", "Sum"], [
+                ["−2", "0", "2", "2"], ["−1", "0", "1", "1"], ["0", "0", "0", "0"], ["1", "1", "0", "1"], ["2", "2", "0", "2"],
+            ], {"num": [0, 1, 2, 3]}),
+            ("viz", "neuron-relu-sum", VIZ["ex_relu"], r"<b>Figure 16.</b> Approximating $x^2$ and $\sin\frac{\pi x}{2}$ on the interval $[-2,\ 2]$ by a sum of ReLU neurons with evenly spaced kinks. The thin lines are the contributions of individual neurons, the orange line is their sum. Increase the number of neurons and watch the maximum error: for $x^2$ it drops fourfold with every doubling."),
+        ],
+        take=r"A single ReLU neuron is a “kink”. Enough kinks add up to a curve of any shape. The non-linearity $f$ is not a decoration but the source of the network’s expressive power.")),
+
+    # 15 --------------------------------------------------------------
+    ("example", dict(n=15, title="A training epoch by hand", kinds=["table", "calculation"],
+        goal=r"Work through a full epoch of stochastic gradient descent on three objects and see how each object moves the weight and the bias.",
+        blocks=[
+            ("p", r"The neuron is $a = \sigma(wx + b)$, starting from $w = 0$, $b = 0$, with learning rate $\eta = 1$ and the BCE loss, so $\delta = a - y$ and the updates are $w \leftarrow w - \eta\,\delta x$, $b \leftarrow b - \eta\,\delta$. The data: $(x,\ y) = (1,\ 1),\ (-1,\ 0),\ (2,\ 1)$."),
+            ("table", ["Step", r"$x$", r"$y$", r"$z = wx + b$", r"$a$", r"$\delta = a - y$", r"new $w$", r"new $b$"], [
+                ["1", "1", "1", "0", "0.5", "−0.5", "0.5", "0.5"],
+                ["2", "−1", "0", "0", "0.5", "0.5", "1", "0"],
+                ["3", "2", "1", "2", "0.8808", "−0.1192", "1.2384", "0.1192"],
+            ], {"num": [0, 1, 2, 3, 4, 5, 6, 7]}),
+            ("p", r"Step 2 is interesting: $z = 0.5\cdot(-1) + 0.5 = 0$, the neuron erred “towards one”, $\delta = +0.5$, and the weight grew because the input is negative: $w \leftarrow 0.5 - 0.5\cdot(-1) = 1$. The mean BCE over the three objects is $\ln 2 \approx 0.6931$ before the epoch and $0.1945$ after it."),
+        ],
+        take=r"Learning is many small corrections of the form “error × input”. An object with a large $|\delta|$ moves the weights a lot; an object the neuron has almost got right (step 3) moves them only slightly.")),
+
+    # 16 --------------------------------------------------------------
+    ("example", dict(n=16, title="Confident and wrong: saturation with MSE and with BCE", kinds=["table"],
+        goal=r"Show quantitatively why a sigmoid at the output is trained with binary cross-entropy rather than with the mean squared error.",
+        blocks=[
+            ("p", r"The correct answer is $y = 0$, yet the neuron answers “1” more and more confidently. Let us compare the neuron’s error $\delta = \partial L/\partial z$ for $L = \tfrac12(a - y)^2$ (then $\delta = (a - y)\,\sigma'(z)$) and for BCE (then $\delta = a - y$):"),
+            ("table", [r"$z$", r"$a = \sigma(z)$", r"$\sigma'(z)$", r"$\delta$ with MSE", r"$\delta$ with BCE"], [
+                ["0", "0.5", "0.25", "0.125", "0.5"],
+                ["2", "0.8808", "0.105", "0.0925", "0.8808"],
+                ["5", "0.9933", "0.00665", "0.0066", "0.9933"],
+                ["10", "0.99995", "0.0000454", "0.0000454", "0.99995"],
+            ], {"num": [0, 1, 2, 3, 4]}),
+            ("p", r"With MSE, the more wrong the neuron is, the smaller the gradient: at $z = 10$ the signal is more than 20,000 times weaker than with BCE, and the neuron is “stuck” in its error. With BCE the factor $\sigma'(z)$ cancels out, and the gradient is almost equal to the size of the error."),
+        ],
+        take=r"The choice of the loss function is part of the neuron’s design: the loss must “get along” with the activation. The sigmoid pairs with BCE, softmax with cross-entropy, and the identity activation with MSE.")),
+
+    # 17 --------------------------------------------------------------
+    ("example", dict(n=17, title="Everything together: a logistic neuron from scratch in NumPy", kinds=["code"],
+        goal=r"Assemble everything from the article in a couple of dozen lines: the vector form $z = X\mathbf{w} + b$, the sigmoid, BCE, the gradient $\delta\,\mathbf{x}$ and the descent step, and make sure that it works.",
+        blocks=[
+            ("code", "python", CODE_EX17["en"]),
+            ("p", r"The program’s output:"),
+            ("code", "text", "epoch   0  loss 0.6931  acc 0.50\nepoch 100  loss 0.2266  acc 0.90\nepoch 200  loss 0.2261  acc 0.90\nepoch 300  loss 0.2261  acc 0.90\nw = [1.937 1.713]  b = 0.082"),
+            ("p", r"The initial loss $\ln 2 \approx 0.6931$ is that of a coin toss: with zero weights $a = 0.5$ for every object. After 100 epochs the loss levels off at about $0.226$ with an accuracy of 90%: the classes overlap, and no straight line can separate them without errors. The weights $w_1 \approx 1.94$ and $w_2 \approx 1.71$ are almost equal: the data are symmetric about the diagonal, and the boundary runs across it."),
+        ],
+        take=r"The whole “neural network” here is a single line, <code>z = X @ w + b</code>, plus two lines for the gradient. Everything built on top (layers, optimisers, frameworks) is this same formula scaled up.")),
+])
+
+
+PRACTICE_UZ = dict(id="practice", title=r"Amaliyot: oddiydan murakkabga 17 ta misol", blocks=[
+    ("p", r"Formulani o‘qishning o‘zi kam — uni qo‘l bilan «paypaslab» ko‘rish kerak. Quyida 17 ta misol bor. Har biri tushunishga oid bitta vazifani hal qiladi: unda maqsad, yechim (jadval, hisob, geometriya, rasm yoki kod) va xulosa bor. Misollar bitta kirish va to‘g‘ri chiziqdan boshlanib, neyronni noldan o‘qitishgacha boradi. Barcha sonlar hisoblash orqali tekshirilgan."),
+    ("table", [r"№", r"Misol", r"Nimani o‘rgatadi", r"Format"], [
+        [r'<a href="#ex-1">1</a>', r"Bitta kirish — to‘g‘ri chiziq", r"grafikda $w$ va $b$ ning ma’nosi", r"jadval, rasm"],
+        [r'<a href="#ex-2">2</a>', r"Ishoralarning to‘rtta kombinatsiyasi", r"$w_ix_i$ hissasining ishorasi", r"2×2 jadval"],
+        [r'<a href="#ex-3">3</a>', r"Talaba imtihondan o‘tadimi", r"belgilar hissalarini o‘qish", r"kaskad, jadval"],
+        [r'<a href="#ex-4">4</a>', r"So‘mdagi daromad va yillardagi yosh", r"kirishlarni nega masshtablash kerak", r"hisob, jadval"],
+        [r'<a href="#ex-5">5</a>', r"To‘rtta kirish: yig‘indi = vektor", r"$\mathbf{w}^{\top}\mathbf{x}$ yoki $\mathbf{w}\mathbf{x}^{\top}$", r"matritsalar"],
+        [r'<a href="#ex-6">6</a>', r"Film tavsiyasi", r"neyron o‘xshashlik o‘lchovi sifatida", r"reyting jadvali"],
+        [r'<a href="#ex-7">7</a>', r"Oliygohga qabul", r"chegara va sath chiziqlari", r"geometriya, rasm"],
+        [r'<a href="#ex-8">8</a>', r"Siljish bo‘sag‘ani suradi", r"$b$ ning roli", r"jadval"],
+        [r'<a href="#ex-9">9</a>', r"Bitta bo‘sag‘a — turli keskinlik", r"$\lVert\mathbf{w}\rVert$ ning roli", r"jadval, rasm"],
+        [r'<a href="#ex-10">10</a>', r"Qo‘riqlash signalizatsiyasi", r"vaznli ovoz berish", r"rostlik jadvali"],
+        [r'<a href="#ex-11">11</a>', r"Oltita ventil bitta formula bilan", r"vaznlar dastur sifatida", r"jadval"],
+        [r'<a href="#ex-12">12</a>', r"Spam-filtr", r"siyrak kirishlar", r"jadval"],
+        [r'<a href="#ex-13">13</a>', r"Yashirin qatlam orqali XOR", r"fazoni almashtirish", r"jadval, animatsiya"],
+        [r'<a href="#ex-14">14</a>', r"ReLU neyronlaridan siniq chiziq", r"universal approksimatsiya", r"rasm"],
+        [r'<a href="#ex-15">15</a>', r"Qo‘lda bitta o‘qitish epoxasi", r"har bir misolda gradiyent qadami", r"jadval"],
+        [r'<a href="#ex-16">16</a>', r"Ishonchli, lekin noto‘g‘ri", r"to‘yinish: MSE va BCE", r"jadval"],
+        [r'<a href="#ex-17">17</a>', r"NumPy’da noldan neyron", r"hammasi birga", r"kod"],
+    ], {"num": [0]}),
+
+    # 1 ---------------------------------------------------------------
+    ("example", dict(n=1, title=r"Bitta kirish — bu to‘g‘ri chiziq tenglamasi", kinds=["jadval", "rasm"],
+        goal=r"Bitta kirishli va ayniy aktivatsiyali neyron maktabdan tanish $y = kx + c$ to‘g‘ri chiziq ekanini ko‘rish: bunda $w$ vazn — qiyalik, $b$ siljish esa $y$ o‘qi bilan kesishish nuqtasi.",
+        blocks=[
+            ("p", r"$w = 1{,}5$, $b = -1$, $f(z) = z$ ni olamiz. U holda $a = 1{,}5x - 1$. Beshta kirish uchun chiqishni hisoblaymiz:"),
+            ("table", [r"$x$", r"$wx$", r"$a = wx + b$", r"$a$ ning o‘zgarishi"], [
+                ["−2", "−3", "−4", "—"],
+                ["−1", "−1,5", "−2,5", "+1,5"],
+                ["0", "0", "−1", "+1,5"],
+                ["1", "1,5", "0,5", "+1,5"],
+                ["2", "3", "2", "+1,5"],
+            ], {"num": [0, 1, 2, 3]}),
+            ("p", r"$x$ bo‘yicha har bir birlik qadam chiqishni aynan $w = 1{,}5$ ga o‘zgartiradi — qiyalik aynan shu. $x = 0$ da chiqish $b = -1$ ga teng. Chiqish $x_0 = -b/w = 1/1{,}5 \approx 0{,}667$ nuqtada nolga aylanadi."),
+            ("viz", "neuron-bias", VIZ["ex_line"], r"<b>11-rasm.</b> O‘sha neyron grafikda; to‘q sariq nuqtalar — jadval satrlari. $w$ va $b$ ni suring: to‘g‘ri chiziqning qiyaligi va siljishi o‘zgaradi. O‘sha to‘g‘ri chiziq S-egri chiziqqa qanday «o‘ralishini» ko‘rish uchun funksiyani sigmoidaga almashtiring."),
+        ],
+        take=r"Vazn — kirish bir birlikka o‘zgarganda chiqishning o‘zgarish tezligi, siljish — nol kirishdagi chiqish. Neyron formulasidagi qolgan hamma narsa — shu to‘g‘ri chiziqning ko‘p kirishlar va nochiziqli $f$ uchun umumlashmasi.")),
+
+    # 2 ---------------------------------------------------------------
+    ("example", dict(n=2, title=r"Ishoralarning to‘rtta kombinatsiyasi", kinds=["2×2 jadval"],
+        goal=r"Qoidani mustahkamlash: ta’sir yo‘nalishini vazn ishorasi ham, kirish ishorasi ham alohida olingan holda emas, balki ularning ko‘paytmasi ishorasi belgilaydi.",
+        blocks=[
+            ("table", ["", r"$x = +3$", r"$x = -3$"], [
+                [r"$w = +2$", "+6: «yoqlab»", "−6: «qarshi»"],
+                [r"$w = -2$", "−6: «qarshi»", "+6: «yoqlab»"],
+            ], {"num": []}),
+            ("p", r"Belgi — haroratning me’yordan chetlanishi, neyron esa muzqaymoqqa bo‘lgan talabni baholaydi, deylik. Musbat vazn: issiq ($x = +3$) talabni oshiradi, sovuq ($x = -3$) pasaytiradi. Isitgichlarga bo‘lgan talabni baholaydigan neyronning vazni manfiy: unda sovuq ($x = -3$, $w = -2$) $+6$ hissa beradi."),
+        ],
+        take=r"Manfiy vazn — «yomon» kirish emas, balki teskari bog‘liqlikdagi kirish: «qancha kam bo‘lsa, shuncha yaxshi». Shuning uchun belgilarni nol atrofida markazlashtirish qulay: shunda kirish ishorasining o‘zi «odatdagidan ko‘p yoki kam» degan ma’noni tashiydi.")),
+
+    # 3 ---------------------------------------------------------------
+    ("example", dict(n=3, title=r"Talaba imtihondan o‘tadimi: hissalarni o‘qish", kinds=["kaskad", "jadval", "hisob"],
+        goal=r"Neyron javobini alohida belgilar hissalariga ajratishni va «model nega shunday qaror qildi» degan savolga javob berishni o‘rganish.",
+        blocks=[
+            ("p", r"Kirishlar: $x_1 = 6$ — tayyorgarlik soatlari, $x_2 = 7$ — imtihon oldidan uxlangan soatlar, $x_3 = 3$ — qoldirilgan darslar. Vaznlar: $\mathbf{w} = (0{,}8;\ 0{,}3;\ -0{,}9)$, $b = -4$, $f = \sigma$."),
+            ("table", [r"Belgi", r"$x_i$", r"$w_i$", r"$w_ix_i$ hissa", r"Roli"], [
+                ["tayyorgarlik soatlari", "6", "0,8", "+4,8", "asosiy «yoqlab» dalil"],
+                ["uyqu soatlari", "7", "0,3", "+2,1", "«yoqlab» dalil"],
+                ["qoldirilgan darslar", "3", "−0,9", "−2,7", "«qarshi» dalil"],
+                ["siljish", "—", "—", "−4", "imtihonning qat’iyligi"],
+                [r"<b>jami $z$</b>", "", "", "<b>0,2</b>", ""],
+            ], {"num": [1, 2, 3]}),
+            ("eq", r"a = \sigma(0{,}2) = \frac{1}{1 + e^{-0{,}2}} \approx 0{,}5498"),
+            ("viz", "neuron-steps", VIZ["ex_student"], r"<b>12-rasm.</b> Talaba uchun hissalar kaskadi: ikkita «yoqlab» ustun, bitta «qarshi» ustun va siljish. Yakuniy $z = 0{,}2$ noldan sal yuqori — javob chegarada turibdi."),
+            ("p", r"O‘tish imkoniyati — taxminan 55%: model deyarli ishonmaydi. Jadval javobni nima eng kuchli o‘zgartirishini darhol ko‘rsatadi. Yana bir soat tayyorgarlik $z$ ga $0{,}8$ qo‘shadi: $\sigma(1{,}0) \approx 0{,}7311$. Agar talaba darslarni qoldirmaganida edi, $-2{,}7$ hissa yo‘qolardi: $\sigma(2{,}9) \approx 0{,}9478$."),
+        ],
+        take=r"Bitta neyron uchun javobni tushuntirish aniq va tekin: $z$ $w_ix_i$ qo‘shiluvchilarga ajraladi. Aynan shuning uchun chiziqli modellarni banklar va tibbiyotda yaxshi ko‘rishadi — har bir qarorni satrma-satr yozib berish mumkin.")),
+
+    # 4 ---------------------------------------------------------------
+    ("example", dict(n=4, title=r"So‘mdagi daromad va yillardagi yosh: kirishlarni nega masshtablash kerak", kinds=["hisob", "jadval"],
+        goal=r"Turli masshtabdagi belgilar neyronni o‘qitishdan oldinoq buzishini va buni standartlashtirish qanday davolashini sonlarda ko‘rsatish.",
+        blocks=[
+            ("p", r"Ikki mijoz: ikkalasining ham daromadi 5 000 000 so‘m, yoshi esa 35 va 60. Bir xil $w_1 = w_2 = 0{,}01$ vaznlar va $b = 0$ ni olamiz:"),
+            ("eq", r"\begin{aligned} z_A &= 0{,}01\cdot 5\,000\,000 + 0{,}01\cdot 35 = 50\,000{,}35\\ z_B &= 0{,}01\cdot 5\,000\,000 + 0{,}01\cdot 60 = 50\,000{,}6 \end{aligned}"),
+            ("p", r"Yosh $z$ ni $50\,000$ dan atigi $0{,}25$ ga o‘zgartirdi — u deyarli ko‘rinmaydi, $\sigma(z)$ esa ikkalasi uchun ham mashina arifmetikasi aniqligida 1 ga teng. Bundan ham yomoni, $w_1$ bo‘yicha gradiyent $x_1 = 5\,000\,000$ kirishga, $w_2$ bo‘yicha esa $x_2 \approx 50$ kirishga proporsional: ikki vazn uchun o‘qitish qadamlari yuz ming marta farq qiladi va yagona $\eta$ qadamni tanlab bo‘lmaydi."),
+            ("p", r"Standartlashtiramiz: o‘rtacha qiymatni ayiramiz va standart chetlanishga bo‘lamiz (tanlanma bo‘yicha daromad o‘rtacha 4 000 000, chetlanishi 1 000 000, yosh esa o‘rtacha 40, chetlanishi 10 bo‘lsin):"),
+            ("table", [r"Mijoz", r"Daromad", r"Yosh", r"$\tilde x_1$", r"$\tilde x_2$", r"$z = \tilde x_1 + \tilde x_2$", r"$a = \sigma(z)$"], [
+                ["A", "5 000 000", "35", "1", "−0,5", "0,5", "0,6225"],
+                ["B", "5 000 000", "60", "1", "2", "3", "0,9526"],
+            ], {"num": [1, 2, 3, 4, 5, 6]}),
+        ],
+        take=r"Neyron belgilarni faqat sonlar orqali solishtiradi, shuning uchun o‘lchov birliklari vaznlarga «sizib kiradi». Standartlashtirishdan keyin barcha kirishlar bitta masshtabda yashaydi, vaznlarni solishtirish mumkin bo‘ladi, gradiyent tushish esa barqarorlashadi.")),
+
+    # 5 ---------------------------------------------------------------
+    ("example", dict(n=5, title=r"To‘rtta kirish: yig‘indi, vektor va bitta keng tarqalgan xato", kinds=["matritsalar", "hisob"],
+        goal=r"$n = 4$ da koordinatali va vektor yozuvlari bitta son berishini tekshirish va transponirlash adashtirilganda nima hosil bo‘lishini ko‘rish.",
+        blocks=[
+            ("eq", r"\mathbf{x} = (1;\ 0;\ -2;\ 4), \qquad \mathbf{w} = (3;\ 5;\ 0{,}5;\ -1), \qquad b = 2"),
+            ("p", r"Koordinatalar bo‘yicha:"),
+            ("eq", r"\begin{aligned} \sum_{i=1}^{4} w_ix_i &= 3\cdot1 + 5\cdot0 + 0{,}5\cdot(-2) + (-1)\cdot4 = 3 + 0 - 1 - 4 = -2\\ z &= -2 + 2 = 0 \end{aligned}"),
+            ("p", r"Vektor shaklida — satr ustunga, o‘sha to‘rtta ko‘paytma:"),
+            ("eq", r"\mathbf{w}^{\top}\mathbf{x} = \begin{pmatrix}3 & 5 & 0{,}5 & -1\end{pmatrix}\begin{pmatrix}1\\0\\-2\\4\end{pmatrix} = -2 = \mathbf{x}^{\top}\mathbf{w}"),
+            ("p", r"$z = 0$, demak $a = \sigma(0) = 0{,}5$: obyekt aynan qaror chegarasida yotadi. Endi xato: transponirlash o‘rnini almashtiramiz. $\mathbf{w}\mathbf{x}^{\top}$ — bu $4\times1$ ustunning $1\times4$ satrga ko‘paytmasi, ya’ni barcha $w_ix_j$ juft ko‘paytmalardan iborat $4\times4$ matritsa:"),
+            ("eq", r"\mathbf{w}\mathbf{x}^{\top} = \begin{pmatrix} \mathbf{3} & 0 & -6 & 12\\ 5 & \mathbf{0} & -10 & 20\\ 0{,}5 & 0 & \mathbf{-1} & 2\\ -1 & 0 & 2 & \mathbf{-4} \end{pmatrix}, \qquad \operatorname{tr}(\mathbf{w}\mathbf{x}^{\top}) = 3 + 0 - 1 - 4 = -2"),
+        ],
+        take=r"Skalyar ko‘paytma — tashqi ko‘paytma diagonalining yig‘indisi (izi): neyronga faqat indeksi bir xil bo‘lgan $w_ix_i$ juftlar kerak. Agar kodda son o‘rniga $n\times n$ matritsa chiqsa, transponirlash adashtirilgan.")),
+
+    # 6 ---------------------------------------------------------------
+    ("example", dict(n=6, title=r"Film tavsiyasi: neyron o‘xshashlik o‘lchovi sifatida", kinds=["reyting jadvali", "geometriya"],
+        goal=r"$\mathbf{w}^{\top}\mathbf{x}$ ning geometrik ma’nosini amalda ko‘rish: vaznlar — foydalanuvchining «didi», kirishlar — film tavsifi, chiqish — film didga qanchalik mos kelishi.",
+        blocks=[
+            ("p", r"Film belgilari: jangari, komediya va drama ulushi. Foydalanuvchi didi $\mathbf{w} = (0{,}9;\ 0{,}1;\ 0{,}4)$: u jangarilarni yaxshi ko‘radi, dramani biroz yoqtiradi, komediyalarga befarq. Siljish kerak emas: $b = 0$."),
+            ("table", [r"Film", r"$\mathbf{x}$ (jangari; komediya; drama)", r"$\mathbf{w}^{\top}\mathbf{x}$", r"$\cos\theta$", r"O‘rin"], [
+                ["A", "(1; 0; 0,2)", "0,98", "0,9707", "1"],
+                ["C", "(0,6; 0,2; 0,8)", "0,88", "0,8717", "2"],
+                ["D", "(0,1; 0,9; 0,9)", "0,54", "0,4273", "3"],
+                ["B", "(0; 1; 0,3)", "0,22", "0,2129", "4"],
+            ], {"num": [2, 3, 4]}),
+            ("p", r"Masalan, C film uchun: $0{,}9\cdot0{,}6 + 0{,}1\cdot0{,}2 + 0{,}4\cdot0{,}8 = 0{,}54 + 0{,}02 + 0{,}32 = 0{,}88$. Bu yerda skalyar ko‘paytma bo‘yicha tartib burchak kosinusi bo‘yicha tartib bilan mos keladi: film vektori va did vektori orasidagi burchak qancha kichik bo‘lsa, film ro‘yxatda shuncha yuqorida turadi."),
+            ("p", r"Siljish tartibga ta’sir qilmaydi: to‘rttala bahoga istalgan $b$ ni qo‘shsak, o‘rinlar o‘zgarmaydi. $b$ solishtirish emas, mutlaq bo‘sag‘a («umuman ko‘rsatish kerakmi») muhim bo‘lganda kerak."),
+        ],
+        take=r"Skalyar ko‘paytma — «kirish vaznlar shabloniga qanchalik o‘xshaydi» degan o‘lchov. Tavsiya tizimlari, embeddinglar bo‘yicha qidiruv va transformerlardagi e’tibor mexanizmi shunga asoslangan: hamma joyda $\mathbf{q}^{\top}\mathbf{k}$ hisoblanadi.")),
+
+    # 7 ---------------------------------------------------------------
+    ("example", dict(n=7, title=r"Oliygohga qabul: qaror chegarasi va sath chiziqlari", kinds=["geometriya", "rasm", "jadval"],
+        goal=r"Qaror chegarasini oshkor ko‘rinishda topish, aniq nuqtalarni u bo‘yicha tekshirish va chegaraga parallel bitta chiziqdagi barcha nuqtalar bir xil javob olishini tushunish.",
+        blocks=[
+            ("p", r"Matematikadan $x_1$ va tildan $x_2$ ballar (0 dan 10 gacha), $\mathbf{w} = (1;\ 0{,}5)$, $b = -9$, $f = \sigma$. $a = 0{,}5$ chegara — bu $z = 0$:"),
+            ("eq", r"x_1 + 0{,}5x_2 - 9 = 0 \quad\Longleftrightarrow\quad x_2 = 18 - 2x_1"),
+            ("table", [r"Abituriyent", r"$(x_1;\ x_2)$", r"$z$", r"$a$", r"$d = z/\lVert\mathbf{w}\rVert$", r"Qaror"], [
+                ["A", "(8; 4)", "1", "0,7311", "0,8944", "qabul qilindi"],
+                ["B", "(6; 6)", "0", "0,5", "0", "chegarada"],
+                ["C", "(5; 4)", "−2", "0,1192", "−1,7889", "qabul qilinmadi"],
+                ["D", "(9; 2)", "1", "0,7311", "0,8944", "qabul qilindi"],
+            ], {"num": [2, 3, 4]}),
+            ("p", r"Bu yerda $\lVert\mathbf{w}\rVert = \sqrt{1 + 0{,}25} \approx 1{,}1180$. A va D abituriyentlar bir xil ehtimollik oldi, garchi ularning ballari turlicha bo‘lsa ham: ikkala nuqta ham chegaraga parallel bo‘lgan $z = 1$ to‘g‘ri chiziqda yotadi. Neyron uchun faqat chegaragacha bo‘lgan masofa muhim, uning bo‘ylab joylashuv emas."),
+            ("viz", "neuron-points", VIZ["ex_exam"], r"<b>13-rasm.</b> Ballar tekisligidagi to‘rtta abituriyent. Yaxlit chiziq — $a = 0{,}5$ chegara, punktir — $z = \pm 2$ sathlar, strelka — $\mathbf{w}$ normal. O‘ngdagi jadval slayderlar surilganda qayta hisoblanadi: tilni matematikadan muhimroq qilib ko‘ring."),
+        ],
+        take=r"Ikki kirishli neyron faqat bitta yo‘nalishni — $\mathbf{w}$ bo‘ylab yo‘nalishni «ko‘radi». Belgilar orasidagi murosa vaznlar nisbati bilan beriladi: bu yerda matematikadan bitta ball tildan ikki ballga teng.")),
+
+    # 8 ---------------------------------------------------------------
+    ("example", dict(n=8, title=r"Siljish bo‘sag‘ani suradi", kinds=["jadval"],
+        goal=r"$b$ ning rolini ajratib olish: kirish va vazn qayd etilgan, faqat siljish o‘zgaradi.",
+        blocks=[
+            ("p", r"Bitta kirish $x = 2$, vazn $w = 1$, $f = \sigma$. $b$ ni o‘zgartiramiz:"),
+            ("table", [r"$b$", r"$z = 2 + b$", r"$a = \sigma(z)$", r"$x_0 = -b/w$ bo‘sag‘a", r"Qanday o‘qiladi"], [
+                ["−4", "−2", "0,1192", "4", "qat’iy neyron: 4 dan katta kirish kerak"],
+                ["−2", "0", "0,5", "2", "kirish aynan bo‘sag‘ada"],
+                ["0", "2", "0,8808", "0", "bo‘sag‘a nolda"],
+                ["2", "4", "0,9820", "−2", "xayrixoh neyron: deyarli doim «ha»"],
+            ], {"num": [0, 1, 2, 3]}),
+        ],
+        take=r"$b$ ni $+2$ ga o‘zgartirish bo‘sag‘ani $-2/w$ ga suradi va o‘sha kirishdagi javobni 12% dan 98% gacha o‘zgartiradi. Siljish — kirishlar oshib o‘tishi kerak bo‘lgan «planka».")),
+
+    # 9 ---------------------------------------------------------------
+    ("example", dict(n=9, title=r"Bitta bo‘sag‘a — turli keskinlik", kinds=["jadval", "rasm"],
+        goal=r"$w$ va $b$ ni bir vaqtda $k$ songa ko‘paytirish chegarani surmasligini, lekin neyronni ishonchliroq qilishini ko‘rsatish va buni regulyarizatsiya bilan bog‘lash.",
+        blocks=[
+            ("p", r"$\sigma(k(x - 2))$ neyronlar, ya’ni $w = k$, $b = -2k$: hammasida bo‘sag‘a $x_0 = 2$. Bo‘sag‘adan $0{,}5$ masofadagi chiqishni solishtiramiz:"),
+            ("table", [r"$k$", r"$w$", r"$b$", r"$a(2{,}5)$", r"$a(1{,}5)$", r"Bo‘sag‘adagi qiyalik $w/4$"], [
+                ["1", "1", "−2", "0,6225", "0,3775", "0,25"],
+                ["2", "2", "−4", "0,7311", "0,2689", "0,5"],
+                ["4", "4", "−8", "0,8808", "0,1192", "1"],
+                ["10", "10", "−20", "0,9933", "0,0067", "2,5"],
+            ], {"num": [0, 1, 2, 3, 4, 5]}),
+            ("viz", "neuron-bias", VIZ["ex_steep"], r"<b>14-rasm.</b> $w = 4$, $b = -8$ bo‘lgan neyron; to‘q sariq nuqtalar — jadvaldagi $x = 1{,}5$ va $x = 2{,}5$ dagi qiymatlar. $w$ va $b$ ni $-b/w$ nisbat 2 ga tengligicha qoladigan qilib suring: bo‘sag‘a joyida turadi, keskinlik esa o‘zgaradi."),
+        ],
+        take=r"Chegara $\mathbf{w}$ yo‘nalishi va $b/\lVert\mathbf{w}\rVert$ nisbat bilan aniqlanadi, $\lVert\mathbf{w}\rVert$ uzunlik esa — bu ishonch. Shuning uchun katta vaznlarni jarimalaydigan L2-regulyarizatsiya model ehtimolliklarini kamroq qat’iy qiladi va bunda chegaraning o‘zini surishi shart emas.")),
+
+    # 10 --------------------------------------------------------------
+    ("example", dict(n=10, title=r"Qo‘riqlash signalizatsiyasi: vaznli ovoz berish", kinds=["rostlik jadvali"],
+        goal=r"Zinali aktivatsiyali bitta neyron bir nechta shartdan iborat murakkab qoidani bitta ham «agar»siz qanday amalga oshirishini ko‘rish.",
+        blocks=[
+            ("p", r"Datchiklar: $m$ — harakat, $d$ — eshik ochiq, $n$ — tun (har biri 0 yoki 1). Neyron: $z = 2m + 2d + n - 3$, $z \ge 0$ da xavotir signali beriladi."),
+            ("table", [r"$m$", r"$d$", r"$n$", r"$z$", r"Xavotir"], [
+                ["0", "0", "0", "−3", "0"],
+                ["0", "0", "1", "−2", "0"],
+                ["0", "1", "0", "−1", "0"],
+                ["0", "1", "1", "0", "1"],
+                ["1", "0", "0", "−1", "0"],
+                ["1", "0", "1", "0", "1"],
+                ["1", "1", "0", "1", "1"],
+                ["1", "1", "1", "2", "1"],
+            ], {"num": [0, 1, 2, 3, 4]}),
+            ("p", r"Qoidani jadvaldan o‘qiymiz: xavotir, agar harakat ham, eshik ham ishga tushgan bo‘lsa (istalgan vaqtda), yoki ulardan kamida bittasi tunda ishga tushgan bo‘lsa. 3 bo‘sag‘a ovozlardan «yig‘iladi»: harakat va eshikning vazni 2 dan, tunniki — 1."),
+        ],
+        take=r"Vaznlar va siljish — ixcham dastur: «har bir shart shuncha ball keltiradi, yig‘indi bo‘sag‘adan kam bo‘lmasa — qaror qabul qilinadi». Rostlik jadvalining sakkiz satri to‘rtta songa sig‘di.")),
+
+    # 11 --------------------------------------------------------------
+    ("example", dict(n=11, title=r"Oltita mantiqiy ventil bitta formula bilan", kinds=["jadval"],
+        goal=r"Neyron formulasi bitta ekanini, «dastur» esa to‘liq vaznlarda yozilganini ko‘rsatish: faqat $\mathbf{w}$ va $b$ ni o‘zgartirib, turli funksiyalar olamiz.",
+        blocks=[
+            ("table", [r"Ventil", r"$\mathbf{w}$", r"$b$", "(0; 0)", "(0; 1)", "(1; 0)", "(1; 1)"], [
+                ["AND", "(1; 1)", "−1,5", "0", "0", "0", "1"],
+                ["OR", "(1; 1)", "−0,5", "0", "1", "1", "1"],
+                ["NAND", "(−1; −1)", "1,5", "1", "1", "1", "0"],
+                ["NOR", "(−1; −1)", "0,5", "1", "0", "0", "0"],
+                [r"$x_1$ VA EMAS $x_2$", "(1; −1)", "−0,5", "0", "0", "1", "0"],
+                ["XOR", "—", "—", "0", "1", "1", "0"],
+            ], {"num": [2, 3, 4, 5, 6]}),
+            ("p", r"«$x_1$ VA EMAS $x_2$» satrini $(1;\ 0)$ nuqtada tekshiramiz: $z = 1 - 0 - 0{,}5 = 0{,}5 \ge 0$, chiqish 1. $(1;\ 1)$ nuqtada: $z = 1 - 1 - 0{,}5 = -0{,}5$, chiqish 0. Uchta kirish uchun «ko‘pchilik ovozi» $\mathbf{w} = (1;\ 1;\ 1)$, $b = -1{,}5$ ni beradi."),
+        ],
+        take=r"Oltita ventildan beshtasi — turli sonlar bilan yozilgan ayni bir formula. Oltinchisi, XOR, hech qanday vaznlarda hosil bo‘lmaydi (isboti — 3-keysda), va bu chegara chiziqliligining bevosita natijasi.")),
+
+    # 12 --------------------------------------------------------------
+    ("example", dict(n=12, title=r"Spam-filtr: minglab kirishlardan ishlaydiganlari bir nechta", kinds=["jadval", "hisob"],
+        goal=r"Neyronni matnda ko‘rsatish va siyraklikni tushunish: kirishlar lug‘atdagi so‘zlar qancha bo‘lsa, shuncha, lekin har bir xatda noldan farqlilari — bir nechta.",
+        blocks=[
+            ("p", r"$x_i$ kirish — $i$ so‘z xatda necha marta uchragani. Lug‘at 50 000 so‘zdan iborat bo‘lsin, demak $n = 50\,000$. To‘rtta so‘zning vaznlari: «bepul» $1{,}5$, «yutuq» $2$, «uchrashuv» $-1$, «hisobot» $-1{,}5$; qolgan so‘zlarning vaznlari nolga yaqin; $b = -2$."),
+            ("table", [r"Xat", r"So‘zlar", r"$z$", r"$a = \sigma(z)$", r"Hukm"], [
+                ["1", "«bepul» ×2, «yutuq» ×1", "1,5·2 + 2·1 − 2 = 3", "0,9526", "spam"],
+                ["2", "«uchrashuv» ×1, «hisobot» ×2, «bepul» ×1", "−1 − 3 + 1,5 − 2 = −4,5", "0,0110", "spam emas"],
+            ], {"num": [3]}),
+            ("p", r"50 000 ta $w_ix_i$ qo‘shiluvchidan birinchi xatda noldan farqlisi ikkita, ikkinchisida uchta: qolgan barcha kirishlar nolga teng va hech narsa qo‘shmaydi. Shuning uchun bunday neyron butun lug‘at bo‘yicha emas, xatdagi so‘zlar ro‘yxati bo‘yicha hisoblanadi."),
+        ],
+        take=r"Kirishlar o‘n minglab bo‘lganda ham formula o‘zgarmaydi: faqat uni qanchalik samarali hisoblash o‘zgaradi. O‘qitishda $\delta\,x_i$ gradiyent ham faqat xatda uchragan so‘zlarning vaznlariga tegadi.")),
+
+    # 13 --------------------------------------------------------------
+    ("example", dict(n=13, title=r"Yashirin qatlam orqali XOR: fazoni almashtirish", kinds=["jadval", "animatsiya", "matritsalar"],
+        goal=r"Ikkita yashirin neyron XOR nuqtalarini ularni bitta to‘g‘ri chiziq bilan ajratish mumkin bo‘lgan yangi fazoga qanday o‘tkazishini qadamma-qadam kuzatish.",
+        blocks=[
+            ("p", r"Yashirin qatlam: $h_1 = H(x_1 + x_2 - 0{,}5)$ (OR) va $h_2 = H(-x_1 - x_2 + 1{,}5)$ (NAND). Chiqish: $y = H(h_1 + h_2 - 1{,}5)$ (AND). Matritsa yozuvida:"),
+            ("eq", r"\mathbf{h} = H\!\left(\begin{pmatrix}1 & 1\\-1 & -1\end{pmatrix}\mathbf{x} + \begin{pmatrix}-0{,}5\\1{,}5\end{pmatrix}\right), \qquad y = H\big((1\ \ 1)\,\mathbf{h} - 1{,}5\big)"),
+            ("table", [r"$(x_1;\ x_2)$", r"$z_{h_1}$", r"$h_1$", r"$z_{h_2}$", r"$h_2$", r"$z_y$", r"$y$", "XOR"], [
+                ["(0; 0)", "−0,5", "0", "1,5", "1", "−0,5", "0", "0"],
+                ["(0; 1)", "0,5", "1", "0,5", "1", "0,5", "1", "1"],
+                ["(1; 0)", "0,5", "1", "0,5", "1", "0,5", "1", "1"],
+                ["(1; 1)", "1,5", "1", "−0,5", "0", "−0,5", "0", "0"],
+            ], {"num": [1, 2, 3, 4, 5, 6, 7]}),
+            ("viz", "neuron-xor-morph", VIZ["ex_xor"], r"<b>15-rasm.</b> $(x_1;\ x_2)$ kirish fazosidan $(h_1;\ h_2)$ yashirin fazoga o‘tish animatsiyasi. Slayder chapdan o‘ngga surilganda nuqtalar o‘zlarining yangi koordinatalariga ko‘chadi: 1-sinfning ikkita nuqtasi $(1;\ 1)$ da qo‘shilib ketadi va AND to‘g‘ri chizig‘i ularni qolganlaridan ajratadi."),
+        ],
+        take=r"Yashirin qatlam masalani o‘zi «yechmaydi» — u koordinatalar tizimini o‘zgartiradi. Har bir neyron avvalgidek chiziqli, lekin nochiziqli aktivatsiyali neyronlar kompozitsiyasi ajratib bo‘lmaydiganni ajratiladigan qiladi. Chuqur tarmoqlarning butun mohiyati shunda.")),
+
+    # 14 --------------------------------------------------------------
+    ("example", dict(n=14, title=r"ReLU neyronlaridan siniq chiziq: tarmoq istalgan egri chiziqni qanday chizadi", kinds=["rasm", "hisob"],
+        goal=r"Universal approksimatsiya teoremasini o‘z ko‘zingiz bilan ko‘rish: $c_k\,\mathrm{ReLU}(x - x_k)$ oddiy neyronlar yig‘indisi siniq chiziq quradi va u neyronlar soni ortishi bilan istalgan uzluksiz funksiyaga yaqinlashadi.",
+        blocks=[
+            ("p", r"Har bir neyron — $\mathrm{ReLU}(x - x_k)$, ya’ni $w = 1$, $b = -x_k$: $x_k$ nuqtagacha u jim, undan keyin 1 qiyalik bilan o‘sadi. Chiqish neyroni ularni $c_k$ vaznlar bilan qo‘shadi va har bir $x_k$ nuqtada yig‘indining qiyaligi $c_k$ ga o‘zgaradi. Eng oddiy holat — ikki neyrondan yasalgan modul:"),
+            ("eq", r"|x| = \mathrm{ReLU}(x) + \mathrm{ReLU}(-x)"),
+            ("table", [r"$x$", r"$\mathrm{ReLU}(x)$", r"$\mathrm{ReLU}(-x)$", r"Yig‘indi"], [
+                ["−2", "0", "2", "2"], ["−1", "0", "1", "1"], ["0", "0", "0", "0"], ["1", "1", "0", "1"], ["2", "2", "0", "2"],
+            ], {"num": [0, 1, 2, 3]}),
+            ("viz", "neuron-relu-sum", VIZ["ex_relu"], r"<b>16-rasm.</b> $[-2;\ 2]$ kesmada $x^2$ va $\sin\frac{\pi x}{2}$ ni sinish nuqtalari tekis joylashtirilgan ReLU neyronlari yig‘indisi bilan yaqinlashtirish. Ingichka chiziqlar — alohida neyronlarning hissalari, to‘q sariq chiziq — ularning yig‘indisi. Neyronlar sonini oshiring va maksimal xatoni kuzating: $x^2$ uchun u har safar ikki baravar oshirilganda to‘rt marta kamayadi."),
+        ],
+        take=r"Bitta ReLU neyroni — bu «sinish». Yetarlicha ko‘p sinishlar qo‘shilib, istalgan shakldagi egri chiziqni hosil qiladi. $f$ ning nochiziqliligi — bezak emas, balki tarmoq ifoda kuchining manbai.")),
+
+    # 15 --------------------------------------------------------------
+    ("example", dict(n=15, title=r"Qo‘lda bitta o‘qitish epoxasi", kinds=["jadval", "hisob"],
+        goal=r"Uchta obyektda stoxastik gradiyent tushishning to‘liq epoxasini bosib o‘tish va har bir obyekt vazn va siljishni qanday surishini ko‘rish.",
+        blocks=[
+            ("p", r"$a = \sigma(wx + b)$ neyron, boshlang‘ich qiymatlar $w = 0$, $b = 0$, qadam $\eta = 1$, BCE yo‘qotishlari, shuning uchun $\delta = a - y$, yangilanishlar esa $w \leftarrow w - \eta\,\delta x$, $b \leftarrow b - \eta\,\delta$. Ma’lumotlar: $(x;\ y) = (1;\ 1),\ (-1;\ 0),\ (2;\ 1)$."),
+            ("table", [r"Qadam", r"$x$", r"$y$", r"$z = wx + b$", r"$a$", r"$\delta = a - y$", r"yangi $w$", r"yangi $b$"], [
+                ["1", "1", "1", "0", "0,5", "−0,5", "0,5", "0,5"],
+                ["2", "−1", "0", "0", "0,5", "0,5", "1", "0"],
+                ["3", "2", "1", "2", "0,8808", "−0,1192", "1,2384", "0,1192"],
+            ], {"num": [0, 1, 2, 3, 4, 5, 6, 7]}),
+            ("p", r"2-qadam qiziq: $z = 0{,}5\cdot(-1) + 0{,}5 = 0$, neyron «birlik tomonga» xato qildi, $\delta = +0{,}5$, vazn esa o‘sdi, chunki kirish manfiy: $w \leftarrow 0{,}5 - 0{,}5\cdot(-1) = 1$. Uchta obyekt bo‘yicha o‘rtacha BCE epoxadan oldin $\ln 2 \approx 0{,}6931$ ga, keyin esa $0{,}1945$ ga teng."),
+        ],
+        take=r"O‘qitish — «xato × kirish» ko‘rinishidagi ko‘plab kichik tuzatmalar. $|\delta|$ katta bo‘lgan obyekt vaznlarni kuchli suradi, deyarli to‘g‘ri topilgan obyekt (3-qadam) esa — kuchsiz.")),
+
+    # 16 --------------------------------------------------------------
+    ("example", dict(n=16, title=r"Ishonchli, lekin noto‘g‘ri: MSE va BCE da to‘yinish", kinds=["jadval"],
+        goal=r"Nega chiqishdagi sigmoida o‘rtacha kvadratik xato bilan emas, binar kross-entropiya bilan o‘qitilishini miqdoriy ko‘rsatish.",
+        blocks=[
+            ("p", r"To‘g‘ri javob $y = 0$, neyron esa tobora ishonch bilan «1» deb javob bermoqda. $\delta = \partial L/\partial z$ neyron xatosini $L = \tfrac12(a - y)^2$ uchun (u holda $\delta = (a - y)\,\sigma'(z)$) va BCE uchun (u holda $\delta = a - y$) solishtiramiz:"),
+            ("table", [r"$z$", r"$a = \sigma(z)$", r"$\sigma'(z)$", r"MSE da $\delta$", r"BCE da $\delta$"], [
+                ["0", "0,5", "0,25", "0,125", "0,5"],
+                ["2", "0,8808", "0,105", "0,0925", "0,8808"],
+                ["5", "0,9933", "0,00665", "0,0066", "0,9933"],
+                ["10", "0,99995", "0,0000454", "0,0000454", "0,99995"],
+            ], {"num": [0, 1, 2, 3, 4]}),
+            ("p", r"MSE da neyron qancha kuchli xato qilsa, gradiyent shuncha kichik bo‘ladi: $z = 10$ da signal BCE dagidan 20 000 martadan ham ko‘proq kuchsiz — neyron o‘z xatosida «tiqilib qoldi». BCE da $\sigma'(z)$ ko‘paytuvchi qisqarib ketadi va gradiyent deyarli xato kattaligiga teng bo‘ladi."),
+        ],
+        take=r"Yo‘qotish funksiyasini tanlash — neyron tuzilishining bir qismi: yo‘qotishlar aktivatsiya bilan «do‘st» bo‘lishi kerak. Sigmoida uchun juftlik — BCE, softmax uchun — kross-entropiya, ayniy aktivatsiya uchun — MSE.")),
+
+    # 17 --------------------------------------------------------------
+    ("example", dict(n=17, title=r"Hammasi birga: NumPy’da noldan logistik neyron", kinds=["kod"],
+        goal=r"Maqoladagi hamma narsani yigirmatacha satrga yig‘ish: $z = X\mathbf{w} + b$ vektor shakli, sigmoida, BCE, $\delta\,\mathbf{x}$ gradiyent va tushish qadami — va bularning ishlashiga ishonch hosil qilish.",
+        blocks=[
+            ("code", "python", CODE_EX17["uz"]),
+            ("p", r"Dastur chiqishi:"),
+            ("code", "text", "epoch   0  loss 0.6931  acc 0.50\nepoch 100  loss 0.2266  acc 0.90\nepoch 200  loss 0.2261  acc 0.90\nepoch 300  loss 0.2261  acc 0.90\nw = [1.937 1.713]  b = 0.082"),
+            ("p", r"Boshlang‘ich yo‘qotish $\ln 2 \approx 0{,}6931$ — tanga tashlashdagidek: nol vaznlarda hamma uchun $a = 0{,}5$. 100 epoxadan keyin yo‘qotish taxminan $0{,}226$ atrofida platoga chiqadi, aniqlik 90%: sinflar ustma-ust tushadi va hech bir to‘g‘ri chiziq ularni xatosiz ajrata olmaydi. $w_1 \approx 1{,}94$, $w_2 \approx 1{,}71$ vaznlar deyarli teng — ma’lumotlar diagonalga nisbatan simmetrik va chegara unga ko‘ndalang joylashdi."),
+        ],
+        take=r"Bu yerdagi butun «neyron tarmoq» — bitta <code>z = X @ w + b</code> satri va ikkita gradiyent satri. Uning ustidagi hamma narsa (qatlamlar, optimizatorlar, freymvorklar) — ayni shu formulaning masshtablanishi.")),
 ])
 
 
@@ -1135,6 +1693,8 @@ EN = [
         ("p", r"The gradients PyTorch computed match our hand-computed $\delta\,\mathbf{x}$ and $\delta$ from section 10. Speed matters too: on a vector of a million elements, <code>w @ x</code> in NumPy runs hundreds of times faster than a pure-Python loop, because it is computed in compiled code and uses the processor’s vector instructions."),
     ]),
 
+    PRACTICE_EN,
+
     dict(id="mistakes", title="Common mistakes", blocks=[
         ("ul", [
             r"<b>Mixing up dimensions.</b> $\mathbf{w}\mathbf{x}^{\top}$ instead of $\mathbf{w}^{\top}\mathbf{x}$ gives an $n\times n$ matrix instead of a number. In code, check the shapes (<code>.shape</code>): $(N, n)$ times $(n, m)$ gives $(N, m)$.",
@@ -1473,6 +2033,8 @@ UZ = [
         ("code", "python", CODE_TORCH["uz"]),
         ("p", r"PyTorch hisoblagan gradiyentlar 10-bo‘limda qo‘lda hisoblangan $\delta\,\mathbf{x}$ va $\delta$ bilan mos keladi. Tezlik ham muhim: million elementli vektorda NumPy’dagi <code>w @ x</code> sof Python’dagi sikldan yuzlab marta tez ishlaydi, chunki u kompilyatsiya qilingan kodda hisoblanadi va protsessorning vektor buyruqlaridan foydalanadi."),
     ]),
+
+    PRACTICE_UZ,
 
     dict(id="mistakes", title="Ko‘p uchraydigan xatolar", blocks=[
         ("ul", [
