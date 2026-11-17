@@ -648,3 +648,23 @@ details.ex-sol[open] > summary::after { content: "−"; }
 .nr-tt th, .nr-tt td { padding: 8px 10px; }
 .article .data.nr-tt { min-width: 0; }
 .article .data.nr-tt td, .article .data.nr-tt th { min-width: 0; padding: 8px 10px; }
+/* worked examples: section "practice" of the neuron article */
+.nr-ex { display: flex; flex-direction: column; gap: 18px; padding: 26px 28px 28px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); scroll-margin-top: 80px; }
+.nr-ex > h3 { margin: -6px 0 0; }
+.nr-ex-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.nr-ex-n { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.nr-ex-kinds { display: flex; flex-wrap: wrap; gap: 6px; }
+.nr-ex-kinds span { padding: 3px 10px; border-radius: 999px; background: var(--bg2); font-size: 12px; font-weight: 500; color: var(--fg3); }
+.nr-ex-goal, .nr-ex-take { padding: 14px 18px; border-radius: 4px; font-size: 16px; line-height: 1.7; }
+.nr-ex-goal { background: var(--bg2); border-left: 2px solid var(--accent); }
+.nr-ex-take { background: var(--bg2); border-left: 2px solid var(--v-teal); }
+.nr-ex-goal b, .nr-ex-take b { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg3); }
+.nr-ex-goal p, .nr-ex-take p { margin: 0; }
+.nr-ex .eqd, .nr-ex .fv, .nr-ex .callout, .nr-ex details.deep { background: var(--bg2); }
+.nr-ex .eqd { background: var(--bg2); }
+.nr-ex figure.viz { margin: 0; }
+.nr-ex-index td:first-child a { font-weight: 600; }
+@media (max-width: 520px) { .nr-ex { padding: 18px 14px 20px; } .nr-ex-goal, .nr-ex-take { padding: 12px 14px; font-size: 15px; } }
+.article .nr-ex .data { min-width: 0; }
+.article .nr-ex .data td, .article .nr-ex .data th { min-width: 0; padding-right: 14px; }
+.fv[data-viz="neuron-xor-morph"] .fv-plot, .fv[data-viz="neuron-dot"] .fv-plot { max-width: 520px; margin: 0 auto; }
