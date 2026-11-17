@@ -16,6 +16,7 @@ from pathlib import Path
 import content_ce_workbook as cw
 import content_formulas as formulas
 import content_mae_mse as mm
+import content_neuron as nr
 import workbook_ce
 from content_sigmoid import ARTICLE, TABLE_ROWS
 
@@ -131,6 +132,7 @@ COURSE_URL = "https://jakharbek.github.io/ml_gradient_boosting/"
 MATH_COURSE_URL = "https://jakharbek.github.io/math_lessons/"
 MATH_COURSE = {"ru": MATH_COURSE_URL, "en": MATH_COURSE_URL + "en/", "uz": MATH_COURSE_URL + "uz/"}
 POSTS = [
+    dict(slug=nr.SLUG, topic="ml", date=nr.DATE, mins=nr.MINUTES, title=nr.TITLE, excerpt=nr.EXCERPT),
     dict(slug="math-lessons-course", topic="math", date="2026-11-16",
          url=MATH_COURSE,
          title={"ru": "Открыт курс «Математика по косточкам»",
@@ -1426,6 +1428,65 @@ def formula_page(lang, fid, mod):
 """ + footer(lang, rel) + "</body>\n</html>\n"
 
 
+# ---------- article: the formula of a single neuron (tools/content_neuron.py, assets/js/neuron.js) ----------
+def neuron_article(lang):
+    s, ui, p = SITE[lang], FX_UI[lang], POST[nr.SLUG]
+    sections = nr.SECTIONS[lang]
+    rel = "../../"
+    page = f"{nr.SLUG}/"
+    nav = [(s["allArticles"], f"{rel}{lang}/#posts", False), (s["navMaterials"], f"{rel}{lang}/materials/", False), (s["navAbout"], f"{rel}{lang}/about/", False)]
+    toc = "\n".join(f'      <a href="#{sec["id"]}"><span class="n">{i + 1}</span>{sec["title"]}</a>' for i, sec in enumerate(sections))
+    body = "\n\n".join(f'    <h2 id="{sec["id"]}">{sec["title"]}</h2>\n' + render_blocks(sec["blocks"], lang) for sec in sections)
+    tags = "".join(f'<a href="{rel}{lang}/#posts">{t}</a>' for t in nr.TAGS[lang])
+    related = "\n    ".join(f'<a class="{"prev" if i == 0 else "next"}" href="{href}"><span class="kicker">{k}</span><span class="big">{t}</span></a>' for i, (href, t, k) in enumerate(nr.RELATED[lang]))
+    topic = next(names[lang][0] for tid, _, _, names in TOPICS if tid == p["topic"])
+    extra = (f'  <link rel="stylesheet" href="{KATEX}/katex.min.css">\n'
+             f'  <script defer src="{KATEX}/katex.min.js"></script>\n'
+             f'  <script defer src="{KATEX}/contrib/auto-render.min.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/viz.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/neuron.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/materials.js"></script>\n')
+    title = p["title"][lang]
+    return head(lang, f"{title} — {s['brand']}", html.escape(nr.DESCRIPTION[lang], quote=True), rel, page, "article", extra) + header(lang, rel, page, nav) + f"""<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker">{topic}</span>
+  <h1>{title}</h1>
+  <p class="dek">{nr.DEK[lang]}</p>
+  <div class="author">
+    <img src="{rel}assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="{p['date']}">{fmt_date(p['date'], lang)}</time> · {p['mins']} {ui['min']}</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="{ui['toc']}">
+    <span>{ui['toc']}</span>
+    <nav>
+{toc}
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">{tex(nr.HERO)}</div>
+
+{body}
+
+    <div class="tags">{tags}</div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="{s['allArticles']}">
+  <div class="wrap-m">
+    {related}
+  </div>
+</nav>
+</main>
+
+""" + footer(lang, rel) + "</body>\n</html>\n"
+
+
 def build_formula(fid):
     mod = load_formula(fid)
     assert fid in CARD, f"{fid}: no card with this id in content_formulas.py"
@@ -1505,7 +1566,7 @@ def main():
         build_formula(fid)
     workbook_ce.build()  # assets/files/cross-entropy-practice-<lang>.xlsx (before the page: it shows their sizes)
     for lang in LANGS:
-        pages = {"": home, "sigmoid": article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
+        pages = {"": home, "sigmoid": article, nr.SLUG: neuron_article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
                  f"materials/{mm.SLUG}": material_mae_mse, f"materials/{cw.SLUG}": material_ce_workbook}
         for sub, render in pages.items():
             (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)

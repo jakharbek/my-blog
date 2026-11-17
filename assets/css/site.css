@@ -598,3 +598,53 @@ details.ex-sol[open] > summary::after { content: "−"; }
 .cew-score { font-weight: 600; color: var(--fg2); }
 .fv-handle.cew-off .knob { opacity: .35; }
 @media (max-width: 520px) { .cew-page .fx-hero { font-size: .8em; padding: 18px 8px; } }
+
+/* ---------- article "The formula of a single neuron" (assets/js/neuron.js) ---------- */
+.nr-diagram { width: 100%; min-width: 0; }
+.nr-svg .nr-edge { fill: none; stroke-linecap: round; transition: stroke-width .15s; }
+.nr-svg .nr-node { fill: var(--card); stroke: var(--v-ink); stroke-width: 1.5; }
+.nr-svg .nr-bias { stroke-dasharray: 3 2; }
+.nr-svg .nr-sum { stroke-width: 2; }
+.nr-svg .nr-out { stroke: var(--v-orange); stroke-width: 2.2; }
+.nr-svg .nr-fcurve { stroke-width: 2; }
+.nr-svg .nr-v { font-family: var(--sans); font-size: 13px; font-weight: 600; fill: var(--fg); font-variant-numeric: tabular-nums; }
+.nr-svg .nr-v.nr-big { font-size: 22px; font-weight: 500; }
+.nr-svg .nr-v.nr-small { font-size: 12px; }
+.nr-svg .nr-t { font-family: var(--sans); font-size: 12.5px; fill: var(--fg2); paint-order: stroke; stroke: var(--card); stroke-width: 4px; stroke-linejoin: round; font-variant-numeric: tabular-nums; }
+.nr-svg .nr-t.nr-lbl, .nr-svg .nr-t.nr-z { font-weight: 600; fill: var(--fg); }
+.nr-svg .nr-t.nr-p { font-weight: 600; }
+.nr-svg .nr-t.nr-cap { font-size: 11px; fill: var(--fg4); letter-spacing: .04em; }
+.nr-svg .nr-t.t-blue { fill: var(--v-blue); } .nr-svg .nr-t.t-red { fill: var(--v-red); } .nr-svg .nr-t.t-faint { fill: var(--v-faint); }
+.nr-svg .nr-dot { stroke: var(--card); stroke-width: 1.5; }
+.fv-svg .nr-strong { font-weight: 600; font-size: 13px; }
+.nr-sliders { flex: 1 1 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 6px 24px; }
+.nr-sl-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.nr-sl-col .fv-slider { flex: 0 0 auto; }
+.nr-sl-h { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--fg4); }
+.nr-row { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.fv-note .nr-eqline { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+.fv-note .nr-eqline .katex-display { margin: .4em 0; }
+.fv-note p { margin: 0; }
+.nr-tt { width: auto; min-width: 280px; }
+.nr-tt td.ok { color: var(--v-teal); font-weight: 600; } .nr-tt td.bad { color: var(--v-red); font-weight: 600; }
+.nr-tt tr.cur td { background: var(--bg3); }
+.nr-done { font-weight: 600; color: var(--fg); }
+.nr-px { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 14px; padding: 18px 12px; border-radius: 4px; background: var(--card); }
+.nr-gcol { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: var(--fg3); }
+.nr-grid { display: grid; grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(3, 46px); gap: 3px; }
+.nr-cell { display: flex; align-items: center; justify-content: center; border: 0; border-radius: 3px; font: 600 13px/1 var(--sans); font-variant-numeric: tabular-nums; color: var(--fg); padding: 0; }
+.nr-grid.in .nr-cell { cursor: pointer; box-shadow: inset 0 0 0 1px var(--line); transition: background-color .15s; }
+.nr-grid.in .nr-cell:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.nr-op { font-size: 22px; color: var(--fg3); }
+.nr-px-out { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; color: var(--fg); }
+.nr-px-out b { font-weight: 600; color: var(--fg3); } .nr-px-out b.on { color: var(--v-orange); }
+.nr-meter { display: inline-block; width: 140px; height: 8px; border-radius: 4px; background: var(--bg3); overflow: hidden; }
+.nr-meter i { display: block; height: 100%; background: var(--v-orange); transition: width .2s; }
+@media (max-width: 520px) { .nr-grid { grid-template-columns: repeat(3, 34px); grid-template-rows: repeat(3, 34px); } .nr-cell { font-size: 11px; } .nr-op { font-size: 18px; } }
+.nr-svg, .fv[data-viz="neuron-logic"] .fv-col:first-child { max-width: 100%; }
+.fv[data-viz="neuron-logic"] .fv-col:first-child { flex: 1 1 300px; max-width: 440px; }
+.fv[data-viz="neuron-logic"] .nr-tt { min-width: 0; width: 100%; }
+.fv[data-viz="neuron-train"] .fv-svg .dot { stroke-width: 1.5; }
+.nr-tt th, .nr-tt td { padding: 8px 10px; }
+.article .data.nr-tt { min-width: 0; }
+.article .data.nr-tt td, .article .data.nr-tt th { min-width: 0; padding: 8px 10px; }
