@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>The formula of a single neuron, bone by bone — Abdulatipov J.</title>
+  <meta name="description" content="The artificial neuron a = f(Σ wᵢxᵢ + b) = f(wᵀx + b) in depth: inputs, weights, bias, activation, the vector form, geometry, cases, learning and code. With interactive figures.">
+  <meta property="og:title" content="The formula of a single neuron, bone by bone — Abdulatipov J.">
+  <meta property="og:description" content="The artificial neuron a = f(Σ wᵢxᵢ + b) = f(wᵀx + b) in depth: inputs, weights, bias, activation, the vector form, geometry, cases, learning and code. With interactive figures.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://javharbek.uz/en/neuron/">
+  <meta property="og:image" content="https://javharbek.uz/assets/img/javharbek.png">
+  <meta property="og:site_name" content="Abdulatipov J.">
+  <link rel="canonical" href="https://javharbek.uz/en/neuron/">
+  <link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/neuron/">
+  <link rel="alternate" hreflang="en" href="https://javharbek.uz/en/neuron/">
+  <link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/neuron/">
+  <link rel="alternate" hreflang="x-default" href="https://javharbek.uz/en/neuron/">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+  <link rel="stylesheet" href="../../assets/css/assistant.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../assets/js/viz.js"></script>
+  <script defer src="../../assets/js/neuron.js"></script>
+  <script defer src="../../assets/js/materials.js"></script>
+  <script defer src="../../assets/js/markdown.js"></script>
+  <script defer src="../../assets/js/assistant.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../en/#posts">All articles</a>
+    <a href="../../en/materials/">Materials</a>
+    <a href="../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../ru/neuron/" lang="ru" hreflang="ru">RU</a> <a href="../../en/neuron/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../uz/neuron/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker">ML / AI</span>
+  <h1>The formula of a single neuron, bone by bone</h1>
+  <p class="dek">Every neural network, from logistic regression to large language models, is built from one part. We take its formula apart down to the last symbol: what each x, w, b, z, f and a is, why the sum and the dot product are the same thing, what a neuron “sees” in space, how it solves problems from different fields, and how it learns.</p>
+  <div class="author">
+    <img src="../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-11-17">17 November 2026</time> · 35 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#idea"><span class="n">1</span>What a single neuron does</a>
+      <a href="#anatomy"><span class="n">2</span>The formula bone by bone: every symbol</a>
+      <a href="#numbers"><span class="n">3</span>Step by step with numbers</a>
+      <a href="#vector"><span class="n">4</span>The vector form: the same formula in one move</a>
+      <a href="#geometry"><span class="n">5</span>Geometry: how a neuron divides space</a>
+      <a href="#bias"><span class="n">6</span>The bias b: why we need the free term</a>
+      <a href="#activation"><span class="n">7</span>The activation function f</a>
+      <a href="#cases"><span class="n">8</span>Cases: one formula, four professions</a>
+      <a href="#layer"><span class="n">9</span>From one neuron to a layer</a>
+      <a href="#learning"><span class="n">10</span>How a neuron learns</a>
+      <a href="#code"><span class="n">11</span>Code: from a loop to vectors</a>
+      <a href="#mistakes"><span class="n">12</span>Common mistakes</a>
+      <a href="#summary"><span class="n">13</span>Summary</a>
+      <a href="#quiz"><span class="n">14</span>Test yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$a=f\Big(\sum_{i=1}^{n} w_i x_i+b\Big)=f\big(\mathbf{w}^{\top}\mathbf{x}+b\big)$$</div>
+
+    <h2 id="idea">What a single neuron does</h2>
+    <p>Every neural network, from logistic regression to GPT, is assembled from one and the same part. This part is called an artificial neuron, and all of its work fits into a single line:</p>
+    <div class="eqd">$$a = f\Big(\sum_{i=1}^{n} w_i x_i + b\Big)$$</div>
+    <p>The same formula is also written more compactly, in vector form:</p>
+    <div class="eqd">$$a = f\big(\mathbf{w}^{\top}\mathbf{x} + b\big)$$</div>
+    <p>These are not two different formulas but one and the same, written in two languages: the per-coordinate one and the vector one. Below we will take both apart and prove that they are equal. For now, let us read the formula as a recipe of three steps:</p>
+    <ol class="flist"><li><b>Weigh.</b> Multiply each input $x_i$ by its own weight $w_i$. The weight says how important the input is and whether it is “for” or “against”.</li><li><b>Add up and shift.</b> Add all the products and add the bias $b$. The result is a single number, the weighted sum $z$.</li><li><b>Decide.</b> Pass $z$ through the activation function $f$. The result is the neuron’s output $a$.</li></ol>
+    <figure class="viz"><div class="fv" data-viz="neuron-anatomy" data-config="{&quot;x&quot;: [2, -1, 3], &quot;w&quot;: [0.5, -1, 0.25], &quot;b&quot;: -0.75, &quot;f&quot;: &quot;sigmoid&quot;}"></div><figcaption><b>Figure 1.</b> A neuron at work: three inputs, three weights, a bias and a sigmoid. The thickness of a connection is the absolute value of the weight, its colour is the sign of the contribution $w_ix_i$ (blue for a contribution “for”, red for “against”). Pulses run from the inputs to the summer $\Sigma$, then to the activation function and on to the output. Move the sliders: every number in the diagram is recomputed at once.</figcaption></figure>
+    <div class="callout intuition"><b>An analogy</b><p>A bank’s credit committee decides whether to grant a loan. Each expert brings their own opinion: these are the inputs $x_i$. Each expert has their own authority and their own stance: these are the weights $w_i$. A large positive weight is a respected supporter, a negative one is a sceptic, a zero weight is someone nobody listens to. The bias $b$ is the committee’s mood before the discussion begins: a strict committee starts in the minus. The function $f$ is the procedure that turns the final score into a decision: “yes/no” or “probability of default 33%”.</p></div>
+    <div class="callout history"><b>Where the formula came from</b><p>In 1943 Warren McCulloch and Walter Pitts described a “logical neuron”: it sums binary inputs and fires if the sum exceeds a threshold. In 1958 Frank Rosenblatt built the perceptron, a neuron whose weights are fitted from examples. The image is borrowed from biology: dendrites receive signals (inputs), synapses amplify or attenuate them (weights), the cell body sums them, and the axon emits a pulse if the total excitation is above a threshold (activation). The analogy is loose: a living neuron is far more complex, but the idea “weigh, add up, decide” has survived.</p></div>
+
+    <h2 id="anatomy">The formula bone by bone: every symbol</h2>
+    <p>Let us read the expression from left to right. It contains seven objects, and each has its own role, its own type and its own source: some come from the data, others are learned, and still others are chosen by the network’s architect.</p>
+    <dl class="symbols"><dt>$x_i$</dt><dd><b>input</b> number $i$: one feature of the object (the floor area of a flat, the brightness of a pixel, the output of a neuron in the previous layer);</dd><dt>$w_i$</dt><dd><b>weight</b> of input $i$: how strongly and in which direction this input affects the result; learned;</dd><dt>$i,\ n$</dt><dd><b>index</b> of the input and the <b>number of inputs</b>: $i$ runs through the values $1, 2, \dots, n$;</dd><dt>$\sum_{i=1}^{n}$</dt><dd><b>summation sign</b>: add up the expression for all $i$ from $1$ to $n$;</dd><dt>$b$</dt><dd><b>bias</b>: a number added to the sum; learned;</dd><dt>$z$</dt><dd><b>weighted sum</b>, everything inside $f$: $z = \sum w_ix_i + b$ (pre-activation, logit);</dd><dt>$f$</dt><dd><b>activation function</b>: the rule by which $z$ is turned into an answer;</dd><dt>$a$</dt><dd><b>output</b> of the neuron (activation): the model’s answer or the input to the next layer.</dd></dl>
+    <h3>Inputs $x_i$: what the neuron sees</h3>
+    <p>Inputs are just numbers. A neuron knows nothing about flats, images or words: all of these are first turned into numbers. For a flat, $x_1 = 60$ (floor area, m²) and $x_2 = 2$ (rooms); for a 28×28 black-and-white image, $n = 784$ pixel brightnesses; for a neuron deep inside a network, the inputs are the outputs of the neurons in the previous layer.</p>
+    <p>Inputs are not learned: they are data and come from outside. But their scale matters. If $x_1$ is income in Uzbek soums (hundreds of thousands) and $x_2$ is the number of children (single digits), the first input will overwhelm the second even before training. That is why features are usually standardised: subtract the mean and divide by the standard deviation.</p>
+    <h3>Weights $w_i$: what matters to the neuron</h3>
+    <p>A weight is the multiplier of an input. It encodes three things at once:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Weight</th><th>What it means</th><th>How $z$ changes if $x_i$ grows by 1</th></tr></thead><tbody><tr><td>$w_i = 2$</td><td>the input is strongly “for”</td><td>grows by 2</td></tr><tr><td>$w_i = 0.1$</td><td>the input is weakly “for”</td><td>grows by 0.1</td></tr><tr><td>$w_i = 0$</td><td>the input is ignored</td><td>does not change</td></tr><tr><td>$w_i = -0.5$</td><td>the input is “against”</td><td>decreases by 0.5</td></tr></tbody></table></div>
+    <p>The sign of a weight is the direction of the influence, its absolute value is the strength. A weight also carries units: if $x_i$ is a floor area in m² and $a$ is a price in thousands of dollars, then $w_i$ is measured in “thousands of dollars per m²”. Weights are the neuron’s memory: everything it has learned from the data is stored in them and in the bias.</p>
+    <h3>The index $i$, the number of inputs $n$ and the summation sign</h3>
+    <p>The $\sum$ sign is a compact notation for a long addition. Below it you write the value the counter $i$ starts from, above it the value it ends at. Let us expand the sum for $n = 3$:</p>
+    <div class="eqd">$$\sum_{i=1}^{3} w_i x_i = w_1x_1 + w_2x_2 + w_3x_3$$</div>
+    <p>The number $n$ is set by the data: the neuron has as many inputs, and as many weights, as the object has features. The order of the terms does not matter; what matters is the pairing: the $i$-th weight is always multiplied by the $i$-th input. If you shuffle the weights relative to the inputs, you get a different neuron.</p>
+    <h3>The bias $b$: the initial inclination</h3>
+    <p>The bias is added to the sum once and is not multiplied by anything. It is the value of $z$ when all inputs are zero, that is, the neuron’s “default” opinion before it has looked at the data. Without it the neuron loses an important degree of freedom; section 6 is about this.</p>
+    <h3>The weighted sum $z$</h3>
+    <p>It is convenient to give everything inside $f$ a single letter. Then the neuron’s formula splits into two stages, a linear one and a non-linear one:</p>
+    <div class="eqd">$$z = \sum_{i=1}^{n} w_i x_i + b, \qquad a = f(z)$$</div>
+    <p>$z$ has many names: pre-activation, weighted sum, net input, and in classification, the logit. It is a single number of any sign and any magnitude. The first stage gathers the “evidence”, the second delivers the “verdict”.</p>
+    <h3>The activation function $f$ and the output $a$</h3>
+    <p>$f$ takes one number and returns one number. Its choice determines the neuron’s “profession”: the identity $f(z) = z$ turns it into linear regression, the sigmoid into a probability estimator, the step into a “yes/no” switch, ReLU into a feature detector in a hidden layer. More on this in section 7. The output $a$ is either the answer of the whole model or one of the inputs $x$ for the neurons of the next layer.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Object</th><th>What it is</th><th>Where it comes from</th><th>Example</th></tr></thead><tbody><tr><td>$x_i$</td><td>a number</td><td>data</td><td>60 m²</td></tr><tr><td>$w_i$</td><td>a number</td><td>training</td><td>1.2</td></tr><tr><td>$b$</td><td>a number</td><td>training</td><td>10</td></tr><tr><td>$n$</td><td>a natural number</td><td>data (number of features)</td><td>3</td></tr><tr><td>$z$</td><td>a number</td><td>computed</td><td>82</td></tr><tr><td>$f$</td><td>a function $\mathbb{R}\to\mathbb{R}$</td><td>the architect’s choice</td><td>ReLU</td></tr><tr><td>$a$</td><td>a number</td><td>computed</td><td>82</td></tr></tbody></table></div>
+    <div class="callout key"><b>How many parameters a neuron has</b><p>There are exactly $n + 1$ trainable parameters: $n$ weights and one bias. A neuron that looks at a 28×28 image has $784 + 1 = 785$ parameters. Everything else in the formula is data ($x_i$), intermediate results ($z$, $a$) or the architect’s decision ($f$, $n$).</p></div>
+
+    <h2 id="numbers">Step by step with numbers</h2>
+    <p>Let us take a concrete neuron with three inputs and work through the formula by hand. The same example will accompany us to the end of the article.</p>
+    <div class="eqd">$$\mathbf{x} = (2,\ -1,\ 3), \qquad \mathbf{w} = (0.5,\ -1,\ 0.25), \qquad b = -0.75, \qquad f = \sigma$$</div>
+    <figure class="viz"><div class="fv" data-viz="neuron-steps" data-config="{&quot;x&quot;: [2, -1, 3], &quot;w&quot;: [0.5, -1, 0.25], &quot;b&quot;: -0.75}"></div><figcaption><b>Figure 2.</b> A cascade of contributions. Each bar is one term $w_ix_i$, followed by the bias $b$; the dashed line shows the running total, and the last bar is the final $z$. Press “Step” or “Play” and watch $z$ being assembled from the contributions and what the sigmoid does with it. The “Another example” button generates new numbers.</figcaption></figure>
+    <h3>Step 1. Weigh: the products</h3>
+    <div class="eqd">$$\begin{aligned} w_1x_1 &amp;= 0.5\cdot 2 = 1\\ w_2x_2 &amp;= (-1)\cdot(-1) = 1\\ w_3x_3 &amp;= 0.25\cdot 3 = 0.75 \end{aligned}$$</div>
+    <p>Look at the second term: a negative weight and a negative input produced a positive contribution. “Against” multiplied by “less than usual” is “for”. The sign of a contribution is determined by the product of the signs, not by the sign of the weight.</p>
+    <h3>Step 2. Add up</h3>
+    <div class="eqd">$$\sum_{i=1}^{3} w_ix_i = 1 + 1 + 0.75 = 2.75$$</div>
+    <h3>Step 3. Shift</h3>
+    <div class="eqd">$$z = 2.75 + (-0.75) = 2$$</div>
+    <h3>Step 4. Activate</h3>
+    <div class="eqd">$$a = \sigma(2) = \frac{1}{1 + e^{-2}} = \frac{1}{1 + 0.1353} \approx 0.8808$$</div>
+    <p>The neuron output $0.8808$. If it is a classifier, it is 88% confident that the object belongs to class 1. The same pre-activation $z = 2$ with other activation functions would give entirely different answers:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$f$</th><th class=num>$a = f(2)$</th><th>How to read it</th></tr></thead><tbody><tr><td>identity</td><td class=num>2</td><td>a number, e.g. a price</td></tr><tr><td>step</td><td class=num>1</td><td>the decision “yes”</td></tr><tr><td>sigmoid</td><td class=num>0.8808</td><td>probability 88%</td></tr><tr><td>tanh</td><td class=num>0.9640</td><td>a strong positive signal in (−1, 1)</td></tr><tr><td>ReLU</td><td class=num>2</td><td>feature found, strength 2</td></tr></tbody></table></div>
+    <div class="callout note"><b>Check yourself</b><p>What will the neuron output if the third input becomes zero? The third term disappears: $z = 1 + 1 + 0 - 0.75 = 1.25$, and $a = \sigma(1.25) \approx 0.7773$. The confidence dropped because a contribution “for” of size $0.75$ is gone.</p></div>
+
+    <h2 id="vector">The vector form: the same formula in one move</h2>
+    <p>Writing out a sum of 784 terms is inconvenient. Linear algebra offers a compact notation: collect the inputs and the weights into vectors, ordered columns of numbers.</p>
+    <div class="eqd">$$\mathbf{x} = \begin{pmatrix}x_1\\x_2\\\vdots\\x_n\end{pmatrix}, \qquad \mathbf{w} = \begin{pmatrix}w_1\\w_2\\\vdots\\w_n\end{pmatrix}$$</div>
+    <p>A bold letter is a vector, a plain one is a number. By convention vectors are columns of size $n\times 1$. The symbol $\top$ denotes transposition: it lays the column on its side and turns it into a $1\times n$ row. Multiply the row by the column using the “row times column” rule, that is, multiply pairwise and add up:</p>
+    <div class="eqd">$$\mathbf{w}^{\top}\mathbf{x} = \begin{pmatrix}w_1 &amp; w_2 &amp; \cdots &amp; w_n\end{pmatrix}\begin{pmatrix}x_1\\x_2\\\vdots\\x_n\end{pmatrix} = w_1x_1 + w_2x_2 + \dots + w_nx_n = \sum_{i=1}^{n} w_ix_i$$</div>
+    <p>We get exactly what appears in the per-coordinate formula. This is the dot product of vectors. Hence:</p>
+    <div class="eqd">$$a = f\Big(\sum_{i=1}^{n} w_ix_i + b\Big) = f\big(\mathbf{w}^{\top}\mathbf{x} + b\big)$$</div>
+    <h3>Dimensions: why the result is a number</h3>
+    <div class="eqd">$$\underbrace{\mathbf{w}^{\top}}_{1\times n}\;\underbrace{\mathbf{x}}_{n\times 1} \;+\; \underbrace{b}_{1\times 1} \;=\; \underbrace{z}_{1\times 1}$$</div>
+    <p>The rule of matrix multiplication: the inner dimensions ($n$ and $n$) must match, the outer ones ($1$ and $1$) give the size of the result. Hence a common mistake: if you move the transposition and write $\mathbf{w}\mathbf{x}^{\top}$, the dimensions become $(n\times 1)(1\times n) = n\times n$, and you get a table of all pairwise products (the outer product) rather than a number.</p>
+    <h3>With our numbers</h3>
+    <div class="eqd">$$\mathbf{w}^{\top}\mathbf{x} = \begin{pmatrix}0.5 &amp; -1 &amp; 0.25\end{pmatrix}\begin{pmatrix}2\\-1\\3\end{pmatrix} = 0.5\cdot2 + (-1)(-1) + 0.25\cdot3 = 2.75$$</div>
+    <p>The same three products and the same sum as in section 3. The vector notation does not change the computation; it changes only the way it is written.</p>
+    <h3>The geometric meaning: a neuron measures similarity</h3>
+    <p>The dot product has a second, geometric formula:</p>
+    <div class="eqd">$$\mathbf{w}^{\top}\mathbf{x} = \lVert\mathbf{w}\rVert\,\lVert\mathbf{x}\rVert\cos\theta$$</div>
+    <p>Here $\lVert\mathbf{w}\rVert = \sqrt{w_1^2 + \dots + w_n^2}$ is the length of the vector, and $\theta$ is the angle between $\mathbf{w}$ and $\mathbf{x}$. So the neuron compares the input with the weight vector as with a template: if $\mathbf{x}$ points the same way as $\mathbf{w}$ ($\theta &lt; 90^\circ$), the contribution is positive; if it is perpendicular, zero; if it points the opposite way, negative. The weights are the “pattern” the neuron looks for in the input.</p>
+    <p>With our numbers: $\lVert\mathbf{w}\rVert = \sqrt{0.25 + 1 + 0.0625} = \sqrt{1.3125} \approx 1.1456$, $\lVert\mathbf{x}\rVert = \sqrt{4 + 1 + 9} = \sqrt{14} \approx 3.7417$, and $\cos\theta = 2.75 / (1.1456\cdot 3.7417) \approx 0.6415$, that is, $\theta \approx 50.1^\circ$. The input clearly resembles the template but does not coincide with it.</p>
+    <figure class="viz"><div class="fv" data-viz="neuron-dot" data-config="{&quot;w&quot;: [2, 1], &quot;x&quot;: [1, 2]}"></div><figcaption><b>Figure 3.</b> The dot product in the plane. Drag the tips of the vectors $\mathbf{w}$ and $\mathbf{x}$. The orange segment is the projection of $\mathbf{x}$ onto the direction of $\mathbf{w}$: $\mathbf{w}^{\top}\mathbf{x}$ equals its signed length multiplied by $\lVert\mathbf{w}\rVert$. The coordinate sum and the cosine formula always give the same number.</figcaption></figure>
+    <details class="deep"><summary>Why $\mathbf{w}^{\top}\mathbf{x} = \lVert\mathbf{w}\rVert\lVert\mathbf{x}\rVert\cos\theta$</summary><div class="deep-body">
+      <p>Consider the triangle with sides $\mathbf{w}$, $\mathbf{x}$ and $\mathbf{w} - \mathbf{x}$. By the law of cosines</p>
+      <div class="eqd">$$\lVert\mathbf{w}-\mathbf{x}\rVert^2 = \lVert\mathbf{w}\rVert^2 + \lVert\mathbf{x}\rVert^2 - 2\lVert\mathbf{w}\rVert\lVert\mathbf{x}\rVert\cos\theta$$</div>
+      <p>On the other hand, expand the squared length in coordinates:</p>
+      <div class="eqd">$$\lVert\mathbf{w}-\mathbf{x}\rVert^2 = \sum_{i=1}^{n}(w_i - x_i)^2 = \sum w_i^2 + \sum x_i^2 - 2\sum w_ix_i = \lVert\mathbf{w}\rVert^2 + \lVert\mathbf{x}\rVert^2 - 2\,\mathbf{w}^{\top}\mathbf{x}$$</div>
+      <p>The right-hand sides are equal, so $\mathbf{w}^{\top}\mathbf{x} = \lVert\mathbf{w}\rVert\lVert\mathbf{x}\rVert\cos\theta$. The algebraic and the geometric formulas are one and the same.</p>
+    </div></details>
+    <h3>One formula, many notations</h3>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Notation</th><th>Where you see it</th></tr></thead><tbody><tr><td>$\sum_{i=1}^{n} w_ix_i$</td><td>textbooks, deriving derivatives with respect to one coordinate</td></tr><tr><td>$\mathbf{w}^{\top}\mathbf{x}$</td><td>linear algebra, research papers</td></tr><tr><td>$\mathbf{w}\cdot\mathbf{x}$, $\langle\mathbf{w},\mathbf{x}\rangle$</td><td>geometry, physics</td></tr><tr><td>$\mathbf{x}^{\top}\mathbf{w}$</td><td>statistics: $\mathbf{x}$ is the object’s row of features</td></tr><tr><td><code>w @ x</code>, <code>np.dot(w, x)</code></td><td>NumPy</td></tr><tr><td><code>x @ W.T + b</code></td><td>PyTorch <code>nn.Linear</code></td></tr></tbody></table></div>
+    <div class="callout key"><b>When to use which form</b><p>The per-coordinate form shows what happens to <i>each</i> input: you need it to understand a feature’s contribution and to derive the derivative with respect to a single weight. The vector form shows what happens to the <i>whole</i> input at once: you need it for short derivations, for geometry and for fast code, since CPUs and GPUs multiply vectors and matrices “wholesale”, hundreds of times faster than a loop over elements.</p></div>
+
+    <h2 id="geometry">Geometry: how a neuron divides space</h2>
+    <p>Let us look at the neuron as a device that cuts the input space into two parts. Take two inputs: each object is a point $(x_1,\ x_2)$ in the plane. The points where the neuron is “least sure” are those where $z = 0$:</p>
+    <div class="eqd">$$w_1x_1 + w_2x_2 + b = 0$$</div>
+    <p>This is the equation of a straight line. On one side of it $z &gt; 0$, on the other $z &lt; 0$. With a sigmoid it is the boundary $a = 0.5$, with a step it is the boundary between the answers “0” and “1”. In $n$ dimensions, $\mathbf{w}^{\top}\mathbf{x} + b = 0$ is a hyperplane: a line in the plane, a plane in three-dimensional space, and so on.</p>
+    <ul class="flist"><li><b>The vector $\mathbf{w}$ is perpendicular to the boundary</b> and points in the direction in which $z$ grows. A one-line proof: if $\mathbf{x}$ and $\mathbf{x}'$ lie on the boundary, then $\mathbf{w}^{\top}\mathbf{x} + b = \mathbf{w}^{\top}\mathbf{x}' + b = 0$, whence $\mathbf{w}^{\top}(\mathbf{x} - \mathbf{x}') = 0$: the vector $\mathbf{w}$ is perpendicular to any segment along the boundary.</li><li><b>The length $\lVert\mathbf{w}\rVert$ is the steepness.</b> The longer $\mathbf{w}$ is, the faster $z$ grows as you move away from the boundary, and the sharper the sigmoid’s transition from 0 to 1.</li><li><b>The bias $b$ shifts the boundary</b> parallel to itself. The distance from the origin to the boundary is $|b| / \lVert\mathbf{w}\rVert$.</li><li><b>$z$ is the signed distance</b> multiplied by $\lVert\mathbf{w}\rVert$. The sign tells which side the point is on, the absolute value tells how far away it is, that is, how confident the neuron is.</li></ul>
+    <div class="eqd">$$d(\mathbf{x}) = \frac{\mathbf{w}^{\top}\mathbf{x} + b}{\lVert\mathbf{w}\rVert} = \frac{z}{\lVert\mathbf{w}\rVert}$$</div>
+    <figure class="viz"><div class="fv" data-viz="neuron-plane" data-config="{&quot;w&quot;: [1.5, 1], &quot;b&quot;: -1, &quot;x&quot;: [1.5, 0.5]}"></div><figcaption><b>Figure 4.</b> A neuron with two inputs and a sigmoid. The colour is the output $a$; the solid line is the boundary $a = 0.5$, the dashed lines are the levels $a \approx 0.12$ and $a \approx 0.88$ (where $z = \mp 2$). Drag the tip of the vector $\mathbf{w}$: the boundary rotates, staying perpendicular to it, and becomes sharper or softer. The $b$ slider moves it parallel to itself. The point $\mathbf{x}$ can be dragged too.</figcaption></figure>
+    <p>For our three-dimensional example the boundary is the plane $0.5x_1 - x_2 + 0.25x_3 - 0.75 = 0$. The point $\mathbf{x} = (2,\ -1,\ 3)$ lies on its positive side at a distance $d = 2 / 1.1456 \approx 1.746$ from it.</p>
+    <h3>The three-dimensional picture</h3>
+    <p>Add a third axis, the output. Over the input plane, $z$ is a tilted plane, $\sigma(z)$ is a “step-shaped carpet” bent across the boundary, and $\mathrm{ReLU}(z)$ is a sheet folded along the boundary. In all three cases the output is constant along the boundary: the neuron senses only one direction, the direction of $\mathbf{w}$.</p>
+    <figure class="viz"><div class="fv" data-viz="neuron-surface" data-config="{&quot;w&quot;: [1.5, 1], &quot;b&quot;: -1}"></div><figcaption><b>Figure 5.</b> The surface of the neuron’s output over the input plane. Switch between $z$, $\sigma(z)$ and $\mathrm{ReLU}(z)$, and rotate with the mouse or a finger. The orange line is the boundary $z = 0$; along it (and along any parallel line) the height does not change.</figcaption></figure>
+    <div class="callout key"><b>The main takeaway</b><p>A single neuron is a linear classifier. However monotonic $f$ may be, the decision boundary remains a straight line (a plane, a hyperplane). This is both the neuron’s strength, simplicity and interpretability, and its limit: problems where the classes cannot be separated by a straight line are beyond it (case 3, XOR).</p></div>
+
+    <h2 id="bias">The bias b: why we need the free term</h2>
+    <p>Remove $b$ from the formula and plug in a zero input: $z = \mathbf{w}^{\top}\mathbf{0} = 0$ for any weights. The boundary $z = 0$ is forced to pass through the origin, like the line $y = kx$ without a free term, which can only be rotated around zero. The bias removes this constraint.</p>
+    <p>With a single input everything is especially clear. The boundary $wx + b = 0$ is the point</p>
+    <div class="eqd">$$x_0 = -\frac{b}{w}$$</div>
+    <p>The weight $w$ is responsible for the steepness (and, when $w &lt; 0$, for the direction), the bias $b$ for the position of the threshold. With $w = 2$, $b = -2$ the sigmoid passes through $0.5$ at the point $x_0 = 1$ rather than at zero.</p>
+    <figure class="viz"><div class="fv" data-viz="neuron-bias" data-config="{&quot;w&quot;: 2, &quot;b&quot;: -2, &quot;f&quot;: &quot;sigmoid&quot;, &quot;fs&quot;: [&quot;sigmoid&quot;, &quot;step&quot;, &quot;relu&quot;, &quot;identity&quot;]}"></div><figcaption><b>Figure 6.</b> A neuron with one input: $a = f(wx + b)$. The weight $w$ changes the steepness, the bias $b$ moves the threshold $x_0 = -b/w$ (the vertical line). The dashed curve is the same neuron without a bias: its threshold is always at zero.</figcaption></figure>
+    <h3>A trick: the bias as one more weight</h3>
+    <p>Add a dummy input $x_0 = 1$ that always equals one, and call the bias the weight $w_0 = b$. Then the bias hides inside the sum, and the sum starts from zero:</p>
+    <div class="eqd">$$z = \sum_{i=1}^{n} w_ix_i + b = \sum_{i=0}^{n} w_ix_i = \tilde{\mathbf{w}}^{\top}\tilde{\mathbf{x}}, \qquad \tilde{\mathbf{x}} = \begin{pmatrix}1\\x_1\\\vdots\\x_n\end{pmatrix}, \quad \tilde{\mathbf{w}} = \begin{pmatrix}b\\w_1\\\vdots\\w_n\end{pmatrix}$$</div>
+    <p>With our numbers: $\tilde{\mathbf{w}} = (-0.75,\ 0.5,\ -1,\ 0.25)$, $\tilde{\mathbf{x}} = (1,\ 2,\ -1,\ 3)$, $\tilde{\mathbf{w}}^{\top}\tilde{\mathbf{x}} = -0.75 + 2.75 = 2$. This is how it is written in statistics (a column of ones in the feature matrix) and in classic texts on the perceptron. It is convenient for derivations, but in code the bias is usually stored separately.</p>
+    <div class="callout intuition"><b>The bias as a threshold</b><p>With a step activation the neuron fires when $\mathbf{w}^{\top}\mathbf{x} + b \ge 0$, that is, when $\mathbf{w}^{\top}\mathbf{x} \ge -b$. So $\theta = -b$ is the firing threshold. A committee with $b = -2$ is sceptical: to say “yes”, the arguments must score more than two points. A committee with $b = +1$ is lenient: it will say “yes” even if there are no arguments at all.</p></div>
+
+    <h2 id="activation">The activation function f</h2>
+    <p>The linear part can only weigh and add up. The function $f$ decides what this score turns into. The five most important options:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>$f$</th><th>Formula</th><th>Values</th><th>Where it is used</th></tr></thead><tbody><tr><td>identity</td><td>$f(z) = z$</td><td>$(-\infty,\ +\infty)$</td><td>linear regression, the output of a regression network</td></tr><tr><td>step</td><td>$f(z) = 1$ for $z \ge 0$, otherwise $0$</td><td>$\{0,\ 1\}$</td><td>Rosenblatt’s perceptron, logic circuits</td></tr><tr><td>sigmoid</td><td>$\sigma(z) = \dfrac{1}{1+e^{-z}}$</td><td>$(0,\ 1)$</td><td>logistic regression, the output of a binary classifier</td></tr><tr><td>tanh</td><td>$\tanh z = \dfrac{e^{z}-e^{-z}}{e^{z}+e^{-z}}$</td><td>$(-1,\ 1)$</td><td>recurrent networks (RNN, LSTM)</td></tr><tr><td>ReLU</td><td>$\max(0,\ z)$</td><td>$[0,\ +\infty)$</td><td>hidden layers of almost all modern networks</td></tr></tbody></table></div>
+    <figure class="viz"><div class="fv" data-viz="neuron-activations" data-config="{&quot;z&quot;: 2}"></div><figcaption><b>Figure 7.</b> One and the same pre-activation $z$, five different outputs. Move $z$ and choose a function; the others are shown as thin lines. The checkbox adds the derivative $f'(z)$, which we will need in the section on learning. At $z = 2$ from our example the outputs are $2$, $1$, $0.8808$, $0.9640$ and $2$.</figcaption></figure>
+    <h3>Why non-linearity is needed at all</h3>
+    <p>If $f$ is the identity, the neuron is a linear function of its input. But a composition of linear functions is again linear. However many layers without activations we stack one after another, the whole network collapses into a single layer with different weights and cannot learn anything that a single neuron cannot.</p>
+    <details class="deep"><summary>Proof: two linear layers equal one</summary><div class="deep-body">
+      <p>Let the first layer compute $\mathbf{h} = W_1\mathbf{x} + \mathbf{b}_1$ and the second $\mathbf{y} = W_2\mathbf{h} + \mathbf{b}_2$. Substitute:</p>
+      <div class="eqd">$$\mathbf{y} = W_2(W_1\mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2 = \underbrace{(W_2W_1)}_{W}\,\mathbf{x} + \underbrace{(W_2\mathbf{b}_1 + \mathbf{b}_2)}_{\mathbf{b}}$$</div>
+      <p>We get a single linear layer with the matrix $W = W_2W_1$ and the bias $\mathbf{b} = W_2\mathbf{b}_1 + \mathbf{b}_2$. By induction the same holds for any number of layers.</p>
+    </div></details>
+    <p>A non-linear $f$ “breaks” the straight line. From many such broken pieces a network assembles a function of practically any shape. This is what the universal approximation theorem states: a network with one hidden layer and a non-linear activation is enough to approximate any continuous function on a bounded domain to arbitrary accuracy (given enough neurons).</p>
+    <div class="callout warn"><b>Activation pitfalls</b><p>The sigmoid and tanh saturate: for $|z| &gt; 5$ their derivative is almost zero, and the gradient barely passes through such a neuron (see the article <a href=\"../sigmoid/\">Anatomy of the sigmoid</a> for details). ReLU outputs zero with a zero derivative for $z &lt; 0$: a neuron that receives a negative $z$ on all the data stops learning, it “dies” (see <a href=\"../materials/ml-formulas/relu/\">ReLU</a> and <a href=\"../materials/ml-formulas/leaky-relu/\">Leaky ReLU</a>).</p></div>
+
+    <h2 id="cases">Cases: one formula, four professions</h2>
+    <p>The formula is one, but the meaning of $x$, $w$, $b$ and the choice of $f$ turn the neuron into completely different tools. Let us go through four cases, each with numbers.</p>
+    <h3>Case 1. Regression: the price of a flat ($f$ is the identity)</h3>
+    <p>Inputs: $x_1$ is the floor area, m²; $x_2$ is the number of rooms; $x_3$ is the distance to the city centre, km. The output is the price in thousands of dollars. Suppose that after training the weights are (the numbers are illustrative) $\mathbf{w} = (1.2,\ 5,\ -2)$, $b = 10$.</p>
+    <ul class="flist"><li>$w_1 = 1.2$: each square metre adds 1,200 dollars;</li><li>$w_2 = 5$: an extra room with the same floor area adds 5,000 dollars;</li><li>$w_3 = -2$: each kilometre from the centre takes away 2,000 dollars;</li><li>$b = 10$: a base premium. It is not “the price of a flat with zero floor area” (there is no such flat in the data) but a correction with which the line best fits the real examples.</li></ul>
+    <div class="eqd">$$a = 1.2\cdot 60 + 5\cdot 2 + (-2)\cdot 5 + 10 = 72 + 10 - 10 + 10 = 82$$</div>
+    <p>A 60 m² flat with two rooms, 5 km from the centre: the model values it at 82 thousand dollars. A single neuron without an activation is exactly linear regression. It is trained by minimising the mean squared error (see <a href=\"../materials/mae-mse-examples/\">MAE and MSE by example</a>).</p>
+    <h3>Case 2. Classification: the probability of default ($f$ is the sigmoid)</h3>
+    <p>A bank’s scoring model. Inputs: $x_1 = 0.4$ is the debt-to-income ratio (the share of income that goes to loan payments); $x_2 = 2$ is the number of late payments in the past year; $x_3 = 5$ is the length of the credit history, in years. Weights: $\mathbf{w} = (3,\ 0.8,\ -0.3)$, $b = -2$.</p>
+    <div class="eqd">$$\begin{aligned} z &amp;= 3\cdot 0.4 + 0.8\cdot 2 + (-0.3)\cdot 5 + (-2) = 1.2 + 1.6 - 1.5 - 2 = -0.7\\ a &amp;= \sigma(-0.7) = \frac{1}{1 + e^{0.7}} \approx 0.3318 \end{aligned}$$</div>
+    <p>The probability of default is about 33%. With a threshold of $0.5$ the loan will be approved; with a stricter threshold of $0.3$ it will not: the threshold is chosen by the business, not by the formula. The signs of the weights read as rules: the debt load and late payments increase the risk, a long credit history reduces it. This is logistic regression; it is trained with <a href=\"../materials/ml-formulas/bce/\">binary cross-entropy</a>.</p>
+    <div class="callout note"><p>The numbers in the cases are illustrative. In real credit scoring the features are standardised and the weights are checked for common sense: for example, more late payments must not lower the risk. The ability to read every weight is the main reason why banks still love logistic regression.</p></div>
+    <h3>Case 3. Logic: a neuron as a gate ($f$ is the step)</h3>
+    <p>The inputs are zeros and ones, and $f(z) = 1$ for $z \ge 0$. Let us choose the weights so that the neuron computes the logical AND: $\mathbf{w} = (1,\ 1)$, $b = -1.5$. The sum $x_1 + x_2$ reaches $1.5$ only when both inputs are ones. For OR it is enough to raise the bias to $b = -0.5$: a single one suffices. For NOT a single input is enough: $w = -1$, $b = 0.5$.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num>$x_1$</th><th class=num>$x_2$</th><th class=num>AND: $z$</th><th class=num>AND: $a$</th><th class=num>OR: $z$</th><th class=num>OR: $a$</th></tr></thead><tbody><tr><td class=num>0</td><td class=num>0</td><td class=num>−1.5</td><td class=num>0</td><td class=num>−0.5</td><td class=num>0</td></tr><tr><td class=num>0</td><td class=num>1</td><td class=num>−0.5</td><td class=num>0</td><td class=num>0.5</td><td class=num>1</td></tr><tr><td class=num>1</td><td class=num>0</td><td class=num>−0.5</td><td class=num>0</td><td class=num>0.5</td><td class=num>1</td></tr><tr><td class=num>1</td><td class=num>1</td><td class=num>0.5</td><td class=num>1</td><td class=num>1.5</td><td class=num>1</td></tr></tbody></table></div>
+    <figure class="viz"><div class="fv" data-viz="neuron-logic" data-config="{&quot;gate&quot;: &quot;and&quot;}"></div><figcaption><b>Figure 8.</b> Logic gates with a single neuron. Choose a gate and tune $w_1$, $w_2$, $b$ by hand, or run the perceptron learning rule and watch the line find its place on its own. For AND, OR and NAND a solution is found within a few epochs. For XOR, never: after every epoch at least one error remains.</figcaption></figure>
+    <p>Exclusive OR (XOR: 1 when the inputs differ) cannot be solved by a single neuron. The points $(0,\ 1)$ and $(1,\ 0)$ must end up on one side of the line, and $(0,\ 0)$ and $(1,\ 1)$ on the other, but they are arranged “crosswise”, and no such line exists.</p>
+    <details class="deep"><summary>Proof that XOR is beyond a single neuron</summary><div class="deep-body">
+      <p>Suppose $w_1$, $w_2$, $b$ exist. Write down the four requirements:</p>
+      <div class="eqd">$$\begin{aligned} (0,0)\mapsto 0:&amp;\quad b &lt; 0\\ (1,0)\mapsto 1:&amp;\quad w_1 + b \ge 0\\ (0,1)\mapsto 1:&amp;\quad w_2 + b \ge 0\\ (1,1)\mapsto 0:&amp;\quad w_1 + w_2 + b &lt; 0 \end{aligned}$$</div>
+      <p>Add the second and the third: $w_1 + w_2 + 2b \ge 0$, that is, $w_1 + w_2 + b \ge -b$. From the first, $-b &gt; 0$, so $w_1 + w_2 + b &gt; 0$, which contradicts the fourth. No such weights exist.</p>
+    </div></details>
+    <div class="callout history"><b>XOR and the “AI winter”</b><p>In 1969 Marvin Minsky and Seymour Papert, in the book <i>Perceptrons</i>, rigorously demonstrated the limitations of the single-layer perceptron, including with the XOR example. Interest in neural networks faded for a long time. The way out turned out to be simple: two layers, $h_1 = \mathrm{OR}(x_1, x_2)$, $h_2 = \mathrm{NAND}(x_1, x_2)$, $y = \mathrm{AND}(h_1, h_2)$. Each of the three neurons is linear, but together they solve a non-linear problem. Training such networks at scale became possible after backpropagation was popularised in 1986.</p></div>
+    <h3>Case 4. Computer vision: an edge detector ($f$ is ReLU)</h3>
+    <p>The inputs are the nine brightnesses of a 3×3 image patch (0 is black, 1 is white), so $n = 9$. It is convenient to lay the weights out on the same grid:</p>
+    <div class="eqd">$$\begin{pmatrix} w_1 &amp; w_2 &amp; w_3\\ w_4 &amp; w_5 &amp; w_6\\ w_7 &amp; w_8 &amp; w_9 \end{pmatrix} = \begin{pmatrix} -1 &amp; 0 &amp; 1\\ -1 &amp; 0 &amp; 1\\ -1 &amp; 0 &amp; 1 \end{pmatrix}, \qquad b = -1$$</div>
+    <p>The neuron adds up the brightnesses of the right column and subtracts the left one. On a “dark on the left, light on the right” patch (the left column is zeros, the middle and right ones are ones), $z = 3 - 0 - 1 = 2$ and $a = \mathrm{ReLU}(2) = 2$: the neuron fires. On a uniform white patch, $z = 3 - 3 - 1 = -1$ and $a = 0$: the neuron stays silent. The bias $-1$ is the sensitivity threshold: the neuron ignores weak changes in brightness.</p>
+    <figure class="viz"><div class="fv" data-viz="neuron-pixels" data-config="{&quot;kernel&quot;: &quot;vertical&quot;}"></div><figcaption><b>Figure 9.</b> A neuron with nine inputs looks at a 3×3 patch. Click the cells on the left to change the brightness (0 → 0.5 → 1) and choose a weight template. The middle grid shows the weights, the right one the products $w_ix_i$; their sum plus $b$ goes through ReLU.</figcaption></figure>
+    <p>A convolutional network is the same neuron sliding over the whole image with the same weights and building a map of “where an edge was found”. There is only one difference from our example: the network fits the filter weights itself, from the data.</p>
+
+    <h2 id="layer">From one neuron to a layer</h2>
+    <p>A layer is several neurons that look at the same input $\mathbf{x}$, but each has its own weights and its own bias. Neuron number $j$ computes $a_j = f(\mathbf{w}_j^{\top}\mathbf{x} + b_j)$. Stack the weight vectors as rows into a matrix $W$ of size $m\times n$, and the biases into a vector $\mathbf{b}$:</p>
+    <div class="eqd">$$\mathbf{a} = f\big(W\mathbf{x} + \mathbf{b}\big), \qquad W = \begin{pmatrix} \mathbf{w}_1^{\top}\\ \vdots\\ \mathbf{w}_m^{\top} \end{pmatrix}, \qquad \mathbf{b} = \begin{pmatrix} b_1\\ \vdots\\ b_m \end{pmatrix}$$</div>
+    <p>The function $f$ is applied to each coordinate separately. An example: our neuron and a second one with weights $\mathbf{w}_2 = (-1,\ 0.5,\ 1)$ and bias $b_2 = 0.5$, with ReLU activation:</p>
+    <div class="eqd">$$W\mathbf{x} + \mathbf{b} = \begin{pmatrix} 0.5 &amp; -1 &amp; 0.25\\ -1 &amp; 0.5 &amp; 1 \end{pmatrix} \begin{pmatrix} 2\\ -1\\ 3 \end{pmatrix} + \begin{pmatrix} -0.75\\ 0.5 \end{pmatrix} = \begin{pmatrix} 2.75\\ 0.5 \end{pmatrix} + \begin{pmatrix} -0.75\\ 0.5 \end{pmatrix} = \begin{pmatrix} 2\\ 1 \end{pmatrix}$$</div>
+    <p>After ReLU, $\mathbf{a} = (2,\ 1)$. Each row of $W$ is a separate neuron, each coordinate of $\mathbf{a}$ is its output. The layer has $m(n + 1) = 2\cdot 4 = 8$ parameters.</p>
+    <h3>A batch of objects</h3>
+    <p>In practice a network processes a batch of $N$ objects at once. Stack them as rows into a matrix $X$ of size $N\times n$:</p>
+    <div class="eqd">$$\underbrace{Z}_{N\times m} = \underbrace{X}_{N\times n}\,\underbrace{W^{\top}}_{n\times m} + \mathbf{1}\mathbf{b}^{\top}, \qquad A = f(Z)$$</div>
+    <p>The term $\mathbf{1}\mathbf{b}^{\top}$ simply adds $\mathbf{b}^{\top}$ to every row (in NumPy and PyTorch, broadcasting does this). This is exactly the formula that <code>nn.Linear</code> computes in PyTorch: $y = xA^{\top} + b$.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Level</th><th>Per-coordinate form</th><th>Vector form</th></tr></thead><tbody><tr><td>one neuron, one object</td><td>$a = f\big(\sum_i w_ix_i + b\big)$</td><td>$a = f(\mathbf{w}^{\top}\mathbf{x} + b)$</td></tr><tr><td>a layer of $m$ neurons</td><td>$a_j = f\big(\sum_i W_{ji}x_i + b_j\big)$</td><td>$\mathbf{a} = f(W\mathbf{x} + \mathbf{b})$</td></tr><tr><td>a layer, a batch of $N$ objects</td><td>$A_{kj} = f\big(\sum_i X_{ki}W_{ji} + b_j\big)$</td><td>$A = f(XW^{\top} + \mathbf{1}\mathbf{b}^{\top})$</td></tr></tbody></table></div>
+    <div class="callout key"><p>The matrix formula is three nested loops, “for each object, for each neuron, for each input”, packed into a single operation. Inside every cell $A_{kj}$ there is still our formula of a single neuron.</p></div>
+
+    <h2 id="learning">How a neuron learns</h2>
+    <p>Where do the weights come from? They are fitted to the data. You define a loss function $L$, a number that shows how far the output $a$ is from the correct answer $y$, and shift each parameter against its gradient many times:</p>
+    <div class="eqd">$$w_i \leftarrow w_i - \eta\,\frac{\partial L}{\partial w_i}, \qquad b \leftarrow b - \eta\,\frac{\partial L}{\partial b}$$</div>
+    <p>Here $\eta$ is the learning rate. The neuron’s formula makes the derivatives remarkably simple. By the chain rule:</p>
+    <div class="eqd">$$\frac{\partial L}{\partial w_i} = \frac{\partial L}{\partial a}\cdot\frac{\partial a}{\partial z}\cdot\frac{\partial z}{\partial w_i} = \delta\cdot x_i, \qquad \frac{\partial L}{\partial b} = \delta, \qquad \delta = \frac{\partial L}{\partial a}\,f'(z)$$</div>
+    <p>The key is the derivatives of the weighted sum: $z = w_1x_1 + \dots + w_nx_n + b$ is linear in each weight, so $\partial z/\partial w_i = x_i$ and $\partial z/\partial b = 1$. The number $\delta$ is the “neuron’s error”, shared by all its weights. The gradient with respect to a weight equals the error multiplied by the input. If the input was zero, the weight does not change: it took no part in this answer.</p>
+    <p>In vector form the whole gradient is written in one line: $\nabla_{\mathbf{w}}L = \delta\,\mathbf{x}$. For a sigmoid with binary cross-entropy the neuron’s error simplifies to the difference between the answer and the target: $\delta = a - y$.</p>
+    <details class="deep"><summary>Derivation: $\delta = a - y$ for the sigmoid and BCE</summary><div class="deep-body">
+      <div class="eqd">$$L = -\big[y\ln a + (1-y)\ln(1-a)\big], \qquad \frac{\partial L}{\partial a} = -\frac{y}{a} + \frac{1-y}{1-a} = \frac{a-y}{a(1-a)}$$</div>
+      <p>The derivative of the sigmoid is expressed through the sigmoid itself: $\sigma'(z) = a(1-a)$. Multiply:</p>
+      <div class="eqd">$$\delta = \frac{a-y}{a(1-a)}\cdot a(1-a) = a - y$$</div>
+      <p>The factors $a(1-a)$ cancel, which is why the “sigmoid + BCE” pair does not suffer from saturation at the output: the gradient is simply proportional to the size of the error.</p>
+    </div></details>
+    <h3>One training step with our numbers</h3>
+    <p>Let the correct answer be $y = 0$, while the neuron output $a \approx 0.8808$, a large error. The neuron’s error is $\delta = a - y \approx 0.8808$, and the learning rate is $\eta = 0.1$:</p>
+    <div class="eqd">$$\begin{aligned} \nabla_{\mathbf{w}}L &amp;= \delta\,\mathbf{x} \approx 0.8808\cdot(2,\ -1,\ 3) = (1.7616,\ -0.8808,\ 2.6424)\\ \mathbf{w} &amp;\leftarrow (0.5,\ -1,\ 0.25) - 0.1\cdot(1.7616,\ -0.8808,\ 2.6424) \approx (0.3238,\ -0.9119,\ -0.0142)\\ b &amp;\leftarrow -0.75 - 0.1\cdot 0.8808 \approx -0.8381 \end{aligned}$$</div>
+    <p>With the new parameters $z \approx 0.6788$ and $a \approx 0.6635$, and the loss fell from $2.1269$ to $1.0891$ in a single step. Each weight moved in proportion to its input: $w_3$ changed the most (the input $x_3 = 3$ is the largest), while $w_2$ even grew, because the input $x_2$ is negative.</p>
+    <figure class="viz"><div class="fv" data-viz="neuron-train" data-config="{&quot;seed&quot;: 7, &quot;eta&quot;: 0.5}"></div><figcaption><b>Figure 10.</b> A neuron learns to separate two classes. One step is a gradient descent step on the mean BCE over all points: the boundary rotates and shifts, and the loss on the right-hand plot goes down. Try a small and a large learning rate $\eta$ and start over.</figcaption></figure>
+    <div class="callout warn"><b>Initialisation</b><p>A single neuron can be trained starting from zero weights; that is exactly what is done in logistic regression. But in a layer of many neurons identical initial weights are a trap: all neurons receive identical gradients and remain copies of each other forever. That is why layer weights are initialised randomly (Xavier and He initialisation).</p></div>
+
+    <h2 id="code">Code: from a loop to vectors</h2>
+    <p>One formula, three levels of code. The loop mirrors the per-coordinate notation symbol for symbol, NumPy mirrors the vector one, and PyTorch adds automatic differentiation.</p>
+    <h3>Per coordinate: a loop, just like the formula</h3>
+    <pre class="code"><span class="lang">python</span><code>import math
+
+def neuron(x, w, b, f):
+    z = b
+    for i in range(len(x)):       # Σ over i: 1 to n in the formula, 0 to n − 1 in Python
+        z += w[i] * x[i]          # contribution of the i-th input
+    return f(z)
+
+sigmoid = lambda z: 1 / (1 + math.exp(-z))
+print(neuron([2, -1, 3], [0.5, -1, 0.25], -0.75, sigmoid))   # 0.8807970779778823</code></pre>
+    <h3>Vectorised: NumPy</h3>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+x = np.array([2.0, -1.0, 3.0])
+w = np.array([0.5, -1.0, 0.25])
+b = -0.75
+
+z = w @ x + b                     # wᵀx + b = 2.0
+a = 1 / (1 + np.exp(-z))          # 0.8807970779778823
+
+# A layer of 2 neurons and a batch of 4 objects
+W = np.array([[ 0.5, -1.0, 0.25],
+              [-1.0,  0.5, 1.0 ]])     # (m, n) = (2, 3): a row is one neuron
+bv = np.array([-0.75, 0.5])            # (m,)
+X = np.array([[2, -1, 3],
+              [0,  0, 0],
+              [1,  1, 1],
+              [4,  2, 0]], dtype=float) # (N, n) = (4, 3): a row is one object
+A = np.maximum(0, X @ W.T + bv)        # ReLU, shape (N, m) = (4, 2)
+print(A)
+# [[2.  1. ]
+#  [0.  0.5]
+#  [0.  1. ]
+#  [0.  0. ]]</code></pre>
+    <h3>PyTorch: a layer and gradients</h3>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+neuron = nn.Linear(in_features=3, out_features=1)   # weight: (1, 3), bias: (1,)
+with torch.no_grad():
+    neuron.weight[:] = torch.tensor([[0.5, -1.0, 0.25]])
+    neuron.bias[:] = torch.tensor([-0.75])
+
+x = torch.tensor([2.0, -1.0, 3.0])
+a = torch.sigmoid(neuron(x))       # ≈ 0.8808
+
+loss = nn.functional.binary_cross_entropy(a, torch.tensor([0.0]))   # correct answer y = 0
+loss.backward()
+print(neuron.weight.grad)          # ≈ [[1.7616, -0.8808, 2.6424]] = δ·x
+print(neuron.bias.grad)            # ≈ [0.8808] = δ</code></pre>
+    <p>The gradients PyTorch computed match our hand-computed $\delta\,\mathbf{x}$ and $\delta$ from section 10. Speed matters too: on a vector of a million elements, <code>w @ x</code> in NumPy runs hundreds of times faster than a pure-Python loop, because it is computed in compiled code and uses the processor’s vector instructions.</p>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ul class="flist"><li><b>Mixing up dimensions.</b> $\mathbf{w}\mathbf{x}^{\top}$ instead of $\mathbf{w}^{\top}\mathbf{x}$ gives an $n\times n$ matrix instead of a number. In code, check the shapes (<code>.shape</code>): $(N, n)$ times $(n, m)$ gives $(N, m)$.</li><li><b>Forgetting the bias.</b> The boundary is nailed to the origin, and the model cannot describe even a simple shift.</li><li><b>Not scaling the inputs.</b> A feature with large values dominates, and gradient descent zigzags and converges slowly.</li><li><b>A sigmoid in every hidden layer of a deep network.</b> Its derivative is at most $0.25$, and the gradient vanishes from layer to layer. Hidden layers use ReLU and its relatives.</li><li><b>Identical initial weights in a layer.</b> The neurons remain clones of each other.</li><li><b>Expecting a non-linear boundary from a single neuron.</b> XOR, “a circle inside a ring”: you need a hidden layer or new features ($x_1x_2$, $x_1^2$).</li><li><b>Getting the indices wrong.</b> In the formula $i$ runs from 1 to $n$, in Python from 0 to $n - 1$.</li><li><b>Computing the sigmoid and the log of the loss separately.</b> For large $|z|$ you end up with $\log 0$. Use numerically stable functions that take logits, for example <code>BCEWithLogitsLoss</code>.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <ul class="flist"><li>A neuron computes $a = f\big(\sum_{i=1}^{n} w_ix_i + b\big) = f(\mathbf{w}^{\top}\mathbf{x} + b)$: weigh, add up, shift, pass through $f$.</li><li>$x_i$ are data, $w_i$ and $b$ are trainable parameters (there are $n + 1$ of them), $z$ is the weighted sum, $f$ is the architect’s choice, $a$ is the answer.</li><li>The sum $\sum w_ix_i$ and the dot product $\mathbf{w}^{\top}\mathbf{x}$ are one and the same; geometrically it is $\lVert\mathbf{w}\rVert\lVert\mathbf{x}\rVert\cos\theta$, a measure of how similar the input is to the weight template.</li><li>The neuron’s boundary $\mathbf{w}^{\top}\mathbf{x} + b = 0$ is a hyperplane: $\mathbf{w}$ sets its orientation and sharpness, $b$ its position. A single neuron is a linear classifier.</li><li>The choice of $f$ determines the profession: identity means regression, sigmoid means probability, step means logic, ReLU means a feature detector.</li><li>A layer is a weight matrix: $\mathbf{a} = f(W\mathbf{x} + \mathbf{b})$; a batch is $A = f(XW^{\top} + \mathbf{1}\mathbf{b}^{\top})$.</li><li>Learning rests on a simple derivative: $\partial L/\partial w_i = \delta\,x_i$, $\partial L/\partial b = \delta$.</li></ul>
+
+    <h2 id="quiz">Test yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. A neuron with the identity activation: $\mathbf{x} = (1,\ 2)$, $\mathbf{w} = (3,\ -1)$, $b = 0.5$. What is the output?</legend><div class="opts"><button type="button" data-ok="1">$1.5$</button><button type="button" data-ok="0">$0.5$</button><button type="button" data-ok="0">$5.5$</button><button type="button" data-ok="0">$-1.5$</button></div><div class="explain" hidden>$z = 3\cdot1 + (-1)\cdot2 + 0.5 = 1.5$, and $a = z$.</div></fieldset><fieldset class="q"><legend>2. How many trainable parameters does a neuron with 10 inputs have?</legend><div class="opts"><button type="button" data-ok="0">10</button><button type="button" data-ok="1">11</button><button type="button" data-ok="0">20</button><button type="button" data-ok="0">100</button></div><div class="explain" hidden>10 weights and one bias: $n + 1 = 11$.</div></fieldset><fieldset class="q"><legend>3. What is the size of $\mathbf{w}^{\top}\mathbf{x}$ if $\mathbf{w}, \mathbf{x}$ are columns of length $n$?</legend><div class="opts"><button type="button" data-ok="0">$n\times 1$</button><button type="button" data-ok="0">$1\times n$</button><button type="button" data-ok="0">$n\times n$</button><button type="button" data-ok="1">$1\times 1$, a single number</button></div><div class="explain" hidden>$(1\times n)(n\times 1) = 1\times 1$. An $n\times n$ matrix would come from $\mathbf{w}\mathbf{x}^{\top}$.</div></fieldset><fieldset class="q"><legend>4. What happens to the decision boundary if you increase only the bias $b$?</legend><div class="opts"><button type="button" data-ok="0">It rotates</button><button type="button" data-ok="1">It shifts parallel to itself</button><button type="button" data-ok="0">It becomes sharper</button><button type="button" data-ok="0">Nothing</button></div><div class="explain" hidden>The normal $\mathbf{w}$ does not change, so the slope stays the same; what changes is the distance $|b|/\lVert\mathbf{w}\rVert$ to the origin.</div></fieldset><fieldset class="q"><legend>5. A neuron $\sigma(wx + b)$ with $w = 2$, $b = -6$. For which $x$ is the output equal to $0.5$?</legend><div class="opts"><button type="button" data-ok="0">$x = -3$</button><button type="button" data-ok="0">$x = 0$</button><button type="button" data-ok="1">$x = 3$</button><button type="button" data-ok="0">$x = 6$</button></div><div class="explain" hidden>$\sigma(z) = 0.5$ at $z = 0$: $2x - 6 = 0$, $x_0 = -b/w = 3$.</div></fieldset><fieldset class="q"><legend>6. Why can a single neuron not compute XOR?</legend><div class="opts"><button type="button" data-ok="0">It does not have enough inputs</button><button type="button" data-ok="0">It needs a different activation function</button><button type="button" data-ok="1">A single neuron’s boundary is a straight line, and the XOR classes cannot be separated by a straight line</button><button type="button" data-ok="0">It needs a larger learning rate</button></div><div class="explain" hidden>With a monotonic $f$ the boundary is the line $w_1x_1 + w_2x_2 + b = 0$, while the XOR points are arranged “crosswise”; a second layer is needed.</div></fieldset><fieldset class="q"><legend>7. What is the derivative $\partial z/\partial w_i$?</legend><div class="opts"><button type="button" data-ok="0">$w_i$</button><button type="button" data-ok="1">$x_i$</button><button type="button" data-ok="0">$1$</button><button type="button" data-ok="0">$f'(z)$</button></div><div class="explain" hidden>$z$ is linear in $w_i$ with coefficient $x_i$. Hence $\partial L/\partial w_i = \delta\,x_i$.</div></fieldset></div>
+
+    <div class="tags"><a href="../../en/#posts">Neural networks</a><a href="../../en/#posts">Linear algebra</a><a href="../../en/#posts">ML basics</a></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="All articles">
+  <div class="wrap-m">
+    <a class="prev" href="../sigmoid/"><span class="kicker">Article</span><span class="big">Anatomy of the sigmoid</span></a>
+    <a class="next" href="../materials/ml-formulas/"><span class="kicker">Material</span><span class="big">A cheat sheet of neural network formulas</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../en/#posts">Articles</a>
+    <a href="../../en/materials/">Materials</a>
+    <a href="../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../assets/js/site.js" defer></script>
+</body>
+</html>

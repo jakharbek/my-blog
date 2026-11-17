@@ -37,6 +37,24 @@
     <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/sigmoid/"/>
   </url>
   <url>
+    <loc>https://javharbek.uz/ru/neuron/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/neuron/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/neuron/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/neuron/"/>
+  </url>
+  <url>
+    <loc>https://javharbek.uz/en/neuron/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/neuron/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/neuron/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/neuron/"/>
+  </url>
+  <url>
+    <loc>https://javharbek.uz/uz/neuron/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/neuron/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/neuron/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/neuron/"/>
+  </url>
+  <url>
     <loc>https://javharbek.uz/ru/about/</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/about/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/about/"/>
