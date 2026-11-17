@@ -1300,9 +1300,9 @@ CARD_ORDER = [c["id"] for g in formulas.GROUPS for c in g["cards"]]
 CARD = {c["id"]: (g, c) for g in formulas.GROUPS for c in g["cards"]}
 
 FX_UI = {
-    "ru": dict(sheet="Шпаргалка", prev="← Предыдущая формула", next="Следующая формула →", toc="Содержание", min="мин чтения", quiz_right="Верно.", quiz_wrong="Не совсем."),
-    "en": dict(sheet="Cheat sheet", prev="← Previous formula", next="Next formula →", toc="Contents", min="min read", quiz_right="Correct.", quiz_wrong="Not quite."),
-    "uz": dict(sheet="Qo‘llanma", prev="← Oldingi formula", next="Keyingi formula →", toc="Mundarija", min="daq o‘qish", quiz_right="To‘g‘ri.", quiz_wrong="Unchalik emas."),
+    "ru": dict(ex="Пример", goal="Цель примера", take="Что показал пример", sheet="Шпаргалка", prev="← Предыдущая формула", next="Следующая формула →", toc="Содержание", min="мин чтения", quiz_right="Верно.", quiz_wrong="Не совсем."),
+    "en": dict(ex="Example", goal="The goal", take="What the example shows", sheet="Cheat sheet", prev="← Previous formula", next="Next formula →", toc="Contents", min="min read", quiz_right="Correct.", quiz_wrong="Not quite."),
+    "uz": dict(ex="Misol", goal="Misolning maqsadi", take="Misol nimani ko‘rsatdi", sheet="Qo‘llanma", prev="← Oldingi formula", next="Keyingi formula →", toc="Mundarija", min="daq o‘qish", quiz_right="To‘g‘ri.", quiz_wrong="Unchalik emas."),
 }
 
 
@@ -1351,6 +1351,14 @@ def render_blocks(blocks, lang, ind="    "):
             out.append(f'<{kind} class="flist">' + "".join(f"<li>{i}</li>" for i in b[1]) + f"</{kind}>")
         elif kind == "deep":
             out.append(f'<details class="deep"><summary>{b[1]}</summary><div class="deep-body">\n' + render_blocks(b[2], lang, ind + "  ") + f"\n{ind}</div></details>")
+        elif kind == "example":
+            # A worked example card: number, formats, goal, body blocks, takeaway (article "neuron", section "practice").
+            e, ui = b[1], FX_UI[lang]
+            kinds = "".join(f"<span>{k}</span>" for k in e["kinds"])
+            out.append(f'<article class="nr-ex" id="ex-{e["n"]}"><header class="nr-ex-head"><span class="nr-ex-n">{ui["ex"]} {e["n"]}</span><span class="nr-ex-kinds">{kinds}</span></header>'
+                       f'<h3>{e["title"]}</h3><div class="nr-ex-goal"><b>{ui["goal"]}</b><p>{e["goal"]}</p></div>\n'
+                       + render_blocks(e["blocks"], lang, ind + "  ")
+                       + f'\n{ind}<div class="nr-ex-take"><b>{ui["take"]}</b><p>{e["take"]}</p></div></article>')
         elif kind == "quiz":
             qs = []
             for i, q in enumerate(b[1]):

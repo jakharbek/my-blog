@@ -25,6 +25,8 @@
       colIn: "входы $x$ (щёлкните)", colW: "веса $w$", colP: "произведения $w_ix_i$", kernel: "Шаблон", vertical: "вертикальная граница", horizontal: "горизонтальная граница", spot: "пятно",
       preset: "Фрагмент", pEdge: "граница", pUniform: "однородный", pH: "гориз. граница", pDot: "точка", pClear: "чёрный",
       fired: "нейрон сработал", silent: "нейрон молчит",
+      exam1: "балл по математике", exam2: "балл по языку", target: "Функция", neurons: "Нейронов ReLU", parts: "Показать отдельные нейроны", params: "параметров:", maxErr: "макс. ошибка:", sumRelu: "сумма нейронов", oneRelu: "вклад одного нейрона",
+      morph: "Вход → скрытый слой", morph0: "Входное пространство: никакая прямая не отделяет закрашенные точки от пустых. Бирюзовая прямая — граница нейрона OR, фиолетовая — NAND.", morph1: "Скрытое пространство $(h_1;\\ h_2)$: точки $(0;\\ 1)$ и $(1;\\ 0)$ слились в $(1;\\ 1)$, и теперь одна прямая AND их отделяет.", morphMid: "Скрытый слой переносит каждую точку в новые координаты $(h_1;\\ h_2)$.",
       eta: "Шаг обучения $\\eta$", loss: "BCE", acc: "точность", epochN: "шаг", class0: "класс 0", class1: "класс 1", lossTitle: "Потери по шагам",
     },
     en: {
@@ -47,6 +49,8 @@
       colIn: "inputs $x$ (click)", colW: "weights $w$", colP: "products $w_ix_i$", kernel: "Template", vertical: "vertical edge", horizontal: "horizontal edge", spot: "spot",
       preset: "Patch", pEdge: "edge", pUniform: "uniform", pH: "horiz. edge", pDot: "dot", pClear: "black",
       fired: "the neuron fires", silent: "the neuron is silent",
+      exam1: "maths score", exam2: "language score", target: "Function", neurons: "ReLU neurons", parts: "Show individual neurons", params: "parameters:", maxErr: "max error:", sumRelu: "sum of neurons", oneRelu: "one neuron's contribution",
+      morph: "Input → hidden layer", morph0: "Input space: no line separates the filled points from the hollow ones. The teal line is the boundary of the OR neuron, the violet one of NAND.", morph1: "Hidden space $(h_1,\\ h_2)$: the points $(0,\\ 1)$ and $(1,\\ 0)$ have merged into $(1,\\ 1)$, and now a single AND line separates them.", morphMid: "The hidden layer moves every point to new coordinates $(h_1,\\ h_2)$.",
       eta: "Learning rate $\\eta$", loss: "BCE", acc: "accuracy", epochN: "step", class0: "class 0", class1: "class 1", lossTitle: "Loss by step",
     },
     uz: {
@@ -63,12 +67,14 @@
       zAt: "$z(\\mathbf{x})$ =", aAt: "$a(\\mathbf{x})$ =", dAt: "$d(\\mathbf{x})$ =", origin: "$|b|/\\lVert\\mathbf{w}\\rVert$ =",
       mode: "Chiqish", x0: "chegara $x_0=-b/w$ =", noBias: "siljishsiz", withBias: "$f(wx+b)$", a0: "$x=0$ da $f(b)$:", slope: "$x_0$ dagi qiyalik:",
       zLbl: "Preaktivatsiya $z$", deriv: "$f'(z)$ hosilani ko‘rsatish",
-      gate: "Ventil", train: "Perseptronni o‘qitish", solution: "Tayyor yechim", epoch: "davr", errors: "hozirgi xatolar",
-      converged: (n) => `Tayyor: ${n}-davrdan keyin to‘rtala nuqta ham to‘g‘ri.`, noLine: (n) => `${n} davrdan keyin ham xatolar qolmoqda: XOR uchun bunday to‘g‘ri chiziq yo‘q.`,
+      gate: "Ventil", train: "Perseptronni o‘qitish", solution: "Tayyor yechim", epoch: "epoxa", errors: "hozirgi xatolar",
+      converged: (n) => `Tayyor: ${n}-epoxadan keyin to‘rtala nuqta ham to‘g‘ri.`, noLine: (n) => `${n} epoxadan keyin ham xatolar qolmoqda: XOR uchun bunday to‘g‘ri chiziq yo‘q.`,
       noSolution: "XOR uchun tayyor yechim yo‘q: nuqtalarni bitta to‘g‘ri chiziq bilan ajratib bo‘lmaydi.", ok: "to‘g‘ri", bad: "xato",
       colIn: "kirishlar $x$ (bosing)", colW: "vaznlar $w$", colP: "ko‘paytmalar $w_ix_i$", kernel: "Shablon", vertical: "vertikal chegara", horizontal: "gorizontal chegara", spot: "dog‘",
       preset: "Fragment", pEdge: "chegara", pUniform: "bir xil", pH: "gor. chegara", pDot: "nuqta", pClear: "qora",
       fired: "neyron ishga tushdi", silent: "neyron jim",
+      exam1: "matematika bali", exam2: "til bali", target: "Funksiya", neurons: "ReLU neyronlari", parts: "Alohida neyronlarni ko‘rsatish", params: "parametrlar:", maxErr: "maks. xato:", sumRelu: "neyronlar yig‘indisi", oneRelu: "bitta neyron hissasi",
+      morph: "Kirish → yashirin qatlam", morph0: "Kirish fazosi: hech bir to‘g‘ri chiziq bo‘yalgan nuqtalarni bo‘sh nuqtalardan ajratmaydi. Firuza chiziq — OR neyronining chegarasi, binafsha — NAND.", morph1: "Yashirin fazo $(h_1;\\ h_2)$: $(0;\\ 1)$ va $(1;\\ 0)$ nuqtalar $(1;\\ 1)$ ga birlashdi, endi ularni bitta AND chizig‘i ajratadi.", morphMid: "Yashirin qatlam har bir nuqtani yangi $(h_1;\\ h_2)$ koordinatalarga ko‘chiradi.",
       eta: "O‘qitish qadami $\\eta$", loss: "BCE", acc: "aniqlik", epochN: "qadam", class0: "0-sinf", class1: "1-sinf", lossTitle: "Qadamlar bo‘yicha yo‘qotish",
     },
   }[FV.lang] || {};
@@ -523,6 +529,11 @@
       }
       p.fn((x) => F(wt * x + b), { c: "blue", w: 2.6, jump: f === "step" ? 0.5 : null });
       if (Number.isFinite(x0) && x0 > -5 && x0 < 5) p.dot(x0, F(0), { c: "violet", r: 5 });
+      (cfg.marks || []).forEach((m) => {
+        const y = F(wt * m + b);
+        p.dot(m, y, { c: "orange", r: 4.5 });
+        p.text(m, y, n4(y), { dx: 8, dy: 16, anchor: "start", c: "orange", cls: "nr-strong" });
+      });
       p.legend([{ label: L.withBias, c: "blue" }, { label: L.noBias, c: "faint", dash: true }]);
       ro.set("x0", Number.isFinite(x0) ? n4(x0) : "—");
       ro.set("a0", n4(F(b)));
@@ -734,6 +745,125 @@
       const [loss, acc] = lossOf();
       ro.set("e", String(ep)); ro.set("w", vec(th.slice(0, 2).map((v) => Math.round(v * 100) / 100)));
       ro.set("b", FV.fmt(th[2], 2)); ro.set("l", FV.fmt(loss, 3)); ro.set("a", Math.round(acc * 100) + "%");
+    }
+    draw();
+  });
+  // ======================================================================
+  // 11. Labelled points on a plane with its own axes (examples section)
+  // ======================================================================
+  FV.widget("neuron-points", (el, cfg) => {
+    const w = FV.shell(el, { cols: true });
+    const c1 = FV.col(w.stage), c2 = FV.col(w.stage);
+    const R = cfg.range || [0, 10];
+    let wv = (cfg.w || [1, 0.5]).slice(), b = cfg.b != null ? cfg.b : -9;
+    const pts = cfg.pts || [];
+    const ax = cfg.axes === "exam" ? [L.exam1, L.exam2] : ["x₁", "x₂"];
+    const p = new FV.Plot(c1, { x: R, y: R, equal: true, xLabel: ax[0], yLabel: ax[1], maxHeight: 460 });
+    const br = cfg.bRange || [-15, 5];
+    const s1 = FV.ui.slider({ label: L.w1, min: -2, max: 2, step: 0.05, value: wv[0], fmt: (v) => FV.fmt(v, 2), oninput: (v) => { wv[0] = v; draw(); } });
+    const s2 = FV.ui.slider({ label: L.w2, min: -2, max: 2, step: 0.05, value: wv[1], fmt: (v) => FV.fmt(v, 2), oninput: (v) => { wv[1] = v; draw(); } });
+    const s3 = FV.ui.slider({ label: L.b, min: br[0], max: br[1], step: 0.1, value: b, fmt: (v) => FV.fmt(v, 1), oninput: (v) => { b = v; draw(); } });
+    const rs = FV.ui.button({ label: "↺ " + FV.t("restart"), onclick: () => { wv = cfg.w.slice(); b = cfg.b; s1.set(wv[0]); s2.set(wv[1]); s3.set(b); draw(); } });
+    w.controls.append(s1.el, s2.el, s3.el, rs.el);
+    p.onresize = draw;
+    function draw() {
+      p.clear();
+      const nw2 = wv[0] ** 2 + wv[1] ** 2, nw = Math.sqrt(nw2) || 1;
+      p.heat((x1, x2) => sig(wv[0] * x1 + wv[1] * x2 + b), { cmap: "diverging", z: [0, 1], res: 4, alpha: 0.6 });
+      [[-2, "4 5"], [2, "4 5"], [0, null]].forEach(([lev, dash]) => {
+        const s = clipLine(wv[0], wv[1], b - lev, R[0], R[1], R[0], R[1]);
+        if (s) p.line(s[0][0], s[0][1], s[1][0], s[1][1], { c: "ink", w: lev ? 1.1 : 2.4, dash, opacity: lev ? 0.6 : 1 });
+      });
+      // the normal w, drawn from the boundary point nearest to the centre
+      const cx = (R[0] + R[1]) / 2, zc = wv[0] * cx + wv[1] * cx + b;
+      const f = [cx - (zc * wv[0]) / nw2, cx - (zc * wv[1]) / nw2], k = (0.14 * (R[1] - R[0])) / nw;
+      if (nw2 > 1e-9 && f[0] > R[0] && f[0] < R[1] && f[1] > R[0] && f[1] < R[1]) {
+        p.arrow(f[0], f[1], f[0] + wv[0] * k, f[1] + wv[1] * k, { c: "blue", w: 2.4 });
+        p.text(f[0] + wv[0] * k, f[1] + wv[1] * k, "w", { dx: 8, dy: -6, c: "blue", cls: "nr-strong" });
+      }
+      const rows = pts.map((q) => {
+        const z = wv[0] * q.x[0] + wv[1] * q.x[1] + b, a = sig(z);
+        p.dot(q.x[0], q.x[1], { r: 6, c: a >= 0.5 ? "red" : "blue" });
+        p.text(q.x[0], q.x[1], q.l, { dx: 10, dy: -10, cls: "nr-strong" });
+        return `<tr><td>${q.l}</td><td class=num>${vec(q.x)}</td><td class=num>${n4(z)}</td><td class=num>${n4(a)}</td><td class=num>${n4(z / nw)}</td></tr>`;
+      });
+      c2.innerHTML = `<div class="table-wrap"><table class="data nr-tt"><thead><tr><th></th><th class=num>x</th><th class=num>z</th><th class=num>a</th><th class=num>d</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+      const cf = (v) => (Math.abs(Math.abs(v) - 1) < 1e-9 ? "" : tn(Math.abs(v)));
+      c2.append(FV.rich(`$z = ${wv[0] < 0 ? "-" : ""}${cf(wv[0])}x_1 ${wv[1] < 0 ? "-" : "+"} ${cf(wv[1])}x_2 ${b < 0 ? "-" : "+"} ${tn(Math.abs(b))}$`, "p"));
+    }
+    draw();
+  });
+
+  // ======================================================================
+  // 12. A sum of ReLU neurons builds a broken line (universal approximation)
+  // ======================================================================
+  FV.widget("neuron-relu-sum", (el, cfg) => {
+    const w = FV.shell(el, {});
+    const G = { sq: { f: (x) => x * x, y: [-0.6, 4.4], tex: "x^2" }, sin: { f: (x) => Math.sin((Math.PI * x) / 2), y: [-1.4, 1.4], tex: "\\sin\\frac{\\pi x}{2}" } };
+    let tg = cfg.target || "sq", K = cfg.k || 4, parts = true;
+    const X0 = -2, X1 = 2;
+    const p = new FV.Plot(w.stage, { x: [X0, X1], y: G[tg].y, xLabel: "x", yLabel: "y", aspect: 0.55 });
+    const seg = FV.ui.seg({ label: L.target, value: tg, options: [{ value: "sq", label: "$x^2$" }, { value: "sin", label: "$\\sin\\frac{\\pi x}{2}$" }], onchange: (v) => { tg = v; p.setDomain(null, G[tg].y); draw(); } });
+    const sk = FV.ui.slider({ label: L.neurons, min: 1, max: 16, step: 1, value: K, fmt: (v) => String(v), oninput: (v) => { K = v; draw(); } });
+    const ck = FV.ui.check({ label: L.parts, checked: true, onchange: (v) => { parts = v; draw(); } });
+    w.controls.append(seg.el, sk.el, ck.el);
+    const ro = FV.ui.readout(w.readout, [{ key: "n", label: L.neurons + ":" }, { key: "p", label: L.params }, { key: "e", label: L.maxErr, c: "red" }]);
+    p.onresize = draw;
+    function build() {
+      const g = G[tg].f, xs = FV.linspace(X0, X1, K + 1), sl = [];
+      for (let k = 0; k < K; k++) sl.push((g(xs[k + 1]) - g(xs[k])) / (xs[k + 1] - xs[k]));
+      // y(x) = g(x₀) + Σ cₖ·ReLU(x − xₖ),  cₖ = sₖ − sₖ₋₁ (s₋₁ = 0): each term is one neuron with w = 1, b = −xₖ
+      const c = sl.map((s, k) => s - (k ? sl[k - 1] : 0));
+      const y = (x) => g(xs[0]) + c.reduce((acc, ck, k) => acc + ck * Math.max(0, x - xs[k]), 0);
+      return { xs, c, y, g };
+    }
+    function draw() {
+      const m = build();
+      p.clear();
+      p.fn(m.g, { c: "faint", w: 5, opacity: 0.35 });
+      if (parts) m.c.forEach((ck, k) => p.fn((x) => ck * Math.max(0, x - m.xs[k]), { c: ck >= 0 ? "blue" : "red", w: 1.2, opacity: 0.55 }));
+      p.fn(m.y, { c: "orange", w: 2.6 });
+      m.xs.slice(0, -1).forEach((x) => p.dot(x, m.y(x), { r: 3.5, c: "orange" }));
+      p.legend([{ label: "$y=" + G[tg].tex + "$", c: "faint" }, { label: L.sumRelu, c: "orange" }].concat(parts ? [{ label: L.oneRelu, c: "blue" }] : []));
+      let e = 0;
+      FV.linspace(X0, X1, 801).forEach((x) => { e = Math.max(e, Math.abs(m.y(x) - m.g(x))); });
+      ro.set("n", String(K)); ro.set("p", String(3 * K + 1)); ro.set("e", FV.num(e, 3));
+    }
+    draw();
+  });
+
+  // ======================================================================
+  // 13. XOR: the hidden layer moves the points into a separable position
+  // ======================================================================
+  FV.widget("neuron-xor-morph", (el, cfg) => {
+    const w = FV.shell(el, {});
+    const P = [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]];
+    const H = (z) => (z >= 0 ? 1 : 0);
+    const hid = (q) => [H(q[0] + q[1] - 0.5), H(-q[0] - q[1] + 1.5)];
+    let t = 0, dir = 1, timer = 0;
+    const p = new FV.Plot(w.stage, { x: [-0.45, 1.45], y: [-0.45, 1.45], equal: true, xLabel: "x₁ → h₁", yLabel: "x₂ → h₂", xTicks: [0, 1], yTicks: [0, 1], maxHeight: 420 });
+    const st = FV.ui.slider({ label: L.morph, min: 0, max: 1, step: 0.01, value: 0, fmt: (v) => FV.fmt(v, 2), oninput: (v) => { stop(); t = v; draw(); }, wide: true });
+    const play = FV.ui.button({ label: "▶ " + FV.t("play"), primary: true, onclick: () => (timer ? stop() : start()) });
+    w.controls.append(st.el, play.el);
+    function start() { play.setLabel("❚❚ " + FV.t("pause")); timer = setInterval(() => { t += dir * 0.02; if (t >= 1 || t <= 0) { t = FV.clamp(t, 0, 1); dir = -dir; } st.set(t); draw(); }, 40); }
+    function stop() { clearInterval(timer); timer = 0; play.setLabel("▶ " + FV.t("play")); }
+    p.onresize = draw;
+    function draw() {
+      p.clear();
+      const ln = (a, b, c, o) => { const s = clipLine(a, b, c, -0.45, 1.45, -0.45, 1.45); if (s) p.line(s[0][0], s[0][1], s[1][0], s[1][1], o); };
+      if (t < 1) { ln(1, 1, -0.5, { c: "teal", w: 2, opacity: 1 - t }); ln(-1, -1, 1.5, { c: "violet", w: 2, opacity: 1 - t }); }
+      if (t > 0) ln(1, 1, -1.5, { c: "ink", w: 2.4, opacity: t });
+      const seen = {};
+      P.forEach((q) => {
+        const h = hid(q), x = q[0] + (h[0] - q[0]) * t, y = q[1] + (h[1] - q[1]) * t;
+        p.dot(x, y, { r: 8, c: q[2] ? "teal" : "ink", hollow: !q[2] });
+        const key = Math.round(x * 20) + ":" + Math.round(y * 20), k = (seen[key] = (seen[key] || 0) + 1);
+        p.text(x, y, `(${q[0]}${SEP.trim()} ${q[1]})`, { dx: 12, dy: k > 1 ? 14 : -10 });
+      });
+      p.legend(t < 0.5 ? [{ label: "OR: $x_1+x_2-0{,}5=0$".replace("0{,}5", FV.lang === "en" ? "0.5" : "0{,}5"), c: "teal" }, { label: "NAND: $-x_1-x_2+1{,}5=0$".replace("1{,}5", FV.lang === "en" ? "1.5" : "1{,}5"), c: "violet" }]
+        : [{ label: "AND: $h_1+h_2-1{,}5=0$".replace("1{,}5", FV.lang === "en" ? "1.5" : "1{,}5"), c: "ink" }]);
+      w.note.textContent = "";
+      w.note.append(FV.rich(t < 0.02 ? L.morph0 : t > 0.98 ? L.morph1 : L.morphMid));
     }
     draw();
   });
