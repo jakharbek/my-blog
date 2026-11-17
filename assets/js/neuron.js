@@ -43,6 +43,7 @@
       fsHelpTouch: "Щипок — масштаб · два пальца — перемещать · один палец — вращать · касание нейрона — войти",
       netAct: "Функция активации", netActFor: "Активация нейрона {n}:", netActNone: "{n} — вход, у него нет активации", netActLayer: "для всего слоя", netActReset: "все — сигмоида",
       netActSet: "Активация {n}: {f}", netActAll: "Все нейроны снова с сигмоидой", netMse: "Выход не сигмоида: ответ уже не вероятность, поэтому потери — MSE ½(ŷ − y)², а δ = (ŷ − y)·f′(z).",
+      netKeys: "Клавиши: стрелки — вращать; Shift + стрелки или W A S D — перемещать; + и − — масштаб; 0 — сброс; Enter — войти в выбранный нейрон; Esc или Backspace — выйти из нейрона.", fsZoomNow: "Масштаб {p}%: нажмите, чтобы вписать",
       eta: "Шаг обучения $\\eta$", loss: "BCE", acc: "точность", epochN: "шаг", class0: "класс 0", class1: "класс 1", lossTitle: "Потери по шагам",
     },
     en: {
@@ -83,6 +84,7 @@
       fsHelpTouch: "Pinch — zoom · two fingers — pan · one finger — rotate · tap a neuron — go inside",
       netAct: "Activation function", netActFor: "Activation of neuron {n}:", netActNone: "{n} is an input, it has no activation", netActLayer: "for the whole layer", netActReset: "all sigmoid",
       netActSet: "Activation of {n}: {f}", netActAll: "All neurons use the sigmoid again", netMse: "The output is not a sigmoid: the answer is no longer a probability, so the loss is MSE ½(ŷ − y)² and δ = (ŷ − y)·f′(z).",
+      netKeys: "Keys: arrows rotate; Shift + arrows or W A S D pan; + and − zoom; 0 resets; Enter enters the selected neuron; Esc or Backspace leaves the neuron.", fsZoomNow: "Zoom {p}%: press to fit",
       eta: "Learning rate $\\eta$", loss: "BCE", acc: "accuracy", epochN: "step", class0: "class 0", class1: "class 1", lossTitle: "Loss by step",
     },
     uz: {
@@ -123,6 +125,7 @@
       fsHelpTouch: "Chimchilash — masshtab · ikki barmoq — surish · bitta barmoq — aylantirish · neyronga tegish — ichiga kirish",
       netAct: "Aktivatsiya funksiyasi", netActFor: "{n} neyronining aktivatsiyasi:", netActNone: "{n} — kirish, uning aktivatsiyasi yo‘q", netActLayer: "butun qatlam uchun", netActReset: "hammasi — sigmoida",
       netActSet: "{n} aktivatsiyasi: {f}", netActAll: "Barcha neyronlar yana sigmoida bilan", netMse: "Chiqish sigmoida emas: javob endi ehtimollik emas, shuning uchun yo‘qotish — MSE ½(ŷ − y)², δ = (ŷ − y)·f′(z).",
+      netKeys: "Tugmalar: strelkalar — aylantirish; Shift + strelkalar yoki W A S D — surish; + va − — masshtab; 0 — tiklash; Enter — tanlangan neyronga kirish; Esc yoki Backspace — neyrondan chiqish.", fsZoomNow: "Masshtab {p}%: sig‘dirish uchun bosing",
       eta: "O‘qitish qadami $\\eta$", loss: "BCE", acc: "aniqlik", epochN: "qadam", class0: "0-sinf", class1: "1-sinf", lossTitle: "Qadamlar bo‘yicha yo‘qotish",
     },
   }[FV.lang] || {};
@@ -324,8 +327,8 @@
     }
     function frame(now) {
       raf = 0;
-      if (!running) return;
-      if (visible) pulses(((now - t0) % 2600) / 2600);
+      if (!running || !visible) return;          // off screen the loop sleeps; the observer wakes it up
+      pulses(((now - t0) % 2600) / 2600);
       raf = requestAnimationFrame(frame);
     }
     function start() { running = true; play.setLabel("❚❚ " + FV.t("pause")); t0 = performance.now(); if (!raf) raf = requestAnimationFrame(frame); }
@@ -335,7 +338,7 @@
       let last = 0;
       new ResizeObserver(() => { const x = box.clientWidth; if (Math.abs(x - last) > 1) { last = x; layout(); draw(); } }).observe(box);
     }
-    if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { visible = e.isIntersecting; })).observe(el);
+    if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { visible = e.isIntersecting; if (visible && running && !raf) raf = requestAnimationFrame(frame); })).observe(el);
     layout(); draw();
     if (!reduced()) start();
   });
@@ -364,7 +367,7 @@
       const c = compute();
       const lo = Math.min(0, ...c.cum), hi = Math.max(0, ...c.cum);
       const pad = Math.max(0.4, (hi - lo) * 0.18);
-      if (p) { p.wrap.remove(); }
+      if (p) { p.ro && p.ro.disconnect(); p.wrap.remove(); }
       p = new FV.Plot(w.stage, { x: [-0.6, ex.x.length + 1.6], y: [lo - pad, hi + pad], xTicks: ticks(), aspect: 0.48, minHeight: 240, maxHeight: 360, ariaLabel: L.cum });
       p.onresize = draw;
     }
@@ -707,10 +710,13 @@
     w.stage.append(FV.h("div", { class: "nr-px" }, col(L.colIn, gIn), FV.h("span", { class: "nr-op", text: "×" }), col(L.colW, gW), FV.h("span", { class: "nr-op", text: "=" }), col(L.colP, gP)), out);
     const sk = FV.ui.seg({ label: L.kernel, value: kern, options: ["vertical", "horizontal", "spot"].map((k) => ({ value: k, label: L[k] })), onchange: (v) => { kern = v; draw(); } });
     const sp = FV.h("div", { class: "fv-seg" }, FV.h("span", { text: L.preset }), FV.h("div", { class: "fv-seg-btns" },
-      [["edge", L.pEdge], ["uniform", L.pUniform], ["h", L.pH], ["dot", L.pDot], ["clear", L.pClear]].map(([k, lab]) => FV.h("button", { type: "button", "aria-pressed": "false", onclick: () => { x = P[k].slice(); draw(); } }, lab))));
+      [["edge", L.pEdge], ["uniform", L.pUniform], ["h", L.pH], ["dot", L.pDot], ["clear", L.pClear]].map(([k, lab]) => FV.h("button", { type: "button", onclick: () => { x = P[k].slice(); draw(); } }, lab))));
     w.controls.append(sk.el, sp);
     const ro = FV.ui.readout(w.readout, [{ key: "s", label: "$\\sum w_ix_i$ =" }, { key: "b", label: "$b$ =" }, { key: "z", label: "$z$ =", c: "blue" }, { key: "a", label: "$a=\\mathrm{ReLU}(z)$ =", c: "orange" }]);
     const shade = (t) => FV.rgb(FV.cmap("diverging", t));
+    // white or near-black digits, whichever is more readable on the cell's colour (WCAG relative luminance)
+    const ink = (t) => { const c = FV.cmap("diverging", t).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+      const Lc = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; return 1.05 / (Lc + 0.05) > (Lc + 0.05) / 0.0595 ? "#FFFFFF" : "#171A20"; };
     function draw() {
       const k = K[kern], m = Math.max(...k.w.map(Math.abs));
       let s = 0;
@@ -721,9 +727,11 @@
         cellsIn[i].textContent = FV.num(v, 2);
         cellsIn[i].setAttribute("aria-label", `x${SUB[i + 1]} = ${FV.num(v, 2)}`);
         cellsW[i].style.background = shade(0.5 - k.w[i] / (2 * m));
+        cellsW[i].style.color = ink(0.5 - k.w[i] / (2 * m));
         cellsW[i].textContent = n4(k.w[i]);
         const pr = k.w[i] * v; s += pr;
         cellsP[i].style.background = shade(0.5 - pr / (2 * m));
+        cellsP[i].style.color = ink(0.5 - pr / (2 * m));
         cellsP[i].textContent = pr === 0 ? "0" : n4(pr);
       });
       const z = s + k.b, a = Math.max(0, z);
@@ -893,7 +901,9 @@
     const st = FV.ui.slider({ label: L.morph, min: 0, max: 1, step: 0.01, value: 0, fmt: (v) => FV.fmt(v, 2), oninput: (v) => { stop(); t = v; draw(); }, wide: true });
     const play = FV.ui.button({ label: "▶ " + FV.t("play"), primary: true, onclick: () => (timer ? stop() : start()) });
     w.controls.append(st.el, play.el);
-    function start() { play.setLabel("❚❚ " + FV.t("pause")); timer = setInterval(() => { t += dir * 0.02; if (t >= 1 || t <= 0) { t = FV.clamp(t, 0, 1); dir = -dir; } st.set(t); draw(); }, 40); }
+    let seen = true;
+    if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { seen = e.isIntersecting; })).observe(el);
+    function start() { play.setLabel("❚❚ " + FV.t("pause")); timer = setInterval(() => { if (!seen) return; t += dir * 0.02; if (t >= 1 || t <= 0) { t = FV.clamp(t, 0, 1); dir = -dir; } st.set(t); draw(); }, 40); }
     function stop() { clearInterval(timer); timer = 0; play.setLabel("▶ " + FV.t("play")); }
     p.onresize = draw;
     function draw() {
@@ -977,7 +987,9 @@
     let uz = 1, uzT = 1, zAnchor = null, panX = 0, panY = 0, vAz = 0, vEl = 0, camTw = null, isFs = false;
 
     // ----- DOM
-    const cv = FV.h("canvas", { class: "nr-net-canvas", role: "img", "aria-label": L.netAria, tabindex: 0 });
+    const keysId = "nrk" + Math.random().toString(36).slice(2, 8);
+    const keysDesc = FV.h("p", { class: "nr-sr", id: keysId, text: L.netKeys });
+    const cv = FV.h("canvas", { class: "nr-net-canvas", role: "img", "aria-label": L.netAria, "aria-describedby": keysId, tabindex: 0 });
     const tip = FV.h("div", { class: "nr-net-tip", hidden: true });
     const crumbCur = FV.h("span", { class: "nr-crumb-cur" });
     const crumb = FV.h("nav", { class: "nr-net-crumb", "aria-label": L.netCrumbAria },
@@ -987,7 +999,7 @@
     const fsBtn = (cls, title, text, onclick) => FV.h("button", { type: "button", class: "nr-fs-btn " + cls, title, "aria-label": title, onclick }, text);
     const zoomLbl = fsBtn("nr-fs-zoom", L.fsFit, "100%", () => fitView());
     // on narrow screens the two floating windows take turns, so they never cover each other
-    const toggleWin = (cls, other) => { const on = el.classList.toggle(cls) === false; if (on && window.innerWidth < 900) el.classList.add(other); syncFsBar(); };
+    const toggleWin = (cls, other) => { const on = el.classList.toggle(cls) === false; if (on && window.innerWidth < 1040) el.classList.add(other); syncFsBar(); };
     const dockB = fsBtn("nr-fs-tg", L.fsControls, "", () => toggleWin("nr-dock-off", "nr-info-off"));
     const infoB = fsBtn("nr-fs-tg", L.fsPanel, "", () => toggleWin("nr-info-off", "nr-dock-off"));
     dockB.append(FV.h("span", { class: "i", text: "⚙" }), FV.h("span", { class: "t", text: L.fsControls }));
@@ -1006,7 +1018,7 @@
     const panel = FV.h("div", { class: "nr-net-panel" });
     const pL = FV.h("div", { class: "nr-net-sel" }), pR = FV.h("div", { class: "nr-net-mat" });
     panel.append(pL, pR);
-    w.stage.append(stageBox, live, panel);
+    w.stage.append(stageBox, live, keysDesc, panel);
     const segMode = FV.ui.seg({ label: L.netMode, value: mode, options: [{ value: "fwd", label: L.netFwd }, { value: "bwd", label: L.netBwd }], onchange: (v) => { mode = v; start(); } });
     const segSel = FV.ui.seg({ label: L.netNeuron, value: sel, options: N.map((n) => ({ value: n.id, label: n.name })), onchange: (v) => { if (focus > 0.5 || anim) enterN(v); else { sel = v; draw(); } } });
     const play = FV.ui.button({ label: "▶ " + L.netPlay, primary: true, onclick: () => (playing ? stopPlay() : start()) });
@@ -1135,7 +1147,7 @@
           ctx.fillText(n.bias ? "1" : (mode === "bwd" && n.layer > 0 ? FV.num(v, 2) : FV.fmt(v, 2)), q.X, q.Y + 1);
           if (!n.bias) label(ctx, nameOf(n.id), q.X, q.Y + R + 12, n.id === "h0" ? FV.rgb(C.orange) : FV.rgb(C.ink), C);
         }
-        if (!n.bias && zoom < 0.05) hot.push({ x: q.X, y: q.Y, r: R + 6, id: n.id, tip: () => `${n.name}: ${mode === "fwd" ? (n.layer ? "a" : "x") : "δ"} = ${n4(nodeVal(n, run()).v)} · ${L.netClickIn}` });
+        if (!n.bias && zoom < 0.05) hot.push({ x: q.X, y: q.Y, r: R + 6, id: n.id, tip: () => `${n.name}: ${mode === "fwd" ? (n.layer ? "a" : "x") : (n.layer ? "δ" : "∂L/∂x")} = ${n4(nodeVal(n, run()).v)} · ${L.netClickIn}` });
       });
       ctx.restore();
     }
@@ -1202,12 +1214,14 @@
       const src = I.ins.map((_, k) => srcPos(k, m)), syn = src.map(onMembrane);
       const bSrc = [CORE[0], -1.85, 0], bSyn = onMembrane([CORE[0], -1, 0.0001]);
       const fz = (zv) => FV.clamp(zv, -4, 4);
+      // the panel shows f in the forward pass and its derivative f′ in the backward pass
+      const Gf = mode === "bwd" ? I.A.d : I.A.f, gv = Gf(I.z);
       let lo = 0, hi = 0;
-      for (let i = 0; i <= 80; i++) { const v = I.A.f(-4 + (8 * i) / 80); lo = Math.min(lo, v); hi = Math.max(hi, v); }
+      for (let i = 0; i <= 80; i++) { const v = Gf(-4 + (8 * i) / 80); lo = Math.min(lo, v); hi = Math.max(hi, v); }
       if (hi - lo < 1e-6) hi = lo + 1;
       const gx = (zv) => GX0 + ((fz(zv) + 4) / 8) * (GX1 - GX0), gy = (av) => ((FV.clamp(av, lo, hi) - lo) / (hi - lo) - 0.5) * 2 * (GY * 0.85);
-      const gPt = [gx(I.z), gy(I.a), 0];
-      const axonA = [GX1, gy(I.a), 0], axonB = [RM, 0, 0], dest = [2.55, 0, 0];
+      const gPt = [gx(I.z), gy(gv), 0];
+      const axonA = [GX1, gy(gv), 0], axonB = [RM, 0, 0], dest = [2.55, 0, 0];
 
       // membrane: a translucent sphere with three great circles
       const cq = P3([0, 0, 0]), Rp = RM * scl * cq.k;
@@ -1234,8 +1248,8 @@
       line([GX0, gy(0), 0], [GX1, gy(0), 0], FV.rgb(C.ink, 0.25), 0.8, [2, 3]);
       line([gx(0), -GY, 0], [gx(0), GY, 0], FV.rgb(C.ink, 0.2), 0.8, [2, 3]);
       ctx.beginPath();
-      for (let i = 0; i <= 80; i++) { const zv = -4 + (8 * i) / 80, q = P3([gx(zv), gy(I.A.f(zv)), 0]); i ? ctx.lineTo(q.X, q.Y) : ctx.moveTo(q.X, q.Y); }
-      ctx.strokeStyle = FV.rgb(C.blue); ctx.lineWidth = 2.2; ctx.stroke();
+      for (let i = 0; i <= 80; i++) { const zv = -4 + (8 * i) / 80, q = P3([gx(zv), gy(Gf(zv)), 0]); i ? ctx.lineTo(q.X, q.Y) : ctx.moveTo(q.X, q.Y); }
+      ctx.strokeStyle = FV.rgb(mode === "bwd" ? C.orange : C.blue); ctx.lineWidth = 2.2; ctx.stroke();
       line([gx(I.z), gy(lo), 0], gPt, FV.rgb(C.orange, 0.6), 1, [2, 3]);
       line(axonA, axonB, FV.rgb(C.orange, 0.95), 2.4);
       line(axonB, dest, FV.rgb(I.out ? (I.out.w >= 0 ? C.blue : C.red) : C.orange, 0.95), I.out ? 1 + 2.8 * Math.min(1, Math.abs(I.out.w) / 1.5) : 2.4);
@@ -1269,7 +1283,9 @@
         if (I.out) { const tt = mode === "fwd" ? r.y : FV.clamp(r.d2 / 0.4, -1, 1); sphere(ctx, q.X, q.Y, R, valueFill(tt, C), C); ctx.fillStyle = "#171A20"; ctx.font = `600 ${Math.round(FV.clamp(R * 0.6, 9, 14))}px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(FV.fmt(mode === "fwd" ? r.y : r.d2, 2), q.X, q.Y + 1);
           label(ctx, I.out.name, q.X, q.Y + R + 12, fg, C); hot.push({ x: q.X, y: q.Y, r: R + 6, id: "y", tip: () => `ŷ = ${n4(r.y)} · ${L.netClickIn}` }); }
         else { ctx.beginPath(); ctx.rect(q.X - R, q.Y - R * 0.75, 2 * R, 1.5 * R); ctx.fillStyle = FV.rgb(mixC(C.card, C.orange, 0.25)); ctx.fill(); ctx.strokeStyle = FV.rgb(C.orange); ctx.lineWidth = 2; ctx.stroke();
-          ctx.fillStyle = fg; ctx.font = `600 ${Math.round(FV.clamp(R * 0.42, 9, 13))}px ${sans}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(L.inAnswer, q.X, q.Y); }
+          ctx.fillStyle = fg; let fsz = Math.round(FV.clamp(R * 0.42, 9, 13)); ctx.font = `600 ${fsz}px ${sans}`;
+          while (fsz > 7 && ctx.measureText(L.inAnswer).width > 1.8 * R) { fsz--; ctx.font = `600 ${fsz}px ${sans}`; }
+          ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(L.inAnswer, q.X, q.Y); }
       } });
       things.map((o) => ({ o, q: P3(o.p) })).filter((o) => o.q.ok).sort((a, b) => a.q.d - b.q.d).forEach(({ o, q }) => o.draw(q));
 
@@ -1315,6 +1331,7 @@
       hint.textContent = isIn ? (byId[inside].layer === 0 ? (mode === "fwd" ? L.inFan : L.inFanBwd) + ". " + L.netHintFan : L.netHintIn) : L.netHintNet;
       go.setLabel(isIn ? "⤴ " + L.netLeave : "⤵ " + L.netEnter);
       zoomLbl.textContent = Math.round(uz * 100) + "%";
+      zoomLbl.setAttribute("aria-label", L.fsZoomNow.replace("{p}", Math.round(uz * 100)));
       const sn = byId[sel], noAct = sn.layer === 0;
       actLbl.textContent = noAct ? L.netActNone.replace("{n}", sn.name) : L.netActFor.replace("{n}", sn.name);
       actSel.disabled = noAct; if (!noAct && actSel.value !== acts[sel]) actSel.value = acts[sel];
@@ -1420,9 +1437,12 @@
       if (el.requestFullscreen && document.fullscreenEnabled !== false) el.requestFullscreen().catch(() => setFs(true, true));
       else setFs(true, true);
     }
+    let fakeScroll = null;
     function setFs(on, fake) {
       if (on === isFs && !fake) return;
       isFs = on; if (on) visible = true;
+      if (on && fake) fakeScroll = window.scrollY;
+      const wasFake = el.classList.contains("nr-fs-fake");
       el.classList.toggle("nr-fs", on); el.classList.toggle("nr-fs-fake", !!(on && fake));
       document.documentElement.classList.toggle("nr-noscroll", !!(on && fake));
       // In full screen the wheel is heard on the document. Headless Chromium delivered no wheel events to the
@@ -1430,7 +1450,7 @@
       // duration (a passive listener never blocks scrolling).
       if (on) { document.addEventListener("wheel", onWheel, { passive: false, capture: true }); window.addEventListener("wheel", noop, { passive: true }); }
       else { document.removeEventListener("wheel", onWheel, { capture: true }); window.removeEventListener("wheel", noop); }
-      if (on) { const wide = window.innerWidth >= 900; el.classList.toggle("nr-dock-off", !wide); el.classList.toggle("nr-info-off", !wide); }
+      if (on) { const wide = window.innerWidth >= 1040; el.classList.toggle("nr-dock-off", !wide); el.classList.toggle("nr-info-off", !wide); }
       full.setLabel((on ? "✕ " : "⛶ ") + (on ? L.netExit : L.netFull));
       fsHelp.textContent = window.matchMedia && window.matchMedia("(pointer: coarse)").matches ? L.fsHelpTouch : L.fsHelp;
       syncFsBar();
@@ -1438,6 +1458,12 @@
       resize();
       showHelp(on);
       if (on) cv.focus({ preventScroll: true });
+      else {
+        if (wasFake && fakeScroll != null) window.scrollTo(0, fakeScroll);
+        fakeScroll = null;
+        el.scrollIntoView({ block: "nearest" });
+        full.el.focus({ preventScroll: true });
+      }
     }
     function syncFsBar() {
       dockB.setAttribute("aria-pressed", el.classList.contains("nr-dock-off") ? "false" : "true");
@@ -1554,17 +1580,29 @@
     }
     el.addEventListener("wheel", onWheel, { passive: false });
     cv.addEventListener("dblclick", (e) => { if (!hit(...at(e))) { const [px, py] = at(e); zoomBy(1.8, px, py); } });
+    el.addEventListener("keydown", (e) => {
+      if (!isFs) return;
+      if (e.key === "Tab") {   // the page behind a full-screen widget is not reachable, so focus cycles inside it
+        const f = [...el.querySelectorAll('button, input, select, canvas[tabindex], [tabindex="0"]')].filter((x) => !x.disabled && x.offsetParent !== null && getComputedStyle(x).visibility !== "hidden");
+        if (!f.length) return;
+        const i = f.indexOf(document.activeElement), n = e.shiftKey ? (i <= 0 ? f.length - 1 : i - 1) : (i === f.length - 1 ? 0 : i + 1);
+        e.preventDefault(); f[n].focus();
+        return;
+      }
+      if (e.key === "Escape" && e.target !== cv) { e.preventDefault(); if (inside) exitN(); else toggleFs(); }
+    });
     cv.addEventListener("keydown", (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;   // Ctrl/⌘ shortcuts (page zoom, save…) belong to the browser
       if (e.key === "Enter") { e.preventDefault(); enterN(sel); return; }
-      if ((e.key === "Escape" || e.key === "Backspace") && inside) { e.preventDefault(); exitN(); return; }
-      if (e.key === "Escape" && isFs) { e.preventDefault(); toggleFs(); return; }
+      if ((e.key === "Escape" || e.key === "Backspace") && inside) { e.preventDefault(); e.stopPropagation(); exitN(); return; }
+      if (e.key === "Escape" && isFs) { e.preventDefault(); e.stopPropagation(); toggleFs(); return; }
       if (e.key === "+" || e.key === "=") { e.preventDefault(); zoomBy(1.25); return; }
       if (e.key === "-" || e.key === "_") { e.preventDefault(); zoomBy(0.8); return; }
       if (e.key === "0") { e.preventDefault(); fitView(true); return; }
       const pan = { w: [0, 40], s: [0, -40], a: [40, 0], d: [-40, 0], W: [0, 40], S: [0, -40], A: [40, 0], D: [-40, 0], "ц": [0, 40], "ы": [0, -40], "ф": [40, 0], "в": [-40, 0] }[e.key];
       if (pan) { e.preventDefault(); camTw = null; panX += pan[0]; panY += pan[1]; draw(); return; }
       const k = { ArrowLeft: [0.12, 0], ArrowRight: [-0.12, 0], ArrowUp: [0, -0.08], ArrowDown: [0, 0.08] }[e.key];
-      if (k && e.shiftKey) { e.preventDefault(); camTw = null; panX += k[0] * -330; panY += k[1] * -500; draw(); return; }
+      if (k && e.shiftKey) { e.preventDefault(); camTw = null; panX += k[0] * 330; panY += k[1] * -500; draw(); return; }
       if (k) { e.preventDefault(); az += k[0]; elv = FV.clamp(elv + k[1], -0.9, 1.2); draw(); }
     });
     window.addEventListener("resize", () => { if (isFs) resize(); });
