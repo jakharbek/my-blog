@@ -31,7 +31,7 @@
       netSpin: "Вращать", netBias: "Смещения как вход «1»", netFull: "На весь экран", netExit: "Выйти", netTarget: "Верный ответ", netLoss: "BCE:", netParams: "параметров:",
       netIn: "входной слой", netHidden: "скрытый слой", netOut: "выходной слой", netOurs: "наш нейрон", netW1: "Скрытый слой: $W^{(1)}$ | $\\mathbf{b}^{(1)}$", netW2: "Выход: $\\mathbf{w}^{(2)\\top}$ | $b^{(2)}$",
       netInText: "Вход {i} — это не нейрон, а число из данных. Он ничего не считает, а раздаёт своё значение всем трём нейронам скрытого слоя.",
-      netHidText: "Нейрон скрытого слоя считает ту же формулу $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; его веса — одна строка матрицы $W^{(1)}$ справа.",
+      netHidText: "Нейрон скрытого слоя считает ту же формулу $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; его веса — одна строка матрицы $W^{(1)}$ на соседней панели.",
       netHidNext: "Его выход становится одним из входов выходного нейрона, с весом {w}.", netOutText: "Выходной нейрон — та же формула, но его входы — выходы скрытого слоя $h_1, h_2, h_3$.",
       eta: "Шаг обучения $\\eta$", loss: "BCE", acc: "точность", epochN: "шаг", class0: "класс 0", class1: "класс 1", lossTitle: "Потери по шагам",
     },
@@ -61,7 +61,7 @@
       netSpin: "Rotate", netBias: "Biases as input “1”", netFull: "Full screen", netExit: "Exit", netTarget: "Correct answer", netLoss: "BCE:", netParams: "parameters:",
       netIn: "input layer", netHidden: "hidden layer", netOut: "output layer", netOurs: "our neuron", netW1: "Hidden layer: $W^{(1)}$ | $\\mathbf{b}^{(1)}$", netW2: "Output: $\\mathbf{w}^{(2)\\top}$ | $b^{(2)}$",
       netInText: "Input {i} is not a neuron but a number from the data. It computes nothing; it hands its value to all three neurons of the hidden layer.",
-      netHidText: "A hidden neuron computes the same formula $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; its weights are one row of the matrix $W^{(1)}$ on the right.",
+      netHidText: "A hidden neuron computes the same formula $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$; its weights are one row of the matrix $W^{(1)}$ in the neighbouring panel.",
       netHidNext: "Its output becomes one of the inputs of the output neuron, with weight {w}.", netOutText: "The output neuron is the same formula, but its inputs are the outputs of the hidden layer $h_1, h_2, h_3$.",
       eta: "Learning rate $\\eta$", loss: "BCE", acc: "accuracy", epochN: "step", class0: "class 0", class1: "class 1", lossTitle: "Loss by step",
     },
@@ -91,7 +91,7 @@
       netSpin: "Aylantirish", netBias: "Siljishlar «1» kirish sifatida", netFull: "To‘liq ekran", netExit: "Chiqish", netTarget: "To‘g‘ri javob", netLoss: "BCE:", netParams: "parametrlar:",
       netIn: "kirish qatlami", netHidden: "yashirin qatlam", netOut: "chiqish qatlami", netOurs: "bizning neyron", netW1: "Yashirin qatlam: $W^{(1)}$ | $\\mathbf{b}^{(1)}$", netW2: "Chiqish: $\\mathbf{w}^{(2)\\top}$ | $b^{(2)}$",
       netInText: "{i}-kirish neyron emas, ma’lumotlardagi son. U hech narsa hisoblamaydi, o‘z qiymatini yashirin qatlamning uchala neyroniga tarqatadi.",
-      netHidText: "Yashirin qatlam neyroni xuddi shu $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$ formulani hisoblaydi; uning vaznlari — o‘ngdagi $W^{(1)}$ matritsasining bitta satri.",
+      netHidText: "Yashirin qatlam neyroni xuddi shu $a = \\sigma(\\mathbf{w}^{\\top}\\mathbf{x} + b)$ formulani hisoblaydi; uning vaznlari — qo‘shni paneldagi $W^{(1)}$ matritsasining bitta satri.",
       netHidNext: "Uning chiqishi chiqish neyronining kirishlaridan biriga aylanadi, vazni {w}.", netOutText: "Chiqish neyroni — o‘sha formula, faqat uning kirishlari yashirin qatlam chiqishlari $h_1, h_2, h_3$.",
       eta: "O‘qitish qadami $\\eta$", loss: "BCE", acc: "aniqlik", epochN: "qadam", class0: "0-sinf", class1: "1-sinf", lossTitle: "Qadamlar bo‘yicha yo‘qotish",
     },
@@ -921,6 +921,7 @@
     // ----- state and controls
     let sel = cfg.select || "h0", mode = "fwd", showBias = false, spin = !reduced(), playing = false;
     let az = -0.62, elv = 0.22, t = -1, t0 = 0, raf = 0, visible = true, lastSpin = 0;
+    let panelKey = "";
     const cv = FV.h("canvas", { class: "nr-net-canvas", role: "img", "aria-label": L.netAria, tabindex: 0 });
     const tip = FV.h("div", { class: "nr-net-tip", hidden: true });
     const stageBox = FV.h("div", { class: "nr-net-stage" }, cv, tip);
@@ -954,11 +955,11 @@
     function resize() {
       Wd = Math.max(280, stageBox.clientWidth || 640);
       const fs = document.fullscreenElement === el;
-      Hd = fs ? Math.max(320, window.innerHeight - 330) : FV.clamp(Math.round(Wd * 0.62), 300, 560);
+      Hd = fs ? Math.max(320, window.innerHeight - 330) : Wd < 520 ? Math.round(Wd * 0.9) : FV.clamp(Math.round(Wd * 0.62), 300, 560);
       dpr = Math.min(2, window.devicePixelRatio || 1);
       cv.width = Math.round(Wd * dpr); cv.height = Math.round(Hd * dpr);
       cv.style.width = Wd + "px"; cv.style.height = Hd + "px";
-      F = CAM * Math.min((0.46 * Wd) / 2.05, (0.42 * Hd) / 1.3);
+      F = CAM * Math.min((0.47 * Wd) / (Wd < 520 ? 1.95 : 2.05), (0.42 * Hd) / 1.3);
       draw();
     }
     function proj(p) {
@@ -993,7 +994,8 @@
       const P = {}; N.concat(BN).forEach((n) => (P[n.id] = proj(n.pos)));
       // layer captions on the floor
       [[-1.75, L.netIn], [0, L.netHidden], [1.75, L.netOut]].forEach(([x, s]) => {
-        const q = proj([x, 1.32, 0]); ctx.fillStyle = C.faint; ctx.font = `600 ${Math.round(12 * FV.clamp(q.k / (F / CAM), 0.8, 1.2))}px ${sans}`; ctx.textAlign = "center"; ctx.fillText(s, q.X, q.Y);
+        const q = proj([x, 1.32, 0]); ctx.fillStyle = C.faint; ctx.font = `600 ${Math.round((Wd < 520 ? 10 : 12) * FV.clamp(q.k / (F / CAM), 0.8, 1.2))}px ${sans}`; ctx.textAlign = "center";
+        const hw = ctx.measureText(s).width / 2 + 6; ctx.fillText(s, FV.clamp(q.X, hw, Wd - hw), Math.max(14, q.Y));
       });
       // edges, far to near
       const edges = E.filter((e) => showBias || !e.bias).map((e) => ({ e, A: P[e.a], B: P[e.b], d: (P[e.a].d + P[e.b].d) / 2 })).sort((u, v) => u.d - v.d);
@@ -1052,7 +1054,9 @@
       // read-outs and the panel
       ro.set("y", n4(r.y)); ro.set("l", n4(r.loss)); ro.set("p", "3·(3+1) + 1·(3+1) = 16");
       segSel.set(sel);
-      renderPanel(r);
+      // the panel (KaTeX) changes only with the data, not with the rotation or the pulses
+      const key = [sel, mode, target, X.join(",")].join("|");
+      if (key !== panelKey) { panelKey = key; renderPanel(r); }
     }
 
     function renderPanel(r) {
