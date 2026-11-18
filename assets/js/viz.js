@@ -133,7 +133,7 @@
   // "Вес $w_1$" → "Вес w₁": a readable text name for controls whose visible label is a formula
   const SUBS = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉" };
   const SUPS = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹", "-": "⁻" };
-  const GREEK = { alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", eta: "η", theta: "θ", lambda: "λ", mu: "μ", sigma: "σ", tau: "τ", phi: "φ", Phi: "Φ", Sigma: "Σ", pi: "π", nabla: "∇", partial: "∂", infty: "∞", cdot: "·", times: "×", top: "ᵀ", ge: "≥", le: "≤", approx: "≈", lVert: "‖", rVert: "‖" };
+  const GREEK = { alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", eta: "η", theta: "θ", lambda: "λ", mu: "μ", sigma: "σ", tau: "τ", phi: "φ", Phi: "Φ", Sigma: "Σ", pi: "π", nabla: "∇", partial: "∂", infty: "∞", cdot: "·", times: "×", top: "ᵀ", ge: "≥", le: "≤", approx: "≈", lVert: "‖", rVert: "‖", to: "→" };
   FV.plain = function (str) {
     return String(str).replace(/\$([^$]+)\$/g, (_, t) => t
       .replace(/\\(?:mathrm|mathbf|operatorname|text|boldsymbol)\{([^{}]*)\}/g, "{$1}")

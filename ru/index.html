@@ -73,7 +73,7 @@
       </div>
     </div>
     <div class="chips" role="group" aria-label="Фильтр по разделу">
-      <button type="button" class="chip" data-topic="all" aria-pressed="true"><span>Все</span><small>9</small></button><button type="button" class="chip" data-topic="code" aria-pressed="false"><span>Программирование</span><small>0</small></button><button type="button" class="chip" data-topic="ml" aria-pressed="false"><span>ML / AI</span><small>8</small></button><button type="button" class="chip" data-topic="math" aria-pressed="false"><span>Математика</span><small>1</small></button><button type="button" class="chip" data-topic="phys" aria-pressed="false"><span>Физика</span><small>0</small></button><button type="button" class="chip" data-topic="cv" aria-pressed="false"><span>Компьютерное зрение</span><small>0</small></button><button type="button" class="chip" data-topic="sys" aria-pressed="false"><span>Инженерия систем</span><small>0</small></button>
+      <button type="button" class="chip" data-topic="all" aria-pressed="true"><span>Все</span><small>10</small></button><button type="button" class="chip" data-topic="code" aria-pressed="false"><span>Программирование</span><small>0</small></button><button type="button" class="chip" data-topic="ml" aria-pressed="false"><span>ML / AI</span><small>9</small></button><button type="button" class="chip" data-topic="math" aria-pressed="false"><span>Математика</span><small>1</small></button><button type="button" class="chip" data-topic="phys" aria-pressed="false"><span>Физика</span><small>0</small></button><button type="button" class="chip" data-topic="cv" aria-pressed="false"><span>Компьютерное зрение</span><small>0</small></button><button type="button" class="chip" data-topic="sys" aria-pressed="false"><span>Инженерия систем</span><small>0</small></button>
     </div>
 
     <a id="featured" class="featured" href="sigmoid/">
@@ -96,10 +96,14 @@
     </a>
 
     <div class="found">
-      <span id="found" aria-live="polite" data-text="Найдено записей: ">Найдено записей: 9</span>
+      <span id="found" aria-live="polite" data-text="Найдено записей: ">Найдено записей: 10</span>
       <button id="reset" type="button" class="ul" hidden>Сбросить фильтры</button>
     </div>
     <div id="post-list" class="list">
+      <a class="row" href="forward-pass/" data-topic="ml">
+        <span class="l"><span class="kicker">ML / AI</span><span class="rt">Формула Forward Pass: как сеть превращает вход в ответ</span><span class="ex">Прямой проход по косточкам: z⁽ˡ⁾ = W⁽ˡ⁾a⁽ˡ⁻¹⁾ + b⁽ˡ⁾ и a⁽ˡ⁾ = f(z⁽ˡ⁾) слой за слоем — каждая буква, размерности, геометрия, пакеты, стоимость и код. Анимации, интерактивная сеть и 8 разобранных примеров.</span></span>
+        <span class="r"><time datetime="2026-11-18">18 ноября 2026</time><span>45 мин</span></span>
+      </a>
       <a class="row" href="neuron/" data-topic="ml">
         <span class="l"><span class="kicker">ML / AI</span><span class="rt">Формула одного нейрона: разбор по косточкам</span><span class="ex">a = f(Σ wᵢxᵢ + b) и a = f(wᵀx + b): каждая буква формулы, векторная и покоординатная запись, геометрия, кейсы, обучение и практикум из 17 разобранных примеров — с анимациями, таблицами и расчётами.</span></span>
         <span class="r"><time datetime="2026-11-17">17 ноября 2026</time><span>55 мин</span></span>
@@ -149,7 +153,7 @@
     </div>
     <div class="tiles">
       <button type="button" class="tile" data-topic="code"><span class="glyph math">{ }</span><span class="nm"><b>Программирование</b><span>PHP, Java, Python, алгоритмы и структуры данных</span></span><span class="cnt">0</span></button>
-      <button type="button" class="tile" data-topic="ml"><span class="glyph math">∇</span><span class="nm"><b>ML / AI</b><span>Бустинг, нейросети, LLM, скоринг</span></span><span class="cnt">8</span></button>
+      <button type="button" class="tile" data-topic="ml"><span class="glyph math">∇</span><span class="nm"><b>ML / AI</b><span>Бустинг, нейросети, LLM, скоринг</span></span><span class="cnt">9</span></button>
       <button type="button" class="tile" data-topic="math"><span class="glyph math">∑</span><span class="nm"><b>Математика</b><span>Анализ, линейная алгебра, вероятность</span></span><span class="cnt">1</span></button>
       <button type="button" class="tile" data-topic="phys"><span class="glyph math it">ℏ</span><span class="nm"><b>Физика</b><span>Механика, поля, квантовый мир</span></span><span class="cnt">0</span></button>
       <button type="button" class="tile" data-topic="cv"><span class="glyph math">◎</span><span class="nm"><b>Компьютерное зрение</b><span>Детекция, лица, Re-ID</span></span><span class="cnt">0</span></button>
