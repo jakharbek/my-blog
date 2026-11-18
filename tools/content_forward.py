@@ -581,8 +581,235 @@ EN = [
     ]),
 ]
 
+UZ = [
+    dict(id="idea", title="To‘g‘ri o‘tish nima", blocks=[
+        ("p", r"<a href='../neuron/'>Bitta neyron haqidagi maqolada</a> biz $a = f(\mathbf{w}^{\top}\mathbf{x} + b)$ formulasini tahlil qildik. Haqiqiy tarmoq — qatlamlarga terilgan ko‘plab shunday neyronlar: bir qatlamning chiqishlari keyingisining kirishlariga aylanadi. <b>To‘g‘ri o‘tish</b> (forward pass) — tarmoq javobini hisoblash: kirish chapdan o‘ngga, qatlamma-qatlam, oxirgi qatlamgacha boradi."),
+        ("p", r"Butun jarayon uch satrda yoziladi:"),
+        ("eq", r"\mathbf{a}^{(0)} = \mathbf{x}"),
+        ("eq", r"\mathbf{z}^{(l)} = W^{(l)}\mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}, \qquad \mathbf{a}^{(l)} = f^{(l)}\big(\mathbf{z}^{(l)}\big), \qquad l = 1, 2, \dots, L"),
+        ("eq", r"\hat{\mathbf{y}} = \mathbf{a}^{(L)}"),
+        ("p", r"Buni yo‘riqnoma sifatida o‘qiymiz: kirishni «nolinchi qatlam»ga joylang; har bir qatlamda kelgan narsani vaznlar matritsasiga ko‘paytiring, siljishlarni qo‘shing va aktivatsiya funksiyasidan o‘tkazing; oxirgi qatlamdan chiqqan narsa — javobning o‘zi. Siklni yoyib yozsak, bitta uzun ichma-ich formula hosil bo‘ladi:"),
+        ("eq", r"\hat{\mathbf{y}} = f^{(L)}\Big(W^{(L)}\,f^{(L-1)}\big(\cdots f^{(1)}\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big)\cdots\big) + \mathbf{b}^{(L)}\Big)"),
+        ("viz", "fp-flow", VIZ["flow"], r"<b>1-rasm.</b> 2–3–2–1 tarmog‘ida to‘g‘ri o‘tish. «Qadam» yoki «Boshlash» tugmasini bosing: signal qatlamma-qatlam o‘tadi, har bir neyronda avval $z$, so‘ng $a = f(z)$ paydo bo‘ladi. Ko‘k bog‘lanishlar — musbat vaznlar, qizillari — manfiy vaznlar, qalinlik — vazn moduli. Kirish slayderlarini suring: $\hat y$ javob darhol qayta hisoblanadi."),
+        ("callout", "intuition", "O‘xshatish", r"Zavoddagi konveyer. Xomashyo ($\mathbf{x}$ kirish) dastgohlardan (qatlamlardan) o‘tadi. Har bir dastgoh bir xil ishni bajaradi: kelgan detallarni kerakli nisbatlarda aralashtiradi ($W$ matritsa), o‘z qo‘shimchasini qo‘shadi ($\mathbf{b}$ siljish) va natijaga ishlov beradi ($f$ aktivatsiya). Hech bir dastgoh yakuniy mahsulot haqida bilmaydi — u faqat oldingisidan kelgan narsani ko‘radi. Oxirgi dastgoh chiqishidagi mahsulot — tarmoq javobi."),
+        ("callout", "key", "Asosiysi", r"To‘g‘ri o‘tish tarmoqni o‘qitmaydi va uning vaznlarini o‘zgartirmaydi — u faqat joriy vaznlarda javobni hisoblaydi. O‘qitish keyin boshlanadi: javob to‘g‘ri javob bilan solishtiriladi (yo‘qotish funksiyasi), teskari o‘tish esa vaznlarni qanday tuzatish kerakligini hisoblaydi."),
+    ]),
 
-SECTIONS = {"ru": RU, "en": EN, "uz": globals().get("UZ", RU)}
+    dict(id="anatomy", title="Formula mayda detallarigacha: har bir belgi", blocks=[
+        ("p", r"To‘g‘ri o‘tishning barcha belgilari va ularning o‘lchamlari. $l$ qatlamdagi neyronlar sonini $n_l$ bilan belgilaymiz; $n_0$ — kirishlar soni."),
+        ("symbols", [
+            (r"l", r"<b>qatlam raqami</b>: $l = 1, \dots, L$; qavs ichidagi $^{(l)}$ yuqori indeks daraja emas, balki «$l$ qatlamga tegishli» degani;"),
+            (r"L", r"<b>vaznli qatlamlar soni</b> (tarmoq chuqurligi); kirish «qatlami» $0$ ning vaznlari yo‘q;"),
+            (r"\mathbf{a}^{(l-1)}", r"$l$ <b>qatlamning kirishi</b> — oldingi qatlamning chiqishi, $n_{l-1}$ uzunlikdagi vektor; $\mathbf{a}^{(0)} = \mathbf{x}$;"),
+            (r"W^{(l)}", r"qatlamning <b>vaznlar matritsasi</b>: $n_l$ ta satr va $n_{l-1}$ ta ustun; $j$-satr — $j$-neyronning vaznlari;"),
+            (r"W^{(l)}_{jk}", r"<b>bitta vazn</b>: $l-1$ qatlamning $k$ neyronidan $l$ qatlamning $j$ neyroniga (avval «qayerga», keyin «qayerdan»);"),
+            (r"\mathbf{b}^{(l)}", r"$n_l$ uzunlikdagi <b>siljishlar vektori</b> — har bir neyronga bittadan;"),
+            (r"\mathbf{z}^{(l)}", r"qatlamning <b>predaktivatsiyalari</b>, $n_l$ uzunlikdagi vektor: uning barcha neyronlarining vaznli yig‘indilari;"),
+            (r"f^{(l)}", r"qatlamning <b>aktivatsiya funksiyasi</b>; har bir koordinataga alohida qo‘llaniladi;"),
+            (r"\mathbf{a}^{(l)}", r"<b>qatlam chiqishi</b> (aktivatsiyalar), $n_l$ uzunlikdagi vektor;"),
+            (r"\hat{\mathbf{y}}", r"<b>tarmoq javobi</b>: oxirgi qatlamning chiqishi $\mathbf{a}^{(L)}$."),
+        ]),
+        ("h3", "Bitta qatlam — bir yo‘la ko‘plab neyronlar"),
+        ("p", r"Formulaning birinchi satrini koordinatalar bo‘yicha yozib chiqamiz. $l$ qatlamning $j$ neyroni yakka neyron hisoblaydigan formulaning aynan o‘zini hisoblaydi: kirishlarning vaznli yig‘indisi va o‘z siljishi."),
+        ("eq", r"z^{(l)}_j = \sum_{k=1}^{n_{l-1}} W^{(l)}_{jk}\,a^{(l-1)}_k + b^{(l)}_j, \qquad a^{(l)}_j = f^{(l)}\big(z^{(l)}_j\big), \qquad j = 1, \dots, n_l"),
+        ("p", r"$W^{(l)}\mathbf{a}^{(l-1)}$ matritsa yozuvi — barcha $n_l$ ta shunday yig‘indini bitta amalda hisoblash usuli, xolos: matritsaning $j$-satri kirishlar vektoriga ko‘paytirilsa, $z_j$ hosil bo‘ladi. Shuning uchun to‘g‘ri o‘tish formulasi — qatlamning barcha neyronlariga qo‘llanilgan va barcha qatlamlar uchun takrorlangan bitta neyron formulasi."),
+        ("h3", "Misolimizdagi o‘lchamlar"),
+        ("p", r"Bundan keyingi butun matn bitta tarmoqqa tayanadi: 2 ta kirish, ReLU’li 3 va 2 neyronli yashirin qatlamlar, sigmoidali bitta chiqish neyroni (2–3–2–1 tarmog‘i)."),
+        ("table", ["$l$ qatlam", r"$n_{l-1} \to n_l$", r"$W^{(l)}$", r"$\mathbf{b}^{(l)}$", r"$f^{(l)}$", "Parametrlar"], [
+            ["1", "2 → 3", "3 × 2", "3", "ReLU", "3·2 + 3 = 9"],
+            ["2", "3 → 2", "2 × 3", "2", "ReLU", "2·3 + 2 = 8"],
+            ["3", "2 → 1", "1 × 2", "1", "sigmoida", "1·2 + 1 = 3"],
+            ["<b>jami</b>", "", "", "", "", "<b>20</b>"],
+        ], {"num": [0]}),
+        ("callout", "key", "Hisoblash qoidasi", r"$n_{l-1}\to n_l$ qatlamda aynan $n_l\,(n_{l-1} + 1)$ ta parametr bor: $n_l n_{l-1}$ ta vazn va $n_l$ ta siljish. Butun tarmoqda — qatlamlar bo‘yicha yig‘indi."),
+    ]),
+
+    dict(id="numbers", title="Sonlarda to‘g‘ri o‘tish, qadamma-qadam", blocks=[
+        ("p", r"Kirish $\mathbf{x} = (1;\ 2)$. Vaznlar va siljishlar:"),
+        ("eq", r"W^{(1)} = \begin{pmatrix} 1 & -1\\ 0{,}5 & 1\\ -1 & 2 \end{pmatrix},\ \mathbf{b}^{(1)} = \begin{pmatrix} 0{,}5\\ -1\\ 0 \end{pmatrix};\quad W^{(2)} = \begin{pmatrix} 1 & 0{,}5 & -0{,}5\\ -1 & 1 & 0{,}5 \end{pmatrix},\ \mathbf{b}^{(2)} = \begin{pmatrix} 0\\ 0{,}5 \end{pmatrix};\quad W^{(3)} = \begin{pmatrix} 2 & -0{,}5 \end{pmatrix},\ b^{(3)} = 1"),
+        ("h3", "1-qatlam: ikki sondan — uchta"),
+        ("eq", r"\mathbf{z}^{(1)} = \begin{pmatrix} 1\cdot1 + (-1)\cdot2 + 0{,}5\\ 0{,}5\cdot1 + 1\cdot2 - 1\\ (-1)\cdot1 + 2\cdot2 + 0 \end{pmatrix} = \begin{pmatrix} -0{,}5\\ 1{,}5\\ 3 \end{pmatrix}, \qquad \mathbf{a}^{(1)} = \mathrm{ReLU}\big(\mathbf{z}^{(1)}\big) = \begin{pmatrix} 0\\ 1{,}5\\ 3 \end{pmatrix}"),
+        ("p", r"Birinchi neyron manfiy yig‘indi oldi va ReLU uni «o‘chirdi»: tarmoq bo‘ylab undan keyin nol boradi."),
+        ("h3", "2-qatlam: uch sondan — ikkita"),
+        ("eq", r"\mathbf{z}^{(2)} = \begin{pmatrix} 1\cdot0 + 0{,}5\cdot1{,}5 - 0{,}5\cdot3 + 0\\ -1\cdot0 + 1\cdot1{,}5 + 0{,}5\cdot3 + 0{,}5 \end{pmatrix} = \begin{pmatrix} -0{,}75\\ 3{,}5 \end{pmatrix}, \qquad \mathbf{a}^{(2)} = \begin{pmatrix} 0\\ 3{,}5 \end{pmatrix}"),
+        ("h3", "3-qatlam: ikki sondan — javob"),
+        ("eq", r"z^{(3)} = 2\cdot0 - 0{,}5\cdot3{,}5 + 1 = -0{,}75, \qquad \hat y = \sigma(-0{,}75) = \frac{1}{1 + e^{0{,}75}} \approx 0{,}3208"),
+        ("viz", "fp-matvec", VIZ["matvec"], r"<b>2-rasm.</b> Har bir qatlam ichida «matritsani vektorga» ko‘paytirish. Qatlamni tanlang va «Qadam» tugmasini bosing: $W$ ning satri (bitta neyron) ajratib ko‘rsatiladi, uning ostida — kirish bilan juft ko‘paytmalar, ularning yig‘indisi, siljish va aktivatsiya. Shunday qilib, $W\mathbf{a} + \mathbf{b}$ — bir vaqtda bajarilgan $n_l$ ta bitta neyron formulasi ekani ko‘rinadi."),
+        ("table", ["Qatlam", r"$\mathbf{z}^{(l)}$", r"$\mathbf{a}^{(l)}$"], [
+            ["kirish", "—", "(1; 2)"],
+            ["1", "(−0,5; 1,5; 3)", "(0; 1,5; 3)"],
+            ["2", "(−0,75; 3,5)", "(0; 3,5)"],
+            ["3", "−0,75", "0,3208"],
+        ], {"num": []}),
+        ("callout", "note", "Nimani saqlash kerak", r"O‘qitishda shu jadvaldagi barcha $\mathbf{z}^{(l)}$ va $\mathbf{a}^{(l)}$ eslab qolinadi: teskari o‘tish ulardan to‘g‘ri o‘tishni takrorlamasdan gradiyentlarni hisoblash uchun foydalanadi."),
+    ]),
+
+    dict(id="shapes", title="O‘lchamlar: xatolarning yarmini ushlaydigan tekshiruv", blocks=[
+        ("p", r"To‘g‘ri o‘tishning har bir amali vektor o‘lchamini oddiy qoida bo‘yicha o‘zgartiradi: $n_l \times n_{l-1}$ matritsa $n_{l-1}$ uzunlikdagi vektorga ko‘paytirilsa, $n_l$ uzunlikdagi vektor hosil bo‘ladi. Tarmog‘imizning o‘lchamlar zanjiri:"),
+        ("eq", r"\underbrace{\mathbf{x}}_{2} \xrightarrow{\ W^{(1)}:\,3\times2\ } \underbrace{\mathbf{a}^{(1)}}_{3} \xrightarrow{\ W^{(2)}:\,2\times3\ } \underbrace{\mathbf{a}^{(2)}}_{2} \xrightarrow{\ W^{(3)}:\,1\times2\ } \underbrace{\hat y}_{1}"),
+        ("p", r"$W^{(l)}$ ustunlarining soni qatlam kirishining uzunligiga mos kelishi shart, satrlar soni esa chiqish uzunligini belgilaydi. Agar ular mos kelmasa, kod shakl xatosi bilan to‘xtaydi — va bu yaxshi: shakllar tasodifan mos kelib, ma’no chalkashib ketgani yomonroq (masalan, kvadrat matritsada $W^{\top}$ o‘rniga $W$)."),
+        ("viz", "fp-shapes", VIZ["shapes"], r"<b>3-rasm.</b> Arxitektura konstruktori. Qatlamlar o‘lchamlarini chiziqcha orqali kiriting yoki tayyor variantni tanlang: jadval $W^{(l)}$, $\mathbf{b}^{(l)}$ shakllarini, bitta obyekt uchun parametrlar va ko‘paytirishlar sonini, ustunchalar esa parametrlar qayerda to‘planganini ko‘rsatadi."),
+        ("callout", "key", "To‘g‘ri o‘tish narxi", r"Bitta obyekt uchun qatlam $n_l\cdot n_{l-1}$ ta qo‘shishli ko‘paytirish sarflaydi — har bir vaznga bittadan. Demak, butun to‘g‘ri o‘tish taxminan tarmoqdagi vaznlar soncha amal talab qiladi: $\sum_l n_l\,n_{l-1}$. Bizning tarmoq uchun bu $6 + 6 + 2 = 14$ ta ko‘paytirish."),
+    ]),
+
+    dict(id="geometry", title="Geometriya: qatlam fazo bilan nima qiladi", blocks=[
+        ("p", r"Qatlamga fazoni almashtirish sifatida qaraymiz. $W\mathbf{a} + \mathbf{b}$ chiziqli qismi fazoni buradi, cho‘zadi, qiyshaytiradi va suradi: to‘g‘ri chiziqlar to‘g‘riligicha, parallellar parallelligicha qoladi, to‘r kataklari bir xil parallelogrammlarga aylanadi. So‘ng aktivatsiya uni egadi: ReLU manfiy sohaga tushgan hamma narsani o‘qlarga taxlaydi, sigmoida va tanh esa uzoqdagi nuqtalarni chetlarga siqadi."),
+        ("viz", "fp-space", VIZ["space"], r"<b>4-rasm.</b> 2 → 2 qatlami tekislikni qanday egadi. Slayder to‘rni bosqichlar bo‘ylab ravon olib o‘tadi: dastlabki tekislik → $W\mathbf{x} + \mathbf{b}$ chiziqli qismi → aktivatsiya. Rangli nuqtalar — ikki sinf obyektlari: egilgandan keyin ularni to‘g‘ri chiziq bilan ajratish mumkin bo‘lib qolishini kuzating, holbuki kirishda buning iloji yo‘q edi. Aktivatsiyani va tayyor matritsalarni tanlang."),
+        ("p", r"Chuqurlikning asosiy ma’nosi shundan kelib chiqadi: har bir qatlam fazoni biroz qayta bichadi va oxirgi qatlamga kelib turli sinflarning nuqtalari oddiy chegaraning turli tomonlarida bo‘lib qoladi. Oxirgi qatlam — odatiy chiziqli klassifikator yoki regressiya, lekin u oldingi qatlamlar u uchun tayyorlab bergan fazoda ishlaydi."),
+        ("deep", "Nega aktivatsiyalarsiz qatlamlar bittaga qo‘shilib ketadi", [
+            ("p", r"Agar $f$ ni olib tashlasak, ikki qatlam $W^{(2)}(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}) + \mathbf{b}^{(2)} = (W^{(2)}W^{(1)})\mathbf{x} + (W^{(2)}\mathbf{b}^{(1)} + \mathbf{b}^{(2)})$ ni beradi — bu yana bitta chiziqli qatlam. Nochiziqliliksiz har qanday chuqurlik bitta qatlamga teng: bir necha marta burilgan parallelogrammlar parallelogrammligicha qoladi. Batafsil — <a href='../neuron/#activation'>bitta neyron haqidagi maqolada</a>."),
+        ]),
+    ]),
+
+    dict(id="batch", title="Obyektlar paketi: ko‘p kirishlar uchun o‘sha formula", blocks=[
+        ("p", r"Amalda tarmoq birdaniga $N$ ta obyektdan iborat paketni (batch) hisoblaydi. Ular satrlar qilib $N \times n_0$ o‘lchamli $X$ matritsaga yig‘iladi va to‘g‘ri o‘tish matritsalar uchun qayta yoziladi:"),
+        ("eq", r"A^{(0)} = X, \qquad Z^{(l)} = A^{(l-1)}\,W^{(l)\top} + \mathbf{1}\,\mathbf{b}^{(l)\top}, \qquad A^{(l)} = f^{(l)}\big(Z^{(l)}\big)"),
+        ("p", r"$A^{(l)}$ matritsaning $k$-satri — $k$ obyekt uchun $\mathbf{a}^{(l)}$; transponirlash obyektlar endi ustunlar emas, satrlar bo‘lib joylashgani uchun paydo bo‘ldi. $\mathbf{1}\mathbf{b}^{\top}$ qo‘shiluvchi siljishlarni har bir satrga qo‘shadi (NumPy va PyTorch’da buni broadcasting bajaradi). Tarmog‘imiz orqali o‘tgan uch obyektli paket:"),
+        ("table", ["Obyekt", r"$\mathbf{x}$", r"$\mathbf{z}^{(1)}$", r"$\mathbf{z}^{(2)}$", r"$z^{(3)}$", r"$\hat y$"], [
+            ["1", "(1; 2)", "(−0,5; 1,5; 3)", "(−0,75; 3,5)", "−0,75", "0,3208"],
+            ["2", "(0; 0)", "(0,5; −1; 0)", "(0,5; 0)", "2", "0,8808"],
+            ["3", "(2; −1)", "(3,5; −1; −4)", "(3,5; −3)", "8", "0,9997"],
+        ], {"num": [4, 5]}),
+        ("p", r"Ikkinchi obyekt — nol kirish: tarmoq unga beradigan butun javobni faqat siljishlar belgilaydi. E’tibor bering: $0{,}8808$ javobi — bu $\sigma(2)$, ya’ni bitta neyron haqidagi maqoladagi o‘sha son."),
+        ("callout", "intuition", "Paketlar nima uchun kerak", r"Protsessor va ayniqsa videokarta uchun $N \times n$ matritsani $n \times m$ matritsaga bitta ko‘paytirish vektorni matritsaga $N$ marta ko‘paytirishdan ancha foydaliroq: ma’lumotlar xotiradan bir marta o‘qiladi va parallel qayta ishlanadi. Shuning uchun o‘qitish ham, xulosa chiqarish ham paketlar bilan bajariladi."),
+    ]),
+
+    dict(id="training", title="O‘qitishdagi to‘g‘ri o‘tish: yo‘qotish va kesh", blocks=[
+        ("p", r"O‘qitish paytida to‘g‘ri o‘tish $\hat y$ da emas, balki javobni to‘g‘ri $y$ bilan solishtiradigan $L$ yo‘qotish sonida tugaydi. $y = 1$ belgili obyektimiz va binar kross-entropiya uchun:"),
+        ("eq", r"L = -\big[y\ln\hat y + (1 - y)\ln(1 - \hat y)\big] = -\ln 0{,}3208 \approx 1{,}1369"),
+        ("p", r"To‘g‘ri javob $1$ bo‘lganda $0{,}32$ javobi — yomon, yo‘qotish esa katta. Uni kamaytirish uchun har bir vazn $L$ ga qanday ta’sir qilishini tushunish kerak. Bu bilan teskari o‘tish shug‘ullanadi: u tarmoq bo‘ylab o‘ngdan chapga yuradi va zanjir qoidasiga ko‘ra qatlamlar hosilalarini ko‘paytiradi. Buning uchun unga to‘g‘ri o‘tish hisoblagan aynan o‘sha $\mathbf{z}^{(l)}$ va $\mathbf{a}^{(l)}$ kerak — shuning uchun ular keshlanadi."),
+        ("table", ["Rejim", "To‘g‘ri o‘tish nimani hisoblaydi", "Nimani saqlaydi"], [
+            ["o‘qitish", r"$\hat y$ javob va $L$ yo‘qotish", r"teskari o‘tish uchun barcha $\mathbf{z}^{(l)}$, $\mathbf{a}^{(l)}$"],
+            ["xulosa chiqarish (inference)", r"faqat $\hat y$ javob", "ortiqcha hech narsa: oraliq qiymatlar darhol tashlab yuboriladi"],
+        ], {"num": []}),
+        ("callout", "note", None, r"Aynan shuning uchun o‘qitish xulosa chiqarishdan ancha ko‘p xotira talab qiladi: har bir qadamda xotirada butun paket uchun barcha qatlamlarning aktivatsiyalari turadi. PyTorch’da xulosa chiqarish rejimi <code>torch.no_grad()</code> yoki <code>torch.inference_mode()</code> orqali yoqiladi."),
+    ]),
+
+    dict(id="playground", title="Sinov maydoni: to‘g‘ri o‘tishni o‘zingiz yig‘ing", blocks=[
+        ("p", r"Hammasi birga — bitta interaktiv modelda. Chapda — har bir neyron qiymatlari ko‘rsatilgan tarmoq, o‘ngda — tekislikdagi barcha kirishlar uchun $\hat y$ javob xaritasi: $(x_1;\ x_2)$ nuqtaning rangi tarmoq nima javob berishini ko‘rsatadi. Kirishni, qatlamlarning aktivatsiya funksiyalarini va vaznlar masshtabini o‘zgartiring — bitta son ham, butun xarita ham qanday o‘zgarishini kuzating."),
+        ("viz", "fp-playground", VIZ["play"], r"<b>5-rasm.</b> To‘g‘ri o‘tish sinov maydoni. Xaritadagi nuqtani torting yoki slayderlarni suring — tarmoqdagi qiymatlar qayta hisoblanadi. Yashirin qatlamlar aktivatsiyalarini almashtiring: ayniy funksiyada xaritadagi chegara to‘g‘ri chiziqqa aylanadi (tarmoq bitta chiziqli qatlamga qo‘shilib ketadi), ReLU bilan — siniq chiziqqa, tanh va sigmoida bilan — silliq chiziqqa. «Vaznlar masshtabi» slayderi barcha vaznlarni ko‘paytiradi: katta vaznlar o‘tishlarni keskin qiladi."),
+    ]),
+
+    dict(id="code", title="Kod: to‘g‘ri o‘tish o‘z qo‘limiz bilan va PyTorch’da", blocks=[
+        ("p", r"To‘g‘ri o‘tish — qatlamlar bo‘yicha sikl. Quyida u to‘liq keltirilgan: teskari o‘tish uchun kesh bilan va paket uchun versiya bilan."),
+        ("code", "python", CODE_NUMPY["uz"]),
+        ("p", r"PyTorch’da ham xuddi shunday: <code>nn.Linear</code> $W$ va $\mathbf{b}$ ni saqlaydi va $\mathbf{x}W^{\top} + \mathbf{b}$ ni hisoblaydi, <code>nn.Sequential</code> esa qatlamlar bo‘yicha siklning o‘zi."),
+        ("code", "python", CODE_TORCH["uz"]),
+    ]),
+
+    dict(id="practice", title="Amaliyot: 8 ta misol", blocks=[
+        ("p", r"Har bir misol to‘g‘ri o‘tishning bitta qirrasini ko‘rsatadi. Barcha sonlar hisoblash orqali tekshirilgan."),
+        ("example", dict(n=1, title="Bitta qatlam — bu logistik regressiya", kinds=["hisob"],
+            goal=r"$L = 1$ da to‘g‘ri o‘tish bitta neyron formulasiga aylanishini ko‘rish va yangi maqolani oldingisi bilan bog‘lash.",
+            blocks=[
+                ("p", r"Sigmoidali 3–1 tarmog‘i: $W^{(1)} = (0{,}5\ \ -1\ \ 0{,}25)$, $b^{(1)} = -0{,}75$, kirish $\mathbf{x} = (2;\ -1;\ 3)$."),
+                ("eq", r"\hat y = \sigma\big(W^{(1)}\mathbf{x} + b^{(1)}\big) = \sigma(1 + 1 + 0{,}75 - 0{,}75) = \sigma(2) \approx 0{,}8808"),
+            ],
+            take=r"Sigmoidali bir qatlamli tarmoq — bu logistik regressiya; chuqur tarmoq — $L$ marta takrorlangan o‘sha formula.")),
+        ("example", dict(n=2, title="XOR: yashirin qatlam orqali to‘g‘ri o‘tish", kinds=["jadval"],
+            goal=r"To‘rtta kirishda to‘g‘ri o‘tishni bajarib, ReLU’li yashirin qatlam bitta neyron uddalay olmaydigan narsani qanday mumkin qilishini ko‘rish.",
+            blocks=[
+                ("p", r"2–2–1 tarmog‘i: $h_1 = \mathrm{ReLU}(x_1 + x_2)$, $h_2 = \mathrm{ReLU}(x_1 + x_2 - 1)$, chiqish chiziqli: $\hat y = h_1 - 2h_2$."),
+                ("table", [r"$(x_1;\ x_2)$", r"$\mathbf{z}^{(1)}$", r"$\mathbf{a}^{(1)}$", r"$\hat y$", "XOR"], [
+                    ["(0; 0)", "(0; −1)", "(0; 0)", "0", "0"],
+                    ["(0; 1)", "(1; 0)", "(1; 0)", "1", "1"],
+                    ["(1; 0)", "(1; 0)", "(1; 0)", "1", "1"],
+                    ["(1; 1)", "(2; 1)", "(2; 1)", "0", "0"],
+                ], {"num": [3, 4]}),
+            ],
+            take=r"Ikkinchi neyron faqat ikkala kirish birga teng bo‘lganda yonadi va ortiqchasini ayiradi. ReLU bo‘lmaganda chiqish chiziqli bo‘lardi va XOR hosil bo‘lmasdi.")),
+        ("example", dict(n=3, title="MNIST uchun tarmoqning shakllari va parametrlari", kinds=["jadval", "hisob"],
+            goal=r"Haqiqiy tarmoqning barcha matritsalari shakllarini va parametrlar sonini bir daqiqada hisoblashni o‘rganish.",
+            blocks=[
+                ("p", r"28×28 rasm 784 ta sondan iborat vektorga yoyiladi; 784–128–64–10 tarmog‘i 10 ta son chiqaradi — har bir raqamga bittadan."),
+                ("table", ["Qatlam", r"$W^{(l)}$", r"$\mathbf{b}^{(l)}$", "Parametrlar", "Ko‘paytirishlar"], [
+                    ["1", "128 × 784", "128", "100 480", "100 352"],
+                    ["2", "64 × 128", "64", "8 256", "8 192"],
+                    ["3", "10 × 64", "10", "650", "640"],
+                    ["<b>jami</b>", "", "", "<b>109 386</b>", "<b>109 184</b>"],
+                ], {"num": [3, 4]}),
+            ],
+            take=r"Parametrlarning 90% dan ortig‘i kirishlar ko‘p bo‘lgan birinchi qatlamda joylashgan. Bitta obyektga to‘g‘ri keladigan ko‘paytirishlar soni vaznlar soniga deyarli teng.")),
+        ("example", dict(n=4, title="Bir nechta sinfli chiqish: softmax", kinds=["hisob"],
+            goal=r"Oxirgi qatlam $n_L$ ta sonni ehtimolliklar taqsimotiga qanday aylantirishini ko‘rish.",
+            blocks=[
+                ("p", r"$K$ ta sinf uchun oxirgi qatlam $K$ ta $\mathbf{z}^{(L)}$ sonini chiqaradi, aktivatsiya vazifasini esa softmax bajaradi: $\hat y_k = e^{z_k} / \sum_j e^{z_j}$. $\mathbf{z}^{(L)} = (2;\ 1;\ 0{,}1)$ bo‘lganda:"),
+                ("eq", r"e^{\mathbf{z}} \approx (7{,}3891;\ 2{,}7183;\ 1{,}1052), \quad \sum \approx 11{,}2125, \quad \hat{\mathbf{y}} \approx (0{,}6590;\ 0{,}2424;\ 0{,}0986)"),
+            ],
+            take=r"Softmax — elementma-element aktivatsiya emas: har bir chiqish barcha $z$ larga bog‘liq. Ehtimolliklar yig‘indisi doim 1 ga teng.")),
+        ("example", dict(n=5, title="Nol kirish va siljishlarning roli", kinds=["hisob"],
+            goal=r"Siljishlar tarmoqning «sukut bo‘yicha» javobini belgilashini tushunish.",
+            blocks=[
+                ("p", r"Tarmog‘imizga $\mathbf{x} = (0;\ 0)$ ni beramiz. U holda $\mathbf{z}^{(1)} = \mathbf{b}^{(1)} = (0{,}5;\ -1;\ 0)$, $\mathbf{a}^{(1)} = (0{,}5;\ 0;\ 0)$, $\mathbf{z}^{(2)} = (0{,}5;\ 0)$, $\mathbf{a}^{(2)} = (0{,}5;\ 0)$, $z^{(3)} = 2\cdot0{,}5 + 1 = 2$, $\hat y = \sigma(2) \approx 0{,}8808$."),
+            ],
+            take=r"Siljishlar bo‘lmaganda nol kirish har bir qatlamda doim $\mathbf{z} = \mathbf{0}$ va $\hat y = \sigma(0) = 0{,}5$ ni bergan bo‘lardi — tarmoq nimani o‘rganmasin.")),
+        ("example", dict(n=6, title="«O‘chirilgan» neyronlar: ReLU oqim bilan nima qiladi", kinds=["hisob"],
+            goal=r"$a = 0$ bo‘lgan neyron o‘z shoxobchasini butunlay uzib qo‘yishini ko‘rish: uning chiquvchi vaznlari javobga ta’sir qilmaydi.",
+            blocks=[
+                ("p", r"Misolimizda 2-qatlamning birinchi neyroni $a^{(2)}_1 = 0$ ni chiqardi ($z = -0{,}75$). Uning chiqish qatlamidagi vazni $W^{(3)}_{11} = 2$. Uni $100$ ga yoki $-100$ ga almashtiramiz: $z^{(3)} = 100\cdot0 - 0{,}5\cdot3{,}5 + 1 = -0{,}75$ — javob o‘zgarmaydi."),
+            ],
+            take=r"Berilgan kirishda tarmoqning faqat bir qismi ishlaydi. Boshqa kirish uchun boshqa neyronlar yonadi — ReLU tarmog‘i javobni har biri chiziqli bo‘lgan bo‘laklardan shu tarzda tuzadi.")),
+        ("example", dict(n=7, title="Chuqurlikmi yoki kenglik", kinds=["jadval"],
+            goal=r"Kenglik qanchaga va chuqurlik qanchaga tushishini solishtirish.",
+            blocks=[
+                ("table", ["Tarmoq", "Qatlamlar", "Parametrlar"], [
+                    ["2–100–1", "1 ta yashirin, keng", "2·100 + 100 + 100 + 1 = 401"],
+                    ["2–10–10–10–1", "3 ta yashirin, tor", "30 + 110 + 110 + 11 = 261"],
+                ], {"num": []}),
+            ],
+            take=r"Chuqur tor tarmoq keng sayoz tarmoqdan arzonroq bo‘lishi va shu bilan birga murakkabroq funksiyalarni qurishi mumkin: har bir qatlam fazoni qaytadan taxlaydi va «sinish»lar soni kenglikka qaraganda chuqurlik bilan tezroq o‘sadi.")),
+        ("example", dict(n=8, title="Sonli barqarorlik: to‘g‘ri o‘tish qayerda buziladi", kinds=["hisob", "kod"],
+            goal=r"To‘g‘ri o‘tishda NaN olishning ikkita klassik yo‘lini va ularni qanday chetlab o‘tishni bilib olish.",
+            blocks=[
+                ("p", r"$\mathbf{z} = (1000;\ 1001;\ 1002)$ bo‘lgan softmax: $e^{1000}$ suzuvchi nuqtali songa sig‘maydi va $\infty/\infty = $ NaN hosil bo‘ladi. Lekin barcha $z$ lardan bir xil son ayirilsa, softmax o‘zgarmaydi. Maksimumni ayiramiz:"),
+                ("eq", r"\mathbf{z} - 1002 = (-2;\ -1;\ 0), \quad e^{\mathbf{z} - \max} \approx (0{,}1353;\ 0{,}3679;\ 1), \quad \hat{\mathbf{y}} \approx (0{,}0900;\ 0{,}2447;\ 0{,}6652)"),
+                ("p", r"Sigmoida bilan ham shunday: $z = -1000$ da sodda $1/(1 + e^{1000})$ formulasi to‘lib ketadi. Barqaror versiya manfiy $z$ lar uchun $e^{z}/(1 + e^{z})$ ni hisoblaydi. Klassifikator chiqishida esa yo‘qotishga ehtimolliklar emas, $\mathbf{z}^{(L)}$ logitlar beriladi: <code>BCEWithLogitsLoss</code>, <code>CrossEntropyLoss</code>."),
+            ],
+            take=r"Matematik jihatdan to‘g‘ri o‘tish formulasi istalgan sonlar uchun to‘g‘ri, mashinada esa — yo‘q. Barqaror versiyalar ayni narsani hisoblaydi, lekin xavfsiz tartibda.")),
+    ]),
+
+    dict(id="mistakes", title="Ko‘p uchraydigan xatolar", blocks=[
+        ("ul", [
+            r"<b>Indekslar tartibini adashtirish.</b> $W^{(l)}_{jk}$ — «$k$ neyrondan $j$ neyronga». Matritsaning shakli $n_l \times n_{l-1}$, PyTorch’da — <code>(out_features, in_features)</code>.",
+            r"<b>$W\mathbf{x}$ o‘rniga $\mathbf{x}W$.</b> Bitta ustun-vektor uchun — $W\mathbf{x}$; satrlar ko‘rinishidagi paket uchun — $XW^{\top}$. Ularni aralashtirish shakl xatosiga yoki, undan ham yomoni, kvadrat matritsalarda noto‘g‘ri javobga olib keladi.",
+            r"<b>Qatlamlar orasidagi aktivatsiyani unutish.</b> Tarmoq jimgina bitta chiziqli qatlamga qo‘shilib ketadi.",
+            r"<b>Javob manfiy bo‘lishi mumkin bo‘lgan regressiya chiqishiga ReLU qo‘yish</b>: tarmoq bunday javobni jismonan chiqara olmaydi. Regressiya chiqishida — ayniy funksiya.",
+            r"<b>PyTorch’da softmax qo‘llab, so‘ng CrossEntropyLoss ishlatish</b> — u log-softmax ni ichida allaqachon bajaradi: ehtimolliklar ikki marta hisoblanadi.",
+            r"<b>Kirishni masshtablamaslik.</b> Juda katta $\mathbf{x}$ juda katta $\mathbf{z}$ beradi, sigmoida va tanh ni to‘yintiradi va o‘qitishni buzadi.",
+            r"<b>To‘g‘ri o‘tish tarmoqni o‘qitadi deb hisoblash.</b> U faqat hisoblaydi; vaznlarni teskari o‘tishdan keyin optimizator qadami o‘zgartiradi.",
+        ]),
+    ]),
+
+    dict(id="summary", title="Xulosa", blocks=[
+        ("ul", [
+            r"To‘g‘ri o‘tish: $\mathbf{a}^{(0)} = \mathbf{x}$; $l = 1..L$ uchun: $\mathbf{z}^{(l)} = W^{(l)}\mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}$, $\mathbf{a}^{(l)} = f^{(l)}(\mathbf{z}^{(l)})$; javob $\hat{\mathbf{y}} = \mathbf{a}^{(L)}$.",
+            r"$W^{(l)}$ ning har bir satri — bitta neyron; qatlam — bir yo‘la bajariladigan $n_l$ ta bitta neyron formulasi.",
+            r"$W^{(l)}$ ning shakli $n_l \times n_{l-1}$; qatlamda $n_l(n_{l-1} + 1)$ ta parametr bor; to‘g‘ri o‘tish har bir obyekt uchun $\sum_l n_l n_{l-1}$ ta ko‘paytirish talab qiladi.",
+            r"Paket uchun: $Z^{(l)} = A^{(l-1)}W^{(l)\top} + \mathbf{1}\mathbf{b}^{(l)\top}$.",
+            r"Geometrik jihatdan chiziqli qism fazoni buradi va cho‘zadi, aktivatsiya esa uni egadi; aktivatsiyalarsiz qatlamlar bittaga qo‘shilib ketadi.",
+            r"O‘qitishda to‘g‘ri o‘tish yo‘qotish bilan tugaydi va teskari o‘tish uchun barcha $\mathbf{z}$ va $\mathbf{a}$ ni saqlaydi.",
+        ]),
+    ]),
+
+    dict(id="quiz", title="O‘zingizni tekshiring", blocks=[
+        ("quiz", [
+            dict(q=r"5 ta kirish va 3 ta neyronli qatlamning $W^{(l)}$ matritsasi qanday shaklga ega?", options=[r"$5 \times 3$", r"$3 \times 5$", r"$3 \times 3$", r"$5 \times 5$"], answer=1,
+                 explain=r"Satrlar neyronlar soncha ($n_l = 3$), ustunlar esa kirishlar soncha ($n_{l-1} = 5$)."),
+            dict(q=r"4 → 6 qatlamida nechta parametr bor?", options=["24", "28", "30", "34"], answer=2, explain=r"$6\cdot(4 + 1) = 30$: 24 ta vazn va 6 ta siljish."),
+            dict(q=r"Qatlam: $W = \begin{pmatrix}1 & 2\end{pmatrix}$, $b = -1$, ReLU, kirish $(1;\ -1)$. Chiqish nimaga teng?", options=["0", "−2", "2", "1"], answer=0,
+                 explain=r"$z = 1 - 2 - 1 = -2$, $\mathrm{ReLU}(-2) = 0$."),
+            dict(q=r"2–3–2–1 tarmog‘idan barcha aktivatsiyalarni olib tashlasak, nima bo‘ladi?", options=["U aniqroq bo‘ladi", "U bitta chiziqli qatlamga ekvivalent bo‘lib qoladi", "U hisoblay olmay qoladi", "Hech narsa o‘zgarmaydi"], answer=1,
+                 explain=r"Chiziqli almashtirishlar kompozitsiyasi chiziqli: $W^{(3)}W^{(2)}W^{(1)}\mathbf{x} + \dots$"),
+            dict(q=r"$X$ paket (obyektlar satrlarda) uchun qatlam qanday yoziladi?", options=[r"$WX + \mathbf{b}$", r"$XW^{\top} + \mathbf{1}\mathbf{b}^{\top}$", r"$X^{\top}W$", r"$W^{\top}X^{\top}$"], answer=1,
+                 explain=r"$X$ ning har bir satri — $\mathbf{x}^{\top}$ vektor, va $(W\mathbf{x})^{\top} = \mathbf{x}^{\top}W^{\top}$."),
+            dict(q=r"O‘qitishda $\mathbf{z}^{(l)}$ va $\mathbf{a}^{(l)}$ ni nima uchun saqlash kerak?", options=["Chiroy uchun", "Teskari o‘tish gradiyentlarni to‘g‘ri o‘tishni takrorlamasdan hisoblashi uchun", "Yo‘qotishni kamaytirish uchun", "Bu faqat xulosa chiqarishda kerak"], answer=1,
+                 explain=r"Qatlamlar hosilalari shu qiymatlar orqali ifodalanadi, masalan, $f'(\mathbf{z}^{(l)})$ va $\mathbf{a}^{(l-1)}$."),
+        ]),
+    ]),
+]
+
+
+SECTIONS = {"ru": RU, "en": EN, "uz": UZ}
 
 
 def check_numbers():

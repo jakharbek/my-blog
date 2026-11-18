@@ -36,6 +36,8 @@ assets/css/assistant.css   стили панели ассистента + «мо
 assets/img/javharbek.png   фото автора
 tools/build.py             генератор страниц; тексты интерфейса, разделы, список записей, «Обо мне»
 tools/content_sigmoid.py   тексты статьи о сигмоиде
+tools/content_forward.py   статья «Формула Forward Pass» (ru, en, uz): прямой проход сети 2–3–2–1, 8 примеров; числа проверяет
+                           check_numbers(): python3 tools/content_forward.py; рисунки — assets/js/forward.js
 tools/content_neuron.py    статья «Формула одного нейрона» (ru, en, uz) в блоках страниц формул; числа проверяют check_numbers()
                            и check_practice() (17 примеров раздела «Практикум», блок "example" в build.render_blocks):
                            python3 tools/content_neuron.py

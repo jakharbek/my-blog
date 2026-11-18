@@ -819,3 +819,6 @@ html.nr-noscroll, html.nr-noscroll body { overflow: hidden; }
 .fp-st tr.tot td { font-weight: 600; border-top: 2px solid var(--line); }
 .fp-bar { display: inline-block; width: 90px; height: 8px; border-radius: 4px; background: var(--bg3); overflow: hidden; vertical-align: middle; }
 .fp-bar i { display: block; height: 100%; background: var(--v-blue); }
+/* KaTeX's visually hidden MathML (for screen readers) can stick out of a narrow column and widen the page;
+   clip it at the article without creating a scroll container (sticky elements keep working) */
+main.fx-page { overflow-x: clip; }

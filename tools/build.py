@@ -1321,7 +1321,7 @@ def attr_json(data):
 
 
 GREEK = {"alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "eta": "η", "theta": "θ", "lambda": "λ", "mu": "μ", "sigma": "σ", "phi": "φ",
-         "Sigma": "Σ", "pi": "π", "nabla": "∇", "partial": "∂", "cdot": "·", "top": "ᵀ", "lVert": "‖", "rVert": "‖", "approx": "≈", "ge": "≥", "le": "≤"}
+         "Sigma": "Σ", "pi": "π", "nabla": "∇", "partial": "∂", "cdot": "·", "top": "ᵀ", "lVert": "‖", "rVert": "‖", "approx": "≈", "ge": "≥", "le": "≤", "to": "→", "times": "×"}
 SUBSCRIPT = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
 
 
