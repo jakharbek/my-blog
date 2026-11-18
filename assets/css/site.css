@@ -783,3 +783,39 @@ html.nr-noscroll, html.nr-noscroll body { overflow: hidden; }
   .fv.nr-fs .fv-controls { width: min(560px, calc(50vw - 21px)); }
   .fv.nr-fs .nr-net-panel { width: min(430px, calc(50vw - 21px)); }
 }
+
+/* ---------- article "The forward pass formula" (assets/js/forward.js) ---------- */
+.fp-net { width: 100%; min-width: 0; }
+.fp-svg .fp-edge { fill: none; stroke-linecap: round; transition: opacity .3s; }
+.fp-svg .fp-edge.fp-flow { stroke-dasharray: 7 6; animation: fp-dash .9s linear infinite; }
+@keyframes fp-dash { to { stroke-dashoffset: -13; } }
+@media (prefers-reduced-motion: reduce) { .fp-svg .fp-edge.fp-flow { animation: none; stroke-dasharray: none; } }
+.fp-svg .fp-node { fill: var(--card); stroke: var(--v-ink); stroke-width: 1.5; transition: fill .3s; }
+.fp-svg .fp-node.fp-blue { fill: color-mix(in srgb, var(--v-blue) calc(var(--fp-a, .3) * 100%), var(--card)); }
+.fp-svg .fp-node.fp-red { fill: color-mix(in srgb, var(--v-red) calc(var(--fp-a, .3) * 100%), var(--card)); }
+.fp-svg .fp-node-on { stroke: var(--v-orange); stroke-width: 3; }
+.fp-svg .fp-val { font: 600 12px var(--sans); fill: var(--fg); paint-order: stroke; stroke: var(--card); stroke-width: 3px; font-variant-numeric: tabular-nums; }
+.fp-svg .fp-z { font: 500 11px var(--sans); fill: var(--fg3); font-variant-numeric: tabular-nums; }
+.fp-svg .fp-cap { font: 600 12px var(--sans); fill: var(--fg2); letter-spacing: .03em; }
+.fp-svg .fp-cap2 { font: 500 11px var(--sans); fill: var(--fg4); }
+.fp-mv { width: 100%; }
+.fp-mvt { border-collapse: separate; border-spacing: 4px 3px; margin: 0 auto; font-variant-numeric: tabular-nums; font-size: 14px; }
+.fp-mvt th { font-weight: 500; color: var(--fg3); padding: 0 6px 6px; }
+.fp-mvt td { padding: 6px 8px; border-radius: 4px; background: var(--card); text-align: right; color: var(--fg2); min-width: 3.2em; transition: background-color .25s; }
+.fp-mvt td.fp-op { background: transparent; color: var(--fg4); min-width: 0; text-align: center; font-size: 18px; }
+.fp-mvt td.fp-W { display: flex; gap: 4px; background: transparent; padding: 0; }
+.fp-mvt td.fp-W span { flex: 1; min-width: 3.2em; padding: 6px 8px; border-radius: 4px; background: var(--card); }
+.fp-mvt .pos { color: var(--tx-blue); } .fp-mvt .neg { color: var(--tx-red); }
+.fp-mvt td.fp-W span.on, .fp-mvt td.on { background: color-mix(in srgb, var(--v-orange) 22%, var(--card)); color: var(--fg); font-weight: 600; }
+.fp-mvt tr td:empty { background: transparent; }
+.fp-inl { display: flex; flex: 1 1 100%; align-items: center; gap: 10px; font-size: 14px; color: var(--fg3); }
+.fp-in { flex: 1; min-width: 0; max-width: 360px; height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--fg); font: 500 15px var(--mono); }
+.fp-in:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fp-err { flex-basis: 100%; font-size: 13px; color: var(--tx-red); }
+.fp-err:empty { display: none; }
+.fp-shapes { width: 100%; }
+.article .data.fp-st { min-width: 0; }
+.article .data.fp-st td, .article .data.fp-st th { min-width: 0; padding-right: 14px; white-space: nowrap; }
+.fp-st tr.tot td { font-weight: 600; border-top: 2px solid var(--line); }
+.fp-bar { display: inline-block; width: 90px; height: 8px; border-radius: 4px; background: var(--bg3); overflow: hidden; vertical-align: middle; }
+.fp-bar i { display: block; height: 100%; background: var(--v-blue); }

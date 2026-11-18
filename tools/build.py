@@ -18,6 +18,7 @@ import content_ce_workbook as cw
 import content_formulas as formulas
 import content_mae_mse as mm
 import content_neuron as nr
+import content_forward as fw
 import workbook_ce
 from content_sigmoid import ARTICLE, TABLE_ROWS
 
@@ -133,6 +134,7 @@ COURSE_URL = "https://jakharbek.github.io/ml_gradient_boosting/"
 MATH_COURSE_URL = "https://jakharbek.github.io/math_lessons/"
 MATH_COURSE = {"ru": MATH_COURSE_URL, "en": MATH_COURSE_URL + "en/", "uz": MATH_COURSE_URL + "uz/"}
 POSTS = [
+    dict(slug=fw.SLUG, topic="ml", date=fw.DATE, mins=fw.MINUTES, title=fw.TITLE, excerpt=fw.EXCERPT),
     dict(slug=nr.SLUG, topic="ml", date=nr.DATE, mins=nr.MINUTES, title=nr.TITLE, excerpt=nr.EXCERPT),
     dict(slug="math-lessons-course", topic="math", date="2026-11-16",
          url=MATH_COURSE,
@@ -1463,7 +1465,8 @@ def formula_page(lang, fid, mod):
 
 
 # ---------- article: the formula of a single neuron (tools/content_neuron.py, assets/js/neuron.js) ----------
-def neuron_article(lang):
+def long_article(lang, nr, js):
+    """A long interactive article built from a content module (content_neuron.py, content_forward.py)."""
     s, ui, p = SITE[lang], FX_UI[lang], POST[nr.SLUG]
     sections = nr.SECTIONS[lang]
     rel = "../../"
@@ -1478,7 +1481,7 @@ def neuron_article(lang):
              f'  <script defer src="{KATEX}/katex.min.js"></script>\n'
              f'  <script defer src="{KATEX}/contrib/auto-render.min.js"></script>\n'
              f'  <script defer src="{rel}assets/js/viz.js"></script>\n'
-             f'  <script defer src="{rel}assets/js/neuron.js"></script>\n'
+             f'  <script defer src="{rel}assets/js/{js}.js"></script>\n'
              f'  <script defer src="{rel}assets/js/materials.js"></script>\n')
     title = p["title"][lang]
     return head(lang, f"{title} — {s['brand']}", html.escape(nr.DESCRIPTION[lang], quote=True), rel, page, "article", extra) + header(lang, rel, page, nav) + f"""<div class="progress" aria-hidden="true"><div id="progress"></div></div>
@@ -1520,6 +1523,14 @@ def neuron_article(lang):
 
 """ + footer(lang, rel) + "</body>\n</html>\n"
 
+
+
+def neuron_article(lang):
+    return long_article(lang, nr, "neuron")
+
+
+def forward_article(lang):
+    return long_article(lang, fw, "forward")
 
 def build_formula(fid):
     mod = load_formula(fid)
@@ -1600,7 +1611,7 @@ def main():
         build_formula(fid)
     workbook_ce.build()  # assets/files/cross-entropy-practice-<lang>.xlsx (before the page: it shows their sizes)
     for lang in LANGS:
-        pages = {"": home, "sigmoid": article, nr.SLUG: neuron_article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
+        pages = {"": home, "sigmoid": article, nr.SLUG: neuron_article, fw.SLUG: forward_article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
                  f"materials/{mm.SLUG}": material_mae_mse, f"materials/{cw.SLUG}": material_ce_workbook}
         for sub, render in pages.items():
             (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)

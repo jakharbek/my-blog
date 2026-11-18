@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>The forward pass formula: how a network turns an input into an answer — Abdulatipov J.</title>
+  <meta name="description" content="The neural network forward pass z⁽ˡ⁾ = W⁽ˡ⁾a⁽ˡ⁻¹⁾ + b⁽ˡ⁾, a⁽ˡ⁾ = f(z⁽ˡ⁾) step by step: notation, worked numbers, shapes, batches, the geometry of layers, cost, code. With interactive figures.">
+  <meta property="og:title" content="The forward pass formula: how a network turns an input into an answer — Abdulatipov J.">
+  <meta property="og:description" content="The neural network forward pass z⁽ˡ⁾ = W⁽ˡ⁾a⁽ˡ⁻¹⁾ + b⁽ˡ⁾, a⁽ˡ⁾ = f(z⁽ˡ⁾) step by step: notation, worked numbers, shapes, batches, the geometry of layers, cost, code. With interactive figures.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://javharbek.uz/en/forward-pass/">
+  <meta property="og:image" content="https://javharbek.uz/assets/img/javharbek.png">
+  <meta property="og:site_name" content="Abdulatipov J.">
+  <link rel="canonical" href="https://javharbek.uz/en/forward-pass/">
+  <link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/forward-pass/">
+  <link rel="alternate" hreflang="en" href="https://javharbek.uz/en/forward-pass/">
+  <link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/forward-pass/">
+  <link rel="alternate" hreflang="x-default" href="https://javharbek.uz/en/forward-pass/">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+  <link rel="stylesheet" href="../../assets/css/assistant.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../assets/js/viz.js"></script>
+  <script defer src="../../assets/js/forward.js"></script>
+  <script defer src="../../assets/js/materials.js"></script>
+  <script defer src="../../assets/js/markdown.js"></script>
+  <script defer src="../../assets/js/assistant.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../en/">Abdulatipov J.</a>
+    <nav class="nav" aria-label="Main navigation">
+    <a href="../../en/#posts">All articles</a>
+    <a href="../../en/materials/">Materials</a>
+    <a href="../../en/about/">About me</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Language"><a href="../../ru/forward-pass/" lang="ru" hreflang="ru">RU</a> <a href="../../en/forward-pass/" lang="en" hreflang="en" aria-current="true">EN</a> <a href="../../uz/forward-pass/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Dark theme&quot;, &quot;toLight&quot;: &quot;Light theme&quot;}" aria-label="Dark theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker">ML / AI</span>
+  <h1>The forward pass formula: how a network turns an input into an answer</h1>
+  <p class="dek">The forward pass is what a network does every time it answers: the input goes through layer after layer, and every layer repeats the same two actions — a linear map and an activation. We take the formula apart down to the last index, compute it by hand on a small network, watch how layers bend space, and write the code.</p>
+  <div class="author">
+    <img src="../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-11-18">18 November 2026</time> · 45 min read</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Contents">
+    <span>Contents</span>
+    <nav>
+      <a href="#idea"><span class="n">1</span>What the forward pass is</a>
+      <a href="#anatomy"><span class="n">2</span>The formula bone by bone: every symbol</a>
+      <a href="#numbers"><span class="n">3</span>The forward pass in numbers, step by step</a>
+      <a href="#shapes"><span class="n">4</span>Shapes: a check that catches half of all bugs</a>
+      <a href="#geometry"><span class="n">5</span>Geometry: what a layer does to space</a>
+      <a href="#batch"><span class="n">6</span>A batch of objects: the same formula for many inputs</a>
+      <a href="#training"><span class="n">7</span>The forward pass in training: the loss and the cache</a>
+      <a href="#playground"><span class="n">8</span>Playground: build the forward pass yourself</a>
+      <a href="#code"><span class="n">9</span>Code: the forward pass by hand and in PyTorch</a>
+      <a href="#practice"><span class="n">10</span>Practice: 8 examples</a>
+      <a href="#mistakes"><span class="n">11</span>Common mistakes</a>
+      <a href="#summary"><span class="n">12</span>Summary</a>
+      <a href="#quiz"><span class="n">13</span>Test yourself</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathbf{a}^{(0)}=\mathbf{x},\qquad \mathbf{z}^{(l)}=W^{(l)}\mathbf{a}^{(l-1)}+\mathbf{b}^{(l)},\qquad \mathbf{a}^{(l)}=f^{(l)}\big(\mathbf{z}^{(l)}\big),\qquad \hat{\mathbf{y}}=\mathbf{a}^{(L)}$$</div>
+
+    <h2 id="idea">What the forward pass is</h2>
+    <p>In <a href='../neuron/'>the article about a single neuron</a> we took apart the formula $a = f(\mathbf{w}^{\top}\mathbf{x} + b)$. A real network is many such neurons stacked into layers: the outputs of one layer become the inputs of the next. The <b>forward pass</b> is the computation of the network’s answer: the input travels from left to right, layer by layer, all the way to the last layer.</p>
+    <p>The whole procedure is written in three lines:</p>
+    <div class="eqd">$$\mathbf{a}^{(0)} = \mathbf{x}$$</div>
+    <div class="eqd">$$\mathbf{z}^{(l)} = W^{(l)}\mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}, \qquad \mathbf{a}^{(l)} = f^{(l)}\big(\mathbf{z}^{(l)}\big), \qquad l = 1, 2, \dots, L$$</div>
+    <div class="eqd">$$\hat{\mathbf{y}} = \mathbf{a}^{(L)}$$</div>
+    <p>Let us read it as an instruction: put the input into the “zeroth layer”; in every layer, multiply whatever has arrived by the weight matrix, add the biases and pass the result through the activation function; whatever comes out of the last layer is the answer. If we unroll the loop, we get one long nested formula:</p>
+    <div class="eqd">$$\hat{\mathbf{y}} = f^{(L)}\Big(W^{(L)}\,f^{(L-1)}\big(\cdots f^{(1)}\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big)\cdots\big) + \mathbf{b}^{(L)}\Big)$$</div>
+    <figure class="viz"><div class="fv" data-viz="fp-flow" data-config="{&quot;net&quot;: {&quot;x&quot;: [1, 2], &quot;W&quot;: [[[1, -1], [0.5, 1], [-1, 2]], [[1, 0.5, -0.5], [-1, 1, 0.5]], [[2, -0.5]]], &quot;b&quot;: [[0.5, -1, 0], [0, 0.5], [1]], &quot;f&quot;: [&quot;relu&quot;, &quot;relu&quot;, &quot;sigmoid&quot;]}}"></div><figcaption><b>Figure 1.</b> The forward pass in a 2–3–2–1 network. Press “Step” or “Play”: the signal travels layer by layer, and in every neuron first $z$ appears, then $a = f(z)$. Blue connections are positive weights, red ones are negative, the thickness is the absolute value of the weight. Move the input sliders: the answer $\hat y$ is recomputed at once.</figcaption></figure>
+    <div class="callout intuition"><b>An analogy</b><p>An assembly line in a factory. The raw material (the input $\mathbf{x}$) passes through machines (the layers). Every machine does the same thing: it mixes the incoming parts in the right proportions (the matrix $W$), adds its own additive (the bias $\mathbf{b}$) and processes the result (the activation $f$). No machine knows about the final product: it sees only what came from the previous one. The product leaving the last machine is the network’s answer.</p></div>
+    <div class="callout key"><b>The main point</b><p>The forward pass does not train the network and does not change its weights: it only computes the answer with the current weights. Training comes afterwards: the answer is compared with the correct one (the loss function), and the backward pass computes how to adjust the weights.</p></div>
+
+    <h2 id="anatomy">The formula bone by bone: every symbol</h2>
+    <p>All the notation of the forward pass, with sizes. We denote the number of neurons in layer $l$ by $n_l$; $n_0$ is the number of inputs.</p>
+    <dl class="symbols"><dt>$l$</dt><dd><b>layer number</b>: $l = 1, \dots, L$; the superscript in parentheses $^{(l)}$ means “belongs to layer $l$”, not a power;</dd><dt>$L$</dt><dd><b>number of layers with weights</b> (the depth of the network); the input “layer” $0$ has no weights;</dd><dt>$\mathbf{a}^{(l-1)}$</dt><dd><b>input of layer</b> $l$: the output of the previous layer, a vector of length $n_{l-1}$; $\mathbf{a}^{(0)} = \mathbf{x}$;</dd><dt>$W^{(l)}$</dt><dd><b>weight matrix</b> of the layer: $n_l$ rows and $n_{l-1}$ columns; row $j$ holds the weights of neuron $j$;</dd><dt>$W^{(l)}_{jk}$</dt><dd><b>a single weight</b>: from neuron $k$ of layer $l-1$ to neuron $j$ of layer $l$ (first “where to”, then “where from”);</dd><dt>$\mathbf{b}^{(l)}$</dt><dd><b>bias vector</b> of length $n_l$: one bias per neuron;</dd><dt>$\mathbf{z}^{(l)}$</dt><dd><b>pre-activations</b> of the layer, a vector of length $n_l$: the weighted sums of all its neurons;</dd><dt>$f^{(l)}$</dt><dd><b>activation function</b> of the layer; applied to each coordinate separately;</dd><dt>$\mathbf{a}^{(l)}$</dt><dd><b>output of the layer</b> (activations), a vector of length $n_l$;</dd><dt>$\hat{\mathbf{y}}$</dt><dd><b>the network’s answer</b>: the output of the last layer $\mathbf{a}^{(L)}$.</dd></dl>
+    <h3>One layer is many neurons at once</h3>
+    <p>Let us write the first line of the formula out coordinate by coordinate. Neuron $j$ of layer $l$ computes exactly the same formula as a single neuron: the weighted sum of its inputs plus its own bias.</p>
+    <div class="eqd">$$z^{(l)}_j = \sum_{k=1}^{n_{l-1}} W^{(l)}_{jk}\,a^{(l-1)}_k + b^{(l)}_j, \qquad a^{(l)}_j = f^{(l)}\big(z^{(l)}_j\big), \qquad j = 1, \dots, n_l$$</div>
+    <p>The matrix notation $W^{(l)}\mathbf{a}^{(l-1)}$ is simply a way to compute all $n_l$ of these sums in one operation: the $j$-th row of the matrix multiplied by the input vector gives $z_j$. So the forward pass formula is the formula of a single neuron, applied to all the neurons of a layer and repeated for all the layers.</p>
+    <h3>The sizes in our example</h3>
+    <p>The rest of the text relies on one network: 2 inputs, hidden layers of 3 and 2 neurons with ReLU, and one output neuron with the sigmoid (a 2–3–2–1 network).</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num aria-label="Layer l">Layer $l$</th><th aria-label="n_l-1 to n_l">$n_{l-1} \to n_l$</th><th aria-label="W^(l)">$W^{(l)}$</th><th aria-label="b^(l)">$\mathbf{b}^{(l)}$</th><th aria-label="f^(l)">$f^{(l)}$</th><th>Parameters</th></tr></thead><tbody><tr><td class=num>1</td><td>2 → 3</td><td>3 × 2</td><td>3</td><td>ReLU</td><td>3·2 + 3 = 9</td></tr><tr><td class=num>2</td><td>3 → 2</td><td>2 × 3</td><td>2</td><td>ReLU</td><td>2·3 + 2 = 8</td></tr><tr><td class=num>3</td><td>2 → 1</td><td>1 × 2</td><td>1</td><td>sigmoid</td><td>1·2 + 1 = 3</td></tr><tr><td class=num><b>total</b></td><td></td><td></td><td></td><td></td><td><b>20</b></td></tr></tbody></table></div>
+    <div class="callout key"><b>The counting rule</b><p>A layer $n_{l-1}\to n_l$ has exactly $n_l\,(n_{l-1} + 1)$ parameters: $n_l n_{l-1}$ weights and $n_l$ biases. The whole network has the sum over its layers.</p></div>
+
+    <h2 id="numbers">The forward pass in numbers, step by step</h2>
+    <p>The input is $\mathbf{x} = (1,\ 2)$. The weights and biases:</p>
+    <div class="eqd">$$W^{(1)} = \begin{pmatrix} 1 &amp; -1\\ 0.5 &amp; 1\\ -1 &amp; 2 \end{pmatrix},\ \mathbf{b}^{(1)} = \begin{pmatrix} 0.5\\ -1\\ 0 \end{pmatrix};\quad W^{(2)} = \begin{pmatrix} 1 &amp; 0.5 &amp; -0.5\\ -1 &amp; 1 &amp; 0.5 \end{pmatrix},\ \mathbf{b}^{(2)} = \begin{pmatrix} 0\\ 0.5 \end{pmatrix};\quad W^{(3)} = \begin{pmatrix} 2 &amp; -0.5 \end{pmatrix},\ b^{(3)} = 1$$</div>
+    <h3>Layer 1: from two numbers to three</h3>
+    <div class="eqd">$$\mathbf{z}^{(1)} = \begin{pmatrix} 1\cdot1 + (-1)\cdot2 + 0.5\\ 0.5\cdot1 + 1\cdot2 - 1\\ (-1)\cdot1 + 2\cdot2 + 0 \end{pmatrix} = \begin{pmatrix} -0.5\\ 1.5\\ 3 \end{pmatrix}, \qquad \mathbf{a}^{(1)} = \mathrm{ReLU}\big(\mathbf{z}^{(1)}\big) = \begin{pmatrix} 0\\ 1.5\\ 3 \end{pmatrix}$$</div>
+    <p>The first neuron received a negative sum, and ReLU “switched it off”: from here on, only a zero travels down the network from it.</p>
+    <h3>Layer 2: from three numbers to two</h3>
+    <div class="eqd">$$\mathbf{z}^{(2)} = \begin{pmatrix} 1\cdot0 + 0.5\cdot1.5 - 0.5\cdot3 + 0\\ -1\cdot0 + 1\cdot1.5 + 0.5\cdot3 + 0.5 \end{pmatrix} = \begin{pmatrix} -0.75\\ 3.5 \end{pmatrix}, \qquad \mathbf{a}^{(2)} = \begin{pmatrix} 0\\ 3.5 \end{pmatrix}$$</div>
+    <h3>Layer 3: from two numbers to the answer</h3>
+    <div class="eqd">$$z^{(3)} = 2\cdot0 - 0.5\cdot3.5 + 1 = -0.75, \qquad \hat y = \sigma(-0.75) = \frac{1}{1 + e^{0.75}} \approx 0.3208$$</div>
+    <figure class="viz"><div class="fv" data-viz="fp-matvec" data-config="{&quot;net&quot;: {&quot;x&quot;: [1, 2], &quot;W&quot;: [[[1, -1], [0.5, 1], [-1, 2]], [[1, 0.5, -0.5], [-1, 1, 0.5]], [[2, -0.5]]], &quot;b&quot;: [[0.5, -1, 0], [0, 0.5], [1]], &quot;f&quot;: [&quot;relu&quot;, &quot;relu&quot;, &quot;sigmoid&quot;]}}"></div><figcaption><b>Figure 2.</b> The matrix–vector product inside each layer. Choose a layer and press “Step”: a row of $W$ (one neuron) is highlighted, and below it you see the pairwise products with the input, their sum, the bias and the activation. This shows that $W\mathbf{a} + \mathbf{b}$ is $n_l$ single-neuron formulas evaluated at the same time.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Layer</th><th aria-label="z^(l)">$\mathbf{z}^{(l)}$</th><th aria-label="a^(l)">$\mathbf{a}^{(l)}$</th></tr></thead><tbody><tr><td>input</td><td>—</td><td>(1, 2)</td></tr><tr><td>1</td><td>(−0.5, 1.5, 3)</td><td>(0, 1.5, 3)</td></tr><tr><td>2</td><td>(−0.75, 3.5)</td><td>(0, 3.5)</td></tr><tr><td>3</td><td>−0.75</td><td>0.3208</td></tr></tbody></table></div>
+    <div class="callout note"><b>What to keep</b><p>During training, all the $\mathbf{z}^{(l)}$ and $\mathbf{a}^{(l)}$ in this table are stored: the backward pass uses them to compute the gradients without repeating the forward pass.</p></div>
+
+    <h2 id="shapes">Shapes: a check that catches half of all bugs</h2>
+    <p>Every operation of the forward pass changes the size of the vector by a simple rule: an $n_l \times n_{l-1}$ matrix multiplied by a vector of length $n_{l-1}$ gives a vector of length $n_l$. The chain of sizes in our network:</p>
+    <div class="eqd">$$\underbrace{\mathbf{x}}_{2} \xrightarrow{\ W^{(1)}:\,3\times2\ } \underbrace{\mathbf{a}^{(1)}}_{3} \xrightarrow{\ W^{(2)}:\,2\times3\ } \underbrace{\mathbf{a}^{(2)}}_{2} \xrightarrow{\ W^{(3)}:\,1\times2\ } \underbrace{\hat y}_{1}$$</div>
+    <p>The number of columns of $W^{(l)}$ must match the length of the layer’s input; the number of rows determines the length of its output. If they do not match, the code fails with a shape error, and that is a good thing: it is worse when the shapes happen to match but the meaning is mixed up (for example, $W$ instead of $W^{\top}$ for a square matrix).</p>
+    <figure class="viz"><div class="fv" data-viz="fp-shapes" data-config="{&quot;sizes&quot;: [2, 3, 2, 1], &quot;presets&quot;: [[2, 3, 2, 1], [784, 128, 64, 10], [3, 3, 1], [2, 100, 1], [2, 10, 10, 10, 1]]}"></div><figcaption><b>Figure 3.</b> An architecture builder. Enter the layer sizes separated by hyphens or pick a ready-made option: the table shows the shapes of $W^{(l)}$ and $\mathbf{b}^{(l)}$, the number of parameters and the number of multiplications per object, and the bars show where the parameters are concentrated.</figcaption></figure>
+    <div class="callout key"><b>The cost of the forward pass</b><p>For one object, a layer spends $n_l\cdot n_{l-1}$ multiply-adds, one per weight. So the whole forward pass costs roughly as many operations as the network has weights: $\sum_l n_l\,n_{l-1}$. For our network this is $6 + 6 + 2 = 14$ multiplications.</p></div>
+
+    <h2 id="geometry">Geometry: what a layer does to space</h2>
+    <p>Let us look at a layer as a transformation of space. The linear part $W\mathbf{a} + \mathbf{b}$ rotates, stretches, shears and shifts space: straight lines stay straight, parallel lines stay parallel, and the cells of a grid become identical parallelograms. The activation then bends it: ReLU folds everything that landed in the negative region onto the axes, while the sigmoid and tanh squeeze distant points towards the edges.</p>
+    <figure class="viz"><div class="fv" data-viz="fp-space" data-config="{&quot;preset&quot;: &quot;fold&quot;}"></div><figcaption><b>Figure 4.</b> How a 2 → 2 layer bends the plane. The slider smoothly moves the grid through the stages: the original plane → the linear part $W\mathbf{x} + \mathbf{b}$ → the activation. The coloured dots are objects of two classes: watch how, after the bending, they can be separated by a straight line, although at the input this was impossible. Choose the activation and the preset matrices.</figcaption></figure>
+    <p>This is the main point of depth: each layer reshapes space a little, and by the last layer the points of different classes end up on different sides of a simple boundary. The last layer is an ordinary linear classifier or regression, but one that works in a space the previous layers have prepared for it.</p>
+    <details class="deep"><summary>Why layers collapse without activations</summary><div class="deep-body">
+      <p>If we remove $f$, two layers give $W^{(2)}(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}) + \mathbf{b}^{(2)} = (W^{(2)}W^{(1)})\mathbf{x} + (W^{(2)}\mathbf{b}^{(1)} + \mathbf{b}^{(2)})$, which is again a single linear layer. Any depth without non-linearity equals one layer: parallelograms rotated several times remain parallelograms. For details, see <a href='../neuron/#activation'>the article about a single neuron</a>.</p>
+    </div></details>
+
+    <h2 id="batch">A batch of objects: the same formula for many inputs</h2>
+    <p>In practice a network processes a whole batch of $N$ objects at once. They are stacked as rows into a matrix $X$ of size $N \times n_0$, and the forward pass is rewritten for matrices:</p>
+    <div class="eqd">$$A^{(0)} = X, \qquad Z^{(l)} = A^{(l-1)}\,W^{(l)\top} + \mathbf{1}\,\mathbf{b}^{(l)\top}, \qquad A^{(l)} = f^{(l)}\big(Z^{(l)}\big)$$</div>
+    <p>Row $k$ of the matrix $A^{(l)}$ is $\mathbf{a}^{(l)}$ for object $k$; the transpose appears because the objects are now stored as rows rather than columns. The term $\mathbf{1}\mathbf{b}^{\top}$ adds the biases to every row (in NumPy and PyTorch this is done by broadcasting). A batch of three objects through our network:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Object</th><th aria-label="x">$\mathbf{x}$</th><th aria-label="z^(1)">$\mathbf{z}^{(1)}$</th><th aria-label="z^(2)">$\mathbf{z}^{(2)}$</th><th class=num aria-label="z^(3)">$z^{(3)}$</th><th class=num aria-label="ŷ">$\hat y$</th></tr></thead><tbody><tr><td>1</td><td>(1, 2)</td><td>(−0.5, 1.5, 3)</td><td>(−0.75, 3.5)</td><td class=num>−0.75</td><td class=num>0.3208</td></tr><tr><td>2</td><td>(0, 0)</td><td>(0.5, −1, 0)</td><td>(0.5, 0)</td><td class=num>2</td><td class=num>0.8808</td></tr><tr><td>3</td><td>(2, −1)</td><td>(3.5, −1, −4)</td><td>(3.5, −3)</td><td class=num>8</td><td class=num>0.9997</td></tr></tbody></table></div>
+    <p>The second object is the zero input: the network’s entire answer to it is determined by the biases alone. Note that the answer $0.8808$ is $\sigma(2)$, the very same number as in the article about a single neuron.</p>
+    <div class="callout intuition"><b>Why batches</b><p>A single matrix multiplication of $N \times n$ by $n \times m$ is far more efficient for a CPU, and especially for a GPU, than $N$ vector–matrix multiplications: the data are read from memory once and processed in parallel. That is why both training and inference run in batches.</p></div>
+
+    <h2 id="training">The forward pass in training: the loss and the cache</h2>
+    <p>During training, the forward pass ends not at $\hat y$ but at the loss value $L$, which compares the answer with the correct $y$. For our object with the label $y = 1$ and binary cross-entropy:</p>
+    <div class="eqd">$$L = -\big[y\ln\hat y + (1 - y)\ln(1 - \hat y)\big] = -\ln 0.3208 \approx 1.1369$$</div>
+    <p>An answer of $0.32$ when the correct one is $1$ is bad, and the loss is large. To reduce it, we need to know how each weight affects $L$. This is the job of the backward pass: it goes through the network from right to left and multiplies the derivatives of the layers by the chain rule. For this it needs exactly the $\mathbf{z}^{(l)}$ and $\mathbf{a}^{(l)}$ that the forward pass computed, which is why they are cached.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Mode</th><th>What the forward pass computes</th><th>What it stores</th></tr></thead><tbody><tr><td>training</td><td>the answer $\hat y$ and the loss $L$</td><td>all $\mathbf{z}^{(l)}$, $\mathbf{a}^{(l)}$ for the backward pass</td></tr><tr><td>inference</td><td>only the answer $\hat y$</td><td>nothing extra: intermediate values are discarded immediately</td></tr></tbody></table></div>
+    <div class="callout note"><p>This is exactly why training needs much more memory than inference: at every step, the activations of all layers for the whole batch are held in memory. In PyTorch, inference mode is turned on with <code>torch.no_grad()</code> or <code>torch.inference_mode()</code>.</p></div>
+
+    <h2 id="playground">Playground: build the forward pass yourself</h2>
+    <p>Everything together in one interactive model. On the left is the network with the value of every neuron; on the right is a map of the answer $\hat y$ for all inputs of the plane: the colour of the point $(x_1,\ x_2)$ shows what the network will answer. Change the input, the activation functions of the layers and the weight scale, and watch how both the single number and the whole map change.</p>
+    <figure class="viz"><div class="fv" data-viz="fp-playground" data-config="{&quot;net&quot;: {&quot;x&quot;: [1, 2], &quot;W&quot;: [[[1, -1], [0.5, 1], [-1, 2]], [[1, 0.5, -0.5], [-1, 1, 0.5]], [[2, -0.5]]], &quot;b&quot;: [[0.5, -1, 0], [0, 0.5], [1]], &quot;f&quot;: [&quot;relu&quot;, &quot;relu&quot;, &quot;sigmoid&quot;]}}"></div><figcaption><b>Figure 5.</b> The forward pass playground. Drag the point on the map or move the sliders: the values in the network are recomputed. Switch the activations of the hidden layers: with the identity function the boundary on the map becomes a straight line (the network collapses into one linear layer), with ReLU a polyline, with tanh and the sigmoid a smooth curve. The “weight scale” slider multiplies all the weights: large weights make the transitions sharp.</figcaption></figure>
+
+    <h2 id="code">Code: the forward pass by hand and in PyTorch</h2>
+    <p>The forward pass is a loop over the layers. Here it is in full, with a cache for the backward pass and with a batch version.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+relu = lambda z: np.maximum(0, z)
+sigmoid = lambda z: 1 / (1 + np.exp(-z))
+
+# The 2–3–2–1 network: a list of layers (W, b, f)
+layers = [
+    (np.array([[1, -1], [0.5, 1], [-1, 2]]),       np.array([0.5, -1, 0]), relu),
+    (np.array([[1, 0.5, -0.5], [-1, 1, 0.5]]),     np.array([0.0, 0.5]),   relu),
+    (np.array([[2, -0.5]]),                        np.array([1.0]),        sigmoid),
+]
+
+def forward(x, layers):
+    a = x                                  # a⁽⁰⁾ = x
+    cache = []                             # z and a of every layer are needed by the backward pass
+    for W, b, f in layers:
+        z = W @ a + b                      # z⁽ˡ⁾ = W⁽ˡ⁾ a⁽ˡ⁻¹⁾ + b⁽ˡ⁾
+        a = f(z)                           # a⁽ˡ⁾ = f⁽ˡ⁾(z⁽ˡ⁾)
+        cache.append((z, a))
+    return a, cache
+
+y_hat, cache = forward(np.array([1.0, 2.0]), layers)
+for l, (z, a) in enumerate(cache, 1):
+    print(f&quot;layer {l}: z = {z}, a = {np.round(a, 4)}&quot;)
+# layer 1: z = [-0.5  1.5  3. ], a = [0.  1.5 3. ]
+# layer 2: z = [-0.75  3.5 ], a = [0.  3.5]
+# layer 3: z = [-0.75], a = [0.3208]
+
+# A batch: the rows of X are objects; the same formula, only X @ W.T
+X = np.array([[1, 2], [0, 0], [2, -1]], dtype=float)
+A = X
+for W, b, f in layers:
+    A = f(A @ W.T + b)                     # Z = X Wᵀ + 1bᵀ
+print(np.round(A.ravel(), 4))              # [0.3208 0.8808 0.9997]</code></pre>
+    <p>The same thing in PyTorch: <code>nn.Linear</code> stores $W$ and $\mathbf{b}$ and computes $\mathbf{x}W^{\top} + \mathbf{b}$, and <code>nn.Sequential</code> is exactly the loop over the layers.</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+net = nn.Sequential(
+    nn.Linear(2, 3), nn.ReLU(),            # layer 1: W⁽¹⁾ — (3, 2), b⁽¹⁾ — (3,)
+    nn.Linear(3, 2), nn.ReLU(),            # layer 2: W⁽²⁾ — (2, 3)
+    nn.Linear(2, 1), nn.Sigmoid(),         # layer 3: W⁽³⁾ — (1, 2)
+)
+with torch.no_grad():                      # the same weights as in the article
+    net[0].weight[:] = torch.tensor([[1., -1.], [0.5, 1.], [-1., 2.]]); net[0].bias[:] = torch.tensor([0.5, -1., 0.])
+    net[2].weight[:] = torch.tensor([[1., 0.5, -0.5], [-1., 1., 0.5]]); net[2].bias[:] = torch.tensor([0., 0.5])
+    net[4].weight[:] = torch.tensor([[2., -0.5]]);                       net[4].bias[:] = torch.tensor([1.])
+
+X = torch.tensor([[1., 2.], [0., 0.], [2., -1.]])
+print(net(X).squeeze())                    # ≈ [0.3208, 0.8808, 0.9997]
+print(sum(p.numel() for p in net.parameters()))   # 20</code></pre>
+
+    <h2 id="practice">Practice: 8 examples</h2>
+    <p>Each example shows one facet of the forward pass. Every number has been verified by computation.</p>
+    <article class="nr-ex" id="ex-1"><header class="nr-ex-head"><span class="nr-ex-n">Example 1</span><span class="nr-ex-kinds"><span>calculation</span></span></header><h3>One layer is logistic regression</h3><div class="nr-ex-goal"><b>The goal</b><p>See that with $L = 1$ the forward pass reduces to the formula of a single neuron, and connect this article with the previous one.</p></div>
+      <p>A 3–1 network with the sigmoid: $W^{(1)} = (0.5\ \ -1\ \ 0.25)$, $b^{(1)} = -0.75$, input $\mathbf{x} = (2,\ -1,\ 3)$.</p>
+      <div class="eqd">$$\hat y = \sigma\big(W^{(1)}\mathbf{x} + b^{(1)}\big) = \sigma(1 + 1 + 0.75 - 0.75) = \sigma(2) \approx 0.8808$$</div>
+    <div class="nr-ex-take"><b>What the example shows</b><p>A single-layer network with the sigmoid is logistic regression; a deep network is the same formula repeated $L$ times.</p></div></article>
+    <article class="nr-ex" id="ex-2"><header class="nr-ex-head"><span class="nr-ex-n">Example 2</span><span class="nr-ex-kinds"><span>table</span></span></header><h3>XOR: a forward pass through a hidden layer</h3><div class="nr-ex-goal"><b>The goal</b><p>Run the forward pass on four inputs and see how a hidden layer with ReLU makes possible what a single neuron cannot do.</p></div>
+      <p>A 2–2–1 network: $h_1 = \mathrm{ReLU}(x_1 + x_2)$, $h_2 = \mathrm{ReLU}(x_1 + x_2 - 1)$, with a linear output: $\hat y = h_1 - 2h_2$.</p>
+      <div class="table-wrap"><table class="data"><thead><tr><th aria-label="(x₁, x₂)">$(x_1,\ x_2)$</th><th aria-label="z^(1)">$\mathbf{z}^{(1)}$</th><th aria-label="a^(1)">$\mathbf{a}^{(1)}$</th><th class=num aria-label="ŷ">$\hat y$</th><th class=num>XOR</th></tr></thead><tbody><tr><td>(0, 0)</td><td>(0, −1)</td><td>(0, 0)</td><td class=num>0</td><td class=num>0</td></tr><tr><td>(0, 1)</td><td>(1, 0)</td><td>(1, 0)</td><td class=num>1</td><td class=num>1</td></tr><tr><td>(1, 0)</td><td>(1, 0)</td><td>(1, 0)</td><td class=num>1</td><td class=num>1</td></tr><tr><td>(1, 1)</td><td>(2, 1)</td><td>(2, 1)</td><td class=num>0</td><td class=num>0</td></tr></tbody></table></div>
+    <div class="nr-ex-take"><b>What the example shows</b><p>The second neuron switches on only when both inputs are ones, and it subtracts the excess. Without ReLU the output would be linear, and XOR would be out of reach.</p></div></article>
+    <article class="nr-ex" id="ex-3"><header class="nr-ex-head"><span class="nr-ex-n">Example 3</span><span class="nr-ex-kinds"><span>table</span><span>calculation</span></span></header><h3>Shapes and parameters of a network for MNIST</h3><div class="nr-ex-goal"><b>The goal</b><p>Learn to compute the shapes of all the matrices and the number of parameters of a real network in a minute.</p></div>
+      <p>A 28×28 image is flattened into a vector of 784 numbers; the 784–128–64–10 network outputs 10 numbers, one per digit.</p>
+      <div class="table-wrap"><table class="data"><thead><tr><th>Layer</th><th aria-label="W^(l)">$W^{(l)}$</th><th aria-label="b^(l)">$\mathbf{b}^{(l)}$</th><th class=num>Parameters</th><th class=num>Multiplications</th></tr></thead><tbody><tr><td>1</td><td>128 × 784</td><td>128</td><td class=num>100,480</td><td class=num>100,352</td></tr><tr><td>2</td><td>64 × 128</td><td>64</td><td class=num>8,256</td><td class=num>8,192</td></tr><tr><td>3</td><td>10 × 64</td><td>10</td><td class=num>650</td><td class=num>640</td></tr><tr><td><b>total</b></td><td></td><td></td><td class=num><b>109,386</b></td><td class=num><b>109,184</b></td></tr></tbody></table></div>
+    <div class="nr-ex-take"><b>What the example shows</b><p>More than 90% of the parameters are in the first layer, which has many inputs. The number of multiplications per object is almost equal to the number of weights.</p></div></article>
+    <article class="nr-ex" id="ex-4"><header class="nr-ex-head"><span class="nr-ex-n">Example 4</span><span class="nr-ex-kinds"><span>calculation</span></span></header><h3>An output with several classes: softmax</h3><div class="nr-ex-goal"><b>The goal</b><p>See how the last layer turns $n_L$ numbers into a probability distribution.</p></div>
+      <p>For $K$ classes the last layer outputs $K$ numbers $\mathbf{z}^{(L)}$, and the activation is softmax: $\hat y_k = e^{z_k} / \sum_j e^{z_j}$. For $\mathbf{z}^{(L)} = (2,\ 1,\ 0.1)$:</p>
+      <div class="eqd">$$e^{\mathbf{z}} \approx (7.3891,\ 2.7183,\ 1.1052), \quad \sum \approx 11.2125, \quad \hat{\mathbf{y}} \approx (0.6590,\ 0.2424,\ 0.0986)$$</div>
+    <div class="nr-ex-take"><b>What the example shows</b><p>Softmax is not an element-wise activation: each output depends on all the $z$. The probabilities always sum to 1.</p></div></article>
+    <article class="nr-ex" id="ex-5"><header class="nr-ex-head"><span class="nr-ex-n">Example 5</span><span class="nr-ex-kinds"><span>calculation</span></span></header><h3>The zero input and the role of the biases</h3><div class="nr-ex-goal"><b>The goal</b><p>Understand that the biases set the network’s “default” answer.</p></div>
+      <p>Feed $\mathbf{x} = (0,\ 0)$ into our network. Then $\mathbf{z}^{(1)} = \mathbf{b}^{(1)} = (0.5,\ -1,\ 0)$, $\mathbf{a}^{(1)} = (0.5,\ 0,\ 0)$, $\mathbf{z}^{(2)} = (0.5,\ 0)$, $\mathbf{a}^{(2)} = (0.5,\ 0)$, $z^{(3)} = 2\cdot0.5 + 1 = 2$, $\hat y = \sigma(2) \approx 0.8808$.</p>
+    <div class="nr-ex-take"><b>What the example shows</b><p>Without biases, the zero input would always give $\mathbf{z} = \mathbf{0}$ in every layer and $\hat y = \sigma(0) = 0.5$, no matter what the network has learned.</p></div></article>
+    <article class="nr-ex" id="ex-6"><header class="nr-ex-head"><span class="nr-ex-n">Example 6</span><span class="nr-ex-kinds"><span>calculation</span></span></header><h3>“Switched-off” neurons: what ReLU does to the flow</h3><div class="nr-ex-goal"><b>The goal</b><p>See that a neuron with $a = 0$ completely disconnects its branch: its outgoing weights do not affect the answer.</p></div>
+      <p>In our example, the first neuron of layer 2 output $a^{(2)}_1 = 0$ ($z = -0.75$). Its weight in the output layer is $W^{(3)}_{11} = 2$. Replace it with $100$ or with $-100$: $z^{(3)} = 100\cdot0 - 0.5\cdot3.5 + 1 = -0.75$, and the answer does not change.</p>
+    <div class="nr-ex-take"><b>What the example shows</b><p>For a given input, only part of the network is at work. For a different input, other neurons switch on: this is how a ReLU network assembles its answer from pieces, each of which is linear.</p></div></article>
+    <article class="nr-ex" id="ex-7"><header class="nr-ex-head"><span class="nr-ex-n">Example 7</span><span class="nr-ex-kinds"><span>table</span></span></header><h3>Depth or width</h3><div class="nr-ex-goal"><b>The goal</b><p>Compare what width costs and what depth costs.</p></div>
+      <div class="table-wrap"><table class="data"><thead><tr><th>Network</th><th>Layers</th><th>Parameters</th></tr></thead><tbody><tr><td>2–100–1</td><td>1 hidden, wide</td><td>2·100 + 100 + 100 + 1 = 401</td></tr><tr><td>2–10–10–10–1</td><td>3 hidden, narrow</td><td>30 + 110 + 110 + 11 = 261</td></tr></tbody></table></div>
+    <div class="nr-ex-take"><b>What the example shows</b><p>A deep narrow network can cost less than a wide shallow one and still build more complex functions: each layer folds space anew, and the number of “kinks” grows faster with depth than with width.</p></div></article>
+    <article class="nr-ex" id="ex-8"><header class="nr-ex-head"><span class="nr-ex-n">Example 8</span><span class="nr-ex-kinds"><span>calculation</span><span>code</span></span></header><h3>Numerical stability: where the forward pass breaks</h3><div class="nr-ex-goal"><b>The goal</b><p>Learn two classic ways to get NaN in the forward pass and how to avoid them.</p></div>
+      <p>Softmax with $\mathbf{z} = (1000,\ 1001,\ 1002)$: $e^{1000}$ does not fit into a floating-point number, and we get $\infty/\infty = $ NaN. But softmax does not change if the same number is subtracted from all the $z$. Let us subtract the maximum:</p>
+      <div class="eqd">$$\mathbf{z} - 1002 = (-2,\ -1,\ 0), \quad e^{\mathbf{z} - \max} \approx (0.1353,\ 0.3679,\ 1), \quad \hat{\mathbf{y}} \approx (0.0900,\ 0.2447,\ 0.6652)$$</div>
+      <p>The same goes for the sigmoid: at $z = -1000$ the naive $1/(1 + e^{1000})$ overflows. The stable version computes $e^{z}/(1 + e^{z})$ for negative $z$. And at the output of a classifier, the loss is given the logits $\mathbf{z}^{(L)}$, not the probabilities: <code>BCEWithLogitsLoss</code>, <code>CrossEntropyLoss</code>.</p>
+    <div class="nr-ex-take"><b>What the example shows</b><p>Mathematically, the forward pass formula holds for any numbers; on a machine it does not. Stable versions compute the same thing, but in a safe order.</p></div></article>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ul class="flist"><li><b>Mixing up the order of the indices.</b> $W^{(l)}_{jk}$ means “into neuron $j$ from neuron $k$”. The matrix has the shape $n_l \times n_{l-1}$; in PyTorch it is <code>(out_features, in_features)</code>.</li><li><b>$\mathbf{x}W$ instead of $W\mathbf{x}$.</b> For a single column vector it is $W\mathbf{x}$; for a batch stored as rows it is $XW^{\top}$. Mixing them up gives a shape error or, worse, a wrong answer with square matrices.</li><li><b>Forgetting the activation between layers.</b> The network silently collapses into a single linear layer.</li><li><b>Putting ReLU on the output of a regression</b> where the answer can be negative: the network will be physically unable to produce it. The output of a regression uses the identity function.</li><li><b>Applying softmax and then CrossEntropyLoss in PyTorch</b>, which already performs log-softmax internally: the probabilities are computed twice.</li><li><b>Not scaling the input.</b> Huge $\mathbf{x}$ give huge $\mathbf{z}$, saturate sigmoids and tanh, and break training.</li><li><b>Believing that the forward pass trains the network.</b> It only computes; the weights are changed by the optimizer step after the backward pass.</li></ul>
+
+    <h2 id="summary">Summary</h2>
+    <ul class="flist"><li>The forward pass: $\mathbf{a}^{(0)} = \mathbf{x}$; for $l = 1..L$: $\mathbf{z}^{(l)} = W^{(l)}\mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}$, $\mathbf{a}^{(l)} = f^{(l)}(\mathbf{z}^{(l)})$; the answer is $\hat{\mathbf{y}} = \mathbf{a}^{(L)}$.</li><li>Each row of $W^{(l)}$ is one neuron; a layer is $n_l$ single-neuron formulas at once.</li><li>$W^{(l)}$ has the shape $n_l \times n_{l-1}$; a layer has $n_l(n_{l-1} + 1)$ parameters; the forward pass costs $\sum_l n_l n_{l-1}$ multiplications per object.</li><li>For a batch: $Z^{(l)} = A^{(l-1)}W^{(l)\top} + \mathbf{1}\mathbf{b}^{(l)\top}$.</li><li>Geometrically, the linear part rotates and stretches space and the activation bends it; without activations, the layers collapse into one.</li><li>In training, the forward pass ends with the loss and stores all $\mathbf{z}$ and $\mathbf{a}$ for the backward pass.</li></ul>
+
+    <h2 id="quiz">Test yourself</h2>
+    <div class="quiz" data-right="Correct." data-wrong="Not quite."><fieldset class="q"><legend>1. What is the shape of $W^{(l)}$ for a layer with 5 inputs and 3 neurons?</legend><div class="opts"><button type="button" data-ok="0" aria-label="5 times 3">$5 \times 3$</button><button type="button" data-ok="1" aria-label="3 times 5">$3 \times 5$</button><button type="button" data-ok="0" aria-label="3 times 3">$3 \times 3$</button><button type="button" data-ok="0" aria-label="5 times 5">$5 \times 5$</button></div><div class="explain" hidden>There are as many rows as neurons ($n_l = 3$) and as many columns as inputs ($n_{l-1} = 5$).</div></fieldset><fieldset class="q"><legend>2. How many parameters does a 4 → 6 layer have?</legend><div class="opts"><button type="button" data-ok="0">24</button><button type="button" data-ok="0">28</button><button type="button" data-ok="1">30</button><button type="button" data-ok="0">34</button></div><div class="explain" hidden>$6\cdot(4 + 1) = 30$: 24 weights and 6 biases.</div></fieldset><fieldset class="q"><legend>3. A layer: $W = \begin{pmatrix}1 & 2\end{pmatrix}$, $b = -1$, ReLU, input $(1,\ -1)$. What is the output?</legend><div class="opts"><button type="button" data-ok="1">0</button><button type="button" data-ok="0">−2</button><button type="button" data-ok="0">2</button><button type="button" data-ok="0">1</button></div><div class="explain" hidden>$z = 1 - 2 - 1 = -2$, $\mathrm{ReLU}(-2) = 0$.</div></fieldset><fieldset class="q"><legend>4. What happens if all the activations are removed from a 2–3–2–1 network?</legend><div class="opts"><button type="button" data-ok="0">It becomes more accurate</button><button type="button" data-ok="1">It becomes equivalent to a single linear layer</button><button type="button" data-ok="0">It stops computing</button><button type="button" data-ok="0">Nothing changes</button></div><div class="explain" hidden>A composition of linear maps is linear: $W^{(3)}W^{(2)}W^{(1)}\mathbf{x} + \dots$</div></fieldset><fieldset class="q"><legend>5. How is a layer written for a batch $X$ (objects as rows)?</legend><div class="opts"><button type="button" data-ok="0" aria-label="WX + b">$WX + \mathbf{b}$</button><button type="button" data-ok="1" aria-label="XW^ᵀ + 1b^ᵀ">$XW^{\top} + \mathbf{1}\mathbf{b}^{\top}$</button><button type="button" data-ok="0" aria-label="X^ᵀW">$X^{\top}W$</button><button type="button" data-ok="0" aria-label="W^ᵀX^ᵀ">$W^{\top}X^{\top}$</button></div><div class="explain" hidden>Each row of $X$ is a vector $\mathbf{x}^{\top}$, and $(W\mathbf{x})^{\top} = \mathbf{x}^{\top}W^{\top}$.</div></fieldset><fieldset class="q"><legend>6. Why are $\mathbf{z}^{(l)}$ and $\mathbf{a}^{(l)}$ stored during training?</legend><div class="opts"><button type="button" data-ok="0">For looks</button><button type="button" data-ok="1">So that the backward pass can compute the gradients without a second forward pass</button><button type="button" data-ok="0">To reduce the loss</button><button type="button" data-ok="0">It is only needed for inference</button></div><div class="explain" hidden>The derivatives of the layers are expressed through these values, for example $f'(\mathbf{z}^{(l)})$ and $\mathbf{a}^{(l-1)}$.</div></fieldset></div>
+
+    <div class="tags"><a href="../../en/#posts">Neural networks</a><a href="../../en/#posts">Linear algebra</a><a href="../../en/#posts">ML basics</a></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="All articles">
+  <div class="wrap-m">
+    <a class="prev" href="../neuron/"><span class="kicker">Previous article</span><span class="big">The formula of a single neuron</span></a>
+    <a class="next" href="../materials/ml-formulas/"><span class="kicker">Material</span><span class="big">A cheat sheet of neural network formulas</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Footer links">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../en/#posts">Articles</a>
+    <a href="../../en/materials/">Materials</a>
+    <a href="../../en/about/">About me</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../assets/js/site.js" defer></script>
+</body>
+</html>

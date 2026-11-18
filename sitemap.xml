@@ -55,6 +55,24 @@
     <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/neuron/"/>
   </url>
   <url>
+    <loc>https://javharbek.uz/ru/forward-pass/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/forward-pass/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/forward-pass/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/forward-pass/"/>
+  </url>
+  <url>
+    <loc>https://javharbek.uz/en/forward-pass/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/forward-pass/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/forward-pass/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/forward-pass/"/>
+  </url>
+  <url>
+    <loc>https://javharbek.uz/uz/forward-pass/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/forward-pass/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/forward-pass/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/forward-pass/"/>
+  </url>
+  <url>
     <loc>https://javharbek.uz/ru/about/</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/about/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/about/"/>

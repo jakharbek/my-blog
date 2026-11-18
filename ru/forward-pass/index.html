@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Формула Forward Pass: как сеть превращает вход в ответ — Абдулатипов Ж.</title>
+  <meta name="description" content="Формула прямого прохода нейросети z⁽ˡ⁾ = W⁽ˡ⁾a⁽ˡ⁻¹⁾ + b⁽ˡ⁾, a⁽ˡ⁾ = f(z⁽ˡ⁾) по шагам: обозначения, расчёт на числах, размерности, пакеты, геометрия слоёв, стоимость, код. С интерактивными рисунками.">
+  <meta property="og:title" content="Формула Forward Pass: как сеть превращает вход в ответ — Абдулатипов Ж.">
+  <meta property="og:description" content="Формула прямого прохода нейросети z⁽ˡ⁾ = W⁽ˡ⁾a⁽ˡ⁻¹⁾ + b⁽ˡ⁾, a⁽ˡ⁾ = f(z⁽ˡ⁾) по шагам: обозначения, расчёт на числах, размерности, пакеты, геометрия слоёв, стоимость, код. С интерактивными рисунками.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://javharbek.uz/ru/forward-pass/">
+  <meta property="og:image" content="https://javharbek.uz/assets/img/javharbek.png">
+  <meta property="og:site_name" content="Абдулатипов Ж.">
+  <link rel="canonical" href="https://javharbek.uz/ru/forward-pass/">
+  <link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/forward-pass/">
+  <link rel="alternate" hreflang="en" href="https://javharbek.uz/en/forward-pass/">
+  <link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/forward-pass/">
+  <link rel="alternate" hreflang="x-default" href="https://javharbek.uz/en/forward-pass/">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+  <link rel="stylesheet" href="../../assets/css/assistant.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="../../assets/js/viz.js"></script>
+  <script defer src="../../assets/js/forward.js"></script>
+  <script defer src="../../assets/js/materials.js"></script>
+  <script defer src="../../assets/js/markdown.js"></script>
+  <script defer src="../../assets/js/assistant.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../../ru/">Абдулатипов Ж.</a>
+    <nav class="nav" aria-label="Основная навигация">
+    <a href="../../ru/#posts">Все статьи</a>
+    <a href="../../ru/materials/">Материалы</a>
+    <a href="../../ru/about/">Обо мне</a>
+    </nav>
+    <div class="tools">
+      <nav class="langs" aria-label="Язык"><a href="../../ru/forward-pass/" lang="ru" hreflang="ru" aria-current="true">RU</a> <a href="../../en/forward-pass/" lang="en" hreflang="en">EN</a> <a href="../../uz/forward-pass/" lang="uz" hreflang="uz">UZ</a></nav>
+      <button id="theme-toggle" class="theme-btn ghost" type="button" data-labels="{&quot;toDark&quot;: &quot;Тёмная тема&quot;, &quot;toLight&quot;: &quot;Светлая тема&quot;}" aria-label="Тёмная тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+
+<main class="material fx-page">
+<section class="art-head wrap-xs">
+  <span class="kicker">ML / AI</span>
+  <h1>Формула Forward Pass: как сеть превращает вход в ответ</h1>
+  <p class="dek">Прямой проход — это то, что сеть делает каждый раз, когда отвечает: вход проходит слой за слоем, и в каждом слое повторяются одни и те же два действия — линейное преобразование и активация. Разбираем формулу до последнего индекса, считаем её руками на маленькой сети, смотрим, как слои сгибают пространство, и пишем код.</p>
+  <div class="author">
+    <img src="../../assets/img/javharbek.png" alt="" width="44" height="44">
+    <span class="who"><b>Javharbek Abdulatipov</b><span><time datetime="2026-11-18">18 ноября 2026</time> · 45 мин чтения</span></span>
+  </div>
+</section>
+
+<div class="art-body wrap-m">
+  <aside class="toc" aria-label="Содержание">
+    <span>Содержание</span>
+    <nav>
+      <a href="#idea"><span class="n">1</span>Что такое прямой проход</a>
+      <a href="#anatomy"><span class="n">2</span>Формула по косточкам: каждый символ</a>
+      <a href="#numbers"><span class="n">3</span>Прямой проход на числах, шаг за шагом</a>
+      <a href="#shapes"><span class="n">4</span>Размерности: проверка, которая ловит половину ошибок</a>
+      <a href="#geometry"><span class="n">5</span>Геометрия: что слой делает с пространством</a>
+      <a href="#batch"><span class="n">6</span>Пакет объектов: та же формула для многих входов</a>
+      <a href="#training"><span class="n">7</span>Прямой проход в обучении: потери и кэш</a>
+      <a href="#playground"><span class="n">8</span>Песочница: собери прямой проход сам</a>
+      <a href="#code"><span class="n">9</span>Код: прямой проход своими руками и в PyTorch</a>
+      <a href="#practice"><span class="n">10</span>Практикум: 8 примеров</a>
+      <a href="#mistakes"><span class="n">11</span>Частые ошибки</a>
+      <a href="#summary"><span class="n">12</span>Итоги</a>
+      <a href="#quiz"><span class="n">13</span>Проверь себя</a>
+    </nav>
+  </aside>
+
+  <article class="article">
+    <div class="fx-hero">$$\mathbf{a}^{(0)}=\mathbf{x},\qquad \mathbf{z}^{(l)}=W^{(l)}\mathbf{a}^{(l-1)}+\mathbf{b}^{(l)},\qquad \mathbf{a}^{(l)}=f^{(l)}\big(\mathbf{z}^{(l)}\big),\qquad \hat{\mathbf{y}}=\mathbf{a}^{(L)}$$</div>
+
+    <h2 id="idea">Что такое прямой проход</h2>
+    <p>В <a href='../neuron/'>статье об одном нейроне</a> мы разобрали формулу $a = f(\mathbf{w}^{\top}\mathbf{x} + b)$. Настоящая сеть — это много таких нейронов, сложенных в слои: выходы одного слоя становятся входами следующего. <b>Прямой проход</b> (forward pass) — это вычисление ответа сети: вход идёт слева направо, слой за слоем, до последнего слоя.</p>
+    <p>Вся процедура записывается тремя строками:</p>
+    <div class="eqd">$$\mathbf{a}^{(0)} = \mathbf{x}$$</div>
+    <div class="eqd">$$\mathbf{z}^{(l)} = W^{(l)}\mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}, \qquad \mathbf{a}^{(l)} = f^{(l)}\big(\mathbf{z}^{(l)}\big), \qquad l = 1, 2, \dots, L$$</div>
+    <div class="eqd">$$\hat{\mathbf{y}} = \mathbf{a}^{(L)}$$</div>
+    <p>Прочитаем как инструкцию: положи вход в «нулевой слой»; в каждом слое умножь то, что пришло, на матрицу весов, прибавь смещения и пропусти через функцию активации; то, что вышло из последнего слоя, и есть ответ. Если раскрыть цикл, получится одна длинная вложенная формула:</p>
+    <div class="eqd">$$\hat{\mathbf{y}} = f^{(L)}\Big(W^{(L)}\,f^{(L-1)}\big(\cdots f^{(1)}\big(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\big)\cdots\big) + \mathbf{b}^{(L)}\Big)$$</div>
+    <figure class="viz"><div class="fv" data-viz="fp-flow" data-config="{&quot;net&quot;: {&quot;x&quot;: [1, 2], &quot;W&quot;: [[[1, -1], [0.5, 1], [-1, 2]], [[1, 0.5, -0.5], [-1, 1, 0.5]], [[2, -0.5]]], &quot;b&quot;: [[0.5, -1, 0], [0, 0.5], [1]], &quot;f&quot;: [&quot;relu&quot;, &quot;relu&quot;, &quot;sigmoid&quot;]}}"></div><figcaption><b>Рисунок 1.</b> Прямой проход в сети 2–3–2–1. Нажмите «Шаг» или «Пуск»: сигнал проходит слой за слоем, в каждом нейроне сначала появляется $z$, затем $a = f(z)$. Синие связи — положительные веса, красные — отрицательные, толщина — модуль веса. Двигайте ползунки входа: ответ $\hat y$ пересчитывается сразу.</figcaption></figure>
+    <div class="callout intuition"><b>Аналогия</b><p>Конвейер на заводе. Сырьё (вход $\mathbf{x}$) проходит через станки (слои). Каждый станок делает одно и то же: смешивает поступившие детали в нужных пропорциях (матрица $W$), добавляет свою добавку (смещение $\mathbf{b}$) и обрабатывает результат (активация $f$). Ни один станок не знает о конечном продукте — он видит только то, что пришло от предыдущего. Продукт на выходе последнего станка — ответ сети.</p></div>
+    <div class="callout key"><b>Главное</b><p>Прямой проход не обучает сеть и не меняет её веса — он только вычисляет ответ при текущих весах. Обучение начинается потом: ответ сравнивают с правильным (функция потерь), и обратный проход вычисляет, как поправить веса.</p></div>
+
+    <h2 id="anatomy">Формула по косточкам: каждый символ</h2>
+    <p>Все обозначения прямого прохода с их размерами. Число нейронов в слое $l$ обозначим $n_l$; $n_0$ — число входов.</p>
+    <dl class="symbols"><dt>$l$</dt><dd><b>номер слоя</b>: $l = 1, \dots, L$; верхний индекс в скобках $^{(l)}$ — «принадлежит слою $l$», а не степень;</dd><dt>$L$</dt><dd><b>число слоёв с весами</b> (глубина сети); входной «слой» $0$ весов не имеет;</dd><dt>$\mathbf{a}^{(l-1)}$</dt><dd><b>вход слоя</b> $l$ — выход предыдущего слоя, вектор длины $n_{l-1}$; $\mathbf{a}^{(0)} = \mathbf{x}$;</dd><dt>$W^{(l)}$</dt><dd><b>матрица весов</b> слоя: $n_l$ строк и $n_{l-1}$ столбцов; строка $j$ — веса нейрона $j$;</dd><dt>$W^{(l)}_{jk}$</dt><dd><b>один вес</b>: от нейрона $k$ слоя $l-1$ к нейрону $j$ слоя $l$ (сначала «куда», потом «откуда»);</dd><dt>$\mathbf{b}^{(l)}$</dt><dd><b>вектор смещений</b> длины $n_l$ — по одному на нейрон;</dd><dt>$\mathbf{z}^{(l)}$</dt><dd><b>предактивации</b> слоя, вектор длины $n_l$: взвешенные суммы всех его нейронов;</dd><dt>$f^{(l)}$</dt><dd><b>функция активации</b> слоя; применяется к каждой координате отдельно;</dd><dt>$\mathbf{a}^{(l)}$</dt><dd><b>выход слоя</b> (активации), вектор длины $n_l$;</dd><dt>$\hat{\mathbf{y}}$</dt><dd><b>ответ сети</b>: выход последнего слоя $\mathbf{a}^{(L)}$.</dd></dl>
+    <h3>Один слой — это много нейронов сразу</h3>
+    <p>Распишем первую строку формулы по координатам. Нейрон $j$ слоя $l$ считает ровно ту же формулу, что и одиночный нейрон: взвешенную сумму входов плюс своё смещение.</p>
+    <div class="eqd">$$z^{(l)}_j = \sum_{k=1}^{n_{l-1}} W^{(l)}_{jk}\,a^{(l-1)}_k + b^{(l)}_j, \qquad a^{(l)}_j = f^{(l)}\big(z^{(l)}_j\big), \qquad j = 1, \dots, n_l$$</div>
+    <p>Матричная запись $W^{(l)}\mathbf{a}^{(l-1)}$ — просто способ посчитать все $n_l$ таких сумм одним действием: $j$-я строка матрицы, умноженная на вектор входов, даёт $z_j$. Поэтому формула прямого прохода — это формула одного нейрона, применённая ко всем нейронам слоя и повторённая для всех слоёв.</p>
+    <h3>Размеры в нашем примере</h3>
+    <p>Весь дальнейший текст опирается на одну сеть: 2 входа, скрытые слои из 3 и 2 нейронов с ReLU, один выходной нейрон с сигмоидой (сеть 2–3–2–1).</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th class=num aria-label="Слой l">Слой $l$</th><th aria-label="n_l-1 to n_l">$n_{l-1} \to n_l$</th><th aria-label="W^(l)">$W^{(l)}$</th><th aria-label="b^(l)">$\mathbf{b}^{(l)}$</th><th aria-label="f^(l)">$f^{(l)}$</th><th>Параметров</th></tr></thead><tbody><tr><td class=num>1</td><td>2 → 3</td><td>3 × 2</td><td>3</td><td>ReLU</td><td>3·2 + 3 = 9</td></tr><tr><td class=num>2</td><td>3 → 2</td><td>2 × 3</td><td>2</td><td>ReLU</td><td>2·3 + 2 = 8</td></tr><tr><td class=num>3</td><td>2 → 1</td><td>1 × 2</td><td>1</td><td>сигмоида</td><td>1·2 + 1 = 3</td></tr><tr><td class=num><b>всего</b></td><td></td><td></td><td></td><td></td><td><b>20</b></td></tr></tbody></table></div>
+    <div class="callout key"><b>Правило подсчёта</b><p>У слоя $n_{l-1}\to n_l$ ровно $n_l\,(n_{l-1} + 1)$ параметров: $n_l n_{l-1}$ весов и $n_l$ смещений. У всей сети — сумма по слоям.</p></div>
+
+    <h2 id="numbers">Прямой проход на числах, шаг за шагом</h2>
+    <p>Вход $\mathbf{x} = (1;\ 2)$. Веса и смещения:</p>
+    <div class="eqd">$$W^{(1)} = \begin{pmatrix} 1 &amp; -1\\ 0{,}5 &amp; 1\\ -1 &amp; 2 \end{pmatrix},\ \mathbf{b}^{(1)} = \begin{pmatrix} 0{,}5\\ -1\\ 0 \end{pmatrix};\quad W^{(2)} = \begin{pmatrix} 1 &amp; 0{,}5 &amp; -0{,}5\\ -1 &amp; 1 &amp; 0{,}5 \end{pmatrix},\ \mathbf{b}^{(2)} = \begin{pmatrix} 0\\ 0{,}5 \end{pmatrix};\quad W^{(3)} = \begin{pmatrix} 2 &amp; -0{,}5 \end{pmatrix},\ b^{(3)} = 1$$</div>
+    <h3>Слой 1: из двух чисел — три</h3>
+    <div class="eqd">$$\mathbf{z}^{(1)} = \begin{pmatrix} 1\cdot1 + (-1)\cdot2 + 0{,}5\\ 0{,}5\cdot1 + 1\cdot2 - 1\\ (-1)\cdot1 + 2\cdot2 + 0 \end{pmatrix} = \begin{pmatrix} -0{,}5\\ 1{,}5\\ 3 \end{pmatrix}, \qquad \mathbf{a}^{(1)} = \mathrm{ReLU}\big(\mathbf{z}^{(1)}\big) = \begin{pmatrix} 0\\ 1{,}5\\ 3 \end{pmatrix}$$</div>
+    <p>Первый нейрон получил отрицательную сумму, и ReLU его «выключила»: дальше по сети от него пойдёт ноль.</p>
+    <h3>Слой 2: из трёх чисел — два</h3>
+    <div class="eqd">$$\mathbf{z}^{(2)} = \begin{pmatrix} 1\cdot0 + 0{,}5\cdot1{,}5 - 0{,}5\cdot3 + 0\\ -1\cdot0 + 1\cdot1{,}5 + 0{,}5\cdot3 + 0{,}5 \end{pmatrix} = \begin{pmatrix} -0{,}75\\ 3{,}5 \end{pmatrix}, \qquad \mathbf{a}^{(2)} = \begin{pmatrix} 0\\ 3{,}5 \end{pmatrix}$$</div>
+    <h3>Слой 3: из двух чисел — ответ</h3>
+    <div class="eqd">$$z^{(3)} = 2\cdot0 - 0{,}5\cdot3{,}5 + 1 = -0{,}75, \qquad \hat y = \sigma(-0{,}75) = \frac{1}{1 + e^{0{,}75}} \approx 0{,}3208$$</div>
+    <figure class="viz"><div class="fv" data-viz="fp-matvec" data-config="{&quot;net&quot;: {&quot;x&quot;: [1, 2], &quot;W&quot;: [[[1, -1], [0.5, 1], [-1, 2]], [[1, 0.5, -0.5], [-1, 1, 0.5]], [[2, -0.5]]], &quot;b&quot;: [[0.5, -1, 0], [0, 0.5], [1]], &quot;f&quot;: [&quot;relu&quot;, &quot;relu&quot;, &quot;sigmoid&quot;]}}"></div><figcaption><b>Рисунок 2.</b> Умножение «матрица на вектор» внутри каждого слоя. Выберите слой и нажимайте «Шаг»: подсвечивается строка $W$ (один нейрон), под ней — попарные произведения с входом, их сумма, смещение и активация. Так видно, что $W\mathbf{a} + \mathbf{b}$ — это $n_l$ формул одного нейрона, выполненных одновременно.</figcaption></figure>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Слой</th><th aria-label="z^(l)">$\mathbf{z}^{(l)}$</th><th aria-label="a^(l)">$\mathbf{a}^{(l)}$</th></tr></thead><tbody><tr><td>вход</td><td>—</td><td>(1; 2)</td></tr><tr><td>1</td><td>(−0,5; 1,5; 3)</td><td>(0; 1,5; 3)</td></tr><tr><td>2</td><td>(−0,75; 3,5)</td><td>(0; 3,5)</td></tr><tr><td>3</td><td>−0,75</td><td>0,3208</td></tr></tbody></table></div>
+    <div class="callout note"><b>Что сохранить</b><p>Все $\mathbf{z}^{(l)}$ и $\mathbf{a}^{(l)}$ из этой таблицы при обучении запоминают: обратный проход использует их, чтобы посчитать градиенты, не повторяя прямой проход.</p></div>
+
+    <h2 id="shapes">Размерности: проверка, которая ловит половину ошибок</h2>
+    <p>Каждое действие прямого прохода меняет размер вектора по простому правилу: матрица $n_l \times n_{l-1}$, умноженная на вектор длины $n_{l-1}$, даёт вектор длины $n_l$. Цепочка размеров нашей сети:</p>
+    <div class="eqd">$$\underbrace{\mathbf{x}}_{2} \xrightarrow{\ W^{(1)}:\,3\times2\ } \underbrace{\mathbf{a}^{(1)}}_{3} \xrightarrow{\ W^{(2)}:\,2\times3\ } \underbrace{\mathbf{a}^{(2)}}_{2} \xrightarrow{\ W^{(3)}:\,1\times2\ } \underbrace{\hat y}_{1}$$</div>
+    <p>Число столбцов $W^{(l)}$ обязано совпасть с длиной входа слоя, число строк определяет длину выхода. Если они не совпали, код упадёт с ошибкой формы — и это хорошо: хуже, когда формы случайно совпали, а смысл перепутан (например, $W$ вместо $W^{\top}$ у квадратной матрицы).</p>
+    <figure class="viz"><div class="fv" data-viz="fp-shapes" data-config="{&quot;sizes&quot;: [2, 3, 2, 1], &quot;presets&quot;: [[2, 3, 2, 1], [784, 128, 64, 10], [3, 3, 1], [2, 100, 1], [2, 10, 10, 10, 1]]}"></div><figcaption><b>Рисунок 3.</b> Конструктор архитектуры. Задайте размеры слоёв через дефис или выберите готовый вариант: таблица показывает формы $W^{(l)}$, $\mathbf{b}^{(l)}$, число параметров и умножений на один объект, а столбики — где сосредоточены параметры.</figcaption></figure>
+    <div class="callout key"><b>Стоимость прямого прохода</b><p>На один объект слой тратит $n_l\cdot n_{l-1}$ умножений со сложением — по одному на каждый вес. Значит, весь прямой проход стоит примерно столько операций, сколько у сети весов: $\sum_l n_l\,n_{l-1}$. Для нашей сети это $6 + 6 + 2 = 14$ умножений.</p></div>
+
+    <h2 id="geometry">Геометрия: что слой делает с пространством</h2>
+    <p>Посмотрим на слой как на преобразование пространства. Линейная часть $W\mathbf{a} + \mathbf{b}$ поворачивает, растягивает, наклоняет и сдвигает пространство: прямые остаются прямыми, параллельные — параллельными, клетки сетки превращаются в одинаковые параллелограммы. Активация затем гнёт его: ReLU складывает всё, что попало в отрицательную область, на оси, сигмоида и tanh сжимают далёкие точки к краям.</p>
+    <figure class="viz"><div class="fv" data-viz="fp-space" data-config="{&quot;preset&quot;: &quot;fold&quot;}"></div><figcaption><b>Рисунок 4.</b> Как слой 2 → 2 изгибает плоскость. Ползунок плавно ведёт сетку через этапы: исходная плоскость → линейная часть $W\mathbf{x} + \mathbf{b}$ → активация. Цветные точки — объекты двух классов: смотрите, как после изгиба их можно разделить прямой, хотя на входе нельзя было. Выбирайте активацию и готовые матрицы.</figcaption></figure>
+    <p>Отсюда главный смысл глубины: каждый слой немного перекраивает пространство, и к последнему слою точки разных классов оказываются по разные стороны простой границы. Последний слой — это обычный линейный классификатор или регрессия, но работающий в пространстве, которое предыдущие слои подготовили для него.</p>
+    <details class="deep"><summary>Почему без активаций слои схлопываются</summary><div class="deep-body">
+      <p>Если убрать $f$, два слоя дают $W^{(2)}(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}) + \mathbf{b}^{(2)} = (W^{(2)}W^{(1)})\mathbf{x} + (W^{(2)}\mathbf{b}^{(1)} + \mathbf{b}^{(2)})$ — снова один линейный слой. Любая глубина без нелинейности равна одному слою: параллелограммы, повёрнутые несколько раз, остаются параллелограммами. Подробно — в <a href='../neuron/#activation'>статье об одном нейроне</a>.</p>
+    </div></details>
+
+    <h2 id="batch">Пакет объектов: та же формула для многих входов</h2>
+    <p>На практике сеть считает сразу пакет (batch) из $N$ объектов. Их складывают строками в матрицу $X$ размера $N \times n_0$, и прямой проход переписывается для матриц:</p>
+    <div class="eqd">$$A^{(0)} = X, \qquad Z^{(l)} = A^{(l-1)}\,W^{(l)\top} + \mathbf{1}\,\mathbf{b}^{(l)\top}, \qquad A^{(l)} = f^{(l)}\big(Z^{(l)}\big)$$</div>
+    <p>Строка $k$ матрицы $A^{(l)}$ — это $\mathbf{a}^{(l)}$ для объекта $k$; транспонирование появилось потому, что объекты теперь лежат строками, а не столбцами. Слагаемое $\mathbf{1}\mathbf{b}^{\top}$ прибавляет смещения к каждой строке (в NumPy и PyTorch это делает broadcasting). Пакет из трёх объектов через нашу сеть:</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Объект</th><th aria-label="x">$\mathbf{x}$</th><th aria-label="z^(1)">$\mathbf{z}^{(1)}$</th><th aria-label="z^(2)">$\mathbf{z}^{(2)}$</th><th class=num aria-label="z^(3)">$z^{(3)}$</th><th class=num aria-label="ŷ">$\hat y$</th></tr></thead><tbody><tr><td>1</td><td>(1; 2)</td><td>(−0,5; 1,5; 3)</td><td>(−0,75; 3,5)</td><td class=num>−0,75</td><td class=num>0,3208</td></tr><tr><td>2</td><td>(0; 0)</td><td>(0,5; −1; 0)</td><td>(0,5; 0)</td><td class=num>2</td><td class=num>0,8808</td></tr><tr><td>3</td><td>(2; −1)</td><td>(3,5; −1; −4)</td><td>(3,5; −3)</td><td class=num>8</td><td class=num>0,9997</td></tr></tbody></table></div>
+    <p>Второй объект — нулевой вход: всё, что сеть ему отвечает, определяют одни смещения. Обратите внимание: ответ $0{,}8808$ — это $\sigma(2)$, то самое число из статьи об одном нейроне.</p>
+    <div class="callout intuition"><b>Зачем пакеты</b><p>Одно матричное умножение $N \times n$ на $n \times m$ для процессора и особенно видеокарты гораздо выгоднее, чем $N$ умножений вектора на матрицу: данные читаются из памяти один раз и обрабатываются параллельно. Поэтому и обучение, и вывод идут пакетами.</p></div>
+
+    <h2 id="training">Прямой проход в обучении: потери и кэш</h2>
+    <p>Во время обучения прямой проход заканчивается не на $\hat y$, а на числе потерь $L$, которое сравнивает ответ с правильным $y$. Для нашего объекта с меткой $y = 1$ и бинарной кросс-энтропией:</p>
+    <div class="eqd">$$L = -\big[y\ln\hat y + (1 - y)\ln(1 - \hat y)\big] = -\ln 0{,}3208 \approx 1{,}1369$$</div>
+    <p>Ответ $0{,}32$ при правильном $1$ — плохой, и потеря большая. Чтобы её уменьшить, нужно понять, как каждый вес влияет на $L$. Этим занимается обратный проход: он идёт по сети справа налево и по цепному правилу перемножает производные слоёв. Для этого ему нужны именно те $\mathbf{z}^{(l)}$ и $\mathbf{a}^{(l)}$, которые посчитал прямой проход, — поэтому их кэшируют.</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Режим</th><th>Что считает прямой проход</th><th>Что хранит</th></tr></thead><tbody><tr><td>обучение</td><td>ответ $\hat y$ и потерю $L$</td><td>все $\mathbf{z}^{(l)}$, $\mathbf{a}^{(l)}$ для обратного прохода</td></tr><tr><td>вывод (inference)</td><td>только ответ $\hat y$</td><td>ничего лишнего: промежуточные значения сразу отбрасываются</td></tr></tbody></table></div>
+    <div class="callout note"><p>Именно поэтому обучение требует намного больше памяти, чем вывод: на каждом шаге в памяти лежат активации всех слоёв для всего пакета. В PyTorch режим вывода включают через <code>torch.no_grad()</code> или <code>torch.inference_mode()</code>.</p></div>
+
+    <h2 id="playground">Песочница: собери прямой проход сам</h2>
+    <p>Всё вместе в одной интерактивной модели. Слева — сеть со значениями каждого нейрона, справа — карта ответа $\hat y$ для всех входов плоскости: цвет точки $(x_1;\ x_2)$ показывает, что ответит сеть. Меняйте вход, функции активации слоёв и масштаб весов — и смотрите, как меняется и одно число, и вся карта.</p>
+    <figure class="viz"><div class="fv" data-viz="fp-playground" data-config="{&quot;net&quot;: {&quot;x&quot;: [1, 2], &quot;W&quot;: [[[1, -1], [0.5, 1], [-1, 2]], [[1, 0.5, -0.5], [-1, 1, 0.5]], [[2, -0.5]]], &quot;b&quot;: [[0.5, -1, 0], [0, 0.5], [1]], &quot;f&quot;: [&quot;relu&quot;, &quot;relu&quot;, &quot;sigmoid&quot;]}}"></div><figcaption><b>Рисунок 5.</b> Песочница прямого прохода. Перетащите точку на карте или двигайте ползунки — значения в сети пересчитываются. Переключайте активации скрытых слоёв: с тождественной функцией граница на карте становится прямой (сеть схлопывается в один линейный слой), с ReLU — ломаной, с tanh и сигмоидой — гладкой. Ползунок «масштаб весов» умножает все веса: большие веса делают переходы резкими.</figcaption></figure>
+
+    <h2 id="code">Код: прямой проход своими руками и в PyTorch</h2>
+    <p>Прямой проход — это цикл по слоям. Ниже он целиком, с кэшем для обратного прохода и с версией для пакета.</p>
+    <pre class="code"><span class="lang">python</span><code>import numpy as np
+
+relu = lambda z: np.maximum(0, z)
+sigmoid = lambda z: 1 / (1 + np.exp(-z))
+
+# Сеть 2–3–2–1: список слоёв (W, b, f)
+layers = [
+    (np.array([[1, -1], [0.5, 1], [-1, 2]]),       np.array([0.5, -1, 0]), relu),
+    (np.array([[1, 0.5, -0.5], [-1, 1, 0.5]]),     np.array([0.0, 0.5]),   relu),
+    (np.array([[2, -0.5]]),                        np.array([1.0]),        sigmoid),
+]
+
+def forward(x, layers):
+    a = x                                  # a⁽⁰⁾ = x
+    cache = []                             # z и a каждого слоя пригодятся обратному проходу
+    for W, b, f in layers:
+        z = W @ a + b                      # z⁽ˡ⁾ = W⁽ˡ⁾ a⁽ˡ⁻¹⁾ + b⁽ˡ⁾
+        a = f(z)                           # a⁽ˡ⁾ = f⁽ˡ⁾(z⁽ˡ⁾)
+        cache.append((z, a))
+    return a, cache
+
+y_hat, cache = forward(np.array([1.0, 2.0]), layers)
+for l, (z, a) in enumerate(cache, 1):
+    print(f&quot;слой {l}: z = {z}, a = {np.round(a, 4)}&quot;)
+# слой 1: z = [-0.5  1.5  3. ], a = [0.  1.5 3. ]
+# слой 2: z = [-0.75  3.5 ], a = [0.  3.5]
+# слой 3: z = [-0.75], a = [0.3208]
+
+# Пакет: строки X — объекты; та же формула, только X @ W.T
+X = np.array([[1, 2], [0, 0], [2, -1]], dtype=float)
+A = X
+for W, b, f in layers:
+    A = f(A @ W.T + b)                     # Z = X Wᵀ + 1bᵀ
+print(np.round(A.ravel(), 4))              # [0.3208 0.8808 0.9997]</code></pre>
+    <p>То же самое в PyTorch: <code>nn.Linear</code> хранит $W$ и $\mathbf{b}$ и считает $\mathbf{x}W^{\top} + \mathbf{b}$, а <code>nn.Sequential</code> и есть цикл по слоям.</p>
+    <pre class="code"><span class="lang">python</span><code>import torch
+import torch.nn as nn
+
+net = nn.Sequential(
+    nn.Linear(2, 3), nn.ReLU(),            # слой 1: W⁽¹⁾ — (3, 2), b⁽¹⁾ — (3,)
+    nn.Linear(3, 2), nn.ReLU(),            # слой 2: W⁽²⁾ — (2, 3)
+    nn.Linear(2, 1), nn.Sigmoid(),         # слой 3: W⁽³⁾ — (1, 2)
+)
+with torch.no_grad():                      # те же веса, что в статье
+    net[0].weight[:] = torch.tensor([[1., -1.], [0.5, 1.], [-1., 2.]]); net[0].bias[:] = torch.tensor([0.5, -1., 0.])
+    net[2].weight[:] = torch.tensor([[1., 0.5, -0.5], [-1., 1., 0.5]]); net[2].bias[:] = torch.tensor([0., 0.5])
+    net[4].weight[:] = torch.tensor([[2., -0.5]]);                       net[4].bias[:] = torch.tensor([1.])
+
+X = torch.tensor([[1., 2.], [0., 0.], [2., -1.]])
+print(net(X).squeeze())                    # ≈ [0.3208, 0.8808, 0.9997]
+print(sum(p.numel() for p in net.parameters()))   # 20</code></pre>
+
+    <h2 id="practice">Практикум: 8 примеров</h2>
+    <p>Каждый пример показывает одну грань прямого прохода. Все числа проверены вычислением.</p>
+    <article class="nr-ex" id="ex-1"><header class="nr-ex-head"><span class="nr-ex-n">Пример 1</span><span class="nr-ex-kinds"><span>расчёт</span></span></header><h3>Один слой — это логистическая регрессия</h3><div class="nr-ex-goal"><b>Цель примера</b><p>Увидеть, что при $L = 1$ прямой проход вырождается в формулу одного нейрона, и связать новую статью с предыдущей.</p></div>
+      <p>Сеть 3–1 с сигмоидой: $W^{(1)} = (0{,}5\ \ -1\ \ 0{,}25)$, $b^{(1)} = -0{,}75$, вход $\mathbf{x} = (2;\ -1;\ 3)$.</p>
+      <div class="eqd">$$\hat y = \sigma\big(W^{(1)}\mathbf{x} + b^{(1)}\big) = \sigma(1 + 1 + 0{,}75 - 0{,}75) = \sigma(2) \approx 0{,}8808$$</div>
+    <div class="nr-ex-take"><b>Что показал пример</b><p>Однослойная сеть с сигмоидой — это логистическая регрессия; глубокая сеть — та же формула, повторённая $L$ раз.</p></div></article>
+    <article class="nr-ex" id="ex-2"><header class="nr-ex-head"><span class="nr-ex-n">Пример 2</span><span class="nr-ex-kinds"><span>таблица</span></span></header><h3>XOR: прямой проход через скрытый слой</h3><div class="nr-ex-goal"><b>Цель примера</b><p>Пройти прямой проход на четырёх входах и увидеть, как скрытый слой с ReLU делает возможным то, что не умеет один нейрон.</p></div>
+      <p>Сеть 2–2–1: $h_1 = \mathrm{ReLU}(x_1 + x_2)$, $h_2 = \mathrm{ReLU}(x_1 + x_2 - 1)$, выход линейный: $\hat y = h_1 - 2h_2$.</p>
+      <div class="table-wrap"><table class="data"><thead><tr><th aria-label="(x₁; x₂)">$(x_1;\ x_2)$</th><th aria-label="z^(1)">$\mathbf{z}^{(1)}$</th><th aria-label="a^(1)">$\mathbf{a}^{(1)}$</th><th class=num aria-label="ŷ">$\hat y$</th><th class=num>XOR</th></tr></thead><tbody><tr><td>(0; 0)</td><td>(0; −1)</td><td>(0; 0)</td><td class=num>0</td><td class=num>0</td></tr><tr><td>(0; 1)</td><td>(1; 0)</td><td>(1; 0)</td><td class=num>1</td><td class=num>1</td></tr><tr><td>(1; 0)</td><td>(1; 0)</td><td>(1; 0)</td><td class=num>1</td><td class=num>1</td></tr><tr><td>(1; 1)</td><td>(2; 1)</td><td>(2; 1)</td><td class=num>0</td><td class=num>0</td></tr></tbody></table></div>
+    <div class="nr-ex-take"><b>Что показал пример</b><p>Второй нейрон включается только при двух единицах и вычитает лишнее. Без ReLU выход был бы линейным, и XOR не получился бы.</p></div></article>
+    <article class="nr-ex" id="ex-3"><header class="nr-ex-head"><span class="nr-ex-n">Пример 3</span><span class="nr-ex-kinds"><span>таблица</span><span>расчёт</span></span></header><h3>Формы и параметры сети для MNIST</h3><div class="nr-ex-goal"><b>Цель примера</b><p>Научиться за минуту посчитать формы всех матриц и число параметров реальной сети.</p></div>
+      <p>Картинка 28×28 вытягивается в вектор из 784 чисел; сеть 784–128–64–10 выдаёт 10 чисел — по одному на цифру.</p>
+      <div class="table-wrap"><table class="data"><thead><tr><th>Слой</th><th aria-label="W^(l)">$W^{(l)}$</th><th aria-label="b^(l)">$\mathbf{b}^{(l)}$</th><th class=num>Параметров</th><th class=num>Умножений</th></tr></thead><tbody><tr><td>1</td><td>128 × 784</td><td>128</td><td class=num>100 480</td><td class=num>100 352</td></tr><tr><td>2</td><td>64 × 128</td><td>64</td><td class=num>8 256</td><td class=num>8 192</td></tr><tr><td>3</td><td>10 × 64</td><td>10</td><td class=num>650</td><td class=num>640</td></tr><tr><td><b>всего</b></td><td></td><td></td><td class=num><b>109 386</b></td><td class=num><b>109 184</b></td></tr></tbody></table></div>
+    <div class="nr-ex-take"><b>Что показал пример</b><p>Больше 90% параметров — в первом слое, где много входов. Число умножений на один объект почти равно числу весов.</p></div></article>
+    <article class="nr-ex" id="ex-4"><header class="nr-ex-head"><span class="nr-ex-n">Пример 4</span><span class="nr-ex-kinds"><span>расчёт</span></span></header><h3>Выход из нескольких классов: softmax</h3><div class="nr-ex-goal"><b>Цель примера</b><p>Увидеть, как последний слой превращает $n_L$ чисел в распределение вероятностей.</p></div>
+      <p>Для $K$ классов последний слой выдаёт $K$ чисел $\mathbf{z}^{(L)}$, а активацией служит softmax: $\hat y_k = e^{z_k} / \sum_j e^{z_j}$. При $\mathbf{z}^{(L)} = (2;\ 1;\ 0{,}1)$:</p>
+      <div class="eqd">$$e^{\mathbf{z}} \approx (7{,}3891;\ 2{,}7183;\ 1{,}1052), \quad \sum \approx 11{,}2125, \quad \hat{\mathbf{y}} \approx (0{,}6590;\ 0{,}2424;\ 0{,}0986)$$</div>
+    <div class="nr-ex-take"><b>Что показал пример</b><p>Softmax — не поэлементная активация: каждый выход зависит от всех $z$. Сумма вероятностей всегда 1.</p></div></article>
+    <article class="nr-ex" id="ex-5"><header class="nr-ex-head"><span class="nr-ex-n">Пример 5</span><span class="nr-ex-kinds"><span>расчёт</span></span></header><h3>Нулевой вход и роль смещений</h3><div class="nr-ex-goal"><b>Цель примера</b><p>Понять, что смещения задают ответ сети «по умолчанию».</p></div>
+      <p>Подадим в нашу сеть $\mathbf{x} = (0;\ 0)$. Тогда $\mathbf{z}^{(1)} = \mathbf{b}^{(1)} = (0{,}5;\ -1;\ 0)$, $\mathbf{a}^{(1)} = (0{,}5;\ 0;\ 0)$, $\mathbf{z}^{(2)} = (0{,}5;\ 0)$, $\mathbf{a}^{(2)} = (0{,}5;\ 0)$, $z^{(3)} = 2\cdot0{,}5 + 1 = 2$, $\hat y = \sigma(2) \approx 0{,}8808$.</p>
+    <div class="nr-ex-take"><b>Что показал пример</b><p>Без смещений нулевой вход всегда давал бы $\mathbf{z} = \mathbf{0}$ на каждом слое и $\hat y = \sigma(0) = 0{,}5$, что бы сеть ни выучила.</p></div></article>
+    <article class="nr-ex" id="ex-6"><header class="nr-ex-head"><span class="nr-ex-n">Пример 6</span><span class="nr-ex-kinds"><span>расчёт</span></span></header><h3>«Выключенные» нейроны: что ReLU делает с потоком</h3><div class="nr-ex-goal"><b>Цель примера</b><p>Увидеть, что нейрон с $a = 0$ полностью отключает свою ветку: его исходящие веса не влияют на ответ.</p></div>
+      <p>В нашем примере первый нейрон слоя 2 выдал $a^{(2)}_1 = 0$ ($z = -0{,}75$). Его вес в выходном слое $W^{(3)}_{11} = 2$. Заменим его на $100$ или на $-100$: $z^{(3)} = 100\cdot0 - 0{,}5\cdot3{,}5 + 1 = -0{,}75$ — ответ не изменится.</p>
+    <div class="nr-ex-take"><b>Что показал пример</b><p>При данном входе работает только часть сети. Для другого входа включатся другие нейроны — так ReLU-сеть составляет ответ из кусков, каждый из которых линеен.</p></div></article>
+    <article class="nr-ex" id="ex-7"><header class="nr-ex-head"><span class="nr-ex-n">Пример 7</span><span class="nr-ex-kinds"><span>таблица</span></span></header><h3>Глубина или ширина</h3><div class="nr-ex-goal"><b>Цель примера</b><p>Сравнить, во что обходится ширина и во что — глубина.</p></div>
+      <div class="table-wrap"><table class="data"><thead><tr><th>Сеть</th><th>Слои</th><th>Параметров</th></tr></thead><tbody><tr><td>2–100–1</td><td>1 скрытый, широкий</td><td>2·100 + 100 + 100 + 1 = 401</td></tr><tr><td>2–10–10–10–1</td><td>3 скрытых, узких</td><td>30 + 110 + 110 + 11 = 261</td></tr></tbody></table></div>
+    <div class="nr-ex-take"><b>Что показал пример</b><p>Глубокая узкая сеть может стоить меньше широкой мелкой и при этом строить более сложные функции: каждый слой складывает пространство заново, и число «изломов» растёт с глубиной быстрее, чем с шириной.</p></div></article>
+    <article class="nr-ex" id="ex-8"><header class="nr-ex-head"><span class="nr-ex-n">Пример 8</span><span class="nr-ex-kinds"><span>расчёт</span><span>код</span></span></header><h3>Численная устойчивость: где прямой проход ломается</h3><div class="nr-ex-goal"><b>Цель примера</b><p>Узнать два классических способа получить NaN на прямом проходе и как их обойти.</p></div>
+      <p>Softmax с $\mathbf{z} = (1000;\ 1001;\ 1002)$: $e^{1000}$ не помещается в число с плавающей точкой, получаются $\infty/\infty = $ NaN. Но softmax не меняется, если из всех $z$ вычесть одно и то же число. Вычтем максимум:</p>
+      <div class="eqd">$$\mathbf{z} - 1002 = (-2;\ -1;\ 0), \quad e^{\mathbf{z} - \max} \approx (0{,}1353;\ 0{,}3679;\ 1), \quad \hat{\mathbf{y}} \approx (0{,}0900;\ 0{,}2447;\ 0{,}6652)$$</div>
+      <p>То же с сигмоидой: при $z = -1000$ наивная $1/(1 + e^{1000})$ переполняется. Устойчивая версия считает $e^{z}/(1 + e^{z})$ для отрицательных $z$. И на выходе классификатора в потери отдают логиты $\mathbf{z}^{(L)}$, а не вероятности: <code>BCEWithLogitsLoss</code>, <code>CrossEntropyLoss</code>.</p>
+    <div class="nr-ex-take"><b>Что показал пример</b><p>Математически формула прямого прохода верна для любых чисел, а машинно — нет. Устойчивые версии считают то же самое, но в безопасном порядке.</p></div></article>
+
+    <h2 id="mistakes">Частые ошибки</h2>
+    <ul class="flist"><li><b>Перепутать порядок индексов.</b> $W^{(l)}_{jk}$ — «в нейрон $j$ из нейрона $k$». Матрица имеет форму $n_l \times n_{l-1}$, в PyTorch — <code>(out_features, in_features)</code>.</li><li><b>$\mathbf{x}W$ вместо $W\mathbf{x}$.</b> Для одного вектора-столбца — $W\mathbf{x}$; для пакета строками — $XW^{\top}$. Смешение даёт ошибку формы или, хуже, неверный ответ у квадратных матриц.</li><li><b>Забыть активацию между слоями.</b> Сеть молча схлопывается в один линейный слой.</li><li><b>Поставить ReLU на выход регрессии</b>, где ответ бывает отрицательным: сеть физически не сможет его выдать. На выходе регрессии — тождественная функция.</li><li><b>Применить softmax и затем CrossEntropyLoss в PyTorch</b>, которая уже делает log-softmax внутри: вероятности посчитаются дважды.</li><li><b>Не масштабировать вход.</b> Огромные $\mathbf{x}$ дают огромные $\mathbf{z}$, насыщают сигмоиды и tanh и ломают обучение.</li><li><b>Считать, что прямой проход учит сеть.</b> Он только вычисляет; веса меняет шаг оптимизатора после обратного прохода.</li></ul>
+
+    <h2 id="summary">Итоги</h2>
+    <ul class="flist"><li>Прямой проход: $\mathbf{a}^{(0)} = \mathbf{x}$; для $l = 1..L$: $\mathbf{z}^{(l)} = W^{(l)}\mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}$, $\mathbf{a}^{(l)} = f^{(l)}(\mathbf{z}^{(l)})$; ответ $\hat{\mathbf{y}} = \mathbf{a}^{(L)}$.</li><li>Каждая строка $W^{(l)}$ — один нейрон; слой — это $n_l$ формул одного нейрона сразу.</li><li>$W^{(l)}$ имеет форму $n_l \times n_{l-1}$; у слоя $n_l(n_{l-1} + 1)$ параметров; прямой проход стоит $\sum_l n_l n_{l-1}$ умножений на объект.</li><li>Для пакета: $Z^{(l)} = A^{(l-1)}W^{(l)\top} + \mathbf{1}\mathbf{b}^{(l)\top}$.</li><li>Геометрически линейная часть поворачивает и растягивает пространство, активация его гнёт; без активаций слои схлопываются в один.</li><li>При обучении прямой проход заканчивается потерей и сохраняет все $\mathbf{z}$ и $\mathbf{a}$ для обратного прохода.</li></ul>
+
+    <h2 id="quiz">Проверь себя</h2>
+    <div class="quiz" data-right="Верно." data-wrong="Не совсем."><fieldset class="q"><legend>1. Какую форму имеет $W^{(l)}$ слоя, где 5 входов и 3 нейрона?</legend><div class="opts"><button type="button" data-ok="0" aria-label="5 times 3">$5 \times 3$</button><button type="button" data-ok="1" aria-label="3 times 5">$3 \times 5$</button><button type="button" data-ok="0" aria-label="3 times 3">$3 \times 3$</button><button type="button" data-ok="0" aria-label="5 times 5">$5 \times 5$</button></div><div class="explain" hidden>Строк столько, сколько нейронов ($n_l = 3$), столбцов — сколько входов ($n_{l-1} = 5$).</div></fieldset><fieldset class="q"><legend>2. Сколько параметров у слоя 4 → 6?</legend><div class="opts"><button type="button" data-ok="0">24</button><button type="button" data-ok="0">28</button><button type="button" data-ok="1">30</button><button type="button" data-ok="0">34</button></div><div class="explain" hidden>$6\cdot(4 + 1) = 30$: 24 веса и 6 смещений.</div></fieldset><fieldset class="q"><legend>3. Слой: $W = \begin{pmatrix}1 & 2\end{pmatrix}$, $b = -1$, ReLU, вход $(1;\ -1)$. Выход?</legend><div class="opts"><button type="button" data-ok="1">0</button><button type="button" data-ok="0">−2</button><button type="button" data-ok="0">2</button><button type="button" data-ok="0">1</button></div><div class="explain" hidden>$z = 1 - 2 - 1 = -2$, $\mathrm{ReLU}(-2) = 0$.</div></fieldset><fieldset class="q"><legend>4. Что будет, если убрать все активации у сети 2–3–2–1?</legend><div class="opts"><button type="button" data-ok="0">Она станет точнее</button><button type="button" data-ok="1">Она станет эквивалентна одному линейному слою</button><button type="button" data-ok="0">Она перестанет считать</button><button type="button" data-ok="0">Ничего не изменится</button></div><div class="explain" hidden>Композиция линейных преобразований линейна: $W^{(3)}W^{(2)}W^{(1)}\mathbf{x} + \dots$</div></fieldset><fieldset class="q"><legend>5. Как записывается слой для пакета $X$ (объекты строками)?</legend><div class="opts"><button type="button" data-ok="0" aria-label="WX + b">$WX + \mathbf{b}$</button><button type="button" data-ok="1" aria-label="XW^ᵀ + 1b^ᵀ">$XW^{\top} + \mathbf{1}\mathbf{b}^{\top}$</button><button type="button" data-ok="0" aria-label="X^ᵀW">$X^{\top}W$</button><button type="button" data-ok="0" aria-label="W^ᵀX^ᵀ">$W^{\top}X^{\top}$</button></div><div class="explain" hidden>Каждая строка $X$ — вектор $\mathbf{x}^{\top}$, а $(W\mathbf{x})^{\top} = \mathbf{x}^{\top}W^{\top}$.</div></fieldset><fieldset class="q"><legend>6. Зачем при обучении сохранять $\mathbf{z}^{(l)}$ и $\mathbf{a}^{(l)}$?</legend><div class="opts"><button type="button" data-ok="0">Для красоты</button><button type="button" data-ok="1">Чтобы обратный проход посчитал градиенты без повторного прямого</button><button type="button" data-ok="0">Чтобы уменьшить потерю</button><button type="button" data-ok="0">Это нужно только при выводе</button></div><div class="explain" hidden>Производные слоёв выражаются через эти значения, например $f'(\mathbf{z}^{(l)})$ и $\mathbf{a}^{(l-1)}$.</div></fieldset></div>
+
+    <div class="tags"><a href="../../ru/#posts">Нейросети</a><a href="../../ru/#posts">Линейная алгебра</a><a href="../../ru/#posts">Основы ML</a></div>
+  </article>
+</div>
+
+<nav class="fx-nav" aria-label="Все статьи">
+  <div class="wrap-m">
+    <a class="prev" href="../neuron/"><span class="kicker">Предыдущая статья</span><span class="big">Формула одного нейрона</span></a>
+    <a class="next" href="../materials/ml-formulas/"><span class="kicker">Материал</span><span class="big">Шпаргалка формул нейросетей</span></a>
+  </div>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <nav aria-label="Ссылки в подвале">
+    <span>Javharbek Abdulatipov © 2026</span>
+    <a href="../../ru/#posts">Статьи</a>
+    <a href="../../ru/materials/">Материалы</a>
+    <a href="../../ru/about/">Обо мне</a>
+    <a href="https://www.linkedin.com/in/javharbek-abdulatipov">LinkedIn</a>
+    <a href="https://github.com/jakharbek">GitHub</a>
+    <a href="https://t.me/javharbek16">Telegram</a>
+  </nav>
+</footer>
+
+<script src="../../assets/js/site.js" defer></script>
+</body>
+</html>

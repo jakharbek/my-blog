@@ -38,9 +38,9 @@ TAGS = {
 }
 # The cards under the article: (href relative to <lang>/neuron/, title, kicker)
 RELATED = {
-    "ru": [("../sigmoid/", "Анатомия сигмоиды", "Статья"), ("../materials/ml-formulas/", "Шпаргалка формул нейросетей", "Материал")],
-    "en": [("../sigmoid/", "Anatomy of the sigmoid", "Article"), ("../materials/ml-formulas/", "A cheat sheet of neural network formulas", "Material")],
-    "uz": [("../sigmoid/", "Sigmoidaning anatomiyasi", "Maqola"), ("../materials/ml-formulas/", "Neyron tarmoq formulalari qo‘llanmasi", "Material")],
+    "ru": [("../sigmoid/", "Анатомия сигмоиды", "Статья"), ("../forward-pass/", "Формула Forward Pass", "Следующая статья")],
+    "en": [("../sigmoid/", "Anatomy of the sigmoid", "Article"), ("../forward-pass/", "The forward pass formula", "Next article")],
+    "uz": [("../sigmoid/", "Sigmoidaning anatomiyasi", "Maqola"), ("../forward-pass/", "Forward Pass formulasi", "Keyingi maqola")],
 }
 
 # The running example, shared by the text, the figures and check_numbers().
