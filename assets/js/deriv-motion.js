@@ -13,10 +13,11 @@
 
   const L = {
     ru: {
+      calc: "Формулы и расчёт", cdef: "По определению", cavg: "Средние скорости", cinc: "Приращение пути", cavg1: "Средняя скорость на отрезке", cinst: "Мгновенная скорость (производная)", cgap: "Разница", cvol: "Объём воды", carea: "Площадь зеркала воды", crate: "Скорость подъёма", csmall: "За малое время", cpoint: "В точке", ctan: "Касательная", cdev: "Отклонение от касательной", cratio: "Доля от ширины окна", ckink: "Излом в нуле", cval: "Значение", cder: "Производная", csign: "Знак", up: "растёт", down: "убывает", flatw: "касательная горизонтальна", ch: "Высота", cv: "Скорость", ca: "Ускорение (вторая производная)", cturn: "Обороты", cchain: "Цепное правило", cm: "см", sec: "с", devh: "отклонение от горизонтали / окно", left: "слева", right: "справа",
       play: "Пуск", pause: "Пауза", restart: "Сначала", time: "Время $t$, мин", work: "работа", home: "дом",
       walker: "пешеход", car: "машина", dist: "путь", speed: "скорость", avg: "средняя", mpm: "м/мин", kmh: "км/ч", m: "м",
       sAxis: "путь s, м", tAxis: "t, мин",
-      raceNote: (t, s1, s2, v2, k2) => `$t = ${t}$ мин. Пешеход прошёл $${s1}$ м, его скорость всё время $80$ м/мин — его график прямая, наклон везде одинаков. Машина проехала $${s2}$ м, её скорость сейчас $${v2}$ м/мин ($${k2}$ км/ч) — это наклон касательной к её графику. Оба добрались за $5$ минут, но средние скорости разные: $400 \\div 5 = 80$ и $3000 \\div 5 = 600$ м/мин.`,
+      raceNote: (t, s1, s2, v2, k2) => `$t = ${t}$ мин. Пешеход прошёл $${s1}$ м, его скорость всё время $80$ м/мин — его график — прямая, наклон везде одинаков. Машина проехала $${s2}$ м, её скорость сейчас $${v2}$ м/мин ($${k2}$ км/ч) — это наклон касательной к её графику. Оба доберутся до дома за $5$ минут, но средние скорости разные: $400 \\div 5 = 80$ и $3000 \\div 5 = 600$ м/мин.`,
       t0: "Момент $t_0$, мин", dt: "Отрезок $\\Delta t$, мин", shrink: "Δt → 0", avgSpeed: "средняя $\\Delta s / \\Delta t$", instSpeed: "спидометр $s'(t_0)$",
       gaugeNote: (dt, a, v) => `На отрезке $\\Delta t = ${dt}$ мин средняя скорость $\\frac{\\Delta s}{\\Delta t} = ${a}$ м/мин (оранжевая стрелка, наклон секущей). Спидометр показывает $${v}$ м/мин (синяя стрелка, наклон касательной). Уменьшайте $\\Delta t$ — стрелки сольются: это и есть производная.`,
       shape: "Сосуд", cyl: "цилиндр", cone: "воронка", vase: "ваза", level: "уровень $h$, см", rate: "$dh/dt$, см/с", area: "площадь сечения $A(h)$, см²", hAxis: "h, см", tsAxis: "t, с",
@@ -29,9 +30,10 @@
       hgt: "высота $h$, м", vel: "скорость $v = h'$, м/с", acc: "ускорение $a = h''$, м/с²", tsec: "t, с",
       ballNote: (t, h, v) => `$t = ${t}$ с: высота $h = ${h}$ м, скорость $v = h'(t) = 20 - 10t = ${v}$ м/с (стрелка). Скорость — наклон графика высоты, ускорение $a = v'(t) = h''(t) = -10$ м/с² — наклон графика скорости. В верхней точке ($t = 2$ с) касательная горизонтальна: $v = 0$.`,
       k1: "$\\frac{du}{dx}$ — передача первой пары", k2: "$\\frac{dy}{du}$ — передача второй пары", turnsX: "обороты $x$", turnsU: "обороты $u$", turnsY: "обороты $y$",
-      gearsNote: (a, b, c) => `Первая шестерня ($x$) делает оборот — вторая ($u$) делает $${a}$ оборота, третья ($y$) — $${a} \\cdot ${b} = ${c}$. Передаточные числа перемножаются: $\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx}$. Это и есть цепное правило; маленькая шестерня крутится быстрее большой.`,
+      gearsNote: (a, b, c) => `За один оборот первой шестерни ($x$) число оборотов второй ($u$) — $${a}$, третьей ($y$) — $${a} \\cdot ${b} = ${c}$. Передаточные числа перемножаются: $\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx}$. Это и есть цепное правило; маленькая шестерня крутится быстрее большой.`,
     },
     en: {
+      calc: "Formulas and calculation", cdef: "From the definition", cavg: "Average speeds", cinc: "Increment of distance", cavg1: "Average speed over the interval", cinst: "Instantaneous speed (the derivative)", cgap: "Difference", cvol: "Water volume", carea: "Water surface area", crate: "Rate of rise", csmall: "Over a short time", cpoint: "At the point", ctan: "Tangent", cdev: "Deviation from the tangent", cratio: "Share of the window width", ckink: "The kink at zero", cval: "Value", cder: "Derivative", csign: "Sign", up: "increases", down: "decreases", flatw: "horizontal tangent", ch: "Height", cv: "Velocity", ca: "Acceleration (second derivative)", cturn: "Turns", cchain: "The chain rule", cm: "cm", sec: "s", devh: "deviation from the horizontal / window", left: "left", right: "right",
       play: "Play", pause: "Pause", restart: "Restart", time: "Time $t$, min", work: "work", home: "home",
       walker: "walker", car: "car", dist: "distance", speed: "speed", avg: "average", mpm: "m/min", kmh: "km/h", m: "m",
       sAxis: "distance s, m", tAxis: "t, min",
@@ -48,17 +50,18 @@
       hgt: "height $h$, m", vel: "velocity $v = h'$, m/s", acc: "acceleration $a = h''$, m/s²", tsec: "t, s",
       ballNote: (t, h, v) => `$t = ${t}$ s: height $h = ${h}$ m, velocity $v = h'(t) = 20 - 10t = ${v}$ m/s (the arrow). Velocity is the slope of the height graph; acceleration $a = v'(t) = h''(t) = -10$ m/s² is the slope of the velocity graph. At the top ($t = 2$ s) the tangent is horizontal: $v = 0$.`,
       k1: "$\\frac{du}{dx}$ — ratio of the first pair", k2: "$\\frac{dy}{du}$ — ratio of the second pair", turnsX: "turns of $x$", turnsU: "turns of $u$", turnsY: "turns of $y$",
-      gearsNote: (a, b, c) => `The first gear ($x$) makes one turn — the second ($u$) makes $${a}$ turns, the third ($y$) $${a} \\cdot ${b} = ${c}$. The gear ratios multiply: $\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx}$. That is the chain rule; a small gear spins faster than a big one.`,
+      gearsNote: (a, b, c) => `Per turn of the first gear ($x$), the number of turns of the second ($u$) is $${a}$, of the third ($y$) $${a} \\cdot ${b} = ${c}$. The gear ratios multiply: $\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx}$. That is the chain rule; a small gear spins faster than a big one.`,
     },
     uz: {
+      calc: "Formulalar va hisob", cdef: "Ta’rif bo‘yicha", cavg: "O‘rtacha tezliklar", cinc: "Yo‘l orttirmasi", cavg1: "Oraliqdagi o‘rtacha tezlik", cinst: "Oniy tezlik (hosila)", cgap: "Farq", cvol: "Suv hajmi", carea: "Suv sirtining yuzi", crate: "Ko‘tarilish tezligi", csmall: "Qisqa vaqt ichida", cpoint: "Nuqtada", ctan: "Urinma", cdev: "Urinmadan og‘ish", cratio: "Oyna kengligidagi ulushi", ckink: "Noldagi sinish", cval: "Qiymat", cder: "Hosila", csign: "Ishora", up: "o‘sadi", down: "kamayadi", flatw: "urinma gorizontal", ch: "Balandlik", cv: "Tezlik", ca: "Tezlanish (ikkinchi hosila)", cturn: "Aylanishlar", cchain: "Zanjir qoidasi", cm: "sm", sec: "s", devh: "gorizontaldan og‘ish / oyna", left: "chapda", right: "o‘ngda",
       play: "Boshlash", pause: "Pauza", restart: "Boshidan", time: "Vaqt $t$, daq", work: "ish", home: "uy",
       walker: "piyoda", car: "mashina", dist: "yo‘l", speed: "tezlik", avg: "o‘rtacha", mpm: "m/daq", kmh: "km/soat", m: "m",
       sAxis: "yo‘l s, m", tAxis: "t, daq",
-      raceNote: (t, s1, s2, v2, k2) => `$t = ${t}$ daq. Piyoda $${s1}$ m yurdi, uning tezligi doim $80$ m/daq — grafigi to‘g‘ri chiziq, qiyaligi hamma joyda bir xil. Mashina $${s2}$ m yurdi, hozirgi tezligi $${v2}$ m/daq ($${k2}$ km/soat) — bu uning grafigiga urinmaning qiyaligi. Ikkalasi ham $5$ daqiqada yetib keldi, lekin o‘rtacha tezliklar har xil: $400 \\div 5 = 80$ va $3000 \\div 5 = 600$ m/daq.`,
+      raceNote: (t, s1, s2, v2, k2) => `$t = ${t}$ daq. Piyoda $${s1}$ m yurdi, uning tezligi doim $80$ m/daq — grafigi to‘g‘ri chiziq, qiyaligi hamma joyda bir xil. Mashina $${s2}$ m yurdi, hozirgi tezligi $${v2}$ m/daq ($${k2}$ km/soat) — bu uning grafigiga urinmaning qiyaligi. Ikkalasi ham $5$ daqiqada yetib keladi, lekin o‘rtacha tezliklar har xil: $400 \\div 5 = 80$ va $3000 \\div 5 = 600$ m/daq.`,
       t0: "$t_0$ payt, daq", dt: "$\\Delta t$ oraliq, daq", shrink: "Δt → 0", avgSpeed: "o‘rtacha $\\Delta s / \\Delta t$", instSpeed: "spidometr $s'(t_0)$",
       gaugeNote: (dt, a, v) => `$\\Delta t = ${dt}$ daq oraliqda o‘rtacha tezlik $\\frac{\\Delta s}{\\Delta t} = ${a}$ m/daq (to‘q sariq strelka, kesuvchining qiyaligi). Spidometr $${v}$ m/daq ni ko‘rsatadi (ko‘k strelka, urinmaning qiyaligi). $\\Delta t$ ni kichraytiring — strelkalar ustma-ust tushadi: bu hosilaning o‘zi.`,
       shape: "Idish", cyl: "silindr", cone: "voronka", vase: "vaza", level: "sath $h$, sm", rate: "$dh/dt$, sm/s", area: "kesim yuzi $A(h)$, sm²", hAxis: "h, sm", tsAxis: "t, s",
-      tankNote: (h, a, r) => `Suv o‘zgarmas $Q$ sarf bilan quyiladi. Sath $h = ${h}$ sm, suv sirtining yuzi $A = ${a}$ sm², sath $\\frac{dh}{dt} = \\frac{Q}{A} = ${r}$ sm/s tezlik bilan ko‘tariladi. Idish tor joyda suv tez ko‘tariladi va grafik tikroq; keng joyda — sekin.`,
+      tankNote: (h, a, r) => `Suv o‘zgarmas $Q$ sarf bilan quyiladi. Sath $h = ${h}$ sm, suv sirtining yuzi $A = ${a}$ sm², sath $\\frac{dh}{dt} = \\frac{Q}{A} = ${r}$ sm/s tezlik bilan ko‘tariladi. Idishning tor joyida suv tez ko‘tariladi va grafik tikroq; keng joyida — sekin.`,
       fn: "Funksiya", pt: "$x_0$ nuqta", zoom: "Kattalashtirish", win: "oyna kengligi", dev: "urinmadan og‘ish / oyna",
       zoomNote: (z, d) => `Kattalashtirish $\\times${z}$: oynada egri chiziq urinmadan oyna kengligining ko‘pi bilan $${d}$ qismiga uzoqlashadi. Kattalashtirish qancha kuchli bo‘lsa, egri chiziq shuncha to‘g‘rilanadi — nuqta yaqinida silliq funksiya $f'(x_0)$ qiyalikli to‘g‘ri chiziqdan farq qilmaydi.`,
       kinkNote: (z) => `Kattalashtirish $\\times${z}$, sinish esa sinishligicha qoladi: chapda qiyalik $-1$, o‘ngda $+1$. Qancha kattalashtirmang, $|x|$ nolda to‘g‘ri chiziqqa aylanmaydi — shuning uchun u yerda hosila yo‘q.`,
@@ -110,6 +113,46 @@
     return svg;
   }
   const el = (tag, attrs, parent, text) => { const e = S(tag, attrs, parent); if (text != null) e.textContent = text; return e; };
+  // The "formulas and calculation" panel: display formulas with the current numbers, recomputed every frame.
+  // Numbers carry the colour of their object in the figure (\htmlClass{t-…}), so the eye links the two.
+  const KOPT = { displayMode: true, throwOnError: false, strict: false, trust: (c) => c.command === "\\htmlClass" };
+  const kx = (src) => { try { return window.katex ? window.katex.renderToString(src, KOPT) : src; } catch (e) { return src; } };
+  const C = (cls, v) => `\\htmlClass{t-${cls}}{${v}}`;
+  const pm = (v, d = 4) => (v < 0 ? "- " : "+ ") + tn(Math.abs(v), d);
+  const U = (u) => `\\ \\text{${u}}`;
+  // Split TeX at top-level separators (outside braces).
+  function splitTop(tex, seps) {
+    const out = []; let depth = 0, cur = "";
+    for (let i = 0; i < tex.length; i++) {
+      const ch = tex[i];
+      if (ch === "{") depth++; else if (ch === "}") depth--;
+      const sep = depth === 0 && seps.find((x) => tex.startsWith(x, i));
+      if (sep) { out.push(cur); cur = ""; i += sep.length - 1; } else cur += ch;
+    }
+    out.push(cur);
+    return out;
+  }
+  // Long chains of equalities go on several lines: "a = b" then "= c = d" …; parallel formulas (",\qquad") each get a line.
+  function wrap(tex, narrow) {
+    if (tex.includes("\\begin{")) return tex;
+    const lines = [];
+    splitTop(tex, [",\\qquad ", ",\\quad "]).forEach((seg) => {
+      // on a phone every step of the chain gets its own line
+      const parts = splitTop(seg, [" = "]), per = narrow ? 1 : 2;
+      if (parts.length <= (narrow ? 2 : 3)) { lines.push(parts.join(" = ")); return; }
+      lines.push(parts.slice(0, 2).join(" = "));
+      for (let i = 2; i < parts.length; i += per) lines.push("= " + parts.slice(i, i + per).join(" = "));
+    });
+    return lines.length === 1 ? tex : "\\begin{aligned}" + lines.map((l) => "&" + l).join("\\\\[3pt] ") + "\\end{aligned}";
+  }
+  function calcPanel(ui) {
+    const box = FV.h("div", { class: "dm-calc", role: "group", "aria-label": L.calc });
+    box.append(FV.h("div", { class: "dm-calc-title", text: L.calc }));
+    const body = FV.h("div", { class: "dm-calc-body" });
+    box.append(body);
+    ui.readout.after(box);
+    return (rows) => { body.innerHTML = rows.map(([lab, tex]) => `<div class="dm-calc-row"><div class="dm-calc-lab">${lab}</div><div class="dm-calc-eq">${kx(wrap(tex, body.clientWidth > 0 && body.clientWidth < 460))}</div></div>`).join(""); };
+  }
 
   // ---------- 1. a walker and a car: the same 5 minutes ----------
   FV.widget("dm-race", (root) => {
@@ -149,6 +192,7 @@
     const ck = clock({ before: () => { if (t >= T) t = 0; }, tick: (dt) => { t = Math.min(T, t + dt * 0.7); st.set(t); draw(); return t < T; }, jump: () => { t = t >= T ? 0 : Math.min(T, t + 1); st.set(t); draw(); } });
     ui.controls.append(st.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "s1", label: L.walker + ": " + L.dist, c: "teal" }, { key: "v1", label: L.speed, c: "teal" }, { key: "s2", label: L.car + ": " + L.dist, c: "orange" }, { key: "v2", label: L.speed, c: "orange" }]);
+    const calc = calcPanel(ui);
     function draw() {
       const a = s1(t), b = s2(t), va = v1(), vb = v2(t);
       walker.setAttribute("transform", `translate(${X(a)} ${Y1})`); car.setAttribute("transform", `translate(${X(b)} ${Y2})`);
@@ -163,6 +207,14 @@
       plot.dot(t, a, { c: "teal" }); plot.dot(t, b, { c: "orange" });
       plot.legend([{ label: L.walker + ": $s = 80t$", c: "teal" }, { label: L.car, c: "orange" }]);
       ro.set("s1", n(a) + " " + L.m); ro.set("v1", n(va) + " " + L.mpm); ro.set("s2", n(b, 4) + " " + L.m); ro.set("v2", n(vb, 3) + " " + L.mpm);
+      const u = t / T, hstep = t + 0.01 <= T ? 0.01 : -0.01, q = (s2(t + hstep) - b) / hstep;
+      calc([
+        [L.walker, `s_1(t) = 80t = 80\\cdot ${C("ink", tn(t, 3))} = ${C("teal", tn(a, 4))}${U(L.m)},\\qquad v_1 = s_1'(t) = ${C("teal", "80")}${U(L.mpm)}`],
+        [L.car, `u = \\frac{t}{5} = ${tn(u, 4)},\\qquad s_2 = 3000\\,(3u^2 - 2u^3) = 3000\\,(3\\cdot ${tn(u, 4)}^2 - 2\\cdot ${tn(u, 4)}^3) = ${C("orange", tn(b, 5))}${U(L.m)}`],
+        [L.cinst, `v_2 = s_2'(t) = 3600\\,(u - u^2) = 3600\\,(${tn(u, 4)} - ${tn(u, 4)}^2) = ${C("orange", tn(vb, 5))}${U(L.mpm)} = ${tn(vb * 0.06, 4)}${U(L.kmh)}`],
+        [L.cdef + ", Δt = " + n(hstep, 2), `\\frac{s_2(t + \\Delta t) - s_2(t)}{\\Delta t} = \\frac{${tn(s2(t + hstep), 6)} - ${tn(b, 6)}}{${tn(hstep, 2)}} = ${C("blue", tn(q, 5))} \\approx v_2`],
+        [L.cavg, `\\bar v_1 = \\frac{400}{5} = ${C("teal", "80")},\\qquad \\bar v_2 = \\frac{3000}{5} = ${C("orange", "600")}${U(L.mpm)}`],
+      ]);
       note(L.raceNote(tn(t, 3), tn(a, 3), tn(b, 4), tn(vb, 3), tn(vb * 0.06, 3)));
     }
     plot.onresize = () => { roadLayout(); draw(); };
@@ -173,7 +225,8 @@
   FV.widget("dm-gauge", (root) => {
     const ui = FV.shell(root, { cols: true }), note = noter(ui);
     const T = 5, D = 3000;
-    const s = (t) => D * (t / T - Math.sin((2 * Math.PI * t) / T) / (2 * Math.PI)), v = (t) => (D / T) * (1 - Math.cos((2 * Math.PI * t) / T));
+    // the same car as in animation 1: s = 3000(3u² − 2u³), u = t/5, s′ = 3600(u − u²)
+    const s = (t) => { const u = t / T; return D * (3 * u * u - 2 * u * u * u); }, v = (t) => { const u = t / T; return 3600 * (u - u * u); };
     let t0 = 1.5, dt = 2;
     const c1 = FV.col(ui.stage), c2 = FV.col(ui.stage);
     const plot = new FV.Plot(c1, { x: [0, 5], y: [-100, 3200], aspect: 0.75, maxHeight: 340, xLabel: L.tAxis, yLabel: L.sAxis });
@@ -197,6 +250,7 @@
     const ck = clock({ label: L.shrink, before: () => { if (dt < 0.01) { dt = Math.min(2, T - t0); } }, tick: (d) => { dt *= Math.pow(0.35, d); if (dt < 0.005) { dt = 0.005; sdt.set(dt); draw(); return false; } sdt.set(dt); draw(); return true; }, jump: () => { dt = 0.005; sdt.set(dt); draw(); } });
     ui.controls.append(st0.el, sdt.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "a", label: L.avgSpeed, c: "orange" }, { key: "v", label: L.instSpeed, c: "blue" }]);
+    const calc = calcPanel(ui);
     function needle(line, val, r) { const p = P(ang(val), r); line.setAttribute("x2", p[0]); line.setAttribute("y2", p[1]); }
     function draw() {
       const a = (s(t0 + dt) - s(t0)) / dt, vi = v(t0), y0 = s(t0);
@@ -209,6 +263,14 @@
       plot.legend([{ label: "$s(t)$", c: "ink" }, { label: L.avgSpeed, c: "orange" }, { label: L.instSpeed, c: "blue", dash: true }]);
       needle(nA, a, R - 18); needle(nV, vi, R - 30);
       ro.set("a", n(a, 4) + " " + L.mpm); ro.set("v", n(vi, 4) + " " + L.mpm);
+      const s1v = s(t0 + dt), ds = s1v - y0, u0 = t0 / T;
+      calc([
+        ["s(t)", `s(t) = 3000\\,(3u^2 - 2u^3),\\quad u = \\frac{t}{5}`],
+        [L.cinc, `\\Delta s = s(${tn(t0 + dt, 4)}) - s(${tn(t0, 3)}) = ${tn(s1v, 6)} - ${tn(y0, 6)} = ${C("orange", tn(ds, 6))}${U(L.m)}`],
+        [L.cavg1, `\\frac{\\Delta s}{\\Delta t} = \\frac{${tn(ds, 6)}}{${tn(dt, 3)}} = ${C("orange", tn(a, 6))}${U(L.mpm)}`],
+        [L.cinst, `s'(t_0) = 3600\\,(u_0 - u_0^2) = 3600\\,(${tn(u0, 4)} - ${tn(u0, 4)}^2) = ${C("blue", tn(vi, 6))}${U(L.mpm)}`],
+        [L.cgap, `\\Big|\\frac{\\Delta s}{\\Delta t} - s'(t_0)\\Big| = ${C("red", tn(Math.abs(a - vi), 4))}${U(L.mpm)}`],
+      ]);
       note(L.gaugeNote(tn(dt, 3), tn(a, 4), tn(vi, 4)));
     }
     plot.onresize = draw;
@@ -241,6 +303,7 @@
     ui.controls.append(seg.el, stt.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "h", label: L.level, c: "blue" }, { key: "a", label: L.area }, { key: "r", label: L.rate, c: "orange" }]);
     const SX = 20, BY = 280, SY = 26; // px per cm horizontally, the bottom, px per cm vertically
+    const calc = calcPanel(ui);
     function draw() {
       const h = hAt(t), A = tab.A(h), rate = tab.Q / A;
       gV.textContent = "";
@@ -261,6 +324,13 @@
       plot.dot(t, h, { c: "blue" });
       plot.legend([{ label: "$h(t)$", c: "ink" }, { label: "$dh/dt$", c: "orange", dash: true }]);
       ro.set("h", n(h, 3)); ro.set("a", n(A, 3)); ro.set("r", n(rate, 3));
+      const Q = tab.Q, V = Math.min(tab.Vs[N], Q * t), r = tab.r(h), dV = Q * 0.1;
+      calc([
+        [L.cvol, `V = Q\\,t = ${tn(Q, 4)}\\cdot ${C("ink", tn(t, 3))} = ${tn(V, 5)}${U(L.cm + "^3")}`.replace("\\text{" + L.cm + "^3}", "\\text{" + L.cm + "}^3")],
+        [L.carea, `A(h) = \\pi\\,r(h)^2 = \\pi\\cdot ${tn(r, 4)}^2 = ${tn(A, 5)}${U(L.cm)}^2,\\qquad h = ${C("blue", tn(h, 4))}${U(L.cm)}`],
+        [L.crate, `\\frac{dh}{dt} = \\frac{Q}{A(h)} = \\frac{${tn(Q, 4)}}{${tn(A, 5)}} = ${C("orange", tn(rate, 4))}${U(L.cm + "/" + L.sec)}`],
+        [L.csmall + ", Δt = " + n(0.1), `\\Delta V = Q\\,\\Delta t = ${tn(dV, 4)},\\qquad \\Delta h \\approx \\frac{\\Delta V}{A} = \\frac{${tn(dV, 4)}}{${tn(A, 5)}} = ${tn(dV / A, 4)}${U(L.cm)}`],
+      ]);
       note(L.tankNote(tn(h, 3), tn(A, 3), tn(rate, 3)));
     }
     plot.onresize = draw;
@@ -284,6 +354,8 @@
     const ck = clock({ before: () => { if (z >= 3) z = 0; }, tick: (d) => { z = Math.min(3, z + d * 0.45); sz.set(z); draw(); return z < 3; }, jump: () => { z = z >= 3 ? 0 : Math.min(3, z + 1); sz.set(z); draw(); } });
     ui.controls.append(seg.el, sx.el, sz.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "w", label: L.win }, { key: "d", label: L.dev, c: "red" }]);
+    const devLabel = ui.readout.querySelectorAll(".fv-ro")[1].firstChild;
+    const calc = calcPanel(ui);
     function draw() {
       const w = 2 / Math.pow(10, z), y0 = P.f(x0);
       plot.setDomain([x0 - w, x0 + w], [y0 - w, y0 + w]);
@@ -301,6 +373,21 @@
       }
       plot.dot(x0, y0, { c: "orange" });
       ro.set("w", n(2 * w, 3)); ro.set("d", n((dev / (2 * w)) * 100, 3) + " %");
+      devLabel.textContent = P.d ? FV.plain(L.dev) : L.devh;
+      if (P.d) {
+        const k = P.d(x0), sq = P === ZF.sq;
+        calc([
+          [L.cpoint, `f(x_0) = ${sq ? tn(x0, 3) + "^2" : "\\sin " + tn(x0, 3)} = ${tn(y0, 5)},\\qquad f'(x_0) = ${sq ? "2\\cdot " + tn(x0, 3) : "\\cos " + tn(x0, 3)} = ${C("blue", tn(k, 5))}`],
+          [L.ctan, `y = f(x_0) + f'(x_0)\\,(x - x_0) = ${tn(y0, 5)} ${pm(k, 5)}\\,(x ${pm(-x0, 3)})`],
+          [L.cdev, sq ? `\\Delta f - f'(x_0)\\,\\Delta x = \\Delta x^2,\\quad \\max_{|\\Delta x| \\le w} \\Delta x^2 = w^2 = ${tn(w, 4)}^2 = ${C("red", tn(w * w, 4))}` : `\\max_{|\\Delta x| \\le w}\\big|\\Delta f - f'(x_0)\\,\\Delta x\\big| = ${C("red", tn(dev, 4))},\\quad w = ${tn(w, 4)}`],
+          [L.cratio, `\\frac{${tn(dev, 4)}}{2w} = \\frac{${tn(dev, 4)}}{${tn(2 * w, 4)}} = ${C("red", tn((dev / (2 * w)) * 100, 4))}\\,\\%`],
+        ]);
+      } else {
+        calc([
+          [L.ckink, `\\frac{f(0 + \\Delta x) - f(0)}{\\Delta x} = \\frac{|\\Delta x|}{\\Delta x} = \\begin{cases} ${C("teal", "+1")}, & \\Delta x > 0\\\\ ${C("red", "-1")}, & \\Delta x < 0 \\end{cases}`],
+          [L.cratio, `w = ${tn(w, 4)}:\\quad \\frac{\\max|f - 0|}{2w} = \\frac{${tn(w, 4)}}{${tn(2 * w, 4)}} = 50\\,\\%`],
+        ]);
+      }
     }
     plot.onresize = draw;
     draw();
@@ -323,6 +410,9 @@
     const ck = clock({ before: () => { if (xc >= P.x[1] - 1e-6) xc = P.x[0]; }, tick: (dt) => { xc = Math.min(P.x[1], xc + dt * (P.x[1] - P.x[0]) / 7); sx.set(xc); draw(); return xc < P.x[1]; }, jump: () => { xc = Math.min(P.x[1], xc + (P.x[1] - P.x[0]) / 6); sx.set(xc); draw(); } });
     ui.controls.append(seg.el, sx.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "f", label: "$f(x)$" }, { key: "d", label: L.slope, c: "orange" }]);
+    const calc = calcPanel(ui);
+    const EXPR = { cubic: ["x^3 - 3x", (x) => `${x}^3 - 3\\cdot ${x}`, "3x^2 - 3", (x) => `3\\cdot ${x}^2 - 3`], sq: ["x^2", (x) => `${x}^2`, "2x", (x) => `2\\cdot ${x}`], sin: ["\\sin x", (x) => `\\sin ${x}`, "\\cos x", (x) => `\\cos ${x}`] };
+    const keyOf = () => Object.keys(BF).find((kk) => BF[kk] === P);
     function draw() {
       const y = P.f(xc), k = d(xc), c = k > 1e-6 ? "teal" : k < -1e-6 ? "red" : "orange";
       p1.clear(); p2.clear();
@@ -339,6 +429,13 @@
       p1.legend([{ label: "$" + P.tex + "$", c: "ink" }, { label: L.slope + " > 0", c: "teal" }, { label: L.slope + " < 0", c: "red" }]);
       p2.legend([{ label: "$f'(x)$", c: "orange" }, { label: L.zeros, c: "orange", dot: true }]);
       ro.set("f", n(y)); ro.set("d", n(k));
+      const E = EXPR[keyOf()], X0 = tn(xc, 3), hs = xc + 0.01 <= P.x[1] ? 0.01 : -0.01, q = (P.f(xc + hs) - y) / hs;
+      calc([
+        [L.cval, `f(x) = ${E[0]} = ${E[1](X0.startsWith("-") ? "(" + X0 + ")" : X0)} = ${tn(y, 5)}`],
+        [L.cdef + ", Δx = " + n(hs, 2), `\\frac{f(x + \\Delta x) - f(x)}{\\Delta x} = \\frac{${tn(P.f(xc + hs), 6)} - ${tn(y, 6)}}{${tn(hs, 2)}} = ${tn(q, 5)}`],
+        [L.cder, `f'(x) = ${E[2]} = ${E[3](X0.startsWith("-") ? "(" + X0 + ")" : X0)} = ${C(c, tn(k, 5))}`],
+        [L.csign, Math.abs(k) < 1e-6 ? `f'(x) = 0:\\ \\text{${L.flatw}}` : k > 0 ? `${C("teal", "f'(x) > 0")}\\ \\Rightarrow\\ f\\ \\text{${L.up}}` : `${C("red", "f'(x) < 0")}\\ \\Rightarrow\\ f\\ \\text{${L.down}}`],
+      ]);
       note(L.buildNote(tn(xc, 3), tn(k, 3)));
     }
     const redraw = () => draw();
@@ -364,6 +461,7 @@
     const ck = clock({ before: () => { if (t >= 4) t = 0; }, tick: (d) => { t = Math.min(4, t + d * 0.8); stt.set(t); draw(); return t < 4; }, jump: () => { t = t >= 4 ? 0 : Math.min(4, t + 0.5); stt.set(t); draw(); } });
     ui.controls.append(stt.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "h", label: L.hgt, c: "orange" }, { key: "v", label: L.vel, c: "blue" }, { key: "a", label: L.acc, c: "red" }]);
+    const calc = calcPanel(ui);
     function draw() {
       const hh = h(t), vv = v(t);
       ball.setAttribute("cy", Y(hh));
@@ -379,6 +477,13 @@
       ph.line(Math.max(0, t - 0.6), hh - vv * Math.min(0.6, t), Math.min(4, t + 0.6), hh + vv * Math.min(0.6, 4 - t), { c: "blue", w: 1.6, dash: true });
       pv.line(Math.max(0, t - 0.6), vv + 10 * Math.min(0.6, t), Math.min(4, t + 0.6), vv - 10 * Math.min(0.6, 4 - t), { c: "red", w: 1.6, dash: true });
       ro.set("h", n(hh, 3)); ro.set("v", n(vv, 3)); ro.set("a", "−10");
+      const T3 = tn(t, 3);
+      calc([
+        [L.ch, `h(t) = 20t - 5t^2 = 20\\cdot ${T3} - 5\\cdot ${T3}^2 = ${C("orange", tn(hh, 5))}${U(L.m)}`],
+        [L.cdef + ", Δt = " + n(0.01), `\\frac{h(t + \\Delta t) - h(t)}{\\Delta t} = 20 - 10t - 5\\,\\Delta t = ${tn(20 - 10 * t - 0.05, 5)} \\approx v(t)`],
+        [L.cv, `v(t) = h'(t) = 20 - 10t = 20 - 10\\cdot ${T3} = ${C("blue", tn(vv, 5))}${U(L.m + "/" + L.sec)}`],
+        [L.ca, `a(t) = v'(t) = h''(t) = \\lim_{\\Delta t \\to 0}\\frac{v(t + \\Delta t) - v(t)}{\\Delta t} = \\frac{-10\\,\\Delta t}{\\Delta t} = ${C("red", "-10")}${U(L.m + "/" + L.sec)}^2`],
+      ]);
       note(L.ballNote(tn(t, 3), tn(hh, 3), tn(vv, 3)));
     }
     ph.onresize = pv.onresize = pa.onresize = draw;
@@ -397,6 +502,7 @@
     ui.controls.append(s1.el, s2.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "x", label: L.turnsX }, { key: "u", label: L.turnsU, c: "teal" }, { key: "y", label: L.turnsY, c: "orange" }, { key: "k", label: "$\\frac{dy}{dx}$", c: "blue" }]);
     let G = [];
+    const calc = calcPanel(ui);
     function gearPath(r, teeth) {
       let d = "";
       const tw = (Math.PI * 2) / teeth;
@@ -425,8 +531,83 @@
       });
       const turns = th / (2 * Math.PI);
       ro.set("x", n(turns, 3)); ro.set("u", n(turns * k1, 3)); ro.set("y", n(turns * k1 * k2, 3)); ro.set("k", n(k1 * k2, 3));
+      const Nx = tn(turns, 3), Nu = tn(turns * k1, 3), Ny = tn(turns * k1 * k2, 3);
+      calc([
+        [L.cturn + ": u", `N_u = \\frac{du}{dx}\\cdot N_x = ${tn(k1, 2)}\\cdot ${Nx} = ${C("teal", Nu)}`],
+        [L.cturn + ": y", `N_y = \\frac{dy}{du}\\cdot N_u = ${tn(k2, 2)}\\cdot ${Nu} = ${C("orange", Ny)}`],
+        [L.cchain, `\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx} = ${tn(k2, 2)}\\cdot ${tn(k1, 2)} = ${C("blue", tn(k1 * k2, 3))}\\qquad \\Big(\\frac{N_y}{N_x} = ${turns > 1e-9 ? tn((turns * k1 * k2) / turns, 3) : tn(k1 * k2, 3)}\\Big)`],
+      ]);
       note(L.gearsNote(tn(k1, 3), tn(k2, 3), tn(k1 * k2, 3)));
     }
     layout(); draw();
+  });
+  // ---------- 8. a shower with two taps: partial derivatives ----------
+  const SH = {
+    ru: { hot: "Горячий кран $h$, л/мин", cold: "Холодный кран $c$, л/мин", turn: "Крутим", tHot: "горячий", tCold: "холодный", temp: "температура $T$, °C",
+      sliceH: "$T$ при замороженном $c$", sliceC: "$T$ при замороженном $h$", hAx: "h, л/мин", cAx: "c, л/мин", mix: "Температура смеси", dh: "Горячий кран (c заморожен)", dc: "Холодный кран (h заморожен)",
+      both: "Крутим оба на 0,1 л/мин", exact: "Точно", grad: "Градиент", note: (T, a, b) => `Сейчас $T = ${T}$ °C. Если повернуть только горячий кран, каждый лишний литр в минуту даёт около $${a}$ °C (наклон левого среза $\\partial T / \\partial h$); только холодный — около $${b}$ °C (наклон правого среза $\\partial T / \\partial c$). Чтобы понять вклад одного крана, второй «замораживают».` },
+    en: { hot: "Hot tap $h$, l/min", cold: "Cold tap $c$, l/min", turn: "Turn", tHot: "hot", tCold: "cold", temp: "temperature $T$, °C",
+      sliceH: "$T$ with $c$ frozen", sliceC: "$T$ with $h$ frozen", hAx: "h, l/min", cAx: "c, l/min", mix: "Mixed temperature", dh: "Hot tap (c frozen)", dc: "Cold tap (h frozen)",
+      both: "Turn both by 0.1 l/min", exact: "Exactly", grad: "Gradient", note: (T, a, b) => `Now $T = ${T}$ °C. Turning only the hot tap, each extra litre per minute adds about $${a}$ °C (the slope of the left slice $\\partial T / \\partial h$); only the cold one, about $${b}$ °C (the slope of the right slice $\\partial T / \\partial c$). To see the effect of one tap, the other one is “frozen”.` },
+    uz: { hot: "Issiq jo‘mrak $h$, l/daq", cold: "Sovuq jo‘mrak $c$, l/daq", turn: "Buraymiz", tHot: "issiq", tCold: "sovuq", temp: "harorat $T$, °C",
+      sliceH: "$c$ muzlatilganda $T$", sliceC: "$h$ muzlatilganda $T$", hAx: "h, l/daq", cAx: "c, l/daq", mix: "Aralashma harorati", dh: "Issiq jo‘mrak (c muzlatilgan)", dc: "Sovuq jo‘mrak (h muzlatilgan)",
+      both: "Ikkalasini 0,1 l/daq ga buraymiz", exact: "Aniq", grad: "Gradiyent", note: (T, a, b) => `Hozir $T = ${T}$ °C. Faqat issiq jo‘mrakni bursak, har bir qo‘shimcha litr/daqiqa taxminan $${a}$ °C beradi (chap kesim qiyaligi $\\partial T / \\partial h$); faqat sovuqni — taxminan $${b}$ °C (o‘ng kesim qiyaligi $\\partial T / \\partial c$). Bitta jo‘mrakning hissasini ko‘rish uchun ikkinchisi «muzlatiladi».` },
+  }[FV.lang] || {};
+  FV.widget("dm-shower", (root) => {
+    const ui = FV.shell(root, { cols: true }), note = noter(ui);
+    const T = (h, c) => (60 * h + 10 * c) / (h + c), Th = (h, c) => (50 * c) / ((h + c) * (h + c)), Tc = (h, c) => (-50 * h) / ((h + c) * (h + c));
+    let h = 2, c = 3, tap = "hot";
+    const c0 = FV.col(ui.stage), c1 = FV.col(ui.stage);
+    c0.classList.add("dm-ball-col");
+    const svg = scene(c0, 160, 300, SH.mix);
+    // the shower: a pipe from both taps, the head and the water coloured by temperature
+    el("path", { d: "M30 270V60h100v210", fill: "none", class: "s-ink", "stroke-width": 4 }, svg);
+    el("path", { d: "M80 60V30h40", fill: "none", class: "s-ink", "stroke-width": 4 }, svg);
+    el("rect", { x: 108, y: 30, width: 34, height: 10, rx: 4, class: "fill-ink" }, svg);
+    const tapH = el("circle", { cx: 30, cy: 250, r: 11, class: "fill-red" }, svg), tapC = el("circle", { cx: 130, cy: 250, r: 11, class: "fill-blue" }, svg);
+    const water = el("g", {}, svg), thermo = el("text", { x: 80, y: 160, "text-anchor": "middle", class: "fv-text dm-big" }, svg);
+    const labH = el("text", { x: 30, y: 292, "text-anchor": "middle", class: "fv-text dm-small t-red" }, svg), labC = el("text", { x: 130, y: 292, "text-anchor": "middle", class: "fv-text dm-small t-blue" }, svg);
+    const p1 = new FV.Plot(c1, { x: [0, 6], y: [8, 62], aspect: 0.45, maxHeight: 190, minHeight: 140, xLabel: SH.hAx, title: SH.sliceH });
+    const p2 = new FV.Plot(c1, { x: [0, 6], y: [8, 62], aspect: 0.45, maxHeight: 190, minHeight: 140, xLabel: SH.cAx, title: SH.sliceC });
+    const sh = FV.ui.slider({ label: SH.hot, min: 0.1, max: 6, step: 0.1, value: h, oninput: (v) => { ck.stop(); h = v; draw(); } });
+    const sc = FV.ui.slider({ label: SH.cold, min: 0.1, max: 6, step: 0.1, value: c, oninput: (v) => { ck.stop(); c = v; draw(); } });
+    const seg = FV.ui.seg({ label: SH.turn, value: tap, options: [{ value: "hot", label: SH.tHot }, { value: "cold", label: SH.tCold }], onchange: (v) => { ck.stop(); tap = v; } });
+    const ck = clock({ before: () => { if (tap === "hot" && h >= 6) h = 0.1; if (tap === "cold" && c >= 6) c = 0.1; },
+      tick: (d) => { if (tap === "hot") { h = Math.min(6, h + d * 1.2); sh.set(h); } else { c = Math.min(6, c + d * 1.2); sc.set(c); } draw(); return (tap === "hot" ? h : c) < 6; },
+      jump: () => { if (tap === "hot") { h = h >= 6 ? 0.1 : Math.min(6, h + 1); sh.set(h); } else { c = c >= 6 ? 0.1 : Math.min(6, c + 1); sc.set(c); } draw(); } });
+    ui.controls.append(sh.el, sc.el, seg.el, ck.el);
+    const ro = FV.ui.readout(ui.readout, [{ key: "T", label: SH.temp, c: "orange" }, { key: "a", label: "$\\partial T / \\partial h$", c: "red" }, { key: "b", label: "$\\partial T / \\partial c$", c: "blue" }]);
+    const calc = calcPanel(ui);
+    function draw() {
+      const t = T(h, c), a = Th(h, c), b = Tc(h, c);
+      // water: colour from blue (10 °C) to red (60 °C), streak count by the flow
+      const k = (t - 10) / 50, col = FV.cmap("diverging", 1 - k);
+      water.textContent = "";
+      const nS = Math.max(2, Math.min(9, Math.round(h + c)));
+      for (let i = 0; i < nS; i++) { const x = 112 + (i * 28) / (nS - 1); el("line", { x1: x, x2: x - 6 + i, y1: 44, y2: 230, stroke: FV.rgb(col, 0.8), "stroke-width": 2.4, "stroke-dasharray": "6 6" }, water); }
+      thermo.textContent = n(t, 3) + " °C";
+      tapH.setAttribute("r", 6 + h * 1.3); tapC.setAttribute("r", 6 + c * 1.3);
+      labH.textContent = "h = " + n(h, 2); labC.textContent = "c = " + n(c, 2);
+      p1.clear(); p1.fn((x) => T(x, c), { c: "red", w: 2.2, from: 0.05 });
+      p1.line(Math.max(0.05, h - 1.2), t - a * Math.min(1.2, h - 0.05), Math.min(6, h + 1.2), t + a * Math.min(1.2, 6 - h), { c: "orange", w: 1.6, dash: true }); p1.dot(h, t, { c: "orange" });
+      p2.clear(); p2.fn((x) => T(h, x), { c: "blue", w: 2.2, from: 0.05 });
+      p2.line(Math.max(0.05, c - 1.2), t - b * Math.min(1.2, c - 0.05), Math.min(6, c + 1.2), t + b * Math.min(1.2, 6 - c), { c: "orange", w: 1.6, dash: true }); p2.dot(c, t, { c: "orange" });
+      ro.set("T", n(t, 4)); ro.set("a", n(a, 4)); ro.set("b", n(b, 4));
+      const H = tn(h, 2), Cc = tn(c, 2), S = tn(h + c, 3), d1 = tn(0.1), t2 = T(h + 0.1, c + 0.1);
+      const qh = (T(h + 0.01, c) - t) / 0.01;
+      calc([
+        [SH.mix, `T(h, c) = \\frac{60h + 10c}{h + c} = \\frac{60\\cdot ${C("red", H)} + 10\\cdot ${C("blue", Cc)}}{${S}} = ${C("orange", tn(t, 5))}\\ ^\\circ\\text{C}`],
+        [SH.dh, `\\frac{\\partial T}{\\partial h} = \\frac{50c}{(h + c)^2} = \\frac{50\\cdot ${Cc}}{${S}^2} = ${C("red", tn(a, 5))}`],
+        [L.cdef + ", Δh = " + n(0.01), `\\frac{T(h + \\Delta h,\\ c) - T(h, c)}{\\Delta h} = \\frac{${tn(T(h + 0.01, c), 6)} - ${tn(t, 6)}}{${tn(0.01)}} = ${tn(qh, 5)}`],
+        [SH.dc, `\\frac{\\partial T}{\\partial c} = -\\frac{50h}{(h + c)^2} = -\\frac{50\\cdot ${H}}{${S}^2} = ${C("blue", tn(b, 5))}`],
+        [SH.both, `dT \\approx \\frac{\\partial T}{\\partial h}\\,\\Delta h + \\frac{\\partial T}{\\partial c}\\,\\Delta c = ${tn(a, 4)}\\cdot ${d1} ${pm(b, 4)}\\cdot ${d1} = ${C("orange", tn((a + b) * 0.1, 4))}`],
+        [SH.exact, `T(h + ${d1},\\ c + ${d1}) - T(h, c) = ${tn(t2, 5)} - ${tn(t, 5)} = ${tn(t2 - t, 4)}`],
+        [SH.grad, `\\nabla T = \\Big(\\frac{\\partial T}{\\partial h}${FV.lang === "en" ? ",\\ " : ";\\ "}\\frac{\\partial T}{\\partial c}\\Big) = (${C("red", tn(a, 4))}${FV.lang === "en" ? ",\\ " : ";\\ "}${C("blue", tn(b, 4))})`],
+      ]);
+      note(SH.note(tn(t, 4), tn(a, 3), tn(b, 3)));
+    }
+    const redraw = () => draw();
+    p1.onresize = p2.onresize = redraw;
+    draw();
   });
 })();

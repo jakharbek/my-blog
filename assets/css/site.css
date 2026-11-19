@@ -867,3 +867,14 @@ main.fx-page { overflow-x: clip; }
 .fv-stage.cols .dm-ball-col { flex: 0 0 170px; max-width: 170px; }
 @media (max-width: 600px) { .fv-stage.cols .dm-ball-col { flex: 1 1 auto; max-width: 200px; margin: 0 auto; } }
 @media (max-width: 520px) { .dm-scene .fv-text, .dm-scene .dm-small { font-size: 22px; } .dm-scene.dm-road-narrow .fv-text, .dm-scene.dm-road-narrow .dm-small { font-size: 15px; } }
+/* the "formulas and calculation" panel under each animation */
+.dm-calc { margin-top: 4px; padding: 12px 14px 6px; border-left: 2px solid var(--accent); border-radius: 0 4px 4px 0; background: var(--card); }
+.dm-calc-title { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg3); margin-bottom: 4px; }
+.dm-calc-row { display: grid; grid-template-columns: minmax(110px, 170px) 1fr; gap: 4px 14px; align-items: center; padding: 4px 0; border-top: 1px dashed var(--line); }
+.dm-calc-row:first-child { border-top: 0; }
+.dm-calc-lab { font-size: 13px; color: var(--fg3); }
+.dm-calc-eq { min-width: 0; overflow-x: auto; overflow-y: hidden; }
+.dm-calc-eq .katex-display { margin: .35em 0; text-align: left; }
+.dm-calc-eq .katex-display > .katex { text-align: left; }
+@media (max-width: 600px) { .dm-calc-row { grid-template-columns: 1fr; } .dm-calc-eq { font-size: .9em; } }
+.dm-scene .dm-big { font-size: 18px; font-weight: 600; }
