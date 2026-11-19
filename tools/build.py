@@ -1305,9 +1305,9 @@ CARD_ORDER = [c["id"] for g in formulas.GROUPS for c in g["cards"]]
 CARD = {c["id"]: (g, c) for g in formulas.GROUPS for c in g["cards"]}
 
 FX_UI = {
-    "ru": dict(ex="Пример", goal="Цель примера", take="Что показал пример", sheet="Шпаргалка", prev="← Предыдущая формула", next="Следующая формула →", toc="Содержание", min="мин чтения", quiz_right="Верно.", quiz_wrong="Не совсем.", sol="Решение", ans="Ответ", level="Сложность", steps=lambda k: "шаг" if k % 10 == 1 and k % 100 != 11 else "шага" if 2 <= k % 10 <= 4 and not 12 <= k % 100 <= 14 else "шагов"),
-    "en": dict(ex="Example", goal="The goal", take="What the example shows", sheet="Cheat sheet", prev="← Previous formula", next="Next formula →", toc="Contents", min="min read", quiz_right="Correct.", quiz_wrong="Not quite.", sol="Solution", ans="Answer", level="Difficulty", steps=lambda k: "step" if k == 1 else "steps"),
-    "uz": dict(ex="Misol", goal="Misolning maqsadi", take="Misol nimani ko‘rsatdi", sheet="Qo‘llanma", prev="← Oldingi formula", next="Keyingi formula →", toc="Mundarija", min="daq o‘qish", quiz_right="To‘g‘ri.", quiz_wrong="Unchalik emas.", sol="Yechim", ans="Javob", level="Qiyinlik", steps=lambda k: "qadam"),
+    "ru": dict(ex="Пример", goal="Цель примера", take="Что показал пример", sheet="Шпаргалка", prev="← Предыдущая формула", next="Следующая формула →", toc="Содержание", min="мин чтения", quiz_right="Верно.", quiz_wrong="Не совсем.", no="№", sol="Решение", ans="Ответ", level="Сложность", steps=lambda k: "шаг" if k % 10 == 1 and k % 100 != 11 else "шага" if 2 <= k % 10 <= 4 and not 12 <= k % 100 <= 14 else "шагов"),
+    "en": dict(ex="Example", goal="The goal", take="What the example shows", sheet="Cheat sheet", prev="← Previous formula", next="Next formula →", toc="Contents", min="min read", quiz_right="Correct.", quiz_wrong="Not quite.", no="No.", sol="Solution", ans="Answer", level="Difficulty", steps=lambda k: "step" if k == 1 else "steps"),
+    "uz": dict(ex="Misol", goal="Misolning maqsadi", take="Misol nimani ko‘rsatdi", sheet="Qo‘llanma", prev="← Oldingi formula", next="Keyingi formula →", toc="Mundarija", min="daq o‘qish", quiz_right="To‘g‘ri.", quiz_wrong="Unchalik emas.", no="№", sol="Yechim", ans="Javob", level="Qiyinlik", steps=lambda k: "qadam"),
 }
 
 
@@ -1323,7 +1323,8 @@ def attr_json(data):
 
 
 GREEK = {"alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "eta": "η", "theta": "θ", "lambda": "λ", "mu": "μ", "sigma": "σ", "phi": "φ",
-         "Sigma": "Σ", "pi": "π", "nabla": "∇", "partial": "∂", "cdot": "·", "top": "ᵀ", "lVert": "‖", "rVert": "‖", "approx": "≈", "ge": "≥", "le": "≤", "to": "→", "times": "×"}
+         "Sigma": "Σ", "pi": "π", "nabla": "∇", "partial": "∂", "cdot": "·", "top": "ᵀ", "lVert": "‖", "rVert": "‖", "approx": "≈", "ge": "≥", "le": "≤", "to": "→", "times": "×",
+         "Delta": "Δ", "epsilon": "ε", "varepsilon": "ε", "varphi": "φ", "tau": "τ", "ne": "≠", "infty": "∞", "circ": "∘", "sum": "Σ", "lim": "lim "}
 SUBSCRIPT = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
 
 
@@ -1332,12 +1333,19 @@ def tex_plain(src):
     def one(m):
         t = m.group(1)
         t = re.sub(r"\\(?:mathrm|mathbf|operatorname|text)\{([^{}]*)\}", r"{\1}", t)
-        t = re.sub(r"\\frac\{([^{}]*)\}\{([^{}]*)\}", r"\1/\2", t)
+        t = re.sub(r"\\(?:,|;|!|quad|qquad)|\\ ", " ", t).replace(r"\left", "").replace(r"\right", "")
+        t = re.sub(r"\\(?:big|Big)\b", "", t)
+        t = re.sub(r"\\sqrt\{([^{}]*)\}", r"√(\1)", t)
+        grp = lambda v: v if re.fullmatch(r"[\w.]+", v.strip()) else f"({v})"
+        t = re.sub(r"\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}", lambda k: grp(k.group(1)) + "/" + grp(k.group(2)), t)
+        t = re.sub(r"\\[dt]?frac(\d)(\d)", r"\1/\2", t)
+        t = re.sub(r"\^\{([^{}]{2,})\}", r"^(\1)", t)
+        t = re.sub(r"\^\{?([0-9])\}?", lambda k: "⁰¹²³⁴⁵⁶⁷⁸⁹"[int(k.group(1))], t)
         t = re.sub(r"\\hat\s*\{?y\}?", "ŷ", t)
         t = re.sub(r"\\tilde\s*\{?([A-Za-z])\}?", "\\1\u0303", t)
         t = re.sub(r"\\([A-Za-z]+)", lambda k: GREEK.get(k.group(1), k.group(1) + " "), t)
         t = re.sub(r"_\{?([0-9])\}?", lambda k: k.group(1).translate(SUBSCRIPT), t)
-        t = re.sub(r"_\{?i\}?", "ᵢ", t).replace("^2", "²").replace("^{2}", "²")
+        t = re.sub(r"_\{?i\}?", "ᵢ", t)
         return re.sub(r"\s+", " ", re.sub(r"[{}\\]", "", t)).strip()
     return re.sub(r"<[^>]+>", "", re.sub(r"\$([^$]+)\$", one, src)).strip()
 
@@ -1399,8 +1407,8 @@ def render_blocks(blocks, lang, ind="    "):
             stars = "★" * d["level"] + "☆" * (5 - d["level"])
             steps = render_blocks([("steps", d["steps"])], lang, "")
             note = f'<p class="cr-note">{d["note"]}</p>' if d.get("note") else ""
-            out.append(f'<article class="cr-drill" id="drill-{d["n"]}"><header class="cr-drill-head"><span class="cr-drill-n">№ {d["n"]}</span>'
-                       f'<span class="cr-stars" role="img" aria-label="{ui["level"]} {d["level"]}/5">{stars}</span></header>'
+            out.append(f'<article class="cr-drill" id="drill-{d["n"]}" aria-labelledby="drill-{d["n"]}-n"><header class="cr-drill-head"><span class="cr-drill-n" id="drill-{d["n"]}-n">{ui["no"]} {d["n"]}</span>'
+                       f'<span class="cr-stars" role="img" aria-label="{ui["level"]} {d["level"]}/5" title="{ui["level"]} {d["level"]}/5">{stars}</span></header>'
                        f'<p class="cr-task">{d["task"]}</p><div class="eqd">{tex(d["f"])}</div>'
                        f'<details class="cr-sol"><summary>{ui["sol"]} · {len(d["steps"])} {ui["steps"](len(d["steps"]))}</summary>{steps}{note}'
                        f'<div class="cr-ans"><b>{ui["ans"]}</b><div class="eqd">{tex(d["ans"])}</div></div></details></article>')

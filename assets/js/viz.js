@@ -133,11 +133,14 @@
   // "Вес $w_1$" → "Вес w₁": a readable text name for controls whose visible label is a formula
   const SUBS = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉" };
   const SUPS = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹", "-": "⁻" };
-  const GREEK = { alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", eta: "η", theta: "θ", lambda: "λ", mu: "μ", sigma: "σ", tau: "τ", phi: "φ", Phi: "Φ", Sigma: "Σ", pi: "π", nabla: "∇", partial: "∂", infty: "∞", cdot: "·", times: "×", top: "ᵀ", ge: "≥", le: "≤", approx: "≈", lVert: "‖", rVert: "‖", to: "→" };
+  const GREEK = { alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", eta: "η", theta: "θ", lambda: "λ", mu: "μ", sigma: "σ", tau: "τ", phi: "φ", Phi: "Φ", Sigma: "Σ", pi: "π", nabla: "∇", partial: "∂", infty: "∞", cdot: "·", times: "×", top: "ᵀ", ge: "≥", le: "≤", approx: "≈", lVert: "‖", rVert: "‖", to: "→", Delta: "Δ", varepsilon: "ε", varphi: "φ", ne: "≠", circ: "∘", sum: "Σ", lim: "lim " };
   FV.plain = function (str) {
     return String(str).replace(/\$([^$]+)\$/g, (_, t) => t
       .replace(/\\(?:mathrm|mathbf|operatorname|text|boldsymbol)\{([^{}]*)\}/g, "{$1}")
-      .replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, "$1/$2")
+      .replace(/\\(?:,|;|!|quad|qquad)|\\ /g, " ").replace(/\\(?:left|right|big|Big)\b/g, "")
+      .replace(/\\sqrt\{([^{}]*)\}/g, "√($1)")
+      .replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g, (_, a, b) => [a, b].map((v) => (/^[\w.]+$/.test(v.trim()) ? v : "(" + v + ")")).join("/"))
+      .replace(/\^\{([^{}]{2,})\}/g, "^($1)")
       .replace(/\\hat\s*\{?y\}?/g, "ŷ")
       .replace(/\\([A-Za-z]+)/g, (m, w) => (GREEK[w] != null ? GREEK[w] : w + " "))
       .replace(/_\{?([0-9])\}?/g, (m, d) => SUBS[d])
@@ -813,7 +816,13 @@
     if (!fn) { console.error("FV: unknown widget " + name); el.textContent = FV.t("error"); return; }
     try { fn(el, cfg); } catch (e) { console.error("FV " + name, e); el.textContent = FV.t("error"); return; }
     const fig = el.closest("figure"), cap = fig && fig.querySelector("figcaption");
-    const alt = cap ? FV.plain(cap.textContent).slice(0, 220) : FV.plain(name);
+    let alt = FV.plain(name);
+    if (cap) {
+      // once KaTeX has rendered the caption, read every formula back from its TeX source
+      const c = cap.cloneNode(true);
+      c.querySelectorAll(".katex").forEach((k) => { const a = k.querySelector("annotation"); k.replaceWith("$" + (a ? a.textContent : k.textContent) + "$"); });
+      alt = FV.plain(c.textContent).replace(/\s+/g, " ").slice(0, 220);
+    }
     el.querySelectorAll('svg[role="img"], canvas[role="img"], svg[role="group"]').forEach((g) => { if (!g.getAttribute("aria-label")) g.setAttribute("aria-label", alt); });
   }
   FV.boot = function () {
