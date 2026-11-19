@@ -55,9 +55,9 @@
       if (s.includes(DEC)) s = s.replace(new RegExp("\\" + DEC + "?0+$"), "");
       return s;
     }
-    const e = Math.floor(Math.log10(a));
-    const m = v / Math.pow(10, e);
-    const ms = FV.fmt(m, sig - 1).replace(new RegExp("\\" + DEC + "?0+$"), "");
+    let e = Math.floor(Math.log10(a));
+    let ms = FV.fmt(v / Math.pow(10, e), sig - 1).replace(new RegExp("\\" + DEC + "?0+$"), "");
+    if (Math.abs(+ms.replace("−", "-").replace(DEC, ".")) >= 10) { e += 1; ms = FV.fmt(v / Math.pow(10, e), sig - 1).replace(new RegExp("\\" + DEC + "?0+$"), ""); }
     return ms + "·10" + String(e).split("").map((c) => SUP[c]).join("");
   };
   FV.clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -133,11 +133,14 @@
   // "Вес $w_1$" → "Вес w₁": a readable text name for controls whose visible label is a formula
   const SUBS = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉" };
   const SUPS = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹", "-": "⁻" };
-  const GREEK = { alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", eta: "η", theta: "θ", lambda: "λ", mu: "μ", sigma: "σ", tau: "τ", phi: "φ", Phi: "Φ", Sigma: "Σ", pi: "π", nabla: "∇", partial: "∂", infty: "∞", cdot: "·", times: "×", top: "ᵀ", ge: "≥", le: "≤", approx: "≈", lVert: "‖", rVert: "‖", to: "→" };
+  const GREEK = { alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", eta: "η", theta: "θ", lambda: "λ", mu: "μ", sigma: "σ", tau: "τ", phi: "φ", Phi: "Φ", Sigma: "Σ", pi: "π", nabla: "∇", partial: "∂", infty: "∞", cdot: "·", times: "×", top: "ᵀ", ge: "≥", le: "≤", approx: "≈", lVert: "‖", rVert: "‖", to: "→", Delta: "Δ", varepsilon: "ε", varphi: "φ", ne: "≠", circ: "∘", sum: "Σ", lim: "lim " };
   FV.plain = function (str) {
     return String(str).replace(/\$([^$]+)\$/g, (_, t) => t
       .replace(/\\(?:mathrm|mathbf|operatorname|text|boldsymbol)\{([^{}]*)\}/g, "{$1}")
-      .replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, "$1/$2")
+      .replace(/\\(?:,|;|!|quad|qquad)|\\ /g, " ").replace(/\\(?:left|right|big|Big)\b/g, "")
+      .replace(/\\sqrt\{([^{}]*)\}/g, "√($1)")
+      .replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g, (_, a, b) => [a, b].map((v) => (/^[\w.]+$/.test(v.trim()) ? v : "(" + v + ")")).join("/"))
+      .replace(/\^\{([^{}]{2,})\}/g, "^($1)")
       .replace(/\\hat\s*\{?y\}?/g, "ŷ")
       .replace(/\\([A-Za-z]+)/g, (m, w) => (GREEK[w] != null ? GREEK[w] : w + " "))
       .replace(/_\{?([0-9])\}?/g, (m, d) => SUBS[d])
@@ -506,7 +509,7 @@
       const up = () => { drag = false; g.classList.remove("active"); };
       g.addEventListener("pointerup", up); g.addEventListener("pointercancel", up);
       g.addEventListener("keydown", (e) => {
-        const sx = (plot.o.x[1] - plot.o.x[0]) / 100, sy = (plot.o.y[1] - plot.o.y[0]) / 100;
+        const sx = o.step ? o.step[0] : (plot.o.x[1] - plot.o.x[0]) / 100, sy = o.step ? o.step[1] : (plot.o.y[1] - plot.o.y[0]) / 100;
         const d = { ArrowLeft: [-sx, 0], ArrowRight: [sx, 0], ArrowUp: [0, sy], ArrowDown: [0, -sy] }[e.key];
         if (d) { e.preventDefault(); apply(h.x + d[0], h.y + d[1]); }
       });
@@ -742,11 +745,12 @@
       const api = {
         el: FV.h("label", { class: "fv-slider" + (o.wide ? " wide" : "") }, FV.rich(o.label, "span"), input, out),
         get value() { return o.map ? o.map(+input.value) : +input.value; },
-        set(v) { input.value = o.unmap ? o.unmap(v) : v; out.textContent = fmt(api.value); },
+        set(v) { input.value = o.unmap ? o.unmap(v) : v; out.textContent = fmt(api.value); input.setAttribute("aria-valuetext", out.textContent); },
         input,
       };
       out.textContent = fmt(api.value);
-      input.addEventListener("input", () => { out.textContent = fmt(api.value); o.oninput && o.oninput(api.value); });
+      input.setAttribute("aria-valuetext", out.textContent);
+      input.addEventListener("input", () => { out.textContent = fmt(api.value); input.setAttribute("aria-valuetext", out.textContent); o.oninput && o.oninput(api.value); });
       return api;
     },
     seg(o) {
@@ -813,7 +817,13 @@
     if (!fn) { console.error("FV: unknown widget " + name); el.textContent = FV.t("error"); return; }
     try { fn(el, cfg); } catch (e) { console.error("FV " + name, e); el.textContent = FV.t("error"); return; }
     const fig = el.closest("figure"), cap = fig && fig.querySelector("figcaption");
-    const alt = cap ? FV.plain(cap.textContent).slice(0, 220) : FV.plain(name);
+    let alt = FV.plain(name);
+    if (cap) {
+      // once KaTeX has rendered the caption, read every formula back from its TeX source
+      const c = cap.cloneNode(true);
+      c.querySelectorAll(".katex").forEach((k) => { const a = k.querySelector("annotation"); k.replaceWith("$" + (a ? a.textContent : k.textContent) + "$"); });
+      alt = FV.plain(c.textContent).replace(/\s+/g, " ").slice(0, 220);
+    }
     el.querySelectorAll('svg[role="img"], canvas[role="img"], svg[role="group"]').forEach((g) => { if (!g.getAttribute("aria-label")) g.setAttribute("aria-label", alt); });
   }
   FV.boot = function () {

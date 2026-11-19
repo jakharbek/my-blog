@@ -41,6 +41,9 @@ tools/content_forward.py   статья «Формула Forward Pass» (ru, en,
 tools/content_chain.py     статья «Цепное правило» (ru, en, uz): определение, доказательство, одна и несколько переменных,
                            10 разборов; формулы проверяет SymPy: python3 tools/content_chain.py; рисунки — assets/js/chain.js
 tools/chain_drills.py      56 примеров практикума с решениями по шагам (ru, en, uz); проверка: python3 tools/chain_drills.py
+tools/content_deriv.py     статья «Производная, частная производная и градиент» (ru, en, uz): всё по определению, 11 разборов;
+                           проверка: python3 tools/content_deriv.py; рисунки — assets/js/deriv.js
+tools/deriv_drills.py      46 примеров практикума, решённых по определению (ru, en, uz); проверка: python3 tools/deriv_drills.py
 tools/content_neuron.py    статья «Формула одного нейрона» (ru, en, uz) в блоках страниц формул; числа проверяют check_numbers()
                            и check_practice() (17 примеров раздела «Практикум», блок "example" в build.render_blocks):
                            python3 tools/content_neuron.py
