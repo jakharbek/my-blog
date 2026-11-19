@@ -84,11 +84,14 @@
     ui.note.setAttribute("aria-live", "off");
     const live = FV.h("div", { class: "sr-only", "aria-live": "polite" });
     ui.root.append(live);
-    let t = 0, last = "";
+    let t = 0, last = "", armed = false;
+    // announcements start only after the user does something inside the figure (not on load or resize)
+    ["pointerdown", "keydown", "input"].forEach((e) => ui.root.addEventListener(e, () => { armed = true; }, { capture: true }));
     return (s) => {
+      if (s === last) return;
       ui.note.textContent = ""; ui.note.append(FV.rich(s, "span"));
       last = s; clearTimeout(t);
-      t = setTimeout(() => { live.textContent = FV.plain(last); }, 600);
+      if (armed) t = setTimeout(() => { live.textContent = FV.plain(last); }, 600);
     };
   }
   // Play/pause: the label says what a press will do; the glyph is decoration.

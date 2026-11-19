@@ -532,7 +532,7 @@
         [L.ch, `h(t) = 20t - 5t^2 = 20\\cdot ${T3} - 5\\cdot ${T3}^2 = ${C("orange", tn(hh, 5))}${U(L.m)}`],
         [L.cdef + ", Δt = " + n(0.01), `\\frac{h(t + \\Delta t) - h(t)}{\\Delta t} = 20 - 10t - 5\\,\\Delta t = ${tn(20 - 10 * t - 0.05, 5)} \\approx v(t)`],
         [L.cv, `v(t) = h'(t) = 20 - 10t = 20 - 10\\cdot ${T3} = ${C("blue", tn(vv, 5))}${U(L.m + "/" + L.sec)}`],
-        [L.ca, `a(t) = v'(t) = h''(t) = \\lim_{\\Delta t \\to 0}\\frac{v(t + \\Delta t) - v(t)}{\\Delta t} = \\frac{-10\\,\\Delta t}{\\Delta t} = ${C("red", "-10")}${U(L.m + "/" + L.sec)}^2`],
+        [L.ca, `a(t) = v'(t) = h''(t) = \\lim_{\\Delta t \\to 0}\\frac{v(t + \\Delta t) - v(t)}{\\Delta t} = \\lim_{\\Delta t \\to 0}\\frac{-10\\,\\Delta t}{\\Delta t} = ${C("red", "-10")}${U(L.m + "/" + L.sec)}^2`],
       ]);
       note(L.ballNote(tn(t, 3), tn(hh, 3), tn(vv, 3)));
     }
@@ -612,13 +612,13 @@
   const SH = {
     ru: { hot: "Горячий кран $h$, л/мин", cold: "Холодный кран $c$, л/мин", turn: "Крутим", tHot: "горячий", tCold: "холодный", temp: "температура $T$, °C",
       sliceH: "$T$ при замороженном $c$", sliceC: "$T$ при замороженном $h$", hAx: "h, л/мин", cAx: "c, л/мин", mix: "Температура смеси", dh: "Горячий кран (c заморожен)", dc: "Холодный кран (h заморожен)",
-      both: "Крутим оба на 0,1 л/мин", exact: "Точно", grad: "Градиент", note: (T, a, b) => `Сейчас $T = ${T}$ °C. Если повернуть только горячий кран, каждый лишний литр в минуту даёт около $${a}$ °C (наклон левого среза $\\partial T / \\partial h$); только холодный — около $${b}$ °C (наклон правого среза $\\partial T / \\partial c$). Чтобы понять вклад одного крана, второй «замораживают».` },
+      both: "Крутим оба на 0,1 л/мин", exact: "Точно", grad: "Градиент", note: (T, a, b) => `Сейчас $T = ${T}$ °C. Если повернуть только горячий кран, каждый лишний литр в минуту даёт около $${a}$ °C (наклон верхнего среза $\\partial T / \\partial h$); только холодный — около $${b}$ °C (наклон нижнего среза $\\partial T / \\partial c$). Чтобы понять вклад одного крана, второй «замораживают».` },
     en: { hot: "Hot tap $h$, l/min", cold: "Cold tap $c$, l/min", turn: "Turn", tHot: "hot", tCold: "cold", temp: "temperature $T$, °C",
       sliceH: "$T$ with $c$ frozen", sliceC: "$T$ with $h$ frozen", hAx: "h, l/min", cAx: "c, l/min", mix: "Mixed temperature", dh: "Hot tap (c frozen)", dc: "Cold tap (h frozen)",
-      both: "Turn both by 0.1 l/min", exact: "Exactly", grad: "Gradient", note: (T, a, b) => `Now $T = ${T}$ °C. Turning only the hot tap, each extra litre per minute adds about $${a}$ °C (the slope of the left slice $\\partial T / \\partial h$); only the cold one, about $${b}$ °C (the slope of the right slice $\\partial T / \\partial c$). To see the effect of one tap, the other one is “frozen”.` },
+      both: "Turn both by 0.1 l/min", exact: "Exactly", grad: "Gradient", note: (T, a, b) => `Now $T = ${T}$ °C. Turning only the hot tap, each extra litre per minute adds about $${a}$ °C (the slope of the upper slice $\\partial T / \\partial h$); only the cold one, about $${b}$ °C (the slope of the lower slice $\\partial T / \\partial c$). To see the effect of one tap, the other one is “frozen”.` },
     uz: { hot: "Issiq jo‘mrak $h$, l/daq", cold: "Sovuq jo‘mrak $c$, l/daq", turn: "Buraymiz", tHot: "issiq", tCold: "sovuq", temp: "harorat $T$, °C",
       sliceH: "$c$ muzlatilganda $T$", sliceC: "$h$ muzlatilganda $T$", hAx: "h, l/daq", cAx: "c, l/daq", mix: "Aralashma harorati", dh: "Issiq jo‘mrak (c muzlatilgan)", dc: "Sovuq jo‘mrak (h muzlatilgan)",
-      both: "Ikkalasini 0,1 l/daq ga buraymiz", exact: "Aniq", grad: "Gradiyent", note: (T, a, b) => `Hozir $T = ${T}$ °C. Faqat issiq jo‘mrakni bursak, har bir qo‘shimcha litr/daqiqa taxminan $${a}$ °C beradi (chap kesim qiyaligi $\\partial T / \\partial h$); faqat sovuqni — taxminan $${b}$ °C (o‘ng kesim qiyaligi $\\partial T / \\partial c$). Bitta jo‘mrakning hissasini ko‘rish uchun ikkinchisi «muzlatiladi».` },
+      both: "Ikkalasini 0,1 l/daq ga buraymiz", exact: "Aniq", grad: "Gradiyent", note: (T, a, b) => `Hozir $T = ${T}$ °C. Faqat issiq jo‘mrakni bursak, har bir qo‘shimcha litr/daqiqa taxminan $${a}$ °C beradi (yuqori kesim qiyaligi $\\partial T / \\partial h$); faqat sovuqni — taxminan $${b}$ °C (pastki kesim qiyaligi $\\partial T / \\partial c$). Bitta jo‘mrakning hissasini ko‘rish uchun ikkinchisi «muzlatiladi».` },
   }[FV.lang] || {};
   FV.widget("dm-shower", (root) => {
     const ui = FV.shell(root, { cols: true }), note = noter(ui);
@@ -649,7 +649,7 @@
     function draw() {
       const t = T(h, c), a = Th(h, c), b = Tc(h, c);
       // water: colour from blue (10 °C) to red (60 °C), streak count by the flow
-      const k = (t - 10) / 50, col = FV.cmap("diverging", 1 - k);
+      const k = (t - 10) / 50, col = FV.cmap("diverging", FV.clamp(k, 0, 1));
       water.textContent = "";
       const nS = Math.max(2, Math.min(9, Math.round(h + c)));
       for (let i = 0; i < nS; i++) { const x = 112 + (i * 28) / (nS - 1); el("line", { x1: x, x2: x - 6 + i, y1: 44, y2: 230, stroke: FV.rgb(col, 0.8), "stroke-width": 2.4, "stroke-dasharray": "6 6" }, water); }
