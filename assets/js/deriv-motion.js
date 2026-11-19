@@ -30,7 +30,7 @@
       hgt: "высота $h$, м", vel: "скорость $v = h'$, м/с", acc: "ускорение $a = h''$, м/с²", tsec: "t, с",
       ballNote: (t, h, v) => `$t = ${t}$ с: высота $h = ${h}$ м, скорость $v = h'(t) = 20 - 10t = ${v}$ м/с (стрелка). Скорость — наклон графика высоты, ускорение $a = v'(t) = h''(t) = -10$ м/с² — наклон графика скорости. В верхней точке ($t = 2$ с) касательная горизонтальна: $v = 0$.`,
       k1: "$\\frac{du}{dx}$ — передача первой пары", k2: "$\\frac{dy}{du}$ — передача второй пары", turnsX: "обороты $x$", turnsU: "обороты $u$", turnsY: "обороты $y$",
-      gearsNote: (a, b, c) => `За один оборот первой шестерни ($x$) число оборотов второй ($u$) — $${a}$, третьей ($y$) — $${a} \\cdot ${b} = ${c}$. Передаточные числа перемножаются: $\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx}$. Это и есть цепное правило; маленькая шестерня крутится быстрее большой.`,
+      gearsNote: (a, b, c) => `За один оборот первой шестерни ($x$) число оборотов второй ($u$) — $${a}$, третьей ($y$) — $${a} \\cdot ${b} = ${c}$. Передаточные числа перемножаются: $\\frac{dy}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx}$. Это и есть цепное правило; маленькая шестерня крутится быстрее большой.`,
     },
     en: {
       calc: "Formulas and calculation", cdef: "From the definition", cavg: "Average speeds", cinc: "Increment of distance", cavg1: "Average speed over the interval", cinst: "Instantaneous speed (the derivative)", cgap: "Difference", cvol: "Water volume", carea: "Water surface area", crate: "Rate of rise", csmall: "Over a short time", cpoint: "At the point", ctan: "Tangent", cdev: "Deviation from the tangent", cratio: "Share of the window width", ckink: "The kink at zero", cval: "Value", cder: "Derivative", csign: "Sign", up: "increases", down: "decreases", flatw: "horizontal tangent", ch: "Height", cv: "Velocity", ca: "Acceleration (second derivative)", cturn: "Turns", cchain: "The chain rule", cm: "cm", sec: "s", devh: "deviation from the horizontal / window", left: "left", right: "right",
@@ -50,7 +50,7 @@
       hgt: "height $h$, m", vel: "velocity $v = h'$, m/s", acc: "acceleration $a = h''$, m/s²", tsec: "t, s",
       ballNote: (t, h, v) => `$t = ${t}$ s: height $h = ${h}$ m, velocity $v = h'(t) = 20 - 10t = ${v}$ m/s (the arrow). Velocity is the slope of the height graph; acceleration $a = v'(t) = h''(t) = -10$ m/s² is the slope of the velocity graph. At the top ($t = 2$ s) the tangent is horizontal: $v = 0$.`,
       k1: "$\\frac{du}{dx}$ — ratio of the first pair", k2: "$\\frac{dy}{du}$ — ratio of the second pair", turnsX: "turns of $x$", turnsU: "turns of $u$", turnsY: "turns of $y$",
-      gearsNote: (a, b, c) => `Per turn of the first gear ($x$), the number of turns of the second ($u$) is $${a}$, of the third ($y$) $${a} \\cdot ${b} = ${c}$. The gear ratios multiply: $\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx}$. That is the chain rule; a small gear spins faster than a big one.`,
+      gearsNote: (a, b, c) => `Per turn of the first gear ($x$), the number of turns of the second ($u$) is $${a}$, of the third ($y$) $${a} \\cdot ${b} = ${c}$. The gear ratios multiply: $\\frac{dy}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx}$. That is the chain rule; a small gear spins faster than a big one.`,
     },
     uz: {
       calc: "Formulalar va hisob", cdef: "Ta’rif bo‘yicha", cavg: "O‘rtacha tezliklar", cinc: "Yo‘l orttirmasi", cavg1: "Oraliqdagi o‘rtacha tezlik", cinst: "Oniy tezlik (hosila)", cgap: "Farq", cvol: "Suv hajmi", carea: "Suv sirtining yuzi", crate: "Ko‘tarilish tezligi", csmall: "Qisqa vaqt ichida", cpoint: "Nuqtada", ctan: "Urinma", cdev: "Urinmadan og‘ish", cratio: "Oyna kengligidagi ulushi", ckink: "Noldagi sinish", cval: "Qiymat", cder: "Hosila", csign: "Ishora", up: "o‘sadi", down: "kamayadi", flatw: "urinma gorizontal", ch: "Balandlik", cv: "Tezlik", ca: "Tezlanish (ikkinchi hosila)", cturn: "Aylanishlar", cchain: "Zanjir qoidasi", cm: "sm", sec: "s", devh: "gorizontaldan og‘ish / oyna", left: "chapda", right: "o‘ngda",
@@ -70,55 +70,93 @@
       hgt: "balandlik $h$, m", vel: "tezlik $v = h'$, m/s", acc: "tezlanish $a = h''$, m/s²", tsec: "t, s",
       ballNote: (t, h, v) => `$t = ${t}$ s: balandlik $h = ${h}$ m, tezlik $v = h'(t) = 20 - 10t = ${v}$ m/s (strelka). Tezlik — balandlik grafigining qiyaligi, tezlanish $a = v'(t) = h''(t) = -10$ m/s² — tezlik grafigining qiyaligi. Eng yuqori nuqtada ($t = 2$ s) urinma gorizontal: $v = 0$.`,
       k1: "$\\frac{du}{dx}$ — birinchi juft uzatmasi", k2: "$\\frac{dy}{du}$ — ikkinchi juft uzatmasi", turnsX: "$x$ aylanishlari", turnsU: "$u$ aylanishlari", turnsY: "$y$ aylanishlari",
-      gearsNote: (a, b, c) => `Birinchi tishli g‘ildirak ($x$) bir marta aylanadi — ikkinchisi ($u$) $${a}$ marta, uchinchisi ($y$) $${a} \\cdot ${b} = ${c}$ marta. Uzatish sonlari ko‘paytiriladi: $\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx}$. Bu zanjir qoidasi; kichik g‘ildirak kattasidan tezroq aylanadi.`,
+      gearsNote: (a, b, c) => `Birinchi tishli g‘ildirak ($x$) bir marta aylanadi — ikkinchisi ($u$) $${a}$ marta, uchinchisi ($y$) $${a} \\cdot ${b} = ${c}$ marta. Uzatish sonlari ko‘paytiriladi: $\\frac{dy}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx}$. Bu zanjir qoidasi; kichik g‘ildirak kattasidan tezroq aylanadi.`,
     },
   }[FV.lang] || {};
 
   const S = FV.svg;
   const n = (v, d = 3) => FV.num(Math.abs(v) < 1e-9 ? 0 : v, d);
-  const tn = (v, d = 3) => n(v, d).replace("−", "-").replace(",", "{,}");
+  // a number for TeX: a·10ⁿ becomes a\cdot 10^{n}, every decimal comma becomes {,}
+  const SUPD = { "⁻": "-", "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9" };
+  const tn = (v, d = 3) => {
+    let s = n(v, d);
+    const m = s.match(/^(.*)·10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)$/);
+    if (m) s = m[1] + "\\cdot 10^{" + m[2].replace(/./g, (c) => SUPD[c]) + "}";
+    return s.replace(/−/g, "-").replace(/,/g, "{,}");
+  };
   const reduced = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // the note is redrawn every frame; a hidden live region announces it calmly after the motion stops
+  // Run fn at most every ~120 ms, always with the latest argument (the last call is never lost).
+  function throttled(fn, ms = 120) {
+    let last = 0, timer = 0, pending;
+    return (arg) => {
+      pending = arg;
+      const now = performance.now();
+      if (now - last >= ms) { last = now; clearTimeout(timer); fn(arg); }
+      else { clearTimeout(timer); timer = setTimeout(() => { last = performance.now(); fn(pending); }, ms); }
+    };
+  }
+  // The note under a figure follows the motion; screen readers get one short announcement after the user stops changing
+  // things (never on load or on resize).
   function noter(ui) {
     ui.note.setAttribute("aria-live", "off");
     const live = FV.h("div", { class: "sr-only", "aria-live": "polite" });
     ui.root.append(live);
-    let t = 0, last = "";
-    return (s) => { ui.note.textContent = ""; ui.note.append(FV.rich(s, "span")); last = s; clearTimeout(t); t = setTimeout(() => { live.textContent = FV.plain(last); }, 700); };
+    let t = 0, last = "", armed = false;
+    const show = throttled((s) => { ui.note.textContent = ""; ui.note.append(FV.rich(s, "span")); });
+    const api = (s) => {
+      if (s === last) return;
+      last = s; show(s);
+      if (!armed) return;
+      clearTimeout(t); t = setTimeout(() => { live.textContent = FV.plain(last); }, 900);
+    };
+    // the first user interaction inside the widget arms the announcements
+    ["pointerdown", "keydown", "input"].forEach((e) => ui.root.addEventListener(e, () => { armed = true; }, { capture: true }));
+    return api;
   }
-  // A clock driving an animation: value v runs from a to b in `secs` seconds; requestAnimationFrame, stops on hidden tab.
+  // Clocks: requestAnimationFrame; every running clock stops when the tab is hidden or its widget leaves the screen.
+  const running = new Set();
+  document.addEventListener("visibilitychange", () => { if (document.hidden) running.forEach((c) => c.stop()); });
   function clock(o) {
     let raf = 0, last = 0;
-    const btn = FV.ui.button({ label: "", primary: true, onclick: () => (raf ? stop() : start()) });
+    const btn = FV.ui.button({ label: "", primary: true, onclick: () => (raf ? api.stop() : api.start()) });
     const label = (on) => { btn.el.textContent = ""; btn.el.append(FV.h("span", { "aria-hidden": "true", text: on ? "❚❚ " : "▶ " }), FV.rich(on ? L.pause : o.label || L.play)); };
     label(false);
     function frame(ts) {
       const dt = last ? Math.min(0.1, (ts - last) / 1000) : 0; last = ts;
-      if (o.tick(dt) === false) { stop(); return; }
+      if (o.tick(dt) === false) { api.stop(); return; }
       raf = requestAnimationFrame(frame);
     }
-    function start() {
-      if (reduced()) { o.jump && o.jump(); return; }
-      if (o.before) o.before();
-      last = 0; raf = requestAnimationFrame(frame); label(true);
-    }
-    function stop() { cancelAnimationFrame(raf); raf = 0; label(false); }
-    document.addEventListener("visibilitychange", () => { if (document.hidden && raf) stop(); });
-    return { el: btn.el, start, stop, get running() { return !!raf; } };
+    const api = {
+      el: btn.el,
+      start() {
+        if (reduced()) { o.jump && o.jump(); return; }
+        if (o.before) o.before();
+        last = 0; raf = requestAnimationFrame(frame); label(true); running.add(api);
+      },
+      stop() { cancelAnimationFrame(raf); raf = 0; label(false); running.delete(api); },
+      get running() { return !!raf; },
+    };
+    if (o.root && "IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { if (!e.isIntersecting && raf) api.stop(); })).observe(o.root);
+    return api;
   }
-  // A plain SVG scene with a fixed coordinate system that scales with the width.
+  // A plain SVG scene with a fixed coordinate system that scales with the width; its text keeps a readable size
+  // on every screen (--dm-fs is the font size in viewBox units that gives ~13 px on screen).
   function scene(parent, w, h, label) {
-    const svg = S("svg", { class: "fv-svg dm-scene", viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": label || "" });
+    const svg = S("svg", { class: "fv-svg dm-scene", viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": FV.plain(label || "") });
     parent.append(svg);
+    svg._fit = () => { const vb = svg.viewBox.baseVal, cw = svg.clientWidth; if (cw) svg.style.setProperty("--dm-fs", ((13 * vb.width) / cw).toFixed(1) + "px"); };
+    if ("ResizeObserver" in window) new ResizeObserver(() => svg._fit()).observe(svg);
+    requestAnimationFrame(() => svg._fit());
     return svg;
   }
   const el = (tag, attrs, parent, text) => { const e = S(tag, attrs, parent); if (text != null) e.textContent = text; return e; };
-  // The "formulas and calculation" panel: display formulas with the current numbers, recomputed every frame.
+  // The "formulas and calculation" panel: display formulas with the current numbers, recomputed with the figure.
   // Numbers carry the colour of their object in the figure (\htmlClass{t-…}), so the eye links the two.
   const KOPT = { displayMode: true, throwOnError: false, strict: false, trust: (c) => c.command === "\\htmlClass" };
   const kx = (src) => { try { return window.katex ? window.katex.renderToString(src, KOPT) : src; } catch (e) { return src; } };
   const C = (cls, v) => `\\htmlClass{t-${cls}}{${v}}`;
   const pm = (v, d = 4) => (v < 0 ? "- " : "+ ") + tn(Math.abs(v), d);
+  const P0 = (s) => (s.startsWith("-") ? "(" + s + ")" : s); // a negative number substituted into a formula gets brackets
   const U = (u) => `\\ \\text{${u}}`;
   // Split TeX at top-level separators (outside braces).
   function splitTop(tex, seps) {
@@ -139,9 +177,10 @@
     splitTop(tex, [",\\qquad ", ",\\quad "]).forEach((seg) => {
       // on a phone every step of the chain gets its own line
       const parts = splitTop(seg, [" = "]), per = narrow ? 1 : 2;
-      if (parts.length <= (narrow ? 2 : 3)) { lines.push(parts.join(" = ")); return; }
-      lines.push(parts.slice(0, 2).join(" = "));
-      for (let i = 2; i < parts.length; i += per) lines.push("= " + parts.slice(i, i + per).join(" = "));
+      if (parts.length <= (narrow ? 2 : 3) && !(narrow && parts.length === 2 && parts[0].length > 60)) { lines.push(parts.join(" = ")); return; }
+      const head = narrow && parts[0].replace(/\\[a-z]+|[{}\s]/g, "").length > 10 ? 1 : 2; // a short left side stays with the first step
+      lines.push(parts.slice(0, head).join(" = "));
+      for (let i = head; i < parts.length; i += per) lines.push("= " + parts.slice(i, i + per).join(" = "));
     });
     return lines.length === 1 ? tex : "\\begin{aligned}" + lines.map((l) => "&" + l).join("\\\\[3pt] ") + "\\end{aligned}";
   }
@@ -151,7 +190,13 @@
     const body = FV.h("div", { class: "dm-calc-body" });
     box.append(body);
     ui.readout.after(box);
-    return (rows) => { body.innerHTML = rows.map(([lab, tex]) => `<div class="dm-calc-row"><div class="dm-calc-lab">${lab}</div><div class="dm-calc-eq">${kx(wrap(tex, body.clientWidth > 0 && body.clientWidth < 460))}</div></div>`).join(""); };
+    let narrow = false, rowsLast = null, html = "";
+    const render = throttled((rows) => {
+      const next = rows.map(([lab, tex]) => `<div class="dm-calc-row"><div class="dm-calc-lab">${lab}</div><div class="dm-calc-eq">${kx(wrap(tex, narrow))}</div></div>`).join("");
+      if (next !== html) { html = next; body.innerHTML = next; }
+    });
+    if ("ResizeObserver" in window) new ResizeObserver(() => { const nw = body.clientWidth > 0 && body.clientWidth < 460; if (nw !== narrow) { narrow = nw; html = ""; if (rowsLast) render(rowsLast); } }).observe(body);
+    return (rows) => { const key = JSON.stringify(rows); if (key === rowsLast && html) return; rowsLast = rows; render(rows); };
   }
 
   // ---------- 1. a walker and a car: the same 5 minutes ----------
@@ -170,28 +215,28 @@
     el("circle", { cx: 0, cy: -16, r: 4 }, walker); el("path", { d: "M0 -12v10M0 -2l-5 9M0 -2l5 9M-5 -8h10", "stroke-width": 2.2, fill: "none", "stroke-linecap": "round" }, walker);
     const car = el("g", { class: "fill-orange" }, gM);
     el("rect", { x: -16, y: -14, width: 32, height: 10, rx: 3 }, car); el("rect", { x: -9, y: -21, width: 17, height: 8, rx: 3 }, car);
-    el("circle", { cx: -9, cy: -3, r: 3.5, class: "fill-ink" }, car); el("circle", { cx: 9, cy: -3, r: 3.5, class: "fill-ink" }, car);
+    el("circle", { cx: -9, cy: -3, r: 3.5, class: "dm-wheel" }, car); el("circle", { cx: 9, cy: -3, r: 3.5, class: "dm-wheel" }, car);
     const lab1 = el("text", { class: "fv-text dm-small t-teal", "text-anchor": "middle" }, gM), lab2 = el("text", { class: "fv-text dm-small t-orange", "text-anchor": "middle" }, gM);
     function roadLayout() {
-      const narrow = (road.clientWidth || ui.stage.clientWidth || 720) < 520;
+      const narrow = (road.clientWidth || ui.stage.clientWidth || 720) < 600;
       W = narrow ? 380 : 720; Y1 = narrow ? 70 : 42; Y2 = narrow ? 170 : 102;
       const H = narrow ? 230 : 156;
       road.setAttribute("viewBox", `0 0 ${W} ${H}`);
-      road.classList.toggle("dm-road-narrow", narrow);
+      road.classList.toggle("dm-road-narrow", narrow); road._fit();
       gR.textContent = "";
       [Y1, Y2].forEach((y) => {
-        el("line", { x1: X(0), x2: X(D2) + 10, y1: y, y2: y, class: "s-guide", "stroke-width": 1, "stroke-dasharray": "4 5" }, gR);
+        el("line", { x1: X(0), x2: X(D2) + 10, y1: y, y2: y, class: "s-faint", "stroke-width": 1, "stroke-dasharray": "4 5" }, gR);
       });
-      const house = (s, y) => { const x = X(s); el("path", { d: `M${x - 9} ${y - 2}h18v-12l-9-8l-9 8z`, class: "fill-guide dm-house" }, gR); el("text", { x, y: y + 20, "text-anchor": "middle", class: "fv-text dm-small" }, gR, L.home); };
+      const house = (s, y) => { const x = X(s); el("path", { d: `M${x - 9} ${y - 2}h18v-12l-9-8l-9 8z`, class: "fill-faint dm-house" }, gR); el("text", { x, y: y + 20, "text-anchor": "middle", class: "fv-text dm-small" }, gR, L.home); };
       house(D1, Y1); house(D2, Y2);
       el("text", { x: X(0), y: H - 8, "text-anchor": "middle", class: "fv-text dm-small" }, gR, L.work);
       el("line", { x1: X(0), x2: X(0), y1: Y1 - 26, y2: Y2 + 14, class: "s-ink", "stroke-width": 2 }, gR);
     }
     const plot = new FV.Plot(ui.stage, { x: [0, 5], y: [0, 3200], aspect: 0.5, maxHeight: 340, xLabel: L.tAxis, yLabel: L.sAxis });
     const st = FV.ui.slider({ label: L.time, min: 0, max: 5, step: 0.01, value: t, oninput: (v) => { ck.stop(); t = v; draw(); } });
-    const ck = clock({ before: () => { if (t >= T) t = 0; }, tick: (dt) => { t = Math.min(T, t + dt * 0.7); st.set(t); draw(); return t < T; }, jump: () => { t = t >= T ? 0 : Math.min(T, t + 1); st.set(t); draw(); } });
+    const ck = clock({ root, before: () => { if (t >= T) t = 0; }, tick: (dt) => { t = Math.min(T, t + dt * 0.7); st.set(t); draw(); return t < T; }, jump: () => { t = t >= T ? 0 : Math.min(T, t + 1); st.set(t); draw(); } });
     ui.controls.append(st.el, ck.el);
-    const ro = FV.ui.readout(ui.readout, [{ key: "s1", label: L.walker + ": " + L.dist, c: "teal" }, { key: "v1", label: L.speed, c: "teal" }, { key: "s2", label: L.car + ": " + L.dist, c: "orange" }, { key: "v2", label: L.speed, c: "orange" }]);
+    const ro = FV.ui.readout(ui.readout, [{ key: "s1", label: L.walker + ": " + L.dist, c: "teal" }, { key: "v1", label: L.walker + ": " + L.speed, c: "teal" }, { key: "s2", label: L.car + ": " + L.dist, c: "orange" }, { key: "v2", label: L.car + ": " + L.speed, c: "orange" }]);
     const calc = calcPanel(ui);
     function draw() {
       const a = s1(t), b = s2(t), va = v1(), vb = v2(t);
@@ -231,12 +276,12 @@
     const c1 = FV.col(ui.stage), c2 = FV.col(ui.stage);
     const plot = new FV.Plot(c1, { x: [0, 5], y: [-100, 3200], aspect: 0.75, maxHeight: 340, xLabel: L.tAxis, yLabel: L.sAxis });
     const g = scene(c2, 300, 230, L.instSpeed);
-    const CX = 150, CY = 150, R = 110, VMAX = 1400, A0 = -210, A1 = 30; // degrees, clockwise from the x axis
+    const CX = 150, CY = 150, R = 110, VMAX = 1000, A0 = -210, A1 = 30; // degrees, clockwise from the x axis
     const ang = (val) => ((A0 + (A1 - A0) * FV.clamp(val / VMAX, 0, 1)) * Math.PI) / 180;
     const P = (a, r) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
     el("path", { d: `M${P(ang(0), R)[0]} ${P(ang(0), R)[1]} A${R} ${R} 0 1 1 ${P(ang(VMAX), R)[0]} ${P(ang(VMAX), R)[1]}`, fill: "none", class: "s-ink", "stroke-width": 3 }, g);
-    for (let k = 0; k <= VMAX; k += 100) {
-      const a = ang(k), big = k % 500 === 0, p = P(a, R), q = P(a, R - (big ? 14 : 7));
+    for (let k = 0; k <= VMAX; k += 50) {
+      const a = ang(k), big = k % 250 === 0, p = P(a, R), q = P(a, R - (big ? 14 : 7));
       el("line", { x1: p[0], y1: p[1], x2: q[0], y2: q[1], class: "s-ink", "stroke-width": big ? 2 : 1 }, g);
       if (big) { const r = P(a, R - 28); el("text", { x: r[0], y: r[1] + 4, "text-anchor": "middle", class: "fv-text dm-small" }, g, String(k)); }
     }
@@ -247,7 +292,7 @@
     const st0 = FV.ui.slider({ label: L.t0, min: 0, max: 4.5, step: 0.01, value: t0, oninput: (x) => { ck.stop(); t0 = x; fix(); draw(); } });
     const sdt = FV.ui.slider({ label: L.dt, min: -2.3, max: Math.log10(2.5), step: 0.01, value: Math.log10(dt), map: (x) => Math.pow(10, x), unmap: Math.log10, fmt: (x) => n(x, 3), oninput: (x) => { ck.stop(); dt = x; draw(); } });
     const fix = () => { const m = Math.max(0.005, T - t0); sdt.input.max = Math.log10(Math.min(2.5, m)); dt = Math.min(dt, m); sdt.set(dt); };
-    const ck = clock({ label: L.shrink, before: () => { if (dt < 0.01) { dt = Math.min(2, T - t0); } }, tick: (d) => { dt *= Math.pow(0.35, d); if (dt < 0.005) { dt = 0.005; sdt.set(dt); draw(); return false; } sdt.set(dt); draw(); return true; }, jump: () => { dt = 0.005; sdt.set(dt); draw(); } });
+    const ck = clock({ root, label: L.shrink, before: () => { if (dt < 0.01) { dt = Math.min(2, T - t0); } }, tick: (d) => { dt *= Math.pow(0.35, d); if (dt < 0.005) { dt = 0.005; sdt.set(dt); draw(); return false; } sdt.set(dt); draw(); return true; }, jump: () => { dt = dt <= 0.0051 ? Math.min(2, T - t0) : 0.005; sdt.set(dt); draw(); } });
     ui.controls.append(st0.el, sdt.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "a", label: L.avgSpeed, c: "orange" }, { key: "v", label: L.instSpeed, c: "blue" }]);
     const calc = calcPanel(ui);
@@ -286,20 +331,20 @@
   FV.widget("dm-tank", (root, cfg) => {
     const ui = FV.shell(root, { cols: true }), note = noter(ui);
     const H = 10, TT = 10, N = 500;
-    let key = cfg.shape || "vase", t = 4, tab = null;
+    let key = SHAPES[cfg.shape] ? cfg.shape : "vase", t = 4, tab = null;
     function build() { // V(h) by the trapezoid rule
       const r = SHAPES[key], A = (h) => Math.PI * r(h) * r(h), hs = [0], Vs = [0];
       for (let i = 1; i <= N; i++) { const h = (H * i) / N; hs.push(h); Vs.push(Vs[i - 1] + ((A(hs[i - 1]) + A(h)) / 2) * (H / N)); }
       tab = { r, A, hs, Vs, Q: Vs[N] / TT };
     }
-    const hAt = (tt) => { const V = Math.min(tab.Vs[N], tab.Q * tt); let i = 1; while (i < N && tab.Vs[i] < V) i++; const f = (V - tab.Vs[i - 1]) / (tab.Vs[i] - tab.Vs[i - 1] || 1); return tab.hs[i - 1] + f * (tab.hs[i] - tab.hs[i - 1]); };
+    const hAt = (tt) => { const V = Math.min(tab.Vs[N], tab.Q * tt); let lo = 1, hi = N; while (lo < hi) { const m = (lo + hi) >> 1; if (tab.Vs[m] < V) lo = m + 1; else hi = m; } const i = lo; const f = (V - tab.Vs[i - 1]) / (tab.Vs[i] - tab.Vs[i - 1] || 1); return tab.hs[i - 1] + f * (tab.hs[i] - tab.hs[i - 1]); };
     const c1 = FV.col(ui.stage), c2 = FV.col(ui.stage);
     const svg = scene(c1, 300, 300, L.shape);
     const gV = el("g", {}, svg);
     const plot = new FV.Plot(c2, { x: [0, TT], y: [0, H], aspect: 0.9, maxHeight: 320, xLabel: L.tsAxis, yLabel: L.hAxis });
     const seg = FV.ui.seg({ label: L.shape, value: key, options: ["cyl", "cone", "vase"].map((k) => ({ value: k, label: L[k] })), onchange: (k) => { ck.stop(); key = k; build(); t = 0; stt.set(t); draw(); } });
     const stt = FV.ui.slider({ label: L.tsAxis, min: 0, max: TT, step: 0.01, value: t, oninput: (x) => { ck.stop(); t = x; draw(); } });
-    const ck = clock({ before: () => { if (t >= TT) t = 0; }, tick: (d) => { t = Math.min(TT, t + d * 1.2); stt.set(t); draw(); return t < TT; }, jump: () => { t = t >= TT ? 0 : Math.min(TT, t + 2); stt.set(t); draw(); } });
+    const ck = clock({ root, before: () => { if (t >= TT) t = 0; }, tick: (d) => { t = Math.min(TT, t + d * 1.2); stt.set(t); draw(); return t < TT; }, jump: () => { t = t >= TT ? 0 : Math.min(TT, t + 2); stt.set(t); draw(); } });
     ui.controls.append(seg.el, stt.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "h", label: L.level, c: "blue" }, { key: "a", label: L.area }, { key: "r", label: L.rate, c: "orange" }]);
     const SX = 20, BY = 280, SY = 26; // px per cm horizontally, the bottom, px per cm vertically
@@ -348,10 +393,10 @@
     let P = ZF.sq, x0 = 1, z = 0;
     const plot = new FV.Plot(ui.stage, { x: [-1, 3], y: [-1, 3], equal: true, xLabel: "x", yLabel: "f(x)" });
     const box = FV.h("div", { class: "dm-zoom-box" }); ui.stage.classList.add("dr-narrow");
-    const seg = FV.ui.seg({ label: L.fn, value: "sq", options: Object.keys(ZF).map((k) => ({ value: k, label: "$" + ZF[k].tex + "$" })), onchange: (k) => { ck.stop(); P = ZF[k]; x0 = P.x0; sx.set(x0); sx.input.disabled = !P.free; draw(); } });
-    const sx = FV.ui.slider({ label: L.pt, min: -1.5, max: 2, step: 0.01, value: x0, oninput: (v) => { x0 = v; draw(); } });
+    const seg = FV.ui.seg({ label: L.fn, value: "sq", options: Object.keys(ZF).map((k) => ({ value: k, label: "$" + ZF[k].tex + "$" })), onchange: (k) => { ck.stop(); const keep = P.free && ZF[k].free; P = ZF[k]; if (!keep) x0 = P.x0; sx.set(x0); sx.input.disabled = !P.free; draw(); } });
+    const sx = FV.ui.slider({ label: L.pt, min: -1.5, max: 2, step: 0.01, value: x0, oninput: (v) => { ck.stop(); x0 = v; draw(); } });
     const sz = FV.ui.slider({ label: L.zoom, min: 0, max: 3, step: 0.01, value: z, fmt: (v) => "×" + n(Math.pow(10, v), 3), oninput: (v) => { ck.stop(); z = v; draw(); } });
-    const ck = clock({ before: () => { if (z >= 3) z = 0; }, tick: (d) => { z = Math.min(3, z + d * 0.45); sz.set(z); draw(); return z < 3; }, jump: () => { z = z >= 3 ? 0 : Math.min(3, z + 1); sz.set(z); draw(); } });
+    const ck = clock({ root, before: () => { if (z >= 3) z = 0; }, tick: (d) => { z = Math.min(3, z + d * 0.45); sz.set(z); draw(); return z < 3; }, jump: () => { z = z >= 3 ? 0 : Math.min(3, z + 1); sz.set(z); draw(); } });
     ui.controls.append(seg.el, sx.el, sz.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "w", label: L.win }, { key: "d", label: L.dev, c: "red" }]);
     const devLabel = ui.readout.querySelectorAll(".fv-ro")[1].firstChild;
@@ -377,7 +422,7 @@
       if (P.d) {
         const k = P.d(x0), sq = P === ZF.sq;
         calc([
-          [L.cpoint, `f(x_0) = ${sq ? tn(x0, 3) + "^2" : "\\sin " + tn(x0, 3)} = ${tn(y0, 5)},\\qquad f'(x_0) = ${sq ? "2\\cdot " + tn(x0, 3) : "\\cos " + tn(x0, 3)} = ${C("blue", tn(k, 5))}`],
+          [L.cpoint, `f(x_0) = ${sq ? P0(tn(x0, 3)) + "^2" : "\\sin " + P0(tn(x0, 3))} = ${tn(y0, 5)},\\qquad f'(x_0) = ${sq ? "2\\cdot " + P0(tn(x0, 3)) : "\\cos " + P0(tn(x0, 3))} = ${C("blue", tn(k, 5))}`],
           [L.ctan, `y = f(x_0) + f'(x_0)\\,(x - x_0) = ${tn(y0, 5)} ${pm(k, 5)}\\,(x ${pm(-x0, 3)})`],
           [L.cdev, sq ? `\\Delta f - f'(x_0)\\,\\Delta x = \\Delta x^2,\\quad \\max_{|\\Delta x| \\le w} \\Delta x^2 = w^2 = ${tn(w, 4)}^2 = ${C("red", tn(w * w, 4))}` : `\\max_{|\\Delta x| \\le w}\\big|\\Delta f - f'(x_0)\\,\\Delta x\\big| = ${C("red", tn(dev, 4))},\\quad w = ${tn(w, 4)}`],
           [L.cratio, `\\frac{${tn(dev, 4)}}{2w} = \\frac{${tn(dev, 4)}}{${tn(2 * w, 4)}} = ${C("red", tn((dev / (2 * w)) * 100, 4))}\\,\\%`],
@@ -395,19 +440,20 @@
 
   // ---------- 5. the graph of f′ drawn from the slopes ----------
   const BF = {
-    cubic: { tex: "f(x) = x^3 - 3x", f: (x) => x * x * x - 3 * x, x: [-2.3, 2.3], y: [-4, 4], dy: [-4, 13] },
-    sq: { tex: "f(x) = x^2", f: (x) => x * x, x: [-2.2, 2.2], y: [-0.5, 5], dy: [-5, 5] },
-    sin: { tex: "f(x) = \\sin x", f: Math.sin, x: [-0.5, 7], y: [-1.4, 1.4], dy: [-1.4, 1.4] },
+    cubic: { tex: "f(x) = x^3 - 3x", f: (x) => x * x * x - 3 * x, d: (x) => 3 * x * x - 3, x: [-2.3, 2.3], y: [-4, 4], dy: [-4, 13] },
+    sq: { tex: "f(x) = x^2", f: (x) => x * x, d: (x) => 2 * x, x: [-2.2, 2.2], y: [-0.5, 5], dy: [-5, 5] },
+    sin: { tex: "f(x) = \\sin x", f: Math.sin, d: Math.cos, x: [-0.5, 7], y: [-1.4, 1.4], dy: [-1.4, 1.4] },
   };
   FV.widget("dm-build", (root) => {
     const ui = FV.shell(root), note = noter(ui);
     let P = BF.cubic, xc = P.x[0];
-    const d = (x) => (P.f(x + 1e-4) - P.f(x - 1e-4)) / 2e-4;
+    const d = (x) => P.d(x);
     const p1 = new FV.Plot(ui.stage, { x: P.x, y: P.y, aspect: 0.4, maxHeight: 260, minHeight: 170, xLabel: "x", title: L.fGraph });
     const p2 = new FV.Plot(ui.stage, { x: P.x, y: P.dy, aspect: 0.4, maxHeight: 260, minHeight: 170, xLabel: "x", title: L.dGraph });
+    p2.svg.setAttribute("aria-hidden", "true");
     const seg = FV.ui.seg({ label: L.fn, value: "cubic", options: Object.keys(BF).map((k) => ({ value: k, label: "$" + BF[k].tex + "$" })), onchange: (k) => { ck.stop(); P = BF[k]; p1.setDomain(P.x, P.y); p2.setDomain(P.x, P.dy); sx.input.min = P.x[0]; sx.input.max = P.x[1]; xc = P.x[0]; sx.set(xc); draw(); } });
     const sx = FV.ui.slider({ label: L.x, min: P.x[0], max: P.x[1], step: 0.01, value: xc, oninput: (v) => { ck.stop(); xc = v; draw(); } });
-    const ck = clock({ before: () => { if (xc >= P.x[1] - 1e-6) xc = P.x[0]; }, tick: (dt) => { xc = Math.min(P.x[1], xc + dt * (P.x[1] - P.x[0]) / 7); sx.set(xc); draw(); return xc < P.x[1]; }, jump: () => { xc = Math.min(P.x[1], xc + (P.x[1] - P.x[0]) / 6); sx.set(xc); draw(); } });
+    const ck = clock({ root, before: () => { if (xc >= P.x[1] - 1e-6) xc = P.x[0]; }, tick: (dt) => { xc = Math.min(P.x[1], xc + dt * (P.x[1] - P.x[0]) / 7); sx.set(xc); draw(); return xc < P.x[1]; }, jump: () => { xc = xc >= P.x[1] - 1e-6 ? P.x[0] : Math.min(P.x[1], xc + (P.x[1] - P.x[0]) / 6); sx.set(xc); draw(); } });
     ui.controls.append(seg.el, sx.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "f", label: "$f(x)$" }, { key: "d", label: L.slope, c: "orange" }]);
     const calc = calcPanel(ui);
@@ -451,14 +497,17 @@
     const c1 = FV.col(ui.stage), c2 = FV.col(ui.stage);
     c1.classList.add("dm-ball-col");
     const svg = scene(c1, 160, 320, L.hgt);
-    const Y = (hh) => 290 - hh * 12.5;
+    svg.setAttribute("viewBox", "-34 0 194 320");
+    const Y = (hh) => 280 - hh * 12.5; // the ball centre; its bottom touches the ground (y = 290) at h = 0
     el("line", { x1: 10, x2: 150, y1: 290, y2: 290, class: "s-ink", "stroke-width": 2.5 }, svg);
-    for (let k = 0; k <= 20; k += 5) { el("line", { x1: 18, x2: 26, y1: Y(k), y2: Y(k), class: "s-ink" }, svg); el("text", { x: 14, y: Y(k) + 4, "text-anchor": "end", class: "fv-text dm-small" }, svg, String(k)); }
+    const Yt = (hh) => 290 - hh * 12.5; // the height scale for the ticks (the bottom of the ball)
+    for (let k = 0; k <= 20; k += 5) { el("line", { x1: 18, x2: 26, y1: Yt(k), y2: Yt(k), class: "s-ink" }, svg); el("text", { x: 14, y: Yt(k) + 4, "text-anchor": "end", class: "fv-text dm-small" }, svg, String(k)); }
     const trail = el("g", {}, svg), ball = el("circle", { cx: 80, r: 10, class: "fill-orange" }, svg), arrow = el("g", { class: "s-blue fill-blue" }, svg);
     const mk = (y, lab) => new FV.Plot(c2, { x: [0, 4], y, aspect: 0.32, maxHeight: 150, minHeight: 110, xLabel: L.tsec, title: lab });
     const ph = mk([-1, 22], L.hgt), pv = mk([-22, 22], L.vel), pa = mk([-12, 2], L.acc);
+    [pv, pa].forEach((pp) => pp.svg.setAttribute("aria-hidden", "true"));
     const stt = FV.ui.slider({ label: L.tsec, min: 0, max: 4, step: 0.01, value: t, oninput: (x) => { ck.stop(); t = x; draw(); } });
-    const ck = clock({ before: () => { if (t >= 4) t = 0; }, tick: (d) => { t = Math.min(4, t + d * 0.8); stt.set(t); draw(); return t < 4; }, jump: () => { t = t >= 4 ? 0 : Math.min(4, t + 0.5); stt.set(t); draw(); } });
+    const ck = clock({ root, before: () => { if (t >= 4) t = 0; }, tick: (d) => { t = Math.min(4, t + d * 0.8); stt.set(t); draw(); return t < 4; }, jump: () => { t = t >= 4 ? 0 : Math.min(4, t + 0.5); stt.set(t); draw(); } });
     ui.controls.append(stt.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "h", label: L.hgt, c: "orange" }, { key: "v", label: L.vel, c: "blue" }, { key: "a", label: L.acc, c: "red" }]);
     const calc = calcPanel(ui);
@@ -469,7 +518,8 @@
       for (let s = 0; s < t; s += 0.25) el("circle", { cx: 80, cy: Y(h(s)), r: 2.5, class: "fill-faint" }, trail);
       arrow.textContent = "";
       if (Math.abs(vv) > 0.3) {
-        const y1 = Y(hh), y2 = y1 - vv * 3.2, dir = Math.sign(y2 - y1);
+        // 2.6 px per m/s, but never through the ground or out of the top
+        const y1 = Y(hh), len = FV.clamp(-vv * 2.6, -(y1 - 14), 286 - y1), y2 = y1 + len, dir = Math.sign(len);
         el("line", { x1: 112, x2: 112, y1, y2: y2 - dir * 6, "stroke-width": 3 }, arrow);
         el("path", { d: `M112 ${y2}l-6 ${-dir * 9}h12z` }, arrow);
       }
@@ -491,56 +541,73 @@
   });
 
   // ---------- 7. gears: the chain rule ----------
+  // Tooth counts keep the exact ratios (n₂ = n₁/k₁, n₃ = n₂/k₂) with a common tooth size, so the teeth really mesh.
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a);
   FV.widget("dm-gears", (root) => {
     const ui = FV.shell(root), note = noter(ui);
     let k1 = 2, k2 = 1.5, th = 0;
-    const svg = scene(ui.stage, 720, 280, "x → u → y");
+    const svg = scene(ui.stage, 720, 290, L.cchain + ": dy/dx = dy/du · du/dx");
     const g = el("g", {}, svg);
     const s1 = FV.ui.slider({ label: L.k1, min: 0.5, max: 3, step: 0.5, value: k1, oninput: (v) => { k1 = v; th = 0; layout(); draw(); } });
     const s2 = FV.ui.slider({ label: L.k2, min: 0.5, max: 3, step: 0.5, value: k2, oninput: (v) => { k2 = v; th = 0; layout(); draw(); } });
-    const ck = clock({ tick: (d) => { th += d * 0.6; draw(); return true; }, jump: () => { th += 0.25; draw(); } });
+    const ck = clock({ root, tick: (d) => { th += d * 0.6; draw(); return true; }, jump: () => { th += 0.25; draw(); } });
     ui.controls.append(s1.el, s2.el, ck.el);
     const ro = FV.ui.readout(ui.readout, [{ key: "x", label: L.turnsX }, { key: "u", label: L.turnsU, c: "teal" }, { key: "y", label: L.turnsY, c: "orange" }, { key: "k", label: "$\\frac{dy}{dx}$", c: "blue" }]);
-    let G = [];
     const calc = calcPanel(ui);
-    function gearPath(r, teeth) {
+    let G = [];
+    // a gear with n teeth, a tooth centred on angle 0
+    function gearPath(r, nT, depth) {
       let d = "";
-      const tw = (Math.PI * 2) / teeth;
-      for (let i = 0; i < teeth; i++) {
+      const tw = (Math.PI * 2) / nT;
+      for (let i = 0; i < nT; i++) {
         const a = i * tw;
-        [[a, r - 6], [a + tw * 0.15, r + 6], [a + tw * 0.45, r + 6], [a + tw * 0.6, r - 6]].forEach(([b, rr], j) => { d += (i === 0 && j === 0 ? "M" : "L") + (rr * Math.cos(b)).toFixed(1) + " " + (rr * Math.sin(b)).toFixed(1); });
+        [[a - tw * 0.3, r + depth], [a + tw * 0.3, r + depth], [a + tw * 0.45, r - depth], [a + tw * 0.55, r - depth]].forEach(([b, rr], j) => { d += (i === 0 && j === 0 ? "M" : "L") + (rr * Math.cos(b)).toFixed(1) + " " + (rr * Math.sin(b)).toFixed(1); });
       }
       return d + "Z";
     }
     function layout() {
-      let r1 = 80, r2 = r1 / k1, r3 = r2 / k2;
-      const total = 2 * (r1 + r2 + r3) + 24, sc = Math.min(1, 680 / total, 230 / (2 * Math.max(r1, r2, r3) + 12));
-      r1 *= sc; r2 *= sc; r3 *= sc;
-      const x1 = 360 - (r1 + r2 + r3 + 6) + r1, x2 = x1 + r1 + r2 + 3, x3 = x2 + r2 + r3 + 3;
-      G = [[x1, r1, "ink", "x"], [x2, r2, "teal", "u"], [x3, r3, "orange", "y"]].map(([cx, r, c, name]) => ({ cx, r, c, name, teeth: Math.max(6, Math.round(r / 5)) }));
+      // integer tooth counts in the exact ratios, reduced, then scaled so that the smallest gear has at least 8 teeth
+      let n = [144, 144 / k1, 144 / k1 / k2];
+      const gg = n.reduce((a, b) => gcd(a, b));
+      n = n.map((x) => x / gg);
+      const m = Math.ceil(8 / Math.min(...n));
+      n = n.map((x) => x * m);
+      const pitch0 = 12, r0 = n.map((x) => (x * pitch0) / (2 * Math.PI));
+      const total = 2 * (r0[0] + r0[1] + r0[2]) + 20, sc = Math.min(1.6, 690 / total, 220 / (2 * Math.max(...r0) + 10));
+      const r = r0.map((x) => x * sc), depth = Math.min(6, (pitch0 * sc) / 4.5);
+      const cx1 = 360 - (r[0] + r[1] + r[2]) + r[0], cx2 = cx1 + r[0] + r[1], cx3 = cx2 + r[1] + r[2];
+      // the phase: gear 1 has a tooth at the contact point (angle 0); gear 2 a gap at its angle π;
+      // gear 3 takes a tooth or a gap at its contact point, opposite to what gear 2 shows there
+      const tw = n.map((x) => (2 * Math.PI) / x);
+      const ph2 = Math.PI - tw[1] / 2;
+      const gapAt2 = n[1] % 2 === 0; // gear 2 shows a gap at its right side when n₂ is even
+      const ph3 = gapAt2 ? Math.PI : Math.PI - tw[2] / 2;
+      g.textContent = "";
+      G = [[cx1, r[0], n[0], "ink", "x", 0], [cx2, r[1], n[1], "teal", "u", ph2], [cx3, r[2], n[2], "orange", "y", ph3]].map(([cx, rr, nT, c, name, ph]) => {
+        const grp = el("g", {}, g);
+        el("path", { d: gearPath(rr, nT, depth), class: "s-" + c + " fill-" + c, "fill-opacity": 0.25, "stroke-width": 2 }, grp);
+        el("line", { x1: 0, y1: 0, x2: Math.max(4, rr - 2 * depth - 2), y2: 0, class: "s-" + c, "stroke-width": 3 }, grp);
+        el("circle", { r: 4, class: "fill-" + c }, grp);
+        el("text", { x: cx, y: Math.min(284, 140 + rr + depth + 20), "text-anchor": "middle", class: "fv-text dm-small t-" + c }, g, name + " · " + nT);
+        return { cx, grp, ph };
+      });
     }
     function draw() {
-      g.textContent = "";
       const angs = [th, -th * k1, th * k1 * k2];
-      G.forEach((gg, i) => {
-        const grp = el("g", { transform: `translate(${gg.cx} 140) rotate(${(angs[i] * 180) / Math.PI + (i === 1 ? 180 / gg.teeth : 0)})` }, g);
-        el("path", { d: gearPath(gg.r, gg.teeth), class: "fill-" + gg.c, "fill-opacity": 0.25, stroke: "currentColor", "stroke-width": 2 }, grp).setAttribute("class", "s-" + gg.c + " fill-" + gg.c);
-        el("line", { x1: 0, y1: 0, x2: gg.r - 10, y2: 0, class: "s-" + gg.c, "stroke-width": 3 }, grp);
-        el("circle", { r: 5, class: "fill-" + gg.c }, grp);
-        el("text", { x: gg.cx, y: 140 + gg.r + 26, "text-anchor": "middle", class: "fv-text t-" + gg.c }, g, gg.name);
-      });
+      G.forEach((gg, i) => gg.grp.setAttribute("transform", `translate(${gg.cx} 140) rotate(${(((angs[i] + gg.ph) * 180) / Math.PI).toFixed(2)})`));
       const turns = th / (2 * Math.PI);
       ro.set("x", n(turns, 3)); ro.set("u", n(turns * k1, 3)); ro.set("y", n(turns * k1 * k2, 3)); ro.set("k", n(k1 * k2, 3));
       const Nx = tn(turns, 3), Nu = tn(turns * k1, 3), Ny = tn(turns * k1 * k2, 3);
       calc([
         [L.cturn + ": u", `N_u = \\frac{du}{dx}\\cdot N_x = ${tn(k1, 2)}\\cdot ${Nx} = ${C("teal", Nu)}`],
         [L.cturn + ": y", `N_y = \\frac{dy}{du}\\cdot N_u = ${tn(k2, 2)}\\cdot ${Nu} = ${C("orange", Ny)}`],
-        [L.cchain, `\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx} = ${tn(k2, 2)}\\cdot ${tn(k1, 2)} = ${C("blue", tn(k1 * k2, 3))}\\qquad \\Big(\\frac{N_y}{N_x} = ${turns > 1e-9 ? tn((turns * k1 * k2) / turns, 3) : tn(k1 * k2, 3)}\\Big)`],
+        [L.cchain, `\\frac{dy}{dx} = \\frac{dy}{du}\\cdot\\frac{du}{dx} = ${tn(k2, 2)}\\cdot ${tn(k1, 2)} = ${C("blue", tn(k1 * k2, 3))}`],
       ]);
       note(L.gearsNote(tn(k1, 3), tn(k2, 3), tn(k1 * k2, 3)));
     }
     layout(); draw();
   });
+
   // ---------- 8. a shower with two taps: partial derivatives ----------
   const SH = {
     ru: { hot: "Горячий кран $h$, л/мин", cold: "Холодный кран $c$, л/мин", turn: "Крутим", tHot: "горячий", tCold: "холодный", temp: "температура $T$, °C",
@@ -569,10 +636,11 @@
     const labH = el("text", { x: 30, y: 292, "text-anchor": "middle", class: "fv-text dm-small t-red" }, svg), labC = el("text", { x: 130, y: 292, "text-anchor": "middle", class: "fv-text dm-small t-blue" }, svg);
     const p1 = new FV.Plot(c1, { x: [0, 6], y: [8, 62], aspect: 0.45, maxHeight: 190, minHeight: 140, xLabel: SH.hAx, title: SH.sliceH });
     const p2 = new FV.Plot(c1, { x: [0, 6], y: [8, 62], aspect: 0.45, maxHeight: 190, minHeight: 140, xLabel: SH.cAx, title: SH.sliceC });
+    p1.svg.setAttribute("aria-hidden", "true"); p2.svg.setAttribute("aria-hidden", "true");
     const sh = FV.ui.slider({ label: SH.hot, min: 0.1, max: 6, step: 0.1, value: h, oninput: (v) => { ck.stop(); h = v; draw(); } });
     const sc = FV.ui.slider({ label: SH.cold, min: 0.1, max: 6, step: 0.1, value: c, oninput: (v) => { ck.stop(); c = v; draw(); } });
     const seg = FV.ui.seg({ label: SH.turn, value: tap, options: [{ value: "hot", label: SH.tHot }, { value: "cold", label: SH.tCold }], onchange: (v) => { ck.stop(); tap = v; } });
-    const ck = clock({ before: () => { if (tap === "hot" && h >= 6) h = 0.1; if (tap === "cold" && c >= 6) c = 0.1; },
+    const ck = clock({ root, before: () => { if (tap === "hot" && h >= 6) h = 0.1; if (tap === "cold" && c >= 6) c = 0.1; },
       tick: (d) => { if (tap === "hot") { h = Math.min(6, h + d * 1.2); sh.set(h); } else { c = Math.min(6, c + d * 1.2); sc.set(c); } draw(); return (tap === "hot" ? h : c) < 6; },
       jump: () => { if (tap === "hot") { h = h >= 6 ? 0.1 : Math.min(6, h + 1); sh.set(h); } else { c = c >= 6 ? 0.1 : Math.min(6, c + 1); sc.set(c); } draw(); } });
     ui.controls.append(sh.el, sc.el, seg.el, ck.el);
