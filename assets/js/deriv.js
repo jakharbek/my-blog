@@ -24,7 +24,7 @@
       gradNote: (g, n, d, ang) => `$\\nabla f = ${g}$, длина $${n}$. Вдоль $\\mathbf{u}$ функция меняется со скоростью $D_{\\mathbf{u}} f = |\\nabla f|\\cos\\varphi = ${d}$, где $\\varphi = ${ang}^{\\circ}$ — угол между $\\mathbf{u}$ и $\\nabla f$. Максимум — когда $\\mathbf{u}$ смотрит вдоль градиента, ноль — вдоль линии уровня.`,
       flat: "В этой точке $\\nabla f = \\mathbf{0}$: функция «плоская» во всех направлениях — это кандидат в минимум, максимум или седло.",
       eta: "Шаг $\\eta$", start: "Старт", go: "Спуск", reset: "Сброс", step: "шаг", path: "путь спуска",
-      descNote: (k, p, f, m) => `Шаг ${k}: $\\mathbf{p} = ${p}$, $f = ${f}$. Для этой чаши каждый шаг умножает $x$ на $${m}$, а $y$ — на свой множитель (см. текст).`,
+      descNote: (k, p, f, m) => `Шаг ${k}: $\\mathbf{p} = ${p}$, $f = ${f}$. Для этой чаши каждый шаг умножает обе координаты на $1 - 2\\eta = ${m}$.`,
       show: "Показать все решения", hide: "Скрыть все решения",
       thK: "шаг", thP: "$\\mathbf{p}$", thG: "$\\nabla f(\\mathbf{p})$", thF: "$f(\\mathbf{p})$",
     },
@@ -43,7 +43,7 @@
       gradNote: (g, n, d, ang) => `$\\nabla f = ${g}$, length $${n}$. Along $\\mathbf{u}$ the function changes at the rate $D_{\\mathbf{u}} f = |\\nabla f|\\cos\\varphi = ${d}$, where $\\varphi = ${ang}^{\\circ}$ is the angle between $\\mathbf{u}$ and $\\nabla f$. The maximum is when $\\mathbf{u}$ points along the gradient, zero along a level curve.`,
       flat: "Here $\\nabla f = \\mathbf{0}$: the function is “flat” in every direction — a candidate for a minimum, a maximum or a saddle.",
       eta: "Step $\\eta$", start: "Start", go: "Descend", reset: "Reset", step: "step", path: "descent path",
-      descNote: (k, p, f, m) => `Step ${k}: $\\mathbf{p} = ${p}$, $f = ${f}$. For this bowl every step multiplies $x$ by $${m}$, and $y$ by its own factor (see the text).`,
+      descNote: (k, p, f, m) => `Step ${k}: $\\mathbf{p} = ${p}$, $f = ${f}$. For this bowl every step multiplies both coordinates by $1 - 2\\eta = ${m}$.`,
       show: "Show all solutions", hide: "Hide all solutions",
       thK: "step", thP: "$\\mathbf{p}$", thG: "$\\nabla f(\\mathbf{p})$", thF: "$f(\\mathbf{p})$",
     },
@@ -62,7 +62,7 @@
       gradNote: (g, n, d, ang) => `$\\nabla f = ${g}$, uzunligi $${n}$. $\\mathbf{u}$ bo‘ylab funksiya $D_{\\mathbf{u}} f = |\\nabla f|\\cos\\varphi = ${d}$ tezlik bilan o‘zgaradi, bu yerda $\\varphi = ${ang}^{\\circ}$ — $\\mathbf{u}$ va $\\nabla f$ orasidagi burchak. Eng kattasi — $\\mathbf{u}$ gradiyent bo‘ylab qaraganda, nol — sath chizig‘i bo‘ylab.`,
       flat: "Bu nuqtada $\\nabla f = \\mathbf{0}$: funksiya barcha yo‘nalishlarda «tekis» — minimum, maksimum yoki egar nuqtasiga nomzod.",
       eta: "$\\eta$ qadam", start: "Start", go: "Tushish", reset: "Qaytarish", step: "qadam", path: "tushish yo‘li",
-      descNote: (k, p, f, m) => `${k}-qadam: $\\mathbf{p} = ${p}$, $f = ${f}$. Bu kosa uchun har bir qadam $x$ ni $${m}$ ga, $y$ ni esa o‘z ko‘paytuvchisiga ko‘paytiradi (matnga qarang).`,
+      descNote: (k, p, f, m) => `${k}-qadam: $\\mathbf{p} = ${p}$, $f = ${f}$. Bu kosa uchun har bir qadam ikkala koordinatani $1 - 2\\eta = ${m}$ ga ko‘paytiradi.`,
       show: "Barcha yechimlarni ko‘rsatish", hide: "Barcha yechimlarni yashirish",
       thK: "qadam", thP: "$\\mathbf{p}$", thG: "$\\nabla f(\\mathbf{p})$", thF: "$f(\\mathbf{p})$",
     },
@@ -111,8 +111,8 @@
       plot.arrow(B[0], A[1], B[0], B[1], { c: "teal", w: 2.4 });
       plot.text((A[0] + B[0]) / 2, A[1], "Δx = " + n(dx), { anchor: "middle", dy: dy >= 0 ? 18 : -8, c: "blue", clip: true });
       plot.text(B[0], (A[1] + B[1]) / 2, "Δy = " + n(dy), { dx: dx > 0 ? 8 : -8, anchor: dx > 0 ? "start" : "end", c: "teal", clip: true });
-      plot.text(A[0], A[1], "A", { dx: -10, dy: -10, anchor: "end", c: "red", clip: true });
-      plot.text(B[0], B[1], "B", { dx: -10, dy: -10, anchor: "end", c: "red", clip: true });
+      plot.text(A[0], A[1], "A", { dx: -16, dy: -14, anchor: "end", c: "red", clip: true });
+      plot.text(B[0], B[1], "B", { dx: -16, dy: -14, anchor: "end", c: "red", clip: true });
       plot.legend([{ label: L.line + " $y = " + tn(k) + "x " + (A[1] - k * A[0] < 0 ? "- " : "+ ") + tn(Math.abs(A[1] - k * A[0])) + "$", c: "ink" }, { label: L.run, c: "blue" }, { label: L.rise, c: "teal" }]);
       ro.set("dx", n(dx)); ro.set("dy", n(dy)); ro.set("k", n(k));
       setNote(ui.note, L.slopeNote(tv(A, 2), tv(B, 2), tn(dx), tn(dy), tn(k)));
@@ -123,8 +123,8 @@
 
   // ---------- 2. the increment: linear part + tail ----------
   const TF = {
-    sq: { tex: "f(x) = x^2", f: (x) => x * x, d: (x) => 2 * x, x: [-1.5, 3.2], y: [-1, 9], x0: 1 },
-    cube: { tex: "f(x) = x^3", f: (x) => x * x * x, d: (x) => 3 * x * x, x: [-1.8, 2.2], y: [-5, 9], x0: 1 },
+    sq: { tex: "f(x) = x^2", f: (x) => x * x, d: (x) => 2 * x, x: [-1.5, 3.2], y: [-1, 10.6], x0: 1 },
+    cube: { tex: "f(x) = x^3", f: (x) => x * x * x, d: (x) => 3 * x * x, x: [-1.8, 2.2], y: [-5, 11], x0: 1 },
     sin: { tex: "f(x) = \\sin x", f: Math.sin, d: Math.cos, x: [-1, 4.2], y: [-1.5, 1.6], x0: 0.6 },
   };
   FV.widget("dr-tail", (el, cfg) => {
