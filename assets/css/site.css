@@ -822,3 +822,35 @@ html.nr-noscroll, html.nr-noscroll body { overflow: hidden; }
 /* KaTeX's visually hidden MathML (for screen readers) can stick out of a narrow column and widen the page;
    clip it at the article without creating a scroll container (sticky elements keep working) */
 main.fx-page { overflow-x: clip; }
+
+/* ---------- article "The chain rule": steps, drills, dependency tree ---------- */
+.article .cr-steps { margin: 0; padding: 0; list-style: none; counter-reset: crs; display: flex; flex-direction: column; gap: 12px; }
+.article .cr-steps > li { position: relative; padding-left: 40px; counter-increment: crs; min-width: 0; }
+.article .cr-steps > li::before { content: counter(crs); position: absolute; left: 0; top: 2px; width: 26px; height: 26px; border-radius: 50%; background: var(--bg2); border: 1px solid var(--line); font-size: 13px; font-weight: 600; line-height: 24px; text-align: center; color: var(--fg3); }
+.article .cr-steps > li > p { margin: 0 0 6px; }
+.article .cr-steps > li > .eqd { margin: 0; }
+.cr-drill { display: flex; flex-direction: column; gap: 10px; padding: 18px 22px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); scroll-margin-top: 80px; }
+.cr-drill-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cr-drill-n { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.cr-stars { font-size: 14px; letter-spacing: 2px; color: var(--tx-orange); }
+.article .cr-task { margin: 0; font-size: 16px; }
+.cr-drill > .eqd { margin: 0; }
+.cr-sol { border-top: 1px dashed var(--line); padding-top: 8px; }
+.cr-sol > summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--fg3); padding: 4px 0; }
+.cr-sol > summary:hover { color: var(--fg); }
+.cr-sol[open] > summary { margin-bottom: 12px; }
+.cr-sol .eqd, .cr-drill .eqd { background: var(--bg2); }
+.cr-ans { margin-top: 14px; padding: 10px 14px; border-left: 2px solid var(--v-teal); background: var(--bg2); border-radius: 0 4px 4px 0; }
+.cr-ans b { display: block; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg3); }
+.cr-ans .eqd { margin: 0; background: transparent; }
+.article .cr-note { margin: 10px 0 0; font-size: 15px; color: var(--fg3); }
+.cr-sol-bar { display: flex; justify-content: flex-end; padding: 0; border: 0; background: transparent; }
+.cr-tree-fig { margin: 0; }
+.cr-tree { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; }
+.cr-tree-e line { stroke: var(--fg4); stroke-width: 1.5; }
+.cr-tree-l text { font-size: 15px; font-style: italic; fill: var(--fg3); }
+.cr-tree-n circle { fill: var(--card); stroke: var(--fg); stroke-width: 1.5; }
+.cr-tree-n circle.cr-s { stroke: var(--accent); stroke-width: 2.5; }
+.cr-tree-n text { font-size: 17px; font-style: italic; font-weight: 600; fill: var(--fg); }
+.cr-tree-fig figcaption { margin-top: 8px; }
+@media (max-width: 520px) { .cr-drill { padding: 14px 12px 16px; } .article .cr-steps > li { padding-left: 0; } .article .cr-steps > li::before { position: static; float: left; margin: 1px 8px 0 0; } .article .cr-steps > li > .eqd { clear: both; } .article .cr-steps .eqd, .cr-drill .eqd, .nr-ex .eqd { padding: 2px 10px; font-size: .88em; } }

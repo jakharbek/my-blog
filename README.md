@@ -38,6 +38,9 @@ tools/build.py             генератор страниц; тексты ин�
 tools/content_sigmoid.py   тексты статьи о сигмоиде
 tools/content_forward.py   статья «Формула Forward Pass» (ru, en, uz): прямой проход сети 2–3–2–1, 8 примеров; числа проверяет
                            check_numbers(): python3 tools/content_forward.py; рисунки — assets/js/forward.js
+tools/content_chain.py     статья «Цепное правило» (ru, en, uz): определение, доказательство, одна и несколько переменных,
+                           10 разборов; формулы проверяет SymPy: python3 tools/content_chain.py; рисунки — assets/js/chain.js
+tools/chain_drills.py      56 примеров практикума с решениями по шагам (ru, en, uz); проверка: python3 tools/chain_drills.py
 tools/content_neuron.py    статья «Формула одного нейрона» (ru, en, uz) в блоках страниц формул; числа проверяют check_numbers()
                            и check_practice() (17 примеров раздела «Практикум», блок "example" в build.render_blocks):
                            python3 tools/content_neuron.py

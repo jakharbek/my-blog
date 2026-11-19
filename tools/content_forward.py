@@ -36,9 +36,9 @@ TAGS = {
     "uz": ["Neyron tarmoqlar", "Chiziqli algebra", "ML asoslari"],
 }
 RELATED = {
-    "ru": [("../neuron/", "Формула одного нейрона", "Предыдущая статья"), ("../materials/ml-formulas/", "Шпаргалка формул нейросетей", "Материал")],
-    "en": [("../neuron/", "The formula of a single neuron", "Previous article"), ("../materials/ml-formulas/", "A cheat sheet of neural network formulas", "Material")],
-    "uz": [("../neuron/", "Bitta neyron formulasi", "Oldingi maqola"), ("../materials/ml-formulas/", "Neyron tarmoq formulalari qo‘llanmasi", "Material")],
+    "ru": [("../chain-rule/", "Цепное правило", "Следующая статья"), ("../neuron/", "Формула одного нейрона", "Предыдущая статья"), ("../materials/ml-formulas/", "Шпаргалка формул нейросетей", "Материал")],
+    "en": [("../chain-rule/", "The chain rule", "Next article"), ("../neuron/", "The formula of a single neuron", "Previous article"), ("../materials/ml-formulas/", "A cheat sheet of neural network formulas", "Material")],
+    "uz": [("../chain-rule/", "Zanjir qoidasi", "Keyingi maqola"), ("../neuron/", "Bitta neyron formulasi", "Oldingi maqola"), ("../materials/ml-formulas/", "Neyron tarmoq formulalari qo‘llanmasi", "Material")],
 }
 
 # The running example: a 2–3–2–1 network, ReLU in the hidden layers, the sigmoid at the output.
