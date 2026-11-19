@@ -1508,8 +1508,8 @@ def long_article(lang, nr, js):
              f'  <script defer src="{KATEX}/katex.min.js"></script>\n'
              f'  <script defer src="{KATEX}/contrib/auto-render.min.js"></script>\n'
              f'  <script defer src="{rel}assets/js/viz.js"></script>\n'
-             f'  <script defer src="{rel}assets/js/{js}.js"></script>\n'
-             f'  <script defer src="{rel}assets/js/materials.js"></script>\n')
+             + "".join(f'  <script defer src="{rel}assets/js/{name}.js"></script>\n' for name in ([js] + list(getattr(nr, "EXTRA_JS", []))))
+             + f'  <script defer src="{rel}assets/js/materials.js"></script>\n')
     title = p["title"][lang]
     return head(lang, f"{title} — {s['brand']}", html.escape(nr.DESCRIPTION[lang], quote=True), rel, page, "article", extra) + header(lang, rel, page, nav) + f"""<div class="progress" aria-hidden="true"><div id="progress"></div></div>
 

@@ -28,6 +28,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
   <script defer src="../../assets/js/viz.js"></script>
   <script defer src="../../assets/js/deriv.js"></script>
+  <script defer src="../../assets/js/deriv-motion.js"></script>
   <script defer src="../../assets/js/materials.js"></script>
   <script defer src="../../assets/js/markdown.js"></script>
   <script defer src="../../assets/js/assistant.js"></script>
@@ -74,17 +75,18 @@
       <a href="#definition"><span class="n">5</span>Hosila ta’rifi</a>
       <a href="#dx"><span class="n">6</span>dx va df nima: differensial va chiziqli yaqinlashish</a>
       <a href="#existence"><span class="n">7</span>Hosila qachon mavjud emas</a>
-      <a href="#table"><span class="n">8</span>Hosilalar jadvali — har bir satr ta’rif bo‘yicha</a>
-      <a href="#partial"><span class="n">9</span>Xususiy hosila: bittasidan boshqa barcha o‘zgaruvchilarni muzlatamiz</a>
-      <a href="#gradient"><span class="n">10</span>Gradiyent va nabla: barcha xususiy hosilalar bitta vektorda</a>
-      <a href="#directional"><span class="n">11</span>Yo‘nalish bo‘yicha hosila</a>
-      <a href="#differential"><span class="n">12</span>To‘liq differensial va chiziqli yaqinlashish</a>
-      <a href="#descent"><span class="n">13</span>Gradiyent tushish va ekstremumlarni izlash</a>
-      <a href="#mistakes"><span class="n">14</span>Tipik xatolar</a>
-      <a href="#worked"><span class="n">15</span>Tahlillar: oddiydan murakkabga, hammasi ta’rif bo‘yicha</a>
-      <a href="#practice"><span class="n">16</span>Amaliyot: 46 ta misol, hammasi ta’rif bo‘yicha</a>
-      <a href="#quiz"><span class="n">17</span>O‘zingizni tekshiring</a>
-      <a href="#summary"><span class="n">18</span>Xulosa</a>
+      <a href="#motion"><span class="n">8</span>Harakatdagi hosila: oddiydan murakkabgacha 7 ta animatsiya</a>
+      <a href="#table"><span class="n">9</span>Hosilalar jadvali — har bir satr ta’rif bo‘yicha</a>
+      <a href="#partial"><span class="n">10</span>Xususiy hosila: bittasidan boshqa barcha o‘zgaruvchilarni muzlatamiz</a>
+      <a href="#gradient"><span class="n">11</span>Gradiyent va nabla: barcha xususiy hosilalar bitta vektorda</a>
+      <a href="#directional"><span class="n">12</span>Yo‘nalish bo‘yicha hosila</a>
+      <a href="#differential"><span class="n">13</span>To‘liq differensial va chiziqli yaqinlashish</a>
+      <a href="#descent"><span class="n">14</span>Gradiyent tushish va ekstremumlarni izlash</a>
+      <a href="#mistakes"><span class="n">15</span>Tipik xatolar</a>
+      <a href="#worked"><span class="n">16</span>Tahlillar: oddiydan murakkabga, hammasi ta’rif bo‘yicha</a>
+      <a href="#practice"><span class="n">17</span>Amaliyot: 46 ta misol, hammasi ta’rif bo‘yicha</a>
+      <a href="#quiz"><span class="n">18</span>O‘zingizni tekshiring</a>
+      <a href="#summary"><span class="n">19</span>Xulosa</a>
     </nav>
   </aside>
 
@@ -189,6 +191,46 @@ for k in range(1, 4):
     <div class="eqd">$$f(x + \Delta x) - f(x) = \frac{f(x + \Delta x) - f(x)}{\Delta x}\cdot\Delta x\ \xrightarrow[\Delta x \to 0]{}\ f'(x)\cdot 0 = 0$$</div>
     <p>ya’ni $f(x + \Delta x) \to f(x)$. Teskarisi noto‘g‘ri: $|x|$ nolda uzluksiz, lekin differensiallanuvchi emas.</p>
     <div class="callout note"><b>Nozik misol</b><p>$f(x) = x^2\sin\frac1x$ funksiya (va $f(0) = 0$) nol atrofida cheksiz ko‘p marta tebranadi, lekin ta’rif bo‘yicha $\frac{f(\Delta x) - 0}{\Delta x} = \Delta x\sin\frac{1}{\Delta x} \to 0$ (chegaralangan ko‘paytuvchi cheksiz kichikka ko‘paytirilgan). Demak, $f'(0) = 0$ mavjud. Ta’rif «ko‘z bilan chamalash» intuitsiyasidan ishonchliroq.</p></div>
+
+    <h2 id="motion">Harakatdagi hosila: oddiydan murakkabgacha 7 ta animatsiya</h2>
+    <p>Yuqoridagi formulalar bitta narsani turli so‘zlar bilan aytadi: hosila — bu <b>o‘zgarish tezligi</b>, urinmaning qiyaligi, kichik qadamlarning cho‘zilish koeffitsiyenti. Quyida bu mohiyatni turli tomondan ko‘rsatadigan yettita interaktiv animatsiya bor — kundalik hayotdagidan (piyoda va mashina) eng umumiysigacha (hosila grafigi, ikkinchi tartibli hosila, zanjir qoidasi). Har birida ishga tushirish tugmasi, slayderlar va rasm bilan birga o‘zgaradigan izoh bor.</p>
+    <h3>1-animatsiya. Piyoda va mashina: vaqt bir xil — tezliklar har xil</h3>
+    <p>Ikki kishi ishdan uyga ketmoqda. Piyoda $400$ m narida yashaydi va bir tekis, $80$ m/daq tezlikda yuradi. Haydovchi $3$ km narida yashaydi: mashina tezlashadi, tez yuradi va uy oldida tormozlaydi. Ikkalasi ham <b>roppa-rosa $5$ daqiqadan keyin</b> uyda bo‘ladi. Vaqt bir xil, tezliklar esa butunlay har xil — va faqat o‘rtacha emas, balki har bir paytda ham.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-race" data-config="{}"></div><figcaption><b>1-animatsiya.</b> Yuqorida — yo‘l: yashil piyoda va to‘q sariq mashina, har birining o‘z uyi bor. Pastda — $s(t)$ yo‘l grafiklari. Punktir — joriy paytdagi urinma: uning qiyaligi shu paytdagi tezlikdir. «Boshlash» tugmasini bosing yoki vaqtni suring.</figcaption></figure>
+    <p>Nima ko‘rinadi. Piyodaning yo‘l grafigi — <b>to‘g‘ri chiziq</b>: har daqiqada u bir xil $80$ m yuradi, qiyalik hamma joyda bir xil, o‘rtacha tezlik oniy tezlik bilan mos tushadi. Mashinaning grafigi — <b>egri chiziq</b>: avval yotiq (tezlashish), o‘rtada tik (tez yurish), oxirida yana yotiq (tormozlash). Mashinaning o‘rtacha tezligi $3000 \div 5 = 600$ m/daq, lekin yo‘lning o‘rtasida spidometr $900$ m/daq ($54$ km/soat) ni ko‘rsatadi, start va uy oldida esa deyarli nolni. Oniy tezlik — urinmaning qiyaligi, ya’ni $s'(t)$ hosila.</p>
+    <div class="callout key"><b>Animatsiya nimani ko‘rsatdi</b><p>O‘rtacha tezlik «butun yo‘l davomida o‘rtacha qancha» degan savolga javob beradi va juda har xil safarlarni bir xil tasvirlaydi. Hosila esa «aynan hozir qanchalik tez» degan savolga javob beradi — va ularni har bir paytda farqlaydi.</p></div>
+    <h3>2-animatsiya. O‘rtacha tezlik spidometr ko‘rsatkichiga aylanadi</h3>
+    <p>Agar ta’rifga ko‘ra tezlik — yo‘lning vaqtga nisbati bo‘lsa, bir lahzada esa yo‘l nolga teng bo‘lsa, «aynan hozirgi» tezlikni qanday bilish mumkin? Javob — limit: $[t_0;\ t_0 + \Delta t]$ oraliqni olamiz, $\frac{\Delta s}{\Delta t}$ o‘rtacha tezlikni hisoblaymiz va $\Delta t$ ni kichraytiramiz.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-gauge" data-config="{}"></div><figcaption><b>2-animatsiya.</b> Chapda — mashina yo‘lining grafigi, $\Delta t$ oraliqdagi to‘q sariq kesuvchi (pastdagi chiziqcha) va $t_0$ paytdagi ko‘k urinma. O‘ngda — spidometr: to‘q sariq strelka — oraliqdagi o‘rtacha tezlik, ko‘k strelka — oniy tezlik. «Δt → 0» tugmasini bosing: oraliq qisqaradi, to‘q sariq strelka ko‘k strelkaga yetib oladi.</figcaption></figure>
+    <p>$\Delta t$ slayderi logarifmik: $2{,}5$ daqiqadan daqiqaning mingdan bir ulushlarigacha. Oraliq katta bo‘lsa, o‘rtacha tezlik oniy tezlikdan ancha farq qilishi mumkin (mashina ham tezlashishga, ham tormozlashga ulguradi). Oraliq juda kichik bo‘lsa, unda tezlik deyarli o‘zgarmaydi va o‘rtacha tezlik oniy tezlik bilan istalgan aniqlikda mos tushadi. Bu aynan $s'(t_0) = \lim\limits_{\Delta t \to 0}\frac{s(t_0 + \Delta t) - s(t_0)}{\Delta t}$ formulasi — haqiqiy spidometr ham yo‘lni juda qisqa vaqt oraliqlarida o‘lchab, xuddi shuni qiladi.</p>
+    <div class="callout key"><b>Animatsiya nimani ko‘rsatdi</b><p>Hosila — «nol vaqtdagi tezlik» emas, balki vaqt oralig‘i tobora qisqarganda <b>o‘rtacha tezlik intiladigan son</b>. Kesuvchi buriladi va urinma ustiga yotadi.</p></div>
+    <h3>3-animatsiya. Idish to‘lmoqda: suvning ko‘tarilish tezligi</h3>
+    <p>Idishga <b>o‘zgarmas</b> $Q$ sarf bilan suv quyiladi (har soniyada bir xil hajm). Bunda $h(t)$ sath notekis o‘sadi: bir xil soniya ichida tor qismda suv baland ko‘tariladi, keng qismda esa zo‘rg‘a sezilarli darajada. Ko‘tarilish tezligi — sathning vaqt bo‘yicha hosilasi.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-tank" data-config="{&quot;shape&quot;: &quot;vase&quot;}"></div><figcaption><b>3-animatsiya.</b> Chapda — idish va suv, o‘ngda — $h(t)$ sath grafigi va urinma. Idish shaklini tanlang: silindr, voronka yoki vaza. «Boshlash» tugmasini bosing va grafik qayerda tikroq bo‘lishini kuzating.</figcaption></figure>
+    <p>Nega shunday. Kichik $\Delta t$ vaqt ichida $Q\,\Delta t$ hajm oqib kiradi va u suv sirtining yuzi $A(h)$ va qalinligi $\Delta h$ bo‘lgan yupqa qatlam bo‘lib yotadi: $Q\,\Delta t \approx A(h)\,\Delta h$. $\Delta t$ ga bo‘lamiz va limitga o‘tamiz:</p>
+    <div class="eqd">$$\frac{dh}{dt} = \lim_{\Delta t \to 0}\frac{\Delta h}{\Delta t} = \frac{Q}{A(h)}$$</div>
+    <p>Silindrda $A$ o‘zgarmas va $h(t)$ grafigi — to‘g‘ri chiziq. Yuqoriga qarab kengayadigan voronkada suv avval tez, keyin tobora sekinroq ko‘tariladi — grafik yuqoriga qavariq. Vazada tezlik ikki marta o‘zgaradi: tor asosda tez, keng «qorin»da sekin, tor bo‘g‘izda yana tez.</p>
+    <div class="callout key"><b>Animatsiya nimani ko‘rsatdi</b><p>Hosila — kattalikning o‘zgarish tezligi va u tizimning o‘z holatiga bog‘liq bo‘lishi mumkin: suvning ko‘tarilish tezligi idishning joriy sathdagi kengligi bilan aniqlanadi. $h(t)$ grafigining shakli idishning shakli haqida — qiyalik orqali «hikoya qiladi».</p></div>
+    <h3>4-animatsiya. Mikroskop: egri chiziq to‘g‘ri chiziqqa aylanadi</h3>
+    <p>Umuman, nega egri chiziqning nuqtadagi qiyaligi haqida gapirish mumkin? Chunki silliq egri chiziq <b>nuqta yaqinida to‘g‘ri chiziqqa o‘xshaydi</b>. «Mikroskop» olib, ikkala o‘q bo‘yicha masshtabni bir xil saqlagan holda $x_0$ nuqta atrofini kattalashtiramiz.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-zoom" data-config="{}"></div><figcaption><b>4-animatsiya.</b> Qora egri chiziq — funksiya, ko‘k punktir — to‘q sariq nuqtadagi urinma. «Boshlash» tugmasini bosing: kattalashtirish $\times 1$ dan $\times 1000$ gacha o‘sadi. O‘ngdagi son egri chiziq oynada urinmadan qanchalik uzoqlashishini ko‘rsatadi. $|x|$ ni tanlang va sinish nuqtasida nima bo‘lishini ko‘ring.</figcaption></figure>
+    <p>$x^2$ va $\sin x$ uchun $1000$ marta kattalashtirilganda egri chiziqni urinmadan farqlab bo‘lmaydi: og‘ish oyna o‘lchamiga proporsional ravishda kamayadi (bu kesuvchi haqidagi bo‘limdagi ikkinchi tartibli «dum»). Bu to‘g‘ri chiziqning qiyaligi — $f'(x_0)$ hosila. $|x|$ uchun nolda manzara har qanday kattalashtirishda o‘zgarmaydi: qiyaliklari $-1$ va $+1$ bo‘lgan ikkita nur. Egri chiziq «yaqinlashadigan» to‘g‘ri chiziq yo‘q — hosila ham yo‘q.</p>
+    <div class="callout key"><b>Animatsiya nimani ko‘rsatdi</b><p><b>Differensiallanuvchi funksiya — mikroskop ostida to‘g‘ri chiziqqa aylanadigan funksiya.</b> Hosila — shu to‘g‘ri chiziqning qiyaligi. Sinish, uzilish yoki vertikal urinma — mikroskop to‘g‘ri chiziqni ko‘rsatmaydigan joylar.</p></div>
+    <h3>5-animatsiya. Hosila grafigini qiyaliklar bo‘yicha quramiz</h3>
+    <p>Har bir nuqtadagi hosila — son (urinmaning qiyaligi). Agar bu sonni barcha $x$ lar uchun yozib chiqsak, o‘z grafigiga ega yangi $f'(x)$ funksiya hosil bo‘ladi. Uni jonli quramiz.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-build" data-config="{}"></div><figcaption><b>5-animatsiya.</b> Yuqorida — $f$ grafigi va uning bo‘ylab harakatlanadigan urinma (funksiya o‘sganda yashil, kamayganda qizil). Pastda to‘q sariq chiziq har bir nuqtadagi qiyalik qiymatini chizadi — bu $f'(x)$ grafigi. Urinma gorizontal bo‘lgan joylar doirachalar bilan belgilangan.</figcaption></figure>
+    <p>$x^3 - 3x$ uchun hammasi birdaniga yaxshi ko‘rinadi: chetlarda funksiya tik o‘sadi — $f'$ katta va musbat; $x = -1$ dagi cho‘qqiga yaqinlashganda o‘sish sekinlashadi va $f'$ nolgacha tushadi; keyin funksiya kamayadi — $f' < 0$; $x = 1$ dagi chuqurlikda yana $f' = 0$, keyin esa o‘sish. Pastki grafik — $3x^2 - 3$ parabola: ta’rif bo‘yicha (amaliyot, № 6) $(x^3)' = 3x^2$, $(3x)' = 3$. $\sin x$ uchun pastki grafik — kosinus, $x^2$ uchun — $2x$ to‘g‘ri chiziq.</p>
+    <div class="callout key"><b>Animatsiya nimani ko‘rsatdi</b><p>Hosilaning ishorasi funksiya o‘sayotganini yoki kamayayotganini ko‘rsatadi, hosilaning nollari esa maksimum va minimumlarga nomzodlar. $f'$ grafigiga qarab, $f$ ning o‘zini ko‘rmasdan uning xatti-harakatini «o‘qish» mumkin.</p></div>
+    <h3>6-animatsiya. Otilgan to‘p: yo‘l, tezlik, tezlanish</h3>
+    <p>To‘p yuqoriga $20$ m/s tezlik bilan otildi (erkin tushish tezlanishini $10$ m/s² deb olamiz). Balandlik $h(t) = 20t - 5t^2$. Hosilani <b>yana bir marta</b> olish mumkin: balandlikning hosilasi — tezlik, tezlikning hosilasi — tezlanish.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-ball" data-config="{}"></div><figcaption><b>6-animatsiya.</b> Chapda — to‘p, ko‘k strelka — uning tezligi (yuqoriga yoki pastga, uzunligi kattalikka proporsional). O‘ngda uchta grafik: balandlik $h(t)$, tezlik $v(t) = h'(t)$ va tezlanish $a(t) = h''(t)$. Yuqori grafikdagi punktir — qiyaligi $v$ bo‘lgan urinma, o‘rtadagisida — qiyaligi $a$ bo‘lgan urinma.</figcaption></figure>
+    <p>Ta’rif bo‘yicha: $\frac{h(t + \Delta t) - h(t)}{\Delta t} = \frac{20\Delta t - 10t\,\Delta t - 5\Delta t^2}{\Delta t} = 20 - 10t - 5\Delta t \to 20 - 10t = v(t)$. Yana bir marta: $\frac{v(t + \Delta t) - v(t)}{\Delta t} = -10 = a$. To‘p yuqoriga uchayotganda $v > 0$ va kamayadi; eng yuqori nuqtada, $t = 2$ s da tezlik nolga teng (balandlik grafigiga urinma gorizontal), balandlik maksimal — $20$ m; keyin $v < 0$, to‘p tushadi. Tezlanish doim bir xil: $-10$ m/s².</p>
+    <div class="callout key"><b>Animatsiya nimani ko‘rsatdi</b><p>Hosilaning hosilasi — <b>ikkinchi tartibli hosila</b> $h''$ — o‘zgarish tezligining o‘zi qanday o‘zgarishini ko‘rsatadi: bu yerda bu tezlanish. Balandlikning maksimumi — birinchi hosila nolga aylanadigan joyda.</p></div>
+    <h3>7-animatsiya. Tishli g‘ildiraklar: zanjir qoidasida nega hosilalar ko‘paytiriladi</h3>
+    <p>$y = f(u)$, $u = g(x)$ murakkab funksiya — bu ikki juft tishli g‘ildirakdan iborat uzatma. Har bir bo‘g‘inning hosilasi — uning «uzatish soni»: bo‘g‘in chiqishi kirishiga qaraganda necha marta tezroq o‘zgaradi.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-gears" data-config="{}"></div><figcaption><b>7-animatsiya.</b> Uchta tishli g‘ildirak: $x$ (qora), $u$ (yashil), $y$ (to‘q sariq). Slayderlar bilan $\frac{du}{dx}$ va $\frac{dy}{du}$ uzatish sonlarini bering — g‘ildiraklarning o‘lchamlari o‘zgaradi. «Boshlash» tugmasini bosing va aylanishlar sonini solishtiring: $x$ bir marta aylanganda $y$ g‘ildirak $\frac{du}{dx}\cdot\frac{dy}{du}$ marta aylanadi.</figcaption></figure>
+    <p>Agar $u$ $x$ dan $2$ marta tezroq, $y$ esa $u$ dan $1{,}5$ marta tezroq o‘zgarsa, $y$ $x$ dan $2\cdot 1{,}5 = 3$ marta tezroq o‘zgaradi. Bu aynan $\frac{dy}{dx} = \frac{dy}{du}\cdot\frac{du}{dx}$ zanjir qoidasi — haqiqiy egri chiziqda uzatish sonlari shunchaki nuqtaga bog‘liq bo‘ladi. Batafsil keltirib chiqarish, tahlillar va amaliyot — <a href='../chain-rule/'>«Zanjir qoidasi»</a> maqolasida.</p>
+    <div class="callout key"><b>Animatsiya nimani ko‘rsatdi</b><p>Hosila — kichik o‘zgarishlarning cho‘zilish koeffitsiyenti. O‘zgarish ketma-ket bir nechta bo‘g‘indan o‘tganda, koeffitsiyentlar ko‘paytiriladi.</p></div>
 
     <h2 id="table">Hosilalar jadvali — har bir satr ta’rif bo‘yicha</h2>
     <p>Hosilalar jadvali «yodlash uchun» qoidalar to‘plami emas, balki har biri ta’rif bo‘yicha olingan natijalar xulosasi. Quyida — keltirib chiqarishlar; raqamlar amaliyotdagi batafsil yechimlarga ishora qiladi.</p>

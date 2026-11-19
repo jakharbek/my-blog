@@ -42,7 +42,8 @@ tools/content_chain.py     статья «Цепное правило» (ru, en,
                            10 разборов; формулы проверяет SymPy: python3 tools/content_chain.py; рисунки — assets/js/chain.js
 tools/chain_drills.py      56 примеров практикума с решениями по шагам (ru, en, uz); проверка: python3 tools/chain_drills.py
 tools/content_deriv.py     статья «Производная, частная производная и градиент» (ru, en, uz): всё по определению, 11 разборов;
-                           проверка: python3 tools/content_deriv.py; рисунки — assets/js/deriv.js
+                           проверка: python3 tools/content_deriv.py; рисунки — assets/js/deriv.js,
+                           7 анимаций раздела «Производная в движении» — assets/js/deriv-motion.js
 tools/deriv_drills.py      46 примеров практикума, решённых по определению (ru, en, uz); проверка: python3 tools/deriv_drills.py
 tools/content_neuron.py    статья «Формула одного нейрона» (ru, en, uz) в блоках страниц формул; числа проверяют check_numbers()
                            и check_practice() (17 примеров раздела «Практикум», блок "example" в build.render_blocks):

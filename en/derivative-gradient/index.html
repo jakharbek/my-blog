@@ -28,6 +28,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
   <script defer src="../../assets/js/viz.js"></script>
   <script defer src="../../assets/js/deriv.js"></script>
+  <script defer src="../../assets/js/deriv-motion.js"></script>
   <script defer src="../../assets/js/materials.js"></script>
   <script defer src="../../assets/js/markdown.js"></script>
   <script defer src="../../assets/js/assistant.js"></script>
@@ -74,17 +75,18 @@
       <a href="#definition"><span class="n">5</span>The definition of the derivative</a>
       <a href="#dx"><span class="n">6</span>What dx and df are: the differential and linear approximation</a>
       <a href="#existence"><span class="n">7</span>When the derivative does not exist</a>
-      <a href="#table"><span class="n">8</span>The table of derivatives: every row from the definition</a>
-      <a href="#partial"><span class="n">9</span>Partial derivatives: freeze every variable but one</a>
-      <a href="#gradient"><span class="n">10</span>The gradient and nabla: all partial derivatives in one vector</a>
-      <a href="#directional"><span class="n">11</span>The directional derivative</a>
-      <a href="#differential"><span class="n">12</span>The total differential and linear approximation</a>
-      <a href="#descent"><span class="n">13</span>Gradient descent and finding extrema</a>
-      <a href="#mistakes"><span class="n">14</span>Common mistakes</a>
-      <a href="#worked"><span class="n">15</span>Worked examples: from simple to hard, all from the definition</a>
-      <a href="#practice"><span class="n">16</span>Practice: 46 examples, all from the definition</a>
-      <a href="#quiz"><span class="n">17</span>Test yourself</a>
-      <a href="#summary"><span class="n">18</span>Summary</a>
+      <a href="#motion"><span class="n">8</span>The derivative in motion: 7 animations from simple to advanced</a>
+      <a href="#table"><span class="n">9</span>The table of derivatives: every row from the definition</a>
+      <a href="#partial"><span class="n">10</span>Partial derivatives: freeze every variable but one</a>
+      <a href="#gradient"><span class="n">11</span>The gradient and nabla: all partial derivatives in one vector</a>
+      <a href="#directional"><span class="n">12</span>The directional derivative</a>
+      <a href="#differential"><span class="n">13</span>The total differential and linear approximation</a>
+      <a href="#descent"><span class="n">14</span>Gradient descent and finding extrema</a>
+      <a href="#mistakes"><span class="n">15</span>Common mistakes</a>
+      <a href="#worked"><span class="n">16</span>Worked examples: from simple to hard, all from the definition</a>
+      <a href="#practice"><span class="n">17</span>Practice: 46 examples, all from the definition</a>
+      <a href="#quiz"><span class="n">18</span>Test yourself</a>
+      <a href="#summary"><span class="n">19</span>Summary</a>
     </nav>
   </aside>
 
@@ -189,6 +191,46 @@ for k in range(1, 4):
     <div class="eqd">$$f(x + \Delta x) - f(x) = \frac{f(x + \Delta x) - f(x)}{\Delta x}\cdot\Delta x\ \xrightarrow[\Delta x \to 0]{}\ f'(x)\cdot 0 = 0$$</div>
     <p>that is, $f(x + \Delta x) \to f(x)$. The converse is false: $|x|$ is continuous at zero but not differentiable.</p>
     <div class="callout note"><b>A subtle example</b><p>The function $f(x) = x^2\sin\frac1x$ (with $f(0) = 0$) oscillates infinitely often near zero, but by the definition $\frac{f(\Delta x) - 0}{\Delta x} = \Delta x\sin\frac{1}{\Delta x} \to 0$ (a bounded factor times an infinitesimal). So $f'(0) = 0$ exists. The definition is more reliable than intuition “by eye”.</p></div>
+
+    <h2 id="motion">The derivative in motion: 7 animations from simple to advanced</h2>
+    <p>The formulas above say the same thing in different words: the derivative is the <b>rate of change</b>, the slope of the tangent, the stretch factor of small steps. Below are seven interactive animations that show this essence from different angles — from the everyday (a walker and a car) to the most general (the graph of the derivative, the second derivative, the chain rule). Each has a start button, sliders and an explanation that changes together with the picture.</p>
+    <h3>Animation 1. A walker and a car: the same time, different speeds</h3>
+    <p>Two people leave work and head home. The walker lives $400$ m away and walks steadily at $80$ m/min. The driver lives $3$ km away: the car speeds up, drives fast and brakes near home. Both are home <b>exactly $5$ minutes later</b>. The time is the same, but the speeds are completely different — and not only on average, but at every moment.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-race" data-config="{}"></div><figcaption><b>Animation 1.</b> At the top is the road: the green walker and the orange car, each with their own home. At the bottom are the graphs of the distance $s(t)$. The dashed line is the tangent at the current moment: its slope is the speed at that moment. Press “Play” or move the time.</figcaption></figure>
+    <p>What we see. The walker’s distance graph is a <b>straight line</b>: every minute they cover the same $80$ m, the slope is the same everywhere, and the average speed equals the instantaneous one. The car’s graph is a <b>curve</b>: gentle at first (speeding up), steep in the middle (driving fast), gentle again at the end (braking). The car’s average speed is $3000 \div 5 = 600$ m/min, but in the middle of the trip the speedometer shows $900$ m/min ($54$ km/h), and at the start and near home almost zero. The instantaneous speed is the slope of the tangent, that is, the derivative $s'(t)$.</p>
+    <div class="callout key"><b>What the animation showed</b><p>The average speed answers the question “how much on average over the whole trip” and describes very different trips in the same way. The derivative answers the question “how fast right now” — and tells them apart at every moment.</p></div>
+    <h3>Animation 2. The average speed turns into the speedometer reading</h3>
+    <p>How can we know the speed “right now” if by definition speed is distance divided by time, and in an instant the distance is zero? The answer is a limit: we take the interval $[t_0,\ t_0 + \Delta t]$, compute the average speed $\frac{\Delta s}{\Delta t}$ and shrink $\Delta t$.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-gauge" data-config="{}"></div><figcaption><b>Animation 2.</b> On the left is the graph of the car’s distance, the orange secant over the interval $\Delta t$ (the strip at the bottom) and the blue tangent at the moment $t_0$. On the right is the speedometer: the orange needle is the average speed over the interval, the blue one is the instantaneous speed. Press “Δt → 0”: the interval shrinks and the orange needle catches up with the blue one.</figcaption></figure>
+    <p>The $\Delta t$ slider is logarithmic: from $2.5$ minutes down to thousandths of a minute. While the interval is large, the average speed can differ a lot from the instantaneous one (the car has time both to speed up and to brake). When the interval is tiny, the speed barely changes on it, and the average speed matches the instantaneous one to any desired accuracy. This is exactly the formula $s'(t_0) = \lim\limits_{\Delta t \to 0}\frac{s(t_0 + \Delta t) - s(t_0)}{\Delta t}$ — a real speedometer does just that, measuring the distance over very short time spans.</p>
+    <div class="callout key"><b>What the animation showed</b><p>The derivative is not “speed over zero time” but <b>the number the average speed approaches</b> as the time interval gets shorter and shorter. The secant turns and lies down on the tangent.</p></div>
+    <h3>Animation 3. Filling a vessel: how fast the water rises</h3>
+    <p>Water is poured into a vessel at a <b>constant</b> rate $Q$ (the same volume every second). The level $h(t)$, however, rises unevenly: in the same second the water climbs high in a narrow part and barely moves in a wide one. The rate at which it rises is the derivative of the level with respect to time.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-tank" data-config="{&quot;shape&quot;: &quot;vase&quot;}"></div><figcaption><b>Animation 3.</b> On the left are the vessel and the water, on the right the graph of the level $h(t)$ and the tangent. Choose the shape of the vessel: cylinder, funnel or vase. Press “Play” and watch where the graph becomes steeper.</figcaption></figure>
+    <p>Why. During a short time $\Delta t$ a volume $Q\,\Delta t$ flows in, and it settles as a thin layer with the water surface area $A(h)$ and thickness $\Delta h$: $Q\,\Delta t \approx A(h)\,\Delta h$. Divide by $\Delta t$ and pass to the limit:</p>
+    <div class="eqd">$$\frac{dh}{dt} = \lim_{\Delta t \to 0}\frac{\Delta h}{\Delta t} = \frac{Q}{A(h)}$$</div>
+    <p>For a cylinder $A$ is constant, and the graph of $h(t)$ is a straight line. In a funnel that widens upwards the water rises fast at first and then more and more slowly — the graph is concave down. In a vase the speed changes twice: fast in the narrow base, slow in the wide “belly”, fast again in the narrow neck.</p>
+    <div class="callout key"><b>What the animation showed</b><p>The derivative is the rate of change of a quantity, and it can depend on the state of the system itself: how fast the water rises is determined by the width of the vessel at the current level. The shape of the graph of $h(t)$ “tells” the shape of the vessel — through its slope.</p></div>
+    <h3>Animation 4. The microscope: a curve becomes a straight line</h3>
+    <p>Why can we speak of the slope of a curve at a point at all? Because a smooth curve <b>looks like a straight line near a point</b>. Let us take a “microscope” and magnify the neighbourhood of the point $x_0$, keeping the same scale on both axes.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-zoom" data-config="{}"></div><figcaption><b>Animation 4.</b> The black curve is the function, the blue dashed line is the tangent at the orange point. Press “Play”: the magnification grows from $\times 1$ to $\times 1000$. The number on the right shows how far the curve departs from the tangent inside the window. Choose $|x|$ and see what happens at the kink.</figcaption></figure>
+    <p>For $x^2$ and $\sin x$ at a magnification of $1000$ the curve can no longer be told apart from the tangent: the deviation falls in proportion to the window size (this is the second-order “tail” from the section on the secant). The slope of this line is the derivative $f'(x_0)$. For $|x|$ at zero the picture does not change at any magnification: two rays with slopes $-1$ and $+1$. There is no line the curve “converges” to — and no derivative.</p>
+    <div class="callout key"><b>What the animation showed</b><p><b>A differentiable function is a function that becomes a straight line under a microscope.</b> The derivative is the slope of that line. A kink, a discontinuity or a vertical tangent are places where the microscope shows no line.</p></div>
+    <h3>Animation 5. Building the graph of the derivative from slopes</h3>
+    <p>The derivative at each point is a number (the slope of the tangent). If we record this number for every $x$, we get a new function $f'(x)$ with its own graph. Let us build it live.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-build" data-config="{}"></div><figcaption><b>Animation 5.</b> At the top are the graph of $f$ and the tangent that rides along it (green when the function increases, red when it decreases). At the bottom the orange line draws the value of the slope at every point — this is the graph of $f'(x)$. Circles mark the places where the tangent is horizontal.</figcaption></figure>
+    <p>For $x^3 - 3x$ everything is visible at once: at the edges the function rises steeply — $f'$ is large and positive; towards the peak at $x = -1$ the rise slows down, and $f'$ drops to zero; then the function decreases — $f' < 0$; at the trough at $x = 1$ again $f' = 0$, and then it rises. The lower graph is the parabola $3x^2 - 3$: by the definition (practice, No. 6) $(x^3)' = 3x^2$, $(3x)' = 3$. For $\sin x$ the lower graph is the cosine, for $x^2$ the line $2x$.</p>
+    <div class="callout key"><b>What the animation showed</b><p>The sign of the derivative shows whether the function increases or decreases, and the zeros of the derivative are candidates for maxima and minima. From the graph of $f'$ one can “read” the behaviour of $f$ without seeing $f$ itself.</p></div>
+    <h3>Animation 6. A thrown ball: distance, velocity, acceleration</h3>
+    <p>A ball is thrown upwards at $20$ m/s (we take the acceleration due to gravity to be $10$ m/s²). Its height is $h(t) = 20t - 5t^2$. The derivative can be taken <b>once more</b>: the derivative of height is velocity, the derivative of velocity is acceleration.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-ball" data-config="{}"></div><figcaption><b>Animation 6.</b> On the left is the ball; the blue arrow is its velocity (up or down, its length proportional to the magnitude). On the right are three graphs: the height $h(t)$, the velocity $v(t) = h'(t)$ and the acceleration $a(t) = h''(t)$. The dashed line on the top graph is the tangent with slope $v$, on the middle one the tangent with slope $a$.</figcaption></figure>
+    <p>By the definition: $\frac{h(t + \Delta t) - h(t)}{\Delta t} = \frac{20\Delta t - 10t\,\Delta t - 5\Delta t^2}{\Delta t} = 20 - 10t - 5\Delta t \to 20 - 10t = v(t)$. Once more: $\frac{v(t + \Delta t) - v(t)}{\Delta t} = -10 = a$. While the ball flies up, $v > 0$ and decreasing; at the top, at $t = 2$ s, the velocity is zero (the tangent to the height graph is horizontal) and the height is at its maximum — $20$ m; then $v < 0$ and the ball falls. The acceleration is the same all the time: $-10$ m/s².</p>
+    <div class="callout key"><b>What the animation showed</b><p>The derivative of the derivative — the <b>second derivative</b> $h''$ — shows how the rate of change itself changes: here it is the acceleration. The maximum height is where the first derivative becomes zero.</p></div>
+    <h3>Animation 7. Gears: why derivatives multiply in the chain rule</h3>
+    <p>A composite function $y = f(u)$, $u = g(x)$ is a transmission of two pairs of gears. The derivative of each link is its “gear ratio”: how many times faster the output of the link changes than its input.</p>
+    <figure class="viz"><div class="fv" data-viz="dm-gears" data-config="{}"></div><figcaption><b>Animation 7.</b> Three gears: $x$ (black), $u$ (green), $y$ (orange). Use the sliders to set the gear ratios $\frac{du}{dx}$ and $\frac{dy}{du}$ — the sizes of the gears change. Press “Play” and compare the number of turns: for one turn of $x$ the gear $y$ makes $\frac{du}{dx}\cdot\frac{dy}{du}$ turns.</figcaption></figure>
+    <p>If $u$ changes $2$ times faster than $x$, and $y$ changes $1.5$ times faster than $u$, then $y$ changes $2\cdot 1.5 = 3$ times faster than $x$. This is the chain rule $\frac{dy}{dx} = \frac{dy}{du}\cdot\frac{du}{dx}$ — for a real curve the gear ratios simply depend on the point. A detailed derivation, walkthroughs and practice are in the article <a href='../chain-rule/'>“The chain rule”</a>.</p>
+    <div class="callout key"><b>What the animation showed</b><p>The derivative is the stretch factor of small changes. When a change passes through several links in a row, the factors multiply.</p></div>
 
     <h2 id="table">The table of derivatives: every row from the definition</h2>
     <p>The table of derivatives is not a set of rules “to memorise” but a summary of results, each obtained from the definition. Below are the derivations; the numbers refer to the detailed solutions in the practice section.</p>
