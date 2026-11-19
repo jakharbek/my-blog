@@ -91,6 +91,24 @@
     <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/chain-rule/"/>
   </url>
   <url>
+    <loc>https://javharbek.uz/ru/derivative-gradient/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/derivative-gradient/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/derivative-gradient/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/derivative-gradient/"/>
+  </url>
+  <url>
+    <loc>https://javharbek.uz/en/derivative-gradient/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/derivative-gradient/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/derivative-gradient/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/derivative-gradient/"/>
+  </url>
+  <url>
+    <loc>https://javharbek.uz/uz/derivative-gradient/</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/derivative-gradient/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/derivative-gradient/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://javharbek.uz/uz/derivative-gradient/"/>
+  </url>
+  <url>
     <loc>https://javharbek.uz/ru/about/</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://javharbek.uz/ru/about/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://javharbek.uz/en/about/"/>

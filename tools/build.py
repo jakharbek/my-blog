@@ -20,6 +20,7 @@ import content_mae_mse as mm
 import content_neuron as nr
 import content_forward as fw
 import content_chain as cr
+import content_deriv as dv
 import workbook_ce
 from content_sigmoid import ARTICLE, TABLE_ROWS
 
@@ -135,6 +136,7 @@ COURSE_URL = "https://jakharbek.github.io/ml_gradient_boosting/"
 MATH_COURSE_URL = "https://jakharbek.github.io/math_lessons/"
 MATH_COURSE = {"ru": MATH_COURSE_URL, "en": MATH_COURSE_URL + "en/", "uz": MATH_COURSE_URL + "uz/"}
 POSTS = [
+    dict(slug=dv.SLUG, topic="math", date=dv.DATE, mins=dv.MINUTES, title=dv.TITLE, excerpt=dv.EXCERPT),
     dict(slug=cr.SLUG, topic="math", date=cr.DATE, mins=cr.MINUTES, title=cr.TITLE, excerpt=cr.EXCERPT),
     dict(slug=fw.SLUG, topic="ml", date=fw.DATE, mins=fw.MINUTES, title=fw.TITLE, excerpt=fw.EXCERPT),
     dict(slug=nr.SLUG, topic="ml", date=nr.DATE, mins=nr.MINUTES, title=nr.TITLE, excerpt=nr.EXCERPT),
@@ -1561,6 +1563,10 @@ def forward_article(lang):
 def chain_article(lang):
     return long_article(lang, cr, "chain")
 
+
+def deriv_article(lang):
+    return long_article(lang, dv, "deriv")
+
 def build_formula(fid):
     mod = load_formula(fid)
     assert fid in CARD, f"{fid}: no card with this id in content_formulas.py"
@@ -1640,7 +1646,7 @@ def main():
         build_formula(fid)
     workbook_ce.build()  # assets/files/cross-entropy-practice-<lang>.xlsx (before the page: it shows their sizes)
     for lang in LANGS:
-        pages = {"": home, "sigmoid": article, nr.SLUG: neuron_article, fw.SLUG: forward_article, cr.SLUG: chain_article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
+        pages = {"": home, "sigmoid": article, nr.SLUG: neuron_article, fw.SLUG: forward_article, cr.SLUG: chain_article, dv.SLUG: deriv_article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
                  f"materials/{mm.SLUG}": material_mae_mse, f"materials/{cw.SLUG}": material_ce_workbook}
         for sub, render in pages.items():
             (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)

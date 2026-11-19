@@ -157,7 +157,7 @@ add(1, "dp", r"f(x) = x^2,\quad x_0 = 3", [
     ("cut", r"\frac{\Delta f}{\Delta x} = 6 + \Delta x"), ("lim", r"f'(3) = \lim_{\Delta x \to 0}(6 + \Delta x) = 6"), ("check", r"f'(x) = 2x,\quad f'(3) = 2\cdot 3 = 6")],
     r"f'(3) = 6", [("qp", "x**2", "x", "3", "6+D", "6")])
 add(2, "d", r"f(x) = 2x^2 - 3x + 1", [
-    ("def", DEF), ("inc", r"\Delta f = 2(x + \Delta x)^2 - 3(x + \Delta x) + 1 - (2x^2 - 3x + 1) = 4x\,\Delta x + 2\Delta x^2 - 3\Delta x"),
+    ("def", DEF), ("inc", r"\begin{aligned}\Delta f &= 2(x + \Delta x)^2 - 3(x + \Delta x) + 1 - (2x^2 - 3x + 1)\\ &= 4x\,\Delta x + 2\Delta x^2 - 3\Delta x\end{aligned}"),
     ("cut", r"\frac{\Delta f}{\Delta x} = 4x - 3 + 2\Delta x"), ("lim", r"f'(x) = 4x - 3")], r"(2x^2 - 3x + 1)' = 4x - 3",
     [("q", "2*x**2-3*x+1", "x", "4*x-3+2*D", "4*x-3")])
 add(2, "d", r"f(x) = x^3", [
@@ -178,7 +178,7 @@ add(2, "d", r"f(x) = x^4", [
     [("q", "x**4", "x", "4*x**3+6*x**2*D+4*x*D**2+D**3", "4*x**3")])
 add(2, "dp", r"f(x) = x^3,\quad x_0 = -1", [
     ("point", r"f'(-1) = \lim_{\Delta x \to 0}\frac{f(-1 + \Delta x) - f(-1)}{\Delta x}"),
-    ("inc", r"\Delta f = (-1 + \Delta x)^3 - (-1) = -1 + 3\Delta x - 3\Delta x^2 + \Delta x^3 + 1 = 3\Delta x - 3\Delta x^2 + \Delta x^3"),
+    ("inc", r"\begin{aligned}\Delta f &= (-1 + \Delta x)^3 - (-1)\\ &= -1 + 3\Delta x - 3\Delta x^2 + \Delta x^3 + 1 = 3\Delta x - 3\Delta x^2 + \Delta x^3\end{aligned}"),
     ("cut", r"\frac{\Delta f}{\Delta x} = 3 - 3\Delta x + \Delta x^2"), ("lim", r"f'(-1) = 3"), ("check", r"f'(x) = 3x^2,\quad f'(-1) = 3\cdot(-1)^2 = 3")],
     r"f'(-1) = 3", [("qp", "x**3", "x", "-1", "3-3*D+D**2", "3")])
 
@@ -204,7 +204,7 @@ add(3, "d", r"f(x) = \sqrt{x + 4},\quad x > -4", [
     ("cut", r"\frac{\Delta f}{\Delta x} = \frac{1}{\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}}"), ("lim", r"f'(x) = \frac{1}{2\sqrt{x + 4}}")], r"f'(x) = \frac{1}{2\sqrt{x + 4}}",
     [("q", "sqrt(x+4)", "x", "1/(sqrt(x+4+D)+sqrt(x+4))", "1/(2*sqrt(x+4))")])
 add(3, "d", r"f(x) = \frac{x}{x + 1},\quad x \ne -1", [
-    ("def", DEF), ("common", r"\Delta f = \frac{x + \Delta x}{x + 1 + \Delta x} - \frac{x}{x + 1} = \frac{(x + \Delta x)(x + 1) - x(x + 1 + \Delta x)}{(x + 1 + \Delta x)(x + 1)} = \frac{\Delta x}{(x + 1 + \Delta x)(x + 1)}"),
+    ("def", DEF), ("common", r"\begin{aligned}\Delta f &= \frac{x + \Delta x}{x + 1 + \Delta x} - \frac{x}{x + 1}\\ &= \frac{(x + \Delta x)(x + 1) - x(x + 1 + \Delta x)}{(x + 1 + \Delta x)(x + 1)} = \frac{\Delta x}{(x + 1 + \Delta x)(x + 1)}\end{aligned}"),
     ("cut", r"\frac{\Delta f}{\Delta x} = \frac{1}{(x + 1 + \Delta x)(x + 1)}"), ("lim", r"f'(x) = \frac{1}{(x + 1)^2}")], r"f'(x) = \frac{1}{(x + 1)^2}",
     [("q", "x/(x+1)", "x", "1/((x+1+D)*(x+1))", "1/(x+1)**2")])
 add(3, "dp", r"f(x) = \sqrt{x},\quad x_0 = 4", [
@@ -233,7 +233,7 @@ add(3, "d", r"f(x) = \cos x", [
     ("known", r"\lim_{t \to 0}\frac{\sin t}{t} = 1"), ("lim", r"f'(x) = -\sin x")], r"(\cos x)' = -\sin x",
     [("q", "cos(x)", "x", "-sin(x+D/2)*sin(D/2)/(D/2)", "-sin(x)")])
 add(4, "d", r"f(x) = \ln x,\quad x > 0", [
-    ("def", DEF), ("factor", r"\Delta f = \ln(x + \Delta x) - \ln x = \ln\Big(1 + \frac{\Delta x}{x}\Big),\qquad \frac{\Delta f}{\Delta x} = \frac1x\cdot\frac{\ln(1 + \Delta x/x)}{\Delta x/x}"),
+    ("def", DEF), ("factor", r"\begin{gathered}\Delta f = \ln(x + \Delta x) - \ln x = \ln\Big(1 + \frac{\Delta x}{x}\Big)\\ \frac{\Delta f}{\Delta x} = \frac1x\cdot\frac{\ln(1 + \Delta x/x)}{\Delta x/x}\end{gathered}"),
     ("known", r"\lim_{t \to 0}\frac{\ln(1 + t)}{t} = 1"), ("lim", r"f'(x) = \frac1x\cdot 1 = \frac1x")], r"(\ln x)' = \frac1x",
     [("q", "log(x)", "x", "(1/x)*log(1+D/x)/(D/x)", "1/x")])
 add(4, "d", r"f(x) = \sin 3x", [
@@ -300,8 +300,8 @@ add(4, "pd", r"f(x, y, z) = xyz", [
     ("incz", r"\Delta_z f = xy(z + \Delta z) - xyz = xy\,\Delta z\ \Rightarrow\ \frac{\partial f}{\partial z} = xy")],
     r"f_x = yz,\quad f_y = xz,\quad f_z = xy", [("q2", "x*y*z", "x", "y*z", "y*z"), ("q2", "x*y*z", "y", "x*z", "x*z"), ("q2", "x*y*z", "z", "x*y", "x*y")])
 add(3, "pdp", r"f(x, y) = x^2 + y^2,\quad (1;\ 2)", [
-    ("incx", r"\frac{f(1 + \Delta x,\ 2) - f(1,\ 2)}{\Delta x} = \frac{(1 + \Delta x)^2 + 4 - 5}{\Delta x} = \frac{2\Delta x + \Delta x^2}{\Delta x} = 2 + \Delta x\ \to\ 2"),
-    ("incy", r"\frac{f(1,\ 2 + \Delta y) - f(1,\ 2)}{\Delta y} = \frac{1 + (2 + \Delta y)^2 - 5}{\Delta y} = \frac{4\Delta y + \Delta y^2}{\Delta y} = 4 + \Delta y\ \to\ 4")],
+    ("incx", r"\begin{aligned}\frac{f(1 + \Delta x,\ 2) - f(1,\ 2)}{\Delta x} &= \frac{(1 + \Delta x)^2 + 4 - 5}{\Delta x}\\ &= \frac{2\Delta x + \Delta x^2}{\Delta x} = 2 + \Delta x\ \to\ 2\end{aligned}"),
+    ("incy", r"\begin{aligned}\frac{f(1,\ 2 + \Delta y) - f(1,\ 2)}{\Delta y} &= \frac{1 + (2 + \Delta y)^2 - 5}{\Delta y}\\ &= \frac{4\Delta y + \Delta y^2}{\Delta y} = 4 + \Delta y\ \to\ 4\end{aligned}")],
     r"f_x(1;\ 2) = 2,\quad f_y(1;\ 2) = 4", [("qp2", "x**2+y**2", "x", {"x": 1, "y": 2}, "2+D", "2"), ("qp2", "x**2+y**2", "y", {"x": 1, "y": 2}, "4+D", "4")])
 
 # ===== 38–41: the gradient =====
@@ -311,7 +311,7 @@ add(3, "gr", r"f(x, y) = x^2 + y^2,\quad (3;\ 4)", [
     ("grad", r"\nabla f(3;\ 4) = (6;\ 8),\qquad |\nabla f| = \sqrt{36 + 64} = 10")], r"\nabla f(3;\ 4) = (6;\ 8)",
     [("qp2", "x**2+y**2", "x", {"x": 3, "y": 4}, "6+D", "6"), ("qp2", "x**2+y**2", "y", {"x": 3, "y": 4}, "8+D", "8")])
 add(4, "gr", r"f(x, y) = x^2 - xy,\quad (2;\ 1)", [
-    ("incx", r"\Delta_x f = (x + \Delta x)^2 - (x + \Delta x)y - x^2 + xy = (2x - y)\Delta x + \Delta x^2\ \Rightarrow\ f_x = 2x - y"),
+    ("incx", r"\begin{aligned}\Delta_x f &= (x + \Delta x)^2 - (x + \Delta x)y - x^2 + xy\\ &= (2x - y)\Delta x + \Delta x^2\ \Rightarrow\ f_x = 2x - y\end{aligned}"),
     ("incy", r"\Delta_y f = x^2 - x(y + \Delta y) - x^2 + xy = -x\,\Delta y\ \Rightarrow\ f_y = -x"),
     ("grad", r"\nabla f = (2x - y;\ -x),\qquad \nabla f(2;\ 1) = (3;\ -2)")], r"\nabla f(2;\ 1) = (3;\ -2)",
     [("q2", "x**2-x*y", "x", "2*x-y+D", "2*x-y"), ("q2", "x**2-x*y", "y", "-x", "-x")])
@@ -337,7 +337,7 @@ add(4, "dir", r"f(x, y) = xy,\quad (1;\ 2),\quad \mathbf{v} = (1;\ 1)", [
     r"D_{\mathbf{u}} f = \frac{3}{\sqrt2} \approx 2{,}121", [("dir", "x*y", {"x": 1, "y": 2}, ("1/sqrt(2)", "1/sqrt(2)"), "3/sqrt(2)+t/2", "3/sqrt(2)")])
 add(4, "lin", r"f(x, y) = x^2 + y^2,\quad (3;\ 4),\quad \Delta x = 0{,}1,\ \Delta y = -0{,}2", [
     ("gradpt", r"f_x = 2x = 6,\qquad f_y = 2y = 8"), ("lin", r"df = 6\cdot 0{,}1 + 8\cdot(-0{,}2) = 0{,}6 - 1{,}6 = -1"),
-    ("exact", r"\Delta f = f(3{,}1;\ 3{,}8) - f(3;\ 4) = 9{,}61 + 14{,}44 - 25 = -0{,}95;\qquad \Delta f - df = \Delta x^2 + \Delta y^2 = 0{,}05")],
+    ("exact", r"\begin{gathered}\Delta f = f(3{,}1;\ 3{,}8) - f(3;\ 4) = 9{,}61 + 14{,}44 - 25 = -0{,}95\\ \Delta f - df = \Delta x^2 + \Delta y^2 = 0{,}05\end{gathered}")],
     r"df = -1,\quad \Delta f = -0{,}95", [("num", "x**2+y**2", {"x": 3, "y": 4}, (0.1, -0.2), -1, -0.95)])
 add(5, "gd", r"f(x, y) = x^2 + y^2,\quad \mathbf{p} = (3;\ 4),\quad \eta = 0{,}1", [
     ("gradpt", r"\nabla f(3;\ 4) = (6;\ 8)"), ("step", r"\mathbf{p} \leftarrow (3;\ 4) - 0{,}1\cdot(6;\ 8) = (2{,}4;\ 3{,}2)"),

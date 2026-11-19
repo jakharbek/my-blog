@@ -25,6 +25,7 @@
       flat: "В этой точке $\\nabla f = \\mathbf{0}$: функция «плоская» во всех направлениях — это кандидат в минимум, максимум или седло.",
       eta: "Шаг $\\eta$", start: "Старт", go: "Спуск", reset: "Сброс", step: "шаг", path: "путь спуска",
       descNote: (k, p, f, m) => `Шаг ${k}: $\\mathbf{p} = ${p}$, $f = ${f}$. Для этой чаши каждый шаг умножает $x$ на $${m}$, а $y$ — на свой множитель (см. текст).`,
+      show: "Показать все решения", hide: "Скрыть все решения",
       thK: "шаг", thP: "$\\mathbf{p}$", thG: "$\\nabla f(\\mathbf{p})$", thF: "$f(\\mathbf{p})$",
     },
     en: {
@@ -43,6 +44,7 @@
       flat: "Here $\\nabla f = \\mathbf{0}$: the function is “flat” in every direction — a candidate for a minimum, a maximum or a saddle.",
       eta: "Step $\\eta$", start: "Start", go: "Descend", reset: "Reset", step: "step", path: "descent path",
       descNote: (k, p, f, m) => `Step ${k}: $\\mathbf{p} = ${p}$, $f = ${f}$. For this bowl every step multiplies $x$ by $${m}$, and $y$ by its own factor (see the text).`,
+      show: "Show all solutions", hide: "Hide all solutions",
       thK: "step", thP: "$\\mathbf{p}$", thG: "$\\nabla f(\\mathbf{p})$", thF: "$f(\\mathbf{p})$",
     },
     uz: {
@@ -61,6 +63,7 @@
       flat: "Bu nuqtada $\\nabla f = \\mathbf{0}$: funksiya barcha yo‘nalishlarda «tekis» — minimum, maksimum yoki egar nuqtasiga nomzod.",
       eta: "$\\eta$ qadam", start: "Start", go: "Tushish", reset: "Qaytarish", step: "qadam", path: "tushish yo‘li",
       descNote: (k, p, f, m) => `${k}-qadam: $\\mathbf{p} = ${p}$, $f = ${f}$. Bu kosa uchun har bir qadam $x$ ni $${m}$ ga, $y$ ni esa o‘z ko‘paytuvchisiga ko‘paytiradi (matnga qarang).`,
+      show: "Barcha yechimlarni ko‘rsatish", hide: "Barcha yechimlarni yashirish",
       thK: "qadam", thP: "$\\mathbf{p}$", thG: "$\\nabla f(\\mathbf{p})$", thF: "$f(\\mathbf{p})$",
     },
   }[FV.lang] || {};
@@ -316,5 +319,19 @@
     const fmtV = (v) => "(" + v.map((x) => n(x, 3)).join(FV.lang === "en" ? ", " : "; ") + ")";
     plot.onresize = debounce(() => { bg = false; draw(); h._place(); });
     reset();
+  });
+  // ---------- 6. the practice: open or close every solution at once ----------
+  FV.widget("dr-solutions", (el) => {
+    el.classList.add("cr-sol-bar");
+    const all = () => Array.from(document.querySelectorAll("details.cr-sol"));
+    const b = FV.ui.button({ label: L.show, onclick: () => { const open = all().some((d) => !d.open); all().forEach((d) => { d.open = open; }); sync(); } });
+    function sync() {
+      const open = all().every((d) => d.open);
+      b.setLabel(open ? L.hide : L.show);
+      b.el.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    document.addEventListener("toggle", (e) => { if (e.target.matches && e.target.matches("details.cr-sol")) sync(); }, true);
+    el.textContent = ""; el.append(b.el);
+    sync();
   });
 })();
