@@ -55,9 +55,9 @@
       if (s.includes(DEC)) s = s.replace(new RegExp("\\" + DEC + "?0+$"), "");
       return s;
     }
-    const e = Math.floor(Math.log10(a));
-    const m = v / Math.pow(10, e);
-    const ms = FV.fmt(m, sig - 1).replace(new RegExp("\\" + DEC + "?0+$"), "");
+    let e = Math.floor(Math.log10(a));
+    let ms = FV.fmt(v / Math.pow(10, e), sig - 1).replace(new RegExp("\\" + DEC + "?0+$"), "");
+    if (Math.abs(+ms.replace("−", "-").replace(DEC, ".")) >= 10) { e += 1; ms = FV.fmt(v / Math.pow(10, e), sig - 1).replace(new RegExp("\\" + DEC + "?0+$"), ""); }
     return ms + "·10" + String(e).split("").map((c) => SUP[c]).join("");
   };
   FV.clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -509,7 +509,7 @@
       const up = () => { drag = false; g.classList.remove("active"); };
       g.addEventListener("pointerup", up); g.addEventListener("pointercancel", up);
       g.addEventListener("keydown", (e) => {
-        const sx = (plot.o.x[1] - plot.o.x[0]) / 100, sy = (plot.o.y[1] - plot.o.y[0]) / 100;
+        const sx = o.step ? o.step[0] : (plot.o.x[1] - plot.o.x[0]) / 100, sy = o.step ? o.step[1] : (plot.o.y[1] - plot.o.y[0]) / 100;
         const d = { ArrowLeft: [-sx, 0], ArrowRight: [sx, 0], ArrowUp: [0, sy], ArrowDown: [0, -sy] }[e.key];
         if (d) { e.preventDefault(); apply(h.x + d[0], h.y + d[1]); }
       });
@@ -745,11 +745,12 @@
       const api = {
         el: FV.h("label", { class: "fv-slider" + (o.wide ? " wide" : "") }, FV.rich(o.label, "span"), input, out),
         get value() { return o.map ? o.map(+input.value) : +input.value; },
-        set(v) { input.value = o.unmap ? o.unmap(v) : v; out.textContent = fmt(api.value); },
+        set(v) { input.value = o.unmap ? o.unmap(v) : v; out.textContent = fmt(api.value); input.setAttribute("aria-valuetext", out.textContent); },
         input,
       };
       out.textContent = fmt(api.value);
-      input.addEventListener("input", () => { out.textContent = fmt(api.value); o.oninput && o.oninput(api.value); });
+      input.setAttribute("aria-valuetext", out.textContent);
+      input.addEventListener("input", () => { out.textContent = fmt(api.value); input.setAttribute("aria-valuetext", out.textContent); o.oninput && o.oninput(api.value); });
       return api;
     },
     seg(o) {

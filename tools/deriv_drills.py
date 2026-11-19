@@ -215,7 +215,7 @@ add(3, "d", r"f(x) = \sqrt{x},\quad x > 0", [
     ("cut", r"\frac{\Delta f}{\Delta x} = \frac{1}{\sqrt{x + \Delta x} + \sqrt{x}}"), ("lim", r"f'(x) = \frac{1}{\sqrt{x} + \sqrt{x}} = \frac{1}{2\sqrt{x}}")],
     r"(\sqrt{x})' = \frac{1}{2\sqrt{x}}", [("q", "sqrt(x)", "x", "1/(sqrt(x+D)+sqrt(x))", "1/(2*sqrt(x))")])
 add(3, "d", r"f(x) = \sqrt{x + 4},\quad x > -4", [
-    ("def", DEF), ("conj", r"\frac{\sqrt{x + 4 + \Delta x} - \sqrt{x + 4}}{\Delta x}\cdot\frac{\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}}{\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}} = \frac{(x + 4 + \Delta x) - (x + 4)}{\Delta x\big(\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}\big)}"),
+    ("def", DEF), ("conj", r"\begin{aligned}&\frac{\sqrt{x + 4 + \Delta x} - \sqrt{x + 4}}{\Delta x}\cdot\frac{\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}}{\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}}\\ &\qquad= \frac{(x + 4 + \Delta x) - (x + 4)}{\Delta x\big(\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}\big)}\end{aligned}"),
     ("cut", r"\frac{\Delta f}{\Delta x} = \frac{1}{\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}}"), ("lim", r"f'(x) = \frac{1}{2\sqrt{x + 4}}")], r"f'(x) = \frac{1}{2\sqrt{x + 4}}",
     [("q", "sqrt(x+4)", "x", "1/(sqrt(x+4+D)+sqrt(x+4))", "1/(2*sqrt(x+4))")])
 add(3, "d", r"f(x) = \frac{x}{x + 1},\quad x \ne -1", [
@@ -359,7 +359,7 @@ add(4, "gd", r"f(x, y) = x^2 + y^2,\quad \mathbf{p} = (3;\ 4),\quad \eta = 0{,}1
     ("value", r"f(3;\ 4) = 25\ \longrightarrow\ f(2{,}4;\ 3{,}2) = 5{,}76 + 10{,}24 = 16")], r"\mathbf{p} = (2{,}4;\ 3{,}2),\quad f: 25 \to 16",
     [("gd", "x**2+y**2", (3, 4), 0.1, (2.4, 3.2), 25, 16)])
 add(4, "gd", r"f(x, y) = (x - 1)^2 + 2y^2,\quad \mathbf{p} = (3;\ 1),\quad \eta = 0{,}25", [
-    ("incx", r"\Delta_x f = (x + \Delta x - 1)^2 - (x - 1)^2 = 2(x - 1)\Delta x + \Delta x^2\ \Rightarrow\ f_x = 2(x - 1)"),
+    ("incx", r"\begin{gathered}\Delta_x f = (x + \Delta x - 1)^2 - (x - 1)^2 = 2(x - 1)\Delta x + \Delta x^2\\ \Rightarrow\ f_x = 2(x - 1)\end{gathered}"),
     ("incy", r"\Delta_y f = 2(y + \Delta y)^2 - 2y^2 = 4y\,\Delta y + 2\Delta y^2\ \Rightarrow\ f_y = 4y"),
     ("gradpt", r"f_x(3;\ 1) = 4,\qquad f_y(3;\ 1) = 4,\qquad \nabla f(3;\ 1) = (4;\ 4)"),
     ("step", r"\mathbf{p} \leftarrow (3;\ 1) - 0{,}25\cdot(4;\ 4) = (2;\ 0)"), ("value", r"f(3;\ 1) = 4 + 2 = 6\ \longrightarrow\ f(2;\ 0) = 1")],
