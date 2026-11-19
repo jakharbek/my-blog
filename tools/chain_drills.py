@@ -1,4 +1,4 @@
-"""50 worked examples on the chain rule for the article "The chain rule" (tools/content_chain.py).
+"""56 worked examples on the chain rule for the article "The chain rule" (tools/content_chain.py).
 
 Each drill is language-neutral data: the formulas (TeX) and the keys of step captions; the captions,
 tasks and notes in three languages live in LABELS / TASKS / NOTES. Every answer is verified with SymPy
@@ -38,18 +38,26 @@ LABELS = {
     "defcut": {"ru": "Делим на $h$ (при $h \\ne 0$ это законно): $h$ в знаменателе сокращается.",
                "en": "Divide by $h$ (legitimate for $h \\ne 0$): the $h$ in the denominator cancels.",
                "uz": "$h$ ga bo‘lamiz ($h \\ne 0$ da bu qonuniy): maxrajdagi $h$ qisqaradi."},
-    "deflim": {"ru": "Переходим к пределу $h \\to 0$: все слагаемые с $h$ исчезают.",
-               "en": "Pass to the limit $h \\to 0$: every term with $h$ vanishes.",
-               "uz": "$h \\to 0$ limitga o‘tamiz: $h$ qatnashgan barcha qo‘shiluvchilar yo‘qoladi."},
+    "deflim": {"ru": "Переходим к пределу $h \\to 0$: оставшееся выражение непрерывно по $h$, поэтому просто подставляем $h = 0$.",
+               "en": "Pass to the limit $h \\to 0$: what remains is continuous in $h$, so we simply substitute $h = 0$.",
+               "uz": "$h \\to 0$ limitga o‘tamiz: qolgan ifoda $h$ bo‘yicha uzluksiz, shuning uchun shunchaki $h = 0$ ni qo‘yamiz."},
+    "limval": {"ru": "Подставляем найденный предел.", "en": "Substitute the limit we have found.", "uz": "Topilgan limitni qo‘yamiz."},
+    "prodsum": {"ru": "Подставляем в $(uv)' = u'v + uv'$ и выносим общий множитель.",
+                "en": "Substitute into $(uv)' = u'v + uv'$ and factor out the common factor.",
+                "uz": "$(uv)' = u'v + uv'$ ga qo‘yamiz va umumiy ko‘paytuvchini qavsdan chiqaramiz."},
+    "pdxprod": {"ru": "Частная производная по $x$: $y$ — константа; $x$ стоит в двух множителях, поэтому применяем правило произведения, а внутри — цепное правило.",
+                "en": "The partial derivative with respect to $x$: $y$ is a constant; $x$ appears in both factors, so we apply the product rule, and the chain rule inside it.",
+                "uz": "$x$ bo‘yicha xususiy hosila: $y$ — o‘zgarmas; $x$ ikkala ko‘paytuvchida qatnashadi, shuning uchun ko‘paytma qoidasini, ichida esa zanjir qoidasini qo‘llaymiz."},
+    "mult3only": {"ru": "Перемножаем звенья цепи.", "en": "Multiply the links of the chain.", "uz": "Zanjir bo‘g‘inlarini ko‘paytiramiz."},
     "conj": {"ru": "Корни в числителе мешают сократить $h$: умножаем числитель и знаменатель на сопряжённое выражение.",
              "en": "The roots in the numerator prevent cancelling $h$: multiply the numerator and the denominator by the conjugate.",
              "uz": "Suratdagi ildizlar $h$ ni qisqartirishga xalaqit beradi: surat va maxrajni qo‘shma ifodaga ko‘paytiramiz."},
     "common": {"ru": "Приводим дроби в числителе к общему знаменателю.",
                "en": "Bring the fractions in the numerator to a common denominator.",
                "uz": "Suratdagi kasrlarni umumiy maxrajga keltiramiz."},
-    "known": {"ru": "Используем замечательный предел (он сам выводится из определения функции).",
-              "en": "Use a standard limit (itself derived from the definition of the function).",
-              "uz": "Ajoyib limitdan foydalanamiz (u funksiya ta’rifidan kelib chiqadi)."},
+    "known": {"ru": "Используем замечательный предел (его доказывают один раз, отдельно).",
+              "en": "Use a standard limit (it is proved once, separately).",
+              "uz": "Ajoyib limitdan foydalanamiz (u bir marta, alohida isbotlanadi)."},
     "check": {"ru": "Проверяем цепным правилом: ответ тот же.",
               "en": "Check with the chain rule: the answer is the same.",
               "uz": "Zanjir qoidasi bilan tekshiramiz: javob o‘sha."},
@@ -109,6 +117,7 @@ TASKS = {
     "pdef": {"ru": "Найдите частные производные по определению.", "en": "Find the partial derivatives from the definition.", "uz": "Xususiy hosilalarni ta’rif bo‘yicha toping."},
     "dt": {"ru": "Найдите $\\frac{dz}{dt}$ по многомерному цепному правилу.", "en": "Find $\\frac{dz}{dt}$ by the multivariable chain rule.", "uz": "Ko‘p o‘lchovli zanjir qoidasi bilan $\\frac{dz}{dt}$ ni toping."},
     "dst": {"ru": "Найдите $\\frac{\\partial z}{\\partial s}$ и $\\frac{\\partial z}{\\partial t}$.", "en": "Find $\\frac{\\partial z}{\\partial s}$ and $\\frac{\\partial z}{\\partial t}$.", "uz": "$\\frac{\\partial z}{\\partial s}$ va $\\frac{\\partial z}{\\partial t}$ ni toping."},
+    "dLt": {"ru": "Найдите $\\frac{dL}{dt}$ по многомерному цепному правилу.", "en": "Find $\\frac{dL}{dt}$ by the multivariable chain rule.", "uz": "Ko‘p o‘lchovli zanjir qoidasi bilan $\\frac{dL}{dt}$ ni toping."},
     "total": {"ru": "Найдите полную производную $\\frac{dz}{dx}$.", "en": "Find the total derivative $\\frac{dz}{dx}$.", "uz": "To‘liq hosila $\\frac{dz}{dx}$ ni toping."},
     "impl": {"ru": "Найдите $y'$ для функции, заданной неявно.", "en": "Find $y'$ for the implicitly defined function.", "uz": "Oshkormas berilgan funksiya uchun $y'$ ni toping."},
     "nn": {"ru": "Найдите градиент потерь по параметрам.", "en": "Find the gradient of the loss with respect to the parameters.", "uz": "Yo‘qotishning parametrlar bo‘yicha gradiyentini toping."},
@@ -159,7 +168,7 @@ add(2, "d", r"y = \sin^2 x", [
 add(2, "d", r"y = \sqrt{1 + \sin x}", [
     ("split", r"y = \sqrt{u},\qquad u = 1 + \sin x"), ("outer", r"\frac{dy}{du} = \frac{1}{2\sqrt{u}}"), ("inner", r"\frac{du}{dx} = \cos x"),
     ("mult", r"\frac{dy}{dx} = \frac{\cos x}{2\sqrt{1 + \sin x}}")], r"y' = \frac{\cos x}{2\sqrt{1 + \sin x}}", [("sqrt(1+sin(x))", "x", "cos(x)/(2*sqrt(1+sin(x)))")])
-add(2, "d", r"y = \ln(\cos x)", [
+add(2, "d", r"y = \ln(\cos x),\quad \cos x > 0", [
     ("split", r"y = \ln u,\qquad u = \cos x"), ("outer", r"\frac{dy}{du} = \frac{1}{u}"), ("inner", r"\frac{du}{dx} = -\sin x"),
     ("mult", r"\frac{dy}{dx} = \frac{-\sin x}{\cos x} = -\operatorname{tg} x")], r"y' = -\operatorname{tg} x", [("log(cos(x))", "x", "-tan(x)")])
 add(2, "d", r"y = e^{\sin x}", [
@@ -171,10 +180,10 @@ add(2, "d", r"y = (x^3 - 2x)^4", [
 add(2, "d", r"y = \operatorname{arctg} 2x", [
     ("split", r"y = \operatorname{arctg} u,\qquad u = 2x"), ("outer", r"\frac{dy}{du} = \frac{1}{1 + u^2}"), ("inner", r"\frac{du}{dx} = 2"),
     ("mult", r"\frac{dy}{dx} = \frac{2}{1 + 4x^2}")], r"y' = \frac{2}{1 + 4x^2}", [("atan(2*x)", "x", "2/(1+4*x**2)")])
-add(2, "d", r"y = \ln(\ln x)", [
+add(2, "d", r"y = \ln(\ln x),\quad x > 1", [
     ("split", r"y = \ln u,\qquad u = \ln x"), ("outer", r"\frac{dy}{du} = \frac{1}{u}"), ("inner", r"\frac{du}{dx} = \frac{1}{x}"),
     ("mult", r"\frac{dy}{dx} = \frac{1}{\ln x}\cdot\frac{1}{x} = \frac{1}{x\ln x}")], r"y' = \frac{1}{x\ln x}", [("log(log(x))", "x", "1/(x*log(x))")])
-add(2, "d", r"y = \frac{1}{1 + e^{-x}}", [
+add(2, "d", r"y = \sigma(x) = \frac{1}{1 + e^{-x}}", [
     ("split", r"y = u^{-1},\qquad u = 1 + e^{-x}"), ("outer", r"\frac{dy}{du} = -u^{-2}"), ("inner", r"\frac{du}{dx} = -e^{-x}\qquad \big((e^{-x})' = e^{-x}\cdot(-1)\big)"),
     ("mult", r"\frac{dy}{dx} = -\frac{1}{(1 + e^{-x})^2}\cdot(-e^{-x}) = \frac{e^{-x}}{(1 + e^{-x})^2}"),
     ("simp", r"\frac{e^{-x}}{(1 + e^{-x})^2} = \frac{1}{1 + e^{-x}}\cdot\frac{e^{-x}}{1 + e^{-x}} = \sigma(x)\big(1 - \sigma(x)\big)")],
@@ -196,15 +205,15 @@ add(3, "d", r"y = e^{\sqrt{x}}", [
 add(3, "d", r"y = \sqrt{1 + e^{2x}}", [
     ("chain3", r"y = \sqrt{u},\quad u = 1 + e^{v},\quad v = 2x"), ("each", r"\frac{dy}{du} = \frac{1}{2\sqrt{u}},\quad \frac{du}{dv} = e^{v},\quad \frac{dv}{dx} = 2"),
     ("mult3", r"\frac{dy}{dx} = \frac{1}{2\sqrt{1 + e^{2x}}}\cdot e^{2x}\cdot 2 = \frac{e^{2x}}{\sqrt{1 + e^{2x}}}")], r"y' = \frac{e^{2x}}{\sqrt{1 + e^{2x}}}", [("sqrt(1+exp(2*x))", "x", "exp(2*x)/sqrt(1+exp(2*x))")])
-add(3, "d", r"y = \ln\sin(x^2)", [
+add(3, "d", r"y = \ln\sin(x^2),\quad \sin(x^2) > 0", [
     ("chain3", r"y = \ln u,\quad u = \sin v,\quad v = x^2"), ("each", r"\frac{dy}{du} = \frac{1}{u},\quad \frac{du}{dv} = \cos v,\quad \frac{dv}{dx} = 2x"),
     ("mult3", r"\frac{dy}{dx} = \frac{\cos(x^2)}{\sin(x^2)}\cdot 2x = 2x\operatorname{ctg}(x^2)")], r"y' = 2x\operatorname{ctg}(x^2)", [("log(sin(x**2))", "x", "2*x*cos(x**2)/sin(x**2)")])
 add(3, "d", r"y = x^2 e^{3x}", [
     ("prod", r"y = \underbrace{x^2}_{u}\cdot\underbrace{e^{3x}}_{v},\qquad u' = 2x,\quad v' = 3e^{3x}"),
-    ("simp", r"y' = 2x\,e^{3x} + x^2\cdot 3e^{3x} = x e^{3x}(2 + 3x)")], r"y' = x e^{3x}(3x + 2)", [("x**2*exp(3*x)", "x", "x*exp(3*x)*(3*x+2)")])
-add(3, "d", r"y = x\sqrt{1 - x^2}", [
+    ("prodsum", r"y' = 2x\,e^{3x} + x^2\cdot 3e^{3x} = x e^{3x}(2 + 3x)")], r"y' = x e^{3x}(3x + 2)", [("x**2*exp(3*x)", "x", "x*exp(3*x)*(3*x+2)")])
+add(3, "d", r"y = x\sqrt{1 - x^2},\quad |x| < 1", [
     ("prod", r"\begin{gathered}u = x,\quad u' = 1;\\ v = \sqrt{1 - x^2},\quad v' = \frac{1}{2\sqrt{1 - x^2}}\cdot(-2x) = -\frac{x}{\sqrt{1 - x^2}}\end{gathered}"),
-    ("simp", r"y' = \sqrt{1 - x^2} - \frac{x^2}{\sqrt{1 - x^2}} = \frac{1 - 2x^2}{\sqrt{1 - x^2}}")], r"y' = \frac{1 - 2x^2}{\sqrt{1 - x^2}}", [("x*sqrt(1-x**2)", "x", "(1-2*x**2)/sqrt(1-x**2)")])
+    ("prodsum", r"y' = 1\cdot\sqrt{1 - x^2} + x\cdot\Big(-\frac{x}{\sqrt{1 - x^2}}\Big) = \frac{1 - 2x^2}{\sqrt{1 - x^2}}")], r"y' = \frac{1 - 2x^2}{\sqrt{1 - x^2}}", [("x*sqrt(1-x**2)", "x", "(1-2*x**2)/sqrt(1-x**2)")])
 add(3, "d", r"y = e^{\cos^2 x}", [
     ("chain3", r"y = e^u,\quad u = v^2,\quad v = \cos x"), ("each", r"\frac{dy}{du} = e^u,\quad \frac{du}{dv} = 2v,\quad \frac{dv}{dx} = -\sin x"),
     ("mult3", r"\frac{dy}{dx} = e^{\cos^2 x}\cdot 2\cos x\cdot(-\sin x) = -\sin 2x\;e^{\cos^2 x}")], r"y' = -\sin 2x\;e^{\cos^2 x}", [("exp(cos(x)**2)", "x", "-sin(2*x)*exp(cos(x)**2)")])
@@ -225,30 +234,30 @@ add(3, "def", r"f(x) = (x^2 + 1)^2", [
     ("defsub", r"\begin{gathered}A = x^2 + 1,\qquad \Delta = (x + h)^2 + 1 - A = 2xh + h^2;\\ (A + \Delta)^2 - A^2 = 2A\Delta + \Delta^2\end{gathered}"),
     ("defcut", r"\frac{2A\Delta + \Delta^2}{h} = (2A + \Delta)\cdot\frac{\Delta}{h} = (2A + \Delta)(2x + h)"),
     ("deflim", r"h \to 0:\ \Delta \to 0,\ 2x + h \to 2x;\qquad f'(x) = 2A\cdot 2x = 4x(x^2 + 1)"),
-    ("check", r"\big(u^2\big)' = 2u\cdot u' = 2(x^2 + 1)\cdot 2x")], r"f'(x) = 4x(x^2 + 1)",
+    ("check", r"u = x^2 + 1:\quad \big(u^2\big)' = 2u\cdot u' = 2(x^2 + 1)\cdot 2x = 4x(x^2 + 1)")], r"f'(x) = 4x(x^2 + 1)",
     [("(x**2+1)**2", "x", "4*x*(x**2+1)"), ("dq", "(x**2+1)**2", "(2*(x**2+1)+2*x*h+h**2)*(2*x+h)")])
-add(3, "def", r"f(x) = \sqrt{3x + 1}", [
+add(3, "def", r"f(x) = \sqrt{3x + 1},\quad x > -\tfrac13", [
     ("def", r"f'(x) = \lim_{h \to 0} \frac{\sqrt{3x + 3h + 1} - \sqrt{3x + 1}}{h}"),
     ("conj", r"\begin{aligned}&\frac{\sqrt{3x + 3h + 1} - \sqrt{3x + 1}}{h}\cdot\frac{\sqrt{3x + 3h + 1} + \sqrt{3x + 1}}{\sqrt{3x + 3h + 1} + \sqrt{3x + 1}}\\ &\qquad= \frac{3h}{h\big(\sqrt{3x + 3h + 1} + \sqrt{3x + 1}\big)}\end{aligned}"),
-    ("defcut", r"= \frac{3}{\sqrt{3x + 3h + 1} + \sqrt{3x + 1}}"), ("deflim", r"f'(x) = \frac{3}{2\sqrt{3x + 1}}"),
+    ("defcut", r"= \frac{3}{\sqrt{3x + 3h + 1} + \sqrt{3x + 1}}"), ("deflim", r"f'(x) = \lim_{h \to 0}\frac{3}{\sqrt{3x + 3h + 1} + \sqrt{3x + 1}} = \frac{3}{2\sqrt{3x + 1}}"),
     ("check", r"\big(\sqrt{u}\big)' = \frac{u'}{2\sqrt{u}} = \frac{3}{2\sqrt{3x + 1}}")], r"f'(x) = \frac{3}{2\sqrt{3x + 1}}",
     [("sqrt(3*x+1)", "x", "3/(2*sqrt(3*x+1))"), ("dq", "sqrt(3*x+1)", "3/(sqrt(3*x+3*h+1)+sqrt(3*x+1))")])
-add(3, "def", r"f(x) = \frac{1}{2x + 3}", [
+add(3, "def", r"f(x) = \frac{1}{2x + 3},\quad x \ne -\tfrac32", [
     ("def", r"f'(x) = \lim_{h \to 0} \frac{1}{h}\left(\frac{1}{2x + 2h + 3} - \frac{1}{2x + 3}\right)"),
     ("common", r"\begin{aligned}\frac{1}{2x + 2h + 3} - \frac{1}{2x + 3} &= \frac{(2x + 3) - (2x + 2h + 3)}{(2x + 2h + 3)(2x + 3)}\\ &= \frac{-2h}{(2x + 2h + 3)(2x + 3)}\end{aligned}"),
-    ("defcut", r"\frac{1}{h}\cdot\frac{-2h}{(2x + 2h + 3)(2x + 3)} = \frac{-2}{(2x + 2h + 3)(2x + 3)}"), ("deflim", r"f'(x) = -\frac{2}{(2x + 3)^2}"),
+    ("defcut", r"\frac{1}{h}\cdot\frac{-2h}{(2x + 2h + 3)(2x + 3)} = \frac{-2}{(2x + 2h + 3)(2x + 3)}"), ("deflim", r"f'(x) = \lim_{h \to 0}\frac{-2}{(2x + 2h + 3)(2x + 3)} = -\frac{2}{(2x + 3)^2}"),
     ("check", r"\big(u^{-1}\big)' = -u^{-2}\cdot u' = -\frac{2}{(2x + 3)^2}")], r"f'(x) = -\frac{2}{(2x + 3)^2}",
     [("1/(2*x+3)", "x", "-2/(2*x+3)**2"), ("dq", "1/(2*x+3)", "-2/((2*x+2*h+3)*(2*x+3))")])
 add(3, "def", r"f(x) = e^{3x}", [
     ("def", r"f'(x) = \lim_{h \to 0} \frac{e^{3x + 3h} - e^{3x}}{h} = e^{3x}\lim_{h \to 0}\frac{e^{3h} - 1}{h}"),
     ("known", r"\lim_{t \to 0}\frac{e^{t} - 1}{t} = 1 \quad\Rightarrow\quad \frac{e^{3h} - 1}{h} = 3\cdot\frac{e^{3h} - 1}{3h} \to 3"),
-    ("deflim", r"f'(x) = 3e^{3x}"), ("check", r"\big(e^u\big)' = e^u\cdot u' = e^{3x}\cdot 3")], r"f'(x) = 3e^{3x}",
+    ("limval", r"f'(x) = e^{3x}\cdot\lim_{h \to 0}\frac{e^{3h} - 1}{h} = 3e^{3x}"), ("check", r"\big(e^u\big)' = e^u\cdot u' = e^{3x}\cdot 3")], r"f'(x) = 3e^{3x}",
     [("exp(3*x)", "x", "3*exp(3*x)"), ("lim", "(exp(3*h)-1)/h", "3")])
 add(3, "def", r"f(x) = \sin 2x", [
     ("def", r"f'(x) = \lim_{h \to 0} \frac{\sin(2x + 2h) - \sin 2x}{h}"),
     ("defsub", r"\sin(2x + 2h) - \sin 2x = 2\cos(2x + h)\,\sin h"),
     ("known", r"\frac{2\cos(2x + h)\sin h}{h} = 2\cos(2x + h)\cdot\frac{\sin h}{h},\qquad \lim_{h \to 0}\frac{\sin h}{h} = 1"),
-    ("deflim", r"f'(x) = 2\cos 2x\cdot 1 = 2\cos 2x"), ("check", r"\big(\sin u\big)' = \cos u\cdot u' = 2\cos 2x")], r"f'(x) = 2\cos 2x",
+    ("limval", r"f'(x) = \lim_{h \to 0} 2\cos(2x + h)\cdot\lim_{h \to 0}\frac{\sin h}{h} = 2\cos 2x\cdot 1 = 2\cos 2x"), ("check", r"\big(\sin u\big)' = \cos u\cdot u' = 2\cos 2x")], r"f'(x) = 2\cos 2x",
     [("sin(2*x)", "x", "2*cos(2*x)"), ("dq", "sin(2*x)", "2*cos(2*x+h)*sin(h)/h")])
 
 # ===== level 4: partial derivatives =====
@@ -269,7 +278,7 @@ add(4, "pd", r"z = \sqrt{x^2 + y^2}", [
     ("pdx", r"\frac{\partial z}{\partial x} = \frac{1}{2\sqrt{x^2 + y^2}}\cdot 2x = \frac{x}{\sqrt{x^2 + y^2}}"), ("pdy", r"\frac{\partial z}{\partial y} = \frac{y}{\sqrt{x^2 + y^2}}")],
     r"z_x = \frac{x}{\sqrt{x^2 + y^2}},\quad z_y = \frac{y}{\sqrt{x^2 + y^2}}", [("sqrt(x**2+y**2)", "x", "x/sqrt(x**2+y**2)"), ("sqrt(x**2+y**2)", "y", "y/sqrt(x**2+y**2)")])
 add(4, "pd", r"z = x\,e^{xy}", [
-    ("pdx", r"\frac{\partial z}{\partial x} = 1\cdot e^{xy} + x\cdot e^{xy}\cdot y = e^{xy}(1 + xy)"), ("pdy", r"\frac{\partial z}{\partial y} = x\cdot e^{xy}\cdot x = x^2 e^{xy}")],
+    ("pdxprod", r"\frac{\partial z}{\partial x} = 1\cdot e^{xy} + x\cdot e^{xy}\cdot y = e^{xy}(1 + xy)"), ("pdy", r"\frac{\partial z}{\partial y} = x\cdot e^{xy}\cdot x = x^2 e^{xy}")],
     r"z_x = e^{xy}(1 + xy),\quad z_y = x^2 e^{xy}", [("x*exp(x*y)", "x", "exp(x*y)*(1+x*y)"), ("x*exp(x*y)", "y", "x**2*exp(x*y)")])
 add(4, "pd", r"w = e^{xyz}", [
     ("pdx", r"\frac{\partial w}{\partial x} = yz\,e^{xyz}"), ("pdy", r"\frac{\partial w}{\partial y} = xz\,e^{xyz}"), ("pdz", r"\frac{\partial w}{\partial z} = xy\,e^{xyz}")],
@@ -279,8 +288,8 @@ add(4, "pdef", r"f(x, y) = x^2 y", [
     ("pdefy", r"f_y = \lim_{h \to 0}\frac{x^2(y + h) - x^2 y}{h} = \lim_{h \to 0}\frac{x^2 h}{h} = x^2")], r"f_x = 2xy,\quad f_y = x^2",
     [("x**2*y", "x", "2*x*y"), ("x**2*y", "y", "x**2")])
 add(4, "pdef", r"f(x, y) = (x + y)^2", [
-    ("pdef", r"f_x = \lim_{h \to 0}\frac{(x + y + h)^2 - (x + y)^2}{h} = \lim_{h \to 0}\frac{2(x + y)h + h^2}{h} = 2(x + y)"),
-    ("pdefy", r"f_y = \lim_{h \to 0}\frac{(x + y + h)^2 - (x + y)^2}{h} = 2(x + y)")], r"f_x = f_y = 2(x + y)",
+    ("pdef", r"\begin{aligned}f_x &= \lim_{h \to 0}\frac{\big((x + h) + y\big)^2 - (x + y)^2}{h} = \lim_{h \to 0}\frac{2(x + y)h + h^2}{h}\\ &= \lim_{h \to 0}\big(2(x + y) + h\big) = 2(x + y)\end{aligned}"),
+    ("pdefy", r"\begin{aligned}f_y &= \lim_{h \to 0}\frac{\big(x + (y + h)\big)^2 - (x + y)^2}{h} = \lim_{h \to 0}\frac{2(x + y)h + h^2}{h}\\ &= \lim_{h \to 0}\big(2(x + y) + h\big) = 2(x + y)\end{aligned}")], r"f_x = f_y = 2(x + y)",
     [("(x+y)**2", "x", "2*(x+y)"), ("(x+y)**2", "y", "2*(x+y)")])
 
 # ===== level 5: the multivariable chain rule =====
@@ -311,13 +320,13 @@ add(5, "dst", r"z = e^{u}\sin v,\quad u = st,\quad v = s + t", [
     ("pouter", r"\frac{\partial z}{\partial u} = e^{u}\sin v,\qquad \frac{\partial z}{\partial v} = e^{u}\cos v"),
     ("pinner", r"u_s = t,\ u_t = s;\qquad v_s = 1,\ v_t = 1"),
     ("sum", r"\begin{gathered}z_s = e^{u}\sin v\cdot t + e^{u}\cos v\cdot 1 = e^{st}\big(t\sin(s + t) + \cos(s + t)\big)\\ z_t = e^{u}\sin v\cdot s + e^{u}\cos v\cdot 1 = e^{st}\big(s\sin(s + t) + \cos(s + t)\big)\end{gathered}")],
-    r"z_s = e^{st}\big(t\sin(s + t) + \cos(s + t)\big)", [("zst", "exp(s*t)*sin(s+t)", "exp(s*t)*(t*sin(s+t)+cos(s+t))", "exp(s*t)*(s*sin(s+t)+cos(s+t))")])
-add(5, "dst", r"z = \ln(u^2 + v^2),\quad u = s\cos t,\quad v = s\sin t", [
+    r"\begin{gathered}z_s = e^{st}\big(t\sin(s + t) + \cos(s + t)\big)\\ z_t = e^{st}\big(s\sin(s + t) + \cos(s + t)\big)\end{gathered}", [("zst", "exp(s*t)*sin(s+t)", "exp(s*t)*(t*sin(s+t)+cos(s+t))", "exp(s*t)*(s*sin(s+t)+cos(s+t))")])
+add(5, "dst", r"z = \ln(u^2 + v^2),\quad u = s\cos t,\quad v = s\sin t,\quad s > 0", [
     ("pouter", r"\frac{\partial z}{\partial u} = \frac{2u}{u^2 + v^2},\qquad \frac{\partial z}{\partial v} = \frac{2v}{u^2 + v^2},\qquad u^2 + v^2 = s^2"),
     ("pinner", r"u_s = \cos t,\ u_t = -s\sin t;\qquad v_s = \sin t,\ v_t = s\cos t"),
     ("sum", r"\begin{gathered}z_s = \frac{2u}{s^2}\cos t + \frac{2v}{s^2}\sin t = \frac{2s\cos^2 t + 2s\sin^2 t}{s^2} = \frac{2}{s}\\ z_t = \frac{2u}{s^2}(-s\sin t) + \frac{2v}{s^2}\,s\cos t = \frac{-2s^2\cos t\sin t + 2s^2\sin t\cos t}{s^2} = 0\end{gathered}")],
     r"z_s = \frac{2}{s},\quad z_t = 0", [("zst", "log(s**2)", "2/s", "0")])
-add(5, "dt", r"L = (wx + b - y)^2;\quad w = 1 + t,\quad b = 2t,\quad x = 3,\ y = 5", [
+add(5, "dLt", r"L = (wx + b - y)^2;\quad w = 1 + t,\quad b = 2t,\quad x = 3,\ y = 5", [
     ("pouter", r"\frac{\partial L}{\partial w} = 2(wx + b - y)\,x,\qquad \frac{\partial L}{\partial b} = 2(wx + b - y)"),
     ("pinner", r"\frac{dw}{dt} = 1,\qquad \frac{db}{dt} = 2"),
     ("sum", r"\frac{dL}{dt} = 2(wx + b - y)(x + 2) = 2(3 + 3t + 2t - 5)\cdot 5 = 10(5t - 2)")],
@@ -331,15 +340,15 @@ add(5, "total", r"z = x\,e^{y},\quad y = x^2", [
     ("total", r"\frac{dz}{dx} = \underbrace{e^{y}}_{\partial z/\partial x} + \underbrace{x e^{y}}_{\partial z/\partial y}\cdot 2x"),
     ("subs", r"= e^{x^2}(1 + 2x^2)")], r"\frac{dz}{dx} = e^{x^2}(1 + 2x^2)", [("x*exp(x**2)", "x", "exp(x**2)*(1+2*x**2)")])
 add(5, "impl", r"x^2 + y^2 = 25", [
-    ("impl", r"2x + 2y\,y' = 0"), ("solve", r"y' = -\frac{x}{y}"), ("point", r"(3;\ 4):\quad y' = -\frac34")], r"y' = -\frac{x}{y}",
+    ("impl", r"2x + 2y\,y' = 0"), ("solve", r"y' = -\frac{x}{y}"), ("point", r"(3;\ 4):\quad y' = -\frac34")], r"y' = -\frac{x}{y}\quad (y \ne 0)",
     [("impl", "x**2+y**2-25", "-x/y")])
 add(5, "impl", r"e^{y} + xy = e", [
     ("impl", r"e^{y}y' + y + x\,y' = 0"), ("solve", r"y' = -\frac{y}{e^{y} + x}"), ("point", r"(0;\ 1):\quad y' = -\frac{1}{e}")],
-    r"y' = -\frac{y}{e^{y} + x}", [("impl", "exp(y)+x*y-E", "-y/(exp(y)+x)")])
+    r"y' = -\frac{y}{e^{y} + x}\quad (e^{y} + x \ne 0)", [("impl", "exp(y)+x*y-E", "-y/(exp(y)+x)")])
 add(5, "nn", r"\hat y = \sigma(wx + b),\quad L = -\ln\hat y\ \ (y = 1)", [
-    ("layers", r"L = -\ln a,\quad a = \sigma(z),\quad z = wx + b"),
+    ("layers", r"L = -\ln a,\quad a = \sigma(z) = \hat y,\quad z = wx + b"),
     ("each", r"\frac{dL}{da} = -\frac{1}{a},\quad \frac{da}{dz} = a(1 - a),\quad \frac{\partial z}{\partial w} = x,\quad \frac{\partial z}{\partial b} = 1"),
-    ("mult3", r"\frac{\partial L}{\partial w} = -\frac{1}{a}\cdot a(1 - a)\cdot x = (a - 1)\,x,\qquad \frac{\partial L}{\partial b} = a - 1")],
+    ("mult3only", r"\frac{\partial L}{\partial w} = -\frac{1}{a}\cdot a(1 - a)\cdot x = (a - 1)\,x = (\hat y - 1)\,x,\qquad \frac{\partial L}{\partial b} = \hat y - 1")],
     r"\frac{\partial L}{\partial w} = (\hat y - 1)\,x,\quad \frac{\partial L}{\partial b} = \hat y - 1",
     [("nnw", "-log(1/(1+exp(-(w*x+b))))", "(1/(1+exp(-(w*x+b)))-1)*x", "1/(1+exp(-(w*x+b)))-1")])
 
@@ -379,7 +388,7 @@ def verify():
 GROUPS = {
     1: {"ru": "Одно звено: основные функции", "en": "One link: the basic functions", "uz": "Bitta bo‘g‘in: asosiy funksiyalar"},
     11: {"ru": "Функция в степени, под логарифмом, под корнем", "en": "A function raised to a power, under a logarithm, under a root", "uz": "Darajadagi, logarifm va ildiz ostidagi funksiya"},
-    21: {"ru": "Три звена и произведения с цепочками", "en": "Three links and products with chains", "uz": "Uchta bo‘g‘in va zanjirli ko‘paytmalar"},
+    21: {"ru": "Три звена, произведения и вложенные цепочки", "en": "Three links, products and nested chains", "uz": "Uchta bo‘g‘in, ko‘paytmalar va ichma-ich zanjirlar"},
     29: {"ru": "По определению: предел разностного отношения", "en": "From the definition: the limit of the difference quotient", "uz": "Ta’rif bo‘yicha: ayirmali nisbatning limiti"},
     35: {"ru": "Частные производные", "en": "Partial derivatives", "uz": "Xususiy hosilalar"},
     44: {"ru": "Многомерное цепное правило", "en": "The multivariable chain rule", "uz": "Ko‘p o‘lchovli zanjir qoidasi"},
