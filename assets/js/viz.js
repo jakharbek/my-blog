@@ -133,13 +133,13 @@
   // "Вес $w_1$" → "Вес w₁": a readable text name for controls whose visible label is a formula
   const SUBS = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉" };
   const SUPS = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹", "-": "⁻" };
-  const GREEK = { alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", eta: "η", theta: "θ", lambda: "λ", mu: "μ", sigma: "σ", tau: "τ", phi: "φ", Phi: "Φ", Sigma: "Σ", pi: "π", nabla: "∇", partial: "∂", infty: "∞", cdot: "·", times: "×", top: "ᵀ", ge: "≥", le: "≤", approx: "≈", lVert: "‖", rVert: "‖", to: "→", Delta: "Δ", varepsilon: "ε", varphi: "φ", ne: "≠", circ: "∘", sum: "Σ", lim: "lim " };
+  const GREEK = { alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", eta: "η", theta: "θ", lambda: "λ", mu: "μ", sigma: "σ", tau: "τ", phi: "φ", Phi: "Φ", Sigma: "Σ", pi: "π", nabla: "∇", partial: "∂", infty: "∞", cdot: "·", times: "×", top: "ᵀ", ge: "≥", le: "≤", approx: "≈", lVert: "‖", rVert: "‖", to: "→", Delta: "Δ", varepsilon: "ε", varphi: "φ", ne: "≠", circ: "∘", sum: "Σ", lim: "lim ", div: "÷" };
   FV.plain = function (str) {
     return String(str).replace(/\$([^$]+)\$/g, (_, t) => t
       .replace(/\\(?:mathrm|mathbf|operatorname|text|boldsymbol)\{([^{}]*)\}/g, "{$1}")
       .replace(/\\(?:,|;|!|quad|qquad)|\\ /g, " ").replace(/\\(?:left|right|big|Big)\b/g, "")
       .replace(/\\sqrt\{([^{}]*)\}/g, "√($1)")
-      .replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g, (_, a, b) => [a, b].map((v) => (/^[\w.]+$/.test(v.trim()) ? v : "(" + v + ")")).join("/"))
+      .replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g, (_, a, b) => " " + [a, b].map((v) => (/^[\w.]+$/.test(v.trim()) ? v : "(" + v + ")")).join("/") + " ")
       .replace(/\^\{([^{}]{2,})\}/g, "^($1)")
       .replace(/\\hat\s*\{?y\}?/g, "ŷ")
       .replace(/\\([A-Za-z]+)/g, (m, w) => (GREEK[w] != null ? GREEK[w] : w + " "))
@@ -518,6 +518,10 @@
       return h;
     }
     legend(items) {
+      // the same legend again (a redraw) is not rebuilt: KaTeX in it is not re-rendered every frame
+      const key = JSON.stringify(items);
+      if (this.legendEl && key === this._legendKey) return;
+      this._legendKey = key;
       if (!this.legendEl) { this.legendEl = FV.h("div", { class: "fv-legend" }); this.wrap.append(this.legendEl); }
       this.legendEl.textContent = "";
       items.forEach((it) => {
