@@ -423,6 +423,78 @@ RU = [
             ["Gradient boosting", "CatBoost, XGBoost: каждое новое дерево учится предсказывать антиградиент функции потерь по предсказаниям текущего ансамбля (псевдоостатки) — направление, в котором ошибка упадёт"],
         ]),
     ]),
+    dict(id="notation", title="Формулы и нотации: одно и то же, записанное по-разному", blocks=[
+        ("p", r"Одна и та же производная в разных книгах, статьях и программах записывается по-разному: штрихом, дробью Лейбница, индексом, оператором $D$ или $\nabla$. Это не разные понятия, а разные <b>имена одного числа (или вектора)</b>. Ниже — все обозначения этой статьи, сгруппированные по смыслу: сначала цепочка равенств, потом таблица «как читать и где встречается»."),
+        ("callout", "key", "Как пользоваться разделом", r"Встретили в статье или в коде незнакомую запись — найдите её в таблицах ниже: рядом стоят равносильные записи, которые вы уже знаете. Знак «$=$» в цепочках означает именно это: <b>одно и то же, записанное по-разному</b>."),
+        ("h3", "1. Приращения"),
+        ("eq", r"\Delta x = x_{\text{новое}} - x_{\text{старое}} = x_1 - x_0 = h,\qquad \Delta y = \Delta f = f(x + \Delta x) - f(x)"),
+        ("table", ["Запись", "Как читать", "Где встречается"], [
+            [r"$\Delta x$", "дельта икс, приращение аргумента", "учебники, физика"],
+            [r"$h$", "то же приращение, короче", "определения через предел, численные методы, код"],
+            [r"$\Delta y,\ \Delta f$", "приращение функции", "учебники"],
+            [r"$\Delta_x f,\ \Delta_y f$", "частное приращение: меняется одна переменная", "функции нескольких переменных"],
+        ]),
+        ("h3", "2. Производная функции одной переменной"),
+        ("eq", r"f'(x) = y' = \frac{dy}{dx} = \frac{df}{dx} = \frac{d}{dx}f(x) = Df(x) = \lim_{\Delta x \to 0}\frac{\Delta y}{\Delta x} = \lim_{h \to 0}\frac{f(x + h) - f(x)}{h}"),
+        ("p", r"Ещё одна равносильная форма определения — через вторую точку $x_1 \to x$: $f'(x) = \lim\limits_{x_1 \to x}\frac{f(x_1) - f(x)}{x_1 - x}$ (здесь $x_1 = x + \Delta x$). Если аргумент — время $t$, физики пишут точку: $\dot s = \frac{ds}{dt}$ — это скорость."),
+        ("table", ["Запись", "Как читать", "Автор / где встречается"], [
+            [r"$f'(x)$, $y'$", "эф штрих от икс", "Лагранж; школа и большинство учебников"],
+            [r"$\dfrac{dy}{dx}$, $\dfrac{df}{dx}$", "дэ игрек по дэ икс", "Лейбниц; физика, цепное правило"],
+            [r"$\dfrac{d}{dx}f(x)$", "производная по икс от эф", "когда функция записана формулой: $\\frac{d}{dx}(x^2) = 2x$"],
+            [r"$Df(x)$, $D_x f$", "дэ эф", "Эйлер; строгий анализ, операторная запись"],
+            [r"$\dot s$, $\dot x$", "эс с точкой", "Ньютон; производная по времени в физике"],
+            [r"$\dfrac{df}{dz}$, $\dfrac{df}{dt}$", "то же действие, другая буква переменной", "буква в знаменателе — имя переменной"],
+        ]),
+        ("h3", "3. Производная в точке, вторая и высшие производные"),
+        ("eq", r"f'(x_0) = \frac{dy}{dx}\Big|_{x = x_0} = \frac{df}{dx}(x_0) = y'(x_0)"),
+        ("eq", r"f''(x) = y'' = \frac{d^2y}{dx^2} = \frac{d}{dx}\Big(\frac{dy}{dx}\Big) = D^2 f(x) = \ddot s\ (\text{по времени}),\qquad f^{(n)}(x) = \frac{d^n y}{dx^n}"),
+        ("p", r"Обратите внимание: в $\frac{d^2y}{dx^2}$ квадрат стоит у $d$ наверху и у $x$ внизу — это не «$dy$ в квадрате», а сокращение записи $\frac{d}{dx}\frac{d}{dx}y$. Пример: для $f(x) = x^3$ имеем $f'(2) = \frac{dy}{dx}\big|_{x = 2} = 3\cdot 2^2 = 12$, $f''(2) = \frac{d^2y}{dx^2}\big|_{x = 2} = 6\cdot 2 = 12$, $f^{(3)}(x) = 6$."),
+        ("h3", "4. Дифференциал"),
+        ("eq", r"dy = df = f'(x)\,dx = \frac{dy}{dx}\,dx,\qquad dx = \Delta x,\qquad \Delta y \approx dy"),
+        ("p", r"Именно поэтому запись $\frac{dy}{dx}$ можно читать как частное дифференциалов: $dy : dx = f'(x)$ при $dx \ne 0$."),
+        ("h3", "5. Частные производные"),
+        ("eq", r"\frac{\partial f}{\partial x} = f_x = f'_x = \partial_x f = D_x f = D_1 f = \lim_{\Delta x \to 0}\frac{\Delta_x f}{\Delta x} = \lim_{h \to 0}\frac{f(x + h,\ y) - f(x,\ y)}{h}"),
+        ("table", ["Запись", "Как читать", "Где встречается"], [
+            [r"$\dfrac{\partial f}{\partial x}$", "дэ круглое эф по дэ круглому икс", "основная запись; математика, ML"],
+            [r"$f_x$, $f'_x$", "эф по икс", "короткая запись в учебниках"],
+            [r"$\partial_x f$", "частная по икс", "физика, компактные формулы"],
+            [r"$D_1 f$, $D_x f$", "производная по первой переменной", "строгий анализ; $D_1$ — по номеру аргумента"],
+            [r"$\Big(\dfrac{\partial f}{\partial x}\Big)_y$", "при постоянном игрек", "термодинамика: явно указано, что заморожено"],
+            [r"$\dfrac{\partial L}{\partial w_i}$, $\dfrac{\partial L}{\partial \mathbf{w}}$", "производная потерь по весу", "машинное обучение"],
+        ]),
+        ("p", r"<b>Вторые и смешанные частные производные:</b> $\frac{\partial^2 f}{\partial x^2} = f_{xx}$, $\frac{\partial^2 f}{\partial y\,\partial x} = \frac{\partial}{\partial y}\Big(\frac{\partial f}{\partial x}\Big) = f_{xy}$. Для гладких функций порядок не важен (теорема Шварца): $f_{xy} = f_{yx}$. Пример: $f = x^2 y$, $f_x = 2xy$, $f_y = x^2$, $f_{xy} = \frac{\partial}{\partial y}(2xy) = 2x$ и $f_{yx} = \frac{\partial}{\partial x}(x^2) = 2x$ — совпали."),
+        ("h3", "6. Градиент и набла"),
+        ("eq", r"\nabla f = \operatorname{grad} f = \Big(\frac{\partial f}{\partial x};\ \frac{\partial f}{\partial y};\ \frac{\partial f}{\partial z}\Big) = \frac{\partial f}{\partial x}\,\mathbf{i} + \frac{\partial f}{\partial y}\,\mathbf{j} + \frac{\partial f}{\partial z}\,\mathbf{k} = \begin{pmatrix} f_x\\ f_y\\ f_z \end{pmatrix}"),
+        ("eq", r"\nabla = \Big(\frac{\partial}{\partial x_1};\ \ldots;\ \frac{\partial}{\partial x_n}\Big),\qquad \nabla f(x) = f'(x)\quad\text{при } n = 1"),
+        ("table", ["Запись", "Как читать", "Где встречается"], [
+            [r"$\nabla f$", "набла эф", "основная запись; ML, физика"],
+            [r"$\operatorname{grad} f$", "градиент эф", "классический анализ, физика"],
+            [r"$f_x\,\mathbf{i} + f_y\,\mathbf{j} + f_z\,\mathbf{k}$", "разложение по ортам", "физика, механика"],
+            [r"строка $(f_x\ \ f_y)$ = $Df$", "производная как линейное отображение", "строгий анализ; это транспонированный градиент"],
+            [r"$\nabla_{\mathbf{w}} L$, $\dfrac{\partial L}{\partial \mathbf{w}}$", "градиент потерь по весам", "ML; в PyTorch — <code>w.grad</code>"],
+        ]),
+        ("h3", "7. Производная по направлению"),
+        ("eq", r"\begin{aligned}D_{\mathbf{u}} f &= \frac{\partial f}{\partial \mathbf{u}} = \lim_{t \to 0}\frac{f(\mathbf{x} + t\mathbf{u}) - f(\mathbf{x})}{t}\\ &= \nabla f\cdot\mathbf{u} = \sum_{i=1}^{n}\frac{\partial f}{\partial x_i}\,u_i = |\nabla f|\cos\varphi,\qquad |\mathbf{u}| = 1\end{aligned}"),
+        ("p", r"Частные производные — частный случай: $D_{\mathbf{i}} f = \frac{\partial f}{\partial x}$, $D_{\mathbf{j}} f = \frac{\partial f}{\partial y}$."),
+        ("h3", "8. Полный дифференциал, полная производная, цепное правило"),
+        ("eq", r"df = \frac{\partial f}{\partial x}\,dx + \frac{\partial f}{\partial y}\,dy = f_x\,dx + f_y\,dy = \sum_{i=1}^{n}\frac{\partial f}{\partial x_i}\,dx_i = \nabla f\cdot d\mathbf{x}"),
+        ("eq", r"\frac{dz}{dx} = \frac{\partial f}{\partial x} + \frac{\partial f}{\partial y}\cdot\frac{dy}{dx}\qquad (z = f(x, y),\ y = y(x))"),
+        ("eq", r"\big(f(g(x))\big)' = (f\circ g)'(x) = f'\big(g(x)\big)\,g'(x) = \frac{dy}{du}\cdot\frac{du}{dx},\qquad D(f\circ g) = Df\cdot Dg"),
+        ("h3", "9. Градиентный спуск"),
+        ("eq", r"\mathbf{p} \leftarrow \mathbf{p} - \eta\,\nabla f(\mathbf{p}),\qquad \mathbf{w}_{t+1} = \mathbf{w}_t - \eta\,\nabla L(\mathbf{w}_t),\qquad w_i := w_i - \eta\,\frac{\partial L}{\partial w_i}"),
+        ("p", r"Стрелка $\leftarrow$ и знак $:=$ означают «присвоить новое значение» (как в коде <code>w = w - lr * grad</code>), а индекс $t$ — номер шага."),
+        ("h3", "10. Один пример во всех нотациях"),
+        ("p", r"$f(x, y) = x^2 y$ в точке $(1;\ 2)$. Все записи в каждой строке — одно и то же число или вектор:"),
+        ("table", ["Понятие", "Равносильные записи", "Значение"], [
+            ["частная по $x$", r"$\dfrac{\partial f}{\partial x}(1;\ 2) = f_x(1;\ 2) = \partial_x f = D_1 f = 2xy\big|_{(1;\ 2)}$", "$4$"],
+            ["частная по $y$", r"$\dfrac{\partial f}{\partial y}(1;\ 2) = f_y(1;\ 2) = \partial_y f = D_2 f = x^2\big|_{(1;\ 2)}$", "$1$"],
+            ["градиент", r"$\nabla f(1;\ 2) = \operatorname{grad} f = 4\,\mathbf{i} + 1\,\mathbf{j}$", "$(4;\\ 1)$"],
+            ["по направлению $\\mathbf{u} = (\\frac35;\\ \\frac45)$", r"$D_{\mathbf{u}} f = \nabla f\cdot\mathbf{u} = 4\cdot\tfrac35 + 1\cdot\tfrac45$", "$\\frac{16}{5}$"],
+            ["вторые", r"$f_{xx} = \dfrac{\partial^2 f}{\partial x^2} = 2y$; $\ f_{xy} = f_{yx} = 2x$", "$4$; $\\ 2$"],
+            ["дифференциал при $dx = 0{,}1$, $dy = 0{,}2$", r"$df = f_x\,dx + f_y\,dy = \nabla f\cdot d\mathbf{x} = 4\cdot 0{,}1 + 1\cdot 0{,}2$", "$0{,}6$"],
+        ]),
+        ("p", r"Для сравнения точное приращение: $\Delta f = 1{,}1^2\cdot 2{,}2 - 2 = 0{,}662$ — дифференциал $0{,}6$ его линейная часть."),
+    ]),
     dict(id="mistakes", title="Типичные ошибки", blocks=[
         ("table", ["Ошибка", "Как правильно"], [
             [r"Считать $\Delta x$ произведением $\Delta\cdot x$", r"$\Delta x$ — одно число: изменение $x$"],
@@ -1695,6 +1767,12 @@ def check_numbers():
     assert sp.solve([sp.diff(E, x), sp.diff(E, y)], [x, y]) == {x: 1, y: -2} and E.subs({x: 1, y: -2}) == -5
     assert ok(E - ((x - 1) ** 2 + (y + 2) ** 2 - 5))
     # sin 4 example not used; quiz: η = 1 → −1
+    # the notation section
+    assert sp.diff(x ** 3, x).subs(x, 2) == 12 and sp.diff(x ** 3, x, 2).subs(x, 2) == 12 and sp.diff(x ** 3, x, 3) == 6
+    G2 = x ** 2 * y
+    assert sp.diff(G2, x).subs({x: 1, y: 2}) == 4 and sp.diff(G2, y).subs({x: 1, y: 2}) == 1 and sp.diff(G2, x, y) == sp.diff(G2, y, x) == 2 * x
+    assert sp.diff(G2, x, 2).subs({x: 1, y: 2}) == 4 and 4 * sp.Rational(3, 5) + 1 * sp.Rational(4, 5) == sp.Rational(16, 5)
+    assert abs(4 * 0.1 + 1 * 0.2 - 0.6) < 1e-12 and abs(1.1 ** 2 * 2.2 - 2 - 0.662) < 1e-12
     # worked examples 12–14
     assert 4 + 1 == 5 and abs(20 ** 0.5 - 4.47) < 0.005
     L3 = 3 * x + y ** 2
