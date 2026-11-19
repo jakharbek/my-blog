@@ -18,9 +18,9 @@ TITLE = {
     "uz": "Zanjir qoidasi: murakkab funksiya hosilasi — ta’rifdan neyron tarmoqlargacha",
 }
 EXCERPT = {
-    "ru": "Производная сложной функции по косточкам: определение через предел, доказательство, одна и несколько переменных, обычные и частные производные, дерево зависимостей, полная производная и обратный проход. 10 подробных разборов и 56 примеров с решением по шагам.",
-    "en": "The derivative of a composite function, taken apart piece by piece: the limit definition, the proof, one and several variables, ordinary and partial derivatives, the dependency tree, the total derivative and backpropagation. 10 detailed walkthroughs and 56 examples solved step by step.",
-    "uz": "Murakkab funksiya hosilasi mayda detallarigacha: limit orqali ta’rif, isbot, bir va bir nechta o‘zgaruvchi, oddiy va xususiy hosilalar, bog‘liqlik daraxti, to‘liq hosila va teskari o‘tish. 10 ta batafsil tahlil va qadamma-qadam yechilgan 56 ta misol.",
+    "ru": "Производная сложной функции по косточкам: определение через предел, доказательство, одна и несколько переменных, обычные и частные производные, дерево зависимостей, полная производная и обратный проход. 12 подробных разборов и 56 примеров с решением по шагам.",
+    "en": "The derivative of a composite function, taken apart piece by piece: the limit definition, the proof, one and several variables, ordinary and partial derivatives, the dependency tree, the total derivative and backpropagation. 12 detailed walkthroughs and 56 examples solved step by step.",
+    "uz": "Murakkab funksiya hosilasi mayda detallarigacha: limit orqali ta’rif, isbot, bir va bir nechta o‘zgaruvchi, oddiy va xususiy hosilalar, bog‘liqlik daraxti, to‘liq hosila va teskari o‘tish. 12 ta batafsil tahlil va qadamma-qadam yechilgan 56 ta misol.",
 }
 DEK = {
     "ru": "Почти любая функция, которую приходится дифференцировать, — это функция от функции: синус от квадрата, логарифм от суммы, сигмоида от взвешенной суммы. Цепное правило говорит, как найти её производную: перемножить производные звеньев. Выводим правило из определения производной, доказываем его, переносим на функции многих переменных, отличаем обычную производную от частной и решаем десятки примеров — от совсем простых до обратного прохода нейрона.",
@@ -85,7 +85,7 @@ RU = [
         ("p", r"Для функций нескольких переменных правило звучит так же, только звеньев может быть несколько параллельно, и тогда вклады всех путей <b>складываются</b>:"),
         ("eq", r"z = f\big(x(t),\ y(t)\big)\quad\Longrightarrow\quad \frac{dz}{dt} = \frac{\partial z}{\partial x}\cdot\frac{dx}{dt} + \frac{\partial z}{\partial y}\cdot\frac{dy}{dt}"),
         ("callout", "intuition", "Аналогия", r"Три шестерёнки. Первая крутит вторую так, что вторая делает 3 оборота на каждый оборот первой; вторая крутит третью — 2 оборота на свой оборот. Сколько оборотов делает третья на один оборот первой? $3 \cdot 2 = 6$. Передаточные числа <b>перемножаются</b>. Производная — это и есть «передаточное число» функции в данной точке, и цепное правило — это правило шестерёнок."),
-        ("p", r"В этой статье мы пройдём весь путь: вспомним <b>определение производной</b> через предел и научимся считать по нему; разберём, что такое <b>сложная функция</b>; выведем и <b>докажем</b> цепное правило прямо из определения; перенесём его на <b>частные производные</b> и функции <b>двух и более переменных</b>; поймём, чем <b>обычная</b> производная отличается от <b>частной</b> и от <b>полной</b>; увидим, что обучение нейросети (обратный проход) — это цепное правило, применённое много раз. В конце — 10 подробных разборов и 56 примеров с решением по шагам, от очень лёгких до трудных."),
+        ("p", r"В этой статье мы пройдём весь путь: вспомним <b>определение производной</b> через предел и научимся считать по нему; разберём, что такое <b>сложная функция</b>; выведем и <b>докажем</b> цепное правило прямо из определения; перенесём его на <b>частные производные</b> и функции <b>двух и более переменных</b>; поймём, чем <b>обычная</b> производная отличается от <b>частной</b> и от <b>полной</b>; увидим, что обучение нейросети (обратный проход) — это цепное правило, применённое много раз. В конце — 12 подробных разборов и 56 примеров с решением по шагам, от очень лёгких до трудных."),
         ("callout", "key", "Главное", r"Цепное правило — не отдельный трюк, а следствие самого определения производной: производная показывает, во сколько раз функция растягивает маленький шаг аргумента. Если шаг проходит через несколько функций подряд, растяжения перемножаются."),
     ]),
     dict(id="definition", title="Производная по определению", blocks=[
@@ -173,6 +173,46 @@ RU = [
             [r"$\operatorname{arctg} u$", r"$\dfrac{u'}{1 + u^2}$", r"$(\operatorname{arctg} 2x)' = \dfrac{2}{1 + 4x^2}$"],
         ]),
         ("callout", "intuition", "Почему производные перемножаются", r"Производная — это коэффициент растяжения маленьких шагов. Внутренняя функция растягивает шаг $\Delta x$ в $g'(x)$ раз: $\Delta u \approx g'(x)\,\Delta x$. Внешняя растягивает уже этот шаг в $f'(u)$ раз: $\Delta y \approx f'(u)\,\Delta u \approx f'(u)\,g'(x)\,\Delta x$. Два растяжения подряд — это их произведение."),
+    ]),
+    dict(id="numbers", title="Цепное правило на числах: приращения шаг за шагом", blocks=[
+        ("p", r"Прежде чем доказывать правило строго, пройдём его на конкретных числах — так видно, откуда оно берётся. Пример везде один: сначала возводим в квадрат, потом в куб."),
+        ("eq", r"x \xrightarrow{\ \text{квадрат}\ } u = x^2 \xrightarrow{\ \text{куб}\ } y = u^3,\qquad F(x) = (x^2)^3"),
+        ("p", r"Внешняя функция $y = u^3$ <b>не видит $x$</b>: на вход она получает только $u$. Это главное, что нужно запомнить про сложную функцию."),
+        ("h3", "1. Сдвигаем вход и смотрим, как сдвиг проходит по цепочке"),
+        ("p", r"Возьмём $x = 2$ и сдвинем его на $\Delta x = 0{,}1$. Приращение — это «стало минус было»:"),
+        ("table", ["", "было", "стало", "приращение"], [
+            [r"$x$", r"$2$", r"$2{,}1$", r"$\Delta x = 0{,}1$"],
+            [r"$u = x^2$", r"$4$", r"$4{,}41$", r"$\Delta u = 0{,}41$"],
+            [r"$y = u^3$", r"$64$", r"$85{,}766$", r"$\Delta y \approx 21{,}766$"],
+        ], {"num": [1, 2, 3]}),
+        ("p", r"Сдвиг прошёл по цепочке: $x$ изменился на $0{,}1$, из-за этого $u$ — на $0{,}41$, а из-за этого $y$ — на $21{,}766$."),
+        ("h3", "2. Три скорости и главное наблюдение"),
+        ("p", r"Скорость — это приращение выхода, делённое на приращение входа. У нас три скорости: у первого звена, у второго и у всей цепочки:"),
+        ("eq", r"\frac{\Delta u}{\Delta x} = \frac{0{,}41}{0{,}1} = 4{,}1,\qquad \frac{\Delta y}{\Delta u} = \frac{21{,}766}{0{,}41} \approx 53{,}09,\qquad \frac{\Delta y}{\Delta x} = \frac{21{,}766}{0{,}1} \approx 217{,}66"),
+        ("p", r"И $4{,}1\cdot 53{,}09 \approx 217{,}66$: <b>скорость цепочки равна произведению скоростей звеньев</b>. Это не совпадение, а обычное сокращение дробей — число $0{,}41$ стоит внизу в одной дроби и наверху в другой, потому что выход первого звена и есть вход второго:"),
+        ("eq", r"\frac{\Delta y}{\Delta x} = \frac{\Delta y}{\Delta u}\cdot\frac{\Delta u}{\Delta x}\qquad\Big(\frac{21{,}766}{0{,}1} = \frac{21{,}766}{0{,}41}\cdot\frac{0{,}41}{0{,}1}\Big)"),
+        ("h3", "3. Уменьшаем сдвиг"),
+        ("p", r"Производная — это скорость при сколь угодно малом сдвиге. Повторим расчёт для меньших $\Delta x$:"),
+        ("table", ["$\\Delta x$", "$\\Delta u$", "$\\dfrac{\\Delta u}{\\Delta x}$", "$\\dfrac{\\Delta y}{\\Delta u}$", "$\\dfrac{\\Delta y}{\\Delta x}$"], [
+            ["$0{,}1$", "$0{,}41$", "$4{,}1$", "$53{,}09$", "$217{,}66$"],
+            ["$0{,}01$", "$0{,}0401$", "$4{,}01$", "$48{,}48$", "$194{,}42$"],
+            ["$0{,}001$", "$0{,}004001$", "$4{,}001$", "$48{,}048$", "$192{,}24$"],
+            ["$\\to 0$", "$\\to 0$", "$\\to 4$", "$\\to 48$", "$\\to 192$"],
+        ], {"num": [0, 1, 2, 3, 4]}),
+        ("p", r"В каждой строке последнее число равно произведению двух предыдущих, и в пределе $4\cdot 48 = 192$. Обратите внимание: $\Delta u \to 0$ вместе с $\Delta x$ — функция $x^2$ непрерывна, малый сдвиг входа даёт малый сдвиг выхода."),
+        ("h3", "4. Каждое звено — по определению, отдельно"),
+        ("p", r"После обозначения $u = g(x)$ у нас по сути две отдельные простые функции. Для каждой распишем определение производной — это одна и та же формула, только буквы разные."),
+        ("steps", [
+            (r"<b>Первое звено</b> $x \to u$, $u = x^2$. Приращение выхода назовём $\Delta u$.", r"\begin{gathered}\Delta u = (x + \Delta x)^2 - x^2 = 2x\,\Delta x + \Delta x^2\\ \frac{\Delta u}{\Delta x} = 2x + \Delta x\ \xrightarrow[\Delta x \to 0]{}\ 2x = g'(x)\end{gathered}"),
+            (r"<b>Второе звено</b> $u \to y$, $y = u^3$. Его аргумент — буква $u$, а сдвиг аргумента — $\Delta u$.", r"\begin{gathered}\Delta y = (u + \Delta u)^3 - u^3 = 3u^2\Delta u + 3u\,\Delta u^2 + \Delta u^3\\ \frac{\Delta y}{\Delta u} = 3u^2 + 3u\,\Delta u + \Delta u^2\ \xrightarrow[\Delta u \to 0]{}\ 3u^2 = f'(u)\end{gathered}"),
+            (r"<b>Вся цепочка</b> $x \to y$ — по тому же определению. Числитель — это то же самое $\Delta y$: $g(x) = u$ и $g(x + \Delta x) = u + \Delta u$.", r"\begin{aligned}F'(x) &= \lim_{\Delta x \to 0}\frac{f(g(x + \Delta x)) - f(g(x))}{\Delta x}\\ &= \lim_{\Delta x \to 0}\frac{f(u + \Delta u) - f(u)}{\Delta x} = \lim_{\Delta x \to 0}\frac{\Delta y}{\Delta x}\end{aligned}"),
+            (r"<b>Соединяем</b>: перемножаем отношения звеньев <b>до</b> перехода к пределу ($\Delta u$ сокращается).", r"\frac{\Delta y}{\Delta x} = \underbrace{(3u^2 + 3u\,\Delta u + \Delta u^2)}_{\Delta y / \Delta u}\cdot\underbrace{(2x + \Delta x)}_{\Delta u / \Delta x}"),
+            (r"<b>Предел</b>: при $\Delta x \to 0$ и $\Delta u \to 0$ все слагаемые с дельтами исчезают. Возвращаем $u = x^2$.", r"F'(x) = 3u^2\cdot 2x = 3(x^2)^2\cdot 2x = 6x^5,\qquad F'(2) = 48\cdot 4 = 192"),
+            (r"<b>Проверка напрямую</b>: $(x^2)^3 = x^6$.", r"(x^6)' = 6x^5\quad\checkmark"),
+        ]),
+        ("h3", "5. Зачем нужно $\\Delta u$"),
+        ("p", r"В дроби $\frac{f(g(x + \Delta x)) - f(g(x))}{\Delta x}$ наверху — приращение $f$, а внизу — приращение $x$. Но аргумент $f$ — не $x$, а $u = g(x)$, и он изменился не на $\Delta x$, а на $\Delta u$. Определение $f'$ требует «приращение функции на приращение <b>её собственного</b> аргумента», поэтому мы искусственно умножаем и делим на $\Delta u$: в первой дроби оно стоит внизу и даёт $f'(u)$, во второй — наверху и даёт $g'(x)$. (Если $\Delta u$ может обращаться в ноль, этот случай обходят в строгом доказательстве ниже.)"),
+        ("callout", "intuition", "Литры, километры и минуты", r"Время $\to$ пробег $\to$ расход бензина. Бак «не знает», сколько прошло минут, — он чувствует только километры. Расход $0{,}1$ л/км — это $f'$, скорость $1{,}5$ км/мин — это $g'$. За $2$ минуты машина проедет $\Delta g = 1{,}5\cdot 2 = 3$ км и сожжёт $\Delta f = 0{,}1\cdot 3 = 0{,}3$ л, то есть $0{,}15$ л/мин $= 0{,}1\cdot 1{,}5$. От минут к литрам напрямую не перейти — только через километры. Километры сокращаются: $\frac{\text{л}}{\text{км}}\cdot\frac{\text{км}}{\text{мин}} = \frac{\text{л}}{\text{мин}}$."),
     ]),
     dict(id="proof", title="Доказательство по определению", blocks=[
         ("p", r"Докажем цепное правило, опираясь только на определение производной. Сначала посмотрим на «почти доказательство», которое приходит в голову первым, и поймём, где оно ломается."),
@@ -352,7 +392,7 @@ RU = [
         ("callout", "note", "Как себя проверить", r"1) Подставьте конкретное число и сравните ответ с разностным отношением при маленьком $h$ (как в таблице с $e^{x^2}$). 2) Если можно, сначала подставьте внутренние функции и продифференцируйте результат напрямую. 3) Проверьте число слагаемых: в многомерном правиле оно равно числу путей от функции к переменной."),
     ]),
     dict(id="worked", title="Разборы: от очень лёгкого к трудному", blocks=[
-        ("p", r"Десять примеров, каждый с целью и подробным решением. Первые — на одно звено, последние — на несколько переменных и нейрон. Где уместно, производная найдена и по определению, и по цепному правилу."),
+        ("p", r"Двенадцать примеров, каждый с целью и подробным решением. Первые — на одно звено, последние — на несколько переменных и нейрон. Где уместно, производная найдена и по определению, и по цепному правилу."),
         ("example", dict(n=1, title="$y = (2x + 3)^2$ тремя способами", kinds=["одна переменная", "по определению"],
             goal=r"Убедиться, что цепное правило даёт то же, что раскрытие скобок и определение производной.",
             blocks=[("steps", [
@@ -430,6 +470,32 @@ RU = [
                 (r"Последнее звено.", r"\frac{\partial L}{\partial w} = (a - y)\,x,\qquad \frac{\partial L}{\partial b} = a - y"),
             ])],
             take=r"Цепное правило объясняет, почему сигмоиду используют вместе с перекрёстной энтропией: их производные сокращаются, и градиент равен просто «ошибке» $a - y$, умноженной на вход.")),
+        ("example", dict(n=11, title="Две входные переменные: $f(x, y) = (2x + 3y)^2$", kinds=["две переменные", "по определению", "проверка числами"],
+            goal=r"Применить цепное правило к функции двух переменных, вывести каждую производную звена по определению и проверить ответ на числах.",
+            blocks=[("steps", [
+                (r"Разбиваем на куски: $z = 2x + 3y$, $f = z^2$. В $z$ входят две стрелки, из $z$ выходит одна.", r"x \searrow\quad z \to f\quad \swarrow y"),
+                (r"Внешний кусок по определению: $f = z^2$ зависит только от $z$.", r"\frac{(z + \Delta z)^2 - z^2}{\Delta z} = \frac{2z\,\Delta z + \Delta z^2}{\Delta z} = 2z + \Delta z \to 2z"),
+                (r"Внутренний кусок по определению — две частные производные: приращение получает одна переменная.", r"\frac{2(x + \Delta x) + 3y - 2x - 3y}{\Delta x} = 2,\qquad \frac{2x + 3(y + \Delta y) - 2x - 3y}{\Delta y} = 3"),
+                (r"Цепное правило отдельно для каждой переменной: вдоль пути $x \to z \to f$ и вдоль пути $y \to z \to f$.", r"\frac{\partial f}{\partial x} = 2z\cdot 2 = 4(2x + 3y),\qquad \frac{\partial f}{\partial y} = 2z\cdot 3 = 6(2x + 3y)"),
+                (r"Проверка без цепного правила: раскрываем скобки.", r"f = 4x^2 + 12xy + 9y^2:\qquad f_x = 8x + 12y,\quad f_y = 12x + 18y\quad\checkmark"),
+            ]), ("table", ["Сдвиг (из точки $(1;\\ 1)$, $f = 25$)", "$z$", "$f$", "$\\dfrac{\\Delta f}{\\text{сдвиг}}$", "Формула"], [
+                ["$\\Delta x = 0{,}01$", "$5{,}02$", "$25{,}2004$", "$20{,}04$", "$4z = 20$"],
+                ["$\\Delta y = 0{,}01$", "$5{,}03$", "$25{,}3009$", "$30{,}09$", "$6z = 30$"],
+            ], {"num": [1, 2, 3]})],
+            take=r"Множитель $\frac{\partial f}{\partial z} = 2z$ общий для обеих производных — его считают один раз. В нейросети такой общий множитель называют ошибкой нейрона $\delta$, а $\frac{\partial L}{\partial w_i} = \delta\cdot x_i$.")),
+        ("example", dict(n=12, title="Одна переменная — два пути: $f = u^2 + v^2$, $u = 2x$, $v = 3x$", kinds=["несколько путей", "проверка числами"],
+            goal=r"Увидеть, почему вклады разных путей складываются, а не перемножаются.",
+            blocks=[("steps", [
+                (r"Путь через $u$: производные звеньев по определению ($v$ при этом не меняется).", r"\frac{\partial f}{\partial u} = 2u,\quad \frac{du}{dx} = 2\ \Rightarrow\ 2u\cdot 2 = 4u"),
+                (r"Путь через $v$.", r"\frac{\partial f}{\partial v} = 2v,\quad \frac{dv}{dx} = 3\ \Rightarrow\ 2v\cdot 3 = 6v"),
+                (r"Сдвиг $x$ меняет $f$ сразу по обоим путям — вклады складываются; возвращаем $u = 2x$, $v = 3x$.", r"\frac{df}{dx} = 4u + 6v = 8x + 18x = 26x"),
+                (r"Проверка напрямую.", r"f = 4x^2 + 9x^2 = 13x^2,\qquad f' = 26x\quad\checkmark"),
+            ]), ("table", ["", "было ($x = 1$)", "стало ($x = 1{,}01$)", "сдвиг"], [
+                ["$u^2 = (2x)^2$", "$4$", "$4{,}0804$", "$0{,}0804$"],
+                ["$v^2 = (3x)^2$", "$9$", "$9{,}1809$", "$0{,}1809$"],
+                ["$f$", "$13$", "$13{,}2613$", "$0{,}2613$"],
+            ], {"num": [1, 2, 3]}), ("p", r"Общий сдвиг $f$ — сумма сдвигов по двум путям: $0{,}0804 + 0{,}1809 = 0{,}2613$, а $\frac{0{,}2613}{0{,}01} = 26{,}13 \approx 26$.")],
+            take=r"Два правила на всю нейросеть: вдоль одного пути производные <b>умножаются</b>, по разным путям — <b>складываются</b>. Когда нейрон передаёт сигнал нескольким нейронам следующего слоя, его ошибка — сумма ошибок, пришедших по всем связям.")),
     ]),
     dict(id="practice", title="Практикум: 56 примеров с решениями", blocks=[
         ("p", r"Примеры идут от очень лёгких к трудным; сложность отмечена звёздами. Сначала попробуйте решить сами, затем откройте решение: каждый шаг объяснён. Примеры № 29–34 и 42–43 решаются <b>по определению</b> (через предел), остальные — по цепному правилу, многие с проверкой."),
@@ -492,7 +558,7 @@ EN = [
         ("p", r"For functions of several variables the rule sounds the same, except that several links can run in parallel, and then the contributions of all the paths <b>add up</b>:"),
         ("eq", r"z = f\big(x(t),\ y(t)\big)\quad\Longrightarrow\quad \frac{dz}{dt} = \frac{\partial z}{\partial x}\cdot\frac{dx}{dt} + \frac{\partial z}{\partial y}\cdot\frac{dy}{dt}"),
         ("callout", "intuition", "An analogy", r"Three gears. The first one turns the second so that the second makes 3 revolutions for every revolution of the first; the second turns the third, 2 revolutions per revolution of its own. How many revolutions does the third make per revolution of the first? $3 \cdot 2 = 6$. Gear ratios <b>multiply</b>. The derivative is exactly the “gear ratio” of a function at a given point, and the chain rule is the rule of gears."),
-        ("p", r"In this article we will go all the way: recall the <b>definition of the derivative</b> as a limit and learn to compute with it; work out what a <b>composite function</b> is; derive and <b>prove</b> the chain rule straight from the definition; extend it to <b>partial derivatives</b> and functions of <b>two or more variables</b>; understand how an <b>ordinary</b> derivative differs from a <b>partial</b> one and from a <b>total</b> one; and see that training a neural network (the backward pass) is the chain rule applied many times over. At the end there are 10 detailed walkthroughs and 56 examples solved step by step, from very easy to hard."),
+        ("p", r"In this article we will go all the way: recall the <b>definition of the derivative</b> as a limit and learn to compute with it; work out what a <b>composite function</b> is; derive and <b>prove</b> the chain rule straight from the definition; extend it to <b>partial derivatives</b> and functions of <b>two or more variables</b>; understand how an <b>ordinary</b> derivative differs from a <b>partial</b> one and from a <b>total</b> one; and see that training a neural network (the backward pass) is the chain rule applied many times over. At the end there are 12 detailed walkthroughs and 56 examples solved step by step, from very easy to hard."),
         ("callout", "key", "The main point", r"The chain rule is not a separate trick but a consequence of the very definition of the derivative: the derivative shows by what factor a function stretches a small step of its argument. If the step passes through several functions in a row, the stretches multiply."),
     ]),
     dict(id="definition", title="The derivative from the definition", blocks=[
@@ -580,6 +646,46 @@ EN = [
             [r"$\arctan u$", r"$\dfrac{u'}{1 + u^2}$", r"$(\arctan 2x)' = \dfrac{2}{1 + 4x^2}$"],
         ]),
         ("callout", "intuition", "Why the derivatives multiply", r"The derivative is the stretch factor of small steps. The inner function stretches the step $\Delta x$ by a factor of $g'(x)$: $\Delta u \approx g'(x)\,\Delta x$. The outer function stretches that step by a factor of $f'(u)$: $\Delta y \approx f'(u)\,\Delta u \approx f'(u)\,g'(x)\,\Delta x$. Two stretches in a row amount to their product."),
+    ]),
+    dict(id="numbers", title="The chain rule on numbers: increments step by step", blocks=[
+        ("p", r"Before proving the rule rigorously, let us walk through it with concrete numbers: this shows where it comes from. The example is the same throughout: first we square, then we cube."),
+        ("eq", r"x \xrightarrow{\ \text{square}\ } u = x^2 \xrightarrow{\ \text{cube}\ } y = u^3,\qquad F(x) = (x^2)^3"),
+        ("p", r"The outer function $y = u^3$ <b>does not see $x$</b>: all it receives as input is $u$. This is the main thing to remember about a composite function."),
+        ("h3", "1. Shift the input and watch the shift travel along the chain"),
+        ("p", r"Take $x = 2$ and shift it by $\Delta x = 0.1$. The increment is “after minus before”:"),
+        ("table", ["", "before", "after", "increment"], [
+            [r"$x$", r"$2$", r"$2.1$", r"$\Delta x = 0.1$"],
+            [r"$u = x^2$", r"$4$", r"$4.41$", r"$\Delta u = 0.41$"],
+            [r"$y = u^3$", r"$64$", r"$85.766$", r"$\Delta y \approx 21.766$"],
+        ], {"num": [1, 2, 3]}),
+        ("p", r"The shift travelled along the chain: $x$ changed by $0.1$, because of that $u$ changed by $0.41$, and because of that $y$ changed by $21.766$."),
+        ("h3", "2. Three rates and the key observation"),
+        ("p", r"A rate is the increment of the output divided by the increment of the input. We have three rates: for the first link, for the second link and for the whole chain:"),
+        ("eq", r"\frac{\Delta u}{\Delta x} = \frac{0.41}{0.1} = 4.1,\qquad \frac{\Delta y}{\Delta u} = \frac{21.766}{0.41} \approx 53.09,\qquad \frac{\Delta y}{\Delta x} = \frac{21.766}{0.1} \approx 217.66"),
+        ("p", r"And $4.1\cdot 53.09 \approx 217.66$: <b>the rate of the chain equals the product of the rates of the links</b>. This is not a coincidence but ordinary cancellation of fractions: the number $0.41$ sits at the bottom of one fraction and at the top of the other, because the output of the first link is exactly the input of the second:"),
+        ("eq", r"\frac{\Delta y}{\Delta x} = \frac{\Delta y}{\Delta u}\cdot\frac{\Delta u}{\Delta x}\qquad\Big(\frac{21.766}{0.1} = \frac{21.766}{0.41}\cdot\frac{0.41}{0.1}\Big)"),
+        ("h3", "3. Shrink the shift"),
+        ("p", r"The derivative is the rate for an arbitrarily small shift. Let us repeat the calculation for smaller $\Delta x$:"),
+        ("table", ["$\\Delta x$", "$\\Delta u$", "$\\dfrac{\\Delta u}{\\Delta x}$", "$\\dfrac{\\Delta y}{\\Delta u}$", "$\\dfrac{\\Delta y}{\\Delta x}$"], [
+            ["$0.1$", "$0.41$", "$4.1$", "$53.09$", "$217.66$"],
+            ["$0.01$", "$0.0401$", "$4.01$", "$48.48$", "$194.42$"],
+            ["$0.001$", "$0.004001$", "$4.001$", "$48.048$", "$192.24$"],
+            ["$\\to 0$", "$\\to 0$", "$\\to 4$", "$\\to 48$", "$\\to 192$"],
+        ], {"num": [0, 1, 2, 3, 4]}),
+        ("p", r"In every row the last number equals the product of the two before it, and in the limit $4\cdot 48 = 192$. Note that $\Delta u \to 0$ together with $\Delta x$: the function $x^2$ is continuous, so a small shift of the input gives a small shift of the output."),
+        ("h3", "4. Each link from the definition, separately"),
+        ("p", r"Once we write $u = g(x)$, we in fact have two separate simple functions. For each of them we write out the definition of the derivative: it is one and the same formula, only the letters differ."),
+        ("steps", [
+            (r"<b>The first link</b> $x \to u$, $u = x^2$. We call the increment of the output $\Delta u$.", r"\begin{gathered}\Delta u = (x + \Delta x)^2 - x^2 = 2x\,\Delta x + \Delta x^2\\ \frac{\Delta u}{\Delta x} = 2x + \Delta x\ \xrightarrow[\Delta x \to 0]{}\ 2x = g'(x)\end{gathered}"),
+            (r"<b>The second link</b> $u \to y$, $y = u^3$. Its argument is the letter $u$, and the shift of the argument is $\Delta u$.", r"\begin{gathered}\Delta y = (u + \Delta u)^3 - u^3 = 3u^2\Delta u + 3u\,\Delta u^2 + \Delta u^3\\ \frac{\Delta y}{\Delta u} = 3u^2 + 3u\,\Delta u + \Delta u^2\ \xrightarrow[\Delta u \to 0]{}\ 3u^2 = f'(u)\end{gathered}"),
+            (r"<b>The whole chain</b> $x \to y$, from the same definition. The numerator is the same $\Delta y$: $g(x) = u$ and $g(x + \Delta x) = u + \Delta u$.", r"\begin{aligned}F'(x) &= \lim_{\Delta x \to 0}\frac{f(g(x + \Delta x)) - f(g(x))}{\Delta x}\\ &= \lim_{\Delta x \to 0}\frac{f(u + \Delta u) - f(u)}{\Delta x} = \lim_{\Delta x \to 0}\frac{\Delta y}{\Delta x}\end{aligned}"),
+            (r"<b>Put them together</b>: multiply the ratios of the links <b>before</b> passing to the limit ($\Delta u$ cancels).", r"\frac{\Delta y}{\Delta x} = \underbrace{(3u^2 + 3u\,\Delta u + \Delta u^2)}_{\Delta y / \Delta u}\cdot\underbrace{(2x + \Delta x)}_{\Delta u / \Delta x}"),
+            (r"<b>The limit</b>: as $\Delta x \to 0$ and $\Delta u \to 0$, all the terms with deltas vanish. Substitute $u = x^2$ back.", r"F'(x) = 3u^2\cdot 2x = 3(x^2)^2\cdot 2x = 6x^5,\qquad F'(2) = 48\cdot 4 = 192"),
+            (r"<b>A direct check</b>: $(x^2)^3 = x^6$.", r"(x^6)' = 6x^5\quad\checkmark"),
+        ]),
+        ("h3", "5. Why we need $\\Delta u$"),
+        ("p", r"In the fraction $\frac{f(g(x + \Delta x)) - f(g(x))}{\Delta x}$ the top is the increment of $f$, and the bottom is the increment of $x$. But the argument of $f$ is not $x$ but $u = g(x)$, and it changed not by $\Delta x$ but by $\Delta u$. The definition of $f'$ requires “the increment of the function over the increment of <b>its own</b> argument”, so we artificially multiply and divide by $\Delta u$: in the first fraction it sits at the bottom and gives $f'(u)$, in the second it sits at the top and gives $g'(x)$. (If $\Delta u$ can turn into zero, this case is handled in the rigorous proof below.)"),
+        ("callout", "intuition", "Litres, kilometres and minutes", r"Time $\to$ distance $\to$ fuel used. The tank “does not know” how many minutes have passed; it only feels the kilometres. A consumption of $0.1$ l/km is $f'$, a speed of $1.5$ km/min is $g'$. In $2$ minutes the car covers $\Delta g = 1.5\cdot 2 = 3$ km and burns $\Delta f = 0.1\cdot 3 = 0.3$ l, that is $0.15$ l/min $= 0.1\cdot 1.5$. There is no direct way from minutes to litres, only through kilometres. The kilometres cancel: $\frac{\text{l}}{\text{km}}\cdot\frac{\text{km}}{\text{min}} = \frac{\text{l}}{\text{min}}$."),
     ]),
     dict(id="proof", title="The proof from the definition", blocks=[
         ("p", r"Let us prove the chain rule relying only on the definition of the derivative. First we will look at the “almost proof” that comes to mind first and see where it breaks down."),
@@ -759,7 +865,7 @@ EN = [
         ("callout", "note", "How to check yourself", r"1) Plug in a specific number and compare the answer with the difference quotient for a small $h$ (as in the table for $e^{x^2}$). 2) If possible, substitute the inner functions first and differentiate the result directly. 3) Check the number of terms: in the multivariable rule it equals the number of paths from the function to the variable."),
     ]),
     dict(id="worked", title="Walkthroughs: from very easy to hard", blocks=[
-        ("p", r"Ten examples, each with a goal and a detailed solution. The first ones have a single link, the last ones involve several variables and a neuron. Where appropriate, the derivative is found both from the definition and by the chain rule."),
+        ("p", r"Twelve examples, each with a goal and a detailed solution. The first ones have a single link, the last ones involve several variables and a neuron. Where appropriate, the derivative is found both from the definition and by the chain rule."),
         ("example", dict(n=1, title=r"$y = (2x + 3)^2$ in three ways", kinds=["one variable", "from the definition"],
             goal=r"Make sure that the chain rule gives the same result as expanding the brackets and as the definition of the derivative.",
             blocks=[("steps", [
@@ -837,6 +943,32 @@ EN = [
                 (r"The last link.", r"\frac{\partial L}{\partial w} = (a - y)\,x,\qquad \frac{\partial L}{\partial b} = a - y"),
             ])],
             take=r"The chain rule explains why the sigmoid is used together with cross-entropy: their derivatives cancel, and the gradient is simply the “error” $a - y$ times the input.")),
+        ("example", dict(n=11, title=r"Two input variables: $f(x, y) = (2x + 3y)^2$", kinds=["two variables", "from the definition", "numerical check"],
+            goal=r"Apply the chain rule to a function of two variables, derive the derivative of each link from the definition and check the answer on numbers.",
+            blocks=[("steps", [
+                (r"Split into pieces: $z = 2x + 3y$, $f = z^2$. Two arrows go into $z$, one comes out of it.", r"x \searrow\quad z \to f\quad \swarrow y"),
+                (r"The outer piece from the definition: $f = z^2$ depends only on $z$.", r"\frac{(z + \Delta z)^2 - z^2}{\Delta z} = \frac{2z\,\Delta z + \Delta z^2}{\Delta z} = 2z + \Delta z \to 2z"),
+                (r"The inner piece from the definition gives two partial derivatives: only one variable gets the increment.", r"\frac{2(x + \Delta x) + 3y - 2x - 3y}{\Delta x} = 2,\qquad \frac{2x + 3(y + \Delta y) - 2x - 3y}{\Delta y} = 3"),
+                (r"The chain rule separately for each variable: along the path $x \to z \to f$ and along the path $y \to z \to f$.", r"\frac{\partial f}{\partial x} = 2z\cdot 2 = 4(2x + 3y),\qquad \frac{\partial f}{\partial y} = 2z\cdot 3 = 6(2x + 3y)"),
+                (r"A check without the chain rule: expand the brackets.", r"f = 4x^2 + 12xy + 9y^2:\qquad f_x = 8x + 12y,\quad f_y = 12x + 18y\quad\checkmark"),
+            ]), ("table", ["Shift (from the point $(1,\\ 1)$, $f = 25$)", "$z$", "$f$", "$\\dfrac{\\Delta f}{\\text{shift}}$", "Formula"], [
+                ["$\\Delta x = 0.01$", "$5.02$", "$25.2004$", "$20.04$", "$4z = 20$"],
+                ["$\\Delta y = 0.01$", "$5.03$", "$25.3009$", "$30.09$", "$6z = 30$"],
+            ], {"num": [1, 2, 3]})],
+            take=r"The factor $\frac{\partial f}{\partial z} = 2z$ is common to both derivatives, so it is computed once. In a neural network such a common factor is called the error of the neuron $\delta$, and $\frac{\partial L}{\partial w_i} = \delta\cdot x_i$.")),
+        ("example", dict(n=12, title=r"One variable, two paths: $f = u^2 + v^2$, $u = 2x$, $v = 3x$", kinds=["several paths", "numerical check"],
+            goal=r"See why the contributions of different paths add up rather than multiply.",
+            blocks=[("steps", [
+                (r"The path through $u$: the derivatives of the links from the definition ($v$ does not change meanwhile).", r"\frac{\partial f}{\partial u} = 2u,\quad \frac{du}{dx} = 2\ \Rightarrow\ 2u\cdot 2 = 4u"),
+                (r"The path through $v$.", r"\frac{\partial f}{\partial v} = 2v,\quad \frac{dv}{dx} = 3\ \Rightarrow\ 2v\cdot 3 = 6v"),
+                (r"A shift of $x$ changes $f$ along both paths at once, so the contributions add up; substitute $u = 2x$, $v = 3x$ back.", r"\frac{df}{dx} = 4u + 6v = 8x + 18x = 26x"),
+                (r"A direct check.", r"f = 4x^2 + 9x^2 = 13x^2,\qquad f' = 26x\quad\checkmark"),
+            ]), ("table", ["", "before ($x = 1$)", "after ($x = 1.01$)", "shift"], [
+                ["$u^2 = (2x)^2$", "$4$", "$4.0804$", "$0.0804$"],
+                ["$v^2 = (3x)^2$", "$9$", "$9.1809$", "$0.1809$"],
+                ["$f$", "$13$", "$13.2613$", "$0.2613$"],
+            ], {"num": [1, 2, 3]}), ("p", r"The total shift of $f$ is the sum of the shifts along the two paths: $0.0804 + 0.1809 = 0.2613$, and $\frac{0.2613}{0.01} = 26.13 \approx 26$.")],
+            take=r"Two rules for the whole neural network: along one path the derivatives <b>multiply</b>, across different paths they <b>add up</b>. When a neuron passes its signal to several neurons of the next layer, its error is the sum of the errors that arrive over all the connections.")),
     ]),
     dict(id="practice", title="Practice: 56 examples with solutions", blocks=[
         ("p", r"The examples go from very easy to hard; the difficulty is marked with stars. Try to solve each one yourself first, then open the solution: every step is explained. Examples No. 29–34 and 42–43 are solved <b>from the definition</b> (via the limit), the rest by the chain rule, many of them with a check."),
@@ -888,7 +1020,7 @@ UZ = [
         ("p", r"Ko‘p o‘zgaruvchili funksiyalar uchun qoida xuddi shunday, faqat bo‘g‘inlar parallel ravishda bir nechta bo‘lishi mumkin, u holda barcha yo‘llarning hissalari <b>qo‘shiladi</b>:"),
         ("eq", r"z = f\big(x(t),\ y(t)\big)\quad\Longrightarrow\quad \frac{dz}{dt} = \frac{\partial z}{\partial x}\cdot\frac{dx}{dt} + \frac{\partial z}{\partial y}\cdot\frac{dy}{dt}"),
         ("callout", "intuition", "O‘xshatish", r"Uchta tishli g‘ildirak. Birinchisi ikkinchisini shunday aylantiradiki, birinchisining har bir aylanishiga ikkinchisi 3 marta aylanadi; ikkinchisi uchinchisini aylantiradi — o‘zining har bir aylanishiga 2 marta. Birinchisining bitta aylanishiga uchinchisi necha marta aylanadi? $3 \cdot 2 = 6$. Uzatish sonlari <b>ko‘paytiriladi</b>. Hosila — funksiyaning berilgan nuqtadagi «uzatish soni»ning aynan o‘zi, zanjir qoidasi esa — tishli g‘ildiraklar qoidasi."),
-        ("p", r"Bu maqolada butun yo‘lni bosib o‘tamiz: limit orqali <b>hosila ta’rifini</b> eslaymiz va u bo‘yicha hisoblashni o‘rganamiz; <b>murakkab funksiya</b> nima ekanini tahlil qilamiz; zanjir qoidasini to‘g‘ridan-to‘g‘ri ta’rifdan keltirib chiqaramiz va <b>isbotlaymiz</b>; uni <b>xususiy hosilalarga</b> hamda <b>ikki va undan ortiq o‘zgaruvchili</b> funksiyalarga o‘tkazamiz; <b>oddiy</b> hosila <b>xususiy</b> va <b>to‘liq</b> hosiladan nimasi bilan farq qilishini tushunamiz; neyron tarmoqni o‘qitish (teskari o‘tish) — ko‘p marta qo‘llanilgan zanjir qoidasi ekanini ko‘ramiz. Oxirida — 10 ta batafsil tahlil va qadamma-qadam yechilgan 56 ta misol, juda osonlaridan qiyinlarigacha."),
+        ("p", r"Bu maqolada butun yo‘lni bosib o‘tamiz: limit orqali <b>hosila ta’rifini</b> eslaymiz va u bo‘yicha hisoblashni o‘rganamiz; <b>murakkab funksiya</b> nima ekanini tahlil qilamiz; zanjir qoidasini to‘g‘ridan-to‘g‘ri ta’rifdan keltirib chiqaramiz va <b>isbotlaymiz</b>; uni <b>xususiy hosilalarga</b> hamda <b>ikki va undan ortiq o‘zgaruvchili</b> funksiyalarga o‘tkazamiz; <b>oddiy</b> hosila <b>xususiy</b> va <b>to‘liq</b> hosiladan nimasi bilan farq qilishini tushunamiz; neyron tarmoqni o‘qitish (teskari o‘tish) — ko‘p marta qo‘llanilgan zanjir qoidasi ekanini ko‘ramiz. Oxirida — 12 ta batafsil tahlil va qadamma-qadam yechilgan 56 ta misol, juda osonlaridan qiyinlarigacha."),
         ("callout", "key", "Asosiysi", r"Zanjir qoidasi alohida hiyla emas, balki hosila ta’rifining o‘zidan kelib chiqadigan natija: hosila funksiya argumentning kichik qadamini necha marta cho‘zishini ko‘rsatadi. Agar qadam ketma-ket bir nechta funksiyadan o‘tsa, cho‘zilishlar ko‘paytiriladi."),
     ]),
     dict(id="definition", title="Ta’rif bo‘yicha hosila", blocks=[
@@ -976,6 +1108,46 @@ UZ = [
             [r"$\operatorname{arctg} u$", r"$\dfrac{u'}{1 + u^2}$", r"$(\operatorname{arctg} 2x)' = \dfrac{2}{1 + 4x^2}$"],
         ]),
         ("callout", "intuition", "Nega hosilalar ko‘paytiriladi", r"Hosila — kichik qadamlarning cho‘zilish koeffitsiyenti. Ichki funksiya $\Delta x$ qadamni $g'(x)$ marta cho‘zadi: $\Delta u \approx g'(x)\,\Delta x$. Tashqi funksiya esa endi shu qadamni $f'(u)$ marta cho‘zadi: $\Delta y \approx f'(u)\,\Delta u \approx f'(u)\,g'(x)\,\Delta x$. Ketma-ket ikki cho‘zilish — ularning ko‘paytmasi."),
+    ]),
+    dict(id="numbers", title="Zanjir qoidasi sonlarda: orttirmalar qadamma-qadam", blocks=[
+        ("p", r"Qoidani qat’iy isbotlashdan oldin uni aniq sonlarda bosib o‘tamiz — shunda u qayerdan kelib chiqishi ko‘rinadi. Misol hamma joyda bitta: avval kvadratga, keyin kubga ko‘taramiz."),
+        ("eq", r"x \xrightarrow{\ \text{kvadrat}\ } u = x^2 \xrightarrow{\ \text{kub}\ } y = u^3,\qquad F(x) = (x^2)^3"),
+        ("p", r"Tashqi funksiya $y = u^3$ <b>$x$ ni ko‘rmaydi</b>: kirishga u faqat $u$ ni oladi. Murakkab funksiya haqida eslab qolish kerak bo‘lgan asosiy narsa shu."),
+        ("h3", "1. Kirishni siljitamiz va siljish zanjir bo‘ylab qanday o‘tishini kuzatamiz"),
+        ("p", r"$x = 2$ ni olamiz va uni $\Delta x = 0{,}1$ ga siljitamiz. Orttirma — «bo‘ldi minus edi»:"),
+        ("table", ["", "edi", "bo‘ldi", "orttirma"], [
+            [r"$x$", r"$2$", r"$2{,}1$", r"$\Delta x = 0{,}1$"],
+            [r"$u = x^2$", r"$4$", r"$4{,}41$", r"$\Delta u = 0{,}41$"],
+            [r"$y = u^3$", r"$64$", r"$85{,}766$", r"$\Delta y \approx 21{,}766$"],
+        ], {"num": [1, 2, 3]}),
+        ("p", r"Siljish zanjir bo‘ylab o‘tdi: $x$ $0{,}1$ ga o‘zgardi, shu sababli $u$ — $0{,}41$ ga, bu sababli esa $y$ — $21{,}766$ ga."),
+        ("h3", "2. Uchta tezlik va asosiy kuzatish"),
+        ("p", r"Tezlik — chiqish orttirmasining kirish orttirmasiga nisbati. Bizda uchta tezlik bor: birinchi bo‘g‘inniki, ikkinchisiniki va butun zanjirniki:"),
+        ("eq", r"\frac{\Delta u}{\Delta x} = \frac{0{,}41}{0{,}1} = 4{,}1,\qquad \frac{\Delta y}{\Delta u} = \frac{21{,}766}{0{,}41} \approx 53{,}09,\qquad \frac{\Delta y}{\Delta x} = \frac{21{,}766}{0{,}1} \approx 217{,}66"),
+        ("p", r"Va $4{,}1\cdot 53{,}09 \approx 217{,}66$: <b>zanjir tezligi bo‘g‘inlar tezliklarining ko‘paytmasiga teng</b>. Bu tasodif emas, balki kasrlarning oddiy qisqarishi — $0{,}41$ soni bir kasrda pastda, boshqasida yuqorida turadi, chunki birinchi bo‘g‘inning chiqishi aynan ikkinchisining kirishidir:"),
+        ("eq", r"\frac{\Delta y}{\Delta x} = \frac{\Delta y}{\Delta u}\cdot\frac{\Delta u}{\Delta x}\qquad\Big(\frac{21{,}766}{0{,}1} = \frac{21{,}766}{0{,}41}\cdot\frac{0{,}41}{0{,}1}\Big)"),
+        ("h3", "3. Siljishni kichraytiramiz"),
+        ("p", r"Hosila — istalgancha kichik siljishdagi tezlik. Hisobni kichikroq $\Delta x$ lar uchun takrorlaymiz:"),
+        ("table", ["$\\Delta x$", "$\\Delta u$", "$\\dfrac{\\Delta u}{\\Delta x}$", "$\\dfrac{\\Delta y}{\\Delta u}$", "$\\dfrac{\\Delta y}{\\Delta x}$"], [
+            ["$0{,}1$", "$0{,}41$", "$4{,}1$", "$53{,}09$", "$217{,}66$"],
+            ["$0{,}01$", "$0{,}0401$", "$4{,}01$", "$48{,}48$", "$194{,}42$"],
+            ["$0{,}001$", "$0{,}004001$", "$4{,}001$", "$48{,}048$", "$192{,}24$"],
+            ["$\\to 0$", "$\\to 0$", "$\\to 4$", "$\\to 48$", "$\\to 192$"],
+        ], {"num": [0, 1, 2, 3, 4]}),
+        ("p", r"Har bir satrda oxirgi son oldingi ikkitasining ko‘paytmasiga teng, limitda esa $4\cdot 48 = 192$. E’tibor bering: $\Delta u \to 0$ $\Delta x$ bilan birga — $x^2$ funksiya uzluksiz, kirishning kichik siljishi chiqishning kichik siljishini beradi."),
+        ("h3", "4. Har bir bo‘g‘in — ta’rif bo‘yicha, alohida"),
+        ("p", r"$u = g(x)$ belgilashdan keyin bizda aslida ikkita alohida oddiy funksiya bor. Har biri uchun hosila ta’rifini yozamiz — bu bitta formulaning o‘zi, faqat harflar boshqa."),
+        ("steps", [
+            (r"<b>Birinchi bo‘g‘in</b> $x \to u$, $u = x^2$. Chiqish orttirmasini $\Delta u$ deb ataymiz.", r"\begin{gathered}\Delta u = (x + \Delta x)^2 - x^2 = 2x\,\Delta x + \Delta x^2\\ \frac{\Delta u}{\Delta x} = 2x + \Delta x\ \xrightarrow[\Delta x \to 0]{}\ 2x = g'(x)\end{gathered}"),
+            (r"<b>Ikkinchi bo‘g‘in</b> $u \to y$, $y = u^3$. Uning argumenti — $u$ harfi, argument siljishi esa — $\Delta u$.", r"\begin{gathered}\Delta y = (u + \Delta u)^3 - u^3 = 3u^2\Delta u + 3u\,\Delta u^2 + \Delta u^3\\ \frac{\Delta y}{\Delta u} = 3u^2 + 3u\,\Delta u + \Delta u^2\ \xrightarrow[\Delta u \to 0]{}\ 3u^2 = f'(u)\end{gathered}"),
+            (r"<b>Butun zanjir</b> $x \to y$ — o‘sha ta’rif bo‘yicha. Surat — aynan o‘sha $\Delta y$: $g(x) = u$ va $g(x + \Delta x) = u + \Delta u$.", r"\begin{aligned}F'(x) &= \lim_{\Delta x \to 0}\frac{f(g(x + \Delta x)) - f(g(x))}{\Delta x}\\ &= \lim_{\Delta x \to 0}\frac{f(u + \Delta u) - f(u)}{\Delta x} = \lim_{\Delta x \to 0}\frac{\Delta y}{\Delta x}\end{aligned}"),
+            (r"<b>Birlashtiramiz</b>: bo‘g‘inlar nisbatlarini limitga o‘tishdan <b>oldin</b> ko‘paytiramiz ($\Delta u$ qisqaradi).", r"\frac{\Delta y}{\Delta x} = \underbrace{(3u^2 + 3u\,\Delta u + \Delta u^2)}_{\Delta y / \Delta u}\cdot\underbrace{(2x + \Delta x)}_{\Delta u / \Delta x}"),
+            (r"<b>Limit</b>: $\Delta x \to 0$ va $\Delta u \to 0$ da deltali barcha qo‘shiluvchilar yo‘qoladi. $u = x^2$ ni qaytaramiz.", r"F'(x) = 3u^2\cdot 2x = 3(x^2)^2\cdot 2x = 6x^5,\qquad F'(2) = 48\cdot 4 = 192"),
+            (r"<b>To‘g‘ridan-to‘g‘ri tekshiruv</b>: $(x^2)^3 = x^6$.", r"(x^6)' = 6x^5\quad\checkmark"),
+        ]),
+        ("h3", "5. $\\Delta u$ nima uchun kerak"),
+        ("p", r"$\frac{f(g(x + \Delta x)) - f(g(x))}{\Delta x}$ kasrda yuqorida — $f$ ning orttirmasi, pastda esa — $x$ ning orttirmasi. Lekin $f$ ning argumenti $x$ emas, balki $u = g(x)$, va u $\Delta x$ ga emas, $\Delta u$ ga o‘zgargan. $f'$ ning ta’rifi «funksiya orttirmasining <b>o‘z</b> argumenti orttirmasiga nisbati»ni talab qiladi, shuning uchun biz sun’iy ravishda $\Delta u$ ga ko‘paytiramiz va bo‘lamiz: birinchi kasrda u pastda turadi va $f'(u)$ ni beradi, ikkinchisida — yuqorida turadi va $g'(x)$ ni beradi. ($\Delta u$ nolga aylanishi mumkin bo‘lsa, bu holat quyidagi qat’iy isbotda chetlab o‘tiladi.)"),
+        ("callout", "intuition", "Litrlar, kilometrlar va daqiqalar", r"Vaqt $\to$ yurilgan masofa $\to$ benzin sarfi. Bak necha daqiqa o‘tganini «bilmaydi» — u faqat kilometrlarni sezadi. $0{,}1$ l/km sarf — bu $f'$, $1{,}5$ km/min tezlik — bu $g'$. $2$ daqiqada mashina $\Delta g = 1{,}5\cdot 2 = 3$ km yuradi va $\Delta f = 0{,}1\cdot 3 = 0{,}3$ l yoqadi, ya’ni $0{,}15$ l/min $= 0{,}1\cdot 1{,}5$. Daqiqalardan litrlarga to‘g‘ridan-to‘g‘ri o‘tib bo‘lmaydi — faqat kilometrlar orqali. Kilometrlar qisqaradi: $\frac{\text{l}}{\text{km}}\cdot\frac{\text{km}}{\text{min}} = \frac{\text{l}}{\text{min}}$."),
     ]),
     dict(id="proof", title="Ta’rif bo‘yicha isbot", blocks=[
         ("p", r"Zanjir qoidasini faqat hosila ta’rifiga tayanib isbotlaymiz. Avval xayolga birinchi keladigan «deyarli isbot»ni ko‘rib chiqamiz va u qayerda buzilishini tushunamiz."),
@@ -1155,7 +1327,7 @@ UZ = [
         ("callout", "note", "O‘zingizni qanday tekshirish mumkin", r"1) Aniq sonni qo‘ying va javobni kichik $h$ dagi ayirmali nisbat bilan solishtiring ($e^{x^2}$ jadvalidagi kabi). 2) Iloji bo‘lsa, avval ichki funksiyalarni qo‘ying va natijani bevosita differensiallang. 3) Qo‘shiluvchilar sonini tekshiring: ko‘p o‘lchovli qoidada u funksiyadan o‘zgaruvchigacha bo‘lgan yo‘llar soniga teng."),
     ]),
     dict(id="worked", title="Tahlillar: juda osondan qiyingacha", blocks=[
-        ("p", r"O‘nta misol, har biri maqsad va batafsil yechim bilan. Birinchilari — bitta bo‘g‘inga, oxirgilari — bir nechta o‘zgaruvchi va neyronga. O‘rinli joylarda hosila ham ta’rif bo‘yicha, ham zanjir qoidasi bo‘yicha topilgan."),
+        ("p", r"O‘n ikkita misol, har biri maqsad va batafsil yechim bilan. Birinchilari — bitta bo‘g‘inga, oxirgilari — bir nechta o‘zgaruvchi va neyronga. O‘rinli joylarda hosila ham ta’rif bo‘yicha, ham zanjir qoidasi bo‘yicha topilgan."),
         ("example", dict(n=1, title="$y = (2x + 3)^2$ uch usulda", kinds=["bitta o‘zgaruvchi", "ta’rif bo‘yicha"],
             goal=r"Zanjir qoidasi qavslarni ochish va hosila ta’rifi beradigan natijaning o‘zini berishiga ishonch hosil qilish.",
             blocks=[("steps", [
@@ -1233,6 +1405,32 @@ UZ = [
                 (r"Oxirgi bo‘g‘in.", r"\frac{\partial L}{\partial w} = (a - y)\,x,\qquad \frac{\partial L}{\partial b} = a - y"),
             ])],
             take=r"Zanjir qoidasi sigmoida nega kross-entropiya bilan birga ishlatilishini tushuntiradi: ularning hosilalari qisqaradi va gradiyent shunchaki kirishga ko‘paytirilgan $a - y$ «xato»ga teng bo‘ladi.")),
+        ("example", dict(n=11, title=r"Ikkita kirish o‘zgaruvchisi: $f(x, y) = (2x + 3y)^2$", kinds=["ikki o‘zgaruvchi", "ta’rif bo‘yicha", "sonli tekshiruv"],
+            goal=r"Zanjir qoidasini ikki o‘zgaruvchili funksiyaga qo‘llash, har bir bo‘g‘in hosilasini ta’rif bo‘yicha keltirib chiqarish va javobni sonlarda tekshirish.",
+            blocks=[("steps", [
+                (r"Bo‘laklarga ajratamiz: $z = 2x + 3y$, $f = z^2$. $z$ ga ikkita strelka kiradi, $z$ dan bitta chiqadi.", r"x \searrow\quad z \to f\quad \swarrow y"),
+                (r"Tashqi bo‘lak ta’rif bo‘yicha: $f = z^2$ faqat $z$ ga bog‘liq.", r"\frac{(z + \Delta z)^2 - z^2}{\Delta z} = \frac{2z\,\Delta z + \Delta z^2}{\Delta z} = 2z + \Delta z \to 2z"),
+                (r"Ichki bo‘lak ta’rif bo‘yicha — ikkita xususiy hosila: orttirmani bitta o‘zgaruvchi oladi.", r"\frac{2(x + \Delta x) + 3y - 2x - 3y}{\Delta x} = 2,\qquad \frac{2x + 3(y + \Delta y) - 2x - 3y}{\Delta y} = 3"),
+                (r"Zanjir qoidasi har bir o‘zgaruvchi uchun alohida: $x \to z \to f$ yo‘li bo‘ylab va $y \to z \to f$ yo‘li bo‘ylab.", r"\frac{\partial f}{\partial x} = 2z\cdot 2 = 4(2x + 3y),\qquad \frac{\partial f}{\partial y} = 2z\cdot 3 = 6(2x + 3y)"),
+                (r"Zanjir qoidasisiz tekshiruv: qavslarni ochamiz.", r"f = 4x^2 + 12xy + 9y^2:\qquad f_x = 8x + 12y,\quad f_y = 12x + 18y\quad\checkmark"),
+            ]), ("table", ["Siljish ($(1;\\ 1)$ nuqtadan, $f = 25$)", "$z$", "$f$", "$\\dfrac{\\Delta f}{\\text{siljish}}$", "Formula"], [
+                ["$\\Delta x = 0{,}01$", "$5{,}02$", "$25{,}2004$", "$20{,}04$", "$4z = 20$"],
+                ["$\\Delta y = 0{,}01$", "$5{,}03$", "$25{,}3009$", "$30{,}09$", "$6z = 30$"],
+            ], {"num": [1, 2, 3]})],
+            take=r"$\frac{\partial f}{\partial z} = 2z$ ko‘paytuvchi ikkala hosila uchun umumiy — u bir marta hisoblanadi. Neyron tarmoqda bunday umumiy ko‘paytuvchi neyron xatosi $\delta$ deb ataladi, va $\frac{\partial L}{\partial w_i} = \delta\cdot x_i$.")),
+        ("example", dict(n=12, title=r"Bitta o‘zgaruvchi — ikkita yo‘l: $f = u^2 + v^2$, $u = 2x$, $v = 3x$", kinds=["bir nechta yo‘l", "sonli tekshiruv"],
+            goal=r"Turli yo‘llarning hissalari nega ko‘paytirilmasdan, qo‘shilishini ko‘rish.",
+            blocks=[("steps", [
+                (r"$u$ orqali yo‘l: bo‘g‘inlar hosilalari ta’rif bo‘yicha ($v$ bunda o‘zgarmaydi).", r"\frac{\partial f}{\partial u} = 2u,\quad \frac{du}{dx} = 2\ \Rightarrow\ 2u\cdot 2 = 4u"),
+                (r"$v$ orqali yo‘l.", r"\frac{\partial f}{\partial v} = 2v,\quad \frac{dv}{dx} = 3\ \Rightarrow\ 2v\cdot 3 = 6v"),
+                (r"$x$ ning siljishi $f$ ni birdaniga ikkala yo‘l bo‘ylab o‘zgartiradi — hissalar qo‘shiladi; $u = 2x$, $v = 3x$ ni qaytaramiz.", r"\frac{df}{dx} = 4u + 6v = 8x + 18x = 26x"),
+                (r"To‘g‘ridan-to‘g‘ri tekshiruv.", r"f = 4x^2 + 9x^2 = 13x^2,\qquad f' = 26x\quad\checkmark"),
+            ]), ("table", ["", "edi ($x = 1$)", "bo‘ldi ($x = 1{,}01$)", "siljish"], [
+                ["$u^2 = (2x)^2$", "$4$", "$4{,}0804$", "$0{,}0804$"],
+                ["$v^2 = (3x)^2$", "$9$", "$9{,}1809$", "$0{,}1809$"],
+                ["$f$", "$13$", "$13{,}2613$", "$0{,}2613$"],
+            ], {"num": [1, 2, 3]}), ("p", r"$f$ ning umumiy siljishi ikki yo‘l bo‘yicha siljishlar yig‘indisiga teng: $0{,}0804 + 0{,}1809 = 0{,}2613$, va $\frac{0{,}2613}{0{,}01} = 26{,}13 \approx 26$.")],
+            take=r"Butun neyron tarmoq uchun ikki qoida: bitta yo‘l bo‘ylab hosilalar <b>ko‘paytiriladi</b>, turli yo‘llar bo‘yicha — <b>qo‘shiladi</b>. Neyron signalni keyingi qatlamning bir nechta neyroniga uzatganda, uning xatosi barcha bog‘lanishlar orqali kelgan xatolar yig‘indisiga teng.")),
     ]),
     dict(id="practice", title="Amaliyot: yechimlari bilan 56 ta misol", blocks=[
         ("p", r"Misollar juda osonlaridan qiyinlariga qarab boradi; murakkablik yulduzchalar bilan belgilangan. Avval o‘zingiz yechib ko‘ring, so‘ng yechimni oching: har bir qadam tushuntirilgan. 29–34 va 42–43-misollar <b>ta’rif bo‘yicha</b> (limit orqali) yechiladi, qolganlari — zanjir qoidasi bo‘yicha, ko‘plari tekshiruv bilan."),
@@ -1334,6 +1532,18 @@ def check_numbers():
     a_, y_ = sp.symbols("a y_", positive=True)
     Lce = -(y_ * sp.log(a_) + (1 - y_) * sp.log(1 - a_))
     assert ok(sp.diff(Lce, a_) * a_ * (1 - a_) - (a_ - y_))
+    # the chain on numbers: x → x² → (x²)³ at x = 2
+    for dx, du, r1, r2, r3 in ((0.1, 0.41, 4.1, 53.09, 217.66), (0.01, 0.0401, 4.01, 48.48, 194.42), (0.001, 0.004001, 4.001, 48.048, 192.24)):
+        u1 = (2 + dx) ** 2; dy = u1 ** 3 - 64
+        assert abs(u1 - 4 - du) < 1e-12 and round((u1 - 4) / dx, 4) == r1 and round(dy / (u1 - 4), len(str(r2).split('.')[1])) == r2 and round(dy / dx, 2) == r3, (dx, dy / (u1 - 4), dy / dx)
+    assert round(2.1 ** 6, 3) == 85.766 and round(2.1 ** 6 - 64, 3) == 21.766 and abs(0.1 * 1.5 - 0.15) < 1e-12 and 1.5 * 2 == 3
+    assert ok(sp.diff((x ** 2) ** 3, x) - 6 * x ** 5) and 3 * 16 * 4 == 192
+    # (2x + 3y)² and the two paths
+    q = (2 * x + 3 * y) ** 2
+    assert ok(sp.diff(q, x) - 4 * (2 * x + 3 * y)) and ok(sp.diff(q, y) - 6 * (2 * x + 3 * y))
+    assert round(((2 * 1.01 + 3) ** 2 - 25) / 0.01, 2) == 20.04 and round(((2 + 3 * 1.01) ** 2 - 25) / 0.01, 2) == 30.09
+    assert round(2.02 ** 2, 4) == 4.0804 and round(3.03 ** 2, 4) == 9.1809 and round((2.02 ** 2 + 3.03 ** 2 - 13) / 0.01, 2) == 26.13
+    assert ok(sp.diff((2 * x) ** 2 + (3 * x) ** 2, x) - 26 * x)
     return True
 
 
