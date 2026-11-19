@@ -19,6 +19,7 @@ import content_formulas as formulas
 import content_mae_mse as mm
 import content_neuron as nr
 import content_forward as fw
+import content_chain as cr
 import workbook_ce
 from content_sigmoid import ARTICLE, TABLE_ROWS
 
@@ -134,6 +135,7 @@ COURSE_URL = "https://jakharbek.github.io/ml_gradient_boosting/"
 MATH_COURSE_URL = "https://jakharbek.github.io/math_lessons/"
 MATH_COURSE = {"ru": MATH_COURSE_URL, "en": MATH_COURSE_URL + "en/", "uz": MATH_COURSE_URL + "uz/"}
 POSTS = [
+    dict(slug=cr.SLUG, topic="math", date=cr.DATE, mins=cr.MINUTES, title=cr.TITLE, excerpt=cr.EXCERPT),
     dict(slug=fw.SLUG, topic="ml", date=fw.DATE, mins=fw.MINUTES, title=fw.TITLE, excerpt=fw.EXCERPT),
     dict(slug=nr.SLUG, topic="ml", date=nr.DATE, mins=nr.MINUTES, title=nr.TITLE, excerpt=nr.EXCERPT),
     dict(slug="math-lessons-course", topic="math", date="2026-11-16",
@@ -1303,9 +1305,9 @@ CARD_ORDER = [c["id"] for g in formulas.GROUPS for c in g["cards"]]
 CARD = {c["id"]: (g, c) for g in formulas.GROUPS for c in g["cards"]}
 
 FX_UI = {
-    "ru": dict(ex="Пример", goal="Цель примера", take="Что показал пример", sheet="Шпаргалка", prev="← Предыдущая формула", next="Следующая формула →", toc="Содержание", min="мин чтения", quiz_right="Верно.", quiz_wrong="Не совсем."),
-    "en": dict(ex="Example", goal="The goal", take="What the example shows", sheet="Cheat sheet", prev="← Previous formula", next="Next formula →", toc="Contents", min="min read", quiz_right="Correct.", quiz_wrong="Not quite."),
-    "uz": dict(ex="Misol", goal="Misolning maqsadi", take="Misol nimani ko‘rsatdi", sheet="Qo‘llanma", prev="← Oldingi formula", next="Keyingi formula →", toc="Mundarija", min="daq o‘qish", quiz_right="To‘g‘ri.", quiz_wrong="Unchalik emas."),
+    "ru": dict(ex="Пример", goal="Цель примера", take="Что показал пример", sheet="Шпаргалка", prev="← Предыдущая формула", next="Следующая формула →", toc="Содержание", min="мин чтения", quiz_right="Верно.", quiz_wrong="Не совсем.", sol="Решение", ans="Ответ", level="Сложность", steps=lambda k: "шаг" if k % 10 == 1 and k % 100 != 11 else "шага" if 2 <= k % 10 <= 4 and not 12 <= k % 100 <= 14 else "шагов"),
+    "en": dict(ex="Example", goal="The goal", take="What the example shows", sheet="Cheat sheet", prev="← Previous formula", next="Next formula →", toc="Contents", min="min read", quiz_right="Correct.", quiz_wrong="Not quite.", sol="Solution", ans="Answer", level="Difficulty", steps=lambda k: "step" if k == 1 else "steps"),
+    "uz": dict(ex="Misol", goal="Misolning maqsadi", take="Misol nimani ko‘rsatdi", sheet="Qo‘llanma", prev="← Oldingi formula", next="Keyingi formula →", toc="Mundarija", min="daq o‘qish", quiz_right="To‘g‘ri.", quiz_wrong="Unchalik emas.", sol="Yechim", ans="Javob", level="Qiyinlik", steps=lambda k: "qadam"),
 }
 
 
@@ -1352,7 +1354,8 @@ def render_blocks(blocks, lang, ind="    "):
         if kind == "p":
             out.append(f"<p>{b[1]}</p>")
         elif kind == "h3":
-            out.append(f"<h3>{b[1]}</h3>")
+            only_tex = "$" in b[1] and not re.sub(r"\$[^$]*\$", "", b[1]).strip()
+            out.append(f"<h3{th_name(b[1]) if only_tex else ''}>{b[1]}</h3>")
         elif kind == "html":
             out.append(b[1])
         elif kind == "eq":
@@ -1387,6 +1390,20 @@ def render_blocks(blocks, lang, ind="    "):
                        f'<h3>{e["title"]}</h3><div class="nr-ex-goal"><b>{ui["goal"]}</b><p>{e["goal"]}</p></div>\n'
                        + render_blocks(e["blocks"], lang, ind + "  ")
                        + f'\n{ind}<div class="nr-ex-take"><b>{ui["take"]}</b><p>{e["take"]}</p></div></article>')
+        elif kind == "steps":
+            # A numbered solution: [(caption HTML, TeX or ""), …] (article "chain-rule").
+            out.append('<ol class="cr-steps">' + "".join(f"<li><p>{c}</p>" + (f'<div class="eqd">{tex(t)}</div>' if t else "") + "</li>" for c, t in b[1]) + "</ol>")
+        elif kind == "drill":
+            # One of the practice drills of the article "chain-rule": task, formula, a folded step-by-step solution and the answer.
+            d, ui = b[1], FX_UI[lang]
+            stars = "★" * d["level"] + "☆" * (5 - d["level"])
+            steps = render_blocks([("steps", d["steps"])], lang, "")
+            note = f'<p class="cr-note">{d["note"]}</p>' if d.get("note") else ""
+            out.append(f'<article class="cr-drill" id="drill-{d["n"]}"><header class="cr-drill-head"><span class="cr-drill-n">№ {d["n"]}</span>'
+                       f'<span class="cr-stars" role="img" aria-label="{ui["level"]} {d["level"]}/5">{stars}</span></header>'
+                       f'<p class="cr-task">{d["task"]}</p><div class="eqd">{tex(d["f"])}</div>'
+                       f'<details class="cr-sol"><summary>{ui["sol"]} · {len(d["steps"])} {ui["steps"](len(d["steps"]))}</summary>{steps}{note}'
+                       f'<div class="cr-ans"><b>{ui["ans"]}</b><div class="eqd">{tex(d["ans"])}</div></div></details></article>')
         elif kind == "quiz":
             qs = []
             for i, q in enumerate(b[1]):
@@ -1532,6 +1549,10 @@ def neuron_article(lang):
 def forward_article(lang):
     return long_article(lang, fw, "forward")
 
+
+def chain_article(lang):
+    return long_article(lang, cr, "chain")
+
 def build_formula(fid):
     mod = load_formula(fid)
     assert fid in CARD, f"{fid}: no card with this id in content_formulas.py"
@@ -1611,7 +1632,7 @@ def main():
         build_formula(fid)
     workbook_ce.build()  # assets/files/cross-entropy-practice-<lang>.xlsx (before the page: it shows their sizes)
     for lang in LANGS:
-        pages = {"": home, "sigmoid": article, nr.SLUG: neuron_article, fw.SLUG: forward_article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
+        pages = {"": home, "sigmoid": article, nr.SLUG: neuron_article, fw.SLUG: forward_article, cr.SLUG: chain_article, "about": about, "materials": materials_index, "materials/ml-formulas": material_formulas,
                  f"materials/{mm.SLUG}": material_mae_mse, f"materials/{cw.SLUG}": material_ce_workbook}
         for sub, render in pages.items():
             (ROOT / lang / sub).mkdir(parents=True, exist_ok=True)
