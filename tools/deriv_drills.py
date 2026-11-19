@@ -9,15 +9,29 @@ LABELS = {
     "def": {"ru": "Записываем определение: предел отношения приращения функции к приращению аргумента.",
             "en": "Write the definition: the limit of the ratio of the increment of the function to the increment of the argument.",
             "uz": "Ta’rifni yozamiz: funksiya orttirmasining argument orttirmasiga nisbati limiti."},
-    "inc": {"ru": "Находим приращение функции $\\Delta f = f(x + \\Delta x) - f(x)$: подставляем $x + \\Delta x$ вместо $x$ и раскрываем скобки.",
-            "en": "Find the increment of the function $\\Delta f = f(x + \\Delta x) - f(x)$: substitute $x + \\Delta x$ for $x$ and expand the brackets.",
-            "uz": "Funksiya orttirmasini topamiz $\\Delta f = f(x + \\Delta x) - f(x)$: $x$ o‘rniga $x + \\Delta x$ ni qo‘yamiz va qavslarni ochamiz."},
+    "inc": {"ru": "Находим приращение функции $\\Delta f = f(x + \\Delta x) - f(x)$: подставляем $x + \\Delta x$ вместо $x$ и упрощаем.",
+            "en": "Find the increment of the function $\\Delta f = f(x + \\Delta x) - f(x)$: substitute $x + \\Delta x$ for $x$ and simplify.",
+            "uz": "Funksiya orttirmasini topamiz $\\Delta f = f(x + \\Delta x) - f(x)$: $x$ o‘rniga $x + \\Delta x$ ni qo‘yamiz va soddalashtiramiz."},
     "cut": {"ru": "Делим на $\\Delta x$ (по определению предела $\\Delta x \\ne 0$, поэтому это законно) и сокращаем.",
             "en": "Divide by $\\Delta x$ (in the definition of the limit $\\Delta x \\ne 0$, so this is legitimate) and cancel.",
             "uz": "$\\Delta x$ ga bo‘lamiz (limit ta’rifida $\\Delta x \\ne 0$, shuning uchun bu qonuniy) va qisqartiramiz."},
     "lim": {"ru": "Переходим к пределу $\\Delta x \\to 0$: оставшееся выражение непрерывно по $\\Delta x$, поэтому подставляем $\\Delta x = 0$.",
             "en": "Pass to the limit $\\Delta x \\to 0$: what remains is continuous in $\\Delta x$, so we substitute $\\Delta x = 0$.",
             "uz": "$\\Delta x \\to 0$ limitga o‘tamiz: qolgan ifoda $\\Delta x$ bo‘yicha uzluksiz, shuning uchun $\\Delta x = 0$ ni qo‘yamiz."},
+    "limk": {"ru": "Переходим к пределу $\\Delta x \\to 0$: первый множитель непрерывен и стремится к своему значению при $\\Delta x = 0$, а дробь стремится к $1$ по замечательному пределу.",
+             "en": "Pass to the limit $\\Delta x \\to 0$: the first factor is continuous and tends to its value at $\\Delta x = 0$, and the fraction tends to $1$ by the fundamental limit.",
+             "uz": "$\\Delta x \\to 0$ limitga o‘tamiz: birinchi ko‘paytuvchi uzluksiz va $\\Delta x = 0$ dagi qiymatiga intiladi, kasr esa ajoyib limitga ko‘ra $1$ ga intiladi."},
+    "limk2": {"ru": "Переходим к пределу $\\Delta x \\to 0$: множитель $2^{x}$ не зависит от $\\Delta x$, а дробь стремится к $\\ln 2$.",
+              "en": "Pass to the limit $\\Delta x \\to 0$: the factor $2^{x}$ does not depend on $\\Delta x$, and the fraction tends to $\\ln 2$.",
+              "uz": "$\\Delta x \\to 0$ limitga o‘tamiz: $2^{x}$ ko‘paytuvchi $\\Delta x$ ga bog‘liq emas, kasr esa $\\ln 2$ ga intiladi."},
+    "logq": {"ru": "Разность логарифмов — логарифм частного; умножаем и делим на $x$, чтобы получить $\\frac{\\ln(1 + t)}{t}$ с $t = \\frac{\\Delta x}{x} \\to 0$ (здесь $x > 0$ фиксировано).",
+             "en": "The difference of logarithms is the logarithm of the quotient; multiply and divide by $x$ to get $\\frac{\\ln(1 + t)}{t}$ with $t = \\frac{\\Delta x}{x} \\to 0$ (here $x > 0$ is fixed).",
+             "uz": "Logarifmlar ayirmasi — bo‘linmaning logarifmi; $\\frac{\\ln(1 + t)}{t}$ ni hosil qilish uchun $x$ ga ko‘paytirib, bo‘lamiz, bunda $t = \\frac{\\Delta x}{x} \\to 0$ ($x > 0$ tayinlangan)."},
+    "squeezed": {"ru": "По теореме о двух милиционерах предел равен нулю.", "en": "By the squeeze theorem the limit is zero.", "uz": "Ikki militsioner teoremasiga ko‘ra limit nolga teng."},
+    "incq": {"ru": "Составляем отношение частного приращения к приращению переменной и переходим к пределу.",
+             "en": "Form the ratio of the partial increment to the increment of the variable and pass to the limit.",
+             "uz": "Xususiy orttirmaning o‘zgaruvchi orttirmasiga nisbatini tuzamiz va limitga o‘tamiz."},
+    "cutlim": {"ru": "Делим на $\\Delta x$ и переходим к пределу.", "en": "Divide by $\\Delta x$ and pass to the limit.", "uz": "$\\Delta x$ ga bo‘lamiz va limitga o‘tamiz."},
     "point": {"ru": "Подставляем точку в определение: приращение даём аргументу именно в этой точке.",
               "en": "Substitute the point into the definition: the argument gets its increment exactly at this point.",
               "uz": "Nuqtani ta’rifga qo‘yamiz: argument aynan shu nuqtada orttirma oladi."},
@@ -48,18 +62,18 @@ LABELS = {
     "nolim": {"ru": "Односторонние пределы различны — общего предела нет, значит, производной в этой точке не существует.",
               "en": "The one-sided limits differ — there is no common limit, so the derivative does not exist at this point.",
               "uz": "Bir tomonlama limitlar har xil — umumiy limit yo‘q, demak, bu nuqtada hosila mavjud emas."},
-    "squeeze": {"ru": "Ограниченный множитель умножается на бесконечно малый — произведение стремится к нулю (теорема о двух милиционерах).",
+    "squeeze": {"ru": "Ограниченный множитель умножается на бесконечно малый — произведение стремится к нулю (теорема о двух милиционерах, или о сжатой функции).",
                 "en": "A bounded factor times a vanishing one — the product tends to zero (the squeeze theorem).",
                 "uz": "Chegaralangan ko‘paytuvchi cheksiz kichikka ko‘paytiriladi — ko‘paytma nolga intiladi (ikki militsioner teoremasi)."},
     "infinite": {"ru": "Отношение неограниченно растёт: конечного предела нет, касательная вертикальна.",
                  "en": "The ratio grows without bound: there is no finite limit, the tangent is vertical.",
                  "uz": "Nisbat cheksiz o‘sadi: chekli limit yo‘q, urinma vertikal."},
-    "incx": {"ru": "Частное приращение по $x$: приращение $\\Delta x$ получает только $x$, а $y$ остаётся прежним (ведёт себя как число).",
-             "en": "The partial increment in $x$: only $x$ gets the increment $\\Delta x$, while $y$ stays the same (behaves as a number).",
-             "uz": "$x$ bo‘yicha xususiy orttirma: $\\Delta x$ orttirmani faqat $x$ oladi, $y$ esa o‘zgarmaydi (son kabi)."},
-    "incy": {"ru": "Частное приращение по $y$: приращение $\\Delta y$ получает только $y$, а $x$ заморожен.",
-             "en": "The partial increment in $y$: only $y$ gets the increment $\\Delta y$, while $x$ is frozen.",
-             "uz": "$y$ bo‘yicha xususiy orttirma: $\\Delta y$ orttirmani faqat $y$ oladi, $x$ esa muzlatilgan."},
+    "incx": {"ru": "Частное приращение по $x$: приращение $\\Delta x$ получает только $x$, остальные переменные остаются прежними (ведут себя как числа).",
+             "en": "The partial increment in $x$: only $x$ gets the increment $\\Delta x$, while the other variables stay the same (behave as numbers).",
+             "uz": "$x$ bo‘yicha xususiy orttirma: $\\Delta x$ orttirmani faqat $x$ oladi, qolgan o‘zgaruvchilar o‘zgarmaydi (son kabi)."},
+    "incy": {"ru": "Частное приращение по $y$: приращение $\\Delta y$ получает только $y$, остальные переменные заморожены.",
+             "en": "The partial increment in $y$: only $y$ gets the increment $\\Delta y$, while the other variables are frozen.",
+             "uz": "$y$ bo‘yicha xususiy orttirma: $\\Delta y$ orttirmani faqat $y$ oladi, qolgan o‘zgaruvchilar muzlatilgan."},
     "incz": {"ru": "Частное приращение по $z$: меняется только $z$.",
              "en": "The partial increment in $z$: only $z$ changes.",
              "uz": "$z$ bo‘yicha xususiy orttirma: faqat $z$ o‘zgaradi."},
@@ -91,9 +105,9 @@ LABELS = {
     "dircheck": {"ru": "Проверка через градиент: $D_{\\mathbf{u}} f = \\nabla f\\cdot\\mathbf{u}$ — тот же ответ.",
                  "en": "Check through the gradient: $D_{\\mathbf{u}} f = \\nabla f\\cdot\\mathbf{u}$ — the same answer.",
                  "uz": "Gradiyent orqali tekshiruv: $D_{\\mathbf{u}} f = \\nabla f\\cdot\\mathbf{u}$ — javob o‘sha-o‘sha."},
-    "gradpt": {"ru": "Частные производные (найдены по определению выше) в данной точке.",
-               "en": "The partial derivatives (found from the definition above) at the given point.",
-               "uz": "Berilgan nuqtadagi xususiy hosilalar (yuqorida ta’rif bo‘yicha topilgan)."},
+    "gradpt": {"ru": "Частные производные в данной точке (выведены по определению: для $x^2 + y^2$ — в № 38, для остальных — в предыдущих шагах).",
+               "en": "The partial derivatives at the given point (derived from the definition: for $x^2 + y^2$ in No. 38, otherwise in the previous steps).",
+               "uz": "Berilgan nuqtadagi xususiy hosilalar (ta’rif bo‘yicha keltirib chiqarilgan: $x^2 + y^2$ uchun — № 38 da, qolganlari — oldingi qadamlarda)."},
     "lin": {"ru": "Полный дифференциал — линейная часть приращения: $df = f_x\\,\\Delta x + f_y\\,\\Delta y$.",
             "en": "The total differential is the linear part of the increment: $df = f_x\\,\\Delta x + f_y\\,\\Delta y$.",
             "uz": "To‘liq differensial — orttirmaning chiziqli qismi: $df = f_x\\,\\Delta x + f_y\\,\\Delta y$."},
@@ -113,6 +127,7 @@ TASKS = {
     "dp": {"ru": "Найдите производную в точке по определению.", "en": "Find the derivative at the point from the definition.", "uz": "Nuqtadagi hosilani ta’rif bo‘yicha toping."},
     "ex": {"ru": "Существует ли производная в точке $x = 0$? Ответьте по определению.", "en": "Does the derivative exist at $x = 0$? Answer from the definition.", "uz": "$x = 0$ nuqtada hosila mavjudmi? Ta’rif bo‘yicha javob bering."},
     "pd": {"ru": "Найдите частные производные по определению.", "en": "Find the partial derivatives from the definition.", "uz": "Xususiy hosilalarni ta’rif bo‘yicha toping."},
+    "grp": {"ru": "Найдите градиент в точке по определению.", "en": "Find the gradient at the point from the definition.", "uz": "Nuqtadagi gradiyentni ta’rif bo‘yicha toping."},
     "pdp": {"ru": "Найдите частные производные в точке по определению.", "en": "Find the partial derivatives at the point from the definition.", "uz": "Nuqtadagi xususiy hosilalarni ta’rif bo‘yicha toping."},
     "gr": {"ru": "Найдите градиент по определению.", "en": "Find the gradient from the definition.", "uz": "Gradiyentni ta’rif bo‘yicha toping."},
     "dir": {"ru": "Найдите производную по направлению по определению и проверьте через градиент.", "en": "Find the directional derivative from the definition and check it through the gradient.", "uz": "Yo‘nalish bo‘yicha hosilani ta’rif bo‘yicha toping va gradiyent orqali tekshiring."},
@@ -200,7 +215,7 @@ add(3, "d", r"f(x) = \sqrt{x},\quad x > 0", [
     ("cut", r"\frac{\Delta f}{\Delta x} = \frac{1}{\sqrt{x + \Delta x} + \sqrt{x}}"), ("lim", r"f'(x) = \frac{1}{\sqrt{x} + \sqrt{x}} = \frac{1}{2\sqrt{x}}")],
     r"(\sqrt{x})' = \frac{1}{2\sqrt{x}}", [("q", "sqrt(x)", "x", "1/(sqrt(x+D)+sqrt(x))", "1/(2*sqrt(x))")])
 add(3, "d", r"f(x) = \sqrt{x + 4},\quad x > -4", [
-    ("def", DEF), ("conj", r"\frac{\sqrt{x + 4 + \Delta x} - \sqrt{x + 4}}{\Delta x} = \frac{(x + 4 + \Delta x) - (x + 4)}{\Delta x\big(\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}\big)}"),
+    ("def", DEF), ("conj", r"\frac{\sqrt{x + 4 + \Delta x} - \sqrt{x + 4}}{\Delta x}\cdot\frac{\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}}{\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}} = \frac{(x + 4 + \Delta x) - (x + 4)}{\Delta x\big(\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}\big)}"),
     ("cut", r"\frac{\Delta f}{\Delta x} = \frac{1}{\sqrt{x + 4 + \Delta x} + \sqrt{x + 4}}"), ("lim", r"f'(x) = \frac{1}{2\sqrt{x + 4}}")], r"f'(x) = \frac{1}{2\sqrt{x + 4}}",
     [("q", "sqrt(x+4)", "x", "1/(sqrt(x+4+D)+sqrt(x+4))", "1/(2*sqrt(x+4))")])
 add(3, "d", r"f(x) = \frac{x}{x + 1},\quad x \ne -1", [
@@ -216,50 +231,50 @@ add(3, "dp", r"f(x) = \sqrt{x},\quad x_0 = 4", [
 # ===== 18–24: the exponential, the logarithm, sine and cosine =====
 add(3, "d", r"f(x) = e^{x}", [
     ("def", DEF), ("factor", r"\Delta f = e^{x + \Delta x} - e^{x} = e^{x}\big(e^{\Delta x} - 1\big),\qquad \frac{\Delta f}{\Delta x} = e^{x}\cdot\frac{e^{\Delta x} - 1}{\Delta x}"),
-    ("known", r"\lim_{t \to 0}\frac{e^{t} - 1}{t} = 1"), ("lim", r"f'(x) = e^{x}\cdot 1 = e^{x}")], r"(e^{x})' = e^{x}",
+    ("known", r"\lim_{t \to 0}\frac{e^{t} - 1}{t} = 1"), ("limk", r"f'(x) = e^{x}\cdot 1 = e^{x}")], r"(e^{x})' = e^{x}",
     [("q", "exp(x)", "x", "exp(x)*(exp(D)-1)/D", "exp(x)")])
 add(3, "d", r"f(x) = e^{2x}", [
     ("def", DEF), ("factor", r"\frac{\Delta f}{\Delta x} = \frac{e^{2x + 2\Delta x} - e^{2x}}{\Delta x} = e^{2x}\cdot\frac{e^{2\Delta x} - 1}{\Delta x} = 2e^{2x}\cdot\frac{e^{2\Delta x} - 1}{2\Delta x}"),
-    ("known", r"t = 2\Delta x \to 0:\qquad \frac{e^{t} - 1}{t} \to 1"), ("lim", r"f'(x) = 2e^{2x}")], r"(e^{2x})' = 2e^{2x}",
+    ("known", r"t = 2\Delta x \to 0:\qquad \frac{e^{t} - 1}{t} \to 1"), ("limk", r"f'(x) = 2e^{2x}\cdot 1 = 2e^{2x}")], r"(e^{2x})' = 2e^{2x}",
     [("q", "exp(2*x)", "x", "2*exp(2*x)*(exp(2*D)-1)/(2*D)", "2*exp(2*x)")])
 add(3, "d", r"f(x) = \sin x", [
     ("def", DEF), ("trig", r"\Delta f = \sin(x + \Delta x) - \sin x = 2\cos\!\Big(x + \frac{\Delta x}{2}\Big)\sin\frac{\Delta x}{2}"),
     ("cut", r"\frac{\Delta f}{\Delta x} = \cos\!\Big(x + \frac{\Delta x}{2}\Big)\cdot\frac{\sin(\Delta x/2)}{\Delta x/2}"),
-    ("known", r"\lim_{t \to 0}\frac{\sin t}{t} = 1"), ("lim", r"f'(x) = \cos x\cdot 1 = \cos x")], r"(\sin x)' = \cos x",
+    ("known", r"\lim_{t \to 0}\frac{\sin t}{t} = 1,\qquad t = \frac{\Delta x}{2} \to 0"), ("limk", r"f'(x) = \cos x\cdot 1 = \cos x")], r"(\sin x)' = \cos x",
     [("q", "sin(x)", "x", "cos(x+D/2)*sin(D/2)/(D/2)", "cos(x)")])
 add(3, "d", r"f(x) = \cos x", [
     ("def", DEF), ("trig", r"\Delta f = \cos(x + \Delta x) - \cos x = -2\sin\!\Big(x + \frac{\Delta x}{2}\Big)\sin\frac{\Delta x}{2}"),
     ("cut", r"\frac{\Delta f}{\Delta x} = -\sin\!\Big(x + \frac{\Delta x}{2}\Big)\cdot\frac{\sin(\Delta x/2)}{\Delta x/2}"),
-    ("known", r"\lim_{t \to 0}\frac{\sin t}{t} = 1"), ("lim", r"f'(x) = -\sin x")], r"(\cos x)' = -\sin x",
+    ("known", r"\lim_{t \to 0}\frac{\sin t}{t} = 1,\qquad t = \frac{\Delta x}{2} \to 0"), ("limk", r"f'(x) = -\sin x\cdot 1 = -\sin x")], r"(\cos x)' = -\sin x",
     [("q", "cos(x)", "x", "-sin(x+D/2)*sin(D/2)/(D/2)", "-sin(x)")])
 add(4, "d", r"f(x) = \ln x,\quad x > 0", [
-    ("def", DEF), ("factor", r"\begin{gathered}\Delta f = \ln(x + \Delta x) - \ln x = \ln\Big(1 + \frac{\Delta x}{x}\Big)\\ \frac{\Delta f}{\Delta x} = \frac1x\cdot\frac{\ln(1 + \Delta x/x)}{\Delta x/x}\end{gathered}"),
-    ("known", r"\lim_{t \to 0}\frac{\ln(1 + t)}{t} = 1"), ("lim", r"f'(x) = \frac1x\cdot 1 = \frac1x")], r"(\ln x)' = \frac1x",
+    ("def", DEF), ("logq", r"\begin{gathered}\Delta f = \ln(x + \Delta x) - \ln x = \ln\Big(1 + \frac{\Delta x}{x}\Big)\\ \frac{\Delta f}{\Delta x} = \frac1x\cdot\frac{\ln(1 + \Delta x/x)}{\Delta x/x}\end{gathered}"),
+    ("known", r"\lim_{t \to 0}\frac{\ln(1 + t)}{t} = 1,\qquad t = \frac{\Delta x}{x} \to 0"), ("limk", r"f'(x) = \frac1x\cdot 1 = \frac1x")], r"(\ln x)' = \frac1x",
     [("q", "log(x)", "x", "(1/x)*log(1+D/x)/(D/x)", "1/x")])
 add(4, "d", r"f(x) = \sin 3x", [
     ("def", DEF), ("trig", r"\Delta f = \sin(3x + 3\Delta x) - \sin 3x = 2\cos\!\Big(3x + \frac{3\Delta x}{2}\Big)\sin\frac{3\Delta x}{2}"),
-    ("cut", r"\frac{\Delta f}{\Delta x} = 3\cos\!\Big(3x + \frac{3\Delta x}{2}\Big)\cdot\frac{\sin(3\Delta x/2)}{3\Delta x/2}"),
-    ("lim", r"f'(x) = 3\cos 3x\cdot 1 = 3\cos 3x")], r"(\sin 3x)' = 3\cos 3x",
+    ("cut", r"\frac{\Delta f}{\Delta x} = \frac{2\cos\!\big(3x + \frac{3\Delta x}{2}\big)\sin\frac{3\Delta x}{2}}{\Delta x} = 3\cos\!\Big(3x + \frac{3\Delta x}{2}\Big)\cdot\frac{\sin(3\Delta x/2)}{3\Delta x/2}"),
+    ("known", r"t = \frac{3\Delta x}{2} \to 0:\qquad \frac{\sin t}{t} \to 1"), ("limk", r"f'(x) = 3\cos 3x\cdot 1 = 3\cos 3x")], r"(\sin 3x)' = 3\cos 3x",
     [("q", "sin(3*x)", "x", "3*cos(3*x+3*D/2)*sin(3*D/2)/(3*D/2)", "3*cos(3*x)")])
 add(4, "d", r"f(x) = 2^{x}", [
     ("def", DEF), ("factor", r"\frac{\Delta f}{\Delta x} = \frac{2^{x + \Delta x} - 2^{x}}{\Delta x} = 2^{x}\cdot\frac{2^{\Delta x} - 1}{\Delta x}"),
-    ("known", r"\lim_{t \to 0}\frac{a^{t} - 1}{t} = \ln a\qquad\big(a^{t} = e^{t\ln a}\big)"), ("lim", r"f'(x) = 2^{x}\ln 2")], r"(2^{x})' = 2^{x}\ln 2",
+    ("known", r"\frac{2^{\Delta x} - 1}{\Delta x} = \ln 2\cdot\frac{e^{\Delta x\ln 2} - 1}{\Delta x\ln 2} \to \ln 2\qquad(t = \Delta x\ln 2 \to 0)"), ("limk2", r"f'(x) = 2^{x}\ln 2")], r"(2^{x})' = 2^{x}\ln 2",
     [("q", "2**x", "x", "2**x*(2**D-1)/D", "2**x*log(2)")])
 
 # ===== 25–28: does the derivative exist? =====
 add(4, "ex", r"f(x) = |x|", [
     ("point", r"\frac{f(0 + \Delta x) - f(0)}{\Delta x} = \frac{|\Delta x|}{\Delta x}"),
     ("right", r"\Delta x > 0:\quad \frac{\Delta x}{\Delta x} = 1\ \to\ 1"), ("left", r"\Delta x < 0:\quad \frac{-\Delta x}{\Delta x} = -1\ \to\ -1"),
-    ("nolim", r"1 \ne -1")], r"f'(0)\ \text{—}", [("side", "Abs(D)/D", "1", "-1")])
+    ("nolim", r"1 \ne -1")], r"f'(0)\ \text{DNE}", [("side", "Abs(D)/D", "1", "-1")])
 add(4, "ex", r"f(x) = x\,|x|", [
     ("point", r"\frac{f(\Delta x) - f(0)}{\Delta x} = \frac{\Delta x\,|\Delta x|}{\Delta x} = |\Delta x|"),
     ("lim", r"f'(0) = \lim_{\Delta x \to 0}|\Delta x| = 0")], r"f'(0) = 0", [("side", "D*Abs(D)/D", "0", "0")])
 add(5, "ex", r"f(x) = \sqrt[3]{x}", [
     ("point", r"\frac{f(\Delta x) - f(0)}{\Delta x} = \frac{\sqrt[3]{\Delta x}}{\Delta x} = \frac{1}{\sqrt[3]{\Delta x^2}}"),
-    ("infinite", r"\Delta x \to 0:\quad \frac{1}{\sqrt[3]{\Delta x^2}} \to +\infty")], r"f'(0)\ \text{—}\ (+\infty)", [("side", "1/Abs(D)**(2/S(3))", "oo", "oo")])
+    ("infinite", r"\Delta x \to 0:\quad \frac{1}{\sqrt[3]{\Delta x^2}} \to +\infty")], r"f'(0)\ \text{DNE}\ \big(\tfrac{\Delta f}{\Delta x} \to +\infty\big)", [("side", "1/Abs(D)**(2/S(3))", "oo", "oo")])
 add(5, "ex", r"f(x) = \begin{cases} x^2\sin\frac1x, & x \ne 0\\ 0, & x = 0\end{cases}", [
     ("point", r"\frac{f(\Delta x) - f(0)}{\Delta x} = \frac{\Delta x^2\sin(1/\Delta x)}{\Delta x} = \Delta x\,\sin\frac{1}{\Delta x}"),
-    ("squeeze", r"-|\Delta x| \le \Delta x\,\sin\frac{1}{\Delta x} \le |\Delta x|,\qquad |\Delta x| \to 0"), ("lim", r"f'(0) = 0")], r"f'(0) = 0",
+    ("squeeze", r"-|\Delta x| \le \Delta x\,\sin\frac{1}{\Delta x} \le |\Delta x|,\qquad |\Delta x| \to 0"), ("squeezed", r"f'(0) = \lim_{\Delta x \to 0}\Delta x\,\sin\frac{1}{\Delta x} = 0")], r"f'(0) = 0",
     [("side", "D*sin(1/D)", "0", "0")])
 
 # ===== 29–37: partial derivatives =====
@@ -279,8 +294,8 @@ add(3, "pd", r"f(x, y) = x^2 y + y^3", [
     ("limy", r"\frac{\partial f}{\partial y} = \lim_{\Delta y \to 0}\big(x^2 + 3y^2 + 3y\,\Delta y + \Delta y^2\big) = x^2 + 3y^2")],
     r"f_x = 2xy,\quad f_y = x^2 + 3y^2", [("q2", "x**2*y+y**3", "x", "(2*x+D)*y", "2*x*y"), ("q2", "x**2*y+y**3", "y", "x**2+3*y**2+3*y*D+D**2", "x**2+3*y**2")])
 add(3, "pd", r"f(x, y) = x^3 + y^3", [
-    ("incx", r"\Delta_x f = (x + \Delta x)^3 - x^3 = 3x^2\Delta x + 3x\,\Delta x^2 + \Delta x^3"), ("limx", r"\frac{\partial f}{\partial x} = 3x^2"),
-    ("incy", r"\Delta_y f = (y + \Delta y)^3 - y^3 = 3y^2\Delta y + 3y\,\Delta y^2 + \Delta y^3"), ("limy", r"\frac{\partial f}{\partial y} = 3y^2")],
+    ("incx", r"\Delta_x f = (x + \Delta x)^3 + y^3 - x^3 - y^3 = 3x^2\Delta x + 3x\,\Delta x^2 + \Delta x^3"), ("limx", r"\frac{\partial f}{\partial x} = 3x^2"),
+    ("incy", r"\Delta_y f = x^3 + (y + \Delta y)^3 - x^3 - y^3 = 3y^2\Delta y + 3y\,\Delta y^2 + \Delta y^3"), ("limy", r"\frac{\partial f}{\partial y} = 3y^2")],
     r"f_x = 3x^2,\quad f_y = 3y^2", [("q2", "x**3+y**3", "x", "3*x**2+3*x*D+D**2", "3*x**2"), ("q2", "x**3+y**3", "y", "3*y**2+3*y*D+D**2", "3*y**2")])
 add(3, "pd", r"f(x, y) = xy^2 + y", [
     ("incx", r"\Delta_x f = (x + \Delta x)y^2 + y - xy^2 - y = y^2\Delta x"), ("limx", r"\frac{\partial f}{\partial x} = y^2"),
@@ -300,17 +315,17 @@ add(4, "pd", r"f(x, y, z) = xyz", [
     ("incz", r"\Delta_z f = xy(z + \Delta z) - xyz = xy\,\Delta z\ \Rightarrow\ \frac{\partial f}{\partial z} = xy")],
     r"f_x = yz,\quad f_y = xz,\quad f_z = xy", [("q2", "x*y*z", "x", "y*z", "y*z"), ("q2", "x*y*z", "y", "x*z", "x*z"), ("q2", "x*y*z", "z", "x*y", "x*y")])
 add(3, "pdp", r"f(x, y) = x^2 + y^2,\quad (1;\ 2)", [
-    ("incx", r"\begin{aligned}\frac{f(1 + \Delta x,\ 2) - f(1,\ 2)}{\Delta x} &= \frac{(1 + \Delta x)^2 + 4 - 5}{\Delta x}\\ &= \frac{2\Delta x + \Delta x^2}{\Delta x} = 2 + \Delta x\ \to\ 2\end{aligned}"),
-    ("incy", r"\begin{aligned}\frac{f(1,\ 2 + \Delta y) - f(1,\ 2)}{\Delta y} &= \frac{1 + (2 + \Delta y)^2 - 5}{\Delta y}\\ &= \frac{4\Delta y + \Delta y^2}{\Delta y} = 4 + \Delta y\ \to\ 4\end{aligned}")],
+    ("incq", r"\begin{aligned}\frac{f(1 + \Delta x,\ 2) - f(1,\ 2)}{\Delta x} &= \frac{(1 + \Delta x)^2 + 4 - 5}{\Delta x}\\ &= \frac{2\Delta x + \Delta x^2}{\Delta x} = 2 + \Delta x\ \to\ 2\end{aligned}"),
+    ("incq", r"\begin{aligned}\frac{f(1,\ 2 + \Delta y) - f(1,\ 2)}{\Delta y} &= \frac{1 + (2 + \Delta y)^2 - 5}{\Delta y}\\ &= \frac{4\Delta y + \Delta y^2}{\Delta y} = 4 + \Delta y\ \to\ 4\end{aligned}")],
     r"f_x(1;\ 2) = 2,\quad f_y(1;\ 2) = 4", [("qp2", "x**2+y**2", "x", {"x": 1, "y": 2}, "2+D", "2"), ("qp2", "x**2+y**2", "y", {"x": 1, "y": 2}, "4+D", "4")])
 
 # ===== 38–41: the gradient =====
-add(3, "gr", r"f(x, y) = x^2 + y^2,\quad (3;\ 4)", [
-    ("incx", r"\frac{f(3 + \Delta x,\ 4) - f(3,\ 4)}{\Delta x} = \frac{(3 + \Delta x)^2 - 9}{\Delta x} = 6 + \Delta x\ \to\ 6"),
-    ("incy", r"\frac{f(3,\ 4 + \Delta y) - f(3,\ 4)}{\Delta y} = \frac{(4 + \Delta y)^2 - 16}{\Delta y} = 8 + \Delta y\ \to\ 8"),
+add(3, "grp", r"f(x, y) = x^2 + y^2,\quad (3;\ 4)", [
+    ("incq", r"\frac{f(3 + \Delta x,\ 4) - f(3,\ 4)}{\Delta x} = \frac{(3 + \Delta x)^2 - 9}{\Delta x} = 6 + \Delta x\ \to\ 6"),
+    ("incq", r"\frac{f(3,\ 4 + \Delta y) - f(3,\ 4)}{\Delta y} = \frac{(4 + \Delta y)^2 - 16}{\Delta y} = 8 + \Delta y\ \to\ 8"),
     ("grad", r"\nabla f(3;\ 4) = (6;\ 8),\qquad |\nabla f| = \sqrt{36 + 64} = 10")], r"\nabla f(3;\ 4) = (6;\ 8)",
     [("qp2", "x**2+y**2", "x", {"x": 3, "y": 4}, "6+D", "6"), ("qp2", "x**2+y**2", "y", {"x": 3, "y": 4}, "8+D", "8")])
-add(4, "gr", r"f(x, y) = x^2 - xy,\quad (2;\ 1)", [
+add(4, "grp", r"f(x, y) = x^2 - xy,\quad (2;\ 1)", [
     ("incx", r"\begin{aligned}\Delta_x f &= (x + \Delta x)^2 - (x + \Delta x)y - x^2 + xy\\ &= (2x - y)\Delta x + \Delta x^2\ \Rightarrow\ f_x = 2x - y\end{aligned}"),
     ("incy", r"\Delta_y f = x^2 - x(y + \Delta y) - x^2 + xy = -x\,\Delta y\ \Rightarrow\ f_y = -x"),
     ("grad", r"\nabla f = (2x - y;\ -x),\qquad \nabla f(2;\ 1) = (3;\ -2)")], r"\nabla f(2;\ 1) = (3;\ -2)",
@@ -321,7 +336,7 @@ add(4, "gr", r"f(x, y, z) = x^2 + y^2 + z^2", [
     ("grad", r"\nabla f = (2x;\ 2y;\ 2z) = 2\,(x;\ y;\ z)")], r"\nabla f = (2x;\ 2y;\ 2z)",
     [("q2", "x**2+y**2+z**2", "x", "2*x+D", "2*x"), ("q2", "x**2+y**2+z**2", "y", "2*y+D", "2*y"), ("q2", "x**2+y**2+z**2", "z", "2*z+D", "2*z")])
 add(2, "gr", r"f(x) = x^3", [
-    ("def", DEF), ("cut", r"\frac{(x + \Delta x)^3 - x^3}{\Delta x} = 3x^2 + 3x\,\Delta x + \Delta x^2\ \to\ 3x^2"),
+    ("def", DEF), ("cutlim", r"\frac{(x + \Delta x)^3 - x^3}{\Delta x} = 3x^2 + 3x\,\Delta x + \Delta x^2\ \to\ 3x^2"),
     ("grad1", r"\nabla f(x) = \Big(\frac{df}{dx}\Big) = (3x^2) = f'(x)")], r"\nabla f = (3x^2) = f'(x)", [("q", "x**3", "x", "3*x**2+3*x*D+D**2", "3*x**2")])
 
 # ===== 42–46: the directional derivative, the differential, descent =====
@@ -339,12 +354,14 @@ add(4, "lin", r"f(x, y) = x^2 + y^2,\quad (3;\ 4),\quad \Delta x = 0{,}1,\ \Delt
     ("gradpt", r"f_x = 2x = 6,\qquad f_y = 2y = 8"), ("lin", r"df = 6\cdot 0{,}1 + 8\cdot(-0{,}2) = 0{,}6 - 1{,}6 = -1"),
     ("exact", r"\begin{gathered}\Delta f = f(3{,}1;\ 3{,}8) - f(3;\ 4) = 9{,}61 + 14{,}44 - 25 = -0{,}95\\ \Delta f - df = \Delta x^2 + \Delta y^2 = 0{,}05\end{gathered}")],
     r"df = -1,\quad \Delta f = -0{,}95", [("num", "x**2+y**2", {"x": 3, "y": 4}, (0.1, -0.2), -1, -0.95)])
-add(5, "gd", r"f(x, y) = x^2 + y^2,\quad \mathbf{p} = (3;\ 4),\quad \eta = 0{,}1", [
+add(4, "gd", r"f(x, y) = x^2 + y^2,\quad \mathbf{p} = (3;\ 4),\quad \eta = 0{,}1", [
     ("gradpt", r"\nabla f(3;\ 4) = (6;\ 8)"), ("step", r"\mathbf{p} \leftarrow (3;\ 4) - 0{,}1\cdot(6;\ 8) = (2{,}4;\ 3{,}2)"),
     ("value", r"f(3;\ 4) = 25\ \longrightarrow\ f(2{,}4;\ 3{,}2) = 5{,}76 + 10{,}24 = 16")], r"\mathbf{p} = (2{,}4;\ 3{,}2),\quad f: 25 \to 16",
     [("gd", "x**2+y**2", (3, 4), 0.1, (2.4, 3.2), 25, 16)])
-add(5, "gd", r"f(x, y) = (x - 1)^2 + 2y^2,\quad \mathbf{p} = (3;\ 1),\quad \eta = 0{,}25", [
-    ("gradpt", r"f_x = 2(x - 1) = 4,\qquad f_y = 4y = 4,\qquad \nabla f(3;\ 1) = (4;\ 4)"),
+add(4, "gd", r"f(x, y) = (x - 1)^2 + 2y^2,\quad \mathbf{p} = (3;\ 1),\quad \eta = 0{,}25", [
+    ("incx", r"\Delta_x f = (x + \Delta x - 1)^2 - (x - 1)^2 = 2(x - 1)\Delta x + \Delta x^2\ \Rightarrow\ f_x = 2(x - 1)"),
+    ("incy", r"\Delta_y f = 2(y + \Delta y)^2 - 2y^2 = 4y\,\Delta y + 2\Delta y^2\ \Rightarrow\ f_y = 4y"),
+    ("gradpt", r"f_x(3;\ 1) = 4,\qquad f_y(3;\ 1) = 4,\qquad \nabla f(3;\ 1) = (4;\ 4)"),
     ("step", r"\mathbf{p} \leftarrow (3;\ 1) - 0{,}25\cdot(4;\ 4) = (2;\ 0)"), ("value", r"f(3;\ 1) = 4 + 2 = 6\ \longrightarrow\ f(2;\ 0) = 1")],
     r"\mathbf{p} = (2;\ 0),\quad f: 6 \to 1", [("gd", "(x-1)**2+2*y**2", (3, 1), 0.25, (2, 0), 6, 1)])
 
@@ -410,6 +427,7 @@ def verify():
 
 
 EN_TEX = [(r";\ ", r",\ "), ("{,}", ".")]
+DNE = {"ru": r"\text{не существует}", "en": r"\text{does not exist}", "uz": r"\text{mavjud emas}"}
 
 
 def localize(t, lang):
@@ -417,7 +435,7 @@ def localize(t, lang):
     if lang == "en":
         for a, b in EN_TEX:
             t = t.replace(a, b)
-    return t
+    return t.replace(r"\text{DNE}", DNE[lang])
 
 
 def drill_blocks(lang):
