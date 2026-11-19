@@ -866,3 +866,4 @@ main.fx-page { overflow-x: clip; }
 .dm-scene .dm-house { opacity: .9; }
 .fv-stage.cols .dm-ball-col { flex: 0 0 170px; max-width: 170px; }
 @media (max-width: 600px) { .fv-stage.cols .dm-ball-col { flex: 1 1 auto; max-width: 200px; margin: 0 auto; } }
+@media (max-width: 520px) { .dm-scene .fv-text, .dm-scene .dm-small { font-size: 22px; } .dm-scene.dm-road-narrow .fv-text, .dm-scene.dm-road-narrow .dm-small { font-size: 15px; } }

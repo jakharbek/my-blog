@@ -118,23 +118,32 @@
     const s1 = (t) => (D1 * t) / T, v1 = () => D1 / T;
     const s2 = (t) => { const u = t / T; return D2 * (3 * u * u - 2 * u * u * u); }, v2 = (t) => { const u = t / T; return (D2 * (6 * u - 6 * u * u)) / T; };
     let t = 2;
-    const road = scene(ui.stage, 720, 150, L.walker + ", " + L.car);
-    const X = (s) => 40 + (s / D2) * 640;
+    // the road: wide and flat on a desktop, narrower and taller on a phone (text stays readable)
+    const road = scene(ui.stage, 720, 156, L.walker + ", " + L.car);
+    let W = 720, Y1 = 42, Y2 = 102;
+    const X = (s) => 40 + (s / D2) * (W - 80);
     const gR = el("g", {}, road), gM = el("g", {}, road);
-    [[42, L.walker], [102, L.car]].forEach(([y, name]) => {
-      el("line", { x1: X(0), x2: X(D2) + 10, y1: y, y2: y, class: "s-guide", "stroke-width": 1, "stroke-dasharray": "4 5" }, gR);
-      el("text", { x: 4, y: y + 4, class: "fv-text dm-small" }, gR, name);
-    });
-    const house = (s, y) => { const x = X(s); el("path", { d: `M${x - 9} ${y - 2}h18v-12l-9-8l-9 8z`, class: "fill-guide dm-house" }, gR); el("text", { x, y: y + 16, "text-anchor": "middle", class: "fv-text dm-small" }, gR, L.home); };
-    house(D1, 42); house(D2, 102);
-    el("text", { x: X(0), y: 135, "text-anchor": "middle", class: "fv-text dm-small" }, gR, L.work);
-    el("line", { x1: X(0), x2: X(0), y1: 20, y2: 120, class: "s-ink", "stroke-width": 2 }, gR);
     const walker = el("g", { class: "fill-teal s-teal" }, gM);
     el("circle", { cx: 0, cy: -16, r: 4 }, walker); el("path", { d: "M0 -12v10M0 -2l-5 9M0 -2l5 9M-5 -8h10", "stroke-width": 2.2, fill: "none", "stroke-linecap": "round" }, walker);
     const car = el("g", { class: "fill-orange" }, gM);
     el("rect", { x: -16, y: -14, width: 32, height: 10, rx: 3 }, car); el("rect", { x: -9, y: -21, width: 17, height: 8, rx: 3 }, car);
     el("circle", { cx: -9, cy: -3, r: 3.5, class: "fill-ink" }, car); el("circle", { cx: 9, cy: -3, r: 3.5, class: "fill-ink" }, car);
     const lab1 = el("text", { class: "fv-text dm-small t-teal", "text-anchor": "middle" }, gM), lab2 = el("text", { class: "fv-text dm-small t-orange", "text-anchor": "middle" }, gM);
+    function roadLayout() {
+      const narrow = (road.clientWidth || ui.stage.clientWidth || 720) < 520;
+      W = narrow ? 380 : 720; Y1 = narrow ? 70 : 42; Y2 = narrow ? 170 : 102;
+      const H = narrow ? 230 : 156;
+      road.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      road.classList.toggle("dm-road-narrow", narrow);
+      gR.textContent = "";
+      [Y1, Y2].forEach((y) => {
+        el("line", { x1: X(0), x2: X(D2) + 10, y1: y, y2: y, class: "s-guide", "stroke-width": 1, "stroke-dasharray": "4 5" }, gR);
+      });
+      const house = (s, y) => { const x = X(s); el("path", { d: `M${x - 9} ${y - 2}h18v-12l-9-8l-9 8z`, class: "fill-guide dm-house" }, gR); el("text", { x, y: y + 20, "text-anchor": "middle", class: "fv-text dm-small" }, gR, L.home); };
+      house(D1, Y1); house(D2, Y2);
+      el("text", { x: X(0), y: H - 8, "text-anchor": "middle", class: "fv-text dm-small" }, gR, L.work);
+      el("line", { x1: X(0), x2: X(0), y1: Y1 - 26, y2: Y2 + 14, class: "s-ink", "stroke-width": 2 }, gR);
+    }
     const plot = new FV.Plot(ui.stage, { x: [0, 5], y: [0, 3200], aspect: 0.5, maxHeight: 340, xLabel: L.tAxis, yLabel: L.sAxis });
     const st = FV.ui.slider({ label: L.time, min: 0, max: 5, step: 0.01, value: t, oninput: (v) => { ck.stop(); t = v; draw(); } });
     const ck = clock({ before: () => { if (t >= T) t = 0; }, tick: (dt) => { t = Math.min(T, t + dt * 0.7); st.set(t); draw(); return t < T; }, jump: () => { t = t >= T ? 0 : Math.min(T, t + 1); st.set(t); draw(); } });
@@ -142,9 +151,9 @@
     const ro = FV.ui.readout(ui.readout, [{ key: "s1", label: L.walker + ": " + L.dist, c: "teal" }, { key: "v1", label: L.speed, c: "teal" }, { key: "s2", label: L.car + ": " + L.dist, c: "orange" }, { key: "v2", label: L.speed, c: "orange" }]);
     function draw() {
       const a = s1(t), b = s2(t), va = v1(), vb = v2(t);
-      walker.setAttribute("transform", `translate(${X(a)} 42)`); car.setAttribute("transform", `translate(${X(b)} 102)`);
-      lab1.setAttribute("x", X(a)); lab1.setAttribute("y", 14); lab1.textContent = n(va) + " " + L.mpm;
-      lab2.setAttribute("x", Math.min(660, X(b))); lab2.setAttribute("y", 74); lab2.textContent = n(vb, 3) + " " + L.mpm;
+      walker.setAttribute("transform", `translate(${X(a)} ${Y1})`); car.setAttribute("transform", `translate(${X(b)} ${Y2})`);
+      lab1.setAttribute("x", Math.max(W < 500 ? 110 : 90, X(a))); lab1.setAttribute("y", Y1 - 28); lab1.textContent = L.walker + " · " + n(va) + " " + L.mpm;
+      lab2.setAttribute("x", FV.clamp(X(b), W < 500 ? 120 : 100, W - (W < 500 ? 120 : 100))); lab2.setAttribute("y", Y2 - 28); lab2.textContent = L.car + " · " + n(vb, 3) + " " + L.mpm;
       plot.clear();
       plot.fn(s1, { c: "teal", w: 2.4, from: 0, to: 5 }); plot.fn(s2, { c: "orange", w: 2.4, from: 0, to: 5 });
       plot.vline(t);
@@ -156,8 +165,8 @@
       ro.set("s1", n(a) + " " + L.m); ro.set("v1", n(va) + " " + L.mpm); ro.set("s2", n(b, 4) + " " + L.m); ro.set("v2", n(vb, 3) + " " + L.mpm);
       note(L.raceNote(tn(t, 3), tn(a, 3), tn(b, 4), tn(vb, 3), tn(vb * 0.06, 3)));
     }
-    plot.onresize = draw;
-    draw();
+    plot.onresize = () => { roadLayout(); draw(); };
+    roadLayout(); draw();
   });
 
   // ---------- 2. average speed → the speedometer ----------
