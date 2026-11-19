@@ -18,9 +18,9 @@ TITLE = {
     "uz": "Zanjir qoidasi: murakkab funksiya hosilasi — ta’rifdan neyron tarmoqlargacha",
 }
 EXCERPT = {
-    "ru": "Производная сложной функции по косточкам: определение через предел, доказательство, одна и несколько переменных, обычные и частные производные, дерево зависимостей, полная производная и обратный проход. 10 подробных разборов и 56 примеров с решением по шагам.",
-    "en": "The derivative of a composite function, taken apart piece by piece: the limit definition, the proof, one and several variables, ordinary and partial derivatives, the dependency tree, the total derivative and backpropagation. 10 detailed walkthroughs and 56 examples solved step by step.",
-    "uz": "Murakkab funksiya hosilasi mayda detallarigacha: limit orqali ta’rif, isbot, bir va bir nechta o‘zgaruvchi, oddiy va xususiy hosilalar, bog‘liqlik daraxti, to‘liq hosila va teskari o‘tish. 10 ta batafsil tahlil va qadamma-qadam yechilgan 56 ta misol.",
+    "ru": "Производная сложной функции по косточкам: определение через предел, доказательство, одна и несколько переменных, обычные и частные производные, дерево зависимостей, полная производная и обратный проход. 12 подробных разборов и 56 примеров с решением по шагам.",
+    "en": "The derivative of a composite function, taken apart piece by piece: the limit definition, the proof, one and several variables, ordinary and partial derivatives, the dependency tree, the total derivative and backpropagation. 12 detailed walkthroughs and 56 examples solved step by step.",
+    "uz": "Murakkab funksiya hosilasi mayda detallarigacha: limit orqali ta’rif, isbot, bir va bir nechta o‘zgaruvchi, oddiy va xususiy hosilalar, bog‘liqlik daraxti, to‘liq hosila va teskari o‘tish. 12 ta batafsil tahlil va qadamma-qadam yechilgan 56 ta misol.",
 }
 DEK = {
     "ru": "Почти любая функция, которую приходится дифференцировать, — это функция от функции: синус от квадрата, логарифм от суммы, сигмоида от взвешенной суммы. Цепное правило говорит, как найти её производную: перемножить производные звеньев. Выводим правило из определения производной, доказываем его, переносим на функции многих переменных, отличаем обычную производную от частной и решаем десятки примеров — от совсем простых до обратного прохода нейрона.",
@@ -85,7 +85,7 @@ RU = [
         ("p", r"Для функций нескольких переменных правило звучит так же, только звеньев может быть несколько параллельно, и тогда вклады всех путей <b>складываются</b>:"),
         ("eq", r"z = f\big(x(t),\ y(t)\big)\quad\Longrightarrow\quad \frac{dz}{dt} = \frac{\partial z}{\partial x}\cdot\frac{dx}{dt} + \frac{\partial z}{\partial y}\cdot\frac{dy}{dt}"),
         ("callout", "intuition", "Аналогия", r"Три шестерёнки. Первая крутит вторую так, что вторая делает 3 оборота на каждый оборот первой; вторая крутит третью — 2 оборота на свой оборот. Сколько оборотов делает третья на один оборот первой? $3 \cdot 2 = 6$. Передаточные числа <b>перемножаются</b>. Производная — это и есть «передаточное число» функции в данной точке, и цепное правило — это правило шестерёнок."),
-        ("p", r"В этой статье мы пройдём весь путь: вспомним <b>определение производной</b> через предел и научимся считать по нему; разберём, что такое <b>сложная функция</b>; выведем и <b>докажем</b> цепное правило прямо из определения; перенесём его на <b>частные производные</b> и функции <b>двух и более переменных</b>; поймём, чем <b>обычная</b> производная отличается от <b>частной</b> и от <b>полной</b>; увидим, что обучение нейросети (обратный проход) — это цепное правило, применённое много раз. В конце — 10 подробных разборов и 56 примеров с решением по шагам, от очень лёгких до трудных."),
+        ("p", r"В этой статье мы пройдём весь путь: вспомним <b>определение производной</b> через предел и научимся считать по нему; разберём, что такое <b>сложная функция</b>; выведем и <b>докажем</b> цепное правило прямо из определения; перенесём его на <b>частные производные</b> и функции <b>двух и более переменных</b>; поймём, чем <b>обычная</b> производная отличается от <b>частной</b> и от <b>полной</b>; увидим, что обучение нейросети (обратный проход) — это цепное правило, применённое много раз. В конце — 12 подробных разборов и 56 примеров с решением по шагам, от очень лёгких до трудных."),
         ("callout", "key", "Главное", r"Цепное правило — не отдельный трюк, а следствие самого определения производной: производная показывает, во сколько раз функция растягивает маленький шаг аргумента. Если шаг проходит через несколько функций подряд, растяжения перемножаются."),
     ]),
     dict(id="definition", title="Производная по определению", blocks=[
@@ -173,6 +173,46 @@ RU = [
             [r"$\operatorname{arctg} u$", r"$\dfrac{u'}{1 + u^2}$", r"$(\operatorname{arctg} 2x)' = \dfrac{2}{1 + 4x^2}$"],
         ]),
         ("callout", "intuition", "Почему производные перемножаются", r"Производная — это коэффициент растяжения маленьких шагов. Внутренняя функция растягивает шаг $\Delta x$ в $g'(x)$ раз: $\Delta u \approx g'(x)\,\Delta x$. Внешняя растягивает уже этот шаг в $f'(u)$ раз: $\Delta y \approx f'(u)\,\Delta u \approx f'(u)\,g'(x)\,\Delta x$. Два растяжения подряд — это их произведение."),
+    ]),
+    dict(id="numbers", title="Цепное правило на числах: приращения шаг за шагом", blocks=[
+        ("p", r"Прежде чем доказывать правило строго, пройдём его на конкретных числах — так видно, откуда оно берётся. Пример везде один: сначала возводим в квадрат, потом в куб."),
+        ("eq", r"x \xrightarrow{\ \text{квадрат}\ } u = x^2 \xrightarrow{\ \text{куб}\ } y = u^3,\qquad F(x) = (x^2)^3"),
+        ("p", r"Внешняя функция $y = u^3$ <b>не видит $x$</b>: на вход она получает только $u$. Это главное, что нужно запомнить про сложную функцию."),
+        ("h3", "1. Сдвигаем вход и смотрим, как сдвиг проходит по цепочке"),
+        ("p", r"Возьмём $x = 2$ и сдвинем его на $\Delta x = 0{,}1$. Приращение — это «стало минус было»:"),
+        ("table", ["", "было", "стало", "приращение"], [
+            [r"$x$", r"$2$", r"$2{,}1$", r"$\Delta x = 0{,}1$"],
+            [r"$u = x^2$", r"$4$", r"$4{,}41$", r"$\Delta u = 0{,}41$"],
+            [r"$y = u^3$", r"$64$", r"$85{,}766$", r"$\Delta y \approx 21{,}766$"],
+        ], {"num": [1, 2, 3]}),
+        ("p", r"Сдвиг прошёл по цепочке: $x$ изменился на $0{,}1$, из-за этого $u$ — на $0{,}41$, а из-за этого $y$ — на $21{,}766$."),
+        ("h3", "2. Три скорости и главное наблюдение"),
+        ("p", r"Скорость — это приращение выхода, делённое на приращение входа. У нас три скорости: у первого звена, у второго и у всей цепочки:"),
+        ("eq", r"\frac{\Delta u}{\Delta x} = \frac{0{,}41}{0{,}1} = 4{,}1,\qquad \frac{\Delta y}{\Delta u} = \frac{21{,}766}{0{,}41} \approx 53{,}09,\qquad \frac{\Delta y}{\Delta x} = \frac{21{,}766}{0{,}1} \approx 217{,}66"),
+        ("p", r"И $4{,}1\cdot 53{,}09 \approx 217{,}66$: <b>скорость цепочки равна произведению скоростей звеньев</b>. Это не совпадение, а обычное сокращение дробей — число $0{,}41$ стоит внизу в одной дроби и наверху в другой, потому что выход первого звена и есть вход второго:"),
+        ("eq", r"\frac{\Delta y}{\Delta x} = \frac{\Delta y}{\Delta u}\cdot\frac{\Delta u}{\Delta x}\qquad\Big(\frac{21{,}766}{0{,}1} = \frac{21{,}766}{0{,}41}\cdot\frac{0{,}41}{0{,}1}\Big)"),
+        ("h3", "3. Уменьшаем сдвиг"),
+        ("p", r"Производная — это скорость при сколь угодно малом сдвиге. Повторим расчёт для меньших $\Delta x$:"),
+        ("table", ["$\\Delta x$", "$\\Delta u$", "$\\dfrac{\\Delta u}{\\Delta x}$", "$\\dfrac{\\Delta y}{\\Delta u}$", "$\\dfrac{\\Delta y}{\\Delta x}$"], [
+            ["$0{,}1$", "$0{,}41$", "$4{,}1$", "$53{,}09$", "$217{,}66$"],
+            ["$0{,}01$", "$0{,}0401$", "$4{,}01$", "$48{,}48$", "$194{,}42$"],
+            ["$0{,}001$", "$0{,}004001$", "$4{,}001$", "$48{,}048$", "$192{,}24$"],
+            ["$\\to 0$", "$\\to 0$", "$\\to 4$", "$\\to 48$", "$\\to 192$"],
+        ], {"num": [0, 1, 2, 3, 4]}),
+        ("p", r"В каждой строке последнее число равно произведению двух предыдущих, и в пределе $4\cdot 48 = 192$. Обратите внимание: $\Delta u \to 0$ вместе с $\Delta x$ — функция $x^2$ непрерывна, малый сдвиг входа даёт малый сдвиг выхода."),
+        ("h3", "4. Каждое звено — по определению, отдельно"),
+        ("p", r"После обозначения $u = g(x)$ у нас по сути две отдельные простые функции. Для каждой распишем определение производной — это одна и та же формула, только буквы разные."),
+        ("steps", [
+            (r"<b>Первое звено</b> $x \to u$, $u = x^2$. Приращение выхода назовём $\Delta u$.", r"\begin{gathered}\Delta u = (x + \Delta x)^2 - x^2 = 2x\,\Delta x + \Delta x^2\\ \frac{\Delta u}{\Delta x} = 2x + \Delta x\ \xrightarrow[\Delta x \to 0]{}\ 2x = g'(x)\end{gathered}"),
+            (r"<b>Второе звено</b> $u \to y$, $y = u^3$. Его аргумент — буква $u$, а сдвиг аргумента — $\Delta u$.", r"\begin{gathered}\Delta y = (u + \Delta u)^3 - u^3 = 3u^2\Delta u + 3u\,\Delta u^2 + \Delta u^3\\ \frac{\Delta y}{\Delta u} = 3u^2 + 3u\,\Delta u + \Delta u^2\ \xrightarrow[\Delta u \to 0]{}\ 3u^2 = f'(u)\end{gathered}"),
+            (r"<b>Вся цепочка</b> $x \to y$ — по тому же определению. Числитель — это то же самое $\Delta y$: $g(x) = u$ и $g(x + \Delta x) = u + \Delta u$.", r"\begin{aligned}F'(x) &= \lim_{\Delta x \to 0}\frac{f(g(x + \Delta x)) - f(g(x))}{\Delta x}\\ &= \lim_{\Delta x \to 0}\frac{f(u + \Delta u) - f(u)}{\Delta x} = \lim_{\Delta x \to 0}\frac{\Delta y}{\Delta x}\end{aligned}"),
+            (r"<b>Соединяем</b>: перемножаем отношения звеньев <b>до</b> перехода к пределу ($\Delta u$ сокращается).", r"\frac{\Delta y}{\Delta x} = \underbrace{(3u^2 + 3u\,\Delta u + \Delta u^2)}_{\Delta y / \Delta u}\cdot\underbrace{(2x + \Delta x)}_{\Delta u / \Delta x}"),
+            (r"<b>Предел</b>: при $\Delta x \to 0$ и $\Delta u \to 0$ все слагаемые с дельтами исчезают. Возвращаем $u = x^2$.", r"F'(x) = 3u^2\cdot 2x = 3(x^2)^2\cdot 2x = 6x^5,\qquad F'(2) = 48\cdot 4 = 192"),
+            (r"<b>Проверка напрямую</b>: $(x^2)^3 = x^6$.", r"(x^6)' = 6x^5\quad\checkmark"),
+        ]),
+        ("h3", "5. Зачем нужно $\\Delta u$"),
+        ("p", r"В дроби $\frac{f(g(x + \Delta x)) - f(g(x))}{\Delta x}$ наверху — приращение $f$, а внизу — приращение $x$. Но аргумент $f$ — не $x$, а $u = g(x)$, и он изменился не на $\Delta x$, а на $\Delta u$. Определение $f'$ требует «приращение функции на приращение <b>её собственного</b> аргумента», поэтому мы искусственно умножаем и делим на $\Delta u$: в первой дроби оно стоит внизу и даёт $f'(u)$, во второй — наверху и даёт $g'(x)$. (Если $\Delta u$ может обращаться в ноль, этот случай обходят в строгом доказательстве ниже.)"),
+        ("callout", "intuition", "Литры, километры и минуты", r"Время $\to$ пробег $\to$ расход бензина. Бак «не знает», сколько прошло минут, — он чувствует только километры. Расход $0{,}1$ л/км — это $f'$, скорость $1{,}5$ км/мин — это $g'$. За $2$ минуты машина проедет $\Delta g = 1{,}5\cdot 2 = 3$ км и сожжёт $\Delta f = 0{,}1\cdot 3 = 0{,}3$ л, то есть $0{,}15$ л/мин $= 0{,}1\cdot 1{,}5$. От минут к литрам напрямую не перейти — только через километры. Километры сокращаются: $\frac{\text{л}}{\text{км}}\cdot\frac{\text{км}}{\text{мин}} = \frac{\text{л}}{\text{мин}}$."),
     ]),
     dict(id="proof", title="Доказательство по определению", blocks=[
         ("p", r"Докажем цепное правило, опираясь только на определение производной. Сначала посмотрим на «почти доказательство», которое приходит в голову первым, и поймём, где оно ломается."),
@@ -352,7 +392,7 @@ RU = [
         ("callout", "note", "Как себя проверить", r"1) Подставьте конкретное число и сравните ответ с разностным отношением при маленьком $h$ (как в таблице с $e^{x^2}$). 2) Если можно, сначала подставьте внутренние функции и продифференцируйте результат напрямую. 3) Проверьте число слагаемых: в многомерном правиле оно равно числу путей от функции к переменной."),
     ]),
     dict(id="worked", title="Разборы: от очень лёгкого к трудному", blocks=[
-        ("p", r"Десять примеров, каждый с целью и подробным решением. Первые — на одно звено, последние — на несколько переменных и нейрон. Где уместно, производная найдена и по определению, и по цепному правилу."),
+        ("p", r"Двенадцать примеров, каждый с целью и подробным решением. Первые — на одно звено, последние — на несколько переменных и нейрон. Где уместно, производная найдена и по определению, и по цепному правилу."),
         ("example", dict(n=1, title="$y = (2x + 3)^2$ тремя способами", kinds=["одна переменная", "по определению"],
             goal=r"Убедиться, что цепное правило даёт то же, что раскрытие скобок и определение производной.",
             blocks=[("steps", [
@@ -430,6 +470,32 @@ RU = [
                 (r"Последнее звено.", r"\frac{\partial L}{\partial w} = (a - y)\,x,\qquad \frac{\partial L}{\partial b} = a - y"),
             ])],
             take=r"Цепное правило объясняет, почему сигмоиду используют вместе с перекрёстной энтропией: их производные сокращаются, и градиент равен просто «ошибке» $a - y$, умноженной на вход.")),
+        ("example", dict(n=11, title="Две входные переменные: $f(x, y) = (2x + 3y)^2$", kinds=["две переменные", "по определению", "проверка числами"],
+            goal=r"Применить цепное правило к функции двух переменных, вывести каждую производную звена по определению и проверить ответ на числах.",
+            blocks=[("steps", [
+                (r"Разбиваем на куски: $z = 2x + 3y$, $f = z^2$. В $z$ входят две стрелки, из $z$ выходит одна.", r"x \searrow\quad z \to f\quad \swarrow y"),
+                (r"Внешний кусок по определению: $f = z^2$ зависит только от $z$.", r"\frac{(z + \Delta z)^2 - z^2}{\Delta z} = \frac{2z\,\Delta z + \Delta z^2}{\Delta z} = 2z + \Delta z \to 2z"),
+                (r"Внутренний кусок по определению — две частные производные: приращение получает одна переменная.", r"\frac{2(x + \Delta x) + 3y - 2x - 3y}{\Delta x} = 2,\qquad \frac{2x + 3(y + \Delta y) - 2x - 3y}{\Delta y} = 3"),
+                (r"Цепное правило отдельно для каждой переменной: вдоль пути $x \to z \to f$ и вдоль пути $y \to z \to f$.", r"\frac{\partial f}{\partial x} = 2z\cdot 2 = 4(2x + 3y),\qquad \frac{\partial f}{\partial y} = 2z\cdot 3 = 6(2x + 3y)"),
+                (r"Проверка без цепного правила: раскрываем скобки.", r"f = 4x^2 + 12xy + 9y^2:\qquad f_x = 8x + 12y,\quad f_y = 12x + 18y\quad\checkmark"),
+            ]), ("table", ["Сдвиг (из точки $(1;\\ 1)$, $f = 25$)", "$z$", "$f$", "$\\dfrac{\\Delta f}{\\text{сдвиг}}$", "Формула"], [
+                ["$\\Delta x = 0{,}01$", "$5{,}02$", "$25{,}2004$", "$20{,}04$", "$4z = 20$"],
+                ["$\\Delta y = 0{,}01$", "$5{,}03$", "$25{,}3009$", "$30{,}09$", "$6z = 30$"],
+            ], {"num": [1, 2, 3]})],
+            take=r"Множитель $\frac{\partial f}{\partial z} = 2z$ общий для обеих производных — его считают один раз. В нейросети такой общий множитель называют ошибкой нейрона $\delta$, а $\frac{\partial L}{\partial w_i} = \delta\cdot x_i$.")),
+        ("example", dict(n=12, title="Одна переменная — два пути: $f = u^2 + v^2$, $u = 2x$, $v = 3x$", kinds=["несколько путей", "проверка числами"],
+            goal=r"Увидеть, почему вклады разных путей складываются, а не перемножаются.",
+            blocks=[("steps", [
+                (r"Путь через $u$: производные звеньев по определению ($v$ при этом не меняется).", r"\frac{\partial f}{\partial u} = 2u,\quad \frac{du}{dx} = 2\ \Rightarrow\ 2u\cdot 2 = 4u"),
+                (r"Путь через $v$.", r"\frac{\partial f}{\partial v} = 2v,\quad \frac{dv}{dx} = 3\ \Rightarrow\ 2v\cdot 3 = 6v"),
+                (r"Сдвиг $x$ меняет $f$ сразу по обоим путям — вклады складываются; возвращаем $u = 2x$, $v = 3x$.", r"\frac{df}{dx} = 4u + 6v = 8x + 18x = 26x"),
+                (r"Проверка напрямую.", r"f = 4x^2 + 9x^2 = 13x^2,\qquad f' = 26x\quad\checkmark"),
+            ]), ("table", ["", "было ($x = 1$)", "стало ($x = 1{,}01$)", "сдвиг"], [
+                ["$u^2 = (2x)^2$", "$4$", "$4{,}0804$", "$0{,}0804$"],
+                ["$v^2 = (3x)^2$", "$9$", "$9{,}1809$", "$0{,}1809$"],
+                ["$f$", "$13$", "$13{,}2613$", "$0{,}2613$"],
+            ], {"num": [1, 2, 3]}), ("p", r"Общий сдвиг $f$ — сумма сдвигов по двум путям: $0{,}0804 + 0{,}1809 = 0{,}2613$, а $\frac{0{,}2613}{0{,}01} = 26{,}13 \approx 26$.")],
+            take=r"Два правила на всю нейросеть: вдоль одного пути производные <b>умножаются</b>, по разным путям — <b>складываются</b>. Когда нейрон передаёт сигнал нескольким нейронам следующего слоя, его ошибка — сумма ошибок, пришедших по всем связям.")),
     ]),
     dict(id="practice", title="Практикум: 56 примеров с решениями", blocks=[
         ("p", r"Примеры идут от очень лёгких к трудным; сложность отмечена звёздами. Сначала попробуйте решить сами, затем откройте решение: каждый шаг объяснён. Примеры № 29–34 и 42–43 решаются <b>по определению</b> (через предел), остальные — по цепному правилу, многие с проверкой."),
@@ -492,7 +558,7 @@ EN = [
         ("p", r"For functions of several variables the rule sounds the same, except that several links can run in parallel, and then the contributions of all the paths <b>add up</b>:"),
         ("eq", r"z = f\big(x(t),\ y(t)\big)\quad\Longrightarrow\quad \frac{dz}{dt} = \frac{\partial z}{\partial x}\cdot\frac{dx}{dt} + \frac{\partial z}{\partial y}\cdot\frac{dy}{dt}"),
         ("callout", "intuition", "An analogy", r"Three gears. The first one turns the second so that the second makes 3 revolutions for every revolution of the first; the second turns the third, 2 revolutions per revolution of its own. How many revolutions does the third make per revolution of the first? $3 \cdot 2 = 6$. Gear ratios <b>multiply</b>. The derivative is exactly the “gear ratio” of a function at a given point, and the chain rule is the rule of gears."),
-        ("p", r"In this article we will go all the way: recall the <b>definition of the derivative</b> as a limit and learn to compute with it; work out what a <b>composite function</b> is; derive and <b>prove</b> the chain rule straight from the definition; extend it to <b>partial derivatives</b> and functions of <b>two or more variables</b>; understand how an <b>ordinary</b> derivative differs from a <b>partial</b> one and from a <b>total</b> one; and see that training a neural network (the backward pass) is the chain rule applied many times over. At the end there are 10 detailed walkthroughs and 56 examples solved step by step, from very easy to hard."),
+        ("p", r"In this article we will go all the way: recall the <b>definition of the derivative</b> as a limit and learn to compute with it; work out what a <b>composite function</b> is; derive and <b>prove</b> the chain rule straight from the definition; extend it to <b>partial derivatives</b> and functions of <b>two or more variables</b>; understand how an <b>ordinary</b> derivative differs from a <b>partial</b> one and from a <b>total</b> one; and see that training a neural network (the backward pass) is the chain rule applied many times over. At the end there are 12 detailed walkthroughs and 56 examples solved step by step, from very easy to hard."),
         ("callout", "key", "The main point", r"The chain rule is not a separate trick but a consequence of the very definition of the derivative: the derivative shows by what factor a function stretches a small step of its argument. If the step passes through several functions in a row, the stretches multiply."),
     ]),
     dict(id="definition", title="The derivative from the definition", blocks=[
@@ -888,7 +954,7 @@ UZ = [
         ("p", r"Ko‘p o‘zgaruvchili funksiyalar uchun qoida xuddi shunday, faqat bo‘g‘inlar parallel ravishda bir nechta bo‘lishi mumkin, u holda barcha yo‘llarning hissalari <b>qo‘shiladi</b>:"),
         ("eq", r"z = f\big(x(t),\ y(t)\big)\quad\Longrightarrow\quad \frac{dz}{dt} = \frac{\partial z}{\partial x}\cdot\frac{dx}{dt} + \frac{\partial z}{\partial y}\cdot\frac{dy}{dt}"),
         ("callout", "intuition", "O‘xshatish", r"Uchta tishli g‘ildirak. Birinchisi ikkinchisini shunday aylantiradiki, birinchisining har bir aylanishiga ikkinchisi 3 marta aylanadi; ikkinchisi uchinchisini aylantiradi — o‘zining har bir aylanishiga 2 marta. Birinchisining bitta aylanishiga uchinchisi necha marta aylanadi? $3 \cdot 2 = 6$. Uzatish sonlari <b>ko‘paytiriladi</b>. Hosila — funksiyaning berilgan nuqtadagi «uzatish soni»ning aynan o‘zi, zanjir qoidasi esa — tishli g‘ildiraklar qoidasi."),
-        ("p", r"Bu maqolada butun yo‘lni bosib o‘tamiz: limit orqali <b>hosila ta’rifini</b> eslaymiz va u bo‘yicha hisoblashni o‘rganamiz; <b>murakkab funksiya</b> nima ekanini tahlil qilamiz; zanjir qoidasini to‘g‘ridan-to‘g‘ri ta’rifdan keltirib chiqaramiz va <b>isbotlaymiz</b>; uni <b>xususiy hosilalarga</b> hamda <b>ikki va undan ortiq o‘zgaruvchili</b> funksiyalarga o‘tkazamiz; <b>oddiy</b> hosila <b>xususiy</b> va <b>to‘liq</b> hosiladan nimasi bilan farq qilishini tushunamiz; neyron tarmoqni o‘qitish (teskari o‘tish) — ko‘p marta qo‘llanilgan zanjir qoidasi ekanini ko‘ramiz. Oxirida — 10 ta batafsil tahlil va qadamma-qadam yechilgan 56 ta misol, juda osonlaridan qiyinlarigacha."),
+        ("p", r"Bu maqolada butun yo‘lni bosib o‘tamiz: limit orqali <b>hosila ta’rifini</b> eslaymiz va u bo‘yicha hisoblashni o‘rganamiz; <b>murakkab funksiya</b> nima ekanini tahlil qilamiz; zanjir qoidasini to‘g‘ridan-to‘g‘ri ta’rifdan keltirib chiqaramiz va <b>isbotlaymiz</b>; uni <b>xususiy hosilalarga</b> hamda <b>ikki va undan ortiq o‘zgaruvchili</b> funksiyalarga o‘tkazamiz; <b>oddiy</b> hosila <b>xususiy</b> va <b>to‘liq</b> hosiladan nimasi bilan farq qilishini tushunamiz; neyron tarmoqni o‘qitish (teskari o‘tish) — ko‘p marta qo‘llanilgan zanjir qoidasi ekanini ko‘ramiz. Oxirida — 12 ta batafsil tahlil va qadamma-qadam yechilgan 56 ta misol, juda osonlaridan qiyinlarigacha."),
         ("callout", "key", "Asosiysi", r"Zanjir qoidasi alohida hiyla emas, balki hosila ta’rifining o‘zidan kelib chiqadigan natija: hosila funksiya argumentning kichik qadamini necha marta cho‘zishini ko‘rsatadi. Agar qadam ketma-ket bir nechta funksiyadan o‘tsa, cho‘zilishlar ko‘paytiriladi."),
     ]),
     dict(id="definition", title="Ta’rif bo‘yicha hosila", blocks=[
@@ -1334,6 +1400,18 @@ def check_numbers():
     a_, y_ = sp.symbols("a y_", positive=True)
     Lce = -(y_ * sp.log(a_) + (1 - y_) * sp.log(1 - a_))
     assert ok(sp.diff(Lce, a_) * a_ * (1 - a_) - (a_ - y_))
+    # the chain on numbers: x → x² → (x²)³ at x = 2
+    for dx, du, r1, r2, r3 in ((0.1, 0.41, 4.1, 53.09, 217.66), (0.01, 0.0401, 4.01, 48.48, 194.42), (0.001, 0.004001, 4.001, 48.048, 192.24)):
+        u1 = (2 + dx) ** 2; dy = u1 ** 3 - 64
+        assert abs(u1 - 4 - du) < 1e-12 and round((u1 - 4) / dx, 4) == r1 and round(dy / (u1 - 4), len(str(r2).split('.')[1])) == r2 and round(dy / dx, 2) == r3, (dx, dy / (u1 - 4), dy / dx)
+    assert round(2.1 ** 6, 3) == 85.766 and round(2.1 ** 6 - 64, 3) == 21.766 and abs(0.1 * 1.5 - 0.15) < 1e-12 and 1.5 * 2 == 3
+    assert ok(sp.diff((x ** 2) ** 3, x) - 6 * x ** 5) and 3 * 16 * 4 == 192
+    # (2x + 3y)² and the two paths
+    q = (2 * x + 3 * y) ** 2
+    assert ok(sp.diff(q, x) - 4 * (2 * x + 3 * y)) and ok(sp.diff(q, y) - 6 * (2 * x + 3 * y))
+    assert round(((2 * 1.01 + 3) ** 2 - 25) / 0.01, 2) == 20.04 and round(((2 + 3 * 1.01) ** 2 - 25) / 0.01, 2) == 30.09
+    assert round(2.02 ** 2, 4) == 4.0804 and round(3.03 ** 2, 4) == 9.1809 and round((2.02 ** 2 + 3.03 ** 2 - 13) / 0.01, 2) == 26.13
+    assert ok(sp.diff((2 * x) ** 2 + (3 * x) ** 2, x) - 26 * x)
     return True
 
 
